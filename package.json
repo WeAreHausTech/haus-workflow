@@ -1,0 +1,48 @@
+{
+  "name": "@haus/ai",
+  "version": "0.1.0",
+  "description": "Haus AI workflow package for Claude Code.",
+  "type": "module",
+  "bin": {
+    "haus-ai": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "library",
+    "README.md",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "scripts": {
+    "build": "tsup src/cli.ts --format esm --dts --clean --out-dir dist",
+    "dev": "tsx src/cli.ts",
+    "catalog:audit": "tsx scripts/verify-no-unsupported-tech.ts",
+    "pack:local": "yarn pack",
+    "publish:dry": "yarn npm publish --dry-run",
+    "publish:private": "yarn npm publish --access restricted",
+    "prepack": "yarn build && yarn catalog:audit"
+  },
+  "dependencies": {
+    "commander": "^13.0.0",
+    "fast-glob": "^3.3.3",
+    "fs-extra": "^11.2.0",
+    "ignore": "^6.0.2",
+    "picomatch": "^4.0.2",
+    "yaml": "^2.6.1",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "^22.0.0",
+    "tsup": "^8.3.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.9.0"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "publishConfig": {
+    "access": "restricted"
+  },
+  "packageManager": "yarn@4.5.3"
+}

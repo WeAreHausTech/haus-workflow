@@ -1,0 +1,150 @@
+{
+  "version": "0.1.0",
+  "items": [
+    {
+      "id": "haus.global-engineering-rules",
+      "source": "haus",
+      "type": "skill",
+      "path": "library/haus/skills/global-engineering-rules",
+      "title": "Haus global engineering rules",
+      "tags": ["haus", "quality", "security"],
+      "repoRoles": [],
+      "requiresAny": [],
+      "tokenEstimate": 1800,
+      "installMode": "copy-selected",
+      "default": true
+    },
+    {
+      "id": "haus.nextjs-patterns",
+      "source": "haus",
+      "type": "skill",
+      "path": "library/haus/skills/nextjs-patterns",
+      "title": "Haus Next.js patterns",
+      "tags": ["frontend", "nextjs", "react", "typescript"],
+      "repoRoles": ["next-app"],
+      "requiresAny": [{ "stack": "nextjs" }, { "dependency": "next" }],
+      "tokenEstimate": 2600,
+      "installMode": "copy-selected"
+    },
+    {
+      "id": "haus.react19-patterns",
+      "source": "haus",
+      "type": "skill",
+      "path": "library/haus/skills/react19-patterns",
+      "title": "Haus React 19 patterns",
+      "tags": ["frontend", "react", "typescript"],
+      "repoRoles": ["react-app", "next-app", "design-system"],
+      "requiresAny": [{ "stack": "react" }, { "dependency": "react" }],
+      "tokenEstimate": 2200,
+      "installMode": "copy-selected"
+    },
+    {
+      "id": "haus.typescript6-patterns",
+      "source": "haus",
+      "type": "skill",
+      "path": "library/haus/skills/typescript6-patterns",
+      "title": "Haus TypeScript patterns",
+      "tags": ["typescript", "frontend", "backend"],
+      "repoRoles": [
+        "next-app",
+        "react-app",
+        "nestjs-api",
+        "vendure-plugin",
+        "vendure-app",
+        "shared-package"
+      ],
+      "requiresAny": [
+        { "stack": "typescript" },
+        { "dependency": "typescript" }
+      ],
+      "tokenEstimate": 2200,
+      "installMode": "copy-selected"
+    },
+    {
+      "id": "haus.vendure-plugin-patterns",
+      "source": "haus",
+      "type": "skill",
+      "path": "library/haus/skills/vendure-plugin-patterns",
+      "title": "Haus Vendure plugin patterns",
+      "tags": ["backend", "vendure", "nestjs", "graphql", "typescript"],
+      "repoRoles": ["vendure-plugin", "vendure-app"],
+      "requiresAny": [
+        { "stack": "vendure" },
+        { "dependency": "@vendure/core" },
+        { "packageNamePattern": "@haus/vendure-*" }
+      ],
+      "tokenEstimate": 3400,
+      "installMode": "copy-selected"
+    },
+    {
+      "id": "haus.laravel-patterns",
+      "source": "haus",
+      "type": "skill",
+      "path": "library/haus/skills/laravel-patterns",
+      "title": "Haus Laravel patterns",
+      "tags": ["backend", "laravel", "php"],
+      "repoRoles": ["laravel-app", "laravel-nova-app"],
+      "requiresAny": [
+        { "stack": "laravel" },
+        { "dependency": "laravel/framework" }
+      ],
+      "tokenEstimate": 2800,
+      "installMode": "copy-selected"
+    },
+    {
+      "id": "haus.wordpress-patterns",
+      "source": "haus",
+      "type": "skill",
+      "path": "library/haus/skills/wordpress-patterns",
+      "title": "Haus WordPress patterns",
+      "tags": ["backend", "wordpress", "php"],
+      "repoRoles": ["wordpress-site", "wordpress-bedrock-site"],
+      "requiresAny": [
+        { "stack": "wordpress" },
+        { "dependency": "roots/bedrock" }
+      ],
+      "tokenEstimate": 3000,
+      "installMode": "copy-selected"
+    },
+    {
+      "id": "haus.dotnet-patterns",
+      "source": "haus",
+      "type": "skill",
+      "path": "library/haus/skills/dotnet-patterns",
+      "title": "Haus .NET patterns",
+      "tags": ["backend", "dotnet", "csharp"],
+      "repoRoles": ["dotnet-service"],
+      "requiresAny": [{ "stack": "dotnet" }],
+      "tokenEstimate": 2600,
+      "installMode": "copy-selected"
+    },
+    {
+      "id": "haus.playwright-patterns",
+      "source": "haus",
+      "type": "skill",
+      "path": "library/haus/skills/playwright-patterns",
+      "title": "Haus Playwright workflow",
+      "tags": ["testing", "playwright"],
+      "repoRoles": ["next-app", "react-app", "vue-app", "test-suite"],
+      "requiresAny": [
+        { "stack": "playwright" },
+        { "dependency": "@playwright/test" }
+      ],
+      "tokenEstimate": 2200,
+      "installMode": "copy-selected"
+    },
+    {
+      "id": "haus.code-reviewer-agent",
+      "source": "haus",
+      "type": "agent",
+      "path": "library/haus/agents/code-reviewer.md",
+      "title": "Haus code reviewer agent",
+      "tags": ["review", "quality", "security"],
+      "repoRoles": [],
+      "requiresAny": [],
+      "tokenEstimate": 1400,
+      "installMode": "copy-selected",
+      "default": true
+    }
+  ]
+}
