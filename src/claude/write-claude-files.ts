@@ -1,6 +1,6 @@
 import path from "node:path";
 import fs from "fs-extra";
-import { readJson, writeJson, writeText } from "../utils/fs.js";
+import { hashText, readJson, writeJson, writeText } from "../utils/fs.js";
 import { claudePath, hausPath, packageRoot } from "../utils/paths.js";
 import type { Recommendation } from "../types.js";
 
@@ -84,9 +84,9 @@ haus context --task "<task>"
     type: r.type,
     source: "haus",
     version: "0.2.0",
-    hash: "sha256-pending",
+    hash: hashText(`${r.id}:${r.type}:${r.reason}`),
     installMode: "copied",
-    paths: []
+    paths: files.map((f) => path.relative(root, f))
   }));
   await writeJson(hausPath(root, "haus.lock.json"), lock);
 
