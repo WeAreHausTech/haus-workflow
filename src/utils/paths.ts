@@ -1,4 +1,5 @@
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 export const HAUS_DIR = ".haus-ai";
 
@@ -12,4 +13,9 @@ export function hausPath(root: string, ...parts: string[]): string {
 
 export function claudePath(root: string, ...parts: string[]): string {
   return path.join(root, ".claude", ...parts);
+}
+
+export function packageRoot(): string {
+  const file = fileURLToPath(import.meta.url);
+  return path.resolve(path.dirname(file), "../..");
 }

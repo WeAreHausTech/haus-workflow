@@ -1,10 +1,11 @@
 import fs from "fs-extra";
 import path from "node:path";
+import { packageRoot } from "../utils/paths.js";
 
 export async function runPlugin(action: "install" | "validate", _options: Record<string, unknown>): Promise<void> {
   if (action === "install") {
     const root = process.cwd();
-    const source = path.join(root, "plugin");
+    const source = path.join(packageRoot(), "plugin");
     const destination = path.join(root, ".claude", "plugins", "haus-ai");
     if (!(await fs.pathExists(source))) {
       console.error("plugin directory missing");
