@@ -1,3 +1,3 @@
 export function diffGeneratedFiles(): string {
-  return "Diff summary unavailable in stub. Compare .haus-ai/haus.lock.json and .claude files.";
+  return "Generated files may change in .claude/* and .haus-ai/haus.lock.json. Review git diff before apply.";
 }
