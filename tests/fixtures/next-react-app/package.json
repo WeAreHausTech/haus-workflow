@@ -1,0 +1,9 @@
+{
+  "name": "next-react-app",
+  "dependencies": {
+    "next": "15.0.0",
+    "react": "19.0.0",
+    "typescript": "6.0.0",
+    "@playwright/test": "1.0.0"
+  }
+}
