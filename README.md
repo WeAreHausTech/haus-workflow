@@ -22,3 +22,20 @@ haus apply --dry-run
 haus apply --write
 haus doctor
 ```
+
+## Guided vs fast
+
+- Guided: asks non-technical project intent questions, then scans and recommends.
+- Fast: scanner-only defaults for quick onboarding.
+
+## Scanner -> recommend -> apply
+
+1. `haus scan --json` writes `.haus-ai/context-map.json`, `.haus-ai/repo-summary.md`, `.haus-ai/dependency-map.json`, `.haus-ai/scan-hashes.json`.
+2. `haus recommend --json` writes `.haus-ai/recommendation.json` with selected/skipped reasons.
+3. `haus apply --write` generates selected `.claude/*` + `.haus-ai/haus.lock.json`.
+
+## Security
+
+- Guard blocks sensitive file access and dangerous shell commands.
+- Memory is local-first and redacts obvious secrets.
+- Source adapters are curated and non-auto-install.
