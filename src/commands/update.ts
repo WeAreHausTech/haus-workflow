@@ -22,7 +22,7 @@ export async function runUpdate(options: { check?: boolean }): Promise<void> {
   if (await hasLocalOverrides(root)) {
     console.log("Local .claude overrides detected. Preserving local files; only lockfile updated.");
   }
-  await applyLock(root);
-  console.log(await diffLock(root));
+  const { before, after } = await applyLock(root);
+  console.log(diffLock(before, after));
   console.log("Update applied with backup in .haus-ai/backups/. Run haus doctor.");
 }

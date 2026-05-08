@@ -36,7 +36,7 @@ export async function runSetupProject(options: { guided?: boolean; fast?: boolea
         continue;
       }
       const answer = await ask(question);
-      merged[question] = existing[question] ?? (answer || "no-answer");
+      merged[question] = answer || existing[question] || "no-answer";
     }
     await writeJson(hausPath(root, "setup-answers.json"), merged);
   }

@@ -1,6 +1,7 @@
 import path from "node:path";
 import fs from "fs-extra";
 import { hashText, listFiles, readJson, readText, writeJson, writeText } from "../utils/fs.js";
+import { readFile } from "node:fs/promises";
 import { hausPath } from "../utils/paths.js";
 import type { ContextMap, PackageManager } from "../types.js";
 import type { ScanResult } from "./types.js";
@@ -82,7 +83,11 @@ export async function scanProject(root: string, mode: "guided" | "fast" = "fast"
     node: deps.filter((d) => !d.includes("/")),
     composer: Object.keys(((composer?.require ?? {}) as Record<string, string>) ?? {})
   };
-  const scanHashes = Object.fromEntries(safeFiles.map((f) => [f, hashText(f)]));
+  const scanHashes = Object.fromEntries(
+    await Promise.all(
+      safeFiles.map(async (f) => [f, hashText(await readFile(path.join(root, f), "utf8"))] as const)
+    )
+  );
   const repoSummary = renderSummary(context);
 
   await writeJson(hausPath(root, "context-map.json"), context);

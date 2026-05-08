@@ -1,7 +1,7 @@
 import path from "node:path";
 import fs from "fs-extra";
 import { readJson, writeJson, writeText } from "../utils/fs.js";
-import { claudePath, hausPath } from "../utils/paths.js";
+import { claudePath, hausPath, packageRoot } from "../utils/paths.js";
 import type { Recommendation } from "../types.js";
 
 export async function writeClaudeFiles(root: string, dryRun: boolean): Promise<string[]> {
@@ -57,11 +57,17 @@ haus context --task "<task>"
   await writeText(claudePath(root, "rules", "haus.md"), "- Keep context minimal.\n- Follow project conventions.\n");
   await writeText(claudePath(root, "rules", "security.md"), "- Never read secrets.\n- Block dangerous shell commands.\n");
 
+  const pkgRoot = packageRoot();
+  const manifest = (await readJson<{ items?: Array<{ id: string; path: string; type: string }> }>(
+    path.join(pkgRoot, "library", "catalog", "manifest.json")
+  )) ?? { items: [] };
+  const manifestById = new Map((manifest.items ?? []).map((item) => [item.id, item]));
+
   for (const item of rec.recommended) {
+    const manifestItem = manifestById.get(item.id);
+    if (!manifestItem?.path) continue;
+    const sourcePath = path.join(pkgRoot, manifestItem.path);
     const target = item.type === "agent" ? "agents" : "skills";
-    const sourceDir = path.join(root, "library/haus", target, item.id.replace("haus.", ""));
-    const fallbackDir = path.join(root, "library/haus", target, item.id);
-    const sourcePath = (await fs.pathExists(sourceDir)) ? sourceDir : fallbackDir;
     const destination = claudePath(root, target, path.basename(sourcePath));
     if (await fs.pathExists(sourcePath)) {
       await fs.ensureDir(path.dirname(destination));
