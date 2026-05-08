@@ -26,5 +26,8 @@ jobs:
       - name: Catalog audit
         run: yarn catalog:audit
 
+      - name: Test
+        run: yarn test
+
       - name: Pack
         run: yarn pack

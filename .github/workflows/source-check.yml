@@ -1,0 +1,19 @@
+name: AI Source Check
+
+on:
+  schedule:
+    - cron: "0 8 * * 1"
+  workflow_dispatch:
+
+jobs:
+  check-sources:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - run: corepack enable
+      - run: yarn install --immutable
+      - run: yarn build
+      - run: node dist/cli.js sources sync --check
+      - run: node dist/cli.js sources audit
+      - run: node dist/cli.js catalog-audit
