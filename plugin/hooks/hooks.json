@@ -2,7 +2,20 @@
   "hooks": {
     "UserPromptSubmit": [
       {
-        "hooks": [{ "type": "command", "command": "haus context --from-hook" }]
+        "hooks": [
+          { "type": "command", "command": "haus context --from-hook" },
+          { "type": "command", "command": "haus memory inject --from-hook" }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Read|Edit|Write",
+        "hooks": [{ "type": "command", "command": "haus guard file-access --from-hook" }]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [{ "type": "command", "command": "haus guard bash --from-hook" }]
       }
     ]
   }
