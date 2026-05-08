@@ -14,7 +14,7 @@ test("update check and apply create backup", () => {
   const checkOut = execSync(`node "${path.resolve("dist/cli.js")}" update --check`, { cwd: temp }).toString();
   assert.equal(checkOut.includes("\"ok\""), true);
 
-  execSync(`node "${path.resolve("dist/cli.js")}" update`, { cwd: temp });
+  const out = execSync(`node "${path.resolve("dist/cli.js")}" update`, { cwd: temp }).toString("utf8");
   const backups = readdirSync(path.join(temp, ".haus-ai/backups"));
   const lock = JSON.parse(readFileSync(path.join(temp, ".haus-ai/haus.lock.json"), "utf8"));
 
@@ -22,4 +22,5 @@ test("update check and apply create backup", () => {
   assert.equal(typeof lock[0].hash, "string");
   assert.equal(lock[0].hash.startsWith("sha256-"), true);
   assert.equal(Array.isArray(lock[0].paths), true);
+  assert.equal(out.includes("Lock item changes") || out.includes("No lock item add/remove changes"), true);
 });

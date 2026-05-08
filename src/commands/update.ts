@@ -1,5 +1,5 @@
 import { applyLock, checkLock, diffLock, hasLocalOverrides } from "../update/lockfile.js";
-import { diffGeneratedFiles } from "../update/diff-generated-files.js";
+import { diffGeneratedFiles, summarizeLockDiff } from "../update/diff-generated-files.js";
 
 export async function runUpdate(options: { check?: boolean }): Promise<void> {
   const root = process.cwd();
@@ -24,5 +24,6 @@ export async function runUpdate(options: { check?: boolean }): Promise<void> {
   }
   const { before, after } = await applyLock(root);
   console.log(diffLock(before, after));
+  console.log(summarizeLockDiff(before, after));
   console.log("Update applied with backup in .haus-ai/backups/. Run haus doctor.");
 }
