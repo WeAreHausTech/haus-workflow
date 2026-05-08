@@ -65,3 +65,6 @@ cache/
 
 # Workspace
 *.code-workspace
+
+# Haus AI generated runtime output
+.haus-ai/
