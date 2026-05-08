@@ -1,6 +1,6 @@
 ---
 name: global-engineering-rules
-description: Haus global-engineering-rules. Use only when selected by haus-ai context scanning.
+description: Haus global-engineering-rules. Use only when selected by haus context scanning.
 ---
 
 # global-engineering-rules

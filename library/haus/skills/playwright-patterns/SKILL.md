@@ -1,6 +1,6 @@
 ---
 name: playwright-patterns
-description: Haus playwright-patterns. Use only when selected by haus-ai context scanning.
+description: Haus playwright-patterns. Use only when selected by haus context scanning.
 ---
 
 # playwright-patterns

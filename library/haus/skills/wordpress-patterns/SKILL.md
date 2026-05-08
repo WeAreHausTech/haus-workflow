@@ -1,6 +1,6 @@
 ---
 name: wordpress-patterns
-description: Haus wordpress-patterns. Use only when selected by haus-ai context scanning.
+description: Haus wordpress-patterns. Use only when selected by haus context scanning.
 ---
 
 # wordpress-patterns

@@ -1,6 +1,6 @@
 ---
 name: laravel-patterns
-description: Haus laravel-patterns. Use only when selected by haus-ai context scanning.
+description: Haus laravel-patterns. Use only when selected by haus context scanning.
 ---
 
 # laravel-patterns
