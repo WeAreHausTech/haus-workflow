@@ -1,6 +1,14 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { execSync } from "node:child_process";
+import fs from "node:fs";
 
-test("recommender placeholder", () => {
-  assert.equal(1, 1);
+test("recommender writes recommendation json shape", () => {
+  execSync("node dist/cli.js scan --json > /dev/null");
+  execSync("node dist/cli.js recommend --json > /dev/null");
+  const file = ".haus-ai/recommendation.json";
+  const parsed = JSON.parse(fs.readFileSync(file, "utf8"));
+  assert.equal(Array.isArray(parsed.recommended), true);
+  assert.equal(Array.isArray(parsed.skipped), true);
+  assert.equal(typeof parsed.estimatedContextTokens, "number");
 });

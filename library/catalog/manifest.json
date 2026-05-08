@@ -145,6 +145,226 @@
       "tokenEstimate": 1400,
       "installMode": "copy-selected",
       "default": true
+    },
+    {
+      "id": "haus.vendure-app-patterns",
+      "source": "haus",
+      "type": "skill",
+      "path": "library/haus/skills/vendure-plugin-patterns",
+      "title": "Haus Vendure app patterns",
+      "tags": ["vendure3", "nestjs", "graphql"],
+      "repoRoles": ["vendure-app"],
+      "tokenEstimate": 3200,
+      "installMode": "copy-selected"
+    },
+    {
+      "id": "haus.nestjs-graphql-patterns",
+      "source": "haus",
+      "type": "skill",
+      "path": "library/haus/skills/typescript6-patterns",
+      "title": "Haus NestJS GraphQL patterns",
+      "tags": ["nestjs", "graphql", "typescript6"],
+      "repoRoles": ["nestjs-api", "graphql-api"],
+      "tokenEstimate": 2600,
+      "installMode": "copy-selected"
+    },
+    {
+      "id": "haus.nx21-monorepo-patterns",
+      "source": "haus",
+      "type": "skill",
+      "path": "library/haus/skills/typescript6-patterns",
+      "title": "Haus Nx 21 monorepo patterns",
+      "tags": ["nx21", "yarn4"],
+      "repoRoles": ["nx-monorepo"],
+      "tokenEstimate": 2200,
+      "installMode": "copy-selected"
+    },
+    {
+      "id": "haus.turbo-monorepo-patterns",
+      "source": "haus",
+      "type": "skill",
+      "path": "library/haus/skills/typescript6-patterns",
+      "title": "Haus Turbo monorepo patterns",
+      "tags": ["turbo", "yarn4"],
+      "repoRoles": ["turbo-monorepo"],
+      "tokenEstimate": 2200,
+      "installMode": "copy-selected"
+    },
+    {
+      "id": "haus.tanstack-query-router-patterns",
+      "source": "haus",
+      "type": "skill",
+      "path": "library/haus/skills/react19-patterns",
+      "title": "Haus TanStack query/router patterns",
+      "tags": ["tanstack-query", "tanstack-router", "react19"],
+      "repoRoles": ["next-app", "react-app"],
+      "tokenEstimate": 2200,
+      "installMode": "copy-selected"
+    },
+    {
+      "id": "haus.radix-shadcn-patterns",
+      "source": "haus",
+      "type": "skill",
+      "path": "library/haus/skills/react19-patterns",
+      "title": "Haus Radix shadcn patterns",
+      "tags": ["radix", "shadcn", "react19"],
+      "repoRoles": ["next-app", "react-app"],
+      "tokenEstimate": 1800,
+      "installMode": "copy-selected"
+    },
+    {
+      "id": "haus.tailwind-scss-patterns",
+      "source": "haus",
+      "type": "skill",
+      "path": "library/haus/skills/react19-patterns",
+      "title": "Haus Tailwind SCSS patterns",
+      "tags": ["tailwind", "scss", "react19"],
+      "repoRoles": ["next-app", "react-app", "vite-app"],
+      "tokenEstimate": 1800,
+      "installMode": "copy-selected"
+    },
+    {
+      "id": "haus.vue-patterns",
+      "source": "haus",
+      "type": "skill",
+      "path": "library/haus/skills/react19-patterns",
+      "title": "Haus Vue patterns",
+      "tags": ["vue"],
+      "repoRoles": ["vue-app"],
+      "tokenEstimate": 2000,
+      "installMode": "copy-selected"
+    },
+    {
+      "id": "haus.laravel-nova-patterns",
+      "source": "haus",
+      "type": "skill",
+      "path": "library/haus/skills/laravel-patterns",
+      "title": "Haus Laravel Nova patterns",
+      "tags": ["laravel-nova", "laravel"],
+      "repoRoles": ["laravel-nova-app"],
+      "tokenEstimate": 2600,
+      "installMode": "copy-selected"
+    },
+    {
+      "id": "haus.wordpress-bedrock-patterns",
+      "source": "haus",
+      "type": "skill",
+      "path": "library/haus/skills/wordpress-patterns",
+      "title": "Haus WordPress Bedrock patterns",
+      "tags": ["wordpress", "bedrock"],
+      "repoRoles": ["wordpress-bedrock-site"],
+      "tokenEstimate": 2600,
+      "installMode": "copy-selected"
+    },
+    {
+      "id": "haus.wordpress-acf-elementor-jetengine-patterns",
+      "source": "haus",
+      "type": "skill",
+      "path": "library/haus/skills/wordpress-patterns",
+      "title": "Haus WordPress ACF Elementor JetEngine patterns",
+      "tags": ["wordpress"],
+      "repoRoles": ["wordpress-bedrock-site", "wordpress-vanilla-site"],
+      "tokenEstimate": 2600,
+      "installMode": "copy-selected"
+    },
+    {
+      "id": "haus.dotnet-service-patterns",
+      "source": "haus",
+      "type": "skill",
+      "path": "library/haus/skills/dotnet-patterns",
+      "title": "Haus dotnet service patterns",
+      "tags": ["dotnet"],
+      "repoRoles": ["dotnet-service"],
+      "tokenEstimate": 2300,
+      "installMode": "copy-selected"
+    },
+    {
+      "id": "haus.auth-oidc-azure-bankid-patterns",
+      "source": "haus",
+      "type": "skill",
+      "path": "library/haus/skills/global-engineering-rules",
+      "title": "Haus auth patterns",
+      "tags": ["oidc", "azure-ad", "bankid"],
+      "repoRoles": [],
+      "tokenEstimate": 1700,
+      "installMode": "copy-selected"
+    },
+    {
+      "id": "haus.database-patterns",
+      "source": "haus",
+      "type": "skill",
+      "path": "library/haus/skills/global-engineering-rules",
+      "title": "Haus database patterns",
+      "tags": ["postgresql", "mariadb", "mssql", "elasticsearch"],
+      "repoRoles": [],
+      "tokenEstimate": 1700,
+      "installMode": "copy-selected"
+    },
+    {
+      "id": "haus.package-manager-yarn4-pnpm89",
+      "source": "haus",
+      "type": "skill",
+      "path": "library/haus/skills/global-engineering-rules",
+      "title": "Haus package manager patterns",
+      "tags": ["yarn4", "pnpm89"],
+      "repoRoles": [],
+      "tokenEstimate": 1200,
+      "installMode": "copy-selected"
+    },
+    {
+      "id": "haus.testing-library-patterns",
+      "source": "haus",
+      "type": "skill",
+      "path": "library/haus/skills/playwright-patterns",
+      "title": "Haus testing library patterns",
+      "tags": ["testing-library"],
+      "repoRoles": [],
+      "tokenEstimate": 1500,
+      "installMode": "copy-selected"
+    },
+    {
+      "id": "haus.phpunit-patterns",
+      "source": "haus",
+      "type": "skill",
+      "path": "library/haus/skills/laravel-patterns",
+      "title": "Haus PHPUnit patterns",
+      "tags": ["phpunit"],
+      "repoRoles": ["laravel-app", "laravel-nova-app"],
+      "tokenEstimate": 1500,
+      "installMode": "copy-selected"
+    },
+    {
+      "id": "haus.storybook-patterns",
+      "source": "haus",
+      "type": "skill",
+      "path": "library/haus/skills/react19-patterns",
+      "title": "Haus Storybook patterns",
+      "tags": ["storybook"],
+      "repoRoles": ["react-app", "next-app", "vite-app"],
+      "tokenEstimate": 1500,
+      "installMode": "copy-selected"
+    },
+    {
+      "id": "haus.security-review",
+      "source": "haus",
+      "type": "skill",
+      "path": "library/haus/skills/global-engineering-rules",
+      "title": "Haus security review",
+      "tags": ["security"],
+      "repoRoles": [],
+      "tokenEstimate": 1200,
+      "installMode": "copy-selected"
+    },
+    {
+      "id": "haus.production-readiness-review",
+      "source": "haus",
+      "type": "skill",
+      "path": "library/haus/skills/global-engineering-rules",
+      "title": "Haus production readiness review",
+      "tags": ["quality"],
+      "repoRoles": [],
+      "tokenEstimate": 1200,
+      "installMode": "copy-selected"
     }
   ]
 }
