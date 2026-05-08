@@ -7,8 +7,11 @@ export type ContextMap = {
   repoName: string;
   packageManager: PackageManager;
   repoRoles: string[];
+  confidence: number;
   detectedStacks: Record<string, string[]>;
   dependencies: string[];
+  securityRisks: string[];
+  crossRepoHints: string[];
   warnings: string[];
 };
 

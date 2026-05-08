@@ -20,9 +20,22 @@ const SAFE_FILES = [
   "components.json",
   "playwright.config.*",
   "phpunit.xml",
+  "artisan",
+  "routes/*.php",
+  "app/Providers/*.php",
+  "schema.graphql",
+  "**/*.graphql",
+  "**/vendure-config.*",
+  "**/*module.ts",
+  "web/app/**",
+  "wp-content/**",
+  ".storybook/**",
+  ".env.example",
   "wp-config.php",
   "**/*.csproj",
-  "**/*.sln"
+  "**/*.sln",
+  "docker-compose.*",
+  "Dockerfile"
 ];
 
 const SENSITIVE = [/^\.env(\.|$)/, /(^|\/)\.env(\.|$)/, /\.pem$/, /\.key$/, /\.p12$/, /\.pfx$/, /\.sql$/, /\.dump$/, /customer-data/, /exports/, /certs/, /secrets/];
@@ -41,8 +54,14 @@ export async function scanProject(root: string, mode: "guided" | "fast" = "fast"
   const roles = detectRoles(deps, safeFiles);
   const stacks = detectStacks(deps, safeFiles);
   const warnings: string[] = [];
+  const securityRisks: string[] = [];
+  const crossRepoHints: string[] = [];
   if (!safeFiles.some((f) => f.endsWith(".env.example"))) warnings.push("No .env.example found");
   if (!(pkg && typeof pkg === "object" && "scripts" in pkg && String((pkg as any).scripts?.test ?? "").length > 0)) warnings.push("No package.json test script found");
+  if (safeFiles.some((f) => f.includes("docker-compose"))) crossRepoHints.push("Containerized services detected");
+  if (safeFiles.some((f) => f.includes("turbo.json") || f.includes("nx.json"))) crossRepoHints.push("Monorepo orchestration detected");
+  if (!safeFiles.some((f) => f.endsWith(".env.example"))) securityRisks.push("Missing env template");
+  if (safeFiles.some((f) => f.includes("wp-content/uploads"))) securityRisks.push("Uploads directory present");
 
   const context: ContextMap = {
     mode,
@@ -51,8 +70,11 @@ export async function scanProject(root: string, mode: "guided" | "fast" = "fast"
     repoName: String(pkg?.name ?? path.basename(root)),
     packageManager,
     repoRoles: roles,
+    confidence: computeConfidence(roles, stacks),
     detectedStacks: stacks,
     dependencies: deps,
+    securityRisks,
+    crossRepoHints,
     warnings
   };
 
@@ -101,12 +123,15 @@ function detectRoles(deps: string[], files: string[]): string[] {
   if (deps.includes("react")) roles.add("react-app");
   if (deps.includes("vite") || files.some((f) => f.includes("vite.config."))) roles.add("vite-app");
   if (deps.includes("@vendure/core")) roles.add("vendure-app");
+  if (deps.some((d) => d.startsWith("@haus/vendure-")) || files.some((f) => f.includes("vendure-config"))) roles.add("vendure-plugin");
   if (deps.includes("@nestjs/core")) roles.add("nestjs-api");
   if (deps.includes("graphql") || deps.includes("@nestjs/graphql")) roles.add("graphql-api");
   if (files.some((f) => f.endsWith("nx.json"))) roles.add("nx-monorepo");
   if (files.some((f) => f.endsWith("turbo.json"))) roles.add("turbo-monorepo");
   if (files.some((f) => f.endsWith("artisan")) || deps.includes("laravel/framework")) roles.add("laravel-app");
+  if (deps.includes("laravel/nova")) roles.add("laravel-nova-app");
   if (files.some((f) => f.endsWith("wp-config.php")) && files.some((f) => f.includes("web/app"))) roles.add("wordpress-bedrock-site");
+  if (files.some((f) => f.endsWith("wp-config.php")) && !files.some((f) => f.includes("web/app"))) roles.add("wordpress-vanilla-site");
   if (files.some((f) => f.endsWith(".csproj") || f.endsWith(".sln"))) roles.add("dotnet-service");
   if (deps.includes("express")) roles.add("express-service");
   return [...roles].sort();
@@ -129,6 +154,7 @@ function detectStacks(deps: string[], files: string[]): Record<string, string[]>
   if (files.some((f) => f.endsWith("wp-config.php"))) add("backend", "wordpress");
   if (files.some((f) => f.endsWith(".csproj") || f.endsWith(".sln"))) add("backend", "dotnet");
   if (deps.includes("@playwright/test")) add("testing", "playwright");
+  if (files.some((f) => f.includes(".storybook"))) add("testing", "storybook");
   if (deps.some((d) => d.startsWith("@testing-library/"))) add("testing", "testing-library");
   if (files.some((f) => f.endsWith("phpunit.xml"))) add("testing", "phpunit");
   if (deps.some((d) => d.startsWith("@storybook/"))) add("testing", "storybook");
@@ -138,6 +164,12 @@ function detectStacks(deps: string[], files: string[]): Record<string, string[]>
   if (deps.includes("@elastic/elasticsearch")) add("databases", "elasticsearch");
   add("packageManagers", "yarn4");
   return out;
+}
+
+function computeConfidence(roles: string[], stacks: Record<string, string[]>): number {
+  const stackCount = Object.values(stacks).reduce((sum, arr) => sum + arr.length, 0);
+  if (roles.length === 0) return 0.15;
+  return Math.min(0.99, Number((0.4 + roles.length * 0.08 + stackCount * 0.02).toFixed(2)));
 }
 
 function renderSummary(context: ContextMap): string {
