@@ -1,0 +1,9 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [{ "type": "command", "command": "haus context --from-hook" }]
+      }
+    ]
+  }
+}

@@ -1,0 +1,75 @@
+import path from "node:path";
+import fs from "fs-extra";
+import { readJson, writeJson, writeText } from "../utils/fs.js";
+import { claudePath, hausPath } from "../utils/paths.js";
+import type { Recommendation } from "../types.js";
+
+export async function writeClaudeFiles(root: string, dryRun: boolean): Promise<string[]> {
+  const rec = (await readJson<Recommendation>(hausPath(root, "recommendation.json"))) ?? {
+    mode: "fast",
+    recommended: [],
+    skipped: [],
+    warnings: [],
+    estimatedContextTokens: 0
+  };
+  const files = [
+    claudePath(root, "CLAUDE.md"),
+    claudePath(root, "settings.json"),
+    claudePath(root, "commands", "haus-doctor.md"),
+    claudePath(root, "commands", "haus-review.md"),
+    claudePath(root, "commands", "haus-explain-context.md"),
+    hausPath(root, "selected-context.json"),
+    hausPath(root, "haus.lock.json")
+  ];
+  if (dryRun) return files;
+
+  await writeText(
+    claudePath(root, "CLAUDE.md"),
+    `# Haus AI
+
+This project uses the Haus AI workflow.
+
+Use \`.haus-ai/context-map.json\`, \`.haus-ai/recommendation.json\`, and \`.haus-ai/repo-summary.md\` before choosing context.
+
+Use:
+
+\`\`\`bash
+haus doctor
+haus explain-context
+haus context --task "<task>"
+\`\`\`
+`
+  );
+  await writeJson(claudePath(root, "settings.json"), {
+    hooks: {
+      UserPromptSubmit: [{ hooks: [{ type: "command", command: "haus context --from-hook" }] }],
+      PreToolUse: [
+        { matcher: "Read|Edit|Write", hooks: [{ type: "command", command: "haus guard file-access --from-hook" }] },
+        { matcher: "Bash", hooks: [{ type: "command", command: "haus guard bash --from-hook" }] }
+      ]
+    }
+  });
+  await writeText(claudePath(root, "commands", "haus-doctor.md"), "Run `haus doctor`.");
+  await writeText(claudePath(root, "commands", "haus-review.md"), "Run `haus context --task \"code review\"` then review diff.");
+  await writeText(claudePath(root, "commands", "haus-explain-context.md"), "Run `haus explain-context`.");
+  await writeJson(
+    hausPath(root, "selected-context.json"),
+    rec.recommended.map((r) => ({ id: r.id, type: r.type, reason: r.reason }))
+  );
+  const lock = rec.recommended.map((r) => ({
+    id: r.id,
+    type: r.type,
+    source: "haus",
+    version: "0.2.0",
+    hash: "sha256-pending",
+    installMode: "copied",
+    paths: []
+  }));
+  await writeJson(hausPath(root, "haus.lock.json"), lock);
+
+  const pluginSrc = path.join(root, "plugin/.claude-plugin/plugin.json");
+  if (await fs.pathExists(pluginSrc)) {
+    await fs.ensureDir(claudePath(root, "plugin"));
+  }
+  return files;
+}
