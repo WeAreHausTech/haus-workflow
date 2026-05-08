@@ -21,4 +21,5 @@ test("update check and apply create backup", () => {
   assert.equal(backups.length > 0, true);
   assert.equal(typeof lock[0].hash, "string");
   assert.equal(lock[0].hash.startsWith("sha256-"), true);
+  assert.equal(Array.isArray(lock[0].paths), true);
 });
