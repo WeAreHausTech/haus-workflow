@@ -1,11 +1,41 @@
-import { readJson } from "../utils/fs.js";
+import { loadSources } from "./load-sources.js";
+
+const ALLOWLIST = ["github.com", "skills.sh", "agenstskills.com", "prpm.dev", "claude.com", "ecc.tools", "medium.com"];
+const UNSUPPORTED = [
+  "python",
+  "django",
+  "go",
+  "rust",
+  "java",
+  "spring",
+  "kotlin",
+  "swift",
+  "android",
+  "flutter",
+  "dart",
+  "c++",
+  "perl",
+  "defi",
+  "trading",
+  "healthcare",
+  "fundraising"
+];
 
 export async function auditSources(root: string): Promise<string[]> {
-  const sources = (await readJson<Array<{ id: string; source: string; version?: string; hash?: string }>>(`${root}/library/catalog/sources.json`)) ?? [];
+  const sources = await loadSources(root);
   const issues: string[] = [];
-  for (const item of sources) {
-    if (!item.version) issues.push(`${item.id}: missing version pin`);
-    if (!item.hash) issues.push(`${item.id}: missing hash pin`);
+  for (const source of sources) {
+    const allowedHost = ALLOWLIST.some((host) => source.url.includes(host));
+    if (!allowedHost) issues.push(`${source.id}: host not allowlisted`);
+    if (!source.license) issues.push(`${source.id}: missing license`);
+    if (!source.pinnedVersion) issues.push(`${source.id}: missing pinnedVersion`);
+    if (!source.pinnedHash) issues.push(`${source.id}: missing pinnedHash`);
+    for (const stack of source.containsStacks ?? []) {
+      if (UNSUPPORTED.some((x) => stack.toLowerCase().includes(x))) issues.push(`${source.id}: unsupported stack "${stack}"`);
+    }
+    if ((source.unsafeHookCommands ?? []).length > 0) {
+      issues.push(`${source.id}: unsafe hook commands present`);
+    }
   }
   return issues;
 }

@@ -1,3 +1,13 @@
-export async function syncSkillkitSource(): Promise<{ source: string; message: string }> {
-  return { source: "agenstskills", message: "Safe stub. Not configured. Candidate report only." };
+import type { CuratedSource, SourceSyncItem } from "./types.js";
+
+export async function syncSkillkitSource(source: CuratedSource, checkOnly: boolean): Promise<SourceSyncItem> {
+  return {
+    id: source.id,
+    source: source.url,
+    status: source.status,
+    policy: source.policy,
+    checkOnly,
+    pinned: Boolean(source.pinnedVersion && source.pinnedHash),
+    notes: "Candidate source checked. No mutation performed."
+  };
 }

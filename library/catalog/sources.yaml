@@ -1,13 +1,70 @@
 sources:
   - id: anthropic-skills
-    source: https://github.com/anthropics/skills
+    url: https://github.com/anthropics/skills
     policy: reference
-    pinned: "candidate"
+    status: approved
+    pinnedVersion: "2026-05-01"
+    pinnedHash: "sha256-candidate-anthropic"
+    license: MIT
+    notes: official provider skill examples and formats only
+    containsStacks:
+      - claude-code
+    unsafeHookCommands: []
   - id: superpowers
-    source: https://github.com/obra/superpowers
+    url: https://github.com/obra/superpowers
     policy: rewrite
-    pinned: "candidate"
+    status: approved
+    pinnedVersion: "2026-05-01"
+    pinnedHash: "sha256-candidate-superpowers"
+    license: MIT
+    notes: curate workflow patterns then rewrite into haus-owned skills
+    containsStacks:
+      - workflow
+      - testing
+      - context-minimisation
+    unsafeHookCommands: []
   - id: ecc
-    source: https://ecc.tools/skills
+    url: https://ecc.tools/skills
     policy: candidate-only
-    pinned: "candidate"
+    status: candidate
+    pinnedVersion: "2026-05-01"
+    pinnedHash: "sha256-candidate-ecc"
+    license: unknown
+    notes: candidate source only pending legal review
+    containsStacks:
+      - token-budgeting
+      - context-minimisation
+    unsafeHookCommands: []
+  - id: skills-sh
+    url: https://skills.sh/
+    policy: candidate-only
+    status: candidate
+    pinnedVersion: "2026-05-01"
+    pinnedHash: "sha256-candidate-skills-sh"
+    license: unknown
+    notes: discovery index only
+    containsStacks:
+      - discovery-index
+    unsafeHookCommands: []
+  - id: prpm
+    url: https://prpm.dev/
+    policy: candidate-only
+    status: candidate
+    pinnedVersion: "2026-05-01"
+    pinnedHash: "sha256-candidate-prpm"
+    license: unknown
+    notes: discovery index only
+    containsStacks:
+      - discovery-index
+    unsafeHookCommands: []
+  - id: agenstskills
+    url: https://www.agenstskills.com/
+    policy: candidate-only
+    status: candidate
+    pinnedVersion: "2026-05-01"
+    pinnedHash: "sha256-candidate-agenstskills"
+    license: unknown
+    notes: candidate source only
+    containsStacks:
+      - discovery-index
+    unsafeHookCommands: []
