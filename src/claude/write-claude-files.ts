@@ -15,6 +15,8 @@ export async function writeClaudeFiles(root: string, dryRun: boolean): Promise<s
   const files = [
     claudePath(root, "CLAUDE.md"),
     claudePath(root, "settings.json"),
+    claudePath(root, "rules", "haus.md"),
+    claudePath(root, "rules", "security.md"),
     claudePath(root, "commands", "haus-doctor.md"),
     claudePath(root, "commands", "haus-review.md"),
     claudePath(root, "commands", "haus-explain-context.md"),
@@ -52,6 +54,21 @@ haus context --task "<task>"
   await writeText(claudePath(root, "commands", "haus-doctor.md"), "Run `haus doctor`.");
   await writeText(claudePath(root, "commands", "haus-review.md"), "Run `haus context --task \"code review\"` then review diff.");
   await writeText(claudePath(root, "commands", "haus-explain-context.md"), "Run `haus explain-context`.");
+  await writeText(claudePath(root, "rules", "haus.md"), "- Keep context minimal.\n- Follow project conventions.\n");
+  await writeText(claudePath(root, "rules", "security.md"), "- Never read secrets.\n- Block dangerous shell commands.\n");
+
+  for (const item of rec.recommended) {
+    const target = item.type === "agent" ? "agents" : "skills";
+    const sourceDir = path.join(root, "library/haus", target, item.id.replace("haus.", ""));
+    const fallbackDir = path.join(root, "library/haus", target, item.id);
+    const sourcePath = (await fs.pathExists(sourceDir)) ? sourceDir : fallbackDir;
+    const destination = claudePath(root, target, path.basename(sourcePath));
+    if (await fs.pathExists(sourcePath)) {
+      await fs.ensureDir(path.dirname(destination));
+      await fs.copy(sourcePath, destination, { overwrite: true, errorOnExist: false });
+      files.push(destination);
+    }
+  }
   await writeJson(
     hausPath(root, "selected-context.json"),
     rec.recommended.map((r) => ({ id: r.id, type: r.type, reason: r.reason }))
