@@ -1,6 +1,6 @@
 ---
 name: typescript6-patterns
-description: Haus typescript6-patterns. Use only when selected by haus-ai context scanning.
+description: Haus typescript6-patterns. Use only when selected by haus context scanning.
 ---
 
 # typescript6-patterns

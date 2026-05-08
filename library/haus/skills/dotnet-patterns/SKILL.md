@@ -1,6 +1,6 @@
 ---
 name: dotnet-patterns
-description: Haus dotnet-patterns. Use only when selected by haus-ai context scanning.
+description: Haus dotnet-patterns. Use only when selected by haus context scanning.
 ---
 
 # dotnet-patterns

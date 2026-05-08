@@ -1,6 +1,6 @@
 ---
 name: react19-patterns
-description: Haus react19-patterns. Use only when selected by haus-ai context scanning.
+description: Haus react19-patterns. Use only when selected by haus context scanning.
 ---
 
 # react19-patterns

@@ -1,6 +1,6 @@
 ---
 name: vendure-plugin-patterns
-description: Haus Vendure 3.x plugin development patterns. Use only when haus-ai detects @vendure/core, @VendurePlugin, vendure config files, or @haus/vendure-* packages.
+description: Haus Vendure 3.x plugin development patterns. Use only when haus detects @vendure/core, @VendurePlugin, vendure config files, or @haus/vendure-* packages.
 ---
 
 # Haus Vendure Plugin Patterns
