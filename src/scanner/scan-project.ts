@@ -53,7 +53,7 @@ export async function scanProject(root: string, mode: "guided" | "fast" = "fast"
   const deps = dependencySet(pkg, composer);
   const packageManager = detectPackageManager(root, pkg);
   const roles = detectRoles(deps, safeFiles);
-  const stacks = detectStacks(deps, safeFiles);
+  const stacks = await detectStacks(root, deps, safeFiles);
   const warnings: string[] = [];
   const securityRisks: string[] = [];
   const crossRepoHints: string[] = [];
@@ -142,7 +142,7 @@ function detectRoles(deps: string[], files: string[]): string[] {
   return [...roles].sort();
 }
 
-function detectStacks(deps: string[], files: string[]): Record<string, string[]> {
+async function detectStacks(root: string, deps: string[], files: string[]): Promise<Record<string, string[]>> {
   const out: Record<string, string[]> = { backend: [], frontend: [], databases: [], testing: [], auth: [], tooling: [], packageManagers: [] };
   const add = (k: string, v: string) => {
     out[k] ??= [];
@@ -154,8 +154,12 @@ function detectStacks(deps: string[], files: string[]): Record<string, string[]>
   if (deps.includes("vite")) add("frontend", "vite8");
   if (deps.includes("@vendure/core")) add("backend", "vendure3");
   if (deps.includes("@nestjs/core")) add("backend", "nestjs");
+  if (await hasNeedle(root, files, "NestFactory")) add("backend", "nestjs");
+  if (await hasNeedle(root, files, "@VendurePlugin")) add("backend", "vendure3");
   if (deps.includes("graphql") || deps.includes("@nestjs/graphql")) add("backend", "graphql");
+  if (files.some((f) => f.endsWith(".graphql") || f.endsWith("schema.graphql"))) add("backend", "graphql");
   if (deps.includes("laravel/framework")) add("backend", "laravel");
+  if (files.some((f) => f.includes("app/Providers/") || f.includes("routes/"))) add("backend", "laravel");
   if (files.some((f) => f.endsWith("wp-config.php"))) add("backend", "wordpress");
   if (files.some((f) => f.endsWith(".csproj") || f.endsWith(".sln"))) add("backend", "dotnet");
   if (deps.includes("@playwright/test")) add("testing", "playwright");
@@ -167,8 +171,24 @@ function detectStacks(deps: string[], files: string[]): Record<string, string[]>
   if (deps.includes("mariadb") || deps.includes("mysql2")) add("databases", "mariadb");
   if (deps.includes("mssql")) add("databases", "mssql");
   if (deps.includes("@elastic/elasticsearch")) add("databases", "elasticsearch");
+  if (await hasNeedle(root, files, "openid")) add("auth", "oidc");
+  if (await hasNeedle(root, files, "AZURE_AD")) add("auth", "azure-ad");
+  if (await hasNeedle(root, files, "BANKID")) add("auth", "bankid");
   add("packageManagers", "yarn4");
   return out;
+}
+
+async function hasNeedle(root: string, files: string[], needle: string): Promise<boolean> {
+  const candidates = files.filter((f) => f.endsWith(".ts") || f.endsWith(".js") || f.endsWith(".php") || f.endsWith(".json") || f.endsWith(".yml") || f.endsWith(".yaml"));
+  for (const rel of candidates.slice(0, 300)) {
+    try {
+      const content = await readFile(path.join(root, rel), "utf8");
+      if (content.includes(needle)) return true;
+    } catch {
+      continue;
+    }
+  }
+  return false;
 }
 
 function computeConfidence(roles: string[], stacks: Record<string, string[]>): number {

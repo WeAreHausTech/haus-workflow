@@ -32,3 +32,17 @@ test("scanner hashes change when file content changes", () => {
 
   assert.notEqual(hashA["package.json"], hashB["package.json"]);
 });
+
+test("scanner detects NestFactory and graphql schema hints", () => {
+  const temp = mkdtempSync(path.join(os.tmpdir(), "haus-scan-nest-"));
+  mkdirSync(path.join(temp, "src"), { recursive: true });
+  writeFileSync(path.join(temp, "package.json"), JSON.stringify({ name: "nest-temp", packageManager: "yarn@4.5.3", dependencies: { "@nestjs/core": "11.0.0" } }, null, 2));
+  writeFileSync(path.join(temp, "yarn.lock"), "# lock");
+  writeFileSync(path.join(temp, "src/main.ts"), "import { NestFactory } from '@nestjs/core';");
+  writeFileSync(path.join(temp, "schema.graphql"), "type Query { health: String }");
+
+  execSync(`node "${path.resolve("dist/cli.js")}" scan --json > /dev/null`, { cwd: temp });
+  const context = JSON.parse(readFileSync(path.join(temp, ".haus-ai/context-map.json"), "utf8"));
+  assert.equal(context.detectedStacks.backend.includes("nestjs"), true);
+  assert.equal(context.detectedStacks.backend.includes("graphql"), true);
+});

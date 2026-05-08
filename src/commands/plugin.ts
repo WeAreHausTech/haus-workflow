@@ -1,12 +1,12 @@
 import fs from "fs-extra";
 import path from "node:path";
+import os from "node:os";
 import { packageRoot } from "../utils/paths.js";
 
 export async function runPlugin(action: "install" | "validate", _options: Record<string, unknown>): Promise<void> {
   if (action === "install") {
-    const root = process.cwd();
-    const source = path.join(packageRoot(), "plugin");
-    const destination = path.join(root, ".claude", "plugins", "haus-ai");
+    const source = await resolvePluginSourcePath();
+    const destination = resolvePluginInstallPath();
     if (!(await fs.pathExists(source))) {
       console.error("plugin directory missing");
       process.exitCode = 1;
@@ -17,11 +17,27 @@ export async function runPlugin(action: "install" | "validate", _options: Record
     console.log(`Plugin installed at ${destination}`);
     return;
   }
-  const ok = await fs.pathExists("plugin/.claude-plugin/plugin.json");
+  const source = await resolvePluginSourcePath();
+  const ok = await fs.pathExists(path.join(source, ".claude-plugin/plugin.json"));
   if (!ok) {
     console.error("plugin/.claude-plugin/plugin.json missing");
     process.exitCode = 1;
     return;
   }
   console.log("Plugin validate passed.");
+}
+
+function resolvePluginInstallPath(): string {
+  const custom = process.env.HAUS_PLUGIN_DIR?.trim();
+  if (custom) return path.resolve(custom);
+  // Default global user install path; can be overridden by HAUS_PLUGIN_DIR.
+  return path.join(os.homedir(), ".claude", "plugins", "haus-ai");
+}
+
+async function resolvePluginSourcePath(): Promise<string> {
+  const candidates = [path.join(process.cwd(), "plugin"), path.join(packageRoot(), "plugin")];
+  for (const candidate of candidates) {
+    if (await fs.pathExists(candidate)) return candidate;
+  }
+  return candidates[0];
 }
