@@ -1,9 +1,14 @@
-export type SourceReport = {
-  source: string;
-  status: "candidate" | "approved" | "rejected";
-  notes: string;
-};
+import type { SourceSyncItem } from "./types.js";
 
-export function renderSourceReport(items: SourceReport[]): string {
-  return JSON.stringify({ generatedAt: new Date().toISOString(), items }, null, 2);
+export function renderSourceReport(items: SourceSyncItem[]): string {
+  return JSON.stringify(
+    {
+      generatedAt: new Date().toISOString(),
+      mode: "check-only",
+      mutateCatalog: false,
+      items
+    },
+    null,
+    2
+  );
 }
