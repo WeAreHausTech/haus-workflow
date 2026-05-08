@@ -1,220 +1,72 @@
 #!/usr/bin/env node
-import crypto from "node:crypto";
-import {
-  cpSync,
-  existsSync,
-  mkdirSync,
-  readdirSync,
-  readFileSync,
-  rmSync,
-  statSync,
-  writeFileSync
-} from "node:fs";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { Command } from "commander";
+import { runApply } from "./commands/apply.js";
+import { runCatalogAudit } from "./commands/catalog-audit.js";
+import { runContext } from "./commands/context.js";
+import { runDoctor } from "./commands/doctor.js";
+import { runExplainContext } from "./commands/explain-context.js";
+import { runGuard } from "./commands/guard.js";
+import { runMemory } from "./commands/memory.js";
+import { runPlugin } from "./commands/plugin.js";
+import { runRecommend } from "./commands/recommend.js";
+import { runRefresh } from "./commands/refresh.js";
+import { runScan } from "./commands/scan.js";
+import { runSetupProject } from "./commands/setup-project.js";
+import { runSources } from "./commands/sources.js";
+import { runUpdate } from "./commands/update.js";
+import { runWorkspace } from "./commands/workspace.js";
 
-const VERSION = "0.1.0";
+const program = new Command();
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const packageRoot = path.resolve(__dirname, "..");
-const libraryRoot = path.join(packageRoot, "library");
+program.name("haus").description("Haus AI workflow CLI").version("0.2.0");
 
-type JsonObject = Record<string, unknown>;
+program.command("scan").option("--json", "JSON output").action(runScan);
+program.command("recommend").option("--json", "JSON output").action(runRecommend);
+program
+  .command("setup-project")
+  .option("--guided", "Guided setup")
+  .option("--fast", "Fast setup")
+  .option("--json", "JSON output")
+  .action(runSetupProject);
+program.command("doctor").action(runDoctor);
+program.command("apply").option("--dry-run").option("--write").action(runApply);
+program.command("explain-context").action(runExplainContext);
+program.command("context").option("--task <task>").option("--from-hook").action(runContext);
+program.command("refresh").action(runRefresh);
+program.command("catalog-audit").action(runCatalogAudit);
 
-type Requirement = {
-  dependency?: string;
-  dependencyPrefix?: string;
-  file?: string;
-  repoRole?: string;
-  stack?: string;
-  packageNamePattern?: string;
-};
+const memory = program.command("memory");
+memory.command("status").action(() => runMemory("status", {}));
+memory.command("add <text>").action((text) => runMemory("add", { text }));
+memory.command("inject").option("--task <task>").option("--from-hook").action((opts) => runMemory("inject", opts));
+memory.command("promote").action(() => runMemory("promote", {}));
 
-type CatalogItem = {
-  id: string;
-  source: "haus" | "ecc";
-  type: "skill" | "agent" | "rule" | "command";
-  path: string;
-  title: string;
-  tags: string[];
-  repoRoles: string[];
-  requiresAny?: Requirement[];
-  requiresAll?: Requirement[];
-  taskTypes?: string[];
-  tokenEstimate: number;
-  installMode: "copy-selected" | "reference-only";
-  default?: boolean;
-};
+const sources = program.command("sources");
+sources.command("sync").option("--check").action((opts) => runSources("sync", opts));
+sources.command("report").action((opts) => runSources("report", opts));
+sources.command("audit").action((opts) => runSources("audit", opts));
 
-type SelectedItem = CatalogItem & { reason: string };
-type ExcludedItem = { id: string; reason: string };
+const plugin = program.command("plugin");
+plugin.command("install").action((opts) => runPlugin("install", opts));
+plugin.command("validate").action((opts) => runPlugin("validate", opts));
 
-type ContextMap = {
-  version: string;
-  generatedAt: string;
-  root: string;
-  repoName: string;
-  packageManager: "pnpm" | "yarn" | "npm" | "unknown";
-  repoRoles: string[];
-  confidence: number;
-  detectedStacks: Record<string, string[]>;
-  dependencies: string[];
-  packageName?: string;
-  signals: string[];
-  selectedCatalogItems: SelectedItem[];
-  excludedCatalogItems: ExcludedItem[];
-  tokenEstimate: number;
-  warnings: string[];
-};
+const guard = program.command("guard");
+guard.command("file-access").option("--from-hook").action((opts) => runGuard("file-access", opts));
+guard.command("bash").option("--from-hook").action((opts) => runGuard("bash", opts));
 
-const SENSITIVE_PATH_PATTERNS = [
-  /^\.env(?:\.|$)/,
-  /(^|\/)\.env(?:\.|$)/,
-  /(^|\/)id_rsa$/,
-  /(^|\/)id_ed25519$/,
-  /\.pem$/,
-  /\.key$/,
-  /\.p12$/,
-  /\.pfx$/,
-  /\.sql$/,
-  /\.dump$/,
-  /\.backup$/,
-  /(^|\/)secrets?(\/|$)/,
-  /(^|\/)certs?(\/|$)/,
-  /(^|\/)customer-data(\/|$)/,
-  /(^|\/)exports(\/|$)/,
-  /(^|\/)wp-content\/uploads(\/|$)/,
-  /(^|\/)storage\/logs(\/|$)/
-];
+program.command("update").option("--check").action(runUpdate);
 
-const SKIP_DIRS = new Set([
-  ".git",
-  "node_modules",
-  "dist",
-  "build",
-  ".next",
-  ".turbo",
-  ".nx",
-  "coverage",
-  "vendor",
-  "storage",
-  "uploads",
-  "tmp",
-  ".haus-ai"
-]);
+const workspace = program.command("workspace");
+workspace.command("init").action(() => runWorkspace("init"));
+workspace.command("scan").action(() => runWorkspace("scan"));
 
-const IMPORTANT_FILE_NAMES = new Set([
-  "package.json",
-  "pnpm-lock.yaml",
-  "yarn.lock",
-  "package-lock.json",
-  "composer.json",
-  "composer.lock",
-  "nx.json",
-  "turbo.json",
-  "tsconfig.json",
-  "next.config.js",
-  "next.config.mjs",
-  "next.config.ts",
-  "vite.config.js",
-  "vite.config.mjs",
-  "vite.config.ts",
-  "tailwind.config.js",
-  "tailwind.config.ts",
-  "playwright.config.js",
-  "playwright.config.ts",
-  "phpunit.xml",
-  "Dockerfile",
-  "docker-compose.yml",
-  "docker-compose.yaml",
-  "components.json"
-]);
+program.parseAsync(process.argv).catch((error: unknown) => {
+  const message = error instanceof Error ? error.message : String(error);
+  console.error(message);
+  process.exitCode = 1;
+});
 
-function main(): void {
-  const [command = "help", ...args] = process.argv.slice(2);
-
-  try {
-    switch (command) {
-      case "--version":
-      case "version":
-        console.log(VERSION);
-        return;
-      case "help":
-      case "--help":
-      case "-h":
-        printHelp();
-        return;
-      case "init":
-        initCommand(process.cwd());
-        return;
-      case "scan":
-        scanCommand(process.cwd(), args.includes("--json"));
-        return;
-      case "doctor":
-        doctorCommand(process.cwd());
-        return;
-      case "apply":
-        applyCommand(process.cwd(), args.includes("--dry-run"), args.includes("--write"));
-        return;
-      case "explain-context":
-        explainContextCommand(process.cwd());
-        return;
-      case "context": {
-        const taskIndex = args.indexOf("--task");
-        const task = taskIndex >= 0 ? args.slice(taskIndex + 1).join(" ") : "";
-        contextCommand(process.cwd(), task, args.includes("--from-hook"));
-        return;
-      }
-      case "refresh":
-        refreshCommand(process.cwd());
-        return;
-      case "catalog-audit":
-        catalogAuditCommand();
-        return;
-      case "guard":
-        guardCommand(args[0] ?? "");
-        return;
-      case "workspace":
-        workspaceCommand(process.cwd(), args[0] ?? "help");
-        return;
-      default:
-        fail(`Unknown command: ${command}\nRun haus-ai help for usage.`);
-    }
-  } catch (error) {
-    if (error instanceof Error) fail(error.message);
-    fail(String(error));
-  }
-}
-
-function printHelp(): void {
-  console.log(`haus-ai ${VERSION}
-
-Usage:
-  haus-ai init
-  haus-ai scan [--json]
-  haus-ai doctor
-  haus-ai apply --dry-run
-  haus-ai apply --write
-  haus-ai explain-context
-  haus-ai context --task "fix checkout bug"
-  haus-ai refresh
-  haus-ai catalog-audit
-  haus-ai workspace init
-  haus-ai workspace scan
-`);
-}
-
-function initCommand(root: string): void {
-  ensureDir(path.join(root, ".haus-ai"));
-  const workspacePath = path.join(root, "haus.workspace.yaml");
-  if (!existsSync(workspacePath)) {
-    writeFileSync(workspacePath, `client: example-client\n\nrepos:\n  - name: current\n    path: .\n    role: auto\n\nrelationships: []\n`, "utf8");
-  }
-  console.log("Initialized Haus AI files.");
-  console.log("Next: run haus-ai scan, then haus-ai doctor.");
-}
-
+/*
 function scanCommand(root: string, json: boolean): ContextMap {
   const context = buildContextMap(root);
   writeContextFiles(root, context);
@@ -885,3 +737,4 @@ function fail(message: string): never {
 }
 
 main();
+*/
