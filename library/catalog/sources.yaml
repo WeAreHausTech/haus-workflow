@@ -1,0 +1,13 @@
+sources:
+  - id: anthropic-skills
+    source: https://github.com/anthropics/skills
+    policy: reference
+    pinned: "candidate"
+  - id: superpowers
+    source: https://github.com/obra/superpowers
+    policy: rewrite
+    pinned: "candidate"
+  - id: ecc
+    source: https://ecc.tools/skills
+    policy: candidate-only
+    pinned: "candidate"
