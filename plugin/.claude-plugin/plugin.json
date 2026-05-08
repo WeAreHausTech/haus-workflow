@@ -1,0 +1,10 @@
+{
+  "name": "@haus/ai",
+  "version": "0.2.0",
+  "skills": [
+    "plugin/skills/haus-setup-project/SKILL.md",
+    "plugin/skills/haus-workflow/SKILL.md",
+    "plugin/skills/haus-context-router/SKILL.md",
+    "plugin/skills/haus-skill-author/SKILL.md"
+  ]
+}
