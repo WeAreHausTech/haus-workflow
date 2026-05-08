@@ -204,7 +204,7 @@ __metadata:
     yaml: "npm:^2.6.1"
     zod: "npm:^3.24.1"
   bin:
-    haus-ai: ./dist/cli.js
+    haus: ./dist/cli.js
   languageName: unknown
   linkType: soft
 

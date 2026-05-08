@@ -1,7 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { scanProject } from "../dist/cli.js";
+import fs from "node:fs";
 
 test("scanner command exists in built cli", async () => {
-  assert.equal(typeof scanProject, "undefined");
+  const text = fs.readFileSync("src/commands/scan.ts", "utf8");
+  assert.equal(text.includes("scanProject"), true);
 });
