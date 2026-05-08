@@ -1,0 +1,8 @@
+{
+  "name": "@haus/vendure-sample",
+  "dependencies": {
+    "@vendure/core": "3.0.0",
+    "@nestjs/core": "11.0.0",
+    "graphql": "16.0.0"
+  }
+}
