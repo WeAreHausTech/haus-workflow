@@ -29,5 +29,13 @@ jobs:
       - name: Test
         run: yarn test
 
+      - name: CLI smoke checks
+        run: |
+          node dist/cli.js scan --json
+          node dist/cli.js recommend --json
+          node dist/cli.js apply --dry-run
+          node dist/cli.js update --check
+          node dist/cli.js sources audit
+
       - name: Pack
         run: yarn pack
