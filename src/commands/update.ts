@@ -1,13 +1,28 @@
-import { applyLock, checkLock } from "../update/lockfile.js";
+import { applyLock, checkLock, diffLock, hasLocalOverrides } from "../update/lockfile.js";
+import { diffGeneratedFiles } from "../update/diff-generated-files.js";
 
 export async function runUpdate(options: { check?: boolean }): Promise<void> {
   const root = process.cwd();
   if (options.check) {
     const status = await checkLock(root);
-    console.log(JSON.stringify(status, null, 2));
+    console.log(
+      JSON.stringify(
+        {
+          ...status,
+          localOverrides: await hasLocalOverrides(root),
+          summary: diffGeneratedFiles()
+        },
+        null,
+        2
+      )
+    );
     if (!status.ok) process.exitCode = 1;
     return;
   }
+  if (await hasLocalOverrides(root)) {
+    console.log("Local .claude overrides detected. Preserving local files; only lockfile updated.");
+  }
   await applyLock(root);
-  console.log("Update applied. Run haus doctor.");
+  console.log(await diffLock(root));
+  console.log("Update applied with backup in .haus-ai/backups/. Run haus doctor.");
 }
