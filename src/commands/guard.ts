@@ -1,6 +1,7 @@
 import { DANGEROUS_COMMANDS } from "../security/dangerous-commands.js";
-import { SENSITIVE_PATHS } from "../security/sensitive-paths.js";
 import { readFileSync } from "node:fs";
+import { guardBash } from "../security/guard-bash.js";
+import { guardFileAccess } from "../security/guard-file-access.js";
 
 function stdin(): string {
   try {
@@ -22,7 +23,7 @@ export async function runGuard(kind: "file-access" | "bash", _options: { fromHoo
 
   if (kind === "file-access") {
     const candidate = String(toolInput.path ?? toolInput.file_path ?? "");
-    if (SENSITIVE_PATHS.some((token) => candidate.includes(token.replace("*", "")))) {
+    if (guardFileAccess(candidate)) {
       deny(`Blocked sensitive path: ${candidate}`);
       process.exitCode = 1;
       return;
@@ -30,7 +31,7 @@ export async function runGuard(kind: "file-access" | "bash", _options: { fromHoo
     return;
   }
   const command = String(toolInput.command ?? "");
-  if (DANGEROUS_COMMANDS.some((token) => command.includes(token))) {
+  if (guardBash(command) || DANGEROUS_COMMANDS.some((token) => command.includes(token))) {
     deny(`Blocked dangerous command: ${command}`);
     process.exitCode = 1;
   }

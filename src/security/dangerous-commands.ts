@@ -1,0 +1,15 @@
+export const DANGEROUS_COMMANDS = [
+  "rm -rf",
+  "sudo",
+  "chmod -R 777",
+  "chown -R",
+  "git push --force",
+  "git reset --hard",
+  "docker system prune",
+  "drop database",
+  "truncate table",
+  "php artisan migrate --force",
+  "npm publish",
+  "yarn npm publish",
+  "pnpm publish"
+];
