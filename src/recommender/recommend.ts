@@ -1,6 +1,7 @@
 import { loadCatalog } from "../catalog/load-catalog.js";
 import { readJson } from "../utils/fs.js";
 import { hausPath } from "../utils/paths.js";
+import { execSync } from "node:child_process";
 import type { ContextMap, Recommendation } from "../types.js";
 
 const UNSUPPORTED = ["python", "django", "go", "rust", "java", "spring", "kotlin", "swift", "android", "flutter", "dart", "c++", "perl", "defi", "trading"];
@@ -15,6 +16,7 @@ export async function recommend(root: string, context: ContextMap): Promise<Reco
   const skipped: Recommendation["skipped"] = [];
   const goals = Object.values(setupAnswers).join(" ").toLowerCase();
   const sourceTrust = new Map((sources.items ?? []).map((x) => [x.id, x.status ?? "candidate"]));
+  const changedFiles = readChangedFiles(root);
 
   for (const item of items) {
     const blob = `${item.id} ${item.tags.join(" ")}`.toLowerCase();
@@ -42,9 +44,14 @@ export async function recommend(root: string, context: ContextMap): Promise<Reco
       score += 20;
       reasons.push("config signal match");
     }
+    if (changedFiles.some((f) => f.includes(item.id.split(".").pop() ?? ""))) {
+      score += 10;
+      reasons.push("changed file match");
+    }
     if (SENSITIVE.some((x) => blob.includes(x))) score -= 100;
     const trust = sourceTrust.get(item.id);
     if (trust === "candidate" || trust === "rejected") score -= 100;
+    if (item.source && item.source !== "haus" && trust !== "approved") score -= 100;
 
     if (score > 0) {
       recommended.push({
@@ -61,4 +68,13 @@ export async function recommend(root: string, context: ContextMap): Promise<Reco
 
   const estimatedContextTokens = recommended.length * 320;
   return { mode: context.mode, recommended, skipped, warnings: context.warnings, estimatedContextTokens };
+}
+
+function readChangedFiles(root: string): string[] {
+  try {
+    const raw = execSync("git diff --name-only", { cwd: root, stdio: ["ignore", "pipe", "ignore"] }).toString("utf8");
+    return raw.split("\n").map((x) => x.trim()).filter(Boolean);
+  } catch {
+    return [];
+  }
 }
