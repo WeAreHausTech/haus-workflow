@@ -90,7 +90,11 @@ export async function recommend(root: string, context: ContextMap): Promise<Reco
       score -= 100;
       pushSkipReason("source-approval", "Source not approved", 100);
     }
-    if (securityRiskCount > 0 && (item.tags.includes("security") || item.id.includes("security"))) {
+    if (
+      securityRiskCount > 0 &&
+      !isDefaultBaseline &&
+      (item.tags.includes("security") || item.id.includes("security"))
+    ) {
       score -= 20;
       pushSkipReason("security-risk-penalty", "Security-tagged item penalized by active risk signals", 20);
     }
