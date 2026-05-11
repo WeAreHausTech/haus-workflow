@@ -23,6 +23,7 @@
       "tags": ["frontend", "nextjs", "react", "typescript"],
       "repoRoles": ["next-app"],
       "requiresAny": [{ "stack": "nextjs" }, { "dependency": "next" }],
+      "ecosystem": "nextjs",
       "tokenEstimate": 2600,
       "installMode": "copy-selected"
     },
@@ -34,7 +35,8 @@
       "title": "Haus React 19 patterns",
       "tags": ["frontend", "react", "typescript"],
       "repoRoles": ["react-app", "next-app", "design-system"],
-      "requiresAny": [{ "stack": "react" }, { "dependency": "react" }],
+      "requiresAny": [{ "stack": "react19" }, { "dependency": "react" }],
+      "ecosystem": "react",
       "tokenEstimate": 2200,
       "installMode": "copy-selected"
     },
@@ -69,10 +71,11 @@
       "tags": ["backend", "vendure", "nestjs", "graphql", "typescript"],
       "repoRoles": ["vendure-plugin", "vendure-app"],
       "requiresAny": [
-        { "stack": "vendure" },
+        { "stack": "vendure3" },
         { "dependency": "@vendure/core" },
         { "packageNamePattern": "@haus/vendure-*" }
       ],
+      "ecosystem": "vendure",
       "tokenEstimate": 3400,
       "installMode": "copy-selected"
     },
@@ -88,6 +91,7 @@
         { "stack": "laravel" },
         { "dependency": "laravel/framework" }
       ],
+      "ecosystem": "laravel",
       "tokenEstimate": 2800,
       "installMode": "copy-selected"
     },
@@ -103,6 +107,7 @@
         { "stack": "wordpress" },
         { "dependency": "roots/bedrock" }
       ],
+      "ecosystem": "wordpress",
       "tokenEstimate": 3000,
       "installMode": "copy-selected"
     },
@@ -115,6 +120,7 @@
       "tags": ["backend", "dotnet", "csharp"],
       "repoRoles": ["dotnet-service"],
       "requiresAny": [{ "stack": "dotnet" }],
+      "ecosystem": "dotnet",
       "tokenEstimate": 2600,
       "installMode": "copy-selected"
     },
@@ -154,6 +160,11 @@
       "title": "Haus Vendure app patterns",
       "tags": ["vendure3", "nestjs", "graphql"],
       "repoRoles": ["vendure-app"],
+      "requiresAny": [
+        { "stack": "vendure3" },
+        { "dependency": "@vendure/core" }
+      ],
+      "ecosystem": "vendure",
       "tokenEstimate": 3200,
       "installMode": "copy-selected"
     },
@@ -164,7 +175,13 @@
       "path": "library/haus/skills/typescript6-patterns",
       "title": "Haus NestJS GraphQL patterns",
       "tags": ["nestjs", "graphql", "typescript6"],
-      "repoRoles": ["nestjs-api", "graphql-api"],
+      "repoRoles": ["nestjs-api"],
+      "requiresAny": [
+        { "stack": "nestjs" },
+        { "dependency": "@nestjs/core" },
+        { "dependency": "@nestjs/graphql" }
+      ],
+      "ecosystem": "nestjs",
       "tokenEstimate": 2600,
       "installMode": "copy-selected"
     },
@@ -176,6 +193,12 @@
       "title": "Haus Nx 21 monorepo patterns",
       "tags": ["nx21", "yarn4"],
       "repoRoles": ["nx-monorepo"],
+      "requiresAny": [
+        { "role": "nx-monorepo" },
+        { "dependency": "nx" },
+        { "packageNamePattern": "@nx/*" }
+      ],
+      "ecosystem": "nx",
       "tokenEstimate": 2200,
       "installMode": "copy-selected"
     },
@@ -187,6 +210,11 @@
       "title": "Haus Turbo monorepo patterns",
       "tags": ["turbo", "yarn4"],
       "repoRoles": ["turbo-monorepo"],
+      "requiresAny": [
+        { "role": "turbo-monorepo" },
+        { "dependency": "turbo" }
+      ],
+      "ecosystem": "turbo",
       "tokenEstimate": 2200,
       "installMode": "copy-selected"
     },
@@ -198,6 +226,13 @@
       "title": "Haus TanStack query/router patterns",
       "tags": ["tanstack-query", "tanstack-router", "react19"],
       "repoRoles": ["next-app", "react-app"],
+      "requiresAny": [
+        { "dependency": "@tanstack/react-query" },
+        { "dependency": "@tanstack/react-router" },
+        { "dependency": "@tanstack/query-core" },
+        { "packageNamePattern": "@tanstack/*" }
+      ],
+      "ecosystem": "react",
       "tokenEstimate": 2200,
       "installMode": "copy-selected"
     },
@@ -209,6 +244,14 @@
       "title": "Haus Radix shadcn patterns",
       "tags": ["radix", "shadcn", "react19"],
       "repoRoles": ["next-app", "react-app"],
+      "requiresAny": [
+        { "dependency": "@radix-ui/react-dialog" },
+        { "dependency": "@radix-ui/themes" },
+        { "dependency": "shadcn-ui" },
+        { "dependency": "@shadcn/ui" },
+        { "packageNamePattern": "@radix-ui/*" }
+      ],
+      "ecosystem": "react",
       "tokenEstimate": 1800,
       "installMode": "copy-selected"
     },
@@ -220,6 +263,12 @@
       "title": "Haus Tailwind SCSS patterns",
       "tags": ["tailwind", "scss", "react19"],
       "repoRoles": ["next-app", "react-app", "vite-app"],
+      "requiresAny": [
+        { "dependency": "tailwindcss" },
+        { "dependency": "sass" },
+        { "dependency": "scss" }
+      ],
+      "ecosystem": "react",
       "tokenEstimate": 1800,
       "installMode": "copy-selected"
     },
@@ -231,6 +280,11 @@
       "title": "Haus Vue patterns",
       "tags": ["vue"],
       "repoRoles": ["vue-app"],
+      "requiresAny": [
+        { "stack": "vue" },
+        { "dependency": "vue" }
+      ],
+      "ecosystem": "vue",
       "tokenEstimate": 2000,
       "installMode": "copy-selected"
     },
@@ -242,6 +296,10 @@
       "title": "Haus Laravel Nova patterns",
       "tags": ["laravel-nova", "laravel"],
       "repoRoles": ["laravel-nova-app"],
+      "requiresAny": [
+        { "dependency": "laravel/nova" }
+      ],
+      "ecosystem": "laravel",
       "tokenEstimate": 2600,
       "installMode": "copy-selected"
     },
@@ -253,6 +311,11 @@
       "title": "Haus WordPress Bedrock patterns",
       "tags": ["wordpress", "bedrock"],
       "repoRoles": ["wordpress-bedrock-site"],
+      "requiresAny": [
+        { "role": "wordpress-bedrock-site" },
+        { "dependency": "roots/bedrock" }
+      ],
+      "ecosystem": "wordpress",
       "tokenEstimate": 2600,
       "installMode": "copy-selected"
     },
@@ -264,6 +327,12 @@
       "title": "Haus WordPress ACF Elementor JetEngine patterns",
       "tags": ["wordpress"],
       "repoRoles": ["wordpress-bedrock-site", "wordpress-vanilla-site"],
+      "requiresAny": [
+        { "role": "wordpress-bedrock-site" },
+        { "role": "wordpress-vanilla-site" },
+        { "stack": "wordpress" }
+      ],
+      "ecosystem": "wordpress",
       "tokenEstimate": 2600,
       "installMode": "copy-selected"
     },
@@ -275,6 +344,8 @@
       "title": "Haus dotnet service patterns",
       "tags": ["dotnet"],
       "repoRoles": ["dotnet-service"],
+      "requiresAny": [{ "stack": "dotnet" }, { "role": "dotnet-service" }],
+      "ecosystem": "dotnet",
       "tokenEstimate": 2300,
       "installMode": "copy-selected"
     },
@@ -286,6 +357,11 @@
       "title": "Haus auth patterns",
       "tags": ["oidc", "azure-ad", "bankid"],
       "repoRoles": [],
+      "requiresAny": [
+        { "stack": "oidc" },
+        { "stack": "azure-ad" },
+        { "stack": "bankid" }
+      ],
       "tokenEstimate": 1700,
       "installMode": "copy-selected"
     },
@@ -297,6 +373,12 @@
       "title": "Haus database patterns",
       "tags": ["postgresql", "mariadb", "mssql", "elasticsearch"],
       "repoRoles": [],
+      "requiresAny": [
+        { "stack": "postgresql" },
+        { "stack": "mariadb" },
+        { "stack": "mssql" },
+        { "stack": "elasticsearch" }
+      ],
       "tokenEstimate": 1700,
       "installMode": "copy-selected"
     },
@@ -308,6 +390,10 @@
       "title": "Haus package manager patterns",
       "tags": ["yarn4", "pnpm89"],
       "repoRoles": [],
+      "requiresAny": [
+        { "stack": "yarn4" },
+        { "stack": "pnpm89" }
+      ],
       "tokenEstimate": 1200,
       "installMode": "copy-selected"
     },
@@ -319,6 +405,12 @@
       "title": "Haus testing library patterns",
       "tags": ["testing-library"],
       "repoRoles": [],
+      "requiresAny": [
+        { "stack": "testing-library" },
+        { "dependency": "@testing-library/react" },
+        { "dependency": "@testing-library/dom" },
+        { "packageNamePattern": "@testing-library/*" }
+      ],
       "tokenEstimate": 1500,
       "installMode": "copy-selected"
     },
@@ -330,6 +422,11 @@
       "title": "Haus PHPUnit patterns",
       "tags": ["phpunit"],
       "repoRoles": ["laravel-app", "laravel-nova-app"],
+      "requiresAny": [
+        { "stack": "phpunit" },
+        { "dependency": "phpunit/phpunit" }
+      ],
+      "ecosystem": "laravel",
       "tokenEstimate": 1500,
       "installMode": "copy-selected"
     },
@@ -341,6 +438,13 @@
       "title": "Haus Storybook patterns",
       "tags": ["storybook"],
       "repoRoles": ["react-app", "next-app", "vite-app"],
+      "requiresAny": [
+        { "stack": "storybook" },
+        { "dependency": "storybook" },
+        { "dependency": "@storybook/react" },
+        { "packageNamePattern": "@storybook/*" }
+      ],
+      "ecosystem": "react",
       "tokenEstimate": 1500,
       "installMode": "copy-selected"
     },
@@ -352,6 +456,7 @@
       "title": "Haus security review",
       "tags": ["security"],
       "repoRoles": [],
+      "requiresAny": [],
       "tokenEstimate": 1200,
       "installMode": "copy-selected"
     },
@@ -363,6 +468,7 @@
       "title": "Haus production readiness review",
       "tags": ["quality"],
       "repoRoles": [],
+      "requiresAny": [],
       "tokenEstimate": 1200,
       "installMode": "copy-selected"
     }

@@ -1,0 +1,10 @@
+{
+  "id": "cross-fixture-pr2-resolution-001",
+  "repo": "all-fixtures",
+  "status": "clean",
+  "commands": [
+    "node scripts/qa-batch.mjs",
+    "yarn test"
+  ],
+  "notes": "PR2 (recommendation scoring + confidence calibration) re-run summary. Resolved PR1 findings: nextjs-app-role-only-bleed-001 (accessory rules now require dep/stack via requiresAny), turbo-monorepo-role-only-bleed-001 (same fix), orphan-graphql-config-nestjs-false-positive-001 (nestjs-graphql-patterns no longer fires on graphql-api role alone; requires nestjs dep/stack), cross-fixture-baseline-confidence-low-001 (default-baseline items now report confidenceLevel 'medium' via selectionMode-aware band), cross-fixture-explain-skip-reason-generic-001 (partially: specific skip codes requires-any-unsatisfied, ecosystem-conflict, role-only-bleed-guard, required-role-missing now exist; CLI rendering polish still pending for PR4). Confidence honesty: 'high' now requires >=2 strong signals AND score>=70, so single-role-match rules are downgraded to 'medium'/'low'. Remaining PR3 work: task-context narrow-collapse, no-keyword-hit over-selection, Nova-task routing, testing-rule relevance, ecosystem isolation for backend tasks in mixed repos."
+}
