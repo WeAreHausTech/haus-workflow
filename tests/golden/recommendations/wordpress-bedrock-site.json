@@ -1,15 +1,28 @@
 {
   "expectedSelectedIds": [
     "haus.wordpress-patterns",
-    "haus.wordpress-bedrock-patterns"
+    "haus.wordpress-bedrock-patterns",
+    "haus.wordpress-acf-elementor-jetengine-patterns"
   ],
   "forbiddenSelectedIds": [
     "haus.nx21-monorepo-patterns",
     "haus.turbo-monorepo-patterns",
     "haus.nextjs-patterns",
     "haus.laravel-patterns",
-    "haus.vendure-plugin-patterns"
+    "haus.vendure-plugin-patterns",
+    "haus.react19-patterns",
+    "haus.tailwind-scss-patterns",
+    "haus.radix-shadcn-patterns",
+    "haus.tanstack-query-router-patterns",
+    "haus.storybook-patterns",
+    "haus.playwright-patterns",
+    "haus.phpunit-patterns",
+    "haus.nestjs-graphql-patterns"
   ],
-  "requiredPositiveReasonContains": "stack/dependency match",
-  "requiredSkipReasonContains": "No role/stack match"
+  "requiredPositiveReasonContains": ["stack/dependency match"],
+  "requiredSkipReasonContains": ["No role/stack match", "requiresAny unsatisfied"],
+  "requireConfidenceForId": {
+    "haus.wordpress-patterns": "high",
+    "haus.wordpress-bedrock-patterns": "high"
+  }
 }

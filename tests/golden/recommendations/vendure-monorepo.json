@@ -9,8 +9,19 @@
     "haus.turbo-monorepo-patterns",
     "haus.laravel-patterns",
     "haus.wordpress-patterns",
-    "haus.nextjs-patterns"
+    "haus.nextjs-patterns",
+    "haus.react19-patterns",
+    "haus.tailwind-scss-patterns",
+    "haus.radix-shadcn-patterns",
+    "haus.tanstack-query-router-patterns",
+    "haus.storybook-patterns",
+    "haus.playwright-patterns",
+    "haus.phpunit-patterns"
   ],
-  "requiredPositiveReasonContains": "stack/dependency match",
-  "requiredSkipReasonContains": "No role/stack match"
+  "requiredPositiveReasonContains": ["stack/dependency match", "requires-any signal match"],
+  "requiredSkipReasonContains": ["No role/stack match", "requiresAny unsatisfied"],
+  "requireConfidenceForId": {
+    "haus.vendure-plugin-patterns": "high",
+    "haus.nestjs-graphql-patterns": "high"
+  }
 }

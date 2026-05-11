@@ -15,6 +15,12 @@ export type ContextMap = {
   warnings: string[];
 };
 
+export type RequiresAnyClause =
+  | { stack: string }
+  | { dependency: string }
+  | { packageNamePattern: string }
+  | { role: string };
+
 export type CatalogItem = {
   id: string;
   type: "skill" | "agent" | "rule" | "command";
@@ -26,6 +32,10 @@ export type CatalogItem = {
   tokenEstimate: number;
   /** When true, recommender applies a baseline score so the item is selected unless policy blocks it. */
   default?: boolean;
+  /** When present and non-empty, at least one clause must match the scanned context, otherwise the rule is skipped with `requires-any-unsatisfied`. */
+  requiresAny?: RequiresAnyClause[];
+  /** Optional ecosystem family identifier (e.g. `wordpress`, `laravel`, `vendure`, `nextjs`, `nestjs`, `dotnet`, `nx`, `turbo`). Used by recommender for cross-ecosystem conflict detection. */
+  ecosystem?: string;
 };
 
 export type Recommendation = {
@@ -34,22 +44,22 @@ export type Recommendation = {
     id: string;
     type: string;
     reason: string;
-    reasons: Array<{ code: string; message: string; weight: number }>;
+    reasons: Array<{ code: string; message: string; weight: number; signal?: string }>;
     confidence: number;
     confidenceLevel: "low" | "medium" | "high";
     selectionMode: "baseline" | "matched";
     install: boolean;
     score: number;
     scoreBreakdown: {
-      bonuses: Array<{ code: string; message: string; weight: number }>;
-      penalties: Array<{ code: string; message: string; penalty: number }>;
+      bonuses: Array<{ code: string; message: string; weight: number; signal?: string }>;
+      penalties: Array<{ code: string; message: string; penalty: number; signal?: string }>;
       finalScore: number;
     };
   }>;
   skipped: Array<{
     id: string;
     reason: string;
-    skipReasons: Array<{ code: string; message: string; penalty: number }>;
+    skipReasons: Array<{ code: string; message: string; penalty: number; signal?: string }>;
   }>;
   warnings: string[];
   estimatedContextTokens: number;
