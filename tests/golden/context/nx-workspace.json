@@ -1,0 +1,18 @@
+{
+  "tasks": {
+    "create new lib": {
+      "expectedTaskIntents": ["monorepo"],
+      "expectedSelectedIds": [
+        "haus.nx21-monorepo-patterns",
+        "haus.package-manager-yarn4-pnpm89"
+      ],
+      "forbiddenSelectedIds": [
+        "haus.react19-patterns",
+        "haus.typescript6-patterns",
+        "haus.nextjs-patterns",
+        "haus.playwright-patterns"
+      ],
+      "forbidBaseline": true
+    }
+  }
+}

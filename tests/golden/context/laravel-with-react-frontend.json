@@ -1,0 +1,28 @@
+{
+  "tasks": {
+    "add queue job": {
+      "expectedTaskIntents": ["backend"],
+      "expectedSelectedIds": ["haus.laravel-patterns"],
+      "forbiddenSelectedIds": [
+        "haus.react19-patterns",
+        "haus.tailwind-scss-patterns",
+        "haus.phpunit-patterns",
+        "haus.package-manager-yarn4-pnpm89"
+      ],
+      "forbidBaseline": true
+    },
+    "build dashboard route": {
+      "expectedTaskIntents": ["frontend"],
+      "expectedSelectedIds": [
+        "haus.react19-patterns",
+        "haus.tailwind-scss-patterns"
+      ],
+      "forbiddenSelectedIds": [
+        "haus.laravel-patterns",
+        "haus.phpunit-patterns",
+        "haus.package-manager-yarn4-pnpm89"
+      ],
+      "forbidBaseline": true
+    }
+  }
+}

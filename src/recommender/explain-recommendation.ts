@@ -5,17 +5,19 @@ type RecommendationLike = Partial<Recommendation> & {
     id: string;
     type?: string;
     reason?: string;
-    reasons?: Array<{ message?: string; code?: string; weight?: number }>;
+    reasons?: Array<{ message?: string; code?: string; weight?: number; signal?: string }>;
     confidence?: number;
     confidenceLevel?: "low" | "medium" | "high";
     selectionMode?: "baseline" | "matched";
     install?: boolean;
     score?: number;
+    tags?: string[];
+    ecosystem?: string;
   }>;
   skipped?: Array<{
     id: string;
     reason?: string;
-    skipReasons?: Array<{ message?: string; code?: string; penalty?: number }>;
+    skipReasons?: Array<{ message?: string; code?: string; penalty?: number; signal?: string }>;
   }>;
 };
 
@@ -44,7 +46,8 @@ export function normalizeRecommendation(input: RecommendationLike): Recommendati
       item.reasons?.map((reason) => ({
         code: reason.code ?? "legacy-reason",
         message: reason.message ?? item.reason ?? "legacy recommendation reason",
-        weight: reason.weight ?? 0
+        weight: reason.weight ?? 0,
+        ...(reason.signal ? { signal: reason.signal } : {})
       })) ?? [{ code: "legacy-reason", message: item.reason ?? "legacy recommendation reason", weight: 0 }];
     const confidence = item.confidence ?? 0;
     return {
@@ -61,7 +64,9 @@ export function normalizeRecommendation(input: RecommendationLike): Recommendati
         bonuses: normalizedReasons,
         penalties: [],
         finalScore: item.score ?? 0
-      }
+      },
+      tags: item.tags,
+      ecosystem: item.ecosystem
     };
   });
 

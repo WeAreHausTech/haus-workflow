@@ -1,0 +1,11 @@
+{
+  "id": "cross-fixture-pr3-context-resolution-001",
+  "repo": "cross-fixture",
+  "status": "clean",
+  "commands": [
+    "yarn build",
+    "node scripts/qa-batch.mjs",
+    "yarn test"
+  ],
+  "notes": "PR3 task-intent context filter resolves the following PR1/PR2 context findings against synthetic fixtures: laravel-app-phpunit-noise-001 (phpunit dropped from non-testing tasks), nx-workspace-task-overselection-001 (only monorepo+package-manager retained for 'create new lib'), laravel-with-react-frontend-stack-bleed-001 (react/tailwind dropped from backend tasks, laravel dropped from frontend tasks), laravel-with-react-frontend-context-narrow-001 (frontend task now returns react+tailwind only), vendure-with-nextjs-storefront-context-narrow-001 (backend task returns vendure+nestjs only, frontend task returns next+react only), nextjs-app-context-narrow-001 (frontend task returns next+react+typescript, playwright excluded), nextjs-app-context-overselect-post-pr2-001 (baselines and package-manager excluded by intent filter), laravel-with-react-frontend-backend-task-bleed-post-pr2-001 (backend task no longer pulls react/tailwind/phpunit), vendure-with-nextjs-storefront-cross-ecosystem-bleed-post-pr2-001 (shipping plugin task drops next/react/package-manager). Validated via tests/golden/context/ deterministic goldens. laravel-app-nova-task-miss-001 remains a documented residual because the laravel-nova-patterns rule is not in the recommended set (requiresAny depends on laravel/nova package, absent in fixture)."
+}

@@ -1,0 +1,18 @@
+{
+  "tasks": {
+    "add custom block": {
+      "expectedTaskIntents": ["frontend"],
+      "expectedSelectedIds": [
+        "haus.wordpress-patterns",
+        "haus.wordpress-bedrock-patterns",
+        "haus.wordpress-acf-elementor-jetengine-patterns"
+      ],
+      "forbiddenSelectedIds": [
+        "haus.package-manager-yarn4-pnpm89",
+        "haus.react19-patterns",
+        "haus.nextjs-patterns"
+      ],
+      "forbidBaseline": true
+    }
+  }
+}
