@@ -2,7 +2,6 @@ import type { Recommendation } from "../types.js";
 import { computeRuleIntents, type TaskIntent } from "./task-intent.js";
 
 type RecommendedRule = Recommendation["recommended"][number];
-type SkippedRule = Recommendation["skipped"][number];
 
 const TASK_SIGNAL_TOKENS = [
   "vendure",
@@ -50,15 +49,7 @@ export function extractTaskSignals(task: string | undefined): string[] {
   return [...found].sort();
 }
 
-function indent(prefix: string, lines: string[]): string[] {
-  return lines.map((line) => `${prefix}${line}`);
-}
-
-function formatReason(reason: { message: string; signal?: string }): string {
-  return reason.signal ? `${reason.message} (${reason.signal})` : reason.message;
-}
-
-function formatSkipReason(reason: { message: string; signal?: string }): string {
+function formatReasonWithSignal(reason: { message: string; signal?: string }): string {
   return reason.signal ? `${reason.message} (${reason.signal})` : reason.message;
 }
 
@@ -81,7 +72,7 @@ export function formatRecommendationHuman(rec: Recommendation): string {
     lines.push(`    confidence: ${item.confidenceLevel} (${item.confidence.toFixed(2)})`);
     lines.push(`    selection: ${item.selectionMode}`);
     lines.push("    why:");
-    for (const reason of item.reasons) lines.push(`      - ${formatReason(reason)}`);
+    for (const reason of item.reasons) lines.push(`      - ${formatReasonWithSignal(reason)}`);
   }
   lines.push("");
   lines.push("Skipped");
@@ -89,7 +80,7 @@ export function formatRecommendationHuman(rec: Recommendation): string {
   for (const item of rec.skipped) {
     lines.push(`- ${item.id}`);
     lines.push("    why:");
-    for (const reason of item.skipReasons) lines.push(`      - ${formatSkipReason(reason)}`);
+    for (const reason of item.skipReasons) lines.push(`      - ${formatReasonWithSignal(reason)}`);
   }
   return lines.join("\n");
 }
@@ -152,7 +143,7 @@ function pickInclusionReason(
 ): string {
   const overlap = [...taskIntents].filter((intent) => ruleIntents.has(intent));
   if (overlap.length > 0) {
-    return `rule intents [${[...ruleIntents].sort().join(", ")}] match task intents [${overlap.sort().join(", ")}]`;
+    return `rule intents [${[...ruleIntents].sort().join(", ")}] match task intents [${[...overlap].sort().join(", ")}]`;
   }
   return `kept via keyword fallback on rule id/tags`;
 }
@@ -223,7 +214,7 @@ export function buildContextExplanation(
         selectionMode: rule.selectionMode,
         ruleIntents: [...ruleIntents].sort(),
         inclusionReason: pickInclusionReason(rule, taskIntents, ruleIntents),
-        reasons: rule.reasons.map(formatReason)
+        reasons: rule.reasons.map(formatReasonWithSignal)
       });
     } else {
       const { code, explanation } = pickExclusionReason(rule, taskIntents, ruleIntents);
@@ -251,7 +242,6 @@ export function buildContextExplanation(
 }
 
 export function formatContextHuman(
-  rec: Recommendation,
   task: string | undefined,
   explanation: ContextExplanation,
   options: { stats?: boolean } = {}
@@ -331,4 +321,3 @@ export function formatContextHuman(
 }
 
 export type { TaskIntent };
-export { indent };
