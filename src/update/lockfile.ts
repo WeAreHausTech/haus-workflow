@@ -1,7 +1,18 @@
 import path from "node:path";
 import { mkdir, readFile, copyFile } from "node:fs/promises";
-import { hashText, readJson, writeJson } from "../utils/fs.js";
+import { readJson, writeJson } from "../utils/fs.js";
 import { hausPath } from "../utils/paths.js";
+import { hashInstalledPaths } from "../lock/hash-installed-paths.js";
+
+export type LockItem = {
+  id: string;
+  type: string;
+  source?: string;
+  version?: string;
+  hash?: string;
+  installMode?: string;
+  paths?: string[];
+};
 
 export async function checkLock(root: string): Promise<{ ok: boolean; count: number }> {
   const lock = (await readJson<Array<{ id: string }>>(hausPath(root, "haus.lock.json"))) ?? [];
@@ -16,7 +27,7 @@ export async function applyLock(root: string): Promise<{ before: string; after: 
   } catch {
     before = "[]";
   }
-  const lock = (await readJson<Array<Record<string, unknown>>>(lockPath)) ?? [];
+  const lock = (await readJson<LockItem[]>(lockPath)) ?? [];
   try {
     const backupDir = hausPath(root, "backups");
     await mkdir(backupDir, { recursive: true });
@@ -24,10 +35,14 @@ export async function applyLock(root: string): Promise<{ before: string; after: 
   } catch {
     // no previous lockfile to backup
   }
-  const enriched = lock.map((x) => {
-    const { hash: _oldHash, ...stableFields } = x;
-    return { ...stableFields, hash: hashText(JSON.stringify(stableFields)) };
-  });
+  const enriched = await Promise.all(
+    lock.map(async (x) => {
+      const paths = Array.isArray(x.paths) ? x.paths.map(String) : [];
+      const { hash: _oldHash, ...stableFields } = x;
+      const newHash = await hashInstalledPaths(root, paths);
+      return { ...stableFields, paths, hash: newHash };
+    })
+  );
   await writeJson(lockPath, enriched);
   const after = JSON.stringify(enriched, null, 2);
   return { before, after };

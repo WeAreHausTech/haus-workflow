@@ -34,6 +34,8 @@ haus doctor
 2. `haus recommend --json` writes `.haus-ai/recommendation.json` with selected/skipped reasons.
 3. `haus apply --write` generates selected `.claude/*` + `.haus-ai/haus.lock.json`.
 
+Hook entries in `.claude/settings.json` mirror [`plugin/hooks/hooks.json`](plugin/hooks/hooks.json). Each lock row’s `hash` fingerprints the installed files under `paths`; `version` is the `@haus/ai` package version that ran apply. Run `haus update` to recompute hashes after local edits to tracked files.
+
 ## Security
 
 - Guard blocks sensitive file access and dangerous shell commands.

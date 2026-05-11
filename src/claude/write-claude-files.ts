@@ -1,9 +1,10 @@
 import path from "node:path";
 import fs from "fs-extra";
-import { hashText, readJson, writeJson, writeText } from "../utils/fs.js";
+import { readJson, writeJson, writeText } from "../utils/fs.js";
 import { claudePath, hausPath, packageRoot } from "../utils/paths.js";
 import type { Recommendation } from "../types.js";
 import { loadClaudeHooksSettings } from "./load-hooks.js";
+import { hashInstalledPaths } from "../lock/hash-installed-paths.js";
 
 export async function writeClaudeFiles(root: string, dryRun: boolean): Promise<string[]> {
   const rec = (await readJson<Recommendation>(hausPath(root, "recommendation.json"))) ?? {
@@ -76,20 +77,28 @@ haus context --task "<task>"
     hausPath(root, "selected-context.json"),
     rec.recommended.map((r) => ({ id: r.id, type: r.type, reason: r.reason }))
   );
-  const lock = rec.recommended.map((r) => ({
-    id: r.id,
-    type: r.type,
-    source: "haus",
-    version: "0.2.0",
-    hash: hashText(`${r.id}:${r.type}:${r.reason}`),
-    installMode: "copied",
-    paths: installedPathsByItem.get(r.id) ?? []
-  }));
+  const hausVersion =
+    (await readJson<{ version?: string }>(path.join(pkgRoot, "package.json")))?.version ?? "0.0.0";
+  const lock = await Promise.all(
+    rec.recommended.map(async (r) => {
+      const relPaths = installedPathsByItem.get(r.id) ?? [];
+      return {
+        id: r.id,
+        type: r.type,
+        source: "haus",
+        version: hausVersion,
+        hash: await hashInstalledPaths(root, relPaths),
+        installMode: "copied",
+        paths: relPaths
+      };
+    })
+  );
   await writeJson(hausPath(root, "haus.lock.json"), lock);
 
   const pluginSrc = path.join(root, "plugin/.claude-plugin/plugin.json");
   if (await fs.pathExists(pluginSrc)) {
     await fs.ensureDir(claudePath(root, "plugin"));
+    // TODO(plugin-pack): copy full plugin subtree into project when product requires bundled plugin mirror.
   }
   return files;
 }

@@ -24,3 +24,30 @@ test("update check and apply create backup", () => {
   assert.equal(Array.isArray(lock[0].paths), true);
   assert.equal(out.includes("Lock item changes") || out.includes("No lock item add/remove changes"), true);
 });
+
+test("update recomputes hash from tracked file paths", () => {
+  const temp = mkdtempSync(path.join(os.tmpdir(), "haus-update-paths-"));
+  mkdirSync(path.join(temp, ".haus-ai"), { recursive: true });
+  mkdirSync(path.join(temp, ".claude"), { recursive: true });
+  writeFileSync(path.join(temp, "package.json"), JSON.stringify({ name: "update-paths", packageManager: "yarn@4.5.3" }, null, 2));
+  writeFileSync(path.join(temp, ".claude/tracked.md"), "content-v1");
+  writeFileSync(
+    path.join(temp, ".haus-ai/haus.lock.json"),
+    JSON.stringify(
+      [{ id: "x", type: "skill", source: "haus", version: "0.1.0", hash: "sha256-stale", installMode: "copied", paths: [".claude/tracked.md"] }],
+      null,
+      2
+    )
+  );
+
+  execSync(`node "${path.resolve("dist/cli.js")}" update`, { cwd: temp });
+  const lock1 = JSON.parse(readFileSync(path.join(temp, ".haus-ai/haus.lock.json"), "utf8"));
+  const h1 = lock1[0].hash;
+  assert.equal(h1.startsWith("sha256-"), true);
+  assert.notEqual(h1, "sha256-stale");
+
+  writeFileSync(path.join(temp, ".claude/tracked.md"), "content-v2");
+  execSync(`node "${path.resolve("dist/cli.js")}" update`, { cwd: temp });
+  const lock2 = JSON.parse(readFileSync(path.join(temp, ".haus-ai/haus.lock.json"), "utf8"));
+  assert.notEqual(lock2[0].hash, h1);
+});

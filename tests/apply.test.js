@@ -43,4 +43,13 @@ test("apply writes claude files and rules", () => {
   assert.equal(pre[1].hooks[0].command, "haus guard bash --from-hook");
   assert.equal(rulesHaus.includes("Keep context minimal"), true);
   assert.equal(rulesSecurity.includes("Never read secrets"), true);
+
+  const pkg = JSON.parse(readFileSync(path.resolve("package.json"), "utf8"));
+  const lock = JSON.parse(readFileSync(path.join(temp, ".haus-ai/haus.lock.json"), "utf8"));
+  assert.equal(Array.isArray(lock), true);
+  assert.equal(lock.length > 0, true);
+  for (const row of lock) {
+    assert.equal(row.version, pkg.version);
+    assert.equal(row.hash.startsWith("sha256-"), true);
+  }
 });
