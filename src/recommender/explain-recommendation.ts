@@ -1,5 +1,24 @@
 import type { Recommendation } from "../types.js";
 
+type RecommendationLike = Partial<Recommendation> & {
+  recommended?: Array<{
+    id: string;
+    type?: string;
+    reason?: string;
+    reasons?: Array<{ message?: string; code?: string; weight?: number }>;
+    confidence?: number;
+    confidenceLevel?: "low" | "medium" | "high";
+    selectionMode?: "baseline" | "matched";
+    install?: boolean;
+    score?: number;
+  }>;
+  skipped?: Array<{
+    id: string;
+    reason?: string;
+    skipReasons?: Array<{ message?: string; code?: string; penalty?: number }>;
+  }>;
+};
+
 type ExplainRecommendation = {
   selected: Array<{
     id: string;
@@ -18,6 +37,58 @@ type ExplainRecommendation = {
     estimatedTokenReductionPct: number;
   };
 };
+
+export function normalizeRecommendation(input: RecommendationLike): Recommendation {
+  const recommended = (input.recommended ?? []).map((item) => {
+    const normalizedReasons =
+      item.reasons?.map((reason) => ({
+        code: reason.code ?? "legacy-reason",
+        message: reason.message ?? item.reason ?? "legacy recommendation reason",
+        weight: reason.weight ?? 0
+      })) ?? [{ code: "legacy-reason", message: item.reason ?? "legacy recommendation reason", weight: 0 }];
+    const confidence = item.confidence ?? 0;
+    return {
+      id: item.id,
+      type: item.type ?? "skill",
+      reason: item.reason ?? normalizedReasons.map((reason) => reason.message).join(", "),
+      reasons: normalizedReasons,
+      confidence,
+      confidenceLevel: item.confidenceLevel ?? (confidence >= 0.75 ? "high" : confidence >= 0.4 ? "medium" : "low"),
+      selectionMode: item.selectionMode ?? "matched",
+      install: item.install ?? true,
+      score: item.score ?? 0,
+      scoreBreakdown: {
+        bonuses: normalizedReasons,
+        penalties: [],
+        finalScore: item.score ?? 0
+      }
+    };
+  });
+
+  const skipped = (input.skipped ?? []).map((item) => ({
+    id: item.id,
+    reason: item.reason ?? "legacy skipped reason",
+    skipReasons:
+      item.skipReasons?.map((reason) => ({
+        code: reason.code ?? "legacy-skip-reason",
+        message: reason.message ?? item.reason ?? "legacy skipped reason",
+        penalty: reason.penalty ?? 0
+      })) ?? [{ code: "legacy-skip-reason", message: item.reason ?? "legacy skipped reason", penalty: 0 }]
+  }));
+
+  return {
+    mode: input.mode === "guided" ? "guided" : "fast",
+    recommended,
+    skipped,
+    warnings: input.warnings ?? [],
+    estimatedContextTokens: input.estimatedContextTokens ?? recommended.length * 320,
+    selectedRules: input.selectedRules ?? recommended.length,
+    skippedRules: input.skippedRules ?? skipped.length,
+    estimatedTokenReductionPct:
+      input.estimatedTokenReductionPct ??
+      Math.max(0, Math.round((skipped.length / Math.max(recommended.length + skipped.length, 1)) * 100))
+  };
+}
 
 export function buildRecommendationExplanation(recommendation: Recommendation): ExplainRecommendation {
   return {
