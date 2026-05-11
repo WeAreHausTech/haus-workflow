@@ -2,12 +2,14 @@ import { readJson, readText } from "../utils/fs.js";
 import { hausPath } from "../utils/paths.js";
 import { readContextOrScan } from "../scanner/read-context.js";
 import type { Recommendation } from "../types.js";
+import { normalizeRecommendation } from "../recommender/explain-recommendation.js";
 
 export async function runContext(options: { task?: string; fromHook?: boolean; json?: boolean }): Promise<void> {
   const root = process.cwd();
   const context = await readContextOrScan(root);
   const summary = (await readText(hausPath(root, "repo-summary.md"))) ?? "";
-  const recommendation = await readJson<Recommendation>(hausPath(root, "recommendation.json"));
+  const recommendationRaw = await readJson<Recommendation>(hausPath(root, "recommendation.json"));
+  const recommendation = recommendationRaw ? normalizeRecommendation(recommendationRaw) : undefined;
   const selected = pickTaskRelevantRules(recommendation, options.task);
   const payload = {
     task: options.task ?? "not provided",

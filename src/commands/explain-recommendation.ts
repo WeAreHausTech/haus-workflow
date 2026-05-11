@@ -1,7 +1,7 @@
 import { readJson } from "../utils/fs.js";
 import { hausPath } from "../utils/paths.js";
 import type { Recommendation } from "../types.js";
-import { buildRecommendationExplanation } from "../recommender/explain-recommendation.js";
+import { buildRecommendationExplanation, normalizeRecommendation } from "../recommender/explain-recommendation.js";
 
 export async function runExplainRecommendation(options: { json?: boolean }): Promise<void> {
   const root = process.cwd();
@@ -9,7 +9,7 @@ export async function runExplainRecommendation(options: { json?: boolean }): Pro
   if (!rec) {
     throw new Error("No recommendation found. Run `haus recommend` first.");
   }
-  const explanation = buildRecommendationExplanation(rec);
+  const explanation = buildRecommendationExplanation(normalizeRecommendation(rec));
   if (options.json) {
     console.log(JSON.stringify(explanation, null, 2));
     return;
