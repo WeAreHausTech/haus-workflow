@@ -10,7 +10,7 @@ Haus looks at your project the way a technical teammate would: it notices langua
 
 After a successful run you will usually see:
 
-- **`.claude/`** — settings and helper files for Claude in this project  
+- **`.claude/`** — settings and helper files for Claude in this project
 - **`.haus-ai/`** — Haus metadata (what was detected, what was chosen, lock information)
 
 You can delete those folders later if you want to remove Haus from the project (see [Undo Haus](#undo-haus-if-you-want-to-remove-it)).
@@ -21,7 +21,8 @@ You can delete those folders later if you want to remove Haus from the project (
 
 1. **A project folder** on your machine (your app, website, or service — the folder you open when you work on it).
 
-2. **Node.js** (version **22 or newer**).  
+2. **Node.js** (version **22 or newer**).
+
    - Check: open Terminal (Mac) or Command Prompt / PowerShell (Windows), paste the line below, press Enter, and look at the number at the start (it should be `v22`, `v23`, or higher).
 
    ```bash
@@ -29,8 +30,6 @@ You can delete those folders later if you want to remove Haus from the project (
    ```
 
    - If you see an error or a number lower than 22, install Node from [https://nodejs.org](https://nodejs.org) (choose the current LTS if it is 22+, otherwise the “Current” installer). Then open a **new** terminal window and run `node --version` again.
-
-3. **Permission to install a small command-line tool** (`haus`). On a work laptop you might need IT approval.
 
 ---
 
@@ -40,15 +39,15 @@ Haus always runs **from the project folder** you want to set up.
 
 ### Mac
 
-1. Open **Terminal** (Spotlight: press Command + Space, type `Terminal`, press Enter).  
-2. Type `cd ` (with a space after `cd`).  
-3. In Finder, drag your **project folder** onto the Terminal window. The path appears after `cd `.  
+1. Open **Terminal** (Spotlight: press Command + Space, type `Terminal`, press Enter).
+2. Type `cd ` (with a space after `cd`).
+3. In Finder, drag your **project folder** onto the Terminal window. The path appears after `cd `.
 4. Press **Enter**. You are now “in” that project for the next commands.
 
 ### Windows
 
-1. Open **PowerShell** or **Command Prompt**.  
-2. Type `cd ` then paste the full path to your project folder (for example `cd C:\Users\You\Documents\my-app`).  
+1. Open **PowerShell** or **Command Prompt**.
+2. Type `cd ` then paste the full path to your project folder (for example `cd C:\Users\You\Documents\my-app`).
 3. Press **Enter**.
 
 ---
@@ -144,8 +143,8 @@ Copy and paste:
 haus setup-project
 ```
 
-- If it asks how you want to set up, choose **guided** if you want a few plain-language questions, or **fast** if you only want a quick scan.  
-- Answer the questions in your own words (you do not need to name frameworks).  
+- If it asks how you want to set up, choose **guided** if you want a few plain-language questions, or **fast** if you only want a quick scan.
+- Answer the questions in your own words (you do not need to name frameworks).
 - At the end it may ask whether to **write files**. If you are not ready, say **no**; you can run the write step later (Step 3).
 
 ### Step 2 — (Optional) See the plan without writing files
@@ -204,12 +203,12 @@ You do not need to edit hook JSON yourself; Haus keeps it aligned with the shipp
 
 ## If something goes wrong
 
-| What you see | What it usually means | What to try |
-|--------------|------------------------|-------------|
-| `command not found: haus` | The tool is not on your PATH | Re-open the terminal, or repeat install / link, or use the `node …/dist/cli.js` form your developer gave you |
-| Error about **plugin/hooks/hooks.json** missing | The Haus package on disk is incomplete | Reinstall from a fresh `.tgz` built with `yarn pack`; only use `HAUS_HOOKS_FALLBACK=1` if a developer tells you to (temporary dev escape) |
-| `doctor --hooks` fails after you edited `.claude/settings.json` by hand | The file no longer matches the official hook list | Run `haus apply --write` again to regenerate from the package, or restore from backup |
-| You are not in the right folder | Haus scanned the wrong project | `cd` to your real project root (where `package.json` or your main code lives) and run the commands again |
+| What you see                                                            | What it usually means                             | What to try                                                                                                                               |
+| ----------------------------------------------------------------------- | ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `command not found: haus`                                               | The tool is not on your PATH                      | Re-open the terminal, or repeat install / link, or use the `node …/dist/cli.js` form your developer gave you                              |
+| Error about **plugin/hooks/hooks.json** missing                         | The Haus package on disk is incomplete            | Reinstall from a fresh `.tgz` built with `yarn pack`; only use `HAUS_HOOKS_FALLBACK=1` if a developer tells you to (temporary dev escape) |
+| `doctor --hooks` fails after you edited `.claude/settings.json` by hand | The file no longer matches the official hook list | Run `haus apply --write` again to regenerate from the package, or restore from backup                                                     |
+| You are not in the right folder                                         | Haus scanned the wrong project                    | `cd` to your real project root (where `package.json` or your main code lives) and run the commands again                                  |
 
 For deeper troubleshooting, share the **exact error text** and which **step** you were on with your team.
 
@@ -217,8 +216,8 @@ For deeper troubleshooting, share the **exact error text** and which **step** yo
 
 ## Undo Haus (if you want to remove it)
 
-1. Make sure you do not need anything inside `.claude` or `.haus-ai` (ask your team if unsure).  
-2. Delete the folders **`.claude`** and **`.haus-ai`** from your project (Finder / File Explorer is fine), or run `haus undo` in a terminal opened in that project (`haus undo --yes` skips the prompt).  
+1. Make sure you do not need anything inside `.claude` or `.haus-ai` (ask your team if unsure).
+2. Delete the folders **`.claude`** and **`.haus-ai`** from your project (Finder / File Explorer is fine), or run `haus undo` in a terminal opened in that project (`haus undo --yes` skips the prompt).
 3. Optionally uninstall the global tool:
 
    ```bash
@@ -229,18 +228,18 @@ For deeper troubleshooting, share the **exact error text** and which **step** yo
 
 ## Short glossary
 
-| Term | Meaning |
-|------|--------|
-| **Terminal** | A text window where you run commands by typing (or pasting) lines and pressing Enter |
-| **`cd`** | “Change directory” — go to a folder |
-| **Project folder** | The top-level folder of the product you are working on |
-| **`haus`** | The Haus command-line program you installed |
-| **`.tgz`** | A packed software file your team can send you for easy install |
+| Term               | Meaning                                                                              |
+| ------------------ | ------------------------------------------------------------------------------------ |
+| **Terminal**       | A text window where you run commands by typing (or pasting) lines and pressing Enter |
+| **`cd`**           | “Change directory” — go to a folder                                                  |
+| **Project folder** | The top-level folder of the product you are working on                               |
+| **`haus`**         | The Haus command-line program you installed                                          |
+| **`.tgz`**         | A packed software file your team can send you for easy install                       |
 
 ---
 
 ## Where to read next (optional)
 
-- Technical setup details: [Setup guide](setup-guide.md)  
-- Command list: [CLI reference](cli.md)  
+- Technical setup details: [Setup guide](setup-guide.md)
+- Command list: [CLI reference](cli.md)
 - Why hooks work the way they do: [Plugin](plugin.md) and [Architecture](architecture.md)
