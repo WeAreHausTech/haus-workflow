@@ -7,8 +7,14 @@ import { execSync } from "node:child_process";
 import { mkdtempSync, mkdirSync, writeFileSync, readFileSync } from "node:fs";
 
 test("scanner command exists in built cli", async () => {
-  execSync("node dist/cli.js scan --json > /dev/null");
-  const parsed = JSON.parse(fs.readFileSync(".haus-ai/context-map.json", "utf8"));
+  const temp = mkdtempSync(path.join(os.tmpdir(), "haus-scan-rootless-"));
+  writeFileSync(
+    path.join(temp, "package.json"),
+    JSON.stringify({ name: "scan-rootless", packageManager: "yarn@4.5.3", dependencies: { react: "19.0.0" } }, null, 2)
+  );
+  writeFileSync(path.join(temp, "yarn.lock"), "# lock");
+  execSync(`node "${path.resolve("dist/cli.js")}" scan --json > /dev/null`, { cwd: temp });
+  const parsed = JSON.parse(fs.readFileSync(path.join(temp, ".haus-ai/context-map.json"), "utf8"));
   assert.equal(typeof parsed.repoName, "string");
   assert.equal(Array.isArray(parsed.repoRoles), true);
   assert.equal(typeof parsed.confidence, "number");
