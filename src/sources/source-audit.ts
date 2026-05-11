@@ -25,7 +25,20 @@ export async function auditSources(root: string): Promise<string[]> {
   const sources = await loadSources(root);
   const issues: string[] = [];
   for (const source of sources) {
-    const allowedHost = ALLOWLIST.some((host) => source.url.includes(host));
+    let allowedHost = false;
+    if (!source.url) {
+      issues.push(`${source.id}: missing url`);
+    } else {
+      try {
+        const parsed = new URL(source.url);
+        const hostname = parsed.hostname.toLowerCase();
+        const protocol = parsed.protocol.toLowerCase();
+        const hostMatched = ALLOWLIST.some((host) => hostname === host || hostname.endsWith(`.${host}`));
+        allowedHost = protocol === "https:" && hostMatched;
+      } catch {
+        issues.push(`${source.id}: invalid url`);
+      }
+    }
     if (!allowedHost) issues.push(`${source.id}: host not allowlisted`);
     if (!source.license) issues.push(`${source.id}: missing license`);
     if (!source.pinnedVersion) issues.push(`${source.id}: missing pinnedVersion`);

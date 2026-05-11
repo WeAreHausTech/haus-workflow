@@ -49,7 +49,7 @@ export async function recommend(root: string, context: ContextMap): Promise<Reco
       reasons.push("changed file match");
     }
     if (SENSITIVE.some((x) => blob.includes(x))) score -= 100;
-    const trust = sourceTrust.get(item.id);
+    const trust = sourceTrust.get(item.source);
     if (trust === "candidate" || trust === "rejected") score -= 100;
     if (item.source && item.source !== "haus" && trust !== "approved") score -= 100;
 
