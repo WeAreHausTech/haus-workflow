@@ -17,6 +17,7 @@ export async function recommend(root: string, context: ContextMap): Promise<Reco
   const goals = Object.values(setupAnswers).join(" ").toLowerCase();
   const sourceTrust = new Map((sources.items ?? []).map((x) => [x.id, x.status ?? "candidate"]));
   const changedFiles = readChangedFiles(root);
+  const securityRiskCount = context.securityRisks?.length ?? 0;
 
   for (const item of items) {
     const blob = `${item.id} ${item.tags.join(" ")}`.toLowerCase();
@@ -52,6 +53,10 @@ export async function recommend(root: string, context: ContextMap): Promise<Reco
     const trust = sourceTrust.get(item.source);
     if (trust === "candidate" || trust === "rejected") score -= 100;
     if (item.source && item.source !== "haus" && trust !== "approved") score -= 100;
+    if (securityRiskCount > 0) {
+      score -= 30;
+      // TODO(M4): replace flat penalty with per-risk rules and catalog-driven metadata; tune vs hard skips.
+    }
 
     if (score > 0) {
       recommended.push({
@@ -67,7 +72,21 @@ export async function recommend(root: string, context: ContextMap): Promise<Reco
   }
 
   const estimatedContextTokens = recommended.length * 320;
-  return { mode: context.mode, recommended, skipped, warnings: context.warnings, estimatedContextTokens };
+  return {
+    mode: context.mode,
+    recommended,
+    skipped,
+    warnings: mergeRecommendationWarnings(context),
+    estimatedContextTokens
+  };
+}
+
+function mergeRecommendationWarnings(context: ContextMap): string[] {
+  const riskLines =
+    (context.securityRisks?.length ?? 0) > 0
+      ? [`Scan reported security signals: ${context.securityRisks.join("; ")}`]
+      : [];
+  return [...new Set([...context.warnings, ...riskLines])];
 }
 
 function readChangedFiles(root: string): string[] {

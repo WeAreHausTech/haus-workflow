@@ -60,3 +60,38 @@ test("unsupported stacks are skipped by policy", () => {
   assert.equal(recommendation.recommended.length, 0);
   assert.equal(recommendation.skipped.some((x) => String(x.reason).includes("Unsupported stack policy")), true);
 });
+
+test("recommend merges securityRisks into warnings", () => {
+  const temp = mkdtempSync(path.join(os.tmpdir(), "haus-rec-sec-"));
+  mkdirSync(path.join(temp, ".haus-ai"), { recursive: true });
+  writeFileSync(path.join(temp, "package.json"), JSON.stringify({ name: "sec-rec", packageManager: "yarn@4.5.3", dependencies: { react: "19.0.0" } }, null, 2));
+  writeFileSync(path.join(temp, "yarn.lock"), "# lock");
+  const context = {
+    mode: "fast",
+    generatedAt: new Date().toISOString(),
+    root: temp,
+    repoName: "sec-rec",
+    packageManager: "yarn",
+    repoRoles: ["react-app"],
+    confidence: 0.9,
+    detectedStacks: {
+      frontend: ["react19"],
+      backend: [],
+      databases: [],
+      testing: [],
+      auth: [],
+      tooling: [],
+      packageManagers: ["yarn4"]
+    },
+    dependencies: ["react"],
+    securityRisks: ["Missing env template"],
+    crossRepoHints: [],
+    warnings: ["No package.json test script found"]
+  };
+  writeFileSync(path.join(temp, ".haus-ai/context-map.json"), JSON.stringify(context, null, 2));
+  execSync(`node "${path.resolve("dist/cli.js")}" recommend --json > /dev/null`, { cwd: temp });
+  const recommendation = JSON.parse(fs.readFileSync(path.join(temp, ".haus-ai/recommendation.json"), "utf8"));
+  const joined = recommendation.warnings.join(" | ");
+  assert.equal(joined.includes("Scan reported security signals"), true);
+  assert.equal(joined.includes("Missing env template"), true);
+});
