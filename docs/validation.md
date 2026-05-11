@@ -175,3 +175,30 @@ The script asserts required fields per record shape. It does not fail CI; it is 
 
 - External clone QA (best-effort).
 - Internal real-repo QA (manual only).
+
+## PR3: Task-intent context filter
+
+`haus context --task` classifies the task string into one or more deterministic
+intents and filters the already-recommended set. It never re-runs scoring and
+never widens the recommended set.
+
+Intents: `backend`, `frontend`, `admin-ui`, `storefront`, `graphql`, `database`,
+`auth`, `testing`, `docs`, `monorepo`.
+
+Filtering order:
+
+1. **No task** -> return `recommended[]` unchanged.
+2. **Task with classified intents** -> keep only rules whose `tags`+`ecosystem`
+   intents intersect the task intents. Baselines are excluded.
+3. **Ambiguous task** (no intents matched) -> token-keyword fallback against rule
+   id/tags/ecosystem/reasons. Baselines excluded.
+4. **Still empty** -> non-baseline medium/high recommendations, capped at 8.
+   Testing-only rules are excluded unless the task itself is testing-related.
+
+Each `context --json` payload now includes the resolved `taskIntents` array for
+auditability.
+
+Goldens live in [tests/golden/context/](../tests/golden/context/) and are
+driven by `tests/context-goldens.test.js`. Each fixture+task entry asserts
+expected intents, required selected IDs, forbidden IDs, and absence of baseline
+rules where applicable.

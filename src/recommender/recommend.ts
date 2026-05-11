@@ -227,7 +227,9 @@ export async function recommend(root: string, context: ContextMap): Promise<Reco
           bonuses: reasons,
           penalties: skipReasons,
           finalScore: score
-        }
+        },
+        tags: item.tags,
+        ecosystem: item.ecosystem
       });
     } else {
       if (skipReasons.length === 0) {

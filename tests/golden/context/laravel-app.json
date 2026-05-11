@@ -1,0 +1,26 @@
+{
+  "tasks": {
+    "add queue job": {
+      "expectedTaskIntents": ["backend"],
+      "expectedSelectedIds": ["haus.laravel-patterns"],
+      "forbiddenSelectedIds": [
+        "haus.phpunit-patterns",
+        "haus.react19-patterns",
+        "haus.nextjs-patterns",
+        "haus.tailwind-scss-patterns",
+        "haus.package-manager-yarn4-pnpm89"
+      ],
+      "forbidBaseline": true
+    },
+    "create nova resource": {
+      "expectedTaskIntents": ["admin-ui"],
+      "expectedSelectedIds": ["haus.laravel-patterns"],
+      "forbiddenSelectedIds": [
+        "haus.phpunit-patterns",
+        "haus.react19-patterns",
+        "haus.nextjs-patterns"
+      ],
+      "forbidBaseline": true
+    }
+  }
+}

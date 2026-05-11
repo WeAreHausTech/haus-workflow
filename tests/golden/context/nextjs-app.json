@@ -1,0 +1,34 @@
+{
+  "tasks": {
+    "build dashboard route": {
+      "expectedTaskIntents": ["frontend"],
+      "expectedSelectedIds": [
+        "haus.nextjs-patterns",
+        "haus.react19-patterns",
+        "haus.typescript6-patterns"
+      ],
+      "forbiddenSelectedIds": [
+        "haus.playwright-patterns",
+        "haus.package-manager-yarn4-pnpm89",
+        "haus.nestjs-graphql-patterns",
+        "haus.vendure-plugin-patterns",
+        "haus.laravel-patterns"
+      ],
+      "forbidBaseline": true
+    },
+    "add tanstack query mutation": {
+      "expectedTaskIntents": ["frontend", "graphql"],
+      "expectedSelectedIds": [
+        "haus.nextjs-patterns",
+        "haus.react19-patterns"
+      ],
+      "forbiddenSelectedIds": [
+        "haus.playwright-patterns",
+        "haus.package-manager-yarn4-pnpm89",
+        "haus.laravel-patterns",
+        "haus.vendure-plugin-patterns"
+      ],
+      "forbidBaseline": true
+    }
+  }
+}

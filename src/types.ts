@@ -55,6 +55,10 @@ export type Recommendation = {
       penalties: Array<{ code: string; message: string; penalty: number; signal?: string }>;
       finalScore: number;
     };
+    /** Catalog tags echoed for downstream task-intent routing. Additive optional field. */
+    tags?: string[];
+    /** Catalog ecosystem family echoed for downstream task-intent routing. Additive optional field. */
+    ecosystem?: string;
   }>;
   skipped: Array<{
     id: string;

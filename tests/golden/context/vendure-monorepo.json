@@ -1,0 +1,55 @@
+{
+  "tasks": {
+    "build shipping plugin": {
+      "expectedTaskIntents": ["backend"],
+      "expectedSelectedIds": [
+        "haus.vendure-plugin-patterns",
+        "haus.vendure-app-patterns",
+        "haus.nestjs-graphql-patterns"
+      ],
+      "forbiddenSelectedIds": [
+        "haus.nextjs-patterns",
+        "haus.react19-patterns",
+        "haus.tailwind-scss-patterns",
+        "haus.tanstack-query-router-patterns",
+        "haus.radix-shadcn-patterns",
+        "haus.playwright-patterns",
+        "haus.storybook-patterns",
+        "haus.phpunit-patterns",
+        "haus.package-manager-yarn4-pnpm89"
+      ],
+      "forbidBaseline": true
+    },
+    "add admin ui extension": {
+      "expectedTaskIntents": ["admin-ui"],
+      "expectedSelectedIds": [
+        "haus.vendure-plugin-patterns",
+        "haus.vendure-app-patterns"
+      ],
+      "forbiddenSelectedIds": [
+        "haus.nestjs-graphql-patterns",
+        "haus.typescript6-patterns",
+        "haus.package-manager-yarn4-pnpm89",
+        "haus.nextjs-patterns",
+        "haus.react19-patterns"
+      ],
+      "forbidBaseline": true
+    },
+    "create graphql resolver": {
+      "expectedTaskIntents": ["backend", "graphql"],
+      "expectedSelectedIds": [
+        "haus.nestjs-graphql-patterns",
+        "haus.vendure-plugin-patterns",
+        "haus.vendure-app-patterns"
+      ],
+      "forbiddenSelectedIds": [
+        "haus.nextjs-patterns",
+        "haus.react19-patterns",
+        "haus.tailwind-scss-patterns",
+        "haus.playwright-patterns",
+        "haus.phpunit-patterns"
+      ],
+      "forbidBaseline": true
+    }
+  }
+}
