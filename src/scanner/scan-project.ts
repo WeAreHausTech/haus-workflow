@@ -154,8 +154,14 @@ function detectRoles(deps: string[], files: string[]): string[] {
   if (files.some((f) => f.endsWith("turbo.json"))) roles.add("turbo-monorepo");
   if (files.some((f) => f.endsWith("artisan")) || deps.includes("laravel/framework")) roles.add("laravel-app");
   if (deps.includes("laravel/nova")) roles.add("laravel-nova-app");
-  if (files.some((f) => f.endsWith("wp-config.php")) && files.some((f) => f.includes("web/app"))) roles.add("wordpress-bedrock-site");
-  if (files.some((f) => f.endsWith("wp-config.php")) && !files.some((f) => f.includes("web/app"))) roles.add("wordpress-vanilla-site");
+  if (files.some((f) => f.endsWith("wp-config.php")) && files.some((f) => f.includes("web/app"))) {
+    roles.add("wordpress-bedrock-site");
+    roles.add("wordpress-site");
+  }
+  if (files.some((f) => f.endsWith("wp-config.php")) && !files.some((f) => f.includes("web/app"))) {
+    roles.add("wordpress-vanilla-site");
+    roles.add("wordpress-site");
+  }
   if (files.some((f) => f.endsWith(".csproj") || f.endsWith(".sln"))) roles.add("dotnet-service");
   if (deps.includes("express")) roles.add("express-service");
   return [...roles].sort();

@@ -154,6 +154,8 @@ If you skipped writing during setup, you can still preview:
 ```bash
 haus scan --json
 haus recommend --json
+haus explain-context --json
+haus context --task "your task here" --json
 haus apply --dry-run
 ```
 
