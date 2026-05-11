@@ -24,7 +24,10 @@ export async function applyLock(root: string): Promise<{ before: string; after: 
   } catch {
     // no previous lockfile to backup
   }
-  const enriched = lock.map((x) => ({ ...x, hash: hashText(JSON.stringify(x)) }));
+  const enriched = lock.map((x) => {
+    const { hash: _oldHash, ...stableFields } = x;
+    return { ...stableFields, hash: hashText(JSON.stringify(stableFields)) };
+  });
   await writeJson(lockPath, enriched);
   const after = JSON.stringify(enriched, null, 2);
   return { before, after };

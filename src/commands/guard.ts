@@ -18,7 +18,16 @@ function deny(reason: string): void {
 
 export async function runGuard(kind: "file-access" | "bash", _options: { fromHook?: boolean }): Promise<void> {
   const raw = stdin();
-  const payload = raw ? JSON.parse(raw) : {};
+  let payload: Record<string, any> = {};
+  if (raw) {
+    try {
+      payload = JSON.parse(raw) as Record<string, any>;
+    } catch {
+      deny("Malformed hook payload");
+      process.exitCode = 1;
+      return;
+    }
+  }
   const toolInput = payload.tool_input ?? {};
 
   if (kind === "file-access") {
