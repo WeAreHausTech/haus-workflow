@@ -202,3 +202,29 @@ Goldens live in [tests/golden/context/](../tests/golden/context/) and are
 driven by `tests/context-goldens.test.js`. Each fixture+task entry asserts
 expected intents, required selected IDs, forbidden IDs, and absence of baseline
 rules where applicable.
+
+## PR4: Explainability polish
+
+`haus explain-recommendation` and `haus explain-context` are pure renderers
+over `.haus-ai/recommendation.json`. They never re-run scoring, never call the
+catalog, and never widen/narrow the recommended set.
+
+`explain-recommendation` human output groups `Selected` and `Skipped`, with per
+rule `confidence`, `selection`, and indented `why:` bullets that include the
+underlying signal (e.g. `stack/dependency match (tag:nestjs)`).
+
+`explain-context --task "<task>"` adds:
+
+- `Task intents` (deterministic classifier output from PR3)
+- `Task signals` (well-known ecosystem/stack tokens spotted in the task text)
+- `Repo signals matched` (ecosystem + tags of rules that survived the task
+  filter)
+- `Included in task context` (per rule: confidence, selection, intents, the
+  human reason for inclusion, and the original recommender why-bullets)
+- `Excluded from task context` (per rule: intents and the human reason for
+  exclusion, e.g. baseline isolation or intent mismatch)
+
+JSON additions are optional, additive fields only (`task`, `taskIntents`,
+`taskSignals`, `repoSignals`, `includedInTask`, `excludedFromTask`). The legacy
+`selected`, `skipped`, `stats` keys remain byte-stable for callers that already
+consume the JSON.
