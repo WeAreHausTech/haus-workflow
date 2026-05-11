@@ -15,6 +15,7 @@ export async function runContext(options: { task?: string; fromHook?: boolean; j
     selectedRules: selected.map((x) => ({
       id: x.id,
       confidenceLevel: x.confidenceLevel,
+      selectionMode: x.selectionMode,
       reasons: x.reasons.map((reason) => reason.message)
     })),
     skippedCount: recommendation?.skippedRules ?? 0,

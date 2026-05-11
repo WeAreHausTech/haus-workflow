@@ -20,6 +20,7 @@ export async function runExplainContext(options: { json?: boolean; stats?: boole
   for (const item of explanation.selected) {
     console.log(`- ${item.id}`);
     console.log(`  confidence: ${item.confidenceLevel} (${item.confidence})`);
+    console.log(`  selection: ${item.selectionMode}`);
     for (const reason of item.reasons) console.log(`  - ${reason}`);
   }
   console.log("Skipped:");
