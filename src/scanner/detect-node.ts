@@ -1,3 +1,4 @@
+// TODO(refactor-scanner): Not wired into scan-project.ts; merge or remove when modular scanner lands.
 export function detectNode(deps: string[]): string[] {
   const out: string[] = [];
   if (deps.includes("typescript")) out.push("typescript6");

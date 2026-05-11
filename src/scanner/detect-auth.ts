@@ -1,3 +1,4 @@
+// TODO(refactor-scanner): Not wired into scan-project.ts; merge or remove when modular scanner lands.
 export function detectAuth(content: string): string[] {
   const out: string[] = [];
   if (content.includes("openid") || content.includes("OIDC")) out.push("oidc");

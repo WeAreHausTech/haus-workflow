@@ -1,3 +1,4 @@
+// TODO(refactor-scanner): Not wired into scan-project.ts; merge or remove when modular scanner lands.
 export function dependencyMap(deps: string[]): Record<string, string[]> {
   return {
     frontend: deps.filter((d) => ["next", "react", "vite", "vue"].includes(d)),

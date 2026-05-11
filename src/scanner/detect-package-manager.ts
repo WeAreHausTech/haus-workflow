@@ -2,6 +2,7 @@ import fs from "fs-extra";
 import path from "node:path";
 import type { PackageManager } from "../types.js";
 
+// TODO(refactor-scanner): Duplicate of scan-project.ts inline detectPackageManager; consolidate.
 export function detectPackageManager(root: string, packageManagerField?: string): PackageManager {
   if (packageManagerField?.startsWith("yarn")) return "yarn";
   if (packageManagerField?.startsWith("pnpm")) return "pnpm";

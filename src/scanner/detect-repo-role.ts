@@ -1,3 +1,4 @@
+// TODO(refactor-scanner): Not wired into scan-project.ts; merge or remove when modular scanner lands.
 export function detectRepoRole(stacks: Record<string, string[]>): string[] {
   const all = Object.values(stacks).flat();
   const roles = new Set<string>();
