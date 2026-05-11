@@ -40,7 +40,12 @@ program.command("setup-project").option("--guided").option("--fast").option("--j
 program.command("doctor").option("--hooks", "Verify .claude/settings.json matches plugin hooks only").action(runDoctor);
 program.command("apply").option("--dry-run").option("--write").action(runApply);
 program.command("undo").option("-y, --yes", "Skip confirmation").action(runUndo);
-program.command("explain-context").option("--json").option("--stats").action(runExplainContext);
+program
+  .command("explain-context")
+  .option("--task <task>")
+  .option("--json")
+  .option("--stats")
+  .action(runExplainContext);
 program.command("explain-recommendation").option("--json").action(runExplainRecommendation);
 program.command("context").option("--task <task>").option("--from-hook").option("--json").action(runContext);
 program.command("refresh").action(runRefresh);

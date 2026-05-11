@@ -9,7 +9,7 @@
 - `haus doctor --hooks` (verify settings hooks only; exits non-zero if missing or drift)
 - `haus apply --dry-run|--write`
 - `haus undo` (remove `.claude/` and `.haus-ai/`; use `-y` / `--yes` to skip confirmation)
-- `haus explain-context [--json] [--stats]`
+- `haus explain-context [--task "..."] [--json] [--stats]`
 - `haus explain-recommendation [--json]`
 - `haus context --task "..." [--json]`
 - `haus refresh`
@@ -34,4 +34,5 @@
   - `skipped[]` with `skipReasons[]`
   - `selectedRules`, `skippedRules`, `estimatedTokenReductionPct`
 - `haus explain-context --json` and `haus explain-recommendation --json` render directly from `.haus-ai/recommendation.json` (no extra scoring pass).
+- `haus explain-context --task "<task>"` renders task-aware human output: task intents, repo signals matched, `Included in task context` and `Excluded from task context` sections with per-rule reasoning. JSON gains additive optional fields (`task`, `taskIntents`, `taskSignals`, `repoSignals`, `includedInTask`, `excludedFromTask`).
 - `haus context --task "<task>" --json` returns task-scoped selected rules plus context minimization stats.
