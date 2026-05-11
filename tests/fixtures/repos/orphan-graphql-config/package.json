@@ -1,0 +1,11 @@
+{
+  "name": "orphan-graphql-config-fixture",
+  "private": true,
+  "packageManager": "pnpm@8.15.8",
+  "dependencies": {
+    "graphql": "16.9.0"
+  },
+  "devDependencies": {
+    "@graphql-codegen/cli": "5.0.0"
+  }
+}

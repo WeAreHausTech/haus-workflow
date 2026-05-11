@@ -1,0 +1,15 @@
+{
+  "id": "nextjs-app-context-narrow-001",
+  "repo": "nextjs-app",
+  "status": "issue",
+  "commands": [
+    "haus context --task \"build dashboard route\" --json",
+    "haus context --task \"add tanstack query mutation\" --json"
+  ],
+  "issue": "Task context returns only haus.tanstack-query-router-patterns and drops nextjs/react19/typescript baseline rules that the implementation actually needs.",
+  "expected": "Implementation tasks against Next.js routes should retain at least nextjs-patterns + react19-patterns + typescript6-patterns alongside any specific accessory rule the task names.",
+  "actual": ["haus.tanstack-query-router-patterns"],
+  "severity": "medium",
+  "rootCauseHypothesis": "src/commands/context.ts `pickTaskRelevantRules` matches task tokens against ${id} ${reason} corpus; \"dashboard\"/\"tanstack\"/\"mutation\" hit only one rule id, so the filter collapses to that single result and never re-adds the base ecosystem rules.",
+  "proposedFixPR": "PR3"
+}

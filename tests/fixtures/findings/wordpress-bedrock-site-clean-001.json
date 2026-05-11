@@ -1,0 +1,11 @@
+{
+  "id": "wordpress-bedrock-site-clean-001",
+  "repo": "wordpress-bedrock-site",
+  "status": "clean",
+  "commands": [
+    "haus scan --json",
+    "haus recommend --json",
+    "haus context --task \"add custom block\" --json"
+  ],
+  "notes": "Recommendation selects only WordPress rules (wordpress-patterns, wordpress-bedrock-patterns, wordpress-acf-elementor-jetengine-patterns) plus baselines. No Node/JS bleed. Task context returns the three WP rules cleanly."
+}

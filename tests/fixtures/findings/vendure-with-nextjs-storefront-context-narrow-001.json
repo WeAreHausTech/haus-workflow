@@ -1,0 +1,15 @@
+{
+  "id": "vendure-with-nextjs-storefront-context-narrow-001",
+  "repo": "vendure-with-nextjs-storefront",
+  "status": "issue",
+  "commands": [
+    "haus context --task \"build shipping plugin\" --json",
+    "haus context --task \"build dashboard route\" --json"
+  ],
+  "issue": "Ecosystem routing works in the sense that the plugin task only returns vendure-plugin and the dashboard task only returns tanstack — but both responses collapse to a single rule and drop the obvious base ecosystem rule (nestjs-graphql for the plugin task; nextjs/react for the dashboard task).",
+  "expected": "build shipping plugin -> vendure-plugin-patterns + nestjs-graphql-patterns + typescript6-patterns; build dashboard route -> nextjs-patterns + react19-patterns + typescript6-patterns (+ tanstack if mentioned).",
+  "actual": ["haus.vendure-plugin-patterns", "haus.tanstack-query-router-patterns"],
+  "severity": "high",
+  "rootCauseHypothesis": "Mixed-stack repo exacerbates the narrow-collapse: when one rule id matches the task token, the filter returns just that one even though the ecosystem clearly demands its base stack rules.",
+  "proposedFixPR": "PR3"
+}

@@ -1,0 +1,12 @@
+{
+  "id": "laravel-app-phpunit-noise-001",
+  "repo": "laravel-app",
+  "status": "issue",
+  "command": "haus context --task \"add queue job\" --json",
+  "issue": "haus.phpunit-patterns appears in implementation-task context even though the task is not test-related.",
+  "expected": "Testing-tagged rules should only appear when the task references testing, fixtures, coverage, or assertions.",
+  "actual": ["haus.laravel-patterns", "haus.phpunit-patterns"],
+  "severity": "low",
+  "rootCauseHypothesis": "phpunit-patterns has `repoRoles: [\"laravel-app\"]` and a Laravel-flavored title that the keyword filter does not exclude; the testing-vs-implementation distinction is not encoded.",
+  "proposedFixPR": "PR3"
+}
