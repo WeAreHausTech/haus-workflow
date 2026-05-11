@@ -1,0 +1,6 @@
+{
+  "name": "roots/bedrock-fixture",
+  "require": {
+    "roots/bedrock": "^1.0"
+  }
+}

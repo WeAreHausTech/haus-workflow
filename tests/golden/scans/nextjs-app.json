@@ -1,0 +1,19 @@
+{
+  "mode": "fast",
+  "packageManager": "pnpm",
+  "repoRoles": ["next-app", "react-app"],
+  "confidence": 0.64,
+  "detectedStacks": {
+    "auth": [],
+    "backend": [],
+    "databases": [],
+    "frontend": ["nextjs", "react19"],
+    "packageManagers": ["pnpm89"],
+    "testing": ["playwright"],
+    "tooling": []
+  },
+  "dependencies": ["@playwright/test", "next", "react", "typescript"],
+  "securityRisks": ["Missing env template"],
+  "crossRepoHints": [],
+  "warnings": ["No .env.example found", "No package.json test script found"]
+}

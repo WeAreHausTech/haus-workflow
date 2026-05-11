@@ -1,0 +1,13 @@
+{
+  "expectedSelectedIds": [
+    "haus.nestjs-graphql-patterns",
+    "haus.package-manager-yarn4-pnpm89"
+  ],
+  "forbiddenSelectedIds": [
+    "haus.laravel-patterns",
+    "haus.wordpress-patterns",
+    "haus.nextjs-patterns"
+  ],
+  "requiredPositiveReasonContains": "stack/dependency match",
+  "requiredSkipReasonContains": "Scan security risk penalty"
+}

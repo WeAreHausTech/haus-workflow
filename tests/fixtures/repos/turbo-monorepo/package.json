@@ -1,0 +1,14 @@
+{
+  "name": "turbo-monorepo-fixture",
+  "private": true,
+  "packageManager": "yarn@4.5.3",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "dependencies": {
+    "turbo": "2.0.0",
+    "react": "19.0.0",
+    "typescript": "5.8.2"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "mode": "fast",
+  "packageManager": "yarn",
+  "repoRoles": ["graphql-api", "nestjs-api", "vendure-app", "vendure-plugin"],
+  "confidence": 0.8,
+  "detectedStacks": {
+    "auth": [],
+    "backend": ["graphql", "nestjs", "vendure3"],
+    "databases": [],
+    "frontend": [],
+    "packageManagers": ["yarn4"],
+    "testing": [],
+    "tooling": []
+  },
+  "dependencies": ["@nestjs/core", "@nestjs/graphql", "@vendure/core", "graphql", "typescript"],
+  "securityRisks": ["Missing env template"],
+  "crossRepoHints": [],
+  "warnings": ["No .env.example found", "No package.json test script found"]
+}
