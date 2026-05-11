@@ -13,6 +13,12 @@ type Issue = {
   severity: "low" | "medium" | "high" | "critical";
   rootCauseHypothesis?: string;
   proposedFixPR?: string;
+  /** PR5 regression annotation: "regressed" (a test guards it) or "open" (still unresolved). */
+  regressionStatus?: "regressed" | "open";
+  /** When regressionStatus is "regressed", file path(s) of the regression coverage. */
+  resolvedByTest?: string | string[];
+  /** When regressionStatus is "open", description of the follow-up route. */
+  followUp?: string;
 };
 
 type Clean = {
@@ -71,6 +77,17 @@ for (const file of files) {
       (typeof parsed.command === "string" && parsed.command.length > 0) ||
       (Array.isArray(parsed.commands) && parsed.commands.length > 0);
     if (!hasCommand) issues.push(`${ctx}: issue record needs "command" or non-empty "commands"`);
+    if (parsed.regressionStatus !== undefined) {
+      if (parsed.regressionStatus !== "regressed" && parsed.regressionStatus !== "open") {
+        issues.push(`${ctx}: regressionStatus must be "regressed" or "open"`);
+      }
+      if (parsed.regressionStatus === "regressed" && !parsed.resolvedByTest) {
+        issues.push(`${ctx}: regressionStatus="regressed" needs "resolvedByTest"`);
+      }
+      if (parsed.regressionStatus === "open" && !parsed.followUp) {
+        issues.push(`${ctx}: regressionStatus="open" needs "followUp"`);
+      }
+    }
   } else {
     cleanCount += 1;
     if (!Array.isArray(parsed.commands) || parsed.commands.length === 0) {

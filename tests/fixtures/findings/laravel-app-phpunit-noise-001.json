@@ -8,5 +8,10 @@
   "actual": ["haus.laravel-patterns", "haus.phpunit-patterns"],
   "severity": "low",
   "rootCauseHypothesis": "phpunit-patterns has `repoRoles: [\"laravel-app\"]` and a Laravel-flavored title that the keyword filter does not exclude; the testing-vs-implementation distinction is not encoded.",
-  "proposedFixPR": "PR3"
+  "proposedFixPR": "PR3",
+  "regressionStatus": "regressed",
+  "resolvedByTest": [
+    "tests/golden/context/laravel-app.json (add queue job forbids haus.phpunit-patterns)",
+    "tests/cross-bleed.test.js (laravel-app / add queue job rejects testing rules)"
+  ]
 }

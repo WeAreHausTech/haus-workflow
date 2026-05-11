@@ -19,5 +19,11 @@
   ],
   "severity": "critical",
   "rootCauseHypothesis": "Keyword filter finds no token hit so it falls back to all medium/high-confidence rules, ignoring that the task is clearly backend (\"queue job\"). No ecosystem-isolation step trims frontend rules when the task is backend-only.",
-  "proposedFixPR": "PR3"
+  "proposedFixPR": "PR3",
+  "regressionStatus": "regressed",
+  "resolvedByTest": [
+    "tests/golden/context/laravel-with-react-frontend.json (add queue job forbids React/Vite/Tailwind/Storybook/TanStack)",
+    "tests/cross-bleed.test.js (laravel-with-react-frontend / add queue job rejects frontend rules)",
+    "tests/golden/recommendations/laravel-with-react-frontend.json (Laravel+React mixed-fixture recommendation snapshot)"
+  ]
 }

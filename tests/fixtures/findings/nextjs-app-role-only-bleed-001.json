@@ -17,5 +17,10 @@
   ],
   "severity": "high",
   "rootCauseHypothesis": "Many accessory catalog entries set `repoRoles: [\"next-app\", \"react-app\"]` so repo-role-match (+40) alone clears the 40-point cutoff. There is no rule that requires at least one dep/stack signal alongside the role.",
-  "proposedFixPR": "PR2"
+  "proposedFixPR": "PR2",
+  "regressionStatus": "regressed",
+  "resolvedByTest": [
+    "tests/golden/recommendations/nextjs-app.json (forbiddenSelectedIds: radix, tailwind, tanstack, storybook)",
+    "tests/recommender.test.js (requiresAny unsatisfied skip reason)"
+  ]
 }

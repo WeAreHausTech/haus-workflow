@@ -1,0 +1,20 @@
+{
+  "expectedSelectedIds": [
+    "haus.code-reviewer-agent",
+    "haus.global-engineering-rules",
+    "haus.package-manager-yarn4-pnpm89"
+  ],
+  "forbiddenSelectedIds": [
+    "haus.nestjs-graphql-patterns",
+    "haus.vendure-plugin-patterns",
+    "haus.vendure-app-patterns",
+    "haus.nextjs-patterns",
+    "haus.react19-patterns",
+    "haus.tailwind-scss-patterns",
+    "haus.laravel-patterns",
+    "haus.wordpress-patterns",
+    "haus.dotnet-patterns"
+  ],
+  "requiredPositiveReasonContains": ["catalog default baseline"],
+  "requiredSkipReasonContains": ["requiresAny unsatisfied"]
+}

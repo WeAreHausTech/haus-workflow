@@ -11,5 +11,10 @@
   ],
   "severity": "low",
   "rootCauseHypothesis": "default-baseline contributes only +25 to score, mapping to confidence 0.25 (\"low\") via the 0.4/0.75 bands. The bands were tuned for matched rules and never adjusted for baselines.",
-  "proposedFixPR": "PR2"
+  "proposedFixPR": "PR2",
+  "regressionStatus": "regressed",
+  "resolvedByTest": [
+    "tests/golden/recommendations/vendure-monorepo.json (requireConfidenceForId)",
+    "tests/recommender.test.js"
+  ]
 }
