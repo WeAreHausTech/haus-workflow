@@ -47,6 +47,8 @@ jobs:
             node "$GITHUB_WORKSPACE/dist/cli.js" scan --json
             node "$GITHUB_WORKSPACE/dist/cli.js" recommend --json
             node "$GITHUB_WORKSPACE/dist/cli.js" apply --write
+            node "$GITHUB_WORKSPACE/dist/cli.js" doctor
+            node "$GITHUB_WORKSPACE/dist/cli.js" doctor --hooks
             # update --check can return non-zero when no lock entries were selected.
             node "$GITHUB_WORKSPACE/dist/cli.js" update --check || true
           )

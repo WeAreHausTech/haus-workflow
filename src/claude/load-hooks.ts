@@ -12,6 +12,15 @@ export type ClaudeHooksSettings = {
   };
 };
 
+export type LoadClaudeHooksOptions = {
+  /**
+   * When true, missing or invalid `plugin/hooks/hooks.json` uses embedded defaults + warn.
+   * Set `HAUS_HOOKS_FALLBACK=1` for local dev only — never for release installs you trust.
+   * Default false: missing/invalid file throws (avoids silent broken Claude config on `apply --write`).
+   */
+  allowEmbeddedFallback?: boolean;
+};
+
 const HookCommandSchema = z.object({
   type: z.literal("command"),
   command: z.string()
@@ -24,7 +33,7 @@ const PluginHooksFileSchema = z.object({
   })
 });
 
-/** Canonical copy when `plugin/hooks/hooks.json` is missing from the pack. */
+/** Last-resort copy when `HAUS_HOOKS_FALLBACK=1` and the plugin file is missing. */
 const EMBEDDED_HOOKS: ClaudeHooksSettings = {
   hooks: {
     UserPromptSubmit: [
@@ -63,25 +72,49 @@ function validateOrThrow(raw: unknown): ClaudeHooksSettings {
   return parsed.data as ClaudeHooksSettings;
 }
 
+function hooksPathOnDisk(): string {
+  return path.join(packageRoot(), "plugin", "hooks", "hooks.json");
+}
+
+function strictLoadErrorMessage(missing: boolean): string {
+  const p = hooksPathOnDisk();
+  if (missing) {
+    return `haus: plugin/hooks/hooks.json missing at ${p}. Ship a complete @haus/ai package. For emergency local dev only, set HAUS_HOOKS_FALLBACK=1 (embedded hooks; not release-safe).`;
+  }
+  return `haus: plugin/hooks/hooks.json invalid at ${p}. Fix the file or use HAUS_HOOKS_FALLBACK=1 for local dev only.`;
+}
+
 /**
  * Loads `plugin/hooks/hooks.json` from the installed `@haus/ai` package (SSOT).
- * Falls back to embedded hooks if the file is missing.
+ * @throws if the file is missing or invalid and `allowEmbeddedFallback` is not true.
  */
-export async function loadClaudeHooksSettings(): Promise<ClaudeHooksSettings> {
-  const hooksPath = path.join(packageRoot(), "plugin", "hooks", "hooks.json");
+export async function loadClaudeHooksSettings(opts?: LoadClaudeHooksOptions): Promise<ClaudeHooksSettings> {
+  const allowFallback = opts?.allowEmbeddedFallback === true;
+  const hooksPath = hooksPathOnDisk();
+
   if (!(await fs.pathExists(hooksPath))) {
-    console.warn("haus: plugin/hooks/hooks.json missing; using embedded hook defaults.");
-    // TODO(M5): optional strict mode — fail apply when plugin pack incomplete once packaging is guaranteed.
+    if (!allowFallback) {
+      throw new Error(strictLoadErrorMessage(true));
+    }
+    console.warn("haus: plugin/hooks/hooks.json missing; using embedded hook defaults (HAUS_HOOKS_FALLBACK).");
     return EMBEDDED_HOOKS;
   }
+
   const raw = await readJson<unknown>(hooksPath);
   if (raw == null) {
-    console.warn("haus: plugin/hooks/hooks.json empty or unreadable; using embedded hook defaults.");
+    if (!allowFallback) {
+      throw new Error(strictLoadErrorMessage(true));
+    }
+    console.warn("haus: plugin/hooks/hooks.json empty or unreadable; using embedded hook defaults (HAUS_HOOKS_FALLBACK).");
     return EMBEDDED_HOOKS;
   }
+
   try {
     return validateOrThrow(raw);
   } catch (err) {
+    if (!allowFallback) {
+      throw new Error(`${strictLoadErrorMessage(false)} (${String(err)})`);
+    }
     console.warn(`haus: invalid hooks file (${hooksPath}); using embedded defaults. ${String(err)}`);
     return EMBEDDED_HOOKS;
   }

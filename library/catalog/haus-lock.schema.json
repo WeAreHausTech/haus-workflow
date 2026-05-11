@@ -11,7 +11,7 @@
       "version": { "type": "string", "description": "@haus/ai package version when the row was written." },
       "hash": {
         "type": "string",
-        "description": "sha256 digest of installed files listed in paths (see hashInstalledPaths); placeholder when paths is empty."
+        "description": "sha256 digest of installed files listed in paths (see src/update/hash-installed.ts); placeholder when paths is empty."
       },
       "installMode": { "type": "string" },
       "paths": { "type": "array", "items": { "type": "string" } }

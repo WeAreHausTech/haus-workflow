@@ -5,7 +5,8 @@
 - `haus scan --json`
 - `haus recommend --json`
 - `haus setup-project --guided|--fast`
-- `haus doctor`
+- `haus doctor` (includes hook contract check when `.claude/settings.json` exists)
+- `haus doctor --hooks` (verify settings hooks only; exits non-zero if missing or drift)
 - `haus apply --dry-run|--write`
 - `haus explain-context`
 - `haus context --task "..."`
@@ -21,5 +22,5 @@
 
 ## Apply vs update
 
-- **`haus apply --write`** materializes `.claude/*`, `.haus-ai/selected-context.json`, and `.haus-ai/haus.lock.json`. Each lock row’s `hash` is a **sha256** digest over the **installed files** listed in `paths` (expanded when a path is a directory). `version` is the `@haus/ai` package version that performed the install.
-- **`haus update`** backs up the existing lockfile, then **recomputes** each row’s `hash` from the current files on disk under `paths` (same algorithm as apply). Other lock fields are preserved. Use this after editing installed assets or when refreshing integrity metadata.
+- **`haus apply --write`** materializes `.claude/*`, `.haus-ai/selected-context.json`, and `.haus-ai/haus.lock.json`. Each lock row’s `hash` is a **sha256** digest over the **installed files** listed in `paths` (expanded when a path is a directory). `version` is the `@haus/ai` package version that performed the install. After writing `.claude/settings.json`, apply runs a **self-check** that it matches `plugin/hooks/hooks.json` (throws on drift).
+- **`haus update`** backs up the existing lockfile, then **recomputes** each row’s `hash` from the current files on disk under `paths` (same `hashInstalledPaths` implementation in `src/update/hash-installed.ts` as apply). Other lock fields are preserved. Use this after editing installed assets or when refreshing integrity metadata.

@@ -2,7 +2,7 @@ import path from "node:path";
 import { mkdir, readFile, copyFile } from "node:fs/promises";
 import { readJson, writeJson } from "../utils/fs.js";
 import { hausPath } from "../utils/paths.js";
-import { hashInstalledPaths } from "../lock/hash-installed-paths.js";
+import { hashInstalledPaths } from "./hash-installed.js";
 
 export type LockItem = {
   id: string;

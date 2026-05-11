@@ -4,7 +4,8 @@ import { readJson, writeJson, writeText } from "../utils/fs.js";
 import { claudePath, hausPath, packageRoot } from "../utils/paths.js";
 import type { Recommendation } from "../types.js";
 import { loadClaudeHooksSettings } from "./load-hooks.js";
-import { hashInstalledPaths } from "../lock/hash-installed-paths.js";
+import { assertPostApplySettingsMatchCanonical } from "./verify-hooks-contract.js";
+import { hashInstalledPaths } from "../update/hash-installed.js";
 
 export async function writeClaudeFiles(root: string, dryRun: boolean): Promise<string[]> {
   const rec = (await readJson<Recommendation>(hausPath(root, "recommendation.json"))) ?? {
@@ -46,6 +47,7 @@ haus context --task "<task>"
   );
   const hookSettings = await loadClaudeHooksSettings();
   await writeJson(claudePath(root, "settings.json"), hookSettings);
+  await assertPostApplySettingsMatchCanonical(root, hookSettings);
   await writeText(claudePath(root, "commands", "haus-doctor.md"), "Run `haus doctor`.");
   await writeText(claudePath(root, "commands", "haus-review.md"), "Run `haus context --task \"code review\"` then review diff.");
   await writeText(claudePath(root, "commands", "haus-explain-context.md"), "Run `haus explain-context`.");

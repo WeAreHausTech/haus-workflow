@@ -9,7 +9,8 @@ export async function runRecommend(options: { json?: boolean }): Promise<void> {
   const context = await readContextOrScan(root);
   const result = await recommend(root, context);
   await writeJson(hausPath(root, "recommendation.json"), result);
-  const hookSettings = await loadClaudeHooksSettings();
+  const hookFallback = process.env.HAUS_HOOKS_FALLBACK === "1";
+  const hookSettings = await loadClaudeHooksSettings({ allowEmbeddedFallback: hookFallback });
   await writeJson(hausPath(root, "recommended-hooks.json"), flattenRecommendedHooks(hookSettings));
   await writeJson(hausPath(root, "recommended-rules.json"), [
     { id: "haus.rule.context-minimal", enabled: true },

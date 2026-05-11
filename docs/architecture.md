@@ -13,7 +13,7 @@ Project outputs in `.claude/` and `.haus-ai/`.
 
 ## Hooks
 
-`plugin/hooks/hooks.json` in the published package is canonical. The apply path copies its `hooks` tree into `.claude/settings.json` so CLI installs and plugin installs stay aligned on context injection, memory injection, and guard commands.
+`plugin/hooks/hooks.json` in the published package is canonical. Apply loads it in strict mode (throws if missing unless `HAUS_HOOKS_FALLBACK=1` for dev), writes `.claude/settings.json`, and runs a post-write self-check. `haus doctor` / `haus doctor --hooks` compare the project file to the contract to catch drift.
 
 ## Recommendations vs scan risks
 
