@@ -1,0 +1,15 @@
+{
+  "id": "orphan-graphql-config-nestjs-false-positive-001",
+  "repo": "orphan-graphql-config",
+  "status": "issue",
+  "commands": [
+    "haus recommend --json",
+    "haus context --task \"generate graphql types\" --json"
+  ],
+  "issue": "haus.nestjs-graphql-patterns is selected with score=70 (repo-role-match + stack-match) and surfaced at medium confidence even though the repo has no @nestjs/* dependency and no NestJS source. The rule is intended for NestJS GraphQL APIs; here it is a false positive that will load NestJS-specific guidance into a pure codegen project.",
+  "expected": "Rules whose id/title signals NestJS should require an actual NestJS signal (dep `@nestjs/core` or role `nestjs-api`), not satisfy on `graphql-api` role alone.",
+  "actual": ["haus.code-reviewer-agent", "haus.global-engineering-rules", "haus.nestjs-graphql-patterns", "haus.package-manager-yarn4-pnpm89"],
+  "severity": "high",
+  "rootCauseHypothesis": "haus.nestjs-graphql-patterns has `repoRoles: [\"nestjs-api\", \"graphql-api\"]` (manifest entry covers both). graphql-api role alone is enough to trigger repo-role-match (+40) and the graphql tag triggers stack-match (+30), clearing the 40-point cutoff with no NestJS signal required.",
+  "proposedFixPR": "PR2"
+}

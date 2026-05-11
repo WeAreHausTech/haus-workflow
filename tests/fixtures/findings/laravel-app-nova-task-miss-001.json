@@ -1,0 +1,12 @@
+{
+  "id": "laravel-app-nova-task-miss-001",
+  "repo": "laravel-app",
+  "status": "issue",
+  "command": "haus context --task \"create nova resource\" --json",
+  "issue": "Task explicitly names \"nova\" but haus.laravel-nova-patterns is skipped because the repo lacks the laravel-nova-app role. The task router therefore cannot surface Nova-specific guidance.",
+  "expected": "Either (a) the recommender allows opt-in selection of a tag-matched rule when the task strongly references it, or (b) explain output makes the skip reason actionable (\"add laravel/nova to deps to enable Nova rules\").",
+  "actual": ["haus.laravel-patterns", "haus.phpunit-patterns"],
+  "severity": "medium",
+  "rootCauseHypothesis": "Skip is gated only on `laravel-nova-app` role detection; the task signal is ignored at recommend time and the context filter cannot re-add a skipped rule.",
+  "proposedFixPR": "PR3"
+}

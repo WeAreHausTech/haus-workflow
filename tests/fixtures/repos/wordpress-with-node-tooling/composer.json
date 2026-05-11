@@ -1,0 +1,6 @@
+{
+  "name": "haus/wordpress-with-node-tooling-fixture",
+  "require": {
+    "roots/bedrock": "^1.0"
+  }
+}

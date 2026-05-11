@@ -1,0 +1,11 @@
+{
+  "id": "wordpress-with-node-tooling-clean-001",
+  "repo": "wordpress-with-node-tooling",
+  "status": "clean",
+  "commands": [
+    "haus scan --json",
+    "haus recommend --json",
+    "haus context --task \"add custom block\" --json"
+  ],
+  "notes": "Despite a package.json with eslint/prettier devDeps, the recommender did not pull any React/Next/Tailwind rules. WordPress rules + package-manager + baselines only. Good resistance to Node-tooling-only stack bleed; the package-manager rule appearing in the task context is mild noise but acceptable."
+}
