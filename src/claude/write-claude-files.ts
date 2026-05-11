@@ -13,7 +13,10 @@ export async function writeClaudeFiles(root: string, dryRun: boolean): Promise<s
     recommended: [],
     skipped: [],
     warnings: [],
-    estimatedContextTokens: 0
+    estimatedContextTokens: 0,
+    selectedRules: 0,
+    skippedRules: 0,
+    estimatedTokenReductionPct: 0
   };
   const files = [
     claudePath(root, "CLAUDE.md"),
@@ -77,7 +80,7 @@ haus context --task "<task>"
   }
   await writeJson(
     hausPath(root, "selected-context.json"),
-    rec.recommended.map((r) => ({ id: r.id, type: r.type, reason: r.reason }))
+    rec.recommended.map((r) => ({ id: r.id, type: r.type, reason: r.reason, confidenceLevel: r.confidenceLevel }))
   );
   const hausVersion =
     (await readJson<{ version?: string }>(path.join(pkgRoot, "package.json")))?.version ?? "0.0.0";
