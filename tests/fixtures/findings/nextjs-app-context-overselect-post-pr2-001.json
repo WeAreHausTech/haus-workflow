@@ -19,5 +19,10 @@
   ],
   "severity": "medium",
   "rootCauseHypothesis": "src/commands/context.ts pickTaskRelevantRules falls back to mediumOrHigh when no token matches. Needs an ecosystem-aware routing table that maps task keywords to rule groups and respects which rules are scaffolding (playwright) vs implementation (nextjs/react/ts).",
-  "proposedFixPR": "PR3"
+  "proposedFixPR": "PR3",
+  "regressionStatus": "regressed",
+  "resolvedByTest": [
+    "tests/golden/context/nextjs-app.json (forbidBaseline + forbids playwright/pkg-mgr)",
+    "tests/cross-bleed.test.js (nextjs-app / build dashboard route rejects testing rules + no baselines)"
+  ]
 }

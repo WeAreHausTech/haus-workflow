@@ -11,5 +11,10 @@
   "actual": ["haus.vendure-plugin-patterns", "haus.tanstack-query-router-patterns"],
   "severity": "high",
   "rootCauseHypothesis": "Mixed-stack repo exacerbates the narrow-collapse: when one rule id matches the task token, the filter returns just that one even though the ecosystem clearly demands its base stack rules.",
-  "proposedFixPR": "PR3"
+  "proposedFixPR": "PR3",
+  "regressionStatus": "regressed",
+  "resolvedByTest": [
+    "tests/golden/context/vendure-with-nextjs-storefront.json (build shipping plugin requires vendure-plugin+vendure-app+nestjs-graphql; build dashboard route requires nextjs+react19)",
+    "tests/cross-bleed.test.js (vendure-with-nextjs-storefront / build shipping plugin rejects storefront rules; build dashboard route rejects vendure backend)"
+  ]
 }

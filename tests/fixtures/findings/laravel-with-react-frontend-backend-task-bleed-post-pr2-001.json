@@ -16,5 +16,10 @@
   ],
   "severity": "high",
   "rootCauseHypothesis": "Mixed-ecosystem repo with no task->ecosystem mapping. Task tokens 'queue' and 'job' do not match any rule id/reason, so the fallback returns the full medium/high set across both ecosystems.",
-  "proposedFixPR": "PR3"
+  "proposedFixPR": "PR3",
+  "regressionStatus": "regressed",
+  "resolvedByTest": [
+    "tests/golden/context/laravel-with-react-frontend.json (add queue job forbids react/tailwind/phpunit/pkg-mgr)",
+    "tests/cross-bleed.test.js (laravel-with-react-frontend / add queue job rejects frontend rules)"
+  ]
 }

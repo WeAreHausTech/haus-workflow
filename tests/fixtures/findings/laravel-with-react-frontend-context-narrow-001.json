@@ -8,5 +8,10 @@
   "actual": ["haus.tanstack-query-router-patterns"],
   "severity": "medium",
   "rootCauseHypothesis": "Same narrow-collapse pattern as nextjs-app-context-narrow-001: a single id match shrinks the payload to one rule with no base-stack retention.",
-  "proposedFixPR": "PR3"
+  "proposedFixPR": "PR3",
+  "regressionStatus": "regressed",
+  "resolvedByTest": [
+    "tests/golden/context/laravel-with-react-frontend.json (build dashboard route requires haus.react19-patterns + haus.tailwind-scss-patterns)",
+    "tests/cross-bleed.test.js (laravel-with-react-frontend / build dashboard route rejects backend rules)"
+  ]
 }

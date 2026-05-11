@@ -1,0 +1,10 @@
+{
+  "id": "cross-fixture-pr5-regression-summary-001",
+  "repo": "cross-fixture",
+  "status": "clean",
+  "commands": [
+    "yarn test",
+    "node --experimental-strip-types scripts/validate-findings.ts"
+  ],
+  "notes": "PR5 regression hardening. Every PR1/PR2 issue finding is now either annotated regressionStatus=\"regressed\" with a concrete test file pointer, or regressionStatus=\"open\" with an explicit followUp route. Coverage added in this PR: tests/golden/recommendations/laravel-with-react-frontend.json, tests/golden/recommendations/vendure-with-nextjs-storefront.json, tests/golden/recommendations/orphan-graphql-config.json, tests/golden/recommendations/wordpress-with-node-tooling.json (mixed-fixture recommendation goldens, extending tests/recommender.test.js to 11 fixtures); tests/cross-bleed.test.js (10 cross-cutting no-bleed assertions across backend/frontend/testing/monorepo/admin-ui/storefront task categories). Validator schema (scripts/validate-findings.ts) extended with optional regressionStatus/resolvedByTest/followUp fields. Only one issue remains open: laravel-app-nova-task-miss-001 (catalog enhancement deferred). No recommender, context, or explain logic changed in PR5."
+}

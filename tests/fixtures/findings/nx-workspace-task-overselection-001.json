@@ -18,5 +18,10 @@
   ],
   "severity": "high",
   "rootCauseHypothesis": "In src/commands/context.ts pickTaskRelevantRules, when zero rules match task tokens it returns the entire medium/high-confidence set. There is no task-to-rule routing table to short-circuit this fallback for ecosystem-specific tasks like \"create new lib\".",
-  "proposedFixPR": "PR3"
+  "proposedFixPR": "PR3",
+  "regressionStatus": "regressed",
+  "resolvedByTest": [
+    "tests/golden/context/nx-workspace.json (create new lib forbids react/typescript6/playwright)",
+    "tests/cross-bleed.test.js (nx-workspace / create new lib rejects implementation rules)"
+  ]
 }

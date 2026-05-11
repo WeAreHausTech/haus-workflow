@@ -8,5 +8,7 @@
   "actual": ["haus.laravel-patterns", "haus.phpunit-patterns"],
   "severity": "medium",
   "rootCauseHypothesis": "Skip is gated only on `laravel-nova-app` role detection; the task signal is ignored at recommend time and the context filter cannot re-add a skipped rule.",
-  "proposedFixPR": "PR3"
+  "proposedFixPR": "PR3",
+  "regressionStatus": "open",
+  "followUp": "Catalog enhancement: either (a) widen haus.laravel-nova-patterns requiresAny to include task-keyword routing at recommend time (would require a small scoring change, intentionally deferred from PR2-PR5), or (b) author a Nova-specific catalog entry that activates on dependency=laravel/nova so the rule appears in repos that actually use Nova. The PR3 context filter correctly narrows to haus.laravel-patterns when no Nova rule was selected, which is the right behavior given the input."
 }

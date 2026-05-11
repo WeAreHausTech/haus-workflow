@@ -7,5 +7,10 @@
   "expected": "Skip reasons should distinguish: (a) hard policy block (unsupported, sensitive, source-trust), (b) required role/dep missing with the specific signal name, (c) conflicting ecosystem detected, (d) score below threshold with the actual score.",
   "severity": "medium",
   "rootCauseHypothesis": "pushSkipReason is only called for explicit policy paths in src/recommender/recommend.ts; the fallback `no-role-stack-match` is generic and does not record the closest signal the rule would have needed.",
-  "proposedFixPR": "PR4"
+  "proposedFixPR": "PR4",
+  "regressionStatus": "regressed",
+  "resolvedByTest": [
+    "tests/recommender.test.js (requiredSkipReasonContains: requiresAny unsatisfied, ecosystem conflict)",
+    "tests/context-explain.test.js (explain-recommendation/context human output includes signal annotations)"
+  ]
 }

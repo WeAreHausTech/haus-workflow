@@ -16,7 +16,11 @@ const fixtures = [
   "laravel-app",
   "wordpress-bedrock-site",
   "turbo-monorepo",
-  "nx-workspace"
+  "nx-workspace",
+  "laravel-with-react-frontend",
+  "vendure-with-nextjs-storefront",
+  "orphan-graphql-config",
+  "wordpress-with-node-tooling"
 ];
 
 for (const fixtureName of fixtures) {

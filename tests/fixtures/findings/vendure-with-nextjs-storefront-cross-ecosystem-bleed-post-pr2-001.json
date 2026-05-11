@@ -18,5 +18,10 @@
   ],
   "severity": "high",
   "rootCauseHypothesis": "Same as laravel-with-react-backend-task-bleed: no ecosystem-aware task routing. \"build shipping plugin\" correctly narrows to vendure-plugin (single id-token hit), but \"build dashboard route\" has no matching id token in the selected set, so the fallback returns everything.",
-  "proposedFixPR": "PR3"
+  "proposedFixPR": "PR3",
+  "regressionStatus": "regressed",
+  "resolvedByTest": [
+    "tests/golden/context/vendure-with-nextjs-storefront.json (build dashboard route forbids vendure-plugin/vendure-app/nestjs-graphql/pkg-mgr)",
+    "tests/cross-bleed.test.js (vendure-with-nextjs-storefront / build dashboard route rejects vendure backend)"
+  ]
 }

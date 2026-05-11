@@ -17,5 +17,10 @@
   ],
   "severity": "high",
   "rootCauseHypothesis": "See nextjs-app-role-only-bleed-001; same root cause in src/recommender/recommend.ts repo-role-match weighting.",
-  "proposedFixPR": "PR2"
+  "proposedFixPR": "PR2",
+  "regressionStatus": "regressed",
+  "resolvedByTest": [
+    "tests/golden/recommendations/turbo-monorepo.json (forbids radix/tailwind/tanstack/storybook/playwright)",
+    "tests/recommender.test.js (requiresAny unsatisfied skip reason)"
+  ]
 }
