@@ -175,10 +175,6 @@ export function classifyTaskIntents(task: string): Set<TaskIntent> {
         intents.add(intent);
         break;
       }
-      if (kw.includes(" ") && t.includes(kw)) {
-        intents.add(intent);
-        break;
-      }
     }
   }
   return intents;

@@ -32,5 +32,5 @@ export async function runExplainContext(options: {
     console.log(JSON.stringify(explanation, null, 2));
     return;
   }
-  console.log(formatContextHuman(normalized, options.task, explanation, { stats: options.stats }));
+  console.log(formatContextHuman(options.task, explanation, { stats: options.stats }));
 }

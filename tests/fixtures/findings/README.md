@@ -9,6 +9,12 @@ Each file is one record. Two shapes share the validator (`scripts/validate-findi
 
 Findings feed the PR2-PR5 backlog. They are observational only; no runtime gating.
 
+Optional fields on `status: "issue"` records (validated when present):
+
+- `regressionStatus`: `"regressed"` | `"open"`
+- `resolvedByTest`: string or string[] — required when `regressionStatus` is `"regressed"`
+- `followUp`: string — required when `regressionStatus` is `"open"`
+
 ## Run the validator
 
 ```bash
