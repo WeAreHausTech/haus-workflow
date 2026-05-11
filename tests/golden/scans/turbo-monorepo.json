@@ -1,0 +1,19 @@
+{
+  "mode": "fast",
+  "packageManager": "yarn",
+  "repoRoles": ["react-app", "turbo-monorepo"],
+  "confidence": 0.6,
+  "detectedStacks": {
+    "auth": [],
+    "backend": [],
+    "databases": [],
+    "frontend": ["react19"],
+    "packageManagers": ["yarn4"],
+    "testing": [],
+    "tooling": []
+  },
+  "dependencies": ["react", "turbo", "typescript"],
+  "securityRisks": ["Missing env template"],
+  "crossRepoHints": ["Monorepo orchestration detected"],
+  "warnings": ["No .env.example found", "No package.json test script found"]
+}

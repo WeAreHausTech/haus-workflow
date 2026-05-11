@@ -1,0 +1,13 @@
+{
+  "expectedSelectedIds": [
+    "haus.wordpress-patterns",
+    "haus.wordpress-bedrock-patterns"
+  ],
+  "forbiddenSelectedIds": [
+    "haus.nextjs-patterns",
+    "haus.laravel-patterns",
+    "haus.vendure-plugin-patterns"
+  ],
+  "requiredPositiveReasonContains": "stack/dependency match",
+  "requiredSkipReasonContains": "Scan security risk penalty"
+}
