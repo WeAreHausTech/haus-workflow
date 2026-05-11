@@ -62,6 +62,7 @@ haus context --task "<task>"
     path.join(pkgRoot, "library", "catalog", "manifest.json")
   )) ?? { items: [] };
   const manifestById = new Map((manifest.items ?? []).map((item) => [item.id, item]));
+  const installedPathsByItem = new Map<string, string[]>();
 
   for (const item of rec.recommended) {
     const manifestItem = manifestById.get(item.id);
@@ -73,6 +74,8 @@ haus context --task "<task>"
       await fs.ensureDir(path.dirname(destination));
       await fs.copy(sourcePath, destination, { overwrite: true, errorOnExist: false });
       files.push(destination);
+      const current = installedPathsByItem.get(item.id) ?? [];
+      installedPathsByItem.set(item.id, [...current, path.relative(root, destination)]);
     }
   }
   await writeJson(
@@ -86,7 +89,7 @@ haus context --task "<task>"
     version: "0.2.0",
     hash: hashText(`${r.id}:${r.type}:${r.reason}`),
     installMode: "copied",
-    paths: files.map((f) => path.relative(root, f))
+    paths: installedPathsByItem.get(r.id) ?? []
   }));
   await writeJson(hausPath(root, "haus.lock.json"), lock);
 
