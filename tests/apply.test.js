@@ -7,9 +7,12 @@ import { execSync } from "node:child_process";
 import { mkdtempSync, mkdirSync, writeFileSync, readFileSync } from "node:fs";
 
 test("generated settings uses haus command", () => {
-  const text = fs.readFileSync("src/claude/write-claude-files.ts", "utf8");
-  assert.equal(/haus-ai\s+(doctor|context|guard|apply)/.test(text), false);
-  assert.equal(text.includes("haus context --from-hook"), true);
+  const combined = [
+    fs.readFileSync("src/claude/write-claude-files.ts", "utf8"),
+    fs.readFileSync("src/claude/load-hooks.ts", "utf8")
+  ].join("\n");
+  assert.equal(/haus-ai\s+(doctor|context|guard|apply)/.test(combined), false);
+  assert.equal(combined.includes("haus context --from-hook"), true);
 });
 
 test("apply writes claude files and rules", () => {
@@ -29,7 +32,15 @@ test("apply writes claude files and rules", () => {
   const rulesHaus = readFileSync(path.join(temp, ".claude/rules/haus.md"), "utf8");
   const rulesSecurity = readFileSync(path.join(temp, ".claude/rules/security.md"), "utf8");
 
-  assert.equal(settings.hooks.UserPromptSubmit[0].hooks[0].command, "haus context --from-hook");
+  const ups = settings.hooks.UserPromptSubmit[0].hooks;
+  assert.equal(ups.length, 2);
+  assert.equal(ups[0].command, "haus context --from-hook");
+  assert.equal(ups[1].command, "haus memory inject --from-hook");
+  const pre = settings.hooks.PreToolUse;
+  assert.equal(pre[0].matcher, "Read|Edit|Write");
+  assert.equal(pre[0].hooks[0].command, "haus guard file-access --from-hook");
+  assert.equal(pre[1].matcher, "Bash");
+  assert.equal(pre[1].hooks[0].command, "haus guard bash --from-hook");
   assert.equal(rulesHaus.includes("Keep context minimal"), true);
   assert.equal(rulesSecurity.includes("Never read secrets"), true);
 });

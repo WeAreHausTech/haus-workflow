@@ -10,3 +10,7 @@
 - source policy adapters
 
 Project outputs in `.claude/` and `.haus-ai/`.
+
+## Hooks
+
+`plugin/hooks/hooks.json` in the published package is canonical. The apply path copies its `hooks` tree into `.claude/settings.json` so CLI installs and plugin installs stay aligned on context injection, memory injection, and guard commands.

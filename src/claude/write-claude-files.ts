@@ -3,6 +3,7 @@ import fs from "fs-extra";
 import { hashText, readJson, writeJson, writeText } from "../utils/fs.js";
 import { claudePath, hausPath, packageRoot } from "../utils/paths.js";
 import type { Recommendation } from "../types.js";
+import { loadClaudeHooksSettings } from "./load-hooks.js";
 
 export async function writeClaudeFiles(root: string, dryRun: boolean): Promise<string[]> {
   const rec = (await readJson<Recommendation>(hausPath(root, "recommendation.json"))) ?? {
@@ -42,15 +43,8 @@ haus context --task "<task>"
 \`\`\`
 `
   );
-  await writeJson(claudePath(root, "settings.json"), {
-    hooks: {
-      UserPromptSubmit: [{ hooks: [{ type: "command", command: "haus context --from-hook" }] }],
-      PreToolUse: [
-        { matcher: "Read|Edit|Write", hooks: [{ type: "command", command: "haus guard file-access --from-hook" }] },
-        { matcher: "Bash", hooks: [{ type: "command", command: "haus guard bash --from-hook" }] }
-      ]
-    }
-  });
+  const hookSettings = await loadClaudeHooksSettings();
+  await writeJson(claudePath(root, "settings.json"), hookSettings);
   await writeText(claudePath(root, "commands", "haus-doctor.md"), "Run `haus doctor`.");
   await writeText(claudePath(root, "commands", "haus-review.md"), "Run `haus context --task \"code review\"` then review diff.");
   await writeText(claudePath(root, "commands", "haus-explain-context.md"), "Run `haus explain-context`.");
