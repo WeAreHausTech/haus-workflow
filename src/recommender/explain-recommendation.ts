@@ -5,6 +5,7 @@ type ExplainRecommendation = {
     id: string;
     confidence: number;
     confidenceLevel: "low" | "medium" | "high";
+    selectionMode: "baseline" | "matched";
     reasons: string[];
   }>;
   skipped: Array<{
@@ -24,6 +25,7 @@ export function buildRecommendationExplanation(recommendation: Recommendation): 
       id: item.id,
       confidence: item.confidence,
       confidenceLevel: item.confidenceLevel,
+      selectionMode: item.selectionMode,
       reasons: item.reasons.map((reason) => reason.message)
     })),
     skipped: recommendation.skipped.map((item) => ({

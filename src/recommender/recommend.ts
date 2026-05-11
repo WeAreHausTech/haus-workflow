@@ -47,6 +47,7 @@ export async function recommend(root: string, context: ContextMap): Promise<Reco
     }
 
     let score = 0;
+    const isDefaultBaseline = item.default === true;
     const reasons: Recommendation["recommended"][number]["reasons"] = [];
     const skipReasons: Recommendation["skipped"][number]["skipReasons"] = [];
     const pushReason = (code: string, message: string, weight: number) => {
@@ -57,7 +58,7 @@ export async function recommend(root: string, context: ContextMap): Promise<Reco
       skipReasons.push({ code, message, penalty });
     };
 
-    if (item.default === true) {
+    if (isDefaultBaseline) {
       pushReason("default-baseline", "catalog default baseline", 25);
     }
     if (item.repoRoles.some((r) => context.repoRoles.includes(r))) pushReason("repo-role-match", "repo role match", 40);
@@ -94,7 +95,7 @@ export async function recommend(root: string, context: ContextMap): Promise<Reco
       pushSkipReason("security-risk-penalty", "Security-tagged item penalized by active risk signals", 20);
     }
 
-    const minScore = item.default === true ? 1 : 40;
+    const minScore = isDefaultBaseline ? 1 : 40;
     if (score >= minScore) {
       const confidence = Math.min(0.99, Number((score / 100).toFixed(2)));
       recommended.push({
@@ -104,6 +105,7 @@ export async function recommend(root: string, context: ContextMap): Promise<Reco
         reasons,
         confidence,
         confidenceLevel: toConfidenceLevel(confidence),
+        selectionMode: isDefaultBaseline && reasons.every((r) => r.code === "default-baseline") ? "baseline" : "matched",
         install: true,
         score,
         scoreBreakdown: {

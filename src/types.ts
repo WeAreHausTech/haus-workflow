@@ -37,6 +37,7 @@ export type Recommendation = {
     reasons: Array<{ code: string; message: string; weight: number }>;
     confidence: number;
     confidenceLevel: "low" | "medium" | "high";
+    selectionMode: "baseline" | "matched";
     install: boolean;
     score: number;
     scoreBreakdown: {

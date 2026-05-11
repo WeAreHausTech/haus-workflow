@@ -15,6 +15,7 @@ test("explain-context renders recommendation JSON without recomputation", () => 
   assert.equal(Array.isArray(parsed.skipped), true);
   assert.equal(typeof parsed.stats.selectedRules, "number");
   assert.equal(parsed.selected.some((item) => item.id === "haus.vendure-plugin-patterns"), true);
+  assert.equal(parsed.selected.some((item) => item.id === "haus.global-engineering-rules" && item.selectionMode === "baseline"), true);
 });
 
 test("explain-recommendation returns stable JSON", () => {
@@ -36,4 +37,5 @@ test("context --task --json returns task-scoped selected rules", () => {
   assert.equal(Array.isArray(parsed.selectedRules), true);
   assert.equal(parsed.selectedRules.some((item) => item.id === "haus.vendure-plugin-patterns"), true);
   assert.equal(parsed.selectedRules.some((item) => item.id === "haus.nextjs-patterns"), false);
+  assert.equal(parsed.selectedRules.some((item) => item.selectionMode === "baseline"), false);
 });
