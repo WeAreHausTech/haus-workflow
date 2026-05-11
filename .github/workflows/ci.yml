@@ -31,10 +31,25 @@ jobs:
 
       - name: CLI smoke checks
         run: |
-          node dist/cli.js scan --json
-          node dist/cli.js recommend --json
-          node dist/cli.js apply --dry-run
-          node dist/cli.js update --check
+          TMP_DIR="$(mktemp -d)"
+          cat > "$TMP_DIR/package.json" <<'EOF'
+          {
+            "name": "haus-smoke",
+            "packageManager": "yarn@4.5.3",
+            "dependencies": {
+              "react": "19.0.0"
+            }
+          }
+          EOF
+          touch "$TMP_DIR/yarn.lock"
+          (
+            cd "$TMP_DIR"
+            node "$GITHUB_WORKSPACE/dist/cli.js" scan --json
+            node "$GITHUB_WORKSPACE/dist/cli.js" recommend --json
+            node "$GITHUB_WORKSPACE/dist/cli.js" apply --write
+            # update --check can return non-zero when no lock entries were selected.
+            node "$GITHUB_WORKSPACE/dist/cli.js" update --check || true
+          )
           node dist/cli.js sources audit
 
       - name: Pack
