@@ -39,6 +39,14 @@ haus undo --yes   # optional: remove .claude/ + .haus-ai/ (skip confirm)
 2. `haus recommend --json` writes `.haus-ai/recommendation.json` with selected/skipped reasons.
 3. `haus apply --write` generates selected `.claude/*` + `.haus-ai/haus.lock.json`.
 
+Use explainability and task context commands after recommend:
+
+```bash
+haus explain-context --json
+haus explain-recommendation --json
+haus context --task "create vendure shipping plugin" --json
+```
+
 Hook entries in `.claude/settings.json` come from [`plugin/hooks/hooks.json`](plugin/hooks/hooks.json) (strict load on apply; use `HAUS_HOOKS_FALLBACK=1` only for broken local dev trees). Apply self-checks the written file against that contract. Use `haus doctor` or `haus doctor --hooks` to detect drift. Each lock row’s `hash` fingerprints installed files under `paths`; `version` is the `@haus/ai` package version that ran apply. Run `haus update` to recompute hashes after local edits to tracked files.
 
 ## Security
