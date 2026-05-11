@@ -29,7 +29,10 @@ const SAFE_FILES = [
   "**/vendure-config.*",
   "**/*module.ts",
   "web/app/**",
-  "wp-content/**",
+  "wp-content/plugins/**",
+  "wp-content/themes/**",
+  "wp-content/mu-plugins/**",
+  "wp-content/acf-json/**",
   ".storybook/**",
   ".env.example",
   "wp-config.php",
@@ -39,7 +42,23 @@ const SAFE_FILES = [
   "Dockerfile"
 ];
 
-const SENSITIVE = [/^\.env(\.|$)/, /(^|\/)\.env(\.|$)/, /\.pem$/, /\.key$/, /\.p12$/, /\.pfx$/, /\.sql$/, /\.dump$/, /customer-data/, /exports/, /certs/, /secrets/];
+const SENSITIVE = [
+  /^\.env(\.|$)/,
+  /(^|\/)\.env(\.|$)/,
+  /\.pem$/,
+  /\.key$/,
+  /\.p12$/,
+  /\.pfx$/,
+  /\.sql$/,
+  /\.dump$/,
+  /customer-data/,
+  /exports/,
+  /certs/,
+  /secrets/,
+  /(^|\/)storage\/logs(\/|$)/,
+  /(^|\/)wp-content\/uploads(\/|$)/,
+  /(^|\/)uploads(\/|$)/
+];
 
 function blocked(rel: string): boolean {
   return SENSITIVE.some((x) => x.test(rel));
@@ -53,7 +72,7 @@ export async function scanProject(root: string, mode: "guided" | "fast" = "fast"
   const deps = dependencySet(pkg, composer);
   const packageManager = detectPackageManager(root, pkg);
   const roles = detectRoles(deps, safeFiles);
-  const stacks = await detectStacks(root, deps, safeFiles);
+  const stacks = await detectStacks(root, deps, safeFiles, packageManager);
   const warnings: string[] = [];
   const securityRisks: string[] = [];
   const crossRepoHints: string[] = [];
@@ -142,7 +161,12 @@ function detectRoles(deps: string[], files: string[]): string[] {
   return [...roles].sort();
 }
 
-async function detectStacks(root: string, deps: string[], files: string[]): Promise<Record<string, string[]>> {
+async function detectStacks(
+  root: string,
+  deps: string[],
+  files: string[],
+  packageManager: PackageManager
+): Promise<Record<string, string[]>> {
   const out: Record<string, string[]> = { backend: [], frontend: [], databases: [], testing: [], auth: [], tooling: [], packageManagers: [] };
   const add = (k: string, v: string) => {
     out[k] ??= [];
@@ -174,7 +198,8 @@ async function detectStacks(root: string, deps: string[], files: string[]): Prom
   if (await hasNeedle(root, files, "openid")) add("auth", "oidc");
   if (await hasNeedle(root, files, "AZURE_AD")) add("auth", "azure-ad");
   if (await hasNeedle(root, files, "BANKID")) add("auth", "bankid");
-  add("packageManagers", "yarn4");
+  if (packageManager === "yarn") add("packageManagers", "yarn4");
+  if (packageManager === "pnpm") add("packageManagers", "pnpm89");
   return out;
 }
 
