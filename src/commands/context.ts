@@ -43,6 +43,7 @@ export async function runContext(options: { task?: string; fromHook?: boolean; j
 
 function pickTaskRelevantRules(recommendation: Recommendation | undefined, task: string | undefined) {
   const recommended = recommendation?.recommended ?? [];
+  const mediumOrHigh = recommended.filter((item) => item.confidenceLevel !== "low");
   if (!task) return recommended;
 
   const terms = task
@@ -53,6 +54,9 @@ function pickTaskRelevantRules(recommendation: Recommendation | undefined, task:
     const corpus = `${item.id} ${item.reason} ${item.reasons.map((r) => r.message).join(" ")}`.toLowerCase();
     return terms.some((term) => corpus.includes(term));
   });
-  if (filtered.length > 0) return filtered;
-  return recommended.filter((item) => item.confidenceLevel !== "low");
+  if (filtered.length > 0) {
+    const filteredMediumOrHigh = filtered.filter((item) => item.confidenceLevel !== "low");
+    return filteredMediumOrHigh.length > 0 ? filteredMediumOrHigh : filtered;
+  }
+  return mediumOrHigh;
 }

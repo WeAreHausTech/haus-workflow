@@ -4,10 +4,12 @@
     "haus.phpunit-patterns"
   ],
   "forbiddenSelectedIds": [
+    "haus.nx21-monorepo-patterns",
+    "haus.turbo-monorepo-patterns",
     "haus.nextjs-patterns",
     "haus.wordpress-patterns",
     "haus.vendure-plugin-patterns"
   ],
   "requiredPositiveReasonContains": "stack/dependency match",
-  "requiredSkipReasonContains": "Scan security risk penalty"
+  "requiredSkipReasonContains": "No role/stack match"
 }
