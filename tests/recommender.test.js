@@ -7,12 +7,29 @@ import os from "node:os";
 import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
 
 test("recommender writes recommendation json shape", () => {
-  execSync("node dist/cli.js scan --json > /dev/null");
-  execSync("node dist/cli.js recommend --json > /dev/null");
-  const file = ".haus-ai/recommendation.json";
+  const temp = mkdtempSync(path.join(os.tmpdir(), "haus-rec-rootless-"));
+  mkdirSync(path.join(temp, "library/catalog"), { recursive: true });
+  writeFileSync(
+    path.join(temp, "package.json"),
+    JSON.stringify({ name: "rec-rootless", packageManager: "yarn@4.5.3", dependencies: { react: "19.0.0" } }, null, 2)
+  );
+  writeFileSync(path.join(temp, "yarn.lock"), "# lock");
+  writeFileSync(
+    path.join(temp, "library/catalog/manifest.json"),
+    JSON.stringify(
+      {
+        items: [{ id: "haus.react19-patterns", type: "skill", source: "haus", version: "1", path: "none", tags: ["react19"], repoRoles: ["react-app"], tokenEstimate: 100 }]
+      },
+      null,
+      2
+    )
+  );
+  execSync(`node "${path.resolve("dist/cli.js")}" scan --json > /dev/null`, { cwd: temp });
+  execSync(`node "${path.resolve("dist/cli.js")}" recommend --json > /dev/null`, { cwd: temp });
+  const file = path.join(temp, ".haus-ai/recommendation.json");
   const parsed = JSON.parse(fs.readFileSync(file, "utf8"));
-  const hooks = JSON.parse(fs.readFileSync(".haus-ai/recommended-hooks.json", "utf8"));
-  const rules = JSON.parse(fs.readFileSync(".haus-ai/recommended-rules.json", "utf8"));
+  const hooks = JSON.parse(fs.readFileSync(path.join(temp, ".haus-ai/recommended-hooks.json"), "utf8"));
+  const rules = JSON.parse(fs.readFileSync(path.join(temp, ".haus-ai/recommended-rules.json"), "utf8"));
   assert.equal(Array.isArray(parsed.recommended), true);
   assert.equal(Array.isArray(parsed.skipped), true);
   assert.equal(typeof parsed.estimatedContextTokens, "number");
