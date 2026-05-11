@@ -39,6 +39,11 @@ export type Recommendation = {
     confidenceLevel: "low" | "medium" | "high";
     install: boolean;
     score: number;
+    scoreBreakdown: {
+      bonuses: Array<{ code: string; message: string; weight: number }>;
+      penalties: Array<{ code: string; message: string; penalty: number }>;
+      finalScore: number;
+    };
   }>;
   skipped: Array<{
     id: string;

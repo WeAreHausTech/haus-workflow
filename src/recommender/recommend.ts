@@ -29,6 +29,22 @@ export async function recommend(root: string, context: ContextMap): Promise<Reco
       });
       continue;
     }
+    if (item.id === "haus.nx21-monorepo-patterns" && !context.repoRoles.includes("nx-monorepo")) {
+      skipped.push({
+        id: item.id,
+        reason: "Required role missing: nx-monorepo",
+        skipReasons: [{ code: "required-role-missing", message: "Required role missing: nx-monorepo", penalty: 100 }]
+      });
+      continue;
+    }
+    if (item.id === "haus.turbo-monorepo-patterns" && !context.repoRoles.includes("turbo-monorepo")) {
+      skipped.push({
+        id: item.id,
+        reason: "Required role missing: turbo-monorepo",
+        skipReasons: [{ code: "required-role-missing", message: "Required role missing: turbo-monorepo", penalty: 100 }]
+      });
+      continue;
+    }
 
     let score = 0;
     const reasons: Recommendation["recommended"][number]["reasons"] = [];
@@ -73,12 +89,13 @@ export async function recommend(root: string, context: ContextMap): Promise<Reco
       score -= 100;
       pushSkipReason("source-approval", "Source not approved", 100);
     }
-    if (securityRiskCount > 0 && item.default !== true) {
-      score -= 30;
-      pushSkipReason("security-risk-penalty", "Scan security risk penalty", 30);
+    if (securityRiskCount > 0 && (item.tags.includes("security") || item.id.includes("security"))) {
+      score -= 20;
+      pushSkipReason("security-risk-penalty", "Security-tagged item penalized by active risk signals", 20);
     }
 
-    if (score > 0) {
+    const minScore = item.default === true ? 1 : 40;
+    if (score >= minScore) {
       const confidence = Math.min(0.99, Number((score / 100).toFixed(2)));
       recommended.push({
         id: item.id,
@@ -88,7 +105,12 @@ export async function recommend(root: string, context: ContextMap): Promise<Reco
         confidence,
         confidenceLevel: toConfidenceLevel(confidence),
         install: true,
-        score
+        score,
+        scoreBreakdown: {
+          bonuses: reasons,
+          penalties: skipReasons,
+          finalScore: score
+        }
       });
     } else {
       if (skipReasons.length === 0) {
