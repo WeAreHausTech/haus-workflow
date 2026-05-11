@@ -30,8 +30,24 @@ export type CatalogItem = {
 
 export type Recommendation = {
   mode: "guided" | "fast";
-  recommended: Array<{ id: string; type: string; reason: string; confidence: number; install: boolean }>;
-  skipped: Array<{ id: string; reason: string }>;
+  recommended: Array<{
+    id: string;
+    type: string;
+    reason: string;
+    reasons: Array<{ code: string; message: string; weight: number }>;
+    confidence: number;
+    confidenceLevel: "low" | "medium" | "high";
+    install: boolean;
+    score: number;
+  }>;
+  skipped: Array<{
+    id: string;
+    reason: string;
+    skipReasons: Array<{ code: string; message: string; penalty: number }>;
+  }>;
   warnings: string[];
   estimatedContextTokens: number;
+  selectedRules: number;
+  skippedRules: number;
+  estimatedTokenReductionPct: number;
 };

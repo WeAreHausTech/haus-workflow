@@ -22,66 +22,97 @@ export async function recommend(root: string, context: ContextMap): Promise<Reco
   for (const item of items) {
     const blob = `${item.id} ${item.tags.join(" ")}`.toLowerCase();
     if (UNSUPPORTED.some((x) => blob.includes(x))) {
-      skipped.push({ id: item.id, reason: "Unsupported stack policy" });
+      skipped.push({
+        id: item.id,
+        reason: "Unsupported stack policy",
+        skipReasons: [{ code: "unsupported-policy", message: "Unsupported stack policy", penalty: 100 }]
+      });
       continue;
     }
 
     let score = 0;
-    const reasons: string[] = [];
+    const reasons: Recommendation["recommended"][number]["reasons"] = [];
+    const skipReasons: Recommendation["skipped"][number]["skipReasons"] = [];
+    const pushReason = (code: string, message: string, weight: number) => {
+      score += weight;
+      reasons.push({ code, message, weight });
+    };
+    const pushSkipReason = (code: string, message: string, penalty: number) => {
+      skipReasons.push({ code, message, penalty });
+    };
+
     if (item.default === true) {
-      score += 25;
-      reasons.push("catalog default baseline");
+      pushReason("default-baseline", "catalog default baseline", 25);
     }
-    if (item.repoRoles.some((r) => context.repoRoles.includes(r))) score += 40;
+    if (item.repoRoles.some((r) => context.repoRoles.includes(r))) pushReason("repo-role-match", "repo role match", 40);
     if (item.tags.some((t) => stack.has(t.toLowerCase()))) {
-      score += 30;
-      reasons.push("stack/dependency match");
+      pushReason("stack-match", "stack/dependency match", 30);
     }
     if (item.tags.some((t) => goals.includes(t) || goals.includes(t.replace(/-/g, " ")))) {
-      score += 15;
-      reasons.push("guided goal match");
+      pushReason("goal-match", "guided goal match", 15);
     }
     if (item.tags.includes(context.packageManager) || item.tags.includes(`${context.packageManager}4`) || item.tags.includes(`${context.packageManager}89`)) {
-      score += 10;
-      reasons.push("package manager match");
+      pushReason("package-manager-match", "package manager match", 10);
     }
     if (item.tags.some((t) => context.warnings.join(" ").toLowerCase().includes(t.toLowerCase()))) {
-      score += 20;
-      reasons.push("config signal match");
+      pushReason("config-signal-match", "config signal match", 20);
     }
     if (changedFiles.some((f) => f.includes(item.id.split(".").pop() ?? ""))) {
-      score += 10;
-      reasons.push("changed file match");
+      pushReason("changed-file-match", "changed file match", 10);
     }
-    if (SENSITIVE.some((x) => blob.includes(x))) score -= 100;
+    if (SENSITIVE.some((x) => blob.includes(x))) {
+      score -= 100;
+      pushSkipReason("sensitive-policy", "Sensitive content policy block", 100);
+    }
     const trust = sourceTrust.get(item.source);
-    if (trust === "candidate" || trust === "rejected") score -= 100;
-    if (item.source && item.source !== "haus" && trust !== "approved") score -= 100;
+    if (trust === "candidate" || trust === "rejected") {
+      score -= 100;
+      pushSkipReason("source-trust", "Source trust policy block", 100);
+    }
+    if (item.source && item.source !== "haus" && trust !== "approved") {
+      score -= 100;
+      pushSkipReason("source-approval", "Source not approved", 100);
+    }
     if (securityRiskCount > 0 && item.default !== true) {
       score -= 30;
-      // TODO(M4): replace flat penalty with per-risk rules and catalog-driven metadata; tune vs hard skips.
+      pushSkipReason("security-risk-penalty", "Scan security risk penalty", 30);
     }
 
     if (score > 0) {
+      const confidence = Math.min(0.99, Number((score / 100).toFixed(2)));
       recommended.push({
         id: item.id,
         type: item.type,
-        reason: reasons.length ? reasons.join(", ") : `score=${score}`,
-        confidence: Math.min(0.99, Number((score / 100).toFixed(2))),
-        install: true
+        reason: reasons.length ? reasons.map((x) => x.message).join(", ") : `score=${score}`,
+        reasons,
+        confidence,
+        confidenceLevel: toConfidenceLevel(confidence),
+        install: true,
+        score
       });
     } else {
-      skipped.push({ id: item.id, reason: "No role/stack match" });
+      if (skipReasons.length === 0) {
+        pushSkipReason("no-role-stack-match", "No role/stack match", 0);
+      }
+      skipped.push({ id: item.id, reason: skipReasons[0].message, skipReasons });
     }
   }
 
+  recommended.sort((a, b) => a.id.localeCompare(b.id));
+  skipped.sort((a, b) => a.id.localeCompare(b.id));
   const estimatedContextTokens = recommended.length * 320;
+  const selectedRules = recommended.length;
+  const skippedRules = skipped.length;
+  const estimatedTokenReductionPct = Math.max(0, Math.round((skippedRules / Math.max(selectedRules + skippedRules, 1)) * 100));
   return {
     mode: context.mode,
     recommended,
     skipped,
     warnings: mergeRecommendationWarnings(context),
-    estimatedContextTokens
+    estimatedContextTokens,
+    selectedRules,
+    skippedRules,
+    estimatedTokenReductionPct
   };
 }
 
@@ -94,10 +125,17 @@ function mergeRecommendationWarnings(context: ContextMap): string[] {
 }
 
 function readChangedFiles(root: string): string[] {
+  if (process.env.HAUS_DISABLE_GIT_SIGNALS === "1") return [];
   try {
     const raw = execSync("git diff --name-only", { cwd: root, stdio: ["ignore", "pipe", "ignore"] }).toString("utf8");
-    return raw.split("\n").map((x) => x.trim()).filter(Boolean);
+    return raw.split("\n").map((x) => x.trim()).filter(Boolean).sort();
   } catch {
     return [];
   }
+}
+
+function toConfidenceLevel(confidence: number): "low" | "medium" | "high" {
+  if (confidence >= 0.75) return "high";
+  if (confidence >= 0.4) return "medium";
+  return "low";
 }

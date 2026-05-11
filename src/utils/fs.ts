@@ -34,7 +34,8 @@ export async function exists(file: string): Promise<boolean> {
 }
 
 export async function listFiles(root: string, patterns: string[]): Promise<string[]> {
-  return fg(patterns, { cwd: root, dot: true, onlyFiles: true, ignore: ["**/node_modules/**", "**/.git/**", "**/dist/**"] });
+  const files = await fg(patterns, { cwd: root, dot: true, onlyFiles: true, ignore: ["**/node_modules/**", "**/.git/**", "**/dist/**"] });
+  return files.sort((a, b) => a.localeCompare(b));
 }
 
 export function hashText(value: string): string {
