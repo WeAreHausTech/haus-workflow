@@ -95,3 +95,38 @@ test("recommend merges securityRisks into warnings", () => {
   assert.equal(joined.includes("Scan reported security signals"), true);
   assert.equal(joined.includes("Missing env template"), true);
 });
+
+test("catalog default baseline recommends with no role match", () => {
+  const temp = mkdtempSync(path.join(os.tmpdir(), "haus-rec-default-"));
+  mkdirSync(path.join(temp, "library/catalog"), { recursive: true });
+  writeFileSync(path.join(temp, "package.json"), JSON.stringify({ name: "def-rec", packageManager: "yarn@4.5.3" }, null, 2));
+  writeFileSync(path.join(temp, "yarn.lock"), "# lock");
+  writeFileSync(
+    path.join(temp, "library/catalog/manifest.json"),
+    JSON.stringify(
+      {
+        items: [
+          {
+            id: "haus.baseline-only",
+            type: "skill",
+            source: "haus",
+            version: "1",
+            path: "none",
+            tags: [],
+            repoRoles: [],
+            tokenEstimate: 10,
+            default: true
+          }
+        ]
+      },
+      null,
+      2
+    )
+  );
+  execSync(`node "${path.resolve("dist/cli.js")}" scan --json > /dev/null`, { cwd: temp });
+  execSync(`node "${path.resolve("dist/cli.js")}" recommend --json > /dev/null`, { cwd: temp });
+  const recommendation = JSON.parse(fs.readFileSync(path.join(temp, ".haus-ai/recommendation.json"), "utf8"));
+  const row = recommendation.recommended.find((x) => x.id === "haus.baseline-only");
+  assert.ok(row);
+  assert.equal(String(row.reason).includes("catalog default baseline"), true);
+});

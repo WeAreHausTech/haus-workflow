@@ -8,6 +8,7 @@
 - `haus doctor` (includes hook contract check when `.claude/settings.json` exists)
 - `haus doctor --hooks` (verify settings hooks only; exits non-zero if missing or drift)
 - `haus apply --dry-run|--write`
+- `haus undo` (remove `.claude/` and `.haus-ai/`; use `-y` / `--yes` to skip confirmation)
 - `haus explain-context`
 - `haus context --task "..."`
 - `haus refresh`

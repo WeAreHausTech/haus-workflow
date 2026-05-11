@@ -1,7 +1,8 @@
 import { scanProject } from "../scanner/scan-project.js";
 
-export async function runScan(options: { json?: boolean }): Promise<void> {
-  const result = await scanProject(process.cwd(), "fast");
+export async function runScan(options: { json?: boolean; mode?: "guided" | "fast" }): Promise<void> {
+  const mode = options.mode ?? "fast";
+  const result = await scanProject(process.cwd(), mode);
   if (options.json) {
     console.log(JSON.stringify(result, null, 2));
     return;

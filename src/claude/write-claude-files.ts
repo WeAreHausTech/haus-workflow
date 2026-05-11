@@ -102,5 +102,5 @@ haus context --task "<task>"
     await fs.ensureDir(claudePath(root, "plugin"));
     // TODO(plugin-pack): copy full plugin subtree into project when product requires bundled plugin mirror.
   }
-  return files;
+  return [...new Set(files)];
 }

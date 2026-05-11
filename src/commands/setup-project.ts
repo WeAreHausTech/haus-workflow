@@ -41,8 +41,9 @@ export async function runSetupProject(options: { guided?: boolean; fast?: boolea
     await writeJson(hausPath(root, "setup-answers.json"), merged);
   }
 
-  await runScan({ json: true });
-  await runRecommend({ json: true });
+  const emitJson = options.json === true;
+  await runScan({ json: emitJson, mode });
+  await runRecommend({ json: emitJson });
   await runDoctor();
   if (options.json) return;
   const approved = await confirm("Approve and write Claude files now?");

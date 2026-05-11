@@ -24,6 +24,48 @@ test("doctor reports hooks OK after apply", () => {
   assert.equal((r.stdout ?? "").includes("HOOKS OK"), true);
 });
 
+test("doctor prints each shared warning once", () => {
+  const temp = mkdtempSync(path.join(os.tmpdir(), "haus-doctor-dedupe-"));
+  mkdirSync(path.join(temp, ".haus-ai"), { recursive: true });
+  const dup = "duplicate warning line for doctor";
+  const context = {
+    mode: "fast",
+    generatedAt: new Date().toISOString(),
+    root: temp,
+    repoName: "dedupe",
+    packageManager: "yarn",
+    repoRoles: [],
+    confidence: 0.5,
+    detectedStacks: {
+      frontend: [],
+      backend: [],
+      databases: [],
+      testing: [],
+      auth: [],
+      tooling: [],
+      packageManagers: []
+    },
+    dependencies: [],
+    securityRisks: [],
+    crossRepoHints: [],
+    warnings: [dup]
+  };
+  writeFileSync(path.join(temp, ".haus-ai/context-map.json"), JSON.stringify(context, null, 2));
+  writeFileSync(
+    path.join(temp, ".haus-ai/recommendation.json"),
+    JSON.stringify(
+      { mode: "fast", recommended: [], skipped: [], warnings: [dup], estimatedContextTokens: 0 },
+      null,
+      2
+    )
+  );
+  const cli = path.resolve("dist/cli.js");
+  const r = spawnSync("node", [cli, "doctor"], { cwd: temp, encoding: "utf8" });
+  assert.equal(r.status, 0);
+  const hits = (r.stdout ?? "").split(dup).length - 1;
+  assert.equal(hits, 1);
+});
+
 test("doctor --hooks fails when settings missing", () => {
   const temp = mkdtempSync(path.join(os.tmpdir(), "haus-doctor-hooks-miss-"));
   const cli = path.resolve("dist/cli.js");

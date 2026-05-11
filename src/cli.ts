@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import { Command } from "commander";
 import { runApply } from "./commands/apply.js";
 import { runCatalogAudit } from "./commands/catalog-audit.js";
@@ -13,17 +15,30 @@ import { runRefresh } from "./commands/refresh.js";
 import { runScan } from "./commands/scan.js";
 import { runSetupProject } from "./commands/setup-project.js";
 import { runSources } from "./commands/sources.js";
+import { runUndo } from "./commands/undo.js";
 import { runUpdate } from "./commands/update.js";
 import { runWorkspace } from "./commands/workspace.js";
+import { packageRoot } from "./utils/paths.js";
+
+function cliVersion(): string {
+  try {
+    const pkgPath = path.join(packageRoot(), "package.json");
+    const pkg = JSON.parse(readFileSync(pkgPath, "utf8")) as { version?: string };
+    return pkg.version ?? "0.0.0";
+  } catch {
+    return "0.0.0";
+  }
+}
 
 const program = new Command();
 
-program.name("haus").description("Haus AI workflow CLI").version("0.2.0");
+program.name("haus").description("Haus AI workflow CLI").version(cliVersion());
 program.command("scan").option("--json").action(runScan);
 program.command("recommend").option("--json").action(runRecommend);
 program.command("setup-project").option("--guided").option("--fast").option("--json").action(runSetupProject);
 program.command("doctor").option("--hooks", "Verify .claude/settings.json matches plugin hooks only").action(runDoctor);
 program.command("apply").option("--dry-run").option("--write").action(runApply);
+program.command("undo").option("-y, --yes", "Skip confirmation").action(runUndo);
 program.command("explain-context").action(runExplainContext);
 program.command("context").option("--task <task>").option("--from-hook").action(runContext);
 program.command("refresh").action(runRefresh);

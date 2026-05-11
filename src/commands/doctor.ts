@@ -29,7 +29,8 @@ export async function runDoctor(options?: { hooks?: boolean }): Promise<void> {
   console.log(`Roles: ${context.repoRoles.join(", ") || "unknown"}`);
   console.log(`Package manager: ${context.packageManager}`);
   console.log(`Recommended items: ${recommendation?.recommended?.length ?? 0}`);
-  for (const warning of [...context.warnings, ...(recommendation?.warnings ?? [])]) {
+  const warningLines = [...new Set([...context.warnings, ...(recommendation?.warnings ?? [])])];
+  for (const warning of warningLines) {
     console.log(`- WARN: ${warning}`);
   }
 

@@ -28,6 +28,10 @@ export async function recommend(root: string, context: ContextMap): Promise<Reco
 
     let score = 0;
     const reasons: string[] = [];
+    if (item.default === true) {
+      score += 25;
+      reasons.push("catalog default baseline");
+    }
     if (item.repoRoles.some((r) => context.repoRoles.includes(r))) score += 40;
     if (item.tags.some((t) => stack.has(t.toLowerCase()))) {
       score += 30;
@@ -53,7 +57,7 @@ export async function recommend(root: string, context: ContextMap): Promise<Reco
     const trust = sourceTrust.get(item.source);
     if (trust === "candidate" || trust === "rejected") score -= 100;
     if (item.source && item.source !== "haus" && trust !== "approved") score -= 100;
-    if (securityRiskCount > 0) {
+    if (securityRiskCount > 0 && item.default !== true) {
       score -= 30;
       // TODO(M4): replace flat penalty with per-risk rules and catalog-driven metadata; tune vs hard skips.
     }

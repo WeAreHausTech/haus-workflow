@@ -24,6 +24,8 @@ export type CatalogItem = {
   tags: string[];
   repoRoles: string[];
   tokenEstimate: number;
+  /** When true, recommender applies a baseline score so the item is selected unless policy blocks it. */
+  default?: boolean;
 };
 
 export type Recommendation = {

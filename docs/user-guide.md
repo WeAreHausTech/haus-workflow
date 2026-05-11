@@ -168,6 +168,8 @@ haus apply --write
 
 This creates or updates `.claude/` and `.haus-ai/` in **this** project.
 
+To remove those folders later (for example on a throwaway copy), run `haus undo` in the same project folder, or use `haus undo --yes` to skip the confirmation prompt.
+
 ### Step 4 — Quick health check
 
 ```bash
@@ -216,7 +218,7 @@ For deeper troubleshooting, share the **exact error text** and which **step** yo
 ## Undo Haus (if you want to remove it)
 
 1. Make sure you do not need anything inside `.claude` or `.haus-ai` (ask your team if unsure).  
-2. Delete the folders **`.claude`** and **`.haus-ai`** from your project (Finder / File Explorer is fine).  
+2. Delete the folders **`.claude`** and **`.haus-ai`** from your project (Finder / File Explorer is fine), or run `haus undo` in a terminal opened in that project (`haus undo --yes` skips the prompt).  
 3. Optionally uninstall the global tool:
 
    ```bash

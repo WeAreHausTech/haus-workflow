@@ -25,6 +25,7 @@ haus recommend --json
 haus apply --dry-run
 haus apply --write
 haus doctor
+haus undo --yes   # optional: remove .claude/ + .haus-ai/ (skip confirm)
 ```
 
 ## Guided vs fast
