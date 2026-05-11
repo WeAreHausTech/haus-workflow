@@ -1,5 +1,9 @@
 # Setup Guide
 
+**New to the terminal?** Use the plain-language walkthrough: **[User guide](user-guide.md)** (install Haus, open your project, run setup, check health).
+
+---
+
 Run `haus setup-project`.
 
 - Guided mode asks plain-language questions.

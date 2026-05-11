@@ -6,6 +6,10 @@ CLI command: `haus`
 Package name: `@haus/ai`  
 Project metadata dir: `.haus-ai/`
 
+## User guide (non-technical)
+
+Step-by-step for trying Haus on a project without coding: **[docs/user-guide.md](docs/user-guide.md)**.
+
 ## Install
 
 ```bash
