@@ -110,6 +110,18 @@ const cases = [
     forbidLabel: "frontend-only"
   },
   {
+    name: "vendure-with-nextjs-storefront / add tanstack query mutation stays frontend",
+    fixture: "vendure-with-nextjs-storefront",
+    task: "add tanstack query mutation",
+    forbid: new Set([
+      "haus.vendure-plugin-patterns",
+      "haus.vendure-app-patterns",
+      "haus.nestjs-graphql-patterns",
+      "haus.laravel-patterns"
+    ]),
+    forbidLabel: "backend"
+  },
+  {
     name: "wordpress-with-node-tooling / add custom block rejects monorepo rules",
     fixture: "wordpress-with-node-tooling",
     task: "add custom block",

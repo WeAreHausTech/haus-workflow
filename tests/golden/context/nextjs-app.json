@@ -17,7 +17,7 @@
       "forbidBaseline": true
     },
     "add tanstack query mutation": {
-      "expectedTaskIntents": ["frontend", "graphql"],
+      "expectedTaskIntents": ["frontend"],
       "expectedSelectedIds": [
         "haus.nextjs-patterns",
         "haus.react19-patterns"
