@@ -1,18 +1,23 @@
 # Security
 
-Guardrails:
+## Guardrails
 
-- block sensitive file access
-- block dangerous shell commands
-- redact obvious secrets in memory
+- `guard file-access` blocks sensitive path access
+- `guard bash` blocks dangerous bash command tokens
+- both return explicit deny reason payloads for hook usage
 
-## Scanner signals and recommendations
+## Sensitive data handling
 
-When `haus scan` writes non-empty `securityRisks` on `context-map.json`, `haus recommend` adds a **Scan reported security signals** line to `recommendation.json` warnings and applies a **flat score penalty** to every catalog candidate (until finer per-risk rules exist). Treat these recommendations as lower confidence until risks are addressed.
+- scanner excludes sensitive paths from scan set
+- memory text is redacted before write/inject
+- generated security rule file (`./.claude/rules/security.md`) reinforces policy
 
-Run:
+## Hook contract safety
 
-```bash
-haus guard file-access --from-hook
-haus guard bash --from-hook
-```
+- canonical hook config comes from `plugin/hooks/hooks.json`
+- `apply --write` writes `./.claude/settings.json` from canonical data
+- `doctor --hooks` detects drift against canonical hook contract
+
+## Unsupported stack safety
+
+Recommender blocks known unsupported categories (for example Python, Go, Rust, Java/Spring, mobile app stacks, DeFi/trading patterns) via policy filters in scoring flow.
