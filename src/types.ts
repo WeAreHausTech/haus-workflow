@@ -27,8 +27,18 @@ export type CatalogItem = {
   source: string;
   version: string;
   path: string;
+  title?: string;
   tags: string[];
   repoRoles: string[];
+  installMode?: "copy-selected" | "plugin-only";
+  purpose?: string;
+  whenToUse?: string;
+  whenNotToUse?: string;
+  references?: string[];
+  safetyNotes?: string[];
+  sourceInfluences?: Array<{ source: string; idea: string }>;
+  intents?: string[];
+  tokenBudget?: number;
   tokenEstimate: number;
   /** When true, recommender applies a baseline score so the item is selected unless policy blocks it. */
   default?: boolean;

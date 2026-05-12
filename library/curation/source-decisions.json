@@ -1,0 +1,39 @@
+{
+  "decisions": [
+    {
+      "source": "ecc",
+      "ideasAccepted": [],
+      "ideasRejected": []
+    },
+    {
+      "source": "superpowers",
+      "ideasAccepted": [],
+      "ideasRejected": []
+    },
+    {
+      "source": "anthropic-skills",
+      "ideasAccepted": [],
+      "ideasRejected": []
+    },
+    {
+      "source": "jeffallan-skills",
+      "ideasAccepted": [],
+      "ideasRejected": []
+    },
+    {
+      "source": "skills-sh",
+      "ideasAccepted": [],
+      "ideasRejected": []
+    },
+    {
+      "source": "prpm",
+      "ideasAccepted": [],
+      "ideasRejected": []
+    },
+    {
+      "source": "skillkit",
+      "ideasAccepted": [],
+      "ideasRejected": []
+    }
+  ]
+}

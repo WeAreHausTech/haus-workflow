@@ -5,6 +5,16 @@ description: Set up Haus AI workflow in the current project. Use when the user w
 
 # Haus Setup Project
 
+## Use when
+
+- user wants Haus workflow initialized in repo
+- user wants guided or fast setup for Claude tooling
+
+## Do not use when
+
+- setup already applied and user asks only for coding task
+- repo is not intended for Haus workflow installation
+
 Start by asking:
 
 "How do you want to set this project up?
@@ -32,3 +42,7 @@ Only after approval:
 haus apply --write
 haus doctor
 ```
+
+## References
+
+- `references/setup-modes.md`

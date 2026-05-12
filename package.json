@@ -21,10 +21,11 @@
     "test": "node --test tests/**/*.test.js",
     "catalog:audit": "tsx scripts/verify-no-unsupported-tech.ts",
     "sources:audit": "tsx scripts/audit-sources.ts",
+    "sources:decisions": "tsx scripts/validate-source-decisions.ts",
     "pack:local": "yarn pack",
     "publish:dry": "yarn npm publish --dry-run",
     "publish:private": "yarn npm publish --access restricted",
-    "prepack": "yarn build && yarn catalog:audit"
+    "prepack": "yarn build && yarn catalog:audit && yarn sources:audit && yarn sources:decisions"
   },
   "dependencies": {
     "commander": "^13.0.0",

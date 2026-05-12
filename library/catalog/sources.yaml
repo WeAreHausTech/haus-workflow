@@ -57,14 +57,27 @@ sources:
     containsStacks:
       - discovery-index
     unsafeHookCommands: []
-  - id: agenstskills
-    url: https://www.agenstskills.com/
+  - id: jeffallan-skills
+    url: https://github.com/jeffallan
     policy: candidate-only
     status: candidate
     pinnedVersion: "2026-05-01"
-    pinnedHash: "sha256-candidate-agenstskills"
+    pinnedHash: "sha256-candidate-jeffallan"
     license: unknown
-    notes: candidate source only
+    notes: organization and naming ideas only
     containsStacks:
+      - workflow
       - discovery-index
+    unsafeHookCommands: []
+  - id: skillkit
+    url: https://skillkit.dev/
+    policy: candidate-only
+    status: candidate
+    pinnedVersion: "2026-05-01"
+    pinnedHash: "sha256-candidate-skillkit"
+    license: unknown
+    notes: packaging and validation inspiration only
+    containsStacks:
+      - workflow
+      - validation
     unsafeHookCommands: []

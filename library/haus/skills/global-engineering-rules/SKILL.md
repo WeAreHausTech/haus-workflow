@@ -1,11 +1,20 @@
 ---
 name: global-engineering-rules
-description: Haus global-engineering-rules. Use only when selected by haus context scanning.
+description: Haus global engineering rules. Use only when selected by haus context scanning.
 ---
 
-# global-engineering-rules
+# Haus Global Engineering Rules
 
-Follow Haus standards:
+## Use when
+
+- selected by recommender as baseline guardrail
+- task needs deterministic quality and security boundaries
+
+## Do not use when
+
+- task explicitly targets unsupported stack/workflow
+
+## Rules
 
 - Use the detected project conventions.
 - Keep changes small and production-oriented.
