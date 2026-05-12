@@ -1,7 +1,7 @@
 import path from "node:path";
 import fs from "fs-extra";
 import { readJson, writeText } from "../utils/fs.js";
-import { claudePath, hausPath, packageRoot } from "../utils/paths.js";
+import { claudePath, displayPath, hausPath, packageRoot } from "../utils/paths.js";
 import type { Recommendation } from "../types.js";
 import { loadClaudeHooksSettings } from "./load-hooks.js";
 import { assertPostApplySettingsMatchCanonical } from "./verify-hooks-contract.js";
@@ -114,9 +114,10 @@ haus context --task "<task>"
 async function writeManagedText(root: string, filePath: string, nextText: string): Promise<void> {
   const prev = (await fs.pathExists(filePath)) ? await fs.readFile(filePath, "utf8") : "";
   if (hasTextChanged(prev, nextText) && prev.length > 0) {
-    const diffText = createUnifiedDiff(path.relative(root, filePath), prev, nextText);
+    const printable = displayPath(root, filePath);
+    const diffText = createUnifiedDiff(printable, prev, nextText);
     const summary = summarizeDiff(diffText);
-    console.log(`Overwriting ${path.relative(root, filePath)} (diff +${summary.additions} -${summary.deletions})`);
+    console.log(`Overwriting ${printable} (diff +${summary.additions} -${summary.deletions})`);
   }
   await writeText(filePath, nextText);
 }

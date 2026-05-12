@@ -1,7 +1,7 @@
 import fs from "fs-extra";
 import path from "node:path";
 import os from "node:os";
-import { packageRoot } from "../utils/paths.js";
+import { displayPath, packageRoot } from "../utils/paths.js";
 
 export async function runPlugin(action: "install" | "validate", _options: Record<string, unknown>): Promise<void> {
   if (action === "install") {
@@ -14,7 +14,7 @@ export async function runPlugin(action: "install" | "validate", _options: Record
     }
     await fs.ensureDir(path.dirname(destination));
     await fs.copy(source, destination, { overwrite: true, errorOnExist: false });
-    console.log(`Plugin installed at ${destination}`);
+    console.log(`Plugin installed at ${displayPath(process.cwd(), destination)}`);
     return;
   }
   const source = await resolvePluginSourcePath();
