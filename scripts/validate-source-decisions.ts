@@ -2,26 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import YAML from "yaml";
 import { z } from "zod";
-
-const DECISIONS_FILE = "library/curation/source-decisions.json";
-const SOURCES_FILE = "library/catalog/sources.yaml";
-
-const unsupportedWords = [
-  "python",
-  "django",
-  "go",
-  "rust",
-  "java",
-  "spring",
-  "kotlin",
-  "swift",
-  "android",
-  "flutter",
-  "dart",
-  "c++",
-  "trading",
-  "healthcare"
-];
+import { containsUnsupportedStackMention } from "../src/curation/unsupported-stack-mention.js";
 
 const acceptedIdeaSchema = z.object({
   idea: z.string().min(1),
@@ -52,24 +33,38 @@ type SourcesYaml = {
   sources?: Array<{ id: string }>;
 };
 
-function hasUnsupportedWord(input: string): boolean {
-  const lowered = input.toLowerCase();
-  return unsupportedWords.some((word) => lowered.includes(word));
+function resolveDecisionsPath(): string {
+  const override = process.env.HAUS_SOURCE_DECISIONS_PATH;
+  if (override && override.trim().length > 0) {
+    return path.resolve(override);
+  }
+  return path.resolve(process.cwd(), "library/curation/source-decisions.json");
+}
+
+function resolveSourcesPath(): string {
+  const override = process.env.HAUS_SOURCES_PATH;
+  if (override && override.trim().length > 0) {
+    return path.resolve(override);
+  }
+  return path.resolve(process.cwd(), "library/catalog/sources.yaml");
 }
 
 function main(): void {
   const issues: string[] = [];
 
-  const decisionsText = fs.readFileSync(DECISIONS_FILE, "utf8");
+  const decisionsPath = resolveDecisionsPath();
+  const sourcesPath = resolveSourcesPath();
+
+  const decisionsText = fs.readFileSync(decisionsPath, "utf8");
   const parsedJson = JSON.parse(decisionsText);
   const parsed = sourceDecisionsSchema.safeParse(parsedJson);
   if (!parsed.success) {
     for (const issue of parsed.error.issues) {
-      issues.push(`${DECISIONS_FILE}: ${issue.path.join(".")} ${issue.message}`);
+      issues.push(`${decisionsPath}: ${issue.path.join(".")} ${issue.message}`);
     }
   }
 
-  const sourcesText = fs.readFileSync(SOURCES_FILE, "utf8");
+  const sourcesText = fs.readFileSync(sourcesPath, "utf8");
   const sourcesParsed = YAML.parse(sourcesText) as SourcesYaml;
   const sourceIds = new Set((sourcesParsed.sources ?? []).map((s) => s.id));
 
@@ -82,11 +77,11 @@ function main(): void {
       seen.add(decision.source);
 
       if (!sourceIds.has(decision.source)) {
-        issues.push(`${decision.source}: source not present in ${SOURCES_FILE}`);
+        issues.push(`${decision.source}: source not present in ${sourcesPath}`);
       }
 
       for (const idea of decision.ideasAccepted) {
-        if (hasUnsupportedWord(`${idea.idea} ${idea.target} ${idea.reason}`)) {
+        if (containsUnsupportedStackMention(`${idea.idea} ${idea.target} ${idea.reason}`)) {
           issues.push(`${decision.source}: accepted idea includes unsupported stack signal -> ${idea.idea}`);
         }
       }
