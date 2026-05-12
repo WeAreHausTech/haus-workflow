@@ -1,247 +1,174 @@
-# Haus AI — User guide (no coding required)
+# Haus AI User Guide
 
-This guide helps you try **Haus AI** on a real project folder using only **copy-and-paste** steps in a terminal. You do not need to read code or edit program files.
+This guide shows how to use `@haus/ai` in a real project, even if you are not a developer.
 
----
+## What Haus AI does
 
-## What Haus does (in plain language)
+Haus AI scans your project, recommends context files/rules, then writes controlled files so Claude works with safer, stack-aware guidance.
 
-Haus looks at your project the way a technical teammate would: it notices languages, frameworks, and tools, then suggests a **small set of AI helpers** (skills, rules, and safety checks) that fit **your** stack. When you approve, it writes a few standard folders so **Claude Code** (or similar tools) can follow Haus rules and stay safer around secrets and risky commands.
+Main output folders:
 
-After a successful run you will usually see:
+- `./.claude` (Claude settings/rules/commands)
+- `./.haus-ai` (scan/recommendation/lock/memory metadata)
 
-- **`.claude/`** — settings and helper files for Claude in this project
-- **`.haus-ai/`** — Haus metadata (what was detected, what was chosen, lock information)
+## Before you start
 
-You can delete those folders later if you want to remove Haus from the project (see [Undo Haus](#undo-haus-if-you-want-to-remove-it)).
+You need:
 
----
+- a project folder on your machine
+- Node.js 22+ (`node --version`)
+- terminal access
 
-## What you need on your computer
-
-1. **A project folder** on your machine (your app, website, or service — the folder you open when you work on it).
-
-2. **Node.js** (version **22 or newer**).
-
-   - Check: open Terminal (Mac) or Command Prompt / PowerShell (Windows), paste the line below, press Enter, and look at the number at the start (it should be `v22`, `v23`, or higher).
-
-   ```bash
-   node --version
-   ```
-
-   - If you see an error or a number lower than 22, install Node from [https://nodejs.org](https://nodejs.org) (choose the current LTS if it is 22+, otherwise the “Current” installer). Then open a **new** terminal window and run `node --version` again.
-
----
-
-## Open a terminal “inside” your project
-
-Haus always runs **from the project folder** you want to set up.
-
-### Mac
-
-1. Open **Terminal** (Spotlight: press Command + Space, type `Terminal`, press Enter).
-2. Type `cd ` (with a space after `cd`).
-3. In Finder, drag your **project folder** onto the Terminal window. The path appears after `cd `.
-4. Press **Enter**. You are now “in” that project for the next commands.
-
-### Windows
-
-1. Open **PowerShell** or **Command Prompt**.
-2. Type `cd ` then paste the full path to your project folder (for example `cd C:\Users\You\Documents\my-app`).
-3. Press **Enter**.
-
----
-
-## Install Haus on your machine
-
-Pick **one** path. If someone from Haus already gave you a **`.tgz` file**, use **Option A**. If you are testing from the **Haus AI git folder** on your disk, use **Option B** (or ask a developer to produce a `.tgz` for Option A).
-
-### Option A — Install from a package file (simplest for non-developers)
-
-Your teammate runs `yarn pack` (or `npm pack`) in the Haus AI repo and sends you the **`.tgz` file** that command prints (the exact filename appears in their terminal; it usually contains the version number, for example `haus-ai-0.1.0.tgz`).
-
-1. Save that file somewhere easy to find (for example your **Downloads** folder).
-
-2. In the terminal, go to the folder that contains the file. Example on Mac if the file is in Downloads:
-
-   ```bash
-   cd ~/Downloads
-   ```
-
-3. Install Haus globally (replace the filename with the real name of your `.tgz` file):
-
-   ```bash
-   npm install -g ./YOUR-FILE-NAME.tgz
-   ```
-
-4. Confirm the tool is there:
-
-   ```bash
-   haus --help
-   ```
-
-   You should see a list of commands. If you see “command not found”, close the terminal, open a new one, and try `haus --help` again.
-
-### Option B — Link from a cloned Haus AI repository (for internal testers)
-
-Someone on your team clones the Haus AI repo, installs dependencies, and builds it. Then they tell you the **full path** to that folder (for example `/Users/you/Documents/GitHub/haus-ai-workflow`).
-
-1. In a terminal, go to that Haus AI folder:
-
-   ```bash
-   cd /path/to/haus-ai-workflow
-   ```
-
-   (Replace with the real path.)
-
-2. Install and build (they may do this once for you):
-
-   ```bash
-   corepack enable
-   yarn install
-   yarn build
-   ```
-
-3. Register the tool on your machine:
-
-   ```bash
-   npm link
-   ```
-
-4. Open a **new** terminal, go to **your project folder** (see previous section), then link Haus into this project:
-
-   ```bash
-   cd /path/to/your-project
-   npm link @haus/ai
-   ```
-
-5. Check:
-
-   ```bash
-   haus --help
-   ```
-
-If `haus` is still not found, use the full path to the built file (your developer can give you this line). Example:
+Check Node:
 
 ```bash
-node /path/to/haus-ai-workflow/dist/cli.js --help
+node --version
 ```
 
-For the rest of this guide, wherever you see `haus`, you can paste that `node …/dist/cli.js` line instead.
+If version is below 22, install/update Node first.
 
----
+## Install Haus AI
 
-## Run Haus on your project (recommended path)
+Global install:
 
-These commands must be run **from your project folder** (not from the Haus AI repo folder).
+```bash
+npm install -g @haus/ai
+haus --help
+```
 
-### Step 1 — Guided setup (questions + scan)
+If global install is not allowed, use repo-local run:
 
-Copy and paste:
+```bash
+yarn install
+yarn build
+node dist/cli.js --help
+```
+
+## Use Haus in a project
+
+Move terminal to project root (folder that contains your app code), then run:
 
 ```bash
 haus setup-project
 ```
 
-- If it asks how you want to set up, choose **guided** if you want a few plain-language questions, or **fast** if you only want a quick scan.
-- Answer the questions in your own words (you do not need to name frameworks).
-- At the end it may ask whether to **write files**. If you are not ready, say **no**; you can run the write step later (Step 3).
+Setup modes:
 
-### Step 2 — (Optional) See the plan without writing files
+- guided: asks simple onboarding questions
+- fast: minimal prompts, default flow
 
-If you skipped writing during setup, you can still preview:
+## Typical daily workflow
+
+### 1) Scan project
 
 ```bash
 haus scan --json
+```
+
+Writes project detection outputs to `./.haus-ai/*`.
+
+### 2) Generate recommendations
+
+```bash
 haus recommend --json
-haus explain-context --json
-haus context --task "your task here" --json
+```
+
+Creates `./.haus-ai/recommendation.json` with selected and skipped items, confidence, and reasons.
+
+### 3) Preview generated changes
+
+```bash
 haus apply --dry-run
 ```
 
-`--json` means “machine-readable output”; you can ignore the details or share the output with a teammate.
+Shows planned files without writing.
 
-### Step 3 — Write the Haus files (when you are ready)
+### 4) Apply generated files
 
 ```bash
 haus apply --write
 ```
 
-This creates or updates `.claude/` and `.haus-ai/` in **this** project.
+Writes generated files and reports overwrite summaries with concise diff counts.
 
-To remove those folders later (for example on a throwaway copy), run `haus undo` in the same project folder, or use `haus undo --yes` to skip the confirmation prompt.
-
-### Step 4 — Quick health check
+### 5) Verify setup health
 
 ```bash
 haus doctor
-```
-
-You want to see a line like **HOOKS OK** when settings exist. For a check that only looks at hooks:
-
-```bash
 haus doctor --hooks
 ```
 
-If something failed, see [If something goes wrong](#if-something-goes-wrong).
+`--hooks` checks that project hook settings still match shipped plugin hook contract.
 
----
+## Update flow
 
-## Using Claude Code after Haus is installed
+Check update state:
 
-If your team uses **Claude Code**:
+```bash
+haus update --check
+```
 
-1. Install the Haus plugin once on your machine (a teammate may do this for you):
+Apply lock refresh:
 
-   ```bash
-   haus plugin install
-   ```
+```bash
+haus update
+```
 
-2. Open your project in Claude Code as usual. The new `.claude` settings tell Claude to use Haus hooks (context, memory, guards) when your team has enabled them.
+Update behavior:
 
-You do not need to edit hook JSON yourself; Haus keeps it aligned with the shipped **plugin hook file**.
+- preserves local `.claude` overrides
+- backs up lockfile under `./.haus-ai/backups`
+- prints unified lockfile diff summary
 
----
+## Memory commands
 
-## If something goes wrong
+```bash
+haus memory status
+haus memory add "Use explicit transaction boundaries in checkout service"
+haus memory inject --task "review checkout flow"
+haus memory promote
+```
 
-| What you see                                                            | What it usually means                             | What to try                                                                                                                               |
-| ----------------------------------------------------------------------- | ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `command not found: haus`                                               | The tool is not on your PATH                      | Re-open the terminal, or repeat install / link, or use the `node …/dist/cli.js` form your developer gave you                              |
-| Error about **plugin/hooks/hooks.json** missing                         | The Haus package on disk is incomplete            | Reinstall from a fresh `.tgz` built with `yarn pack`; only use `HAUS_HOOKS_FALLBACK=1` if a developer tells you to (temporary dev escape) |
-| `doctor --hooks` fails after you edited `.claude/settings.json` by hand | The file no longer matches the official hook list | Run `haus apply --write` again to regenerate from the package, or restore from backup                                                     |
-| You are not in the right folder                                         | Haus scanned the wrong project                    | `cd` to your real project root (where `package.json` or your main code lives) and run the commands again                                  |
+Memory is local-only in `./.haus-ai/memory`.
 
-For deeper troubleshooting, share the **exact error text** and which **step** you were on with your team.
+## Explain/context commands
 
----
+Use when you need to understand why rules were selected:
 
-## Undo Haus (if you want to remove it)
+```bash
+haus explain-context --json
+haus explain-recommendation --json
+haus context --task "build shipping plugin" --json
+```
 
-1. Make sure you do not need anything inside `.claude` or `.haus-ai` (ask your team if unsure).
-2. Delete the folders **`.claude`** and **`.haus-ai`** from your project (Finder / File Explorer is fine), or run `haus undo` in a terminal opened in that project (`haus undo --yes` skips the prompt).
-3. Optionally uninstall the global tool:
+## Claude slash-command usage
 
-   ```bash
-   npm uninstall -g @haus/ai
-   ```
+After `haus apply --write`, command docs are generated in:
 
----
+- `./.claude/commands/haus-doctor.md`
+- `./.claude/commands/haus-review.md`
+- `./.claude/commands/haus-explain-context.md`
 
-## Short glossary
+Some environments expose these as slash commands. If not, run the CLI commands directly.
 
-| Term               | Meaning                                                                              |
-| ------------------ | ------------------------------------------------------------------------------------ |
-| **Terminal**       | A text window where you run commands by typing (or pasting) lines and pressing Enter |
-| **`cd`**           | “Change directory” — go to a folder                                                  |
-| **Project folder** | The top-level folder of the product you are working on                               |
-| **`haus`**         | The Haus command-line program you installed                                          |
-| **`.tgz`**         | A packed software file your team can send you for easy install                       |
+## Plugin commands
 
----
+```bash
+haus plugin install
+haus plugin validate
+```
 
-## Where to read next (optional)
+## If something fails
 
-- Technical setup details: [Setup guide](setup-guide.md)
-- Command list: [CLI reference](cli.md)
-- Why hooks work the way they do: [Plugin](plugin.md) and [Architecture](architecture.md)
+- `haus: command not found` -> reinstall globally or use local `node dist/cli.js ...`
+- Node engine error -> switch to Node 22+
+- hook mismatch in doctor -> run `haus apply --write` again
+- wrong project scanned -> `cd` into correct project root, rerun
+
+## Remove generated setup
+
+```bash
+haus undo --yes
+```
+
+Removes `./.claude` and `./.haus-ai` in current project.

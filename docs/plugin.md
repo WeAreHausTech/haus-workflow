@@ -1,21 +1,26 @@
-# Plugin
+# Plugin, Skills, and Hooks
 
-Plugin ships skills, agents, hooks.
+## Plugin entrypoint
 
-Install locally:
+File: `plugin/.claude-plugin/plugin.json`
 
-```bash
-haus plugin install
-haus plugin validate
-```
+- declares plugin name/version
+- declares skill `SKILL.md` file list
 
-## Hook contract (SSOT)
+## Hook source of truth
 
-[`plugin/hooks/hooks.json`](../plugin/hooks/hooks.json) is the **single source of truth** for which shell hooks run in Claude Code.
+File: `plugin/hooks/hooks.json`
 
-- `haus apply --write` loads that file from the installed `@haus/ai` package (strict: **throws** if missing or invalid) and writes the same object into `.claude/settings.json`, then **self-checks** the file on disk against the canonical JSON.
-- `haus recommend` builds `.haus-ai/recommended-hooks.json` from the same source. By default it is also strict. For **local dev only**, set `HAUS_HOOKS_FALLBACK=1` to allow embedded defaults + warnings when the plugin file is absent (never use this for installs you ship).
+- loaded by `src/claude/load-hooks.ts`
+- validated with `zod`
+- written to project `./.claude/settings.json` during apply
 
-`haus doctor` and `haus doctor --hooks` compare the project’s `.claude/settings.json` to the plugin contract; `--hooks` fails if settings are missing or drifted.
+## Skills
 
-Hooks inject context, memory, and guardrails.
+Plugin skills live under `plugin/skills/*/SKILL.md`.
+These are authored guidance artifacts, not runtime code modules.
+
+## Subagents
+
+No dedicated subagent runtime framework is implemented in this repo.
+Any subagent behavior comes from external host tooling, not from a local orchestration engine.
