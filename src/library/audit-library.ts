@@ -4,7 +4,7 @@ import fg from "fast-glob";
 import { loadCatalog } from "../catalog/load-catalog.js";
 import type { CatalogItem } from "../types.js";
 
-const PLACEHOLDER_RE = /\b(PLACEHOLDER|TBD|FIXME)\b/i;
+const PLACEHOLDER_OR_TODO_RE = /\b(TODO|FIXME|PLACEHOLDER|TBD)\b/i;
 
 /** `npx` is allowed only when the next token is `tsx`. */
 const DISALLOWED_NPX_RE = /\bnpx\s+(?!tsx\b)\S+/i;
@@ -19,8 +19,62 @@ const RISKY_INVOCATION_RES: RegExp[] = [
 
 const BANNED_AGENT_SUBSTRINGS = ["autonomous", "swarm", "delegate", "orchestrat", "marketplace"];
 
+/** Markdown shipped as skills, agents, or catalog (not src/tests/scripts). */
+const SHIPPED_MD_GLOBS = ["library/haus/**/*.md", "plugin/skills/**/*.md", "plugin/agents/**/*.md"] as const;
+
+const MANIFEST_REL = "library/catalog/manifest.json";
+
 function isLibraryPath(p: string): boolean {
   return p.startsWith("library/");
+}
+
+function isCatalogInstallable(item: CatalogItem): boolean {
+  if (item.type !== "skill" && item.type !== "agent") return false;
+  return item.installMode !== "plugin-only";
+}
+
+function referenceBaseDir(root: string, item: CatalogItem): string {
+  const abs = path.resolve(root, item.path);
+  return item.type === "agent" ? path.dirname(abs) : abs;
+}
+
+function auditCatalogManifest(root: string, items: CatalogItem[]): string[] {
+  const failures: string[] = [];
+  const installablePathToIds = new Map<string, string[]>();
+
+  for (const item of items) {
+    const normPath = item.path.replace(/\\/g, "/");
+
+    if (isCatalogInstallable(item)) {
+      if (item.source !== "haus") {
+        failures.push(`${item.id}: installable catalog item must have source "haus" (got "${item.source}")`);
+      }
+      const list = installablePathToIds.get(normPath) ?? [];
+      list.push(item.id);
+      installablePathToIds.set(normPath, list);
+    }
+
+    const refs = item.references;
+    if (!refs || refs.length === 0) continue;
+
+    const base = referenceBaseDir(root, item);
+    for (const ref of refs) {
+      const refAbs = path.resolve(base, ref);
+      if (!fs.existsSync(refAbs)) {
+        failures.push(
+          `${item.id}: catalog references[] entry does not resolve: ${ref} (expected ${path.relative(root, refAbs)})`
+        );
+      }
+    }
+  }
+
+  for (const [p, ids] of installablePathToIds) {
+    if (ids.length > 1) {
+      failures.push(`duplicate installable catalog path "${p}" for ids: ${ids.join(", ")}`);
+    }
+  }
+
+  return failures;
 }
 
 function auditCatalogLibraryItems(root: string, items: CatalogItem[]): string[] {
@@ -72,22 +126,66 @@ function auditCatalogLibraryItems(root: string, items: CatalogItem[]): string[] 
   return failures;
 }
 
-function auditHausMarkdownContent(root: string): string[] {
+function auditPluginSkills(root: string): string[] {
   const failures: string[] = [];
-  const files = fg.sync(["library/haus/**/*.md"], { cwd: root, absolute: true, onlyFiles: true });
+  const skillMds = fg.sync(["plugin/skills/**/SKILL.md"], { cwd: root, absolute: true, onlyFiles: true });
+  for (const skillMd of skillMds) {
+    const rel = path.relative(root, skillMd);
+    const text = fs.readFileSync(skillMd, "utf8");
+    if (!text.includes("## Use when")) {
+      failures.push(`${rel}: missing ## Use when`);
+    }
+    if (!text.includes("## Do not use when")) {
+      failures.push(`${rel}: missing ## Do not use when`);
+    }
+  }
+  return failures;
+}
 
-  for (const abs of files) {
+function auditPluginAgents(root: string): string[] {
+  const failures: string[] = [];
+  const agents = fg.sync(["plugin/agents/*.md"], { cwd: root, absolute: true, onlyFiles: true });
+  for (const abs of agents) {
+    const rel = path.relative(root, abs);
+    const text = fs.readFileSync(abs, "utf8");
+    if (!text.startsWith("---")) {
+      failures.push(`${rel}: missing YAML frontmatter`);
+    }
+    if (!text.includes("## Use when")) {
+      failures.push(`${rel}: missing ## Use when`);
+    }
+    if (!text.includes("## Do not use when")) {
+      failures.push(`${rel}: missing ## Do not use when`);
+    }
+    if (!text.includes("## Verification")) {
+      failures.push(`${rel}: missing ## Verification`);
+    }
+    const lower = text.toLowerCase();
+    for (const ban of BANNED_AGENT_SUBSTRINGS) {
+      if (lower.includes(ban)) {
+        failures.push(`${rel}: contains disallowed phrase "${ban}"`);
+      }
+    }
+  }
+  return failures;
+}
+
+function auditShippedMarkdownAndManifest(root: string): string[] {
+  const failures: string[] = [];
+  const mdFiles = fg.sync([...SHIPPED_MD_GLOBS], { cwd: root, absolute: true, onlyFiles: true });
+
+  for (const abs of mdFiles) {
     const rel = path.relative(root, abs);
     const text = fs.readFileSync(abs, "utf8");
     const lines = text.split(/\r?\n/);
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i] ?? "";
-      if (PLACEHOLDER_RE.test(line)) {
-        failures.push(`${rel}:${i + 1}: placeholder token in shipped library line`);
+      if (PLACEHOLDER_OR_TODO_RE.test(line)) {
+        failures.push(`${rel}:${i + 1}: TODO or placeholder token in shipped content`);
       }
       if (DISALLOWED_NPX_RE.test(line)) {
-        failures.push(`${rel}:${i + 1}: disallowed npx (only npx tsx is allowed in library docs)`);
+        failures.push(`${rel}:${i + 1}: disallowed npx (only npx tsx is allowed)`);
       }
       for (const re of RISKY_INVOCATION_RES) {
         if (re.test(line)) {
@@ -97,16 +195,32 @@ function auditHausMarkdownContent(root: string): string[] {
     }
   }
 
+  const manifestAbs = path.resolve(root, MANIFEST_REL);
+  if (fs.existsSync(manifestAbs)) {
+    const text = fs.readFileSync(manifestAbs, "utf8");
+    const lines = text.split(/\r?\n/);
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i] ?? "";
+      if (PLACEHOLDER_OR_TODO_RE.test(line)) {
+        failures.push(`${MANIFEST_REL}:${i + 1}: TODO or placeholder token in catalog JSON`);
+      }
+    }
+  }
+
   return failures;
 }
 
 /**
- * Structural and policy checks for Haus-owned files under `library/`
- * (catalog-backed skills and agents, plus markdown under library/haus).
+ * Structural and policy checks for catalog-backed `library/` items, `plugin/skills`,
+ * `plugin/agents`, and shipped markdown under library/haus plus manifest.json.
  */
 export async function auditLibrary(root: string): Promise<string[]> {
   const items = await loadCatalog(root);
-  const a = auditCatalogLibraryItems(root, items);
-  const b = auditHausMarkdownContent(root);
-  return [...a, ...b];
+  return [
+    ...auditCatalogManifest(root, items),
+    ...auditCatalogLibraryItems(root, items),
+    ...auditPluginSkills(root),
+    ...auditPluginAgents(root),
+    ...auditShippedMarkdownAndManifest(root)
+  ];
 }

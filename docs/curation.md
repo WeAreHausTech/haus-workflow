@@ -19,7 +19,7 @@ Public repos, indexes, and packaging sites are **inspiration** or **reference** 
 4. Rewrite as Haus-owned guidance.
 5. Record decision metadata in `library/curation/source-decisions.json`.
 6. Run `yarn sources:decisions` (validates schema, source list, and decision rows).
-7. Run `yarn library:audit` (catalog-backed `library/` layout and Haus markdown policy).
+7. Run `yarn library:audit` (manifest integrity, catalog `library/` and `plugin/` skill and agent shape, shipped markdown policy).
 8. Validate with catalog, recommender, and apply tests.
 
 ## Gate checks
@@ -85,7 +85,7 @@ ECC is a **candidate inspiration** source, not a product dependency. Haus may bo
 
 Shipped in PR6 so far:
 
-- **`yarn library:audit`** — catalog-backed `library/` skills and agents plus `library/haus/**/*.md` content policy (placeholders, risky `npx` / dlx / curl pipes).
+- **`yarn library:audit`** — manifest `references[]` resolution, installable path and `source` rules, catalog-backed `library/` skills and agents, `plugin/skills` and `plugin/agents` shape, and shipped markdown plus `manifest.json` for TODO or placeholder tokens and risky install patterns.
 - **Source decisions** — identifier-aware unsupported stack tokens in accepted rows (see `src/curation/unsupported-stack-mention.ts`).
 
 `yarn sources:decisions` accepts optional `HAUS_SOURCE_DECISIONS_PATH` and `HAUS_SOURCES_PATH` for tests and tooling.
