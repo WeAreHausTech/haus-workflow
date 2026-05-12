@@ -24,7 +24,13 @@ export const ALL_INTENTS: readonly TaskIntent[] = [
 ];
 
 /**
- * Deterministic keyword -> intent table. Substring matching (lowercased).
+ * Deterministic keyword -> intent table. Matching is word-aware: the task
+ * string is lowercased and every non-alphanumeric character is normalized to a
+ * single space, then keywords are matched as space-padded substrings. This
+ * means `unit-test`, `e2e-test`, `docs:`, `tanstack.query`, etc. all match
+ * the same as `unit test`, `docs`, `tanstack query` without leaking into
+ * different intents.
+ *
  * A task may classify to multiple intents.
  */
 const TASK_INTENT_KEYWORDS: Record<TaskIntent, string[]> = {
@@ -164,20 +170,24 @@ const TASK_INTENT_KEYWORDS: Record<TaskIntent, string[]> = {
     "workspace",
     "shared",
     "monorepo",
-    "nx ",
+    "nx",
     "turbo",
-    "pnpm-workspace",
+    "pnpm workspace",
     "yarn workspace"
   ]
 };
 
+function normalizeTaskForMatching(task: string): string {
+  return ` ${task.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim()} `;
+}
+
 export function classifyTaskIntents(task: string): Set<TaskIntent> {
-  const t = ` ${task.toLowerCase()} `;
+  const t = normalizeTaskForMatching(task);
   const intents = new Set<TaskIntent>();
   for (const intent of ALL_INTENTS) {
     const keywords = TASK_INTENT_KEYWORDS[intent];
     for (const kw of keywords) {
-      const needle = kw.includes(" ") ? kw : ` ${kw} `;
+      const needle = ` ${kw} `;
       if (t.includes(needle)) {
         intents.add(intent);
         break;
