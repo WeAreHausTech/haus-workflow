@@ -16,6 +16,22 @@ export function claudePath(root: string, ...parts: string[]): string {
   return path.join(root, ".claude", ...parts);
 }
 
+export function displayPath(root: string, targetPath: string): string {
+  const rel = path.relative(root, targetPath).replace(/\\/g, "/");
+  if (rel && !rel.startsWith("../") && rel !== "..") {
+    return rel.startsWith("./") ? rel : `./${rel}`;
+  }
+  const home = process.env.HOME;
+  const normalized = targetPath.replace(/\\/g, "/");
+  if (home) {
+    const homeRel = path.relative(home, targetPath).replace(/\\/g, "/");
+    if (homeRel && !homeRel.startsWith("../") && homeRel !== "..") {
+      return `~/${homeRel}`;
+    }
+  }
+  return normalized;
+}
+
 /** Resolves the `@haus/ai` package root (works when bundled as `dist/cli.js` or as `dist/utils/*.js`). */
 export function packageRoot(): string {
   let dir = path.dirname(fileURLToPath(import.meta.url));

@@ -69,5 +69,5 @@ test("apply reports diff before overwriting generated files", () => {
   writeFileSync(manualPath, "manual override");
   const second = execaSync("node", [path.resolve("dist/cli.js"), "apply", "--write"], { cwd: temp, reject: false });
   assert.equal(second.exitCode, 0);
-  assert.equal(second.stdout.includes("Overwriting .claude/rules/security.md"), true);
+  assert.equal(second.stdout.includes("Overwriting ./.claude/rules/security.md"), true);
 });
