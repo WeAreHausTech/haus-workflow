@@ -27,7 +27,7 @@ export async function runSources(action: "sync" | "report" | "audit", options: {
     if (source.url.includes("github.com")) items.push(await syncGithubSource(source, checkOnly));
     else if (source.url.includes("skills.sh")) items.push(await syncSkillsShSource(source, checkOnly));
     else if (source.url.includes("prpm.dev")) items.push(await syncPrpmSource(source, checkOnly));
-    else if (source.url.includes("agenstskills.com")) items.push(await syncSkillkitSource(source, checkOnly));
+    else if (source.url.includes("skillkit.dev")) items.push(await syncSkillkitSource(source, checkOnly));
     else {
       items.push({
         id: source.id,

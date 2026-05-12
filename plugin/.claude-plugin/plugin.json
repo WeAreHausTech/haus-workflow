@@ -6,6 +6,7 @@
     "plugin/skills/haus-workflow/SKILL.md",
     "plugin/skills/haus-context-router/SKILL.md",
     "plugin/skills/haus-skill-author/SKILL.md",
+    "plugin/skills/haus-global-engineering-rules/SKILL.md",
     "plugin/skills/haus-documentation-maintainer/SKILL.md"
   ]
 }

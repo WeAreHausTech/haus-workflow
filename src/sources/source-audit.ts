@@ -1,6 +1,6 @@
 import { loadSources } from "./load-sources.js";
 
-const ALLOWLIST = ["github.com", "skills.sh", "agenstskills.com", "prpm.dev", "claude.com", "ecc.tools", "medium.com"];
+const ALLOWLIST = ["github.com", "skills.sh", "skillkit.dev", "prpm.dev", "claude.com", "ecc.tools", "medium.com"];
 const UNSUPPORTED = [
   "python",
   "django",

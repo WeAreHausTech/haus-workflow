@@ -5,6 +5,7 @@ Catalog lives in `library/catalog/manifest.json`.
 - `allowed-stacks.json`: Haus-supported stack allowlist.
 - `haus-lock.schema.json`: lockfile schema.
 - `manifest.json`: curated Haus-owned skills and agents.
+- `../curation/source-decisions.json`: external idea accept/reject decisions.
 
 ## `.haus-ai/haus.lock.json` hashes
 
@@ -26,4 +27,5 @@ Implementation: [`src/update/hash-installed.ts`](../src/update/hash-installed.ts
 ```bash
 yarn catalog:audit
 yarn sources:audit
+yarn sources:decisions
 ```
