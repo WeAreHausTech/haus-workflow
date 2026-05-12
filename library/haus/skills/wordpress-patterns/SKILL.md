@@ -1,14 +1,39 @@
 ---
 name: wordpress-patterns
-description: Haus wordpress-patterns. Use only when selected by haus context scanning.
+description: WordPress core router. Use for theme/plugin behavior, hooks, REST endpoints, and template logic.
 ---
 
-# wordpress-patterns
+# WordPress Patterns
 
-Follow Haus standards:
+## Use when
 
-- Use the detected project conventions.
-- Keep changes small and production-oriented.
-- Add or update tests for behavior changes.
-- Never read secrets, private keys, dumps, production logs, uploads, or customer exports.
-- State exactly what validation was run.
+- task changes WordPress plugin/theme behavior via hooks, filters, templates, or REST handlers
+- task touches `wp-content/themes/*`, `wp-content/plugins/*`, or Bedrock app overrides
+
+## Do not use when
+
+- task is exclusively Bedrock environment/config bootstrap
+- task is Laravel/NestJS/.NET service logic not running in WP runtime
+
+## Inspect first
+
+- entry plugin/theme files and hook registrations (`add_action`, `add_filter`)
+- template files and block registration files
+- custom post type/taxonomy/ACF integration points when relevant
+
+## Avoid mistakes
+
+- hook priority conflicts that silently override behavior
+- direct DB writes bypassing WP APIs and sanitization
+- missing capability/nonce checks on admin actions
+
+## Router
+
+1. Load `references/scope.md` for runtime file map.
+2. Load `references/workflow.md` only when tracing request-hook-render flow.
+3. Keep changes hook-scoped and validate admin + frontend impact.
+
+## References
+
+- references/scope.md
+- references/workflow.md

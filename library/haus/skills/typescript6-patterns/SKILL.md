@@ -1,14 +1,39 @@
 ---
 name: typescript6-patterns
-description: Haus typescript6-patterns. Use only when selected by haus context scanning.
+description: TypeScript router. Use for type contracts, API boundaries, generics, and strictness-safe refactors.
 ---
 
-# typescript6-patterns
+# Typescript6 Patterns
 
-Follow Haus standards:
+## Use when
 
-- Use the detected project conventions.
-- Keep changes small and production-oriented.
-- Add or update tests for behavior changes.
-- Never read secrets, private keys, dumps, production logs, uploads, or customer exports.
-- State exactly what validation was run.
+- task changes public types, DTOs, shared interfaces, or utility generics
+- task touches compile-time contract safety across package boundaries
+
+## Do not use when
+
+- task is purely runtime configuration with no type contract impact
+- task is language-agnostic docs-only update
+
+## Inspect first
+
+- impacted `types.ts`, model/schema files, and exported interfaces
+- call sites consuming changed types across apps/packages
+- tsconfig/strictness settings if compiler behavior involved
+
+## Avoid mistakes
+
+- widening to `any` or unsafe casts to silence compiler
+- changing exported types without migrating downstream consumers
+- mixing runtime validation assumptions with static type checks
+
+## Router
+
+1. Load `references/scope.md` for contract-focused file map.
+2. Load `references/workflow.md` only for type-migration flow.
+3. Prefer narrow, explicit types and safe incremental migration.
+
+## References
+
+- references/scope.md
+- references/workflow.md

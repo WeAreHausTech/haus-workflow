@@ -1,26 +1,39 @@
 ---
 name: vendure-plugin-patterns
-description: Haus Vendure 3.x plugin development patterns. Use only when haus detects @vendure/core, @VendurePlugin, vendure config files, or @haus/vendure-* packages.
+description: Vendure 3 plugin router. Use for plugin modules, resolvers, services, entities, and migrations.
 ---
 
-# Haus Vendure Plugin Patterns
+# Vendure Plugin Patterns
 
-Use this skill for Vendure plugin implementation, debugging, review, and refactoring.
+## Use when
 
-## Rules
+- task changes plugin behavior in `packages/*`, `plugins/*`, or `src/plugins/*`
+- task touches `@VendurePlugin`, plugin resolvers, services, or plugin entities
 
-- Treat Vendure plugins as NestJS modules.
-- Keep plugin boundaries explicit.
-- Keep GraphQL schema extensions close to resolvers.
-- Keep database entities, services, resolvers, and migrations organized by feature.
-- Avoid client-specific behavior in shared plugins unless the plugin is explicitly client-specific.
-- Add or update tests for business logic.
-- Never read production env files.
+## Do not use when
 
-## Expected workflow
+- task is storefront-only Next.js/React UI work
+- task is generic NestJS API without Vendure plugin boundaries
 
-1. Identify plugin boundary.
-2. Identify affected API, service, entity, and migration files.
-3. Make the smallest safe change.
-4. Run the detected package manager checks.
-5. State what was validated and what was not.
+## Inspect first
+
+- `vendure-config.*`, `*.plugin.ts`, `plugin.ts`
+- plugin `api`/`resolvers`/`services`/`entities`/`migrations` files
+- tests near changed feature (`*.spec.ts`, `*.e2e-spec.ts`)
+
+## Avoid mistakes
+
+- adding resolver fields without schema or migration alignment
+- leaking client-specific behavior into shared `@haus/vendure-*` packages
+- skipping permission/channel checks in admin mutations
+
+## Router
+
+1. Load `references/scope.md` for plugin file map.
+2. Load `references/workflow.md` only when implementing or debugging flow.
+3. Keep change scoped to one plugin boundary and verify.
+
+## References
+
+- references/scope.md
+- references/workflow.md
