@@ -4,7 +4,7 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { execSync } from "node:child_process";
+import { execaSync } from "execa";
 
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
 const cli = path.join(root, "dist/cli.js");
@@ -28,14 +28,14 @@ const targets = [
 const results = [];
 for (const t of targets) {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), `haus-qa-${t.fixture}-`));
-  execSync(`cp -R "${path.join(root, "tests/fixtures/repos", t.fixture)}/." "${tmp}/"`);
-  execSync(`node "${cli}" scan --json`, { cwd: tmp, stdio: "ignore" });
-  execSync(`node "${cli}" recommend --json`, { cwd: tmp, stdio: "ignore" });
+  fs.cpSync(path.join(root, "tests/fixtures/repos", t.fixture), tmp, { recursive: true });
+  execaSync("node", [cli, "scan", "--json"], { cwd: tmp, stdout: "ignore" });
+  execaSync("node", [cli, "recommend", "--json"], { cwd: tmp, stdout: "ignore" });
   const scan = JSON.parse(fs.readFileSync(path.join(tmp, ".haus-ai/context-map.json"), "utf8"));
   const rec = JSON.parse(fs.readFileSync(path.join(tmp, ".haus-ai/recommendation.json"), "utf8"));
   const taskCtx = {};
   for (const task of t.tasks) {
-    const raw = execSync(`node "${cli}" context --task ${JSON.stringify(task)} --json`, { cwd: tmp, encoding: "utf8" });
+    const raw = execaSync("node", [cli, "context", "--task", task, "--json"], { cwd: tmp }).stdout;
     taskCtx[task] = JSON.parse(raw);
   }
   const entry = {

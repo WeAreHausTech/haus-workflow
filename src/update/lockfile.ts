@@ -3,6 +3,8 @@ import { mkdir, readFile, copyFile } from "node:fs/promises";
 import { readJson, writeJson } from "../utils/fs.js";
 import { hausPath } from "../utils/paths.js";
 import { hashInstalledPaths } from "./hash-installed.js";
+import { createUnifiedDiff, hasTextChanged } from "../utils/diff.js";
+import { normalizeVersion } from "../utils/versions.js";
 
 export type LockItem = {
   id: string;
@@ -15,8 +17,9 @@ export type LockItem = {
 };
 
 export async function checkLock(root: string): Promise<{ ok: boolean; count: number }> {
-  const lock = (await readJson<Array<{ id: string }>>(hausPath(root, "haus.lock.json"))) ?? [];
-  return { ok: lock.length > 0, count: lock.length };
+  const lock = (await readJson<Array<{ id: string; version?: string }>>(hausPath(root, "haus.lock.json"))) ?? [];
+  const hasValidVersions = lock.every((item) => !item.version || normalizeVersion(item.version) !== null);
+  return { ok: lock.length > 0 && hasValidVersions, count: lock.length };
 }
 
 export async function applyLock(root: string): Promise<{ before: string; after: string }> {
@@ -49,8 +52,8 @@ export async function applyLock(root: string): Promise<{ before: string; after: 
 }
 
 export function diffLock(before: string, after: string): string {
-  if (before.trim() === after.trim()) return "No lockfile changes.";
-  return `Lockfile changed: ${before.length} -> ${after.length} bytes`;
+  if (!hasTextChanged(before.trim(), after.trim())) return "No lockfile changes.";
+  return createUnifiedDiff(".haus-ai/haus.lock.json", before, after);
 }
 
 export async function hasLocalOverrides(root: string): Promise<boolean> {

@@ -1,11 +1,12 @@
 import path from "node:path";
 import fs from "fs-extra";
-import { readJson, writeJson, writeText } from "../utils/fs.js";
+import { readJson, writeText } from "../utils/fs.js";
 import { claudePath, hausPath, packageRoot } from "../utils/paths.js";
 import type { Recommendation } from "../types.js";
 import { loadClaudeHooksSettings } from "./load-hooks.js";
 import { assertPostApplySettingsMatchCanonical } from "./verify-hooks-contract.js";
 import { hashInstalledPaths } from "../update/hash-installed.js";
+import { createUnifiedDiff, hasTextChanged, summarizeDiff } from "../utils/diff.js";
 
 export async function writeClaudeFiles(root: string, dryRun: boolean): Promise<string[]> {
   const rec = (await readJson<Recommendation>(hausPath(root, "recommendation.json"))) ?? {
@@ -31,7 +32,8 @@ export async function writeClaudeFiles(root: string, dryRun: boolean): Promise<s
   ];
   if (dryRun) return files;
 
-  await writeText(
+  await writeManagedText(
+    root,
     claudePath(root, "CLAUDE.md"),
     `# Haus AI
 
@@ -49,13 +51,13 @@ haus context --task "<task>"
 `
   );
   const hookSettings = await loadClaudeHooksSettings();
-  await writeJson(claudePath(root, "settings.json"), hookSettings);
+  await writeManagedJson(root, claudePath(root, "settings.json"), hookSettings);
   await assertPostApplySettingsMatchCanonical(root, hookSettings);
-  await writeText(claudePath(root, "commands", "haus-doctor.md"), "Run `haus doctor`.");
-  await writeText(claudePath(root, "commands", "haus-review.md"), "Run `haus context --task \"code review\"` then review diff.");
-  await writeText(claudePath(root, "commands", "haus-explain-context.md"), "Run `haus explain-context`.");
-  await writeText(claudePath(root, "rules", "haus.md"), "- Keep context minimal.\n- Follow project conventions.\n");
-  await writeText(claudePath(root, "rules", "security.md"), "- Never read secrets.\n- Block dangerous shell commands.\n");
+  await writeManagedText(root, claudePath(root, "commands", "haus-doctor.md"), "Run `haus doctor`.");
+  await writeManagedText(root, claudePath(root, "commands", "haus-review.md"), "Run `haus context --task \"code review\"` then review diff.");
+  await writeManagedText(root, claudePath(root, "commands", "haus-explain-context.md"), "Run `haus explain-context`.");
+  await writeManagedText(root, claudePath(root, "rules", "haus.md"), "- Keep context minimal.\n- Follow project conventions.\n");
+  await writeManagedText(root, claudePath(root, "rules", "security.md"), "- Never read secrets.\n- Block dangerous shell commands.\n");
 
   const pkgRoot = packageRoot();
   const manifest = (await readJson<{ items?: Array<{ id: string; path: string; type: string }> }>(
@@ -78,7 +80,8 @@ haus context --task "<task>"
       installedPathsByItem.set(item.id, [...current, path.relative(root, destination)]);
     }
   }
-  await writeJson(
+  await writeManagedJson(
+    root,
     hausPath(root, "selected-context.json"),
     rec.recommended.map((r) => ({ id: r.id, type: r.type, reason: r.reason, confidenceLevel: r.confidenceLevel }))
   );
@@ -98,7 +101,7 @@ haus context --task "<task>"
       };
     })
   );
-  await writeJson(hausPath(root, "haus.lock.json"), lock);
+  await writeManagedJson(root, hausPath(root, "haus.lock.json"), lock);
 
   const pluginSrc = path.join(root, "plugin/.claude-plugin/plugin.json");
   if (await fs.pathExists(pluginSrc)) {
@@ -106,4 +109,19 @@ haus context --task "<task>"
     // TODO(plugin-pack): copy full plugin subtree into project when product requires bundled plugin mirror.
   }
   return [...new Set(files)];
+}
+
+async function writeManagedText(root: string, filePath: string, nextText: string): Promise<void> {
+  const prev = (await fs.pathExists(filePath)) ? await fs.readFile(filePath, "utf8") : "";
+  if (hasTextChanged(prev, nextText) && prev.length > 0) {
+    const diffText = createUnifiedDiff(path.relative(root, filePath), prev, nextText);
+    const summary = summarizeDiff(diffText);
+    console.log(`Overwriting ${path.relative(root, filePath)} (diff +${summary.additions} -${summary.deletions})`);
+  }
+  await writeText(filePath, nextText);
+}
+
+async function writeManagedJson(root: string, filePath: string, value: unknown): Promise<void> {
+  const nextText = `${JSON.stringify(value, null, 2)}\n`;
+  await writeManagedText(root, filePath, nextText);
 }

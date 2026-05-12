@@ -2,8 +2,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import os from "node:os";
 import path from "node:path";
-import { spawnSync } from "node:child_process";
 import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
+import { execaSync } from "execa";
 
 test("doctor reports hooks OK after apply", () => {
   const temp = mkdtempSync(path.join(os.tmpdir(), "haus-doctor-"));
@@ -15,12 +15,12 @@ test("doctor reports hooks OK after apply", () => {
   writeFileSync(path.join(temp, "yarn.lock"), "# lock");
 
   const cli = path.resolve("dist/cli.js");
-  assert.equal(spawnSync("node", [cli, "scan", "--json"], { cwd: temp, encoding: "utf8" }).status, 0);
-  assert.equal(spawnSync("node", [cli, "recommend", "--json"], { cwd: temp, encoding: "utf8" }).status, 0);
-  assert.equal(spawnSync("node", [cli, "apply", "--write"], { cwd: temp, encoding: "utf8" }).status, 0);
+  assert.doesNotThrow(() => execaSync("node", [cli, "scan", "--json"], { cwd: temp }));
+  assert.doesNotThrow(() => execaSync("node", [cli, "recommend", "--json"], { cwd: temp }));
+  assert.doesNotThrow(() => execaSync("node", [cli, "apply", "--write"], { cwd: temp }));
 
-  const r = spawnSync("node", [cli, "doctor"], { cwd: temp, encoding: "utf8" });
-  assert.equal(r.status, 0);
+  const r = execaSync("node", [cli, "doctor"], { cwd: temp, reject: false });
+  assert.equal(r.exitCode, 0);
   assert.equal((r.stdout ?? "").includes("HOOKS OK"), true);
 });
 
@@ -60,8 +60,8 @@ test("doctor prints each shared warning once", () => {
     )
   );
   const cli = path.resolve("dist/cli.js");
-  const r = spawnSync("node", [cli, "doctor"], { cwd: temp, encoding: "utf8" });
-  assert.equal(r.status, 0);
+  const r = execaSync("node", [cli, "doctor"], { cwd: temp, reject: false });
+  assert.equal(r.exitCode, 0);
   const hits = (r.stdout ?? "").split(dup).length - 1;
   assert.equal(hits, 1);
 });
@@ -69,8 +69,8 @@ test("doctor prints each shared warning once", () => {
 test("doctor --hooks fails when settings missing", () => {
   const temp = mkdtempSync(path.join(os.tmpdir(), "haus-doctor-hooks-miss-"));
   const cli = path.resolve("dist/cli.js");
-  const r = spawnSync("node", [cli, "doctor", "--hooks"], { cwd: temp, encoding: "utf8" });
-  assert.equal(r.status, 1);
+  const r = execaSync("node", [cli, "doctor", "--hooks"], { cwd: temp, reject: false });
+  assert.equal(r.exitCode, 1);
   const out = `${r.stderr ?? ""}${r.stdout ?? ""}`;
   assert.equal(out.includes("doctor --hooks") || out.includes("settings"), true);
 });
@@ -84,10 +84,10 @@ test("doctor --hooks passes after apply", () => {
   );
   writeFileSync(path.join(temp, "yarn.lock"), "# lock");
   const cli = path.resolve("dist/cli.js");
-  spawnSync("node", [cli, "scan", "--json"], { cwd: temp, encoding: "utf8" });
-  spawnSync("node", [cli, "recommend", "--json"], { cwd: temp, encoding: "utf8" });
-  spawnSync("node", [cli, "apply", "--write"], { cwd: temp, encoding: "utf8" });
-  const r = spawnSync("node", [cli, "doctor", "--hooks"], { cwd: temp, encoding: "utf8" });
-  assert.equal(r.status, 0);
+  execaSync("node", [cli, "scan", "--json"], { cwd: temp });
+  execaSync("node", [cli, "recommend", "--json"], { cwd: temp });
+  execaSync("node", [cli, "apply", "--write"], { cwd: temp });
+  const r = execaSync("node", [cli, "doctor", "--hooks"], { cwd: temp, reject: false });
+  assert.equal(r.exitCode, 0);
   assert.equal((r.stdout ?? "").includes("matches plugin hook contract"), true);
 });

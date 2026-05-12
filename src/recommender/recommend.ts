@@ -1,8 +1,8 @@
 import { loadCatalog } from "../catalog/load-catalog.js";
 import { readJson } from "../utils/fs.js";
 import { hausPath } from "../utils/paths.js";
-import { execSync } from "node:child_process";
 import type { CatalogItem, ContextMap, Recommendation, RequiresAnyClause } from "../types.js";
+import { runGit } from "../utils/exec.js";
 
 const UNSUPPORTED = ["python", "django", "go", "rust", "java", "spring", "kotlin", "swift", "android", "flutter", "dart", "c++", "perl", "defi", "trading"];
 const SENSITIVE = [".env", "secrets", "certs", "customer-data", "exports", ".pem", ".key"];
@@ -52,7 +52,7 @@ export async function recommend(root: string, context: ContextMap): Promise<Reco
   const skipped: Recommendation["skipped"] = [];
   const goals = Object.values(setupAnswers).join(" ").toLowerCase();
   const sourceTrust = new Map((sources.items ?? []).map((x) => [x.id, x.status ?? "candidate"]));
-  const changedFiles = readChangedFiles(root);
+  const changedFiles = await readChangedFiles(root);
   const securityRiskCount = context.securityRisks?.length ?? 0;
 
   for (const item of items) {
@@ -362,12 +362,11 @@ function mergeRecommendationWarnings(context: ContextMap): string[] {
   return [...new Set([...context.warnings, ...riskLines])];
 }
 
-function readChangedFiles(root: string): string[] {
+async function readChangedFiles(root: string): Promise<string[]> {
   if (process.env.HAUS_DISABLE_GIT_SIGNALS === "1") return [];
-  try {
-    const raw = execSync("git diff --name-only", { cwd: root, stdio: ["ignore", "pipe", "ignore"] }).toString("utf8");
-    return raw.split("\n").map((x) => x.trim()).filter(Boolean).sort();
-  } catch {
+  const result = await runGit(["diff", "--name-only"], { cwd: root });
+  if (result.exitCode !== 0) {
     return [];
   }
+  return result.stdout.split("\n").map((x) => x.trim()).filter(Boolean).sort();
 }

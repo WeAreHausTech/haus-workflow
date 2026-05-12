@@ -20,6 +20,7 @@ import { runUndo } from "./commands/undo.js";
 import { runUpdate } from "./commands/update.js";
 import { runWorkspace } from "./commands/workspace.js";
 import { packageRoot } from "./utils/paths.js";
+import { satisfiesVersion } from "./utils/versions.js";
 
 function cliVersion(): string {
   try {
@@ -32,6 +33,23 @@ function cliVersion(): string {
 }
 
 const program = new Command();
+
+function validateRuntimeNodeVersion(): void {
+  try {
+    const pkgPath = path.join(packageRoot(), "package.json");
+    const pkg = JSON.parse(readFileSync(pkgPath, "utf8")) as { engines?: { node?: string } };
+    const requiredRange = pkg.engines?.node;
+    if (requiredRange && !satisfiesVersion(process.version, requiredRange)) {
+      throw new Error(`Node ${process.version} does not satisfy required range ${requiredRange}`);
+    }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error(message);
+    process.exit(1);
+  }
+}
+
+validateRuntimeNodeVersion();
 
 program.name("haus").description("Haus AI workflow CLI").version(cliVersion());
 program.command("scan").option("--json").action(runScan);
