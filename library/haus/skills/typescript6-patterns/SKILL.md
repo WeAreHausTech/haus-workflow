@@ -3,7 +3,7 @@ name: typescript6-patterns
 description: TypeScript router. Use for type contracts, API boundaries, generics, and strictness-safe refactors.
 ---
 
-# Typescript6 Patterns
+# TypeScript6 Patterns
 
 ## Use when
 
