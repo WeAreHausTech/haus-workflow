@@ -36,6 +36,10 @@ export async function runGit(args: string[], options: ExecaOptions = {}): Promis
 }
 
 export async function commandExists(command: string): Promise<boolean> {
-  const result = await runCommand(command, ["--version"]);
-  return result.exitCode === 0;
+  try {
+    const result = await runCommand(command, ["--version"]);
+    return result.exitCode === 0;
+  } catch {
+    return false;
+  }
 }
