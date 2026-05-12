@@ -1,4 +1,5 @@
 import { existsSync, readFileSync } from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -21,9 +22,9 @@ export function displayPath(root: string, targetPath: string): string {
   if (rel && !rel.startsWith("../") && rel !== "..") {
     return rel.startsWith("./") ? rel : `./${rel}`;
   }
-  const home = process.env.HOME;
+  const home = os.homedir();
   const normalized = targetPath.replace(/\\/g, "/");
-  if (home) {
+  if (home && home.trim().length > 0) {
     const homeRel = path.relative(home, targetPath).replace(/\\/g, "/");
     if (homeRel && !homeRel.startsWith("../") && homeRel !== "..") {
       return `~/${homeRel}`;
