@@ -13,7 +13,7 @@
       "forbidBaseline": true
     },
     "create nova resource": {
-      "expectedTaskIntents": ["admin-ui"],
+      "expectedTaskIntents": ["admin-ui", "backend"],
       "expectedSelectedIds": ["haus.laravel-patterns"],
       "forbiddenSelectedIds": [
         "haus.phpunit-patterns",

@@ -30,6 +30,22 @@ test("explain-recommendation returns stable JSON", () => {
   assert.equal(parsed.selected.some((item) => item.id === "haus.nextjs-patterns"), true);
 });
 
+test("explain-recommendation preserves skip-reason signal metadata", () => {
+  const cwd = cloneFixtureToTemp("vendure-monorepo");
+  runHaus(cwd, "scan --json");
+  runHaus(cwd, "recommend --json");
+  const output = runHaus(cwd, "explain-recommendation --json");
+  const parsed = JSON.parse(output);
+  const laravelNova = parsed.skipped.find((item) => item.id === "haus.laravel-nova-patterns");
+  assert.ok(laravelNova, "expected haus.laravel-nova-patterns in skipped list");
+  assert.equal(Array.isArray(laravelNova.reasonDetails), true);
+  assert.equal(
+    laravelNova.reasonDetails.some((reason) => reason.code === "requires-any-unsatisfied" && reason.signal),
+    true,
+    "expected requires-any-unsatisfied skip reason with signal metadata"
+  );
+});
+
 test("context --task --json returns task-scoped selected rules", () => {
   const cwd = cloneFixtureToTemp("vendure-monorepo");
   runHaus(cwd, "scan --json");
@@ -100,7 +116,8 @@ test("explain-recommendation --json shape is unchanged", () => {
     );
   }
   for (const item of parsed.skipped) {
-    assert.deepEqual(Object.keys(item).sort(), ["id", "reasons"]);
+    assert.deepEqual(Object.keys(item).sort(), ["id", "reasonDetails", "reasons"]);
+    assert.equal(Array.isArray(item.reasonDetails), true);
   }
   assert.deepEqual(
     Object.keys(parsed.stats).sort(),

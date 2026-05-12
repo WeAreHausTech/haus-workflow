@@ -32,6 +32,7 @@ type ExplainRecommendation = {
   skipped: Array<{
     id: string;
     reasons: string[];
+    reasonDetails?: Array<{ code: string; message: string; penalty: number; signal?: string }>;
   }>;
   stats: {
     selectedRules: number;
@@ -77,8 +78,16 @@ export function normalizeRecommendation(input: RecommendationLike): Recommendati
       item.skipReasons?.map((reason) => ({
         code: reason.code ?? "legacy-skip-reason",
         message: reason.message ?? item.reason ?? "legacy skipped reason",
-        penalty: reason.penalty ?? 0
-      })) ?? [{ code: "legacy-skip-reason", message: item.reason ?? "legacy skipped reason", penalty: 0 }]
+        penalty: reason.penalty ?? 0,
+        ...(reason.signal ? { signal: reason.signal } : {})
+      })) ??
+      [
+        {
+          code: "legacy-skip-reason",
+          message: item.reason ?? "legacy skipped reason",
+          penalty: 0
+        }
+      ]
   }));
 
   return {
@@ -106,7 +115,13 @@ export function buildRecommendationExplanation(recommendation: Recommendation): 
     })),
     skipped: recommendation.skipped.map((item) => ({
       id: item.id,
-      reasons: item.skipReasons.map((reason) => reason.message)
+      reasons: item.skipReasons.map((reason) => reason.message),
+      reasonDetails: item.skipReasons.map((reason) => ({
+        code: reason.code,
+        message: reason.message,
+        penalty: reason.penalty,
+        ...(reason.signal ? { signal: reason.signal } : {})
+      }))
     })),
     stats: {
       selectedRules: recommendation.selectedRules,

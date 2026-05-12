@@ -22,13 +22,13 @@ for (const goldenFile of goldenFiles) {
       const parsed = JSON.parse(output);
 
       if (expectation.expectedTaskIntents) {
-        for (const intent of expectation.expectedTaskIntents) {
-          assert.equal(
-            parsed.taskIntents.includes(intent),
-            true,
-            `expected task intent '${intent}' for task '${task}', got: ${JSON.stringify(parsed.taskIntents)}`
-          );
-        }
+        const actualIntents = [...(parsed.taskIntents ?? [])].sort();
+        const expectedIntents = [...expectation.expectedTaskIntents].sort();
+        assert.deepEqual(
+          actualIntents,
+          expectedIntents,
+          `task intents mismatch for '${task}': expected=${JSON.stringify(expectedIntents)} actual=${JSON.stringify(actualIntents)}`
+        );
       }
 
       for (const expectedId of expectation.expectedSelectedIds ?? []) {
