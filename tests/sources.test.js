@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import os from "node:os";
 import path from "node:path";
 import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
-import { execSync } from "node:child_process";
+import { execaSync } from "execa";
 
 test("sources audit fails for unsupported source stacks", () => {
   const temp = mkdtempSync(path.join(os.tmpdir(), "haus-sources-"));
@@ -24,7 +24,7 @@ test("sources audit fails for unsupported source stacks", () => {
   );
   let failed = false;
   try {
-    execSync(`node "${path.resolve("dist/cli.js")}" sources audit`, { cwd: temp, stdio: "pipe" });
+    execaSync("node", [path.resolve("dist/cli.js"), "sources", "audit"], { cwd: temp });
   } catch {
     failed = true;
   }

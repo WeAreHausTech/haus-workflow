@@ -1,10 +1,11 @@
 import path from "node:path";
-import fs from "fs-extra";
 import { hashText, listFiles, readJson, readText, writeJson, writeText } from "../utils/fs.js";
 import { readFile } from "node:fs/promises";
 import { hausPath } from "../utils/paths.js";
 import type { ContextMap, PackageManager } from "../types.js";
 import type { ScanResult } from "./types.js";
+import { detectPackageManager } from "./detect-package-manager.js";
+import { satisfiesVersion } from "../utils/versions.js";
 
 const SAFE_FILES = [
   "package.json",
@@ -70,7 +71,7 @@ export async function scanProject(root: string, mode: "guided" | "fast" = "fast"
   const files = await listFiles(root, SAFE_FILES);
   const safeFiles = files.filter((f) => !blocked(f));
   const deps = dependencySet(pkg, composer);
-  const packageManager = detectPackageManager(root, pkg);
+  const packageManager = detectPackageManager(root, String(pkg?.packageManager ?? ""));
   const roles = detectRoles(deps, safeFiles);
   const stacks = await detectStacks(root, deps, safeFiles, packageManager);
   const warnings: string[] = [];
@@ -78,6 +79,10 @@ export async function scanProject(root: string, mode: "guided" | "fast" = "fast"
   const crossRepoHints: string[] = [];
   if (!safeFiles.some((f) => f.endsWith(".env.example"))) warnings.push("No .env.example found");
   if (!(pkg && typeof pkg === "object" && "scripts" in pkg && String((pkg as any).scripts?.test ?? "").length > 0)) warnings.push("No package.json test script found");
+  const nodeEngine = typeof pkg?.engines === "object" ? String((pkg.engines as Record<string, unknown>)?.node ?? "") : "";
+  if (nodeEngine && !satisfiesVersion(process.version, nodeEngine)) {
+    warnings.push(`Current Node ${process.version} does not satisfy package engine ${nodeEngine}`);
+  }
   if (safeFiles.some((f) => f.includes("docker-compose"))) crossRepoHints.push("Containerized services detected");
   if (safeFiles.some((f) => f.includes("turbo.json") || f.includes("nx.json"))) crossRepoHints.push("Monorepo orchestration detected");
   if (!safeFiles.some((f) => f.endsWith(".env.example"))) securityRisks.push("Missing env template");
@@ -128,17 +133,6 @@ function dependencySet(pkg?: Record<string, unknown>, composer?: Record<string, 
   pushObj(composer?.require);
   pushObj(composer?.["require-dev"]);
   return [...out].sort();
-}
-
-function detectPackageManager(root: string, pkg?: Record<string, unknown>): PackageManager {
-  const pm = String(pkg?.packageManager ?? "");
-  if (pm.startsWith("yarn")) return "yarn";
-  if (pm.startsWith("pnpm")) return "pnpm";
-  if (pm.startsWith("npm")) return "npm";
-  if (fs.existsSync(path.join(root, "yarn.lock"))) return "yarn";
-  if (fs.existsSync(path.join(root, "pnpm-lock.yaml"))) return "pnpm";
-  if (fs.existsSync(path.join(root, "package-lock.json"))) return "npm";
-  return "unknown";
 }
 
 function detectRoles(deps: string[], files: string[]): string[] {

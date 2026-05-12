@@ -3,8 +3,8 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { execSync } from "node:child_process";
 import { mkdtempSync, mkdirSync, writeFileSync, readFileSync } from "node:fs";
+import { execaSync } from "execa";
 
 test("generated settings uses haus command", () => {
   const combined = [
@@ -24,9 +24,9 @@ test("apply writes claude files and rules", () => {
   );
   writeFileSync(path.join(temp, "yarn.lock"), "# lock");
 
-  execSync(`node "${path.resolve("dist/cli.js")}" scan --json > /dev/null`, { cwd: temp });
-  execSync(`node "${path.resolve("dist/cli.js")}" recommend --json > /dev/null`, { cwd: temp });
-  execSync(`node "${path.resolve("dist/cli.js")}" apply --write > /dev/null`, { cwd: temp });
+  execaSync("node", [path.resolve("dist/cli.js"), "scan", "--json"], { cwd: temp });
+  execaSync("node", [path.resolve("dist/cli.js"), "recommend", "--json"], { cwd: temp });
+  execaSync("node", [path.resolve("dist/cli.js"), "apply", "--write"], { cwd: temp });
 
   const settings = JSON.parse(readFileSync(path.join(temp, ".claude/settings.json"), "utf8"));
   const rulesHaus = readFileSync(path.join(temp, ".claude/rules/haus.md"), "utf8");
@@ -52,4 +52,22 @@ test("apply writes claude files and rules", () => {
     assert.equal(row.version, pkg.version);
     assert.equal(row.hash.startsWith("sha256-"), true);
   }
+});
+
+test("apply reports diff before overwriting generated files", () => {
+  const temp = mkdtempSync(path.join(os.tmpdir(), "haus-apply-overwrite-"));
+  mkdirSync(path.join(temp, "plugin"), { recursive: true });
+  writeFileSync(
+    path.join(temp, "package.json"),
+    JSON.stringify({ name: "apply-overwrite", packageManager: "yarn@4.5.3", dependencies: { react: "19.0.0" } }, null, 2)
+  );
+  writeFileSync(path.join(temp, "yarn.lock"), "# lock");
+  execaSync("node", [path.resolve("dist/cli.js"), "scan", "--json"], { cwd: temp });
+  execaSync("node", [path.resolve("dist/cli.js"), "recommend", "--json"], { cwd: temp });
+  execaSync("node", [path.resolve("dist/cli.js"), "apply", "--write"], { cwd: temp });
+  const manualPath = path.join(temp, ".claude/rules/security.md");
+  writeFileSync(manualPath, "manual override");
+  const second = execaSync("node", [path.resolve("dist/cli.js"), "apply", "--write"], { cwd: temp, reject: false });
+  assert.equal(second.exitCode, 0);
+  assert.equal(second.stdout.includes("Overwriting .claude/rules/security.md"), true);
 });
