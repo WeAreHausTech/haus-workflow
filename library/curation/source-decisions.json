@@ -1,39 +1,226 @@
 {
   "decisions": [
     {
-      "source": "ecc",
-      "ideasAccepted": [],
-      "ideasRejected": []
+      "source": "anthropic-skills",
+      "ideasAccepted": [
+        {
+          "idea": "Compact SKILL.md with optional references directory for deeper detail",
+          "target": "plugin/skills/haus-skill-author/references/skill-authoring-rules.md",
+          "reason": "Keeps router small and moves bulk to Haus-owned reference files.",
+          "copied": false,
+          "maintenanceRisk": "low",
+          "licenseAttributionConcern": "none",
+          "productFit": "strong"
+        },
+        {
+          "idea": "Explicit use when and do not use when sections on each skill surface",
+          "target": "plugin/skills/haus-skill-author/references/skill-authoring-rules.md",
+          "reason": "Supports bounded recommender selection and clear handoff to agents.",
+          "copied": false,
+          "maintenanceRisk": "low",
+          "licenseAttributionConcern": "none",
+          "productFit": "strong"
+        },
+        {
+          "idea": "YAML frontmatter keys name and description on each skill file",
+          "target": "plugin/skills/haus-skill-author/references/skill-authoring-rules.md",
+          "reason": "Stable metadata for authors and tooling without new runtime paths.",
+          "copied": false,
+          "maintenanceRisk": "low",
+          "licenseAttributionConcern": "none",
+          "productFit": "strong"
+        }
+      ],
+      "ideasRejected": [
+        {
+          "idea": "Ship verbatim upstream example bodies as ready-to-use Haus skills",
+          "reason": "Violates Haus policy: ship rewritten guidance only; verbatim copy risks drift and attribution noise."
+        },
+        {
+          "idea": "Treat upstream examples as canonical catalog entries without review",
+          "reason": "Would bypass curation gates and stack fit checks for this product."
+        }
+      ]
     },
     {
       "source": "superpowers",
-      "ideasAccepted": [],
-      "ideasRejected": []
+      "ideasAccepted": [
+        {
+          "idea": "Red-green-refactor habit for risky edits documented as a curation note only",
+          "target": "docs/curation.md",
+          "reason": "Captures test-first discipline in Haus voice without stack file edits or new hooks.",
+          "copied": false,
+          "maintenanceRisk": "low",
+          "licenseAttributionConcern": "low",
+          "productFit": "medium"
+        },
+        {
+          "idea": "Pause for one clarifying question when task scope is unclear before broad scans",
+          "target": "docs/curation.md",
+          "reason": "Reduces wasted context and matches bounded Haus workflow tone.",
+          "copied": false,
+          "maintenanceRisk": "low",
+          "licenseAttributionConcern": "low",
+          "productFit": "strong"
+        },
+        {
+          "idea": "Close work with intent, files touched, and validation stated as evidence before claims",
+          "target": "docs/curation.md",
+          "reason": "Aligns contributors with evidence-style review already used in Haus agents.",
+          "copied": false,
+          "maintenanceRisk": "low",
+          "licenseAttributionConcern": "low",
+          "productFit": "medium"
+        }
+      ],
+      "ideasRejected": [
+        {
+          "idea": "Multi-agent parallel handoffs as a required default workflow",
+          "reason": "Conflicts with Haus stance on bounded single-session work and explicit review agents."
+        },
+        {
+          "idea": "Long scripted session templates copied from upstream into shipping assets",
+          "reason": "High maintenance overlap with Haus routers; verbatim template copy is out of scope."
+        }
+      ]
     },
     {
-      "source": "anthropic-skills",
-      "ideasAccepted": [],
-      "ideasRejected": []
-    },
-    {
-      "source": "jeffallan-skills",
-      "ideasAccepted": [],
-      "ideasRejected": []
+      "source": "ecc",
+      "ideasAccepted": [
+        {
+          "idea": "Progressive disclosure: load deep detail only when the task touches that surface",
+          "target": "docs/curation.md",
+          "reason": "Documentation-only habit; no ECC coupling and no change to token scoring.",
+          "copied": false,
+          "maintenanceRisk": "low",
+          "licenseAttributionConcern": "low",
+          "productFit": "weak"
+        },
+        {
+          "idea": "Thin router SKILL versus deeper reference files for the same topic",
+          "target": "docs/curation.md",
+          "reason": "Reinforces Haus router shape using ECC-style framing as inspiration only.",
+          "copied": false,
+          "maintenanceRisk": "low",
+          "licenseAttributionConcern": "low",
+          "productFit": "medium"
+        }
+      ],
+      "ideasRejected": [
+        {
+          "idea": "Ship ECC-specific formats or treat ECC as a runtime dependency",
+          "reason": "Haus stays decoupled from external index formats; candidate sources remain inspiration-only."
+        },
+        {
+          "idea": "Embed numeric token tables from any external index into recommender code",
+          "reason": "Token and scoring behavior is out of scope for curation-only PRs."
+        }
+      ]
     },
     {
       "source": "skills-sh",
-      "ideasAccepted": [],
-      "ideasRejected": []
+      "ideasAccepted": [
+        {
+          "idea": "Public discovery index is input for search only not catalog truth",
+          "target": "library/curation/README.md",
+          "reason": "Prevents treating listings as curated manifest rows without Haus review.",
+          "copied": false,
+          "maintenanceRisk": "low",
+          "licenseAttributionConcern": "low",
+          "productFit": "medium"
+        }
+      ],
+      "ideasRejected": [
+        {
+          "idea": "Auto-import index entries into library catalog manifest",
+          "reason": "Would add unsupervised catalog growth and bypass manual curation review."
+        },
+        {
+          "idea": "Trust listing quality or license fields without Haus verification",
+          "reason": "Discovery feeds vary; catalog policy requires explicit accept or reject per item."
+        }
+      ]
     },
     {
       "source": "prpm",
-      "ideasAccepted": [],
-      "ideasRejected": []
+      "ideasAccepted": [
+        {
+          "idea": "Stable machine ids haus dot prefix and stack slugs aligned to allowed-stacks policy",
+          "target": "plugin/skills/haus-skill-author/references/skill-authoring-rules.md",
+          "reason": "Matches existing manifest conventions and keeps catalog audits predictable.",
+          "copied": false,
+          "maintenanceRisk": "low",
+          "licenseAttributionConcern": "low",
+          "productFit": "medium"
+        }
+      ],
+      "ideasRejected": [
+        {
+          "idea": "Wire external registry resolution into install or apply paths",
+          "reason": "Would introduce new integration surfaces beyond rewritten Haus-owned assets."
+        },
+        {
+          "idea": "Paste upstream package README prose into Haus reference files",
+          "reason": "Verbatim external prose is disallowed; paraphrase into Haus-owned bullets if needed."
+        }
+      ]
+    },
+    {
+      "source": "jeffallan-skills",
+      "ideasAccepted": [
+        {
+          "idea": "Co-locate references directory beside SKILL.md for each skill folder",
+          "target": "plugin/skills/haus-skill-author/references/skill-authoring-rules.md",
+          "reason": "Matches Haus layout and helps authors find depth next to the router entry.",
+          "copied": false,
+          "maintenanceRisk": "low",
+          "licenseAttributionConcern": "low",
+          "productFit": "medium"
+        }
+      ],
+      "ideasRejected": [
+        {
+          "idea": "Import upstream skill trees wholesale into plugin or library folders",
+          "reason": "Would bypass rewrite policy; maintain Haus-owned text and explicit targets only."
+        },
+        {
+          "idea": "Depend on a personal or org brand namespace as a product requirement",
+          "reason": "Haus catalog stays neutral; names follow haus dot ids and internal conventions."
+        }
+      ]
     },
     {
       "source": "skillkit",
-      "ideasAccepted": [],
-      "ideasRejected": []
+      "ideasAccepted": [
+        {
+          "idea": "Machine-readable schema for source decisions plus yarn sources decisions CI gate",
+          "target": "library/curation/README.md",
+          "reason": "Documents existing validation artifact and keeps audits reproducible without new runtime.",
+          "copied": false,
+          "maintenanceRisk": "low",
+          "licenseAttributionConcern": "low",
+          "productFit": "strong"
+        },
+        {
+          "idea": "Explicit validate-before-merge step using source-decisions schema in the curation loop",
+          "target": "docs/curation.md",
+          "reason": "Ties contributor workflow to the shipped validator already wired in package scripts.",
+          "copied": false,
+          "maintenanceRisk": "low",
+          "licenseAttributionConcern": "low",
+          "productFit": "strong"
+        }
+      ],
+      "ideasRejected": [
+        {
+          "idea": "Treat external packaging marketplace as install source of truth",
+          "reason": "Haus ships curated library content only; no registry-driven install path."
+        },
+        {
+          "idea": "Copy external validation UI copy into Haus docs without rewrite",
+          "reason": "Same as skills policy: inspiration only; wording must be Haus-owned."
+        }
+      ]
     }
   ]
 }
