@@ -39,8 +39,6 @@ const TASK_INTENT_KEYWORDS: Record<TaskIntent, string[]> = {
     "cron",
     "middleware",
     "resolver",
-    "mutation",
-    "subscription",
     "migration",
     "seeder",
     "model",
@@ -53,7 +51,9 @@ const TASK_INTENT_KEYWORDS: Record<TaskIntent, string[]> = {
     "consumer",
     "producer",
     "command",
-    "nova resource"
+    "nova resource",
+    "api mutation",
+    "api subscription"
   ],
   frontend: [
     "component",
@@ -103,11 +103,17 @@ const TASK_INTENT_KEYWORDS: Record<TaskIntent, string[]> = {
     "e-commerce",
     "order page"
   ],
-  graphql: ["graphql", "resolver", "mutation", "subscription", "schema", "codegen"],
+  graphql: [
+    "graphql",
+    "resolver",
+    "graphql mutation",
+    "graphql subscription",
+    "schema",
+    "codegen"
+  ],
   database: [
     "database",
     "migration",
-    "model",
     "seed",
     "table",
     "index",
@@ -115,7 +121,8 @@ const TASK_INTENT_KEYWORDS: Record<TaskIntent, string[]> = {
     "postgres",
     "mariadb",
     "mssql",
-    "query"
+    "sql query",
+    "db query"
   ],
   auth: [
     "auth",
