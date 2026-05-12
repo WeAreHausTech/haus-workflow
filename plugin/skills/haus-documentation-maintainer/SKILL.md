@@ -1,4 +1,9 @@
-# haus-documentation-maintainer
+---
+name: haus-documentation-maintainer
+description: Keep Haus AI workflow docs aligned when commands, dependencies, or generated layout change.
+---
+
+# Haus documentation maintainer
 
 Maintain docs for `@haus/ai` whenever behavior changes.
 
@@ -9,6 +14,11 @@ Maintain docs for `@haus/ai` whenever behavior changes.
 - scanner/recommender/apply/update/memory/security logic changes
 - generated files under `.haus-ai` or `.claude` change
 - plugin skills/hooks layout changes
+
+## Do not use when
+
+- no product or repo surface changed (avoid doc-only churn)
+- user wants narrative without verifying current code and manifests
 
 ## Documentation freshness triggers
 
@@ -31,7 +41,7 @@ Update docs when any of these change:
 3. Read `src/cli.ts` and command modules before command docs.
 4. Read scanner/recommender/update/memory/security modules before technical docs.
 5. Update docs listed below. Keep concise and accurate.
-6. Mark planned/incomplete items explicitly.
+6. Mark planned or incomplete items explicitly (without leaving raw scaffold tokens in shipped skills).
 7. Never document unsupported stacks as supported.
 8. Never invent commands or features.
 

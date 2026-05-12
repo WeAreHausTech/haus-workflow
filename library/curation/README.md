@@ -37,6 +37,6 @@ Public **discovery** listings are **candidate** inspiration: useful to find lead
 
 - **Schema:** `source-decisions.schema.json` describes the shape of `source-decisions.json`.
 - **Gate:** `yarn sources:decisions` runs `scripts/validate-source-decisions.ts` against the committed JSON and `library/catalog/sources.yaml`.
-- **Library:** `yarn library:audit` checks catalog-backed files under `library/` plus markdown policy under `library/haus/`.
+- **Library:** `yarn library:audit` checks manifest (references, installable paths, `source`), catalog-backed `library/` skills and agents, every `plugin/skills/**/SKILL.md` and `plugin/agents/*.md` for the same shape rules, and shipped markdown under `library/haus`, `plugin/skills`, `plugin/agents`, plus `library/catalog/manifest.json` for TODO or placeholder tokens and risky install patterns.
 
 That pairing gives reproducible audits without wiring any external packaging product into install or apply.
