@@ -47,12 +47,12 @@ export async function applyLock(root: string): Promise<{ before: string; after: 
     })
   );
   await writeJson(lockPath, enriched);
-  const after = JSON.stringify(enriched, null, 2);
+  const after = `${JSON.stringify(enriched, null, 2)}\n`;
   return { before, after };
 }
 
 export function diffLock(before: string, after: string): string {
-  if (!hasTextChanged(before.trim(), after.trim())) return "No lockfile changes.";
+  if (!hasTextChanged(before, after)) return "No lockfile changes.";
   return createUnifiedDiff(".haus-ai/haus.lock.json", before, after);
 }
 
