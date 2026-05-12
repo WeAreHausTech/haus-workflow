@@ -1,0 +1,12 @@
+import { auditLibrary } from "../src/library/audit-library.js";
+
+const root = process.cwd();
+const failures = await auditLibrary(root);
+if (failures.length > 0) {
+  console.error("Library audit failed:");
+  for (const f of failures) {
+    console.error(`- ${f}`);
+  }
+  process.exit(1);
+}
+console.log("Library audit passed.");

@@ -9,7 +9,7 @@ Workflow:
 3. Gate against product constraints.
 4. Rewrite into Haus-owned skill, reference, agent, or rule text.
 5. Record accept or reject in `source-decisions.json` (one `target` file per accepted row).
-6. Run `yarn sources:decisions` and product audits or tests.
+6. Run `yarn sources:decisions`, `yarn library:audit`, and product audits or tests.
 
 Rules:
 
@@ -37,5 +37,6 @@ Public **discovery** listings are **candidate** inspiration: useful to find lead
 
 - **Schema:** `source-decisions.schema.json` describes the shape of `source-decisions.json`.
 - **Gate:** `yarn sources:decisions` runs `scripts/validate-source-decisions.ts` against the committed JSON and `library/catalog/sources.yaml`.
+- **Library:** `yarn library:audit` checks catalog-backed files under `library/` plus markdown policy under `library/haus/`.
 
 That pairing gives reproducible audits without wiring any external packaging product into install or apply.

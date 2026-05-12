@@ -19,7 +19,8 @@ Public repos, indexes, and packaging sites are **inspiration** or **reference** 
 4. Rewrite as Haus-owned guidance.
 5. Record decision metadata in `library/curation/source-decisions.json`.
 6. Run `yarn sources:decisions` (validates schema, source list, and decision rows).
-7. Validate with catalog, recommender, and apply tests.
+7. Run `yarn library:audit` (catalog-backed `library/` layout and Haus markdown policy).
+8. Validate with catalog, recommender, and apply tests.
 
 ## Gate checks
 
@@ -38,6 +39,11 @@ An idea is accepted only if all are true:
 Decisions live in `library/curation/source-decisions.json`.
 Schema lives in `library/curation/source-decisions.schema.json`.
 Validator script: `yarn sources:decisions`.
+
+Optional overrides for tooling (absolute or cwd-relative paths resolved with `path.resolve`):
+
+- `HAUS_SOURCE_DECISIONS_PATH` — alternate `source-decisions.json`
+- `HAUS_SOURCES_PATH` — alternate `sources.yaml`
 
 Accepted ideas require:
 
@@ -74,4 +80,12 @@ ECC is a **candidate inspiration** source, not a product dependency. Haus may bo
 
 ## Future work (PR6)
 
-- Replace substring-based banned-term checks in `scripts/validate-source-decisions.ts` with token-aware or word-boundary matching to cut false positives (for example accidental hits inside unrelated words).
+- **Shape gates:** extend `yarn library:audit` with deeper checks (reference file contracts, stack-skill parity) beyond catalog agents and SKILL headers.
+- **Install policy:** expand blocked patterns if new community install surfaces appear.
+
+Shipped in PR6 so far:
+
+- **`yarn library:audit`** — catalog-backed `library/` skills and agents plus `library/haus/**/*.md` content policy (placeholders, risky `npx` / dlx / curl pipes).
+- **Source decisions** — identifier-aware unsupported stack tokens in accepted rows (see `src/curation/unsupported-stack-mention.ts`).
+
+`yarn sources:decisions` accepts optional `HAUS_SOURCE_DECISIONS_PATH` and `HAUS_SOURCES_PATH` for tests and tooling.
