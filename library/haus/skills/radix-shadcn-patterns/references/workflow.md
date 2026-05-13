@@ -2,7 +2,7 @@
 
 ## Implementation steps
 
-1. Check if shadcn already has a matching component: `yarn shadcn@latest add <component-name>`
+1. Check if shadcn already has a matching component: `yarn shadcn add <component-name>` (requires `shadcn` devDep; install once with `yarn add -D shadcn`)
 2. If adding new component: use CLI to generate — do not copy from docs manually
 3. For variant changes: edit `cva()` call in `components/ui/<component>.tsx` — add to `variants` map
 4. For composition: use `asChild` to delegate rendering to a custom element; verify prop forwarding
@@ -14,10 +14,10 @@
 ## Commands
 
 ```bash
-# Add shadcn component
-yarn shadcn@latest add button
-yarn shadcn@latest add dialog
-yarn shadcn@latest add dropdown-menu
+# Add shadcn component (shadcn must be installed as devDep: yarn add -D shadcn)
+yarn shadcn add button
+yarn shadcn add dialog
+yarn shadcn add dropdown-menu
 
 # Type check
 yarn tsc --noEmit
@@ -26,8 +26,8 @@ yarn tsc --noEmit
 jest --testPathPattern components/ui
 yarn storybook dev -p 6006     # visual inspection of component states
 
-# Accessibility audit
-yarn axe-core                  # or use Storybook a11y addon
+# Accessibility audit — use Storybook a11y addon or Playwright + axe-core integration
+# yarn add -D @axe-core/playwright  (then call checkA11y() in Playwright tests)
 ```
 
 ## Validation checklist

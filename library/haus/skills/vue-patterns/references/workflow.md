@@ -16,10 +16,7 @@
 ```bash
 vite dev                                        # start dev server
 vite build                                      # production build
-yarn tsc --noEmit                                # type check .vue files via vue-tsc
-
-# vue-tsc (preferred for .vue file type checking)
-yarn vue-tsc --noEmit
+yarn vue-tsc --noEmit                            # type check .vue SFCs (use vue-tsc, not tsc)
 
 # Tests
 yarn vitest                                      # watch mode

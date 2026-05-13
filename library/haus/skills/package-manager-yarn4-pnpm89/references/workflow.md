@@ -11,7 +11,8 @@
 yarn add <pkg>                       # add to root
 yarn workspace <ws-name> add <pkg>   # add to specific workspace
 yarn workspaces foreach run build    # run build in all workspaces
-yarn sdks vscode                      # update editor SDK after dep change (requires @yarnpkg/sdks devDep)
+yarn plugin import @yarnpkg/plugin-sdks  # one-time: install sdks plugin
+yarn sdks vscode                         # update editor SDK (requires plugin above)
 yarn dedupe                          # deduplicate lockfile entries
 ```
 

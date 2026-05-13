@@ -19,7 +19,7 @@
 
 ## Triggers
 
-- Adding a new shadcn component via CLI (`yarn shadcn@latest add`)
+- Adding a new shadcn component via CLI (`yarn shadcn add` — shadcn installed as devDep)
 - Modifying variant options in `cva()` calls within a UI component
 - Composing Radix sub-components (`Dialog.Trigger`, `Dialog.Content`) in a feature component
 - Changing CSS variable values in `globals.css` (color tokens, radius, spacing)
