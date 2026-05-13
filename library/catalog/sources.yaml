@@ -109,3 +109,50 @@ sources:
     useMode: reference
     installMode: not-installable
     riskLevel: medium
+  - id: voltagent
+    url: https://voltagent.dev/
+    policy: candidate-only
+    status: candidate
+    pinnedVersion: "2026-05-01"
+    pinnedHash: "sha256-candidate-voltagent"
+    license: unknown
+    notes: Python-first agent framework; all primitives rejected due to unsupported stack
+    containsStacks:
+      - python
+      - agents
+    unsafeHookCommands: []
+    # Curated library fields
+    useMode: reference
+    installMode: not-installable
+    riskLevel: medium
+  - id: everything-cc
+    url: https://everything.cc/
+    policy: candidate-only
+    status: candidate
+    pinnedVersion: "2026-05-01"
+    pinnedHash: "sha256-candidate-everything-cc"
+    license: unknown
+    notes: community Claude skill collection index; discovery reference only
+    containsStacks:
+      - discovery-index
+    unsafeHookCommands: []
+    # Curated library fields
+    useMode: reference
+    installMode: not-installable
+    riskLevel: medium
+  - id: claude-docs
+    url: https://docs.anthropic.com/
+    policy: reference
+    status: approved
+    pinnedVersion: "2026-05-01"
+    pinnedHash: "sha256-candidate-claude-docs"
+    license: unknown
+    notes: official Anthropic documentation; reference-only, no artifact copy
+    containsStacks:
+      - claude-code
+      - mcp
+    unsafeHookCommands: []
+    # Curated library fields
+    useMode: reference
+    installMode: not-installable
+    riskLevel: low

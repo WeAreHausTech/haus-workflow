@@ -221,6 +221,56 @@
           "reason": "Same as skills policy: inspiration only; wording must be Haus-owned."
         }
       ]
+    },
+    {
+      "source": "voltagent",
+      "ideasAccepted": [],
+      "ideasRejected": [
+        {
+          "idea": "Use VoltAgent primitives or architecture patterns in Haus",
+          "reason": "Python-first framework. Python is an unsupported stack in Haus. No ideas extracted."
+        }
+      ]
+    },
+    {
+      "source": "everything-cc",
+      "ideasAccepted": [
+        {
+          "idea": "Maintain a community-facing index as a discovery signal during source auditing",
+          "target": "docs/curated-library.md",
+          "reason": "Validates that public discovery indices (everything.cc, skills.sh, prpm) are useful audit inputs, not catalog truth.",
+          "copied": false,
+          "maintenanceRisk": "low",
+          "licenseAttributionConcern": "none",
+          "productFit": "medium"
+        }
+      ],
+      "ideasRejected": [
+        {
+          "idea": "Import everything.cc listings directly into Haus catalog without per-item audit",
+          "reason": "Bypasses curation gates. Index entries must be individually audited before any can install."
+        }
+      ]
+    },
+    {
+      "source": "claude-docs",
+      "ideasAccepted": [
+        {
+          "idea": "Record official Anthropic doc URLs as reference-only entries in curation-decisions.json",
+          "target": "library/curated/decisions/curation-decisions.json",
+          "reason": "Provides stable, authoritative URL references for skill authors without copying doc content.",
+          "copied": false,
+          "maintenanceRisk": "low",
+          "licenseAttributionConcern": "none",
+          "productFit": "strong"
+        }
+      ],
+      "ideasRejected": [
+        {
+          "idea": "Copy official Anthropic documentation prose verbatim into Haus skills or agents",
+          "reason": "No reuse license on documentation content. All Haus text must be Haus-owned."
+        }
+      ]
     }
   ]
 }

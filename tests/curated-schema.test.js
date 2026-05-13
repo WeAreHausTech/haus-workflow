@@ -65,8 +65,7 @@ function scaffoldCuratedTemp(overrides = {}) {
   return temp;
 }
 
-test("curated audit passes on the committed repo (no decisions file yet)", () => {
-  // The real repo has no curation-decisions.json yet — the audit should pass with a note.
+test("curated audit passes on the committed repo", () => {
   execaSync("yarn", ["curated:audit"], { cwd: repoRoot });
 });
 
@@ -242,6 +241,9 @@ test("curated audit fails when copy decision has unknown license without accepte
 
 test("curated audit passes when copy decision has accepted-unknown with justification", () => {
   const temp = scaffoldCuratedTemp();
+  const targetPath = "library/curated/external/demo-source/foo/SKILL.md";
+  mkdirSync(path.join(temp, "library/curated/external/demo-source/foo"), { recursive: true });
+  writeFileSync(path.join(temp, targetPath), "# foo-skill\n\nCopied artifact content.\n");
   writeFileSync(
     path.join(temp, "library/curated/decisions/curation-decisions.json"),
     JSON.stringify(
@@ -258,6 +260,7 @@ test("curated audit passes when copy decision has accepted-unknown with justific
             licenseAcceptedUnknownJustification: "Site has no license file; content is publicly shared reference material with no commercial restriction stated. Low risk for internal tooling use.",
             pinnedRef: "abc1234",
             hash: "sha256-abc",
+            targetPath,
             decision: "copy",
             decisionReason: "Accepted with unknown license per written justification",
             riskLevel: "low",
