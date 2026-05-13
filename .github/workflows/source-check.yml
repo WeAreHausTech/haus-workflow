@@ -6,8 +6,11 @@ on:
   workflow_dispatch:
   pull_request:
     paths:
-      - "library/catalog/sources.yaml"
+      - "library/catalog/**"
       - "library/curation/**"
+
+permissions:
+  contents: read
 
 jobs:
   check-sources:
