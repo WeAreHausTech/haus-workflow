@@ -118,7 +118,6 @@ sources:
     license: unknown
     notes: Python-first agent framework; all primitives rejected due to unsupported stack
     containsStacks:
-      - python
       - agents
     unsafeHookCommands: []
     # Curated library fields
