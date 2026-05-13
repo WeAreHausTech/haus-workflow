@@ -38,7 +38,7 @@ haus update
 
 ```bash
 yarn install
-yarn verify        # typecheck + lint + build + test + prepack — must pass before any PR
+yarn verify        # typecheck + typecheck:scripts + lint + build + test + prepack (incl. audit scripts)
 ```
 
 See [Contributing](docs/contributing.md) for workflows (commands, scanner, catalog, skills, hooks, source decisions).
