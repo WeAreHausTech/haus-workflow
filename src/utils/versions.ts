@@ -24,3 +24,5 @@ export function assertVersionSatisfies(name: string, version: string, range: str
     throw new Error(`${name} version ${version} does not satisfy required range ${range}`);
   }
 }
+
+// test
