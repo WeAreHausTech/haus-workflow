@@ -5,9 +5,9 @@ const ALLOWLIST = [
   "voltagent.dev", "everything.cc", "docs.anthropic.com",
   // stack-specific official docs (PR10)
   "docs.vendure.io", "nextjs.org", "laravel.com", "tailwindcss.com", "ui.shadcn.com",
-  "www.radix-ui.com", "playwright.dev", "tanstack.com", "docs.nestjs.com", "nx.dev",
+  "radix-ui.com", "playwright.dev", "tanstack.com", "docs.nestjs.com", "nx.dev",
   "turbo.build", "vite.dev", "vuejs.org", "developer.wordpress.org", "vitest.dev",
-  "www.typescriptlang.org", "storybook.js.org", "react.dev"
+  "typescriptlang.org", "storybook.js.org", "react.dev"
 ];
 const UNSUPPORTED = [
   "python",
