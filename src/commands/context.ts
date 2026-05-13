@@ -3,6 +3,7 @@ import { classifyTaskIntents, computeRuleIntents, type TaskIntent } from "../rec
 import { readContextOrScan } from "../scanner/read-context.js";
 import type { Recommendation } from "../types.js";
 import { readJson, readText } from "../utils/fs.js";
+import { log } from "../utils/logger.js";
 import { hausPath } from "../utils/paths.js";
 
 type RecommendedRule = Recommendation["recommended"][number];
@@ -30,7 +31,7 @@ export async function runContext(options: { task?: string; fromHook?: boolean; j
   };
 
   if (options.json) {
-    console.log(JSON.stringify(payload, null, 2));
+    log(JSON.stringify(payload, null, 2));
     return;
   }
 
@@ -47,7 +48,7 @@ export async function runContext(options: { task?: string; fromHook?: boolean; j
     summary,
   ];
   const text = lines.join("\n");
-  console.log(options.fromHook ? text.slice(0, 3000) : text);
+  log(options.fromHook ? text.slice(0, 3000) : text);
 }
 
 /**

@@ -5,8 +5,7 @@ import fg from "fast-glob";
 
 import { loadCatalog } from "../catalog/load-catalog.js";
 import type { CatalogItem } from "../types.js";
-
-const PLACEHOLDER_OR_TODO_RE = /\b(TODO|FIXME|PLACEHOLDER|TBD)\b/i;
+import { PLACEHOLDER_RE as PLACEHOLDER_OR_TODO_RE } from "../utils/audit-checks.js";
 
 /** `npx` is allowed only when the next token is `tsx`. */
 const DISALLOWED_NPX_RE = /\bnpx\s+(?!tsx\b)\S+/i;

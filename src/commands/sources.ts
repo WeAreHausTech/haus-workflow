@@ -6,6 +6,7 @@ import { syncSkillsShSource } from "../sources/skills-sh-source.js";
 import { auditSources } from "../sources/source-audit.js";
 import { renderSourceReport } from "../sources/source-report.js";
 import { writeText } from "../utils/fs.js";
+import { error, log } from "../utils/logger.js";
 import { hausPath } from "../utils/paths.js";
 
 export async function runSources(action: "sync" | "report" | "audit", options: { check?: boolean }): Promise<void> {
@@ -13,11 +14,11 @@ export async function runSources(action: "sync" | "report" | "audit", options: {
   if (action === "audit") {
     const issues = await auditSources(root);
     if (issues.length) {
-      issues.forEach((x) => console.error(`- ${x}`));
+      issues.forEach((x) => error(`- ${x}`));
       process.exitCode = 1;
       return;
     }
-    console.log("Source audit passed.");
+    log("Source audit passed.");
     return;
   }
   const checkOnly = Boolean(options.check);
@@ -43,8 +44,8 @@ export async function runSources(action: "sync" | "report" | "audit", options: {
   const report = renderSourceReport(items);
   await writeText(hausPath(root, "sources-report.json"), report);
   if (action === "report") {
-    console.log(report);
+    log(report);
     return;
   }
-  console.log(`Source sync ${checkOnly ? "check" : "report"} generated at .haus-ai/sources-report.json`);
+  log(`Source sync ${checkOnly ? "check" : "report"} generated at .haus-ai/sources-report.json`);
 }

@@ -6,6 +6,7 @@ import type { Recommendation } from "../types.js";
 import { hashInstalledPaths } from "../update/hash-installed.js";
 import { createUnifiedDiff, hasTextChanged, summarizeDiff } from "../utils/diff.js";
 import { readJson, writeText } from "../utils/fs.js";
+import { log, warn } from "../utils/logger.js";
 import { claudePath, displayPath, hausPath, packageRoot } from "../utils/paths.js";
 
 import { loadClaudeHooksSettings } from "./load-hooks.js";
@@ -103,13 +104,13 @@ haus context --task "<task>"
     // Curated items must be approved and not blocked before they are written to disk.
     if (manifestItem.source === "curated") {
       if (manifestItem.reviewStatus !== "approved") {
-        console.warn(
+        warn(
           `Skipping curated item ${item.id}: reviewStatus is not approved (${manifestItem.reviewStatus ?? "unset"})`,
         );
         continue;
       }
       if (manifestItem.riskLevel === "blocked") {
-        console.warn(`Skipping curated item ${item.id}: riskLevel is blocked`);
+        warn(`Skipping curated item ${item.id}: riskLevel is blocked`);
         continue;
       }
     }
@@ -174,7 +175,7 @@ async function writeManagedText(root: string, filePath: string, nextText: string
     const printable = displayPath(root, filePath);
     const diffText = createUnifiedDiff(printable, prev, nextText);
     const summary = summarizeDiff(diffText);
-    console.log(`Overwriting ${printable} (diff +${summary.additions} -${summary.deletions})`);
+    log(`Overwriting ${printable} (diff +${summary.additions} -${summary.deletions})`);
   }
   await writeText(filePath, nextText);
 }

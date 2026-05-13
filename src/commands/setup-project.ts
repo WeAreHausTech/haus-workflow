@@ -1,4 +1,5 @@
 import { readJson, writeJson } from "../utils/fs.js";
+import { log } from "../utils/logger.js";
 import { hausPath } from "../utils/paths.js";
 import { ask, confirm } from "../utils/prompts.js";
 
@@ -21,9 +22,9 @@ export async function runSetupProject(options: { guided?: boolean; fast?: boolea
   const root = process.cwd();
   let mode: "guided" | "fast" = options.guided ? "guided" : "fast";
   if (!options.guided && !options.fast && !options.json) {
-    console.log("How do you want to set this project up?");
-    console.log("1. Guided setup - I'll ask a few simple questions, then scan the project.");
-    console.log("2. Fast setup - I'll only scan the project and recommend defaults.");
+    log("How do you want to set this project up?");
+    log("1. Guided setup - I'll ask a few simple questions, then scan the project.");
+    log("2. Fast setup - I'll only scan the project and recommend defaults.");
     const choice = await ask("Choose 1 or 2");
     mode = choice === "1" ? "guided" : "fast";
   }
@@ -49,8 +50,8 @@ export async function runSetupProject(options: { guided?: boolean; fast?: boolea
   if (options.json) return;
   const approved = await confirm("Approve and write Claude files now?");
   if (!approved) {
-    console.log("Setup reviewed. No files written.");
-    console.log("Next step: run `haus apply --write` when ready.");
+    log("Setup reviewed. No files written.");
+    log("Next step: run `haus apply --write` when ready.");
     return;
   }
   await runApply({ write: true });

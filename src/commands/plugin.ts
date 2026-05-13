@@ -3,6 +3,7 @@ import path from "node:path";
 
 import fs from "fs-extra";
 
+import { error, log } from "../utils/logger.js";
 import { displayPath, packageRoot } from "../utils/paths.js";
 
 export async function runPlugin(action: "install" | "validate", _options: Record<string, unknown>): Promise<void> {
@@ -10,23 +11,23 @@ export async function runPlugin(action: "install" | "validate", _options: Record
     const source = await resolvePluginSourcePath();
     const destination = resolvePluginInstallPath();
     if (!(await fs.pathExists(source))) {
-      console.error("plugin directory missing");
+      error("plugin directory missing");
       process.exitCode = 1;
       return;
     }
     await fs.ensureDir(path.dirname(destination));
     await fs.copy(source, destination, { overwrite: true, errorOnExist: false });
-    console.log(`Plugin installed at ${displayPath(process.cwd(), destination)}`);
+    log(`Plugin installed at ${displayPath(process.cwd(), destination)}`);
     return;
   }
   const source = await resolvePluginSourcePath();
   const ok = await fs.pathExists(path.join(source, ".claude-plugin/plugin.json"));
   if (!ok) {
-    console.error("plugin/.claude-plugin/plugin.json missing");
+    error("plugin/.claude-plugin/plugin.json missing");
     process.exitCode = 1;
     return;
   }
-  console.log("Plugin validate passed.");
+  log("Plugin validate passed.");
 }
 
 function resolvePluginInstallPath(): string {

@@ -2,6 +2,7 @@ import { formatRecommendationHuman } from "../recommender/explain-formatters.js"
 import { buildRecommendationExplanation, normalizeRecommendation } from "../recommender/explain-recommendation.js";
 import type { Recommendation } from "../types.js";
 import { readJson } from "../utils/fs.js";
+import { log } from "../utils/logger.js";
 import { hausPath } from "../utils/paths.js";
 
 export async function runExplainRecommendation(options: { json?: boolean }): Promise<void> {
@@ -13,8 +14,8 @@ export async function runExplainRecommendation(options: { json?: boolean }): Pro
   const normalized = normalizeRecommendation(rec);
   if (options.json) {
     const explanation = buildRecommendationExplanation(normalized);
-    console.log(JSON.stringify(explanation, null, 2));
+    log(JSON.stringify(explanation, null, 2));
     return;
   }
-  console.log(formatRecommendationHuman(normalized));
+  log(formatRecommendationHuman(normalized));
 }
