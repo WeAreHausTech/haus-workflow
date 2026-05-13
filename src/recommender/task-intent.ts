@@ -1,3 +1,69 @@
+import type { Recommendation } from "../types.js";
+
+type RecommendedRule = Recommendation["recommended"][number];
+
+/**
+ * Deterministic task-context filter over `recommendation.json`. Never widens the
+ * recommended set; only narrows it.
+ *
+ * Order:
+ *   1. No task -> return entire recommended set unchanged.
+ *   2. Task with classified intents -> keep rules whose computed intents overlap; baselines excluded.
+ *   3. Task without classified intents (ambiguous) -> token-keyword fallback against id/tags/ecosystem; baselines excluded.
+ *   4. Still empty -> non-baseline medium/high rules, capped at 8 to avoid "select everything" behavior.
+ */
+export function pickTaskRelevantRules(
+  recommendation: Recommendation | undefined,
+  task: string | undefined,
+  taskIntents: Set<TaskIntent> = new Set(),
+): RecommendedRule[] {
+  const recommended = recommendation?.recommended ?? [];
+  if (!task) return recommended;
+
+  if (taskIntents.size > 0) {
+    const intentMatches = recommended.filter((rule) => {
+      if (rule.selectionMode === "baseline") return false;
+      const ruleIntents = computeRuleIntents(rule);
+      if (ruleIntents.size === 0) return false;
+      for (const ti of taskIntents) {
+        if (ruleIntents.has(ti)) return true;
+      }
+      return false;
+    });
+    if (intentMatches.length > 0) return intentMatches;
+  }
+
+  const tokens = task
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter((t) => t.length >= 3);
+  const tokenMatches = recommended.filter((rule) => {
+    if (rule.selectionMode === "baseline") return false;
+    const corpus = [
+      rule.id,
+      rule.ecosystem ?? "",
+      ...(rule.tags ?? []),
+      rule.reason ?? "",
+      ...rule.reasons.map((r) => r.message),
+    ]
+      .join(" ")
+      .toLowerCase();
+    return tokens.some((token) => corpus.includes(token));
+  });
+  if (tokenMatches.length > 0) return tokenMatches;
+
+  const taskWantsTesting = taskIntents.has("testing");
+  const cappedMediumOrHigh = recommended.filter((rule) => {
+    if (rule.selectionMode === "baseline") return false;
+    if (rule.confidenceLevel === "low") return false;
+    if (taskWantsTesting) return true;
+    const ruleIntents = computeRuleIntents(rule);
+    const isTestingOnly = ruleIntents.size > 0 && [...ruleIntents].every((i) => i === "testing");
+    return !isTestingOnly;
+  });
+  return cappedMediumOrHigh.slice(0, 8);
+}
+
 export type TaskIntent =
   | "backend"
   | "frontend"
