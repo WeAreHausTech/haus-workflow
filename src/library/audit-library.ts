@@ -79,8 +79,13 @@ function auditCatalogManifest(root: string, items: CatalogItem[]): string[] {
 
     const base = referenceBaseDir(root, item);
     for (const ref of refs) {
-      // URL references (https://) are external docs — no local file to check
-      if (ref.startsWith("https://") || ref.startsWith("http://")) continue;
+      // External https:// references are doc URLs — no local file to check
+      if (/^https:\/\//i.test(ref)) continue;
+      // Plain http:// references are disallowed — all external refs must use HTTPS
+      if (/^http:\/\//i.test(ref)) {
+        failures.push(`${item.id}: catalog references[] entry uses insecure http URL: ${ref}`);
+        continue;
+      }
       const refAbs = path.resolve(base, ref);
       if (!fs.existsSync(refAbs)) {
         failures.push(
