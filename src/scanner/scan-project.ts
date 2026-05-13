@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 
 import type { ContextMap, PackageManager } from "../types.js";
+import { isRecord } from "../utils/audit-checks.js";
 import { hashText, listFiles, readJson, writeJson, writeText } from "../utils/fs.js";
 import { hausPath } from "../utils/paths.js";
 import { satisfiesVersion } from "../utils/versions.js";
@@ -80,10 +81,9 @@ export async function scanProject(root: string, mode: "guided" | "fast" = "fast"
   const securityRisks: string[] = [];
   const crossRepoHints: string[] = [];
   if (!safeFiles.some((f) => f.endsWith(".env.example"))) warnings.push("No .env.example found");
-  if (!(pkg && typeof pkg === "object" && "scripts" in pkg && String((pkg as any).scripts?.test ?? "").length > 0))
+  if (!(pkg && isRecord(pkg.scripts) && String(pkg.scripts.test ?? "").length > 0))
     warnings.push("No package.json test script found");
-  const nodeEngine =
-    typeof pkg?.engines === "object" ? String((pkg.engines as Record<string, unknown>)?.node ?? "") : "";
+  const nodeEngine = isRecord(pkg?.engines) ? String(pkg.engines.node ?? "") : "";
   if (nodeEngine && !satisfiesVersion(process.version, nodeEngine)) {
     warnings.push(`Current Node ${process.version} does not satisfy package engine ${nodeEngine}`);
   }
@@ -110,7 +110,7 @@ export async function scanProject(root: string, mode: "guided" | "fast" = "fast"
 
   const dependencyMap = {
     node: deps.filter((d) => !d.includes("/")),
-    composer: Object.keys(((composer?.require ?? {}) as Record<string, string>) ?? {}),
+    composer: isRecord(composer?.require) ? Object.keys(composer.require) : [],
   };
   const scanHashes = Object.fromEntries(
     await Promise.all(safeFiles.map(async (f) => [f, hashText(await readFile(path.join(root, f), "utf8"))] as const)),
@@ -128,8 +128,8 @@ export async function scanProject(root: string, mode: "guided" | "fast" = "fast"
 function dependencySet(pkg?: Record<string, unknown>, composer?: Record<string, unknown>): string[] {
   const out = new Set<string>();
   const pushObj = (obj: unknown) => {
-    if (!obj || typeof obj !== "object") return;
-    for (const key of Object.keys(obj as Record<string, unknown>)) out.add(key);
+    if (!isRecord(obj)) return;
+    for (const key of Object.keys(obj)) out.add(key);
   };
   pushObj(pkg?.dependencies);
   pushObj(pkg?.devDependencies);
