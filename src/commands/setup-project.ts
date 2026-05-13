@@ -75,13 +75,14 @@ export async function runSetupProject(options: { guided?: boolean; fast?: boolea
 
   // Doctor summary
   const hooks = await verifyProjectSettingsHooksContract(root);
-  const warningLines = [...new Set(context.warnings)];
+  const warningLines = [...new Set([...context.warnings, ...(recommendation.warnings ?? [])])];
   log(`Repo: ${context.repoName}`);
   for (const warning of warningLines) log(`- WARN: ${warning}`);
   if (hooks.skipped) {
     log(`- HOOKS: (skipped) ${hooks.message}`);
   } else if (!hooks.ok) {
     log(`- HOOKS FAIL: ${hooks.message}`);
+    process.exitCode = 1;
   } else {
     log(`- HOOKS OK: ${hooks.message}`);
   }
