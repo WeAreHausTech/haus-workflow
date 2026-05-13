@@ -79,6 +79,8 @@ function auditCatalogManifest(root: string, items: CatalogItem[]): string[] {
 
     const base = referenceBaseDir(root, item);
     for (const ref of refs) {
+      // URL references (https://) are external docs — no local file to check
+      if (ref.startsWith("https://") || ref.startsWith("http://")) continue;
       const refAbs = path.resolve(base, ref);
       if (!fs.existsSync(refAbs)) {
         failures.push(

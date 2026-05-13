@@ -54,6 +54,7 @@ test("stack skills use unique concrete folders with aligned metadata", () => {
     assert.equal(skillText.includes("## Use when"), true, `${item.id} missing use boundary`);
     assert.equal(skillText.includes("## Do not use when"), true, `${item.id} missing not-use boundary`);
     for (const relRef of item.references) {
+      if (relRef.startsWith("https://") || relRef.startsWith("http://")) continue;
       const refPath = path.resolve(item.path, relRef);
       assert.equal(fs.existsSync(refPath), true, `${item.id} missing reference file ${relRef}`);
     }

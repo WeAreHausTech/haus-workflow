@@ -271,6 +271,366 @@
           "reason": "No reuse license on documentation content. All Haus text must be Haus-owned."
         }
       ]
+    },
+    {
+      "source": "vendure-docs",
+      "ideasAccepted": [
+        {
+          "idea": "Link llms.txt AI-optimised index from vendure-app-patterns and vendure-plugin-patterns skill references",
+          "target": "library/catalog/manifest.json",
+          "reason": "Gives Claude direct access to the Vendure API surface when working on Vendure tasks.",
+          "copied": false,
+          "maintenanceRisk": "low",
+          "licenseAttributionConcern": "none",
+          "productFit": "strong"
+        }
+      ],
+      "ideasRejected": [
+        {
+          "idea": "Copy Vendure documentation prose verbatim into Haus skills",
+          "reason": "No reuse license on documentation content. All Haus text must be Haus-owned."
+        }
+      ]
+    },
+    {
+      "source": "nextjs-docs",
+      "ideasAccepted": [
+        {
+          "idea": "Link llms.txt AI-optimised index from nextjs-patterns skill references",
+          "target": "library/catalog/manifest.json",
+          "reason": "Gives Claude direct access to App Router and server component docs when working on Next.js tasks.",
+          "copied": false,
+          "maintenanceRisk": "low",
+          "licenseAttributionConcern": "none",
+          "productFit": "strong"
+        }
+      ],
+      "ideasRejected": [
+        {
+          "idea": "Copy Next.js documentation prose verbatim into Haus skills",
+          "reason": "No reuse license on documentation content. All Haus text must be Haus-owned."
+        }
+      ]
+    },
+    {
+      "source": "laravel-docs",
+      "ideasAccepted": [
+        {
+          "idea": "Link official Laravel docs URL from laravel-patterns, laravel-nova-patterns, and phpunit-patterns skill references",
+          "target": "library/catalog/manifest.json",
+          "reason": "Provides authoritative reference for Laravel routing, Eloquent, policies, and testing.",
+          "copied": false,
+          "maintenanceRisk": "low",
+          "licenseAttributionConcern": "none",
+          "productFit": "strong"
+        }
+      ],
+      "ideasRejected": [
+        {
+          "idea": "Copy Laravel documentation prose verbatim into Haus skills",
+          "reason": "No reuse license on documentation content. All Haus text must be Haus-owned."
+        }
+      ]
+    },
+    {
+      "source": "tailwind-docs",
+      "ideasAccepted": [
+        {
+          "idea": "Link official Tailwind CSS docs URL from tailwind-scss-patterns skill references",
+          "target": "library/catalog/manifest.json",
+          "reason": "Provides authoritative reference for utility classes, tokens, and configuration.",
+          "copied": false,
+          "maintenanceRisk": "low",
+          "licenseAttributionConcern": "none",
+          "productFit": "strong"
+        }
+      ],
+      "ideasRejected": [
+        {
+          "idea": "Copy Tailwind CSS documentation prose verbatim into Haus skills",
+          "reason": "No reuse license on documentation content. All Haus text must be Haus-owned."
+        }
+      ]
+    },
+    {
+      "source": "shadcn-docs",
+      "ideasAccepted": [
+        {
+          "idea": "Link official shadcn/ui docs URL from radix-shadcn-patterns skill references",
+          "target": "library/catalog/manifest.json",
+          "reason": "Provides authoritative reference for component CLI usage, theming, and variant patterns.",
+          "copied": false,
+          "maintenanceRisk": "low",
+          "licenseAttributionConcern": "none",
+          "productFit": "strong"
+        }
+      ],
+      "ideasRejected": [
+        {
+          "idea": "Copy shadcn/ui documentation prose verbatim into Haus skills",
+          "reason": "No reuse license on documentation content. All Haus text must be Haus-owned."
+        }
+      ]
+    },
+    {
+      "source": "radix-docs",
+      "ideasAccepted": [
+        {
+          "idea": "Link official Radix UI primitives docs URL from radix-shadcn-patterns skill references",
+          "target": "library/catalog/manifest.json",
+          "reason": "Provides authoritative reference for accessible component APIs and focus management.",
+          "copied": false,
+          "maintenanceRisk": "low",
+          "licenseAttributionConcern": "none",
+          "productFit": "strong"
+        }
+      ],
+      "ideasRejected": [
+        {
+          "idea": "Copy Radix UI documentation prose verbatim into Haus skills",
+          "reason": "No reuse license on documentation content. All Haus text must be Haus-owned."
+        }
+      ]
+    },
+    {
+      "source": "playwright-docs",
+      "ideasAccepted": [
+        {
+          "idea": "Link official Playwright docs URL from playwright-patterns skill references",
+          "target": "library/catalog/manifest.json",
+          "reason": "Provides authoritative reference for test authoring, fixtures, and browser automation.",
+          "copied": false,
+          "maintenanceRisk": "low",
+          "licenseAttributionConcern": "none",
+          "productFit": "strong"
+        }
+      ],
+      "ideasRejected": [
+        {
+          "idea": "Copy Playwright documentation prose verbatim into Haus skills",
+          "reason": "No reuse license on documentation content. All Haus text must be Haus-owned."
+        }
+      ]
+    },
+    {
+      "source": "tanstack-docs",
+      "ideasAccepted": [
+        {
+          "idea": "Link official TanStack Query and Router docs URLs from tanstack-query-router-patterns skill references",
+          "target": "library/catalog/manifest.json",
+          "reason": "Provides authoritative reference for query keys, mutations, and type-safe routing.",
+          "copied": false,
+          "maintenanceRisk": "low",
+          "licenseAttributionConcern": "none",
+          "productFit": "strong"
+        }
+      ],
+      "ideasRejected": [
+        {
+          "idea": "Copy TanStack documentation prose verbatim into Haus skills",
+          "reason": "No reuse license on documentation content. All Haus text must be Haus-owned."
+        }
+      ]
+    },
+    {
+      "source": "nestjs-docs",
+      "ideasAccepted": [
+        {
+          "idea": "Link official NestJS docs URL from nestjs-graphql-patterns skill references",
+          "target": "library/catalog/manifest.json",
+          "reason": "Provides authoritative reference for modules, providers, guards, and GraphQL integration.",
+          "copied": false,
+          "maintenanceRisk": "low",
+          "licenseAttributionConcern": "none",
+          "productFit": "strong"
+        }
+      ],
+      "ideasRejected": [
+        {
+          "idea": "Copy NestJS documentation prose verbatim into Haus skills",
+          "reason": "No reuse license on documentation content. All Haus text must be Haus-owned."
+        }
+      ]
+    },
+    {
+      "source": "nx-docs",
+      "ideasAccepted": [
+        {
+          "idea": "Link official Nx docs URL from nx21-monorepo-patterns skill references",
+          "target": "library/catalog/manifest.json",
+          "reason": "Provides authoritative reference for project graph, targets, and CI pipelines.",
+          "copied": false,
+          "maintenanceRisk": "low",
+          "licenseAttributionConcern": "none",
+          "productFit": "strong"
+        }
+      ],
+      "ideasRejected": [
+        {
+          "idea": "Copy Nx documentation prose verbatim into Haus skills",
+          "reason": "No reuse license on documentation content. All Haus text must be Haus-owned."
+        }
+      ]
+    },
+    {
+      "source": "turbo-docs",
+      "ideasAccepted": [
+        {
+          "idea": "Link official Turborepo docs URL from turbo-monorepo-patterns skill references",
+          "target": "library/catalog/manifest.json",
+          "reason": "Provides authoritative reference for pipeline configuration and caching.",
+          "copied": false,
+          "maintenanceRisk": "low",
+          "licenseAttributionConcern": "none",
+          "productFit": "strong"
+        }
+      ],
+      "ideasRejected": [
+        {
+          "idea": "Copy Turborepo documentation prose verbatim into Haus skills",
+          "reason": "No reuse license on documentation content. All Haus text must be Haus-owned."
+        }
+      ]
+    },
+    {
+      "source": "vite-docs",
+      "ideasAccepted": [
+        {
+          "idea": "Link official Vite and Vitest docs URLs from vite8-patterns skill references",
+          "target": "library/catalog/manifest.json",
+          "reason": "Provides authoritative reference for Vite config, plugins, and test runner.",
+          "copied": false,
+          "maintenanceRisk": "low",
+          "licenseAttributionConcern": "none",
+          "productFit": "strong"
+        }
+      ],
+      "ideasRejected": [
+        {
+          "idea": "Copy Vite documentation prose verbatim into Haus skills",
+          "reason": "No reuse license on documentation content. All Haus text must be Haus-owned."
+        }
+      ]
+    },
+    {
+      "source": "vue-docs",
+      "ideasAccepted": [
+        {
+          "idea": "Link official Vue.js docs URL from vue-patterns skill references",
+          "target": "library/catalog/manifest.json",
+          "reason": "Provides authoritative reference for Composition API, reactivity, composables, and Pinia.",
+          "copied": false,
+          "maintenanceRisk": "low",
+          "licenseAttributionConcern": "none",
+          "productFit": "strong"
+        }
+      ],
+      "ideasRejected": [
+        {
+          "idea": "Copy Vue.js documentation prose verbatim into Haus skills",
+          "reason": "No reuse license on documentation content. All Haus text must be Haus-owned."
+        }
+      ]
+    },
+    {
+      "source": "wordpress-dev-docs",
+      "ideasAccepted": [
+        {
+          "idea": "Link official WordPress developer docs URL from wordpress-patterns, wordpress-bedrock-patterns, and wordpress-acf-elementor-jetengine-patterns skill references",
+          "target": "library/catalog/manifest.json",
+          "reason": "Provides authoritative reference for hooks, REST API, plugin and theme development.",
+          "copied": false,
+          "maintenanceRisk": "low",
+          "licenseAttributionConcern": "none",
+          "productFit": "strong"
+        }
+      ],
+      "ideasRejected": [
+        {
+          "idea": "Copy WordPress developer documentation prose verbatim into Haus skills",
+          "reason": "No reuse license on documentation content. All Haus text must be Haus-owned."
+        }
+      ]
+    },
+    {
+      "source": "vitest-docs",
+      "ideasAccepted": [
+        {
+          "idea": "Link official Vitest docs URL from vite8-patterns and testing-library-patterns skill references",
+          "target": "library/catalog/manifest.json",
+          "reason": "Provides authoritative reference for Vitest configuration, mocking, and coverage.",
+          "copied": false,
+          "maintenanceRisk": "low",
+          "licenseAttributionConcern": "none",
+          "productFit": "strong"
+        }
+      ],
+      "ideasRejected": [
+        {
+          "idea": "Copy Vitest documentation prose verbatim into Haus skills",
+          "reason": "No reuse license on documentation content. All Haus text must be Haus-owned."
+        }
+      ]
+    },
+    {
+      "source": "typescript-docs",
+      "ideasAccepted": [
+        {
+          "idea": "Link official TypeScript handbook URL from typescript6-patterns skill references",
+          "target": "library/catalog/manifest.json",
+          "reason": "Provides authoritative reference for type system, generics, and utility types.",
+          "copied": false,
+          "maintenanceRisk": "low",
+          "licenseAttributionConcern": "none",
+          "productFit": "strong"
+        }
+      ],
+      "ideasRejected": [
+        {
+          "idea": "Copy TypeScript documentation prose verbatim into Haus skills",
+          "reason": "No reuse license on documentation content. All Haus text must be Haus-owned."
+        }
+      ]
+    },
+    {
+      "source": "storybook-docs",
+      "ideasAccepted": [
+        {
+          "idea": "Link official Storybook docs URL from storybook-patterns skill references",
+          "target": "library/catalog/manifest.json",
+          "reason": "Provides authoritative reference for story authoring, args, controls, and addons.",
+          "copied": false,
+          "maintenanceRisk": "low",
+          "licenseAttributionConcern": "none",
+          "productFit": "strong"
+        }
+      ],
+      "ideasRejected": [
+        {
+          "idea": "Copy Storybook documentation prose verbatim into Haus skills",
+          "reason": "No reuse license on documentation content. All Haus text must be Haus-owned."
+        }
+      ]
+    },
+    {
+      "source": "react-docs",
+      "ideasAccepted": [
+        {
+          "idea": "Link official React docs URL from react19-patterns skill references",
+          "target": "library/catalog/manifest.json",
+          "reason": "Provides authoritative reference for hooks, server components, Suspense, and React 19 changes.",
+          "copied": false,
+          "maintenanceRisk": "low",
+          "licenseAttributionConcern": "none",
+          "productFit": "strong"
+        }
+      ],
+      "ideasRejected": [
+        {
+          "idea": "Copy React documentation prose verbatim into Haus skills",
+          "reason": "No reuse license on documentation content. All Haus text must be Haus-owned."
+        }
+      ]
     }
   ]
 }

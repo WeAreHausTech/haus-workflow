@@ -355,6 +355,357 @@
           "reviewStatus": "candidate"
         }
       ]
+    },
+    {
+      "sourceId": "vendure-docs",
+      "sourceUrl": "https://docs.vendure.io/",
+      "license": "unknown",
+      "licenseConfidence": "unknown",
+      "auditedAt": "2026-05-13",
+      "auditNotes": "Official Vendure documentation site. Includes llms.txt AI-optimised index. Reference-only; no artifact copy.",
+      "items": [
+        {
+          "id": "vendure-docs.llms-txt",
+          "name": "llms.txt",
+          "kind": "reference",
+          "pathOrUrl": "https://docs.vendure.io/llms.txt",
+          "detectedStacks": ["vendure3"],
+          "summary": "AI-optimised flat index of Vendure documentation, structured for LLM consumption.",
+          "reviewStatus": "candidate"
+        }
+      ]
+    },
+    {
+      "sourceId": "nextjs-docs",
+      "sourceUrl": "https://nextjs.org/",
+      "license": "unknown",
+      "licenseConfidence": "unknown",
+      "auditedAt": "2026-05-13",
+      "auditNotes": "Official Next.js documentation site. Includes llms.txt AI-optimised index. Reference-only; no artifact copy.",
+      "items": [
+        {
+          "id": "nextjs-docs.llms-txt",
+          "name": "llms.txt",
+          "kind": "reference",
+          "pathOrUrl": "https://nextjs.org/llms.txt",
+          "detectedStacks": ["nextjs"],
+          "summary": "AI-optimised flat index of Next.js documentation, structured for LLM consumption.",
+          "reviewStatus": "candidate"
+        }
+      ]
+    },
+    {
+      "sourceId": "laravel-docs",
+      "sourceUrl": "https://laravel.com/",
+      "license": "unknown",
+      "licenseConfidence": "unknown",
+      "auditedAt": "2026-05-13",
+      "auditNotes": "Official Laravel documentation site. Reference-only; no artifact copy.",
+      "items": [
+        {
+          "id": "laravel-docs.main",
+          "name": "docs",
+          "kind": "reference",
+          "pathOrUrl": "https://laravel.com/docs",
+          "detectedStacks": ["laravel"],
+          "summary": "Official Laravel framework documentation covering routing, Eloquent, queues, policies, and testing.",
+          "reviewStatus": "candidate"
+        }
+      ]
+    },
+    {
+      "sourceId": "tailwind-docs",
+      "sourceUrl": "https://tailwindcss.com/",
+      "license": "unknown",
+      "licenseConfidence": "unknown",
+      "auditedAt": "2026-05-13",
+      "auditNotes": "Official Tailwind CSS documentation site. Reference-only; no artifact copy.",
+      "items": [
+        {
+          "id": "tailwind-docs.main",
+          "name": "docs",
+          "kind": "reference",
+          "pathOrUrl": "https://tailwindcss.com/docs",
+          "detectedStacks": ["tailwind"],
+          "summary": "Official Tailwind CSS documentation covering utility classes, configuration, and plugins.",
+          "reviewStatus": "candidate"
+        }
+      ]
+    },
+    {
+      "sourceId": "shadcn-docs",
+      "sourceUrl": "https://ui.shadcn.com/",
+      "license": "unknown",
+      "licenseConfidence": "unknown",
+      "auditedAt": "2026-05-13",
+      "auditNotes": "Official shadcn/ui documentation site. Reference-only; no artifact copy.",
+      "items": [
+        {
+          "id": "shadcn-docs.main",
+          "name": "docs",
+          "kind": "reference",
+          "pathOrUrl": "https://ui.shadcn.com/docs",
+          "detectedStacks": ["shadcn"],
+          "summary": "Official shadcn/ui documentation covering component installation, theming, and CLI usage.",
+          "reviewStatus": "candidate"
+        }
+      ]
+    },
+    {
+      "sourceId": "radix-docs",
+      "sourceUrl": "https://www.radix-ui.com/",
+      "license": "unknown",
+      "licenseConfidence": "unknown",
+      "auditedAt": "2026-05-13",
+      "auditNotes": "Official Radix UI primitives documentation site. Reference-only; no artifact copy.",
+      "items": [
+        {
+          "id": "radix-docs.primitives",
+          "name": "primitives docs",
+          "kind": "reference",
+          "pathOrUrl": "https://www.radix-ui.com/primitives/docs",
+          "detectedStacks": ["radix"],
+          "summary": "Official Radix UI primitives documentation covering accessible component APIs, focus management, and composition patterns.",
+          "reviewStatus": "candidate"
+        }
+      ]
+    },
+    {
+      "sourceId": "playwright-docs",
+      "sourceUrl": "https://playwright.dev/",
+      "license": "unknown",
+      "licenseConfidence": "unknown",
+      "auditedAt": "2026-05-13",
+      "auditNotes": "Official Playwright documentation site. Reference-only; no artifact copy.",
+      "items": [
+        {
+          "id": "playwright-docs.main",
+          "name": "docs",
+          "kind": "reference",
+          "pathOrUrl": "https://playwright.dev/docs/intro",
+          "detectedStacks": ["playwright"],
+          "summary": "Official Playwright documentation covering test authoring, fixtures, page objects, and browser automation.",
+          "reviewStatus": "candidate"
+        }
+      ]
+    },
+    {
+      "sourceId": "tanstack-docs",
+      "sourceUrl": "https://tanstack.com/",
+      "license": "unknown",
+      "licenseConfidence": "unknown",
+      "auditedAt": "2026-05-13",
+      "auditNotes": "Official TanStack documentation site covering Query and Router. Reference-only; no artifact copy.",
+      "items": [
+        {
+          "id": "tanstack-docs.query",
+          "name": "TanStack Query docs",
+          "kind": "reference",
+          "pathOrUrl": "https://tanstack.com/query/latest/docs",
+          "detectedStacks": ["tanstack-query"],
+          "summary": "Official TanStack Query documentation covering query keys, mutations, invalidation, and cache behaviour.",
+          "reviewStatus": "candidate"
+        },
+        {
+          "id": "tanstack-docs.router",
+          "name": "TanStack Router docs",
+          "kind": "reference",
+          "pathOrUrl": "https://tanstack.com/router/latest/docs",
+          "detectedStacks": ["tanstack-router"],
+          "summary": "Official TanStack Router documentation covering type-safe routing, loaders, and search params.",
+          "reviewStatus": "candidate"
+        }
+      ]
+    },
+    {
+      "sourceId": "nestjs-docs",
+      "sourceUrl": "https://docs.nestjs.com/",
+      "license": "unknown",
+      "licenseConfidence": "unknown",
+      "auditedAt": "2026-05-13",
+      "auditNotes": "Official NestJS documentation site. Reference-only; no artifact copy.",
+      "items": [
+        {
+          "id": "nestjs-docs.main",
+          "name": "docs",
+          "kind": "reference",
+          "pathOrUrl": "https://docs.nestjs.com/",
+          "detectedStacks": ["nestjs"],
+          "summary": "Official NestJS documentation covering modules, providers, guards, interceptors, and GraphQL integration.",
+          "reviewStatus": "candidate"
+        }
+      ]
+    },
+    {
+      "sourceId": "nx-docs",
+      "sourceUrl": "https://nx.dev/",
+      "license": "unknown",
+      "licenseConfidence": "unknown",
+      "auditedAt": "2026-05-13",
+      "auditNotes": "Official Nx monorepo documentation site. Reference-only; no artifact copy.",
+      "items": [
+        {
+          "id": "nx-docs.main",
+          "name": "docs",
+          "kind": "reference",
+          "pathOrUrl": "https://nx.dev/docs",
+          "detectedStacks": ["nx21"],
+          "summary": "Official Nx documentation covering project graph, targets, generators, and CI pipelines.",
+          "reviewStatus": "candidate"
+        }
+      ]
+    },
+    {
+      "sourceId": "turbo-docs",
+      "sourceUrl": "https://turbo.build/",
+      "license": "unknown",
+      "licenseConfidence": "unknown",
+      "auditedAt": "2026-05-13",
+      "auditNotes": "Official Turborepo documentation site. Reference-only; no artifact copy.",
+      "items": [
+        {
+          "id": "turbo-docs.main",
+          "name": "repo docs",
+          "kind": "reference",
+          "pathOrUrl": "https://turbo.build/repo/docs",
+          "detectedStacks": ["turbo"],
+          "summary": "Official Turborepo documentation covering pipeline configuration, caching, and workspace orchestration.",
+          "reviewStatus": "candidate"
+        }
+      ]
+    },
+    {
+      "sourceId": "vite-docs",
+      "sourceUrl": "https://vite.dev/",
+      "license": "unknown",
+      "licenseConfidence": "unknown",
+      "auditedAt": "2026-05-13",
+      "auditNotes": "Official Vite documentation site. Reference-only; no artifact copy.",
+      "items": [
+        {
+          "id": "vite-docs.main",
+          "name": "guide",
+          "kind": "reference",
+          "pathOrUrl": "https://vite.dev/guide",
+          "detectedStacks": ["vite8"],
+          "summary": "Official Vite documentation covering config, plugins, build modes, and dev server.",
+          "reviewStatus": "candidate"
+        }
+      ]
+    },
+    {
+      "sourceId": "vue-docs",
+      "sourceUrl": "https://vuejs.org/",
+      "license": "unknown",
+      "licenseConfidence": "unknown",
+      "auditedAt": "2026-05-13",
+      "auditNotes": "Official Vue.js documentation site. Reference-only; no artifact copy.",
+      "items": [
+        {
+          "id": "vue-docs.main",
+          "name": "guide",
+          "kind": "reference",
+          "pathOrUrl": "https://vuejs.org/guide",
+          "detectedStacks": ["vue"],
+          "summary": "Official Vue.js documentation covering Composition API, reactivity, composables, Pinia, and routing.",
+          "reviewStatus": "candidate"
+        }
+      ]
+    },
+    {
+      "sourceId": "wordpress-dev-docs",
+      "sourceUrl": "https://developer.wordpress.org/",
+      "license": "unknown",
+      "licenseConfidence": "unknown",
+      "auditedAt": "2026-05-13",
+      "auditNotes": "Official WordPress developer documentation site. Reference-only; no artifact copy.",
+      "items": [
+        {
+          "id": "wordpress-dev-docs.main",
+          "name": "developer docs",
+          "kind": "reference",
+          "pathOrUrl": "https://developer.wordpress.org/",
+          "detectedStacks": ["wordpress"],
+          "summary": "Official WordPress developer documentation covering hooks, REST API, plugin development, and theme development.",
+          "reviewStatus": "candidate"
+        }
+      ]
+    },
+    {
+      "sourceId": "vitest-docs",
+      "sourceUrl": "https://vitest.dev/",
+      "license": "unknown",
+      "licenseConfidence": "unknown",
+      "auditedAt": "2026-05-13",
+      "auditNotes": "Official Vitest documentation site. Reference-only; no artifact copy.",
+      "items": [
+        {
+          "id": "vitest-docs.main",
+          "name": "guide",
+          "kind": "reference",
+          "pathOrUrl": "https://vitest.dev/guide",
+          "detectedStacks": ["vite8"],
+          "summary": "Official Vitest documentation covering test configuration, mocking, coverage, and Vite integration.",
+          "reviewStatus": "candidate"
+        }
+      ]
+    },
+    {
+      "sourceId": "typescript-docs",
+      "sourceUrl": "https://www.typescriptlang.org/",
+      "license": "unknown",
+      "licenseConfidence": "unknown",
+      "auditedAt": "2026-05-13",
+      "auditNotes": "Official TypeScript documentation site. Reference-only; no artifact copy.",
+      "items": [
+        {
+          "id": "typescript-docs.handbook",
+          "name": "handbook",
+          "kind": "reference",
+          "pathOrUrl": "https://www.typescriptlang.org/docs/handbook/",
+          "detectedStacks": ["typescript"],
+          "summary": "Official TypeScript handbook covering type system, generics, utility types, and declaration files.",
+          "reviewStatus": "candidate"
+        }
+      ]
+    },
+    {
+      "sourceId": "storybook-docs",
+      "sourceUrl": "https://storybook.js.org/",
+      "license": "unknown",
+      "licenseConfidence": "unknown",
+      "auditedAt": "2026-05-13",
+      "auditNotes": "Official Storybook documentation site. Reference-only; no artifact copy.",
+      "items": [
+        {
+          "id": "storybook-docs.main",
+          "name": "docs",
+          "kind": "reference",
+          "pathOrUrl": "https://storybook.js.org/docs",
+          "detectedStacks": ["storybook"],
+          "summary": "Official Storybook documentation covering story authoring, args, controls, addons, and testing integrations.",
+          "reviewStatus": "candidate"
+        }
+      ]
+    },
+    {
+      "sourceId": "react-docs",
+      "sourceUrl": "https://react.dev/",
+      "license": "unknown",
+      "licenseConfidence": "unknown",
+      "auditedAt": "2026-05-13",
+      "auditNotes": "Official React documentation site. Reference-only; no artifact copy.",
+      "items": [
+        {
+          "id": "react-docs.main",
+          "name": "docs",
+          "kind": "reference",
+          "pathOrUrl": "https://react.dev/",
+          "detectedStacks": ["react"],
+          "summary": "Official React documentation covering hooks, server components, Suspense, transitions, and React 19 changes.",
+          "reviewStatus": "candidate"
+        }
+      ]
     }
   ]
 }
