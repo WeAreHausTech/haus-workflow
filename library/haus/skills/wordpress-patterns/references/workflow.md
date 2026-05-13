@@ -20,7 +20,7 @@ wp plugin deactivate plugin-slug
 wp cache flush                          # clear object cache
 wp rewrite flush                        # flush rewrite rules after CPT registration
 wp post list --post_type=custom-type    # verify CPT content
-wp rest list-endpoints                  # list registered REST routes
+wp rest route list                      # list registered REST routes
 
 # PHP linting
 phpcs --standard=WordPress src/         # WordPress coding standards
