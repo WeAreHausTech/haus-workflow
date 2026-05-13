@@ -144,10 +144,11 @@ if (fs.existsSync(decisionsAbs)) {
           fail(`${ctx}: decisionReason too short (min 8 chars)`);
         }
 
-        // copy/adapted require pinnedRef and hash
+        // copy/adapted require pinnedRef, hash, and targetPath
         if (DECISIONS_REQUIRE_PINNED.has(item.decision)) {
           if (!item.pinnedRef) fail(`${ctx}: decision="${item.decision}" requires pinnedRef`);
           if (!item.hash) fail(`${ctx}: decision="${item.decision}" requires hash`);
+          if (!item.targetPath) fail(`${ctx}: decision="${item.decision}" requires targetPath`);
         }
 
         // copy/adapted require a known license (unless accepted-unknown with justification)

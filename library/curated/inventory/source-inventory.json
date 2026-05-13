@@ -1,0 +1,360 @@
+{
+  "version": "0.1.0",
+  "generatedAt": "2026-05-13",
+  "sources": [
+    {
+      "sourceId": "anthropic-skills",
+      "sourceUrl": "https://github.com/anthropics/skills",
+      "license": "MIT",
+      "licenseConfidence": "high",
+      "auditedAt": "2026-05-13",
+      "auditNotes": "Official Anthropic skills repo. MIT license confirmed in repository root LICENSE file. Items are workflow and format examples, not stack-specific patterns. Haus equivalents already exist for most workflow primitives.",
+      "items": [
+        {
+          "id": "anthropic.pdf",
+          "name": "pdf",
+          "kind": "skill",
+          "pathOrUrl": "pdf/SKILL.md",
+          "detectedStacks": ["claude-code"],
+          "summary": "Skill for extracting and analysing content from PDF files using Claude's native PDF reading capability.",
+          "reviewStatus": "candidate"
+        },
+        {
+          "id": "anthropic.sequential-thinking",
+          "name": "sequential-thinking",
+          "kind": "skill",
+          "pathOrUrl": "sequential-thinking/SKILL.md",
+          "detectedStacks": ["claude-code"],
+          "summary": "Skill that guides Claude to reason step-by-step before producing an answer, reducing premature conclusions.",
+          "reviewStatus": "candidate"
+        },
+        {
+          "id": "anthropic.test-driven-development",
+          "name": "test-driven-development",
+          "kind": "skill",
+          "pathOrUrl": "test-driven-development/SKILL.md",
+          "detectedStacks": ["claude-code", "testing"],
+          "summary": "Skill that enforces a red-green-refactor TDD loop before shipping any code change.",
+          "reviewStatus": "candidate"
+        },
+        {
+          "id": "anthropic.code-review",
+          "name": "code-review",
+          "kind": "skill",
+          "pathOrUrl": "code-review/SKILL.md",
+          "detectedStacks": ["claude-code"],
+          "summary": "Structured code review skill covering correctness, security, performance, and readability.",
+          "reviewStatus": "candidate"
+        },
+        {
+          "id": "anthropic.github-integration",
+          "name": "github-integration",
+          "kind": "workflow",
+          "pathOrUrl": "github/SKILL.md",
+          "detectedStacks": ["github", "claude-code"],
+          "summary": "Workflow for interacting with GitHub issues, PRs, and repository state via gh CLI.",
+          "reviewStatus": "candidate"
+        },
+        {
+          "id": "anthropic.linear-integration",
+          "name": "linear-integration",
+          "kind": "skill",
+          "pathOrUrl": "linear-integration/SKILL.md",
+          "detectedStacks": ["linear"],
+          "summary": "Skill for reading and updating Linear issues and project state.",
+          "reviewStatus": "rejected",
+          "notes": "Linear is not a supported stack in Haus. Rejected at inventory stage."
+        },
+        {
+          "id": "anthropic.mcp-installation",
+          "name": "mcp-installation",
+          "kind": "skill",
+          "pathOrUrl": "mcp-installation/SKILL.md",
+          "detectedStacks": ["claude-code", "mcp"],
+          "summary": "Skill for installing and configuring MCP servers in a Claude Code environment.",
+          "reviewStatus": "candidate"
+        },
+        {
+          "id": "anthropic.subagents",
+          "name": "subagents",
+          "kind": "skill",
+          "pathOrUrl": "subagents/SKILL.md",
+          "detectedStacks": ["claude-code"],
+          "summary": "Patterns for spawning and orchestrating Claude subagents for parallel or delegated work.",
+          "reviewStatus": "candidate"
+        },
+        {
+          "id": "anthropic.web-search",
+          "name": "web-search",
+          "kind": "skill",
+          "pathOrUrl": "web-search/SKILL.md",
+          "detectedStacks": ["claude-code"],
+          "summary": "Skill for performing web searches and synthesising results within a Claude Code session.",
+          "reviewStatus": "candidate"
+        }
+      ]
+    },
+    {
+      "sourceId": "superpowers",
+      "sourceUrl": "https://github.com/obra/superpowers",
+      "license": "MIT",
+      "licenseConfidence": "high",
+      "auditedAt": "2026-05-13",
+      "auditNotes": "MIT license confirmed. Source policy is rewrite-only — no verbatim copy or adaptation permitted. Items audited for idea extraction only; any reuse must be fully Haus-authored.",
+      "items": [
+        {
+          "id": "superpowers.ship-it",
+          "name": "SHIP_IT",
+          "kind": "workflow",
+          "pathOrUrl": "SHIP_IT.md",
+          "detectedStacks": ["workflow"],
+          "summary": "End-to-end shipping workflow: plan, implement, verify, close. Enforces evidence-before-claims discipline.",
+          "reviewStatus": "candidate"
+        },
+        {
+          "id": "superpowers.code-review",
+          "name": "code-review",
+          "kind": "skill",
+          "pathOrUrl": "code-review/SKILL.md",
+          "detectedStacks": ["workflow"],
+          "summary": "Opinionated code review skill emphasising intent and outcome over line-level comments.",
+          "reviewStatus": "candidate"
+        },
+        {
+          "id": "superpowers.context-management",
+          "name": "context-management",
+          "kind": "skill",
+          "pathOrUrl": "context-management/SKILL.md",
+          "detectedStacks": ["context-minimisation", "workflow"],
+          "summary": "Techniques for minimising context window usage: load-on-demand, thin routers, progressive disclosure.",
+          "reviewStatus": "candidate"
+        },
+        {
+          "id": "superpowers.debug",
+          "name": "debug",
+          "kind": "skill",
+          "pathOrUrl": "debug/SKILL.md",
+          "detectedStacks": ["workflow"],
+          "summary": "Systematic debugging workflow: reproduce, isolate, hypothesise, verify, fix.",
+          "reviewStatus": "candidate"
+        },
+        {
+          "id": "superpowers.test",
+          "name": "test",
+          "kind": "skill",
+          "pathOrUrl": "test/SKILL.md",
+          "detectedStacks": ["testing", "workflow"],
+          "summary": "Testing workflow patterns: coverage discipline, regression guards, test-first habit.",
+          "reviewStatus": "candidate"
+        }
+      ]
+    },
+    {
+      "sourceId": "ecc",
+      "sourceUrl": "https://ecc.tools/skills",
+      "license": "unknown",
+      "licenseConfidence": "unknown",
+      "auditedAt": "2026-05-13",
+      "auditNotes": "License not found in public-facing content. Status: candidate-only. Items recorded for reference and idea tracking only. No installation until license is resolved.",
+      "items": [
+        {
+          "id": "ecc.context-minimization",
+          "name": "context-minimization",
+          "kind": "skill",
+          "pathOrUrl": "https://ecc.tools/skills/context-minimization",
+          "detectedStacks": ["context-minimisation", "token-budgeting"],
+          "summary": "Skill for aggressively reducing context window consumption via selective loading and summarisation.",
+          "reviewStatus": "candidate",
+          "notes": "Unknown license. Reference-only until resolved."
+        },
+        {
+          "id": "ecc.token-budgeting",
+          "name": "token-budgeting",
+          "kind": "skill",
+          "pathOrUrl": "https://ecc.tools/skills/token-budgeting",
+          "detectedStacks": ["token-budgeting"],
+          "summary": "Techniques for tracking and managing token budget across multi-step Claude Code sessions.",
+          "reviewStatus": "candidate",
+          "notes": "Unknown license. Reference-only until resolved."
+        }
+      ]
+    },
+    {
+      "sourceId": "skills-sh",
+      "sourceUrl": "https://skills.sh/",
+      "license": "unknown",
+      "licenseConfidence": "unknown",
+      "auditedAt": "2026-05-13",
+      "auditNotes": "Public discovery index listing community Claude Code skills. No license found. Used as a discovery signal for auditing other sources, not as a content source.",
+      "items": [
+        {
+          "id": "skills-sh.index",
+          "name": "skills.sh index",
+          "kind": "reference",
+          "pathOrUrl": "https://skills.sh/",
+          "detectedStacks": ["discovery-index"],
+          "summary": "Community-maintained discovery index of Claude Code skills. Used as a search signal for auditing candidate sources.",
+          "reviewStatus": "candidate",
+          "notes": "Index only. Individual listed items must be audited independently."
+        }
+      ]
+    },
+    {
+      "sourceId": "prpm",
+      "sourceUrl": "https://prpm.dev/",
+      "license": "unknown",
+      "licenseConfidence": "unknown",
+      "auditedAt": "2026-05-13",
+      "auditNotes": "Claude Code skills registry and discovery service. No license found. Used as a discovery signal only.",
+      "items": [
+        {
+          "id": "prpm.registry",
+          "name": "prpm registry",
+          "kind": "reference",
+          "pathOrUrl": "https://prpm.dev/",
+          "detectedStacks": ["discovery-index"],
+          "summary": "Claude Code skills registry offering search and discovery. Used as an external discovery signal.",
+          "reviewStatus": "candidate",
+          "notes": "Registry only. Individual listed items must be audited independently."
+        }
+      ]
+    },
+    {
+      "sourceId": "jeffallan-skills",
+      "sourceUrl": "https://github.com/jeffallan",
+      "license": "unknown",
+      "licenseConfidence": "unknown",
+      "auditedAt": "2026-05-13",
+      "auditNotes": "GitHub organisation with Claude Code skill examples. No explicit license found across reviewed repositories. Ideas around skill organisation and co-location patterns were noted.",
+      "items": [
+        {
+          "id": "jeffallan.skill-organization",
+          "name": "skill-organization",
+          "kind": "reference",
+          "pathOrUrl": "https://github.com/jeffallan",
+          "detectedStacks": ["workflow"],
+          "summary": "Skill organisation patterns: co-located references directories, flat naming conventions, explicit use-when sections.",
+          "reviewStatus": "candidate",
+          "notes": "Unknown license. Structural ideas only; no artifact copy."
+        }
+      ]
+    },
+    {
+      "sourceId": "skillkit",
+      "sourceUrl": "https://skillkit.dev/",
+      "license": "unknown",
+      "licenseConfidence": "unknown",
+      "auditedAt": "2026-05-13",
+      "auditNotes": "Skill packaging and validation framework for Claude Code. No license found. Ideas around machine-readable schemas and CI validation gates were noted.",
+      "items": [
+        {
+          "id": "skillkit.packaging",
+          "name": "packaging",
+          "kind": "reference",
+          "pathOrUrl": "https://skillkit.dev/docs/packaging",
+          "detectedStacks": ["workflow", "validation"],
+          "summary": "Skill packaging conventions: directory structure, metadata schema, and distribution format.",
+          "reviewStatus": "candidate",
+          "notes": "Unknown license. Schema ideas informed Haus source-decisions schema design."
+        },
+        {
+          "id": "skillkit.validation",
+          "name": "validation",
+          "kind": "reference",
+          "pathOrUrl": "https://skillkit.dev/docs/validation",
+          "detectedStacks": ["workflow", "validation"],
+          "summary": "Skill validation tooling: lint rules, schema checks, and CI gate patterns.",
+          "reviewStatus": "candidate",
+          "notes": "Unknown license. Validation gate patterns informed yarn sources:decisions CI gate."
+        }
+      ]
+    },
+    {
+      "sourceId": "voltagent",
+      "sourceUrl": "https://voltagent.dev/",
+      "license": "unknown",
+      "licenseConfidence": "unknown",
+      "auditedAt": "2026-05-13",
+      "auditNotes": "Python-first multi-agent orchestration framework. No primitives are usable in a Haus context — Python is an unsupported stack. All items rejected at inventory stage.",
+      "items": [
+        {
+          "id": "voltagent.python-sdk",
+          "name": "python-sdk",
+          "kind": "reference",
+          "pathOrUrl": "https://voltagent.dev/docs/sdk",
+          "detectedStacks": ["python", "agents"],
+          "summary": "Python SDK for building multi-agent workflows with VoltAgent orchestration.",
+          "reviewStatus": "rejected",
+          "notes": "Python is an unsupported stack in Haus. Rejected at inventory stage."
+        },
+        {
+          "id": "voltagent.workflow-engine",
+          "name": "workflow-engine",
+          "kind": "reference",
+          "pathOrUrl": "https://voltagent.dev/docs/workflows",
+          "detectedStacks": ["python", "agents"],
+          "summary": "Python-based workflow orchestration engine for agent pipelines.",
+          "reviewStatus": "rejected",
+          "notes": "Python is an unsupported stack in Haus. Rejected at inventory stage."
+        }
+      ]
+    },
+    {
+      "sourceId": "everything-cc",
+      "sourceUrl": "https://everything.cc/",
+      "license": "unknown",
+      "licenseConfidence": "unknown",
+      "auditedAt": "2026-05-13",
+      "auditNotes": "Community-curated collection index for Claude Code skills and tooling. Used as a discovery signal only. No individual items extracted for installation.",
+      "items": [
+        {
+          "id": "everything-cc.index",
+          "name": "everything.cc index",
+          "kind": "reference",
+          "pathOrUrl": "https://everything.cc/",
+          "detectedStacks": ["discovery-index"],
+          "summary": "Community-curated collection index of Claude Code skills, agents, hooks, and tooling. Used as a discovery signal.",
+          "reviewStatus": "candidate",
+          "notes": "Index only. Items must be audited individually before any can be installed."
+        }
+      ]
+    },
+    {
+      "sourceId": "claude-docs",
+      "sourceUrl": "https://docs.anthropic.com/",
+      "license": "unknown",
+      "licenseConfidence": "unknown",
+      "auditedAt": "2026-05-13",
+      "auditNotes": "Official Anthropic documentation. No explicit reuse license on documentation content. All items recorded as reference-only for use as URL pointers in skill reference arrays.",
+      "items": [
+        {
+          "id": "claude-docs.model-context-protocol",
+          "name": "model-context-protocol",
+          "kind": "reference",
+          "pathOrUrl": "https://docs.anthropic.com/en/docs/claude-code/mcp",
+          "detectedStacks": ["claude-code", "mcp"],
+          "summary": "Official MCP documentation covering server setup, tool definitions, and Claude Code integration.",
+          "reviewStatus": "candidate"
+        },
+        {
+          "id": "claude-docs.computer-use",
+          "name": "computer-use",
+          "kind": "reference",
+          "pathOrUrl": "https://docs.anthropic.com/en/docs/build-with-claude/computer-use",
+          "detectedStacks": ["claude-code"],
+          "summary": "Official documentation for Claude's computer use capability: screenshots, clicks, keyboard input.",
+          "reviewStatus": "candidate"
+        },
+        {
+          "id": "claude-docs.claude-code",
+          "name": "claude-code",
+          "kind": "reference",
+          "pathOrUrl": "https://docs.anthropic.com/en/docs/claude-code/overview",
+          "detectedStacks": ["claude-code"],
+          "summary": "Official Claude Code documentation: overview, tool use, hooks, slash commands, and agent SDK.",
+          "reviewStatus": "candidate"
+        }
+      ]
+    }
+  ]
+}
