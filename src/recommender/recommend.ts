@@ -132,6 +132,41 @@ export async function recommend(
       continue
     }
 
+    // Curated items must be explicitly approved before they can be recommended.
+    if (item.source === 'curated') {
+      const rs = item.reviewStatus
+      if (!rs || rs !== 'approved') {
+        skipped.push({
+          id: item.id,
+          reason: `Curated item not approved (reviewStatus=${rs ?? 'unset'})`,
+          skipReasons: [
+            {
+              code: 'curated-not-approved',
+              message: `Curated item requires reviewStatus:approved (got ${rs ?? 'unset'})`,
+              penalty: 100,
+              signal: `reviewStatus:${rs ?? 'unset'}`,
+            },
+          ],
+        })
+        continue
+      }
+      if (item.riskLevel === 'blocked') {
+        skipped.push({
+          id: item.id,
+          reason: 'Curated item risk level is blocked',
+          skipReasons: [
+            {
+              code: 'curated-risk-blocked',
+              message: 'Curated item riskLevel is blocked',
+              penalty: 100,
+              signal: 'riskLevel:blocked',
+            },
+          ],
+        })
+        continue
+      }
+    }
+
     const isDefaultBaseline = item.default === true
     const reasons: ReasonHit[] = []
     const skipReasons: SkipHit[] = []

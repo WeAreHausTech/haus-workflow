@@ -10,6 +10,10 @@ sources:
     containsStacks:
       - claude-code
     unsafeHookCommands: []
+    # Curated library fields
+    useMode: adapt-allowed
+    installMode: candidate
+    riskLevel: low
   - id: superpowers
     url: https://github.com/obra/superpowers
     policy: rewrite
@@ -23,6 +27,10 @@ sources:
       - testing
       - context-minimisation
     unsafeHookCommands: []
+    # Curated library fields
+    useMode: rewrite-only
+    installMode: candidate
+    riskLevel: low
   - id: ecc
     url: https://ecc.tools/skills
     policy: candidate-only
@@ -35,6 +43,10 @@ sources:
       - token-budgeting
       - context-minimisation
     unsafeHookCommands: []
+    # Curated library fields
+    useMode: reference
+    installMode: not-installable
+    riskLevel: medium
   - id: skills-sh
     url: https://skills.sh/
     policy: candidate-only
@@ -46,6 +58,10 @@ sources:
     containsStacks:
       - discovery-index
     unsafeHookCommands: []
+    # Curated library fields
+    useMode: reference
+    installMode: not-installable
+    riskLevel: medium
   - id: prpm
     url: https://prpm.dev/
     policy: candidate-only
@@ -57,6 +73,10 @@ sources:
     containsStacks:
       - discovery-index
     unsafeHookCommands: []
+    # Curated library fields
+    useMode: reference
+    installMode: not-installable
+    riskLevel: medium
   - id: jeffallan-skills
     url: https://github.com/jeffallan
     policy: candidate-only
@@ -69,6 +89,10 @@ sources:
       - workflow
       - discovery-index
     unsafeHookCommands: []
+    # Curated library fields
+    useMode: reference
+    installMode: not-installable
+    riskLevel: medium
   - id: skillkit
     url: https://skillkit.dev/
     policy: candidate-only
@@ -81,3 +105,7 @@ sources:
       - workflow
       - validation
     unsafeHookCommands: []
+    # Curated library fields
+    useMode: reference
+    installMode: not-installable
+    riskLevel: medium

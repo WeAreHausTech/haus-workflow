@@ -7,14 +7,37 @@
     "properties": {
       "id": { "type": "string" },
       "type": { "type": "string" },
-      "source": { "type": "string" },
+      "source": { "type": "string", "description": "\"haus\" for Haus-owned items; \"curated\" for approved external items." },
       "version": { "type": "string", "description": "@haus/ai package version when the row was written." },
       "hash": {
         "type": "string",
         "description": "sha256 digest of installed files listed in paths (see src/update/hash-installed.ts); placeholder when paths is empty."
       },
       "installMode": { "type": "string" },
-      "paths": { "type": "array", "items": { "type": "string" } }
+      "paths": { "type": "array", "items": { "type": "string" } },
+      "originSourceId": {
+        "type": "string",
+        "description": "For source:\"curated\" items — references the sourceId from sources.yaml."
+      },
+      "useMode": {
+        "type": "string",
+        "enum": ["copy", "adapted", "wrapped", "rewritten", "reference-only"],
+        "description": "How the upstream item was incorporated."
+      },
+      "license": {
+        "type": "string",
+        "description": "SPDX license identifier of the upstream source, e.g. \"MIT\"."
+      },
+      "riskLevel": {
+        "type": "string",
+        "enum": ["low", "medium", "high", "blocked"],
+        "description": "Risk level assessed during curation review."
+      },
+      "reviewStatus": {
+        "type": "string",
+        "enum": ["approved", "candidate", "needs-review", "rejected", "deprecated"],
+        "description": "Curation review gate status. Only approved items are installed."
+      }
     }
   }
 }

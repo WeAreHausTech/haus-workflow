@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "items"],
+  "properties": {
+    "version": { "type": "string", "description": "Schema version, e.g. \"0.1.0\"." },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "sourceId",
+          "sourceUrl",
+          "kind",
+          "license",
+          "licenseConfidence",
+          "decision",
+          "decisionReason",
+          "riskLevel",
+          "reviewStatus",
+          "auditedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Must match an item id in source-inventory.json, e.g. \"anthropic.pdf-tool\"."
+          },
+          "sourceId": {
+            "type": "string",
+            "description": "Must match a sourceId in source-inventory.json and sources.yaml."
+          },
+          "sourceUrl": {
+            "type": "string",
+            "description": "Direct URL to the upstream item (file, folder, or page)."
+          },
+          "kind": {
+            "type": "string",
+            "enum": ["skill", "agent", "hook", "command", "mcp-config", "workflow", "reference", "rule"]
+          },
+          "license": {
+            "type": "string",
+            "description": "SPDX license identifier, e.g. \"MIT\", or \"unknown\"."
+          },
+          "licenseConfidence": {
+            "type": "string",
+            "enum": ["high", "medium", "low", "unknown", "accepted-unknown"]
+          },
+          "pinnedRef": {
+            "type": "string",
+            "description": "Git SHA or version tag of the upstream source this item was derived from. Required when decision is copy or adapted."
+          },
+          "hash": {
+            "type": "string",
+            "description": "sha256 of the upstream source artifact at pinnedRef. Required when decision is copy or adapted."
+          },
+          "decision": {
+            "type": "string",
+            "enum": ["copy", "adapted", "wrapped", "rewritten", "reference-only", "rejected"]
+          },
+          "decisionReason": {
+            "type": "string",
+            "minLength": 8,
+            "description": "Human-readable rationale for the decision."
+          },
+          "targetCatalogId": {
+            "type": "string",
+            "description": "The catalog manifest id this decision maps to. Omitted when decision is rejected."
+          },
+          "targetPath": {
+            "type": "string",
+            "description": "Filesystem path of the resulting artifact. Omitted when decision is reference-only or rejected."
+          },
+          "riskLevel": {
+            "type": "string",
+            "enum": ["low", "medium", "high", "blocked"]
+          },
+          "reviewStatus": {
+            "type": "string",
+            "enum": ["approved", "candidate", "needs-review", "rejected", "deprecated"]
+          },
+          "installMode": {
+            "type": "string",
+            "enum": ["copy-selected", "plugin-only", "reference-only", "not-installable"]
+          },
+          "useMode": {
+            "type": "string",
+            "enum": ["copy", "adapted", "wrapped", "rewritten", "reference-only"]
+          },
+          "detectedStacks": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "maintenancePolicy": {
+            "type": "string",
+            "description": "When to re-review, e.g. \"check-on-upstream-update\" or \"annual\"."
+          },
+          "licenseAcceptedUnknownJustification": {
+            "type": "string",
+            "description": "Required when licenseConfidence is accepted-unknown. Written justification for accepting the unknown license."
+          },
+          "auditedAt": {
+            "type": "string",
+            "description": "ISO 8601 date when this decision was recorded."
+          }
+        },
+        "if": {
+          "properties": {
+            "decision": { "enum": ["copy", "adapted"] }
+          },
+          "required": ["decision"]
+        },
+        "then": {
+          "required": ["pinnedRef", "hash"]
+        }
+      }
+    }
+  }
+}

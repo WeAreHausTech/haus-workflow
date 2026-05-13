@@ -14,6 +14,12 @@ export type LockItem = {
   hash?: string;
   installMode?: string;
   paths?: string[];
+  // Curated provenance — populated for source:"curated" items
+  originSourceId?: string;
+  useMode?: string;
+  license?: string;
+  riskLevel?: string;
+  reviewStatus?: string;
 };
 
 export async function checkLock(root: string): Promise<{ ok: boolean; count: number }> {
