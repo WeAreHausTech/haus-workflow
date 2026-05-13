@@ -12,7 +12,10 @@ const out = path.join(root, "tmp/qa-out");
 fs.mkdirSync(out, { recursive: true });
 
 const targets = [
-  { fixture: "vendure-monorepo", tasks: ["build shipping plugin", "add admin ui extension", "create graphql resolver"] },
+  {
+    fixture: "vendure-monorepo",
+    tasks: ["build shipping plugin", "add admin ui extension", "create graphql resolver"],
+  },
   { fixture: "nextjs-app", tasks: ["build dashboard route", "add tanstack query mutation"] },
   { fixture: "nest-graphql-api", tasks: ["add graphql resolver with auth guard"] },
   { fixture: "laravel-app", tasks: ["create nova resource", "add queue job"] },
@@ -22,7 +25,7 @@ const targets = [
   { fixture: "laravel-with-react-frontend", tasks: ["add queue job", "build dashboard route"] },
   { fixture: "vendure-with-nextjs-storefront", tasks: ["build shipping plugin", "build dashboard route"] },
   { fixture: "orphan-graphql-config", tasks: ["generate graphql types"] },
-  { fixture: "wordpress-with-node-tooling", tasks: ["add custom block"] }
+  { fixture: "wordpress-with-node-tooling", tasks: ["add custom block"] },
 ];
 
 const results = [];
@@ -42,11 +45,14 @@ for (const t of targets) {
     fixture: t.fixture,
     roles: scan.repoRoles,
     stacks: scan.detectedStacks,
-    selected: rec.recommended.map((x) => ({ id: x.id, c: x.confidenceLevel, reasons: x.reasons.map((y) => y.code), score: x.score })),
+    selected: rec.recommended.map((x) => ({
+      id: x.id,
+      c: x.confidenceLevel,
+      reasons: x.reasons.map((y) => y.code),
+      score: x.score,
+    })),
     skipped: rec.skipped.map((x) => x.id),
-    tasks: Object.fromEntries(
-      Object.entries(taskCtx).map(([k, v]) => [k, v.selectedRules.map((x) => x.id)])
-    )
+    tasks: Object.fromEntries(Object.entries(taskCtx).map(([k, v]) => [k, v.selectedRules.map((x) => x.id)])),
   };
   fs.writeFileSync(path.join(out, `${t.fixture}.json`), JSON.stringify(entry, null, 2));
   results.push(entry);
