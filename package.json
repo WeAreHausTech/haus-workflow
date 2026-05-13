@@ -32,7 +32,8 @@
     "pack:local": "yarn pack",
     "publish:dry": "yarn npm publish --dry-run",
     "publish:private": "yarn npm publish --access restricted",
-    "prepack": "yarn build && yarn catalog:audit && yarn sources:audit && yarn sources:decisions && yarn library:audit && yarn curated:audit"
+    "prepack": "yarn build && yarn catalog:audit && yarn sources:audit && yarn sources:decisions && yarn library:audit && yarn curated:audit",
+    "prepare": "husky"
   },
   "dependencies": {
     "commander": "^13.0.0",
@@ -54,6 +55,8 @@
     "@typescript-eslint/parser": "^8.59.3",
     "eslint": "^9.0.0",
     "eslint-plugin-import": "^2.32.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.0.4",
     "prettier": "^3.8.3",
     "tsup": "^8.3.0",
     "tsx": "^4.19.0",
@@ -65,5 +68,11 @@
   "publishConfig": {
     "access": "restricted"
   },
-  "packageManager": "yarn@4.5.3"
+  "packageManager": "yarn@4.5.3",
+  "lint-staged": {
+    "*.ts": [
+      "eslint",
+      "prettier --write"
+    ]
+  }
 }
