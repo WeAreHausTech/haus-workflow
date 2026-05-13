@@ -113,7 +113,7 @@
           "required": ["decision"]
         },
         "then": {
-          "required": ["pinnedRef", "hash"]
+          "required": ["pinnedRef", "hash", "targetPath"]
         }
       }
     }
