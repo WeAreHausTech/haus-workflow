@@ -1,0 +1,50 @@
+name: Quality
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Setup Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "22"
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install
+        run: yarn install --immutable
+
+      - name: Lint
+        run: yarn lint
+
+      - name: Typecheck
+        run: yarn typecheck
+
+      - name: Typecheck scripts
+        run: yarn typecheck:scripts
+
+      - name: Catalog audit
+        run: yarn catalog:audit
+
+      - name: Sources audit
+        run: yarn sources:audit
+
+      - name: Sources decisions
+        run: yarn sources:decisions
+
+      - name: Library audit
+        run: yarn library:audit
+
+      - name: Curated audit
+        run: yarn curated:audit
