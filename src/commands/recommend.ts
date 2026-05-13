@@ -1,8 +1,8 @@
+import { flattenRecommendedHooks, loadClaudeHooksSettings } from "../claude/load-hooks.js";
+import { recommend } from "../recommender/recommend.js";
+import { readContextOrScan } from "../scanner/read-context.js";
 import { writeJson } from "../utils/fs.js";
 import { hausPath } from "../utils/paths.js";
-import { readContextOrScan } from "../scanner/read-context.js";
-import { recommend } from "../recommender/recommend.js";
-import { flattenRecommendedHooks, loadClaudeHooksSettings } from "../claude/load-hooks.js";
 
 export async function runRecommend(options: { json?: boolean }): Promise<void> {
   const root = process.cwd();
@@ -14,7 +14,7 @@ export async function runRecommend(options: { json?: boolean }): Promise<void> {
   await writeJson(hausPath(root, "recommended-hooks.json"), flattenRecommendedHooks(hookSettings));
   await writeJson(hausPath(root, "recommended-rules.json"), [
     { id: "haus.rule.context-minimal", enabled: true },
-    { id: "haus.rule.security", enabled: true }
+    { id: "haus.rule.security", enabled: true },
   ]);
   if (options.json) {
     console.log(JSON.stringify(result, null, 2));

@@ -1,6 +1,22 @@
 import { loadCatalog } from "../catalog/load-catalog.js";
 
-const FORBIDDEN = ["python", "django", "go", "rust", "java", "spring", "kotlin", "swift", "android", "flutter", "dart", "c++", "perl", "defi", "trading"];
+const FORBIDDEN = [
+  "python",
+  "django",
+  "go",
+  "rust",
+  "java",
+  "spring",
+  "kotlin",
+  "swift",
+  "android",
+  "flutter",
+  "dart",
+  "c++",
+  "perl",
+  "defi",
+  "trading",
+];
 
 export async function runCatalogAudit(): Promise<void> {
   const items = await loadCatalog(process.cwd());

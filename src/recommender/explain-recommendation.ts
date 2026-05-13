@@ -43,13 +43,12 @@ type ExplainRecommendation = {
 
 export function normalizeRecommendation(input: RecommendationLike): Recommendation {
   const recommended = (input.recommended ?? []).map((item) => {
-    const normalizedReasons =
-      item.reasons?.map((reason) => ({
-        code: reason.code ?? "legacy-reason",
-        message: reason.message ?? item.reason ?? "legacy recommendation reason",
-        weight: reason.weight ?? 0,
-        ...(reason.signal ? { signal: reason.signal } : {})
-      })) ?? [{ code: "legacy-reason", message: item.reason ?? "legacy recommendation reason", weight: 0 }];
+    const normalizedReasons = item.reasons?.map((reason) => ({
+      code: reason.code ?? "legacy-reason",
+      message: reason.message ?? item.reason ?? "legacy recommendation reason",
+      weight: reason.weight ?? 0,
+      ...(reason.signal ? { signal: reason.signal } : {}),
+    })) ?? [{ code: "legacy-reason", message: item.reason ?? "legacy recommendation reason", weight: 0 }];
     const confidence = item.confidence ?? 0;
     return {
       id: item.id,
@@ -64,30 +63,28 @@ export function normalizeRecommendation(input: RecommendationLike): Recommendati
       scoreBreakdown: {
         bonuses: normalizedReasons,
         penalties: [],
-        finalScore: item.score ?? 0
+        finalScore: item.score ?? 0,
       },
       tags: item.tags,
-      ecosystem: item.ecosystem
+      ecosystem: item.ecosystem,
     };
   });
 
   const skipped = (input.skipped ?? []).map((item) => ({
     id: item.id,
     reason: item.reason ?? "legacy skipped reason",
-    skipReasons:
-      item.skipReasons?.map((reason) => ({
-        code: reason.code ?? "legacy-skip-reason",
-        message: reason.message ?? item.reason ?? "legacy skipped reason",
-        penalty: reason.penalty ?? 0,
-        ...(reason.signal ? { signal: reason.signal } : {})
-      })) ??
-      [
-        {
-          code: "legacy-skip-reason",
-          message: item.reason ?? "legacy skipped reason",
-          penalty: 0
-        }
-      ]
+    skipReasons: item.skipReasons?.map((reason) => ({
+      code: reason.code ?? "legacy-skip-reason",
+      message: reason.message ?? item.reason ?? "legacy skipped reason",
+      penalty: reason.penalty ?? 0,
+      ...(reason.signal ? { signal: reason.signal } : {}),
+    })) ?? [
+      {
+        code: "legacy-skip-reason",
+        message: item.reason ?? "legacy skipped reason",
+        penalty: 0,
+      },
+    ],
   }));
 
   return {
@@ -100,7 +97,7 @@ export function normalizeRecommendation(input: RecommendationLike): Recommendati
     skippedRules: input.skippedRules ?? skipped.length,
     estimatedTokenReductionPct:
       input.estimatedTokenReductionPct ??
-      Math.max(0, Math.round((skipped.length / Math.max(recommended.length + skipped.length, 1)) * 100))
+      Math.max(0, Math.round((skipped.length / Math.max(recommended.length + skipped.length, 1)) * 100)),
   };
 }
 
@@ -111,7 +108,7 @@ export function buildRecommendationExplanation(recommendation: Recommendation): 
       confidence: item.confidence,
       confidenceLevel: item.confidenceLevel,
       selectionMode: item.selectionMode,
-      reasons: item.reasons.map((reason) => reason.message)
+      reasons: item.reasons.map((reason) => reason.message),
     })),
     skipped: recommendation.skipped.map((item) => ({
       id: item.id,
@@ -120,13 +117,13 @@ export function buildRecommendationExplanation(recommendation: Recommendation): 
         code: reason.code,
         message: reason.message,
         penalty: reason.penalty,
-        ...(reason.signal ? { signal: reason.signal } : {})
-      }))
+        ...(reason.signal ? { signal: reason.signal } : {}),
+      })),
     })),
     stats: {
       selectedRules: recommendation.selectedRules,
       skippedRules: recommendation.skippedRules,
-      estimatedTokenReductionPct: recommendation.estimatedTokenReductionPct
-    }
+      estimatedTokenReductionPct: recommendation.estimatedTokenReductionPct,
+    },
   };
 }

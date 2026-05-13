@@ -1,5 +1,5 @@
-import { applyLock, checkLock, diffLock, hasLocalOverrides } from "../update/lockfile.js";
 import { diffGeneratedFiles, summarizeLockDiff } from "../update/diff-generated-files.js";
+import { applyLock, checkLock, diffLock, hasLocalOverrides } from "../update/lockfile.js";
 
 export async function runUpdate(options: { check?: boolean }): Promise<void> {
   const root = process.cwd();
@@ -10,11 +10,11 @@ export async function runUpdate(options: { check?: boolean }): Promise<void> {
         {
           ...status,
           localOverrides: await hasLocalOverrides(root),
-          summary: diffGeneratedFiles()
+          summary: diffGeneratedFiles(),
         },
         null,
-        2
-      )
+        2,
+      ),
     );
     if (!status.ok) process.exitCode = 1;
     return;

@@ -9,6 +9,6 @@ export async function syncPrpmSource(source: CuratedSource, checkOnly: boolean):
     policy: source.policy,
     checkOnly,
     pinned: Boolean(source.pinnedVersion && source.pinnedHash),
-    notes: "Catalog metadata check complete. Integration intentionally offline."
+    notes: "Catalog metadata check complete. Integration intentionally offline.",
   };
 }

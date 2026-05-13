@@ -1,14 +1,17 @@
 import { isDeepStrictEqual } from "node:util";
+
 import fs from "fs-extra";
+
 import { readJson } from "../utils/fs.js";
 import { claudePath } from "../utils/paths.js";
+
 import type { ClaudeHooksSettings } from "./load-hooks.js";
 import { loadClaudeHooksSettings } from "./load-hooks.js";
 
 /** After `apply --write`, ensure disk matches the canonical hook object we intended to write. */
 export async function assertPostApplySettingsMatchCanonical(
   root: string,
-  canonical: ClaudeHooksSettings
+  canonical: ClaudeHooksSettings,
 ): Promise<void> {
   const written = await readJson<unknown>(claudePath(root, "settings.json"));
   if (written == null || typeof written !== "object") {
@@ -16,7 +19,7 @@ export async function assertPostApplySettingsMatchCanonical(
   }
   if (!isDeepStrictEqual(canonical, written)) {
     throw new Error(
-      "haus: post-apply self-check failed: .claude/settings.json does not match plugin/hooks/hooks.json contract"
+      "haus: post-apply self-check failed: .claude/settings.json does not match plugin/hooks/hooks.json contract",
     );
   }
 }
@@ -32,7 +35,7 @@ export async function verifyProjectSettingsHooksContract(root: string): Promise<
     return {
       ok: true,
       skipped: true,
-      message: "No .claude/settings.json (run `haus apply --write` to install hooks)."
+      message: "No .claude/settings.json (run `haus apply --write` to install hooks).",
     };
   }
   let canonical: ClaudeHooksSettings;
@@ -48,7 +51,7 @@ export async function verifyProjectSettingsHooksContract(root: string): Promise<
   if (!isDeepStrictEqual(canonical, project)) {
     return {
       ok: false,
-      message: ".claude/settings.json drifts from plugin/hooks/hooks.json (regenerate with `haus apply --write`)."
+      message: ".claude/settings.json drifts from plugin/hooks/hooks.json (regenerate with `haus apply --write`).",
     };
   }
   return { ok: true, message: "settings.json matches plugin hook contract." };

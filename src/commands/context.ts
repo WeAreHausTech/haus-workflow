@@ -1,13 +1,9 @@
-import { readJson, readText } from "../utils/fs.js";
-import { hausPath } from "../utils/paths.js";
+import { normalizeRecommendation } from "../recommender/explain-recommendation.js";
+import { classifyTaskIntents, computeRuleIntents, type TaskIntent } from "../recommender/task-intent.js";
 import { readContextOrScan } from "../scanner/read-context.js";
 import type { Recommendation } from "../types.js";
-import { normalizeRecommendation } from "../recommender/explain-recommendation.js";
-import {
-  classifyTaskIntents,
-  computeRuleIntents,
-  type TaskIntent
-} from "../recommender/task-intent.js";
+import { readJson, readText } from "../utils/fs.js";
+import { hausPath } from "../utils/paths.js";
 
 type RecommendedRule = Recommendation["recommended"][number];
 
@@ -27,10 +23,10 @@ export async function runContext(options: { task?: string; fromHook?: boolean; j
       id: x.id,
       confidenceLevel: x.confidenceLevel,
       selectionMode: x.selectionMode,
-      reasons: x.reasons.map((reason) => reason.message)
+      reasons: x.reasons.map((reason) => reason.message),
     })),
     skippedCount: recommendation?.skippedRules ?? 0,
-    estimatedTokenReductionPct: recommendation?.estimatedTokenReductionPct ?? 0
+    estimatedTokenReductionPct: recommendation?.estimatedTokenReductionPct ?? 0,
   };
 
   if (options.json) {
@@ -48,7 +44,7 @@ export async function runContext(options: { task?: string; fromHook?: boolean; j
     `Estimated token reduction: ${payload.estimatedTokenReductionPct}%`,
     "Use minimal context.",
     ...payload.selectedRules.map((rule) => `- ${rule.id}: ${rule.reasons.join(", ")}`),
-    summary
+    summary,
   ];
   const text = lines.join("\n");
   console.log(options.fromHook ? text.slice(0, 3000) : text);
@@ -70,7 +66,7 @@ export async function runContext(options: { task?: string; fromHook?: boolean; j
 export function pickTaskRelevantRules(
   recommendation: Recommendation | undefined,
   task: string | undefined,
-  taskIntents: Set<TaskIntent> = new Set()
+  taskIntents: Set<TaskIntent> = new Set(),
 ): RecommendedRule[] {
   const recommended = recommendation?.recommended ?? [];
   if (!task) return recommended;
@@ -99,7 +95,7 @@ export function pickTaskRelevantRules(
       rule.ecosystem ?? "",
       ...(rule.tags ?? []),
       rule.reason ?? "",
-      ...rule.reasons.map((r) => r.message)
+      ...rule.reasons.map((r) => r.message),
     ]
       .join(" ")
       .toLowerCase();
@@ -113,8 +109,7 @@ export function pickTaskRelevantRules(
     if (rule.confidenceLevel === "low") return false;
     if (taskWantsTesting) return true;
     const ruleIntents = computeRuleIntents(rule);
-    const isTestingOnly =
-      ruleIntents.size > 0 && [...ruleIntents].every((i) => i === "testing");
+    const isTestingOnly = ruleIntents.size > 0 && [...ruleIntents].every((i) => i === "testing");
     return !isTestingOnly;
   });
   return cappedMediumOrHigh.slice(0, 8);

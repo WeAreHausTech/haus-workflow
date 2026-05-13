@@ -15,7 +15,8 @@ export function summarizeLockDiff(before: string, after: string): string {
     const nextIds = new Set(next.map((x) => x.id));
     const added = [...nextIds].filter((id) => !prevIds.has(id));
     const removed = [...prevIds].filter((id) => !nextIds.has(id));
-    if (added.length === 0 && removed.length === 0) return `Lock changed: +${counts.additions} -${counts.deletions} lines`;
+    if (added.length === 0 && removed.length === 0)
+      return `Lock changed: +${counts.additions} -${counts.deletions} lines`;
     return `Lock item changes: +${added.length} -${removed.length} (lines +${counts.additions} -${counts.deletions})`;
   } catch {
     return `Lock item changes unavailable. Text diff lines: +${counts.additions} -${counts.deletions}`;

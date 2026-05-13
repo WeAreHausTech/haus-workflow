@@ -1,6 +1,8 @@
 import path from "node:path";
+
 import fs from "fs-extra";
 import { z } from "zod";
+
 import { readJson } from "../utils/fs.js";
 import { packageRoot } from "../utils/paths.js";
 
@@ -23,14 +25,14 @@ export type LoadClaudeHooksOptions = {
 
 const HookCommandSchema = z.object({
   type: z.literal("command"),
-  command: z.string()
+  command: z.string(),
 });
 
 const PluginHooksFileSchema = z.object({
   hooks: z.object({
     UserPromptSubmit: z.array(z.object({ hooks: z.array(HookCommandSchema) })),
-    PreToolUse: z.array(z.object({ matcher: z.string(), hooks: z.array(HookCommandSchema) }))
-  })
+    PreToolUse: z.array(z.object({ matcher: z.string(), hooks: z.array(HookCommandSchema) })),
+  }),
 });
 
 /** Last-resort copy when `HAUS_HOOKS_FALLBACK=1` and the plugin file is missing. */
@@ -40,28 +42,28 @@ const EMBEDDED_HOOKS: ClaudeHooksSettings = {
       {
         hooks: [
           { type: "command", command: "haus context --from-hook" },
-          { type: "command", command: "haus memory inject --from-hook" }
-        ]
-      }
+          { type: "command", command: "haus memory inject --from-hook" },
+        ],
+      },
     ],
     PreToolUse: [
       {
         matcher: "Read|Edit|Write",
-        hooks: [{ type: "command", command: "haus guard file-access --from-hook" }]
+        hooks: [{ type: "command", command: "haus guard file-access --from-hook" }],
       },
       {
         matcher: "Bash",
-        hooks: [{ type: "command", command: "haus guard bash --from-hook" }]
-      }
-    ]
-  }
+        hooks: [{ type: "command", command: "haus guard bash --from-hook" }],
+      },
+    ],
+  },
 };
 
 const STABLE_HOOK_IDS: Record<string, string> = {
   "haus context --from-hook": "haus.context-hook",
   "haus memory inject --from-hook": "haus.memory-hook",
   "haus guard file-access --from-hook": "haus.guard-file",
-  "haus guard bash --from-hook": "haus.guard-bash"
+  "haus guard bash --from-hook": "haus.guard-bash",
 };
 
 function validateOrThrow(raw: unknown): ClaudeHooksSettings {
@@ -105,7 +107,9 @@ export async function loadClaudeHooksSettings(opts?: LoadClaudeHooksOptions): Pr
     if (!allowFallback) {
       throw new Error(strictLoadErrorMessage(true));
     }
-    console.warn("haus: plugin/hooks/hooks.json empty or unreadable; using embedded hook defaults (HAUS_HOOKS_FALLBACK).");
+    console.warn(
+      "haus: plugin/hooks/hooks.json empty or unreadable; using embedded hook defaults (HAUS_HOOKS_FALLBACK).",
+    );
     return EMBEDDED_HOOKS;
   }
 

@@ -11,5 +11,5 @@ export const DANGEROUS_COMMANDS = [
   "php artisan migrate --force",
   "npm publish",
   "yarn npm publish",
-  "pnpm publish"
+  "pnpm publish",
 ];

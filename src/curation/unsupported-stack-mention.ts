@@ -17,7 +17,7 @@ export const UNSUPPORTED_STACK_TERMS = [
   "dart",
   "c++",
   "trading",
-  "healthcare"
+  "healthcare",
 ] as const;
 
 function escapeRegexLiteral(s: string): string {

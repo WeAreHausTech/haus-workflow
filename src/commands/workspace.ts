@@ -1,13 +1,15 @@
 import path from "node:path";
+
 import YAML from "yaml";
-import { readText, writeJson, writeText } from "../utils/fs.js";
+
 import { scanProject } from "../scanner/scan-project.js";
+import { readText, writeJson, writeText } from "../utils/fs.js";
 
 export async function runWorkspace(action: "init" | "scan"): Promise<void> {
   if (action === "init") {
     await writeText(
       "haus.workspace.yaml",
-      `client: unknown\nrepos:\n  - name: current\n    path: .\n    role: auto\nrelationships: []\n`
+      `client: unknown\nrepos:\n  - name: current\n    path: .\n    role: auto\nrelationships: []\n`,
     );
     console.log("Workspace initialized.");
     return;
@@ -36,7 +38,7 @@ export async function runWorkspace(action: "init" | "scan"): Promise<void> {
       path: repo.path,
       roles: result.repoRoles,
       packageManager: result.packageManager,
-      deps: result.dependencies
+      deps: result.dependencies,
     });
     for (const dep of result.dependencies) {
       ownership[dep] ??= [];
@@ -46,14 +48,19 @@ export async function runWorkspace(action: "init" | "scan"): Promise<void> {
 
   await writeJson(".haus-ai/workspace-summary.json", {
     generatedAt: new Date().toISOString(),
-    repos: summaries
+    repos: summaries,
   });
   await writeJson(".haus-ai/dependency-ownership-map.json", ownership);
   await writeText(
     ".haus-ai/cross-repo-summary.md",
     `# Cross Repo Summary\n\n${summaries
-      .map((repo) => `- ${repo.name} (${repo.path}) roles: ${repo.roles.join(", ") || "unknown"}; package manager: ${repo.packageManager}`)
-      .join("\n")}\n`
+      .map(
+        (repo) =>
+          `- ${repo.name} (${repo.path}) roles: ${repo.roles.join(", ") || "unknown"}; package manager: ${repo.packageManager}`,
+      )
+      .join("\n")}\n`,
   );
-  console.log("Workspace scan complete. Wrote .haus-ai/workspace-summary.json, cross-repo-summary.md, dependency-ownership-map.json");
+  console.log(
+    "Workspace scan complete. Wrote .haus-ai/workspace-summary.json, cross-repo-summary.md, dependency-ownership-map.json",
+  );
 }

@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 import { readFileSync } from "node:fs";
 import path from "node:path";
+
 import { Command } from "commander";
+
 import { runApply } from "./commands/apply.js";
 import { runCatalogAudit } from "./commands/catalog-audit.js";
 import { runContext } from "./commands/context.js";
@@ -58,12 +60,7 @@ program.command("setup-project").option("--guided").option("--fast").option("--j
 program.command("doctor").option("--hooks", "Verify .claude/settings.json matches plugin hooks only").action(runDoctor);
 program.command("apply").option("--dry-run").option("--write").action(runApply);
 program.command("undo").option("-y, --yes", "Skip confirmation").action(runUndo);
-program
-  .command("explain-context")
-  .option("--task <task>")
-  .option("--json")
-  .option("--stats")
-  .action(runExplainContext);
+program.command("explain-context").option("--task <task>").option("--json").option("--stats").action(runExplainContext);
 program.command("explain-recommendation").option("--json").action(runExplainRecommendation);
 program.command("context").option("--task <task>").option("--from-hook").option("--json").action(runContext);
 program.command("refresh").action(runRefresh);
@@ -73,11 +70,18 @@ program.command("update").option("--check").action(runUpdate);
 const memory = program.command("memory");
 memory.command("status").action(() => runMemory("status", {}));
 memory.command("add <text>").action((text) => runMemory("add", { text }));
-memory.command("inject").option("--task <task>").option("--from-hook").action((opts) => runMemory("inject", opts));
+memory
+  .command("inject")
+  .option("--task <task>")
+  .option("--from-hook")
+  .action((opts) => runMemory("inject", opts));
 memory.command("promote").action(() => runMemory("promote", {}));
 
 const sources = program.command("sources");
-sources.command("sync").option("--check").action((opts) => runSources("sync", opts));
+sources
+  .command("sync")
+  .option("--check")
+  .action((opts) => runSources("sync", opts));
 sources.command("report").action((opts) => runSources("report", opts));
 sources.command("audit").action((opts) => runSources("audit", opts));
 
@@ -86,8 +90,14 @@ plugin.command("install").action((opts) => runPlugin("install", opts));
 plugin.command("validate").action((opts) => runPlugin("validate", opts));
 
 const guard = program.command("guard");
-guard.command("file-access").option("--from-hook").action((opts) => runGuard("file-access", opts));
-guard.command("bash").option("--from-hook").action((opts) => runGuard("bash", opts));
+guard
+  .command("file-access")
+  .option("--from-hook")
+  .action((opts) => runGuard("file-access", opts));
+guard
+  .command("bash")
+  .option("--from-hook")
+  .action((opts) => runGuard("bash", opts));
 
 const workspace = program.command("workspace");
 workspace.command("init").action(() => runWorkspace("init"));

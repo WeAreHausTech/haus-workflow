@@ -7,7 +7,11 @@ export function scoreCatalogItem(item: CatalogItem, context: ContextMap): { scor
     score += 40;
     reasons.push("repo role match");
   }
-  const stacks = new Set(Object.values(context.detectedStacks).flat().map((x) => x.toLowerCase()));
+  const stacks = new Set(
+    Object.values(context.detectedStacks)
+      .flat()
+      .map((x) => x.toLowerCase()),
+  );
   if (item.tags.some((t) => stacks.has(t.toLowerCase()))) {
     score += 30;
     reasons.push("stack match");

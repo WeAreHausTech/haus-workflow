@@ -1,5 +1,7 @@
-import fs from "fs-extra";
 import path from "node:path";
+
+import fs from "fs-extra";
+
 import { HAUS_DIR } from "../utils/paths.js";
 import { confirm } from "../utils/prompts.js";
 
@@ -15,7 +17,7 @@ export async function runUndo(options: { yes?: boolean }): Promise<void> {
   }
   if (!options.yes) {
     const ok = await confirm(
-      `Remove ${existing.map((p) => path.relative(root, p)).join(" and ")}? This cannot be undone.`
+      `Remove ${existing.map((p) => path.relative(root, p)).join(" and ")}? This cannot be undone.`,
     );
     if (!ok) {
       console.log("Cancelled.");

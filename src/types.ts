@@ -23,19 +23,9 @@ export type RequiresAnyClause =
 
 export type CatalogItemSource = "haus" | "curated";
 
-export type CatalogItemUseMode =
-  | "copy"
-  | "adapted"
-  | "wrapped"
-  | "rewritten"
-  | "reference-only";
+export type CatalogItemUseMode = "copy" | "adapted" | "wrapped" | "rewritten" | "reference-only";
 
-export type CatalogItemReviewStatus =
-  | "approved"
-  | "candidate"
-  | "needs-review"
-  | "rejected"
-  | "deprecated";
+export type CatalogItemReviewStatus = "approved" | "candidate" | "needs-review" | "rejected" | "deprecated";
 
 export type CatalogItemRiskLevel = "low" | "medium" | "high" | "blocked";
 

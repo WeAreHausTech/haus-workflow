@@ -1,7 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
+
 import YAML from "yaml";
 import { z } from "zod";
+
 import { containsUnsupportedStackMention } from "../src/curation/unsupported-stack-mention.js";
 
 const acceptedIdeaSchema = z.object({
@@ -11,22 +13,22 @@ const acceptedIdeaSchema = z.object({
   copied: z.literal(false),
   maintenanceRisk: z.enum(["low", "medium", "high"]),
   licenseAttributionConcern: z.enum(["none", "low", "medium", "high"]),
-  productFit: z.enum(["strong", "medium", "weak", "reject"])
+  productFit: z.enum(["strong", "medium", "weak", "reject"]),
 });
 
 const rejectedIdeaSchema = z.object({
   idea: z.string().min(1),
-  reason: z.string().min(1)
+  reason: z.string().min(1),
 });
 
 const sourceDecisionSchema = z.object({
   source: z.string().min(1),
   ideasAccepted: z.array(acceptedIdeaSchema),
-  ideasRejected: z.array(rejectedIdeaSchema)
+  ideasRejected: z.array(rejectedIdeaSchema),
 });
 
 const sourceDecisionsSchema = z.object({
-  decisions: z.array(sourceDecisionSchema).min(1)
+  decisions: z.array(sourceDecisionSchema).min(1),
 });
 
 type SourcesYaml = {

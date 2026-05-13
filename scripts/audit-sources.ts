@@ -1,4 +1,5 @@
 import fs from "node:fs";
+
 import yaml from "yaml";
 
 const file = "library/catalog/sources.yaml";

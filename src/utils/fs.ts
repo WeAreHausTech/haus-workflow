@@ -1,7 +1,8 @@
 import crypto from "node:crypto";
 import path from "node:path";
-import fs from "fs-extra";
+
 import fg from "fast-glob";
+import fs from "fs-extra";
 
 export async function readJson<T>(file: string): Promise<T | undefined> {
   try {
@@ -34,7 +35,12 @@ export async function exists(file: string): Promise<boolean> {
 }
 
 export async function listFiles(root: string, patterns: string[]): Promise<string[]> {
-  const files = await fg(patterns, { cwd: root, dot: true, onlyFiles: true, ignore: ["**/node_modules/**", "**/.git/**", "**/dist/**"] });
+  const files = await fg(patterns, {
+    cwd: root,
+    dot: true,
+    onlyFiles: true,
+    ignore: ["**/node_modules/**", "**/.git/**", "**/dist/**"],
+  });
   return files.sort((a, b) => a.localeCompare(b));
 }
 

@@ -1,6 +1,8 @@
-import fs from "fs-extra";
-import path from "node:path";
 import os from "node:os";
+import path from "node:path";
+
+import fs from "fs-extra";
+
 import { displayPath, packageRoot } from "../utils/paths.js";
 
 export async function runPlugin(action: "install" | "validate", _options: Record<string, unknown>): Promise<void> {

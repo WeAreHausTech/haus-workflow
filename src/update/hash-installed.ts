@@ -1,6 +1,8 @@
 import path from "node:path";
+
 import fg from "fast-glob";
 import fs from "fs-extra";
+
 import { hashText } from "../utils/fs.js";
 
 /** Deterministic hash when a lock item has no installed paths yet. */

@@ -17,5 +17,5 @@ export const SENSITIVE_PATHS = [
   "customer-data",
   "exports",
   "secrets",
-  "certs"
+  "certs",
 ];

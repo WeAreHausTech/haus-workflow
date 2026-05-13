@@ -9,6 +9,6 @@ export async function syncSkillsShSource(source: CuratedSource, checkOnly: boole
     policy: source.policy,
     checkOnly,
     pinned: Boolean(source.pinnedVersion && source.pinnedHash),
-    notes: "Discovery index only. No auto-install."
+    notes: "Discovery index only. No auto-install.",
   };
 }

@@ -1,11 +1,8 @@
+import { formatRecommendationHuman } from "../recommender/explain-formatters.js";
+import { buildRecommendationExplanation, normalizeRecommendation } from "../recommender/explain-recommendation.js";
+import type { Recommendation } from "../types.js";
 import { readJson } from "../utils/fs.js";
 import { hausPath } from "../utils/paths.js";
-import type { Recommendation } from "../types.js";
-import {
-  buildRecommendationExplanation,
-  normalizeRecommendation
-} from "../recommender/explain-recommendation.js";
-import { formatRecommendationHuman } from "../recommender/explain-formatters.js";
 
 export async function runExplainRecommendation(options: { json?: boolean }): Promise<void> {
   const root = process.cwd();
