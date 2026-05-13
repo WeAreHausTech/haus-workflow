@@ -239,6 +239,39 @@ test("curated audit fails when copy decision has unknown license without accepte
   runCuratedAudit(temp, true);
 });
 
+test("curated audit fails when copy decision is missing targetPath", () => {
+  const temp = scaffoldCuratedTemp();
+  writeFileSync(
+    path.join(temp, "library/curated/decisions/curation-decisions.json"),
+    JSON.stringify(
+      {
+        version: "0.1.0",
+        items: [
+          {
+            id: "demo-source.foo-skill",
+            sourceId: "demo-source",
+            sourceUrl: "https://example.com/skills/foo",
+            kind: "skill",
+            license: "MIT",
+            licenseConfidence: "high",
+            pinnedRef: "abc1234",
+            hash: "sha256-abc",
+            // targetPath intentionally missing
+            decision: "copy",
+            decisionReason: "Missing targetPath should fail",
+            riskLevel: "low",
+            reviewStatus: "candidate",
+            auditedAt: "2026-05-13"
+          }
+        ]
+      },
+      null,
+      2
+    )
+  );
+  runCuratedAudit(temp, true);
+});
+
 test("curated audit passes when copy decision has accepted-unknown with justification", () => {
   const temp = scaffoldCuratedTemp();
   const targetPath = "library/curated/external/demo-source/foo/SKILL.md";
