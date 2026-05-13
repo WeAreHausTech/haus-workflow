@@ -13,6 +13,8 @@
 import fs from "node:fs";
 import path from "node:path";
 
+import { PLACEHOLDER_RE } from "../src/utils/audit-checks.js";
+
 const root = process.cwd();
 
 const INVENTORY_SCHEMA_PATH = "library/curated/inventory/source-inventory.schema.json";
@@ -21,8 +23,6 @@ const INVENTORY_PATH = "library/curated/inventory/source-inventory.json";
 const DECISIONS_PATH = "library/curated/decisions/curation-decisions.json";
 const SOURCES_PATH = "library/catalog/sources.yaml";
 const MANIFEST_PATH = "library/catalog/manifest.json";
-
-const PLACEHOLDER_RE = /\b(TODO|FIXME|PLACEHOLDER|TBD)\b/i;
 const DECISIONS_REQUIRE_PINNED = new Set(["copy", "adapted"]);
 const VALID_DECISIONS = new Set(["copy", "adapted", "wrapped", "rewritten", "reference-only", "rejected"]);
 

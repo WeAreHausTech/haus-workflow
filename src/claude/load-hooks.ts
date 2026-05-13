@@ -4,6 +4,7 @@ import fs from "fs-extra";
 import { z } from "zod";
 
 import { readJson } from "../utils/fs.js";
+import { warn } from "../utils/logger.js";
 import { packageRoot } from "../utils/paths.js";
 
 /** Shape written to `.claude/settings.json` under `hooks`. */
@@ -98,7 +99,7 @@ export async function loadClaudeHooksSettings(opts?: LoadClaudeHooksOptions): Pr
     if (!allowFallback) {
       throw new Error(strictLoadErrorMessage(true));
     }
-    console.warn("haus: plugin/hooks/hooks.json missing; using embedded hook defaults (HAUS_HOOKS_FALLBACK).");
+    warn("haus: plugin/hooks/hooks.json missing; using embedded hook defaults (HAUS_HOOKS_FALLBACK).");
     return EMBEDDED_HOOKS;
   }
 
@@ -107,9 +108,7 @@ export async function loadClaudeHooksSettings(opts?: LoadClaudeHooksOptions): Pr
     if (!allowFallback) {
       throw new Error(strictLoadErrorMessage(true));
     }
-    console.warn(
-      "haus: plugin/hooks/hooks.json empty or unreadable; using embedded hook defaults (HAUS_HOOKS_FALLBACK).",
-    );
+    warn("haus: plugin/hooks/hooks.json empty or unreadable; using embedded hook defaults (HAUS_HOOKS_FALLBACK).");
     return EMBEDDED_HOOKS;
   }
 
@@ -119,7 +118,7 @@ export async function loadClaudeHooksSettings(opts?: LoadClaudeHooksOptions): Pr
     if (!allowFallback) {
       throw new Error(`${strictLoadErrorMessage(false)} (${String(err)})`);
     }
-    console.warn(`haus: invalid hooks file (${hooksPath}); using embedded defaults. ${String(err)}`);
+    warn(`haus: invalid hooks file (${hooksPath}); using embedded defaults. ${String(err)}`);
     return EMBEDDED_HOOKS;
   }
 }

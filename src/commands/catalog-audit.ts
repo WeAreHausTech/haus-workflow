@@ -1,4 +1,5 @@
 import { loadCatalog } from "../catalog/load-catalog.js";
+import { error, log } from "../utils/logger.js";
 
 const FORBIDDEN = [
   "python",
@@ -26,9 +27,9 @@ export async function runCatalogAudit(): Promise<void> {
     for (const word of FORBIDDEN) if (text.includes(word)) failures.push(`${item.id} has unsupported tag ${word}`);
   }
   if (failures.length) {
-    failures.forEach((f) => console.error(f));
+    failures.forEach((f) => error(f));
     process.exitCode = 1;
     return;
   }
-  console.log("Catalog audit passed.");
+  log("Catalog audit passed.");
 }

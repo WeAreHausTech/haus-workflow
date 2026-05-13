@@ -4,6 +4,7 @@ import YAML from "yaml";
 
 import { scanProject } from "../scanner/scan-project.js";
 import { readText, writeJson, writeText } from "../utils/fs.js";
+import { error, log } from "../utils/logger.js";
 
 export async function runWorkspace(action: "init" | "scan"): Promise<void> {
   if (action === "init") {
@@ -11,19 +12,19 @@ export async function runWorkspace(action: "init" | "scan"): Promise<void> {
       "haus.workspace.yaml",
       `client: unknown\nrepos:\n  - name: current\n    path: .\n    role: auto\nrelationships: []\n`,
     );
-    console.log("Workspace initialized.");
+    log("Workspace initialized.");
     return;
   }
   const configText = await readText("haus.workspace.yaml");
   if (!configText) {
-    console.error("Missing haus.workspace.yaml. Run `haus workspace init` first.");
+    error("Missing haus.workspace.yaml. Run `haus workspace init` first.");
     process.exitCode = 1;
     return;
   }
   const config = YAML.parse(configText) as { repos?: Array<{ name: string; path: string; role?: string }> };
   const repos = config.repos ?? [];
   if (repos.length === 0) {
-    console.error("No repos configured in haus.workspace.yaml.");
+    error("No repos configured in haus.workspace.yaml.");
     process.exitCode = 1;
     return;
   }
@@ -60,7 +61,7 @@ export async function runWorkspace(action: "init" | "scan"): Promise<void> {
       )
       .join("\n")}\n`,
   );
-  console.log(
+  log(
     "Workspace scan complete. Wrote .haus-ai/workspace-summary.json, cross-repo-summary.md, dependency-ownership-map.json",
   );
 }

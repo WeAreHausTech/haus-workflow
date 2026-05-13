@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { DANGEROUS_COMMANDS } from "../security/dangerous-commands.js";
 import { guardBash } from "../security/guard-bash.js";
 import { guardFileAccess } from "../security/guard-file-access.js";
+import { log } from "../utils/logger.js";
 
 function stdin(): string {
   try {
@@ -14,7 +15,7 @@ function stdin(): string {
 }
 
 function deny(reason: string): void {
-  console.log(JSON.stringify({ permissionDecision: "deny", permissionDecisionReason: reason }));
+  log(JSON.stringify({ permissionDecision: "deny", permissionDecisionReason: reason }));
 }
 
 export async function runGuard(kind: "file-access" | "bash", _options: { fromHook?: boolean }): Promise<void> {

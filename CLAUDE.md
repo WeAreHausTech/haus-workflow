@@ -8,6 +8,7 @@ Claude Code plugin + CLI that scans repos, recommends context assets, and writes
 yarn build          # compiles src/ → dist/ via tsup
 yarn test           # runs tests/**/*.test.js with Node test runner
 yarn dev <cmd>      # run CLI without building (tsx)
+yarn verify         # full gate: typecheck + lint + test + prepack
 ```
 
 ## Key structure
@@ -22,10 +23,28 @@ yarn dev <cmd>      # run CLI without building (tsx)
 | `src/update/` | Lockfile checks, hash refresh, backup |
 | `src/memory/` | Local memory store + redaction |
 | `src/security/` | Guardrails for sensitive paths + dangerous bash |
+| `src/utils/` | Shared utilities: `logger.ts`, `fs.ts`, `paths.ts`, `audit-checks.ts` |
+| `src/library/` | Catalog loader + audit logic |
+| `src/catalog/` | Catalog manifest types and loader |
+| `src/types/` | Local type declarations (e.g. `diff.d.ts`) |
 | `plugin/` | Shipped plugin metadata, hooks, skills |
 | `library/catalog/manifest.json` | Catalog items used by recommender/apply |
-| `tests/` | Node built-in test runner, no framework |
+| `tests/` | Node built-in test runner, no framework (see `tests/README.md`) |
 | `scripts/` | Audit + QA scripts (not part of the build) |
+
+## src/ module boundaries
+
+- `src/commands/` — thin CLI handlers only; delegate to core modules, never import from each other
+- `src/utils/` — pure utilities with no dependencies on scanner/recommender/claude modules
+- `src/scanner/` → may use `src/utils/` and `src/catalog/`
+- `src/recommender/` → may use `src/scanner/`, `src/utils/`, `src/catalog/`
+- `src/claude/` → may use `src/utils/`, `src/update/`, `src/recommender/`
+- `src/security/` → may use `src/utils/` only
+- All `console.*` calls are banned in `src/` — use `log`/`warn`/`error` from `src/utils/logger.ts`
+
+## scripts/ convention
+
+`scripts/` contains audit and QA scripts run via `tsx` during `prepack`. They are **not** compiled into `dist/`. Scripts may import from `src/` using relative paths (`../src/...`). They are typechecked separately via `tsconfig.scripts.json` (`yarn typecheck:scripts`).
 
 ## Command flow
 

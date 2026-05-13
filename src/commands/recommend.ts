@@ -2,6 +2,7 @@ import { flattenRecommendedHooks, loadClaudeHooksSettings } from "../claude/load
 import { recommend } from "../recommender/recommend.js";
 import { readContextOrScan } from "../scanner/read-context.js";
 import { writeJson } from "../utils/fs.js";
+import { log } from "../utils/logger.js";
 import { hausPath } from "../utils/paths.js";
 
 export async function runRecommend(options: { json?: boolean }): Promise<void> {
@@ -17,10 +18,10 @@ export async function runRecommend(options: { json?: boolean }): Promise<void> {
     { id: "haus.rule.security", enabled: true },
   ]);
   if (options.json) {
-    console.log(JSON.stringify(result, null, 2));
+    log(JSON.stringify(result, null, 2));
     return;
   }
-  console.log("Haus recommendation ready");
-  console.log(`Recommended: ${result.recommended.length}`);
-  console.log(`Skipped: ${result.skipped.length}`);
+  log("Haus recommendation ready");
+  log(`Recommended: ${result.recommended.length}`);
+  log(`Skipped: ${result.skipped.length}`);
 }

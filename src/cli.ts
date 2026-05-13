@@ -21,6 +21,7 @@ import { runSources } from "./commands/sources.js";
 import { runUndo } from "./commands/undo.js";
 import { runUpdate } from "./commands/update.js";
 import { runWorkspace } from "./commands/workspace.js";
+import { error } from "./utils/logger.js";
 import { packageRoot } from "./utils/paths.js";
 import { satisfiesVersion } from "./utils/versions.js";
 
@@ -44,9 +45,9 @@ function validateRuntimeNodeVersion(): void {
     if (requiredRange && !satisfiesVersion(process.version, requiredRange)) {
       throw new Error(`Node ${process.version} does not satisfy required range ${requiredRange}`);
     }
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    console.error(message);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    error(message);
     process.exit(1);
   }
 }
@@ -103,8 +104,8 @@ const workspace = program.command("workspace");
 workspace.command("init").action(() => runWorkspace("init"));
 workspace.command("scan").action(() => runWorkspace("scan"));
 
-program.parseAsync(process.argv).catch((error: unknown) => {
-  const message = error instanceof Error ? error.message : String(error);
-  console.error(message);
+program.parseAsync(process.argv).catch((err: unknown) => {
+  const message = err instanceof Error ? err.message : String(err);
+  error(message);
   process.exitCode = 1;
 });

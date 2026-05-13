@@ -3,6 +3,7 @@ import { normalizeRecommendation } from "../recommender/explain-recommendation.j
 import { classifyTaskIntents, type TaskIntent } from "../recommender/task-intent.js";
 import type { Recommendation } from "../types.js";
 import { readJson } from "../utils/fs.js";
+import { log } from "../utils/logger.js";
 import { hausPath } from "../utils/paths.js";
 
 import { pickTaskRelevantRules } from "./context.js";
@@ -23,8 +24,8 @@ export async function runExplainContext(options: { json?: boolean; stats?: boole
   const explanation = buildContextExplanation(normalized, options.task, taskIntents, includedIds);
 
   if (options.json) {
-    console.log(JSON.stringify(explanation, null, 2));
+    log(JSON.stringify(explanation, null, 2));
     return;
   }
-  console.log(formatContextHuman(options.task, explanation, { stats: options.stats }));
+  log(formatContextHuman(options.task, explanation, { stats: options.stats }));
 }
