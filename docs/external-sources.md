@@ -4,7 +4,7 @@
 
 - No auto-install from public repos. No live registry sync.
 - Pin every source to a specific version/hash in `library/catalog/sources.yaml`.
-- Unknown license → `candidate` status only; cannot install until license is resolved.
+- Unknown license → `candidate` status only by default; cannot install until license is resolved or explicitly accepted with `licenseConfidence: "accepted-unknown"` and a written justification in `curation-decisions.json`.
 - Unsupported stacks are rejected at audit and cannot ship as installables.
 - All reuse must be curated, licensed, pinned, hashed, reviewed, and deterministic.
 
