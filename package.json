@@ -23,10 +23,11 @@
     "sources:audit": "tsx scripts/audit-sources.ts",
     "sources:decisions": "tsx scripts/validate-source-decisions.ts",
     "library:audit": "tsx scripts/library-audit.ts",
+    "curated:audit": "tsx scripts/audit-curated.ts",
     "pack:local": "yarn pack",
     "publish:dry": "yarn npm publish --dry-run",
     "publish:private": "yarn npm publish --access restricted",
-    "prepack": "yarn build && yarn catalog:audit && yarn sources:audit && yarn sources:decisions && yarn library:audit"
+    "prepack": "yarn build && yarn catalog:audit && yarn sources:audit && yarn sources:decisions && yarn library:audit && yarn curated:audit"
   },
   "dependencies": {
     "commander": "^13.0.0",

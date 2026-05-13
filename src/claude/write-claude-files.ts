@@ -60,7 +60,18 @@ haus context --task "<task>"
   await writeManagedText(root, claudePath(root, "rules", "security.md"), "- Never read secrets.\n- Block dangerous shell commands.\n");
 
   const pkgRoot = packageRoot();
-  const manifest = (await readJson<{ items?: Array<{ id: string; path: string; type: string }> }>(
+  type ManifestItem = {
+    id: string;
+    path: string;
+    type: string;
+    source?: string;
+    reviewStatus?: string;
+    riskLevel?: string;
+    originSourceId?: string;
+    useMode?: string;
+    license?: string;
+  };
+  const manifest = (await readJson<{ items?: ManifestItem[] }>(
     path.join(pkgRoot, "library", "catalog", "manifest.json")
   )) ?? { items: [] };
   const manifestById = new Map((manifest.items ?? []).map((item) => [item.id, item]));
@@ -69,6 +80,11 @@ haus context --task "<task>"
   for (const item of rec.recommended) {
     const manifestItem = manifestById.get(item.id);
     if (!manifestItem?.path) continue;
+    // Curated items must be approved before they are written to disk.
+    if (manifestItem.source === "curated" && manifestItem.reviewStatus !== "approved") {
+      console.warn(`Skipping curated item ${item.id}: reviewStatus is not approved (${manifestItem.reviewStatus ?? "unset"})`);
+      continue;
+    }
     const sourcePath = path.join(pkgRoot, manifestItem.path);
     const target = item.type === "agent" ? "agents" : "skills";
     const destination = claudePath(root, target, path.basename(sourcePath));
@@ -90,14 +106,26 @@ haus context --task "<task>"
   const lock = await Promise.all(
     rec.recommended.map(async (r) => {
       const relPaths = installedPathsByItem.get(r.id) ?? [];
-      return {
+      const manifestItem = manifestById.get(r.id);
+      const isCurated = manifestItem?.source === "curated";
+      const base = {
         id: r.id,
         type: r.type,
-        source: "haus",
+        source: isCurated ? "curated" : "haus",
         version: hausVersion,
         hash: await hashInstalledPaths(root, relPaths),
         installMode: "copied",
         paths: relPaths
+      };
+      if (!isCurated || !manifestItem) return base;
+      // Attach curated provenance fields to lock entry for auditability.
+      return {
+        ...base,
+        ...(manifestItem.originSourceId ? { originSourceId: manifestItem.originSourceId } : {}),
+        ...(manifestItem.useMode ? { useMode: manifestItem.useMode } : {}),
+        ...(manifestItem.license ? { license: manifestItem.license } : {}),
+        ...(manifestItem.riskLevel ? { riskLevel: manifestItem.riskLevel } : {}),
+        ...(manifestItem.reviewStatus ? { reviewStatus: manifestItem.reviewStatus } : {})
       };
     })
   );

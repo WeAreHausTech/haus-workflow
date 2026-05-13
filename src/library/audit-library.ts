@@ -46,8 +46,28 @@ function auditCatalogManifest(root: string, items: CatalogItem[]): string[] {
     const normPath = item.path.replace(/\\/g, "/");
 
     if (isCatalogInstallable(item)) {
-      if (item.source !== "haus") {
-        failures.push(`${item.id}: installable catalog item must have source "haus" (got "${item.source}")`);
+      const isHaus = item.source === "haus";
+      const isCuratedApproved = item.source === "curated" && item.reviewStatus === "approved";
+      if (!isHaus && !isCuratedApproved) {
+        const hint =
+          item.source === "curated"
+            ? ` (curated items require reviewStatus:"approved", got "${item.reviewStatus ?? "unset"}")`
+            : ` (must be "haus" or "curated" with reviewStatus:"approved")`;
+        failures.push(`${item.id}: installable catalog item has invalid source/reviewStatus${hint}`);
+      }
+      if (item.source === "curated") {
+        if (!item.originSourceId) {
+          failures.push(`${item.id}: curated item missing required field originSourceId`);
+        }
+        if (!item.license) {
+          failures.push(`${item.id}: curated item missing required field license`);
+        }
+        if (!item.riskLevel) {
+          failures.push(`${item.id}: curated item missing required field riskLevel`);
+        }
+        if (item.riskLevel === "blocked") {
+          failures.push(`${item.id}: curated item riskLevel is "blocked" and cannot be installed`);
+        }
       }
       const list = installablePathToIds.get(normPath) ?? [];
       list.push(item.id);

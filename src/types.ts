@@ -21,6 +21,26 @@ export type RequiresAnyClause =
   | { packageNamePattern: string }
   | { role: string };
 
+export type CatalogItemSource = "haus" | "curated";
+
+export type CatalogItemUseMode =
+  | "copy"
+  | "adapted"
+  | "wrapped"
+  | "rewritten"
+  | "reference-only";
+
+export type CatalogItemReviewStatus =
+  | "approved"
+  | "candidate"
+  | "needs-review"
+  | "rejected"
+  | "deprecated";
+
+export type CatalogItemRiskLevel = "low" | "medium" | "high" | "blocked";
+
+export type CatalogItemLicenseConfidence = "high" | "medium" | "low" | "unknown";
+
 export type CatalogItem = {
   id: string;
   type: "skill" | "agent" | "rule" | "command";
@@ -46,6 +66,23 @@ export type CatalogItem = {
   requiresAny?: RequiresAnyClause[];
   /** Optional ecosystem family identifier (e.g. `wordpress`, `laravel`, `vendure`, `nextjs`, `nestjs`, `dotnet`, `nx`, `turbo`). Used by recommender for cross-ecosystem conflict detection. */
   ecosystem?: string;
+  // Curated external provenance — present when source === "curated"
+  /** References sources.yaml id for this item's origin. */
+  originSourceId?: string;
+  /** Direct URL to the upstream source item (file, folder, or page). */
+  originUrl?: string;
+  /** SPDX license identifier, e.g. "MIT", "Apache-2.0". */
+  license?: string;
+  /** Confidence level of the license determination. */
+  licenseConfidence?: CatalogItemLicenseConfidence;
+  /** How this item was incorporated: verbatim copy, adapted for Haus, wrapped, rewritten, or reference-only. */
+  useMode?: CatalogItemUseMode;
+  /** Risk level of shipping this item. Blocked items must not install. */
+  riskLevel?: CatalogItemRiskLevel;
+  /** Review gate status. Only "approved" items may be recommended and installed. */
+  reviewStatus?: CatalogItemReviewStatus;
+  /** Git SHA or version tag pinning the upstream source this item was derived from. */
+  pinnedRef?: string;
 };
 
 export type Recommendation = {
