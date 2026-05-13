@@ -1,5 +1,15 @@
 # Contributing
 
+## Before opening a PR
+
+Run the full quality gate — it typechecks, lints, builds, tests, and runs all audit scripts:
+
+```bash
+yarn verify
+```
+
+All checks must pass. Do not open a PR with a failing `yarn verify`.
+
 ## Add a command
 
 1. implement command module in `src/commands/<name>.ts`
@@ -38,6 +48,13 @@
 - use built-in Node test runner (`node --test`)
 - keep tests deterministic
 - prefer fixture-based coverage for scanner/recommender flows
+
+## Add or update source decisions
+
+1. Follow the curation policy in `docs/curation.md`
+2. Record accepted ideas in `library/curation/source-decisions.json`
+3. Run `yarn sources:decisions` to validate the decision file
+4. Run `yarn library:audit` to verify manifest integrity
 
 ## What not to add (without explicit requirement)
 

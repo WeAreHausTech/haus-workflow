@@ -34,6 +34,15 @@ haus update --check
 haus update
 ```
 
+## Contributing
+
+```bash
+yarn install
+yarn verify        # typecheck + lint + build + test + prepack — must pass before any PR
+```
+
+See [Contributing](docs/contributing.md) for workflows (commands, scanner, catalog, skills, hooks, source decisions).
+
 ## Docs
 
 - [User guide](docs/user-guide.md)

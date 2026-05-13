@@ -26,6 +26,8 @@ yarn verify         # full gate: typecheck + lint + build + test + prepack
 | `src/utils/` | Shared utilities: `logger.ts`, `fs.ts`, `paths.ts`, `audit-checks.ts` |
 | `src/library/` | Catalog loader + audit logic |
 | `src/catalog/` | Catalog manifest types and loader |
+| `src/sources/` | External source sync, audit, and report |
+| `src/curation/` | Unsupported-stack token detection for source-decision validation |
 | `src/types/` | Local type declarations (e.g. `diff.d.ts`) |
 | `plugin/` | Shipped plugin metadata, hooks, skills |
 | `library/catalog/manifest.json` | Catalog items used by recommender/apply |
@@ -60,4 +62,4 @@ Outputs written to: `.haus-ai/context-map.json`, `.haus-ai/recommendation.json`,
 
 ## Do not read unless asked
 
-`docs/` contains 16 reference files. Do not read them proactively — use them only when a specific doc is relevant to the task at hand.
+`docs/` contains 18 reference files. Do not read them proactively — use them only when a specific doc is relevant to the task at hand.
