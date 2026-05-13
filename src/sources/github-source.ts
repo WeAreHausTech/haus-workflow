@@ -10,6 +10,6 @@ export async function syncGithubSource(source: CuratedSource, checkOnly: boolean
     policy: source.policy,
     checkOnly,
     pinned,
-    notes: pinned ? "Pinned GitHub source metadata verified." : "Missing version/hash pin. Candidate only."
+    notes: pinned ? "Pinned GitHub source metadata verified." : "Missing version/hash pin. Candidate only.",
   };
 }

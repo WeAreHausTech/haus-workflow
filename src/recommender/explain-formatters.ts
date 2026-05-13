@@ -1,4 +1,5 @@
 import type { Recommendation } from "../types.js";
+
 import { computeRuleIntents, type TaskIntent } from "./task-intent.js";
 
 type RecommendedRule = Recommendation["recommended"][number];
@@ -36,7 +37,7 @@ const TASK_SIGNAL_TOKENS = [
   "oidc",
   "oauth",
   "bankid",
-  "jwt"
+  "jwt",
 ];
 
 export function extractTaskSignals(task: string | undefined): string[] {
@@ -58,7 +59,7 @@ export function formatRecommendationHuman(rec: Recommendation): string {
   lines.push("Recommendation explanation");
   lines.push(`  mode: ${rec.mode}`);
   lines.push(
-    `  selected: ${rec.selectedRules} | skipped: ${rec.skippedRules} | estimated token reduction: ${rec.estimatedTokenReductionPct}%`
+    `  selected: ${rec.selectedRules} | skipped: ${rec.skippedRules} | estimated token reduction: ${rec.estimatedTokenReductionPct}%`,
   );
   if (rec.warnings.length > 0) {
     lines.push("  warnings:");
@@ -139,7 +140,7 @@ function collectRepoSignals(rules: RecommendedRule[]): string[] {
 function pickInclusionReason(
   rule: RecommendedRule,
   taskIntents: Set<TaskIntent>,
-  ruleIntents: Set<TaskIntent>
+  ruleIntents: Set<TaskIntent>,
 ): string {
   const overlap = [...taskIntents].filter((intent) => ruleIntents.has(intent));
   if (overlap.length > 0) {
@@ -151,29 +152,29 @@ function pickInclusionReason(
 function pickExclusionReason(
   rule: RecommendedRule,
   taskIntents: Set<TaskIntent>,
-  ruleIntents: Set<TaskIntent>
+  ruleIntents: Set<TaskIntent>,
 ): { code: ExclusionReason; explanation: string } {
   if (rule.selectionMode === "baseline") {
     return {
       code: "baseline",
-      explanation: "baseline rules are excluded from task-scoped context"
+      explanation: "baseline rules are excluded from task-scoped context",
     };
   }
   if (ruleIntents.size === 0) {
     return {
       code: "no-metadata",
-      explanation: "no tags/ecosystem available for task-intent routing"
+      explanation: "no tags/ecosystem available for task-intent routing",
     };
   }
   if (taskIntents.size === 0) {
     return {
       code: "intent-mismatch",
-      explanation: "task intents could not be classified; rule excluded by ambiguous-fallback"
+      explanation: "task intents could not be classified; rule excluded by ambiguous-fallback",
     };
   }
   return {
     code: "intent-mismatch",
-    explanation: `rule intents [${[...ruleIntents].sort().join(", ")}] do not overlap task intents [${[...taskIntents].sort().join(", ")}]`
+    explanation: `rule intents [${[...ruleIntents].sort().join(", ")}] do not overlap task intents [${[...taskIntents].sort().join(", ")}]`,
   };
 }
 
@@ -181,23 +182,23 @@ export function buildContextExplanation(
   rec: Recommendation,
   task: string | undefined,
   taskIntents: Set<TaskIntent>,
-  includedIds: Set<string>
+  includedIds: Set<string>,
 ): ContextExplanation {
   const selected = rec.recommended.map((item) => ({
     id: item.id,
     confidence: item.confidence,
     confidenceLevel: item.confidenceLevel,
     selectionMode: item.selectionMode,
-    reasons: item.reasons.map((reason) => reason.message)
+    reasons: item.reasons.map((reason) => reason.message),
   }));
   const skipped = rec.skipped.map((item) => ({
     id: item.id,
-    reasons: item.skipReasons.map((reason) => reason.message)
+    reasons: item.skipReasons.map((reason) => reason.message),
   }));
   const stats = {
     selectedRules: rec.selectedRules,
     skippedRules: rec.skippedRules,
-    estimatedTokenReductionPct: rec.estimatedTokenReductionPct
+    estimatedTokenReductionPct: rec.estimatedTokenReductionPct,
   };
   if (!task) return { selected, skipped, stats };
 
@@ -214,7 +215,7 @@ export function buildContextExplanation(
         selectionMode: rule.selectionMode,
         ruleIntents: [...ruleIntents].sort(),
         inclusionReason: pickInclusionReason(rule, taskIntents, ruleIntents),
-        reasons: rule.reasons.map(formatReasonWithSignal)
+        reasons: rule.reasons.map(formatReasonWithSignal),
       });
     } else {
       const { code, explanation } = pickExclusionReason(rule, taskIntents, ruleIntents);
@@ -224,7 +225,7 @@ export function buildContextExplanation(
         selectionMode: rule.selectionMode,
         ruleIntents: [...ruleIntents].sort(),
         exclusionReason: code,
-        explanation
+        explanation,
       });
     }
   }
@@ -237,14 +238,14 @@ export function buildContextExplanation(
     taskSignals: extractTaskSignals(task),
     repoSignals: collectRepoSignals(includedRules),
     includedInTask,
-    excludedFromTask
+    excludedFromTask,
   };
 }
 
 export function formatContextHuman(
   task: string | undefined,
   explanation: ContextExplanation,
-  options: { stats?: boolean } = {}
+  options: { stats?: boolean } = {},
 ): string {
   const lines: string[] = [];
   if (task) {

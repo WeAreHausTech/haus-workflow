@@ -125,8 +125,14 @@ if (fs.existsSync(decisionsAbs)) {
       for (const item of decisions.items) {
         const ctx = `${DECISIONS_PATH} item "${item.id}"`;
 
-        if (!item.id) { fail(`${DECISIONS_PATH}: item missing id`); continue; }
-        if (decisionIds.has(item.id)) { fail(`${ctx}: duplicate id`); continue; }
+        if (!item.id) {
+          fail(`${DECISIONS_PATH}: item missing id`);
+          continue;
+        }
+        if (decisionIds.has(item.id)) {
+          fail(`${ctx}: duplicate id`);
+          continue;
+        }
         decisionIds.add(item.id);
 
         if (!item.sourceId) fail(`${ctx}: missing sourceId`);
@@ -155,7 +161,9 @@ if (fs.existsSync(decisionsAbs)) {
         if (DECISIONS_REQUIRE_PINNED.has(item.decision)) {
           if (item.license === "unknown" || !item.license) {
             if (item.licenseConfidence !== "accepted-unknown") {
-              fail(`${ctx}: decision="${item.decision}" requires a known license or licenseConfidence:"accepted-unknown"`);
+              fail(
+                `${ctx}: decision="${item.decision}" requires a known license or licenseConfidence:"accepted-unknown"`,
+              );
             } else if (!item.licenseAcceptedUnknownJustification) {
               fail(`${ctx}: licenseConfidence:"accepted-unknown" requires licenseAcceptedUnknownJustification`);
             }
@@ -259,7 +267,7 @@ function auditManifestCuratedItems(knownDecisionIds: Set<string>): void {
   const decisionsPresent = fs.existsSync(path.resolve(root, DECISIONS_PATH));
   if (!decisionsPresent) {
     fail(
-      `${MANIFEST_PATH}: contains ${curatedItems.length} curated item(s) but ${DECISIONS_PATH} is missing — every curated manifest entry requires a decision record`
+      `${MANIFEST_PATH}: contains ${curatedItems.length} curated item(s) but ${DECISIONS_PATH} is missing — every curated manifest entry requires a decision record`,
     );
     return;
   }
@@ -267,14 +275,14 @@ function auditManifestCuratedItems(knownDecisionIds: Set<string>): void {
   for (const item of curatedItems) {
     if (item.reviewStatus !== "approved") {
       fail(
-        `${MANIFEST_PATH}: curated item "${item.id}" has reviewStatus "${item.reviewStatus ?? "unset"}" — only "approved" items may appear in manifest`
+        `${MANIFEST_PATH}: curated item "${item.id}" has reviewStatus "${item.reviewStatus ?? "unset"}" — only "approved" items may appear in manifest`,
       );
     }
     // Verify each curated manifest item has a corresponding entry in curation-decisions.json
     // so that its license/pinnedRef/hash gates were evaluated before it was approved.
     if (knownDecisionIds.size > 0 && !knownDecisionIds.has(item.id)) {
       fail(
-        `${MANIFEST_PATH}: curated item "${item.id}" has no corresponding entry in ${DECISIONS_PATH} — add a decision record before marking approved`
+        `${MANIFEST_PATH}: curated item "${item.id}" has no corresponding entry in ${DECISIONS_PATH} — add a decision record before marking approved`,
       );
     }
   }

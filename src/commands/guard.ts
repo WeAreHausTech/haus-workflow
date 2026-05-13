@@ -1,5 +1,6 @@
-import { DANGEROUS_COMMANDS } from "../security/dangerous-commands.js";
 import { readFileSync } from "node:fs";
+
+import { DANGEROUS_COMMANDS } from "../security/dangerous-commands.js";
 import { guardBash } from "../security/guard-bash.js";
 import { guardFileAccess } from "../security/guard-file-access.js";
 

@@ -6,9 +6,9 @@ export function renderSourceReport(items: SourceSyncItem[]): string {
       generatedAt: new Date().toISOString(),
       mode: "check-only",
       mutateCatalog: false,
-      items
+      items,
     },
     null,
-    2
+    2,
   );
 }

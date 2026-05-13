@@ -9,6 +9,6 @@ export async function syncSkillkitSource(source: CuratedSource, checkOnly: boole
     policy: source.policy,
     checkOnly,
     pinned: Boolean(source.pinnedVersion && source.pinnedHash),
-    notes: "Candidate source checked. No mutation performed."
+    notes: "Candidate source checked. No mutation performed.",
   };
 }

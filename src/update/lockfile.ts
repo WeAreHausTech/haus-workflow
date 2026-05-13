@@ -1,10 +1,12 @@
-import path from "node:path";
 import { mkdir, readFile, copyFile } from "node:fs/promises";
+import path from "node:path";
+
+import { createUnifiedDiff, hasTextChanged } from "../utils/diff.js";
 import { readJson, writeJson } from "../utils/fs.js";
 import { hausPath } from "../utils/paths.js";
-import { hashInstalledPaths } from "./hash-installed.js";
-import { createUnifiedDiff, hasTextChanged } from "../utils/diff.js";
 import { normalizeVersion } from "../utils/versions.js";
+
+import { hashInstalledPaths } from "./hash-installed.js";
 
 export type LockItem = {
   id: string;
@@ -50,7 +52,7 @@ export async function applyLock(root: string): Promise<{ before: string; after: 
       const { hash: _oldHash, ...stableFields } = x;
       const newHash = await hashInstalledPaths(root, paths);
       return { ...stableFields, paths, hash: newHash };
-    })
+    }),
   );
   await writeJson(lockPath, enriched);
   const after = `${JSON.stringify(enriched, null, 2)}\n`;

@@ -1,12 +1,12 @@
+import { syncGithubSource } from "../sources/github-source.js";
+import { loadSources } from "../sources/load-sources.js";
+import { syncPrpmSource } from "../sources/prpm-source.js";
+import { syncSkillkitSource } from "../sources/skillkit-source.js";
+import { syncSkillsShSource } from "../sources/skills-sh-source.js";
+import { auditSources } from "../sources/source-audit.js";
+import { renderSourceReport } from "../sources/source-report.js";
 import { writeText } from "../utils/fs.js";
 import { hausPath } from "../utils/paths.js";
-import { syncGithubSource } from "../sources/github-source.js";
-import { syncPrpmSource } from "../sources/prpm-source.js";
-import { syncSkillsShSource } from "../sources/skills-sh-source.js";
-import { syncSkillkitSource } from "../sources/skillkit-source.js";
-import { renderSourceReport } from "../sources/source-report.js";
-import { loadSources } from "../sources/load-sources.js";
-import { auditSources } from "../sources/source-audit.js";
 
 export async function runSources(action: "sync" | "report" | "audit", options: { check?: boolean }): Promise<void> {
   const root = process.cwd();
@@ -36,7 +36,7 @@ export async function runSources(action: "sync" | "report" | "audit", options: {
         policy: source.policy,
         checkOnly,
         pinned: Boolean(source.pinnedVersion && source.pinnedHash),
-        notes: "No adapter mapped. Candidate only."
+        notes: "No adapter mapped. Candidate only.",
       });
     }
   }

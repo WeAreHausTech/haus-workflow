@@ -1,6 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
+
 import fg from "fast-glob";
+
 import { loadCatalog } from "../catalog/load-catalog.js";
 import type { CatalogItem } from "../types.js";
 
@@ -14,7 +16,7 @@ const RISKY_INVOCATION_RES: RegExp[] = [
   /\bnpx\s+--yes\b/i,
   /\byarn\s+dlx\b/i,
   /\bpnpm\s+dlx\b/i,
-  /\bcurl\s+[^\n|]+\|\s*(ba)?sh\b/i
+  /\bcurl\s+[^\n|]+\|\s*(ba)?sh\b/i,
 ];
 
 const BANNED_AGENT_SUBSTRINGS = ["autonomous", "swarm", "delegate", "orchestrat", "marketplace"];
@@ -89,7 +91,7 @@ function auditCatalogManifest(root: string, items: CatalogItem[]): string[] {
       const refAbs = path.resolve(base, ref);
       if (!fs.existsSync(refAbs)) {
         failures.push(
-          `${item.id}: catalog references[] entry does not resolve: ${ref} (expected ${path.relative(root, refAbs)})`
+          `${item.id}: catalog references[] entry does not resolve: ${ref} (expected ${path.relative(root, refAbs)})`,
         );
       }
     }
@@ -248,6 +250,6 @@ export async function auditLibrary(root: string): Promise<string[]> {
     ...auditCatalogLibraryItems(root, items),
     ...auditPluginSkills(root),
     ...auditPluginAgents(root),
-    ...auditShippedMarkdownAndManifest(root)
+    ...auditShippedMarkdownAndManifest(root),
   ];
 }

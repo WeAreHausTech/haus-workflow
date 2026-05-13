@@ -9,7 +9,7 @@ export async function ensureMemory(root: string): Promise<void> {
       const file = hausPath(root, "memory", name);
       const current = await readText(file);
       if (!current) await writeText(file, `# ${name}\n`);
-    })
+    }),
   );
   const indexFile = hausPath(root, "memory", "index.json");
   const index = await readJson<Record<string, string[]>>(indexFile);

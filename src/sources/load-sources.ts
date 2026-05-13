@@ -1,7 +1,10 @@
 import path from "node:path";
-import { readText } from "../utils/fs.js";
-import type { CuratedSource } from "./types.js";
+
 import YAML from "yaml";
+
+import { readText } from "../utils/fs.js";
+
+import type { CuratedSource } from "./types.js";
 
 type SourcesYaml = { sources?: CuratedSource[] };
 

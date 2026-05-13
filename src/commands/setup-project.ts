@@ -1,6 +1,7 @@
 import { readJson, writeJson } from "../utils/fs.js";
 import { hausPath } from "../utils/paths.js";
 import { ask, confirm } from "../utils/prompts.js";
+
 import { runApply } from "./apply.js";
 import { runDoctor } from "./doctor.js";
 import { runRecommend } from "./recommend.js";
@@ -13,7 +14,7 @@ const GUIDED_QUESTIONS = [
   "Is this project connected to other repositories?",
   "Are there parts of the project Claude should avoid touching?",
   "Are there client-specific rules or sensitive areas?",
-  "Do you want a minimal, standard, or strict setup?"
+  "Do you want a minimal, standard, or strict setup?",
 ];
 
 export async function runSetupProject(options: { guided?: boolean; fast?: boolean; json?: boolean }): Promise<void> {

@@ -20,7 +20,7 @@ export const ALL_INTENTS: readonly TaskIntent[] = [
   "auth",
   "testing",
   "docs",
-  "monorepo"
+  "monorepo",
 ];
 
 /**
@@ -59,7 +59,7 @@ const TASK_INTENT_KEYWORDS: Record<TaskIntent, string[]> = {
     "command",
     "nova resource",
     "api mutation",
-    "api subscription"
+    "api subscription",
   ],
   frontend: [
     "component",
@@ -83,7 +83,7 @@ const TASK_INTENT_KEYWORDS: Record<TaskIntent, string[]> = {
     "radix",
     "block",
     "client component",
-    "server component"
+    "server component",
   ],
   "admin-ui": [
     "admin",
@@ -95,7 +95,7 @@ const TASK_INTENT_KEYWORDS: Record<TaskIntent, string[]> = {
     "nova",
     "control panel",
     "wp-admin",
-    "vendure admin"
+    "vendure admin",
   ],
   storefront: [
     "storefront",
@@ -107,16 +107,9 @@ const TASK_INTENT_KEYWORDS: Record<TaskIntent, string[]> = {
     "shop",
     "ecommerce",
     "e-commerce",
-    "order page"
+    "order page",
   ],
-  graphql: [
-    "graphql",
-    "resolver",
-    "graphql mutation",
-    "graphql subscription",
-    "schema",
-    "codegen"
-  ],
+  graphql: ["graphql", "resolver", "graphql mutation", "graphql subscription", "schema", "codegen"],
   database: [
     "database",
     "migration",
@@ -128,7 +121,7 @@ const TASK_INTENT_KEYWORDS: Record<TaskIntent, string[]> = {
     "mariadb",
     "mssql",
     "sql query",
-    "db query"
+    "db query",
   ],
   auth: [
     "auth",
@@ -144,7 +137,7 @@ const TASK_INTENT_KEYWORDS: Record<TaskIntent, string[]> = {
     "rbac",
     "acl",
     "guard",
-    "saml"
+    "saml",
   ],
   testing: [
     "test",
@@ -160,7 +153,7 @@ const TASK_INTENT_KEYWORDS: Record<TaskIntent, string[]> = {
     "playwright",
     "cypress",
     "phpunit",
-    "vitest"
+    "vitest",
   ],
   docs: ["doc", "docs", "documentation", "readme", "guide", "tutorial", "changelog"],
   monorepo: [
@@ -173,12 +166,15 @@ const TASK_INTENT_KEYWORDS: Record<TaskIntent, string[]> = {
     "nx",
     "turbo",
     "pnpm workspace",
-    "yarn workspace"
-  ]
+    "yarn workspace",
+  ],
 };
 
 function normalizeTaskForMatching(task: string): string {
-  return ` ${task.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim()} `;
+  return ` ${task
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim()} `;
 }
 
 export function classifyTaskIntents(task: string): Set<TaskIntent> {
@@ -202,11 +198,7 @@ export function classifyTaskIntents(task: string): Set<TaskIntent> {
  * it can legitimately satisfy. Returns empty set when no metadata is available
  * (legacy schema), allowing the caller to fall back to keyword matching.
  */
-export function computeRuleIntents(rule: {
-  id: string;
-  tags?: string[];
-  ecosystem?: string;
-}): Set<TaskIntent> {
+export function computeRuleIntents(rule: { id: string; tags?: string[]; ecosystem?: string }): Set<TaskIntent> {
   const intents = new Set<TaskIntent>();
   const tags = new Set((rule.tags ?? []).map((t) => t.toLowerCase()));
   const eco = rule.ecosystem;
@@ -255,12 +247,7 @@ export function computeRuleIntents(rule: {
   if (tags.has("graphql")) intents.add("graphql");
   if (tags.has("laravel-nova")) intents.add("admin-ui");
   if (tags.has("oidc") || tags.has("azure-ad") || tags.has("bankid")) intents.add("auth");
-  if (
-    tags.has("postgresql") ||
-    tags.has("mariadb") ||
-    tags.has("mssql") ||
-    tags.has("elasticsearch")
-  ) {
+  if (tags.has("postgresql") || tags.has("mariadb") || tags.has("mssql") || tags.has("elasticsearch")) {
     intents.add("database");
   }
   if (tags.has("nx21") || tags.has("turbo") || tags.has("yarn4") || tags.has("pnpm89")) {

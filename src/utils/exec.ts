@@ -11,19 +11,19 @@ export type CommandResult = {
 export async function runCommand(
   command: string,
   args: string[] = [],
-  options: ExecaOptions = {}
+  options: ExecaOptions = {},
 ): Promise<CommandResult> {
   try {
     const result = await execa(command, args, {
       reject: false,
-      ...options
+      ...options,
     });
     return {
       command,
       args,
-      stdout: result.stdout ?? "",
-      stderr: result.stderr ?? "",
-      exitCode: result.exitCode ?? 0
+      stdout: String(result.stdout ?? ""),
+      stderr: String(result.stderr ?? ""),
+      exitCode: result.exitCode ?? 0,
     };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);

@@ -1,19 +1,13 @@
-import { readJson } from "../utils/fs.js";
-import { hausPath } from "../utils/paths.js";
-import type { Recommendation } from "../types.js";
+import { buildContextExplanation, formatContextHuman } from "../recommender/explain-formatters.js";
 import { normalizeRecommendation } from "../recommender/explain-recommendation.js";
 import { classifyTaskIntents, type TaskIntent } from "../recommender/task-intent.js";
-import {
-  buildContextExplanation,
-  formatContextHuman
-} from "../recommender/explain-formatters.js";
+import type { Recommendation } from "../types.js";
+import { readJson } from "../utils/fs.js";
+import { hausPath } from "../utils/paths.js";
+
 import { pickTaskRelevantRules } from "./context.js";
 
-export async function runExplainContext(options: {
-  json?: boolean;
-  stats?: boolean;
-  task?: string;
-}): Promise<void> {
+export async function runExplainContext(options: { json?: boolean; stats?: boolean; task?: string }): Promise<void> {
   const root = process.cwd();
   const rec = await readJson<Recommendation>(hausPath(root, "recommendation.json"));
   if (!rec) {

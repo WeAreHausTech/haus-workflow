@@ -1,11 +1,13 @@
-import path from "node:path";
-import { hashText, listFiles, readJson, readText, writeJson, writeText } from "../utils/fs.js";
 import { readFile } from "node:fs/promises";
-import { hausPath } from "../utils/paths.js";
+import path from "node:path";
+
 import type { ContextMap, PackageManager } from "../types.js";
-import type { ScanResult } from "./types.js";
-import { detectPackageManager } from "./detect-package-manager.js";
+import { hashText, listFiles, readJson, writeJson, writeText } from "../utils/fs.js";
+import { hausPath } from "../utils/paths.js";
 import { satisfiesVersion } from "../utils/versions.js";
+
+import { detectPackageManager } from "./detect-package-manager.js";
+import type { ScanResult } from "./types.js";
 
 const SAFE_FILES = [
   "package.json",
@@ -40,7 +42,7 @@ const SAFE_FILES = [
   "**/*.csproj",
   "**/*.sln",
   "docker-compose.*",
-  "Dockerfile"
+  "Dockerfile",
 ];
 
 const SENSITIVE = [
@@ -58,7 +60,7 @@ const SENSITIVE = [
   /secrets/,
   /(^|\/)storage\/logs(\/|$)/,
   /(^|\/)wp-content\/uploads(\/|$)/,
-  /(^|\/)uploads(\/|$)/
+  /(^|\/)uploads(\/|$)/,
 ];
 
 function blocked(rel: string): boolean {
@@ -78,13 +80,16 @@ export async function scanProject(root: string, mode: "guided" | "fast" = "fast"
   const securityRisks: string[] = [];
   const crossRepoHints: string[] = [];
   if (!safeFiles.some((f) => f.endsWith(".env.example"))) warnings.push("No .env.example found");
-  if (!(pkg && typeof pkg === "object" && "scripts" in pkg && String((pkg as any).scripts?.test ?? "").length > 0)) warnings.push("No package.json test script found");
-  const nodeEngine = typeof pkg?.engines === "object" ? String((pkg.engines as Record<string, unknown>)?.node ?? "") : "";
+  if (!(pkg && typeof pkg === "object" && "scripts" in pkg && String((pkg as any).scripts?.test ?? "").length > 0))
+    warnings.push("No package.json test script found");
+  const nodeEngine =
+    typeof pkg?.engines === "object" ? String((pkg.engines as Record<string, unknown>)?.node ?? "") : "";
   if (nodeEngine && !satisfiesVersion(process.version, nodeEngine)) {
     warnings.push(`Current Node ${process.version} does not satisfy package engine ${nodeEngine}`);
   }
   if (safeFiles.some((f) => f.includes("docker-compose"))) crossRepoHints.push("Containerized services detected");
-  if (safeFiles.some((f) => f.includes("turbo.json") || f.includes("nx.json"))) crossRepoHints.push("Monorepo orchestration detected");
+  if (safeFiles.some((f) => f.includes("turbo.json") || f.includes("nx.json")))
+    crossRepoHints.push("Monorepo orchestration detected");
   if (!safeFiles.some((f) => f.endsWith(".env.example"))) securityRisks.push("Missing env template");
   if (safeFiles.some((f) => f.includes("wp-content/uploads"))) securityRisks.push("Uploads directory present");
 
@@ -100,17 +105,15 @@ export async function scanProject(root: string, mode: "guided" | "fast" = "fast"
     dependencies: deps,
     securityRisks,
     crossRepoHints,
-    warnings
+    warnings,
   };
 
   const dependencyMap = {
     node: deps.filter((d) => !d.includes("/")),
-    composer: Object.keys(((composer?.require ?? {}) as Record<string, string>) ?? {})
+    composer: Object.keys(((composer?.require ?? {}) as Record<string, string>) ?? {}),
   };
   const scanHashes = Object.fromEntries(
-    await Promise.all(
-      safeFiles.map(async (f) => [f, hashText(await readFile(path.join(root, f), "utf8"))] as const)
-    )
+    await Promise.all(safeFiles.map(async (f) => [f, hashText(await readFile(path.join(root, f), "utf8"))] as const)),
   );
   const repoSummary = renderSummary(context);
 
@@ -141,7 +144,8 @@ function detectRoles(deps: string[], files: string[]): string[] {
   if (deps.includes("react")) roles.add("react-app");
   if (deps.includes("vite") || files.some((f) => f.includes("vite.config."))) roles.add("vite-app");
   if (deps.includes("@vendure/core")) roles.add("vendure-app");
-  if (deps.some((d) => d.startsWith("@haus/vendure-")) || files.some((f) => f.includes("vendure-config"))) roles.add("vendure-plugin");
+  if (deps.some((d) => d.startsWith("@haus/vendure-")) || files.some((f) => f.includes("vendure-config")))
+    roles.add("vendure-plugin");
   if (deps.includes("@nestjs/core")) roles.add("nestjs-api");
   if (deps.includes("graphql") || deps.includes("@nestjs/graphql")) roles.add("graphql-api");
   if (files.some((f) => f.endsWith("nx.json"))) roles.add("nx-monorepo");
@@ -165,9 +169,17 @@ async function detectStacks(
   root: string,
   deps: string[],
   files: string[],
-  packageManager: PackageManager
+  packageManager: PackageManager,
 ): Promise<Record<string, string[]>> {
-  const out: Record<string, string[]> = { backend: [], frontend: [], databases: [], testing: [], auth: [], tooling: [], packageManagers: [] };
+  const out: Record<string, string[]> = {
+    backend: [],
+    frontend: [],
+    databases: [],
+    testing: [],
+    auth: [],
+    tooling: [],
+    packageManagers: [],
+  };
   const add = (k: string, v: string) => {
     out[k] ??= [];
     if (!out[k].includes(v)) out[k].push(v);
@@ -204,7 +216,15 @@ async function detectStacks(
 }
 
 async function hasNeedle(root: string, files: string[], needle: string): Promise<boolean> {
-  const candidates = files.filter((f) => f.endsWith(".ts") || f.endsWith(".js") || f.endsWith(".php") || f.endsWith(".json") || f.endsWith(".yml") || f.endsWith(".yaml"));
+  const candidates = files.filter(
+    (f) =>
+      f.endsWith(".ts") ||
+      f.endsWith(".js") ||
+      f.endsWith(".php") ||
+      f.endsWith(".json") ||
+      f.endsWith(".yml") ||
+      f.endsWith(".yaml"),
+  );
   for (const rel of candidates.slice(0, 300)) {
     try {
       const content = await readFile(path.join(root, rel), "utf8");

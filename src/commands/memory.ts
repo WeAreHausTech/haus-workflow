@@ -3,7 +3,7 @@ import { redactMemory } from "../memory/redact-memory.js";
 
 export async function runMemory(
   subcommand: "status" | "add" | "inject" | "promote",
-  options: { text?: string; task?: string; fromHook?: boolean }
+  options: { text?: string; task?: string; fromHook?: boolean },
 ): Promise<void> {
   const root = process.cwd();
   await ensureMemory(root);

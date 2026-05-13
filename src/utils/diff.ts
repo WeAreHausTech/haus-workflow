@@ -6,7 +6,7 @@ export function hasTextChanged(before: string, after: string): boolean {
 
 export function createUnifiedDiff(filePath: string, before: string, after: string): string {
   return createTwoFilesPatch(filePath, filePath, before, after, "before", "after", {
-    context: 3
+    context: 3,
   });
 }
 
