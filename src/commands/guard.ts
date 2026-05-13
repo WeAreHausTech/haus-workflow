@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { DANGEROUS_COMMANDS } from "../security/dangerous-commands.js";
 import { guardBash } from "../security/guard-bash.js";
 import { guardFileAccess } from "../security/guard-file-access.js";
+import { isRecord } from "../utils/audit-checks.js";
 import { log } from "../utils/logger.js";
 
 function stdin(): string {
@@ -20,17 +21,18 @@ function deny(reason: string): void {
 
 export async function runGuard(kind: "file-access" | "bash", _options: { fromHook?: boolean }): Promise<void> {
   const raw = stdin();
-  let payload: Record<string, any> = {};
+  let payload: Record<string, unknown> = {};
   if (raw) {
     try {
-      payload = JSON.parse(raw) as Record<string, any>;
+      const parsed: unknown = JSON.parse(raw);
+      if (isRecord(parsed)) payload = parsed;
     } catch {
       deny("Malformed hook payload");
       process.exitCode = 1;
       return;
     }
   }
-  const toolInput = payload.tool_input ?? {};
+  const toolInput = isRecord(payload.tool_input) ? payload.tool_input : {};
 
   if (kind === "file-access") {
     const candidate = String(toolInput.path ?? toolInput.file_path ?? "");

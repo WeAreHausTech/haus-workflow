@@ -33,7 +33,7 @@
     "publish:dry": "yarn npm publish --dry-run",
     "publish:private": "yarn npm publish --access restricted",
     "prepack": "yarn build && yarn catalog:audit && yarn sources:audit && yarn sources:decisions && yarn library:audit && yarn curated:audit",
-    "verify": "yarn typecheck && yarn typecheck:scripts && yarn lint && yarn test && yarn prepack",
+    "verify": "yarn typecheck && yarn typecheck:scripts && yarn lint && yarn build && yarn test && yarn prepack",
     "prepare": "husky"
   },
   "dependencies": {

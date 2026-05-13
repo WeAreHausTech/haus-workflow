@@ -72,7 +72,7 @@ function validateOrThrow(raw: unknown): ClaudeHooksSettings {
   if (!parsed.success) {
     throw new Error(`Invalid plugin hooks.json: ${parsed.error.message}`);
   }
-  return parsed.data as ClaudeHooksSettings;
+  return parsed.data;
 }
 
 function hooksPathOnDisk(): string {

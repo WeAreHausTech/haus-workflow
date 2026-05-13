@@ -25,7 +25,7 @@ Utilities for running the compiled CLI against fixture repos in a temp directory
 - `normalizeRecommendationForGolden(rec)` — stable sort for golden snapshot comparison
 - `normalizeContextForGolden(ctx)` — stable sort for golden snapshot comparison
 
-Tests that use `fixture-runner.js` require a built `dist/` — run `yarn build` first or use `yarn test` which runs against the current dist.
+Tests that use `fixture-runner.js` require a built `dist/` — run `yarn build && yarn test`, or use `yarn verify` which builds before running tests.
 
 ## fixtures/
 
