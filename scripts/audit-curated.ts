@@ -1,11 +1,14 @@
 /**
  * Curated library audit.
  *
- * Validates library/curated/ inventory and decision files against their JSON schemas,
- * and enforces policy gates on approved installable items.
+ * Performs structural and policy validation of library/curated/ inventory and
+ * decision files. Checks required fields, enum values, cross-references between
+ * files, and enforces install gates (reviewStatus, license, pinnedRef/hash).
+ * Does not run full JSON Schema validation — schema files serve as documentation
+ * and are referenced by tooling.
  *
- * Full hash/pinnedRef verification and targetPath existence checks are added in PR8
- * once library/curated/decisions/curation-decisions.json is populated.
+ * Full hash/pinnedRef content verification is deferred to PR8 once
+ * library/curated/decisions/curation-decisions.json is populated.
  */
 import fs from "node:fs";
 import path from "node:path";
@@ -249,11 +252,28 @@ function auditManifestCuratedItems(knownDecisionIds: Set<string>): void {
     fail(`${MANIFEST_PATH}: failed to parse as JSON`);
     return;
   }
-  for (const item of manifest.items ?? []) {
-    if (item.source !== "curated") continue;
+  const curatedItems = (manifest.items ?? []).filter((item) => item.source === "curated");
+  if (curatedItems.length === 0) return;
+
+  const decisionsPresent = fs.existsSync(path.resolve(root, DECISIONS_PATH));
+  if (!decisionsPresent) {
+    fail(
+      `${MANIFEST_PATH}: contains ${curatedItems.length} curated item(s) but ${DECISIONS_PATH} is missing — every curated manifest entry requires a decision record`
+    );
+    return;
+  }
+
+  for (const item of curatedItems) {
     if (item.reviewStatus !== "approved") {
       fail(
         `${MANIFEST_PATH}: curated item "${item.id}" has reviewStatus "${item.reviewStatus ?? "unset"}" — only "approved" items may appear in manifest`
+      );
+    }
+    // Verify each curated manifest item has a corresponding entry in curation-decisions.json
+    // so that its license/pinnedRef/hash gates were evaluated before it was approved.
+    if (knownDecisionIds.size > 0 && !knownDecisionIds.has(item.id)) {
+      fail(
+        `${MANIFEST_PATH}: curated item "${item.id}" has no corresponding entry in ${DECISIONS_PATH} — add a decision record before marking approved`
       );
     }
   }

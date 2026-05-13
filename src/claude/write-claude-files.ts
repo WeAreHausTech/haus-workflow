@@ -76,14 +76,25 @@ haus context --task "<task>"
   )) ?? { items: [] };
   const manifestById = new Map((manifest.items ?? []).map((item) => [item.id, item]));
   const installedPathsByItem = new Map<string, string[]>();
+  // Track which recommended items were actually installed so that skipped
+  // curated items (unapproved or blocked) are excluded from the lock and
+  // selected-context output — a stale recommendation.json must not cause
+  // unapproved artifacts to appear in the written state.
+  const installedIds = new Set<string>();
 
   for (const item of rec.recommended) {
     const manifestItem = manifestById.get(item.id);
     if (!manifestItem?.path) continue;
-    // Curated items must be approved before they are written to disk.
-    if (manifestItem.source === "curated" && manifestItem.reviewStatus !== "approved") {
-      console.warn(`Skipping curated item ${item.id}: reviewStatus is not approved (${manifestItem.reviewStatus ?? "unset"})`);
-      continue;
+    // Curated items must be approved and not blocked before they are written to disk.
+    if (manifestItem.source === "curated") {
+      if (manifestItem.reviewStatus !== "approved") {
+        console.warn(`Skipping curated item ${item.id}: reviewStatus is not approved (${manifestItem.reviewStatus ?? "unset"})`);
+        continue;
+      }
+      if (manifestItem.riskLevel === "blocked") {
+        console.warn(`Skipping curated item ${item.id}: riskLevel is blocked`);
+        continue;
+      }
     }
     const sourcePath = path.join(pkgRoot, manifestItem.path);
     const target = item.type === "agent" ? "agents" : "skills";
@@ -95,16 +106,18 @@ haus context --task "<task>"
       const current = installedPathsByItem.get(item.id) ?? [];
       installedPathsByItem.set(item.id, [...current, path.relative(root, destination)]);
     }
+    installedIds.add(item.id);
   }
+  const installedItems = rec.recommended.filter((r) => installedIds.has(r.id));
   await writeManagedJson(
     root,
     hausPath(root, "selected-context.json"),
-    rec.recommended.map((r) => ({ id: r.id, type: r.type, reason: r.reason, confidenceLevel: r.confidenceLevel }))
+    installedItems.map((r) => ({ id: r.id, type: r.type, reason: r.reason, confidenceLevel: r.confidenceLevel }))
   );
   const hausVersion =
     (await readJson<{ version?: string }>(path.join(pkgRoot, "package.json")))?.version ?? "0.0.0";
   const lock = await Promise.all(
-    rec.recommended.map(async (r) => {
+    installedItems.map(async (r) => {
       const relPaths = installedPathsByItem.get(r.id) ?? [];
       const manifestItem = manifestById.get(r.id);
       const isCurated = manifestItem?.source === "curated";

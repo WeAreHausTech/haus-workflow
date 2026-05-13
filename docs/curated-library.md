@@ -67,9 +67,11 @@ These two layers are separate by design. Do not conflate them.
 |---|---|---|---|---|---|---|
 | `pinnedRef` | required | required | optional | — | — | — |
 | `hash` | required | required | — | — | — | — |
-| `license` | required | required | recommended | — | — | — |
-| `targetPath` | required | required | optional | — | — | — |
+| `license` | required¹ | required¹ | recommended | — | — | — |
+| `targetPath` | enforced in PR8 | enforced in PR8 | optional | — | — | — |
 | `reviewStatus` | `approved` | `approved` | `approved` | `approved` | — | `rejected` |
+
+¹ A known SPDX license is required, or `licenseConfidence: "accepted-unknown"` with a written `licenseAcceptedUnknownJustification`.
 
 ## Install gates
 

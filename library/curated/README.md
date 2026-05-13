@@ -25,7 +25,7 @@ Haus AI is a curated Claude Code distribution. It governs and installs the best 
 
 | `decision` value | Meaning | Required fields |
 |---|---|---|
-| `copy` | Verbatim copy of upstream content | `license != "unknown"`, `pinnedRef`, `hash` |
+| `copy` | Verbatim copy of upstream content | `pinnedRef`, `hash`, and either a known `license` or `licenseConfidence: "accepted-unknown"` with written justification |
 | `adapted` | Modified for Haus conventions | same as copy |
 | `wrapped` | Haus wrapper references the external item | `originUrl` |
 | `rewritten` | Fully Haus-authored, inspired by source | none beyond standard |
