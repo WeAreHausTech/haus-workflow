@@ -71,7 +71,7 @@ program
   .option("--json")
   .option("--verbose")
   .action(runContext);
-program.command("init").action(runInit);
+program.command("init").option("--fast").option("--json").action(runInit);
 program.command("refresh").action(runRefresh);
 program.command("catalog-audit").action(runCatalogAudit);
 program.command("update").option("--check").action(runUpdate);

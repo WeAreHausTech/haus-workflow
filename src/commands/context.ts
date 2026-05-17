@@ -17,6 +17,12 @@ export async function runContext(options: {
   const summary = (await readText(hausPath(root, "repo-summary.md"))) ?? "";
   const recommendationRaw = await readJson<Recommendation>(hausPath(root, "recommendation.json"));
   const recommendation = recommendationRaw ? normalizeRecommendation(recommendationRaw) : undefined;
+  // Build a lookup from the raw recommended items so --verbose can surface the
+  // original scoreBreakdown (including penalties), which normalizeRecommendation
+  // strips when reconstructing from legacy format.
+  const rawBreakdownById = new Map(
+    (recommendationRaw?.recommended ?? []).map((item) => [item.id, item.scoreBreakdown]),
+  );
   const taskIntents = options.task ? classifyTaskIntents(options.task) : new Set<TaskIntent>();
   const selected = pickTaskRelevantRules(recommendation, options.task, taskIntents);
   const payload = {
@@ -28,11 +34,7 @@ export async function runContext(options: {
       confidenceLevel: x.confidenceLevel,
       selectionMode: x.selectionMode,
       reasons: x.reasons.map((reason) => reason.message),
-      ...(options.verbose
-        ? {
-            scoreBreakdown: (x as { scoreBreakdown?: unknown }).scoreBreakdown,
-          }
-        : {}),
+      ...(options.verbose ? { scoreBreakdown: rawBreakdownById.get(x.id) } : {}),
     })),
     skippedCount: recommendation?.skippedRules ?? 0,
     estimatedTokenReductionPct: recommendation?.estimatedTokenReductionPct ?? 0,
@@ -55,14 +57,7 @@ export async function runContext(options: {
     ...payload.selectedRules.flatMap((rule) => {
       const reasonLine = `- ${rule.id}: ${rule.reasons.join(", ")}`;
       if (!options.verbose) return [reasonLine];
-      const breakdown = (
-        rule as {
-          scoreBreakdown?: {
-            bonuses?: Array<{ code: string; weight: number; signal?: string }>;
-            penalties?: Array<{ code: string; penalty: number; signal?: string }>;
-          };
-        }
-      ).scoreBreakdown;
+      const breakdown = rawBreakdownById.get(rule.id);
       if (!breakdown) return [reasonLine];
       const bonuses = (breakdown.bonuses ?? []).map(
         (b) => `  + ${b.code}(+${b.weight})${b.signal ? ` [${b.signal}]` : ""}`,
