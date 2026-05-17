@@ -34,13 +34,13 @@ test("apply writes claude files and rules", () => {
 
   const ups = settings.hooks.UserPromptSubmit[0].hooks;
   assert.equal(ups.length, 2);
-  assert.equal(ups[0].command, "haus context --from-hook");
-  assert.equal(ups[1].command, "haus memory inject --from-hook");
+  assert.equal(ups[0].command, "haus context --from-hook || true");
+  assert.equal(ups[1].command, "haus memory inject --from-hook || true");
   const pre = settings.hooks.PreToolUse;
   assert.equal(pre[0].matcher, "Read|Edit|Write");
-  assert.equal(pre[0].hooks[0].command, "haus guard file-access --from-hook");
+  assert.equal(pre[0].hooks[0].command, "haus guard file-access --from-hook || true");
   assert.equal(pre[1].matcher, "Bash");
-  assert.equal(pre[1].hooks[0].command, "haus guard bash --from-hook");
+  assert.equal(pre[1].hooks[0].command, "haus guard bash --from-hook || true");
   assert.equal(rulesHaus.includes("Keep context minimal"), true);
   assert.equal(rulesSecurity.includes("Never read secrets"), true);
 
