@@ -11,6 +11,7 @@ import { runDoctor } from "./commands/doctor.js";
 import { runExplainContext } from "./commands/explain-context.js";
 import { runExplainRecommendation } from "./commands/explain-recommendation.js";
 import { runGuard } from "./commands/guard.js";
+import { runInit } from "./commands/init.js";
 import { runMemory } from "./commands/memory.js";
 import { runPlugin } from "./commands/plugin.js";
 import { runRecommend } from "./commands/recommend.js";
@@ -63,7 +64,14 @@ program.command("apply").option("--dry-run").option("--write").action(runApply);
 program.command("undo").option("-y, --yes", "Skip confirmation").action(runUndo);
 program.command("explain-context").option("--task <task>").option("--json").option("--stats").action(runExplainContext);
 program.command("explain-recommendation").option("--json").action(runExplainRecommendation);
-program.command("context").option("--task <task>").option("--from-hook").option("--json").action(runContext);
+program
+  .command("context")
+  .option("--task <task>")
+  .option("--from-hook")
+  .option("--json")
+  .option("--verbose")
+  .action(runContext);
+program.command("init").action(runInit);
 program.command("refresh").action(runRefresh);
 program.command("catalog-audit").action(runCatalogAudit);
 program.command("update").option("--check").action(runUpdate);

@@ -71,3 +71,21 @@ test("apply reports diff before overwriting generated files", () => {
   assert.equal(second.exitCode, 0);
   assert.equal(second.stdout.includes("Overwriting ./.claude/rules/security.md"), true);
 });
+
+test("apply --dry-run shows diffs and does not write files", () => {
+  const temp = mkdtempSync(path.join(os.tmpdir(), "haus-dry-run-"));
+  mkdirSync(path.join(temp, "plugin"), { recursive: true });
+  writeFileSync(
+    path.join(temp, "package.json"),
+    JSON.stringify({ name: "dry-run-test", packageManager: "yarn@4.5.3", dependencies: { react: "19.0.0" } }, null, 2)
+  );
+  writeFileSync(path.join(temp, "yarn.lock"), "# lock");
+  execaSync("node", [path.resolve("dist/cli.js"), "scan", "--json"], { cwd: temp });
+  execaSync("node", [path.resolve("dist/cli.js"), "recommend", "--json"], { cwd: temp });
+  const result = execaSync("node", [path.resolve("dist/cli.js"), "apply", "--dry-run"], { cwd: temp, reject: false });
+  assert.equal(result.exitCode, 0);
+  assert.equal(result.stdout.includes("Dry-run complete"), true);
+  assert.equal(result.stdout.includes("none written"), true);
+  // No files should have been written to .claude/
+  assert.equal(fs.existsSync(path.join(temp, ".claude", "CLAUDE.md")), false);
+});

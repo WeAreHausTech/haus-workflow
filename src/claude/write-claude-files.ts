@@ -34,8 +34,6 @@ export async function writeClaudeFiles(root: string, dryRun: boolean): Promise<s
     hausPath(root, "selected-context.json"),
     hausPath(root, "haus.lock.json"),
   ];
-  if (dryRun) return files;
-
   await writeManagedText(
     root,
     claudePath(root, "CLAUDE.md"),
@@ -53,26 +51,35 @@ haus explain-context
 haus context --task "<task>"
 \`\`\`
 `,
+    dryRun,
   );
   const hookSettings = await loadClaudeHooksSettings();
-  await writeManagedJson(root, claudePath(root, "settings.json"), hookSettings);
-  await assertPostApplySettingsMatchCanonical(root, hookSettings);
-  await writeManagedText(root, claudePath(root, "commands", "haus-doctor.md"), "Run `haus doctor`.");
+  await writeManagedJson(root, claudePath(root, "settings.json"), hookSettings, dryRun);
+  if (!dryRun) await assertPostApplySettingsMatchCanonical(root, hookSettings);
+  await writeManagedText(root, claudePath(root, "commands", "haus-doctor.md"), "Run `haus doctor`.", dryRun);
   await writeManagedText(
     root,
     claudePath(root, "commands", "haus-review.md"),
     'Run `haus context --task "code review"` then review diff.',
+    dryRun,
   );
-  await writeManagedText(root, claudePath(root, "commands", "haus-explain-context.md"), "Run `haus explain-context`.");
+  await writeManagedText(
+    root,
+    claudePath(root, "commands", "haus-explain-context.md"),
+    "Run `haus explain-context`.",
+    dryRun,
+  );
   await writeManagedText(
     root,
     claudePath(root, "rules", "haus.md"),
     "- Keep context minimal.\n- Follow project conventions.\n",
+    dryRun,
   );
   await writeManagedText(
     root,
     claudePath(root, "rules", "security.md"),
     "- Never read secrets.\n- Block dangerous shell commands.\n",
+    dryRun,
   );
 
   const pkgRoot = packageRoot();
@@ -118,19 +125,28 @@ haus context --task "<task>"
     const target = item.type === "agent" ? "agents" : "skills";
     const destination = claudePath(root, target, path.basename(sourcePath));
     if (await fs.pathExists(sourcePath)) {
-      await fs.ensureDir(path.dirname(destination));
-      await fs.copy(sourcePath, destination, { overwrite: true, errorOnExist: false });
+      if (dryRun) {
+        const exists = await fs.pathExists(destination);
+        log(`${displayPath(root, destination)}: ${exists ? "would overwrite" : "would create"} (${item.id})`);
+      } else {
+        await fs.ensureDir(path.dirname(destination));
+        await fs.copy(sourcePath, destination, { overwrite: true, errorOnExist: false });
+      }
       files.push(destination);
       const current = installedPathsByItem.get(item.id) ?? [];
       installedPathsByItem.set(item.id, [...current, path.relative(root, destination)]);
     }
     installedIds.add(item.id);
   }
+
+  if (dryRun) return [...new Set(files)];
+
   const installedItems = rec.recommended.filter((r) => installedIds.has(r.id));
   await writeManagedJson(
     root,
     hausPath(root, "selected-context.json"),
     installedItems.map((r) => ({ id: r.id, type: r.type, reason: r.reason, confidenceLevel: r.confidenceLevel })),
+    false,
   );
   const hausVersion = (await readJson<{ version?: string }>(path.join(pkgRoot, "package.json")))?.version ?? "0.0.0";
   const lock = await Promise.all(
@@ -159,7 +175,7 @@ haus context --task "<task>"
       };
     }),
   );
-  await writeManagedJson(root, hausPath(root, "haus.lock.json"), lock);
+  await writeManagedJson(root, hausPath(root, "haus.lock.json"), lock, false);
 
   const pluginSrc = path.join(root, "plugin/.claude-plugin/plugin.json");
   if (await fs.pathExists(pluginSrc)) {
@@ -169,10 +185,20 @@ haus context --task "<task>"
   return [...new Set(files)];
 }
 
-async function writeManagedText(root: string, filePath: string, nextText: string): Promise<void> {
+async function writeManagedText(root: string, filePath: string, nextText: string, dryRun: boolean): Promise<void> {
   const prev = (await fs.pathExists(filePath)) ? await fs.readFile(filePath, "utf8") : "";
+  const printable = displayPath(root, filePath);
+  if (dryRun) {
+    if (!prev) {
+      log(`${printable}: new file`);
+    } else if (hasTextChanged(prev, nextText)) {
+      log(createUnifiedDiff(printable, prev, nextText));
+    } else {
+      log(`${printable}: unchanged`);
+    }
+    return;
+  }
   if (hasTextChanged(prev, nextText) && prev.length > 0) {
-    const printable = displayPath(root, filePath);
     const diffText = createUnifiedDiff(printable, prev, nextText);
     const summary = summarizeDiff(diffText);
     log(`Overwriting ${printable} (diff +${summary.additions} -${summary.deletions})`);
@@ -180,7 +206,7 @@ async function writeManagedText(root: string, filePath: string, nextText: string
   await writeText(filePath, nextText);
 }
 
-async function writeManagedJson(root: string, filePath: string, value: unknown): Promise<void> {
+async function writeManagedJson(root: string, filePath: string, value: unknown, dryRun: boolean): Promise<void> {
   const nextText = `${JSON.stringify(value, null, 2)}\n`;
-  await writeManagedText(root, filePath, nextText);
+  await writeManagedText(root, filePath, nextText, dryRun);
 }
