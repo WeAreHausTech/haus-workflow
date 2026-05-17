@@ -12,36 +12,44 @@ description: Set up Haus AI workflow in the current project. Use when the user w
 
 ## Do not use when
 
-- setup already applied and user asks only for coding task
+- setup already applied and user asks only for a coding task
 - repo is not intended for Haus workflow installation
 
-Start by asking:
+## Conversation flow
 
-"How do you want to set this project up?
+Start with:
 
-1. Guided setup - I'll ask a few simple questions, then scan the project.
-2. Fast setup - I'll only scan the project and recommend defaults."
+> "I'll help you set up Haus AI for this project. Do you want me to walk you through it with a few questions, or just scan and apply sensible defaults right away?"
+
+- **Walk me through it** → Guided setup
+- **Scan and apply defaults** → Fast setup
 
 ## Guided setup
 
-Ask plain-language questions only. Do not ask users to identify frameworks.
+Ask one question at a time. Do not ask users to identify framework names — infer from scan output. Good questions: what they build, who uses it, any areas to avoid.
 
-Then run:
+Then run the scan, summarize in plain language, show the diff, and ask:
+
+> "Should I go ahead and write these files?"
+
+Only after explicit approval, run apply and confirm success.
+
+## Fast setup
+
+Run scan and recommend, show a brief summary, then ask for approval before writing.
+
+## Commands
 
 ```bash
 haus scan --json
 haus recommend --json
 haus doctor
-```
-
-Ask before writing files.
-
-Only after approval:
-
-```bash
+# after approval:
 haus apply --write
 haus doctor
 ```
+
+If `haus` commands fail: `npm install -g @haus/ai` and retry.
 
 ## References
 
