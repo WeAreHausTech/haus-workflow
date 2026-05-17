@@ -22,7 +22,8 @@ node dist/cli.js doctor
 
 ## Later testing in Claude Code
 
-- Install package globally: `npm install -g @haus/ai`
-- Run plugin install: `haus plugin install`
+- Install CLI globally: `npm install -g @haus/ai`
+- Add Haus marketplace in Claude Code: `/plugin marketplace add github:WeAreHausTech/haus-ai-workflow`
+- Install plugin: `/plugin install haus-ai@haus-marketplace`
 - In project run: `haus setup-project`
 - Validate hooks and guardrails by opening `.claude/settings.json`.

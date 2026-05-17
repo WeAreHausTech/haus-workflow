@@ -4,8 +4,8 @@
 
 File: `plugin/.claude-plugin/plugin.json`
 
-- declares plugin name/version
-- declares skill `SKILL.md` file list
+- declares plugin name/version and metadata (description, author, homepage, repository, license)
+- skills are auto-discovered from `plugin/skills/*/SKILL.md` — no skills list in plugin.json
 
 ## Hook source of truth
 
