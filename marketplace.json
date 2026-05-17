@@ -1,0 +1,11 @@
+{
+  "name": "haus-marketplace",
+  "plugins": [
+    {
+      "name": "haus-ai",
+      "description": "Haus AI workflow — skills, agents, and guardrails for Claude Code",
+      "version": "0.2.0",
+      "path": "plugin"
+    }
+  ]
+}

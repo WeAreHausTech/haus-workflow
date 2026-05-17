@@ -42,29 +42,29 @@ const EMBEDDED_HOOKS: ClaudeHooksSettings = {
     UserPromptSubmit: [
       {
         hooks: [
-          { type: "command", command: "haus context --from-hook" },
-          { type: "command", command: "haus memory inject --from-hook" },
+          { type: "command", command: "haus context --from-hook || true" },
+          { type: "command", command: "haus memory inject --from-hook || true" },
         ],
       },
     ],
     PreToolUse: [
       {
         matcher: "Read|Edit|Write",
-        hooks: [{ type: "command", command: "haus guard file-access --from-hook" }],
+        hooks: [{ type: "command", command: "haus guard file-access --from-hook || true" }],
       },
       {
         matcher: "Bash",
-        hooks: [{ type: "command", command: "haus guard bash --from-hook" }],
+        hooks: [{ type: "command", command: "haus guard bash --from-hook || true" }],
       },
     ],
   },
 };
 
 const STABLE_HOOK_IDS: Record<string, string> = {
-  "haus context --from-hook": "haus.context-hook",
-  "haus memory inject --from-hook": "haus.memory-hook",
-  "haus guard file-access --from-hook": "haus.guard-file",
-  "haus guard bash --from-hook": "haus.guard-bash",
+  "haus context --from-hook || true": "haus.context-hook",
+  "haus memory inject --from-hook || true": "haus.memory-hook",
+  "haus guard file-access --from-hook || true": "haus.guard-file",
+  "haus guard bash --from-hook || true": "haus.guard-bash",
 };
 
 function validateOrThrow(raw: unknown): ClaudeHooksSettings {

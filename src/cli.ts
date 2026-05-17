@@ -87,7 +87,6 @@ sources.command("report").action((opts) => runSources("report", opts));
 sources.command("audit").action((opts) => runSources("audit", opts));
 
 const plugin = program.command("plugin");
-plugin.command("install").action((opts) => runPlugin("install", opts));
 plugin.command("validate").action((opts) => runPlugin("validate", opts));
 
 const guard = program.command("guard");
