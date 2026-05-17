@@ -152,3 +152,26 @@ test("legacy recommendation schema does not crash explain/context", () => {
   const contextParsed = JSON.parse(contextOutput);
   assert.equal(contextParsed.selectedRules.some((item) => item.id === "legacy.rule"), true);
 });
+
+test("context --verbose --json exposes scoreBreakdown with bonuses and penalties", () => {
+  const cwd = cloneFixtureToTemp("vendure-monorepo");
+  runHaus(cwd, "scan --json");
+  runHaus(cwd, "recommend --json");
+  const output = runHaus(cwd, "context --json --verbose");
+  const parsed = JSON.parse(output);
+  assert.equal(Array.isArray(parsed.selectedRules), true);
+  const withBreakdown = parsed.selectedRules.filter((r) => r.scoreBreakdown);
+  assert.equal(withBreakdown.length > 0, true, "expected at least one rule with scoreBreakdown");
+  for (const rule of withBreakdown) {
+    assert.equal(Array.isArray(rule.scoreBreakdown.bonuses), true);
+    assert.equal(Array.isArray(rule.scoreBreakdown.penalties), true);
+  }
+});
+
+test("context --verbose human output includes bonus lines", () => {
+  const cwd = cloneFixtureToTemp("vendure-monorepo");
+  runHaus(cwd, "scan --json");
+  runHaus(cwd, "recommend --json");
+  const output = runHaus(cwd, "context --verbose");
+  assert.match(output, /\+ \S+\(\+\d+\)/, "expected bonus line like '  + code(+weight)'");
+});

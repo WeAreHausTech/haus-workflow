@@ -6,7 +6,7 @@ import { log } from "../utils/logger.js";
 
 import { runSetupProject } from "./setup-project.js";
 
-export async function runInit(_options: Record<string, unknown>): Promise<void> {
+export async function runInit(options: { fast?: boolean; json?: boolean }): Promise<void> {
   const root = process.cwd();
   const hausDir = path.join(root, ".haus-ai");
   const alreadyInit = await fs.pathExists(hausDir);
@@ -16,5 +16,5 @@ export async function runInit(_options: Record<string, unknown>): Promise<void> 
     return;
   }
   log("Welcome to Haus AI. Initializing this project for the first time.");
-  await runSetupProject({});
+  await runSetupProject(options);
 }

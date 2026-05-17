@@ -23,7 +23,8 @@ export async function writeClaudeFiles(root: string, dryRun: boolean): Promise<s
     skippedRules: 0,
     estimatedTokenReductionPct: 0,
   };
-  const files = [
+  // Lock and selected-context are only written during actual apply, not dry-run.
+  const coreFiles = [
     claudePath(root, "CLAUDE.md"),
     claudePath(root, "settings.json"),
     claudePath(root, "rules", "haus.md"),
@@ -31,9 +32,10 @@ export async function writeClaudeFiles(root: string, dryRun: boolean): Promise<s
     claudePath(root, "commands", "haus-doctor.md"),
     claudePath(root, "commands", "haus-review.md"),
     claudePath(root, "commands", "haus-explain-context.md"),
-    hausPath(root, "selected-context.json"),
-    hausPath(root, "haus.lock.json"),
   ];
+  const files = dryRun
+    ? [...coreFiles]
+    : [...coreFiles, hausPath(root, "selected-context.json"), hausPath(root, "haus.lock.json")];
   await writeManagedText(
     root,
     claudePath(root, "CLAUDE.md"),
@@ -190,7 +192,7 @@ async function writeManagedText(root: string, filePath: string, nextText: string
   const printable = displayPath(root, filePath);
   if (dryRun) {
     if (!prev) {
-      log(`${printable}: new file`);
+      log(createUnifiedDiff(printable, "", nextText));
     } else if (hasTextChanged(prev, nextText)) {
       log(createUnifiedDiff(printable, prev, nextText));
     } else {
