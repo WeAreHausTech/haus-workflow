@@ -8,7 +8,12 @@ export async function runApply(options: { dryRun?: boolean; write?: boolean }): 
     return;
   }
   const root = process.cwd();
-  const files = await writeClaudeFiles(root, Boolean(options.dryRun) && !options.write);
-  log(options.write ? "Applied files:" : "Planned files:");
-  files.forEach((f) => log(`- ${displayPath(root, f)}`));
+  const isDryRun = Boolean(options.dryRun) && !options.write;
+  const files = await writeClaudeFiles(root, isDryRun);
+  if (isDryRun) {
+    log(`Dry-run complete — ${files.length} file(s) planned, none written. Run --write to apply.`);
+  } else {
+    log("Applied files:");
+    files.forEach((f) => log(`- ${displayPath(root, f)}`));
+  }
 }

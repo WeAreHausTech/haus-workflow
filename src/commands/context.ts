@@ -6,7 +6,12 @@ import { readJson, readText } from "../utils/fs.js";
 import { log } from "../utils/logger.js";
 import { hausPath } from "../utils/paths.js";
 
-export async function runContext(options: { task?: string; fromHook?: boolean; json?: boolean }): Promise<void> {
+export async function runContext(options: {
+  task?: string;
+  fromHook?: boolean;
+  json?: boolean;
+  verbose?: boolean;
+}): Promise<void> {
   const root = process.cwd();
   const context = await readContextOrScan(root);
   const summary = (await readText(hausPath(root, "repo-summary.md"))) ?? "";
@@ -23,6 +28,11 @@ export async function runContext(options: { task?: string; fromHook?: boolean; j
       confidenceLevel: x.confidenceLevel,
       selectionMode: x.selectionMode,
       reasons: x.reasons.map((reason) => reason.message),
+      ...(options.verbose
+        ? {
+            scoreBreakdown: (x as { scoreBreakdown?: unknown }).scoreBreakdown,
+          }
+        : {}),
     })),
     skippedCount: recommendation?.skippedRules ?? 0,
     estimatedTokenReductionPct: recommendation?.estimatedTokenReductionPct ?? 0,
@@ -42,7 +52,26 @@ export async function runContext(options: { task?: string; fromHook?: boolean; j
     `Skipped rules: ${payload.skippedCount}`,
     `Estimated token reduction: ${payload.estimatedTokenReductionPct}%`,
     "Use minimal context.",
-    ...payload.selectedRules.map((rule) => `- ${rule.id}: ${rule.reasons.join(", ")}`),
+    ...payload.selectedRules.flatMap((rule) => {
+      const reasonLine = `- ${rule.id}: ${rule.reasons.join(", ")}`;
+      if (!options.verbose) return [reasonLine];
+      const breakdown = (
+        rule as {
+          scoreBreakdown?: {
+            bonuses?: Array<{ code: string; weight: number; signal?: string }>;
+            penalties?: Array<{ code: string; penalty: number; signal?: string }>;
+          };
+        }
+      ).scoreBreakdown;
+      if (!breakdown) return [reasonLine];
+      const bonuses = (breakdown.bonuses ?? []).map(
+        (b) => `  + ${b.code}(+${b.weight})${b.signal ? ` [${b.signal}]` : ""}`,
+      );
+      const penalties = (breakdown.penalties ?? []).map(
+        (p) => `  - ${p.code}(${p.penalty})${p.signal ? ` [${p.signal}]` : ""}`,
+      );
+      return [reasonLine, ...bonuses, ...penalties];
+    }),
     summary,
   ];
   const text = lines.join("\n");
