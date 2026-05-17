@@ -4,7 +4,7 @@
     {
       "name": "haus-ai",
       "description": "Haus AI workflow — skills, agents, and guardrails for Claude Code",
-      "version": "0.2.0",
+      "version": "0.1.0",
       "path": "plugin"
     }
   ]

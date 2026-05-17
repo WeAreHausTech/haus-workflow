@@ -1,6 +1,6 @@
 {
   "name": "@haus/ai",
-  "version": "0.2.0",
+  "version": "0.1.0",
   "description": "Haus AI workflow — context routing, guardrails, and skills for Claude Code",
   "author": "Haus Tech",
   "homepage": "https://github.com/WeAreHausTech/haus-ai-workflow",

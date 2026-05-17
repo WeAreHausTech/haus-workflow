@@ -29,7 +29,6 @@ Source of truth: `src/cli.ts`.
 
 ## Plugin and policy
 
-- `haus plugin install`
 - `haus plugin validate`
 - `haus sources sync [--check]`
 - `haus sources report`

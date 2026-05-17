@@ -153,8 +153,19 @@ Some environments expose these as slash commands. If not, run the CLI commands d
 
 ## Plugin commands
 
+Install the Claude Code plugin via Claude Code's `/plugin` system (not via `haus`):
+
 ```bash
-haus plugin install
+# Add Haus marketplace (once per machine)
+/plugin marketplace add github:WeAreHausTech/haus-ai-workflow
+
+# Install plugin
+/plugin install haus-ai@haus-marketplace
+```
+
+Validate the local plugin structure:
+
+```bash
 haus plugin validate
 ```
 
