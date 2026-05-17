@@ -10,21 +10,25 @@ It scans a repo, recommends stack-fit context assets, and writes controlled `.cl
 ## Quick start
 
 ```bash
-yarn install
-yarn build
-node dist/cli.js setup-project
+# Install globally
+npm install -g @haus/ai
+
+# First time in a project
+haus init
 ```
 
-Or globally:
+Or without a global install:
 
 ```bash
-npm install -g @haus/ai
-haus setup-project
+yarn install
+yarn build
+node dist/cli.js init
 ```
 
 ## Main commands
 
 ```bash
+haus init              # first-run setup (use instead of setup-project in new projects)
 haus scan --json
 haus recommend --json
 haus apply --dry-run
@@ -33,6 +37,18 @@ haus doctor
 haus update --check
 haus update
 ```
+
+## Claude Code plugin
+
+Install the plugin once per machine via Claude Code's `/plugin` system:
+
+```
+/plugin marketplace add github:WeAreHausTech/haus-ai-workflow
+/plugin install haus-ai@haus-marketplace
+```
+
+The plugin adds skills (e.g. `/haus-setup-project`) and hooks that inject Haus context automatically into each Claude session.
+After installing the plugin, run `haus init` in each project to set up `.haus-ai/` and `.claude/`.
 
 ## Contributing
 
