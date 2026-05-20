@@ -23,6 +23,8 @@ jobs:
           node-version: "22"
       - run: corepack enable
       - run: yarn install --immutable
+      - name: Audit dependencies
+        run: yarn npm audit --severity high --recursive
       - run: yarn build
       - run: node dist/cli.js sources sync --check
       - run: node dist/cli.js sources audit
