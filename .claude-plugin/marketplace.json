@@ -6,7 +6,7 @@
   },
   "plugins": [
     {
-      "name": "@haus/ai",
+      "name": "haus-ai-workflow",
       "description": "Context routing, guardrails, and AI workflow skills for Claude Code",
       "version": "0.1.0",
       "source": "./plugin",

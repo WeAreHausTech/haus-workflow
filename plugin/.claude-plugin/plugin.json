@@ -1,8 +1,10 @@
 {
-  "name": "@haus/ai",
+  "name": "haus-ai-workflow",
   "version": "0.1.0",
-  "description": "Haus AI workflow — context routing, guardrails, and skills for Claude Code",
-  "author": "Haus Tech",
+  "description": "Haus AI workflow - context routing, guardrails, and skills for Claude Code",
+  "author": {
+    "name": "Haus Tech"
+  },
   "homepage": "https://github.com/WeAreHausTech/haus-ai-workflow",
   "repository": "https://github.com/WeAreHausTech/haus-ai-workflow",
   "license": "MIT"
