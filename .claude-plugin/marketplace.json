@@ -1,0 +1,16 @@
+{
+  "name": "haus-ai-marketplace",
+  "description": "Haus AI workflow — context routing, guardrails, and skills for Claude Code",
+  "owner": {
+    "name": "Haus Tech"
+  },
+  "plugins": [
+    {
+      "name": "@haus/ai",
+      "description": "Context routing, guardrails, and AI workflow skills for Claude Code",
+      "version": "0.2.0",
+      "source": "./plugin",
+      "installPath": "./plugin"
+    }
+  ]
+}
