@@ -8,7 +8,7 @@
     {
       "name": "@haus/ai",
       "description": "Context routing, guardrails, and AI workflow skills for Claude Code",
-      "version": "0.2.0",
+      "version": "0.1.0",
       "source": "./plugin",
       "installPath": "./plugin"
     }
