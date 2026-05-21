@@ -68,3 +68,8 @@ cache/
 
 # Haus AI generated runtime output
 .haus-ai/
+# Yarn 4 transient state
+.yarn/install-state.gz
+.yarn/cache/
+.yarn/unplugged/
+.yarn/build-state.yml
