@@ -53,7 +53,7 @@ plugin/
 
 tests/                     Node built-in runner, 107 tests, no framework
 scripts/                   Audit scripts (tsx, not compiled) — run during prepack
-docs/                      18 reference docs
+docs/                      18 reference docs + docs/specs/ for design specs
 ```
 
 ---
