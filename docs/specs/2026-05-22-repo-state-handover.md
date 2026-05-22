@@ -1,7 +1,6 @@
-Let me read the current state before writing.
-
-Good. Enough context. Writing the handover now.
-
+---
+date: 2026-05-22
+status: current
 ---
 
 ## `haus` — Full project handover
@@ -183,21 +182,19 @@ Module boundaries enforced by ESLint import/order rules:
 | B5 — `haus init` first-run command | #19 | ✅ merged |
 | B1 — `context --verbose` score breakdown | #19 | ✅ merged |
 | A3 — README install instructions | #20 | ✅ merged |
+| A4 — End-to-end plugin install verification | manual | ✅ complete |
 
 ---
 
 ### What's left
 
-**A4 — End-to-end plugin install verification (manual)**
+**B4 — Network fetch for remote catalog**
 
-Cannot be automated — requires a real Claude Code environment with the `/plugin` system. See the A4 handover doc for full steps and pass criteria. Short version:
-1. `/plugin marketplace add WeAreHausTech/haus-ai-workflow`
-2. `/plugin install haus-workflow@haus-marketplace`
-3. Verify `/haus-setup-project` appears in skill list
-4. Run it in a test project, confirm conversational flow + file creation
-5. Verify hooks fire: `haus doctor --hooks` exits 0
+Design spec at `docs/specs/2026-05-22-b4-remote-catalog-design.md`. Implementation in progress.
 
-**B4 — Network fetch for remote catalog** — explicitly deferred. No remote catalog endpoint exists yet. When one is defined, `haus sources sync` is the likely integration point.
+**Future phase — CLI and plugin versioning**
+
+Deferred. See the future versioning section in the B4 spec for decisions recorded so far. Key item: `haus plugin update` command that re-runs the marketplace add + install flow without requiring manual commands.
 
 ---
 

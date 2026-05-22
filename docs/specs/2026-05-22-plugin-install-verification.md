@@ -1,3 +1,8 @@
+---
+date: 2026-05-22
+status: completed
+---
+
 **A4 — End-to-end plugin install verification**
 
 **Goal:** Confirm the full install path works: marketplace add → plugin install → skill fires → hooks inject context.
