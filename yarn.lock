@@ -275,38 +275,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@haus/ai@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "@haus/ai@workspace:."
-  dependencies:
-    "@types/fs-extra": "npm:11.0.4"
-    "@types/node": "npm:22.19.17"
-    "@types/semver": "npm:7.7.1"
-    "@typescript-eslint/eslint-plugin": "npm:8.59.3"
-    "@typescript-eslint/parser": "npm:8.59.3"
-    commander: "npm:13.1.0"
-    diff: "npm:8.0.4"
-    eslint: "npm:9.39.4"
-    eslint-plugin-import: "npm:2.32.0"
-    execa: "npm:9.6.1"
-    fast-glob: "npm:3.3.3"
-    fs-extra: "npm:11.3.5"
-    husky: "npm:9.1.7"
-    ignore: "npm:6.0.2"
-    lint-staged: "npm:17.0.4"
-    picomatch: "npm:4.0.4"
-    prettier: "npm:3.8.3"
-    semver: "npm:7.8.0"
-    tsup: "npm:8.5.1"
-    tsx: "npm:4.21.0"
-    typescript: "npm:5.9.3"
-    yaml: "npm:2.8.4"
-    zod: "npm:3.25.76"
-  bin:
-    haus: ./dist/cli.js
-  languageName: unknown
-  linkType: soft
-
 "@humanfs/core@npm:^0.19.2":
   version: 0.19.2
   resolution: "@humanfs/core@npm:0.19.2"
@@ -2133,6 +2101,38 @@ __metadata:
   checksum: 10c0/f5eb28c3fd0d3e4facd821c1eeee3836c37b70ab0b0fc532e8a39976e18fef43652415dadc52f8c7a5ff6d5ac93b7bef128789aa6f90f4e9b9a9083dce74ab38
   languageName: node
   linkType: hard
+
+"haus@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "haus@workspace:."
+  dependencies:
+    "@types/fs-extra": "npm:11.0.4"
+    "@types/node": "npm:22.19.17"
+    "@types/semver": "npm:7.7.1"
+    "@typescript-eslint/eslint-plugin": "npm:8.59.3"
+    "@typescript-eslint/parser": "npm:8.59.3"
+    commander: "npm:13.1.0"
+    diff: "npm:8.0.4"
+    eslint: "npm:9.39.4"
+    eslint-plugin-import: "npm:2.32.0"
+    execa: "npm:9.6.1"
+    fast-glob: "npm:3.3.3"
+    fs-extra: "npm:11.3.5"
+    husky: "npm:9.1.7"
+    ignore: "npm:6.0.2"
+    lint-staged: "npm:17.0.4"
+    picomatch: "npm:4.0.4"
+    prettier: "npm:3.8.3"
+    semver: "npm:7.8.0"
+    tsup: "npm:8.5.1"
+    tsx: "npm:4.21.0"
+    typescript: "npm:5.9.3"
+    yaml: "npm:2.8.4"
+    zod: "npm:3.25.76"
+  bin:
+    haus: ./dist/cli.js
+  languageName: unknown
+  linkType: soft
 
 "human-signals@npm:^8.0.1":
   version: 8.0.1

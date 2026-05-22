@@ -33,9 +33,14 @@ All checks must pass. Do not open a PR with a failing `yarn verify`.
 
 ## Add skills
 
-1. add `plugin/skills/<name>/SKILL.md`
-2. register path in `plugin/.claude-plugin/plugin.json`
-3. keep skill guidance scoped and factual
+1. add `plugin/skills/<name>/SKILL.md` (auto-discovered by Claude Code — no registration in `plugin.json` needed)
+2. keep skill guidance scoped and factual
+3. respect the ≤80 line budget enforced by `tests/core-skill-shape.test.js`
+
+## Add subagents
+
+1. add `plugin/agents/<name>.md` (auto-discovered by Claude Code)
+2. keep agent scope narrow and tools minimal
 
 ## Add hooks
 

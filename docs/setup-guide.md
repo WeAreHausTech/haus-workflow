@@ -22,8 +22,9 @@ node dist/cli.js doctor
 
 ## Later testing in Claude Code
 
-- Install CLI globally: `npm install -g @haus/ai`
-- Add Haus marketplace in Claude Code: `/plugin marketplace add github:WeAreHausTech/haus-ai-workflow`
-- Install plugin: `/plugin install haus-ai@haus-marketplace`
+- Install CLI globally from a local checkout: `git clone https://github.com/WeAreHausTech/haus-ai-workflow.git && cd haus-ai-workflow && yarn install && yarn build && npm install -g .`
+  (alternative: `yarn pack` and `npm install -g ./package.tgz`. The `haus` CLI is not yet published to npm.)
+- Add Haus marketplace in Claude Code: `/plugin marketplace add github:WeAreHausTech/haus-ai-workflow` *(the repo is private — requires authenticated git access on your machine, e.g. SSH key or `gh auth login`)*
+- Install plugin: `/plugin install haus-workflow@haus-marketplace`
 - In project run: `haus setup-project`
 - Validate hooks and guardrails by opening `.claude/settings.json`.

@@ -8,7 +8,7 @@
       "id": { "type": "string" },
       "type": { "type": "string" },
       "source": { "type": "string", "description": "\"haus\" for Haus-owned items; \"curated\" for approved external items." },
-      "version": { "type": "string", "description": "@haus/ai package version when the row was written." },
+      "version": { "type": "string", "description": "haus package version when the row was written." },
       "hash": {
         "type": "string",
         "description": "sha256 digest of installed files listed in paths (see src/update/hash-installed.ts); placeholder when paths is empty."

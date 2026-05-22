@@ -4,7 +4,7 @@ Good. Enough context. Writing the handover now.
 
 ---
 
-## `@haus/ai` — Full project handover
+## `haus` — Full project handover
 
 **Version:** 0.1.0 | **Runtime:** Node ≥22 | **Package manager:** Yarn 4 | **Main branch:** `main`
 
@@ -12,14 +12,14 @@ Good. Enough context. Writing the handover now.
 
 ### What the project is
 
-`@haus/ai` is a TypeScript CLI (`haus`) + Claude Code plugin. It scans a repo, scores + recommends context assets from a curated catalog, then writes controlled files into `.claude/` and `.haus-ai/`. The Claude Code plugin wires hooks that inject this context automatically into every session.
+`haus` is a TypeScript CLI (`haus` binary) + Claude Code plugin. It scans a repo, scores + recommends context assets from a curated catalog, then writes controlled files into `.claude/` and `.haus-ai/`. The Claude Code plugin wires hooks that inject this context automatically into every session.
 
 Two distribution paths:
 
 | Path | How |
 |---|---|
-| CLI | `npm install -g @haus/ai` |
-| Plugin | `/plugin marketplace add github:WeAreHausTech/haus-ai-workflow` → `/plugin install haus-ai@haus-marketplace` |
+| CLI | Not on npm. Install from a checkout: `yarn install && yarn build && npm install -g .` (or `yarn pack` + `npm install -g ./package.tgz`) |
+| Plugin | `/plugin marketplace add github:WeAreHausTech/haus-ai-workflow` → `/plugin install haus-workflow@haus-marketplace` (repo is **private** — requires authenticated git access: SSH key or `gh auth login`) |
 
 ---
 
@@ -48,7 +48,8 @@ library/catalog/
 
 plugin/
   .claude-plugin/plugin.json   Plugin manifest (name, version, metadata)
-  skills/*/SKILL.md            5 plugin skills (auto-discovered by Claude Code)
+  skills/*/SKILL.md            6 plugin skills (auto-discovered by Claude Code)
+  agents/*.md                  5 plugin subagents (auto-discovered by Claude Code)
   hooks/hooks.json             Hook contract — source of truth for apply + doctor
 
 tests/                     Node built-in runner, 107 tests, no framework
@@ -191,7 +192,7 @@ Module boundaries enforced by ESLint import/order rules:
 
 Cannot be automated — requires a real Claude Code environment with the `/plugin` system. See the A4 handover doc for full steps and pass criteria. Short version:
 1. `/plugin marketplace add github:WeAreHausTech/haus-ai-workflow`
-2. `/plugin install haus-ai@haus-marketplace`
+2. `/plugin install haus-workflow@haus-marketplace`
 3. Verify `/haus-setup-project` appears in skill list
 4. Run it in a test project, confirm conversational flow + file creation
 5. Verify hooks fire: `haus doctor --hooks` exits 0

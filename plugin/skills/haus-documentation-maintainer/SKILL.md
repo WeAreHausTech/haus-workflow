@@ -5,7 +5,7 @@ description: Keep Haus AI workflow docs aligned when commands, dependencies, or 
 
 # Haus documentation maintainer
 
-Maintain docs for `@haus/ai` whenever behavior changes.
+Maintain docs for the `haus` package whenever behavior changes.
 
 ## Use when
 

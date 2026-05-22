@@ -1,6 +1,6 @@
 # library/curated/
 
-This directory holds the **curated external primitives layer** for `@haus/ai`.
+This directory holds the **curated external primitives layer** for the `haus` package.
 
 Haus AI is a curated Claude Code distribution. It governs and installs the best available Claude-native components deterministically — including external ones where they are better than Haus-authored equivalents. This directory is the governance layer for all such external work.
 

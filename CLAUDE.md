@@ -1,4 +1,4 @@
-# @haus/ai — Claude Code context
+# haus — Claude Code context
 
 Claude Code plugin + CLI that scans repos, recommends context assets, and writes controlled outputs into `.claude/` and `.haus-ai/`.
 

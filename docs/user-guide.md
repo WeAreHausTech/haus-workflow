@@ -1,6 +1,6 @@
 # Haus AI User Guide
 
-This guide shows how to use `@haus/ai` in a real project, even if you are not a developer.
+This guide shows how to use `haus` in a real project, even if you are not a developer.
 
 ## What Haus AI does
 
@@ -29,20 +29,53 @@ If version is below 22, install/update Node first.
 
 ## Install Haus AI
 
-Global install:
+`haus` is not published to npm yet. Install it from a clone of the
+[haus-ai-workflow](https://github.com/WeAreHausTech/haus-ai-workflow) repo.
+
+**Primary: global link from checkout**
 
 ```bash
-npm install -g @haus/ai
+git clone https://github.com/WeAreHausTech/haus-ai-workflow.git
+cd haus-ai-workflow
+yarn install
+yarn build
+npm install -g .     # uses npm to symlink the `haus` bin globally
 haus --help
 ```
 
-If global install is not allowed, use repo-local run:
+**Alternative: install from a packed tarball**
+
+```bash
+yarn install
+yarn build
+yarn pack            # produces package.tgz
+npm install -g ./package.tgz
+```
+
+If global install is not allowed, run the CLI directly from the checkout:
 
 ```bash
 yarn install
 yarn build
 node dist/cli.js --help
 ```
+
+### If you switch Node versions often (nvm, Herd, Volta…)
+
+`npm install -g .` only installs `haus` into the currently active Node version's bin. Switch Node → `haus` disappears. Two options:
+
+1. **Re-install per version.** When you change Node, either run `npm install -g .` again from the checkout, or carry globals forward when adding a new Node version:
+   ```bash
+   nvm install <new-version> --reinstall-packages-from=current
+   ```
+
+2. **Use a shell alias that resolves to whatever Node is active.** No per-version install needed:
+   ```bash
+   echo 'alias haus="node /absolute/path/to/haus-ai-workflow/dist/cli.js"' >> ~/.zshrc
+   source ~/.zshrc
+   haus --help
+   ```
+   Use this if you switch Node versions frequently.
 
 ## Use Haus in a project
 
@@ -160,8 +193,10 @@ Install the Claude Code plugin via Claude Code's `/plugin` system (not via `haus
 /plugin marketplace add github:WeAreHausTech/haus-ai-workflow
 
 # Install plugin
-/plugin install haus-ai@haus-marketplace
+/plugin install haus-workflow@haus-marketplace
 ```
+
+> **Note:** The GitHub repo is **private**. The `marketplace add` step needs authenticated git access on your machine (SSH key with repo access, or `gh auth login`). Without auth, the marketplace fetch will fail.
 
 Validate the local plugin structure:
 
@@ -172,6 +207,7 @@ haus plugin validate
 ## If something fails
 
 - `haus: command not found` -> reinstall globally or use local `node dist/cli.js ...`
+- `npm install -g .` fails with `EEXIST` at `.../bin/haus` -> a stale symlink (often from a previous `yarn link`) is in the way. Remove it and retry: `rm "<path-from-error>" && npm install -g .`
 - Node engine error -> switch to Node 22+
 - hook mismatch in doctor -> run `haus apply --write` again
 - wrong project scanned -> `cd` into correct project root, rerun

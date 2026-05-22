@@ -17,10 +17,27 @@ File: `plugin/hooks/hooks.json`
 
 ## Skills
 
-Plugin skills live under `plugin/skills/*/SKILL.md`.
+Plugin skills live under `plugin/skills/*/SKILL.md`. Claude Code discovers them automatically when the plugin is installed; they are not listed in `plugin.json`.
+
+Shipped skills:
+
+- `haus-setup-project`
+- `haus-context-router`
+- `haus-workflow`
+- `haus-global-engineering-rules`
+- `haus-skill-author`
+- `haus-documentation-maintainer`
+
 These are authored guidance artifacts, not runtime code modules.
 
 ## Subagents
 
-No dedicated subagent runtime framework is implemented in this repo.
-Any subagent behavior comes from external host tooling, not from a local orchestration engine.
+Plugin subagents live under `plugin/agents/*.md` and are discovered by Claude Code alongside skills. No local orchestration engine ships in this repo — subagent execution is provided by the Claude Code host.
+
+Shipped subagents:
+
+- `haus-code-reviewer`
+- `haus-docs-researcher`
+- `haus-planner`
+- `haus-security-reviewer`
+- `haus-test-reviewer`

@@ -1,11 +1,9 @@
 {
-  "name": "@haus/ai",
+  "name": "haus",
   "version": "0.1.0",
   "description": "Haus AI workflow package for Claude Code.",
   "type": "module",
-  "bin": {
-    "haus": "./dist/cli.js"
-  },
+  "bin": "./dist/cli.js",
   "files": [
     "dist",
     "library",

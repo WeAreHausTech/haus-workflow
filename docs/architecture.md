@@ -2,7 +2,7 @@
 
 ## Repo overview
 
-`@haus/ai` is a Claude Code plugin/CLI workflow tool.
+`haus` is a Claude Code plugin/CLI workflow tool.
 It scans repositories, recommends context assets, and writes controlled outputs in `./.claude` and `./.haus-ai`.
 
 ## Repo structure
@@ -15,8 +15,16 @@ It scans repositories, recommends context assets, and writes controlled outputs 
 - `src/update/*`: lockfile checks, hash refresh, backup, diff summary
 - `src/memory/*`: local memory store and redaction
 - `src/security/*`: guardrails for sensitive paths and dangerous bash
-- `plugin/*`: shipped plugin metadata, hooks, and skills
+- `src/catalog/*`: catalog manifest loader and allowed-stack validation
+- `src/library/*`: catalog/library audit logic
+- `src/sources/*`: external source sync, audit, and report
+- `src/curation/*`: unsupported-stack token detection for source decisions
+- `src/utils/*`: shared utilities (`logger.ts`, `fs.ts`, `paths.ts`, `audit-checks.ts`, `diff.ts`, `exec.ts`, `prompts.ts`, `versions.ts`)
+- `src/types/*`: local ambient type declarations
+- `plugin/*`: shipped plugin metadata, hooks, skills, and subagents
 - `library/catalog/manifest.json`: catalog items used by recommender/apply
+- `library/curation/`: idea-layer source decisions
+- `library/curated/`: artifact-layer curated external content
 
 ## Command flow
 

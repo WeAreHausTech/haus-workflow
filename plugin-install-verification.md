@@ -4,26 +4,32 @@
 
 **Prerequisites**
 - Claude Code CLI installed and authenticated
-- Node ≥22, npm, `haus` CLI available globally (`npm install -g @haus/ai`)
+- Node ≥22, npm, `haus` CLI available globally. The CLI is not on npm — install it from a checkout: `git clone https://github.com/WeAreHausTech/haus-ai-workflow.git && cd haus-ai-workflow && yarn install && yarn build && npm install -g .` (or `yarn pack` + `npm install -g ./package.tgz`).
 - A test project (any repo with a `package.json` will do)
 
 ---
 
 **Step 1 — Add the Haus marketplace (once per machine)**
 
+> **Prerequisite — private repo access:** `WeAreHausTech/haus-ai-workflow` is a **private** GitHub repository. Claude Code uses your local git credentials to clone it. Before running the command below, ensure one of these works on your machine:
+> - `git clone git@github.com:WeAreHausTech/haus-ai-workflow.git` (SSH key with repo access), **or**
+> - `gh auth status` shows you're logged in with `repo` scope.
+>
+> Without authenticated access the marketplace add will fail with a clone/fetch error.
+
 In any Claude Code session, run:
 ```
 /plugin marketplace add github:WeAreHausTech/haus-ai-workflow
 ```
 
-Expected: Claude Code fetches `marketplace.json` from the repo root and registers `haus-marketplace` as a known marketplace. No error output.
+Expected: Claude Code fetches `.claude-plugin/marketplace.json` from the repo root and registers `haus-marketplace` as a known marketplace. No error output.
 
 ---
 
 **Step 2 — Install the plugin**
 
 ```
-/plugin install haus-ai@haus-marketplace
+/plugin install haus-workflow@haus-marketplace
 ```
 
 Expected:
@@ -35,10 +41,16 @@ Expected:
 
 **Step 3 — Verify skill is available**
 
-Type `/` in Claude Code. Check:
-- `/haus-setup-project` appears in the skill list
-- `/haus-context` appears
-- `/haus-review` appears (if present)
+Type `/` in Claude Code. Check that these skills (from `plugin/skills/`) appear:
+- `/haus-setup-project`
+- `/haus-context-router`
+- `/haus-workflow`
+- `/haus-global-engineering-rules`
+- `/haus-skill-author`
+- `/haus-documentation-maintainer`
+
+Plugin subagents (from `plugin/agents/`) are also registered:
+- `haus-code-reviewer`, `haus-docs-researcher`, `haus-planner`, `haus-security-reviewer`, `haus-test-reviewer`
 
 ---
 
@@ -92,7 +104,7 @@ Expected: `Hooks OK` — no mismatch between `plugin/hooks/hooks.json` and `.cla
 | Symptom | Cause | Fix |
 |---|---|---|
 | `/haus-setup-project` not in skill list | Plugin not installed or skill discovery failed | Check `plugin/skills/haus-setup-project/SKILL.md` exists, reinstall plugin |
-| `haus: command not found` in hooks | `haus` not globally installed | `npm install -g @haus/ai` then re-run hooks |
+| `haus: command not found` in hooks | `haus` not globally installed | Install from checkout (`npm install -g .` in repo) or `npm install -g ./package.tgz` after `yarn pack`, then re-run hooks |
 | `doctor --hooks` reports mismatch | `settings.json` was written before hook contract update | `haus apply --write` again |
 | Context not injected into session | Hook ran but `recommendation.json` missing | Run `haus scan --json && haus recommend --json` |
 
