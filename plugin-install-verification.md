@@ -19,7 +19,7 @@
 
 In any Claude Code session, run:
 ```
-/plugin marketplace add github:WeAreHausTech/haus-ai-workflow
+/plugin marketplace add WeAreHausTech/haus-ai-workflow
 ```
 
 Expected: Claude Code fetches `.claude-plugin/marketplace.json` from the repo root and registers `haus-marketplace` as a known marketplace. No error output.

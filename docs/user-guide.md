@@ -190,7 +190,7 @@ Install the Claude Code plugin via Claude Code's `/plugin` system (not via `haus
 
 ```bash
 # Add Haus marketplace (once per machine)
-/plugin marketplace add github:WeAreHausTech/haus-ai-workflow
+/plugin marketplace add WeAreHausTech/haus-ai-workflow
 
 # Install plugin
 /plugin install haus-workflow@haus-marketplace

@@ -73,7 +73,7 @@ haus update
 Install the plugin once per machine via Claude Code's `/plugin` system:
 
 ```
-/plugin marketplace add github:WeAreHausTech/haus-ai-workflow
+/plugin marketplace add WeAreHausTech/haus-ai-workflow
 /plugin install haus-workflow@haus-marketplace
 ```
 

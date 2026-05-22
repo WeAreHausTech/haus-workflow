@@ -19,7 +19,7 @@ Two distribution paths:
 | Path | How |
 |---|---|
 | CLI | Not on npm. Install from a checkout: `yarn install && yarn build && npm install -g .` (or `yarn pack` + `npm install -g ./package.tgz`) |
-| Plugin | `/plugin marketplace add github:WeAreHausTech/haus-ai-workflow` → `/plugin install haus-workflow@haus-marketplace` (repo is **private** — requires authenticated git access: SSH key or `gh auth login`) |
+| Plugin | `/plugin marketplace add WeAreHausTech/haus-ai-workflow` → `/plugin install haus-workflow@haus-marketplace` (repo is **private** — requires authenticated git access: SSH key or `gh auth login`) |
 
 ---
 
@@ -191,7 +191,7 @@ Module boundaries enforced by ESLint import/order rules:
 **A4 — End-to-end plugin install verification (manual)**
 
 Cannot be automated — requires a real Claude Code environment with the `/plugin` system. See the A4 handover doc for full steps and pass criteria. Short version:
-1. `/plugin marketplace add github:WeAreHausTech/haus-ai-workflow`
+1. `/plugin marketplace add WeAreHausTech/haus-ai-workflow`
 2. `/plugin install haus-workflow@haus-marketplace`
 3. Verify `/haus-setup-project` appears in skill list
 4. Run it in a test project, confirm conversational flow + file creation
@@ -204,7 +204,7 @@ Cannot be automated — requires a real Claude Code environment with the `/plugi
 ### Known architectural decisions
 
 - `normalizeRecommendation()` zeroes `scoreBreakdown.penalties` (reconstructs from reasons array). `context --verbose` bypasses this by reading `rawBreakdownById` directly from `recommendation.json`. Don't route verbose breakdown through `normalizeRecommendation`.
-- Plugin `marketplace.json` is at repo root — Claude Code reads it when `/plugin marketplace add github:...` is called.
+- Plugin `marketplace.json` is at repo root — Claude Code reads it when `/plugin marketplace add <owner>/<repo>` is called.
 - Hook commands are embedded in two places: `plugin/hooks/hooks.json` (authoritative) and `src/claude/load-hooks.ts` (`EMBEDDED_HOOKS` fallback). Both must be kept in sync when hook commands change.
 - Dry-run threads `dryRun: boolean` through `writeManagedText` / `writeManagedJson` — it does NOT early-exit before computing diffs. Lock + selected-context files excluded from dry-run file list.
 - `setup-project` is still the reconfigure command; `init` delegates to it. Don't merge them — `init` is the new-project entry point, `setup-project` stays for re-runs.
