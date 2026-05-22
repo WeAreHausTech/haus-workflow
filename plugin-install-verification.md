@@ -112,9 +112,9 @@ Expected: `Hooks OK` — no mismatch between `plugin/hooks/hooks.json` and `.cla
 
 **Pass criteria**
 
-- [ ] Marketplace add completes without error
-- [ ] `/haus-setup-project` visible in skill list
-- [ ] Skill runs conversational flow (not one-shot dump)
-- [ ] `.haus-ai/context-map.json` and `.claude/settings.json` created after approval
-- [ ] `haus doctor --hooks` exits 0
-- [ ] Hook output visible in session (or silent-fail if haus missing)
+- [x] Marketplace add completes without error
+- [x] `/haus-setup-project` visible in skill list
+- [x] Skill runs conversational flow (not one-shot dump)
+- [x] `.haus-ai/context-map.json` and `.claude/settings.json` created after approval
+- [x] `haus doctor --hooks` exits 0
+- [x] Hook output visible in session (or silent-fail if haus missing)
