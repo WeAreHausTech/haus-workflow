@@ -35,7 +35,7 @@ All checks must pass. Do not open a PR with a failing `yarn verify`.
 
 1. add `plugin/skills/<name>/SKILL.md` (auto-discovered by Claude Code — no registration in `plugin.json` needed)
 2. keep skill guidance scoped and factual
-3. respect the ≤80 line budget enforced by `tests/core-skill-shape.test.js`
+3. aim for ≤80 lines and a router shape (`## Use when` / `## Do not use when`). Note: `tests/core-skill-shape.test.js` only enforces this on a hardcoded list of **core** skills (`haus-context-router`, `haus-workflow`, `haus-setup-project`, `haus-skill-author`, `haus-global-engineering-rules`). If you intend a new skill to be treated as core, add its path to the `coreSkills` array in that test.
 
 ## Add subagents
 

@@ -77,7 +77,7 @@ Install the plugin once per machine via Claude Code's `/plugin` system:
 /plugin install haus-workflow@haus-marketplace
 ```
 
-> **Note:** `WeAreHausTech/haus-ai-workflow` is a **private** GitHub repository. The `marketplace add` step requires authenticated git access on your machine (an SSH key with repo access, or `gh auth login` with the right scopes). Without auth, Claude Code will fail to fetch `marketplace.json` and the install won't proceed.
+> **Note:** `WeAreHausTech/haus-ai-workflow` is a **private** GitHub repository. The `marketplace add` step requires authenticated git access on your machine (an SSH key with repo access, or `gh auth login` with the right scopes). Without auth, Claude Code will fail to fetch `.claude-plugin/marketplace.json` and the install won't proceed.
 
 The plugin adds skills (e.g. `/haus-setup-project`) and hooks that inject Haus context automatically into each Claude session.
 After installing the plugin, run `haus init` in each project to scan and generate recommendations, then `haus apply --write` to write `.claude/` files.
