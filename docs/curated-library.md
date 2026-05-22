@@ -1,13 +1,13 @@
 # Curated Library
 
-`@haus/ai` is a curated Claude Code distribution. It governs and installs the best available Claude-native components for Haus projects — including external ones where they are better than Haus-authored equivalents.
+`haus` is a curated Claude Code distribution. It governs and installs the best available Claude-native components for Haus projects — including external ones where they are better than Haus-authored equivalents.
 
 The curated library layer (`library/curated/`) is the governance mechanism for all external content.
 
 ## Product framing
 
 ```
-@haus/ai = curated deterministic Claude Code distribution for Haus projects
+haus = curated deterministic Claude Code distribution for Haus projects
 ```
 
 Haus-owned means **Haus-governed**, not Haus-authored-everything. Every external primitive that ships must be:

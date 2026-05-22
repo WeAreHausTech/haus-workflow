@@ -1,6 +1,6 @@
 # Memory
 
-`@haus/ai` memory is local-first and file-based under `./.haus-ai/memory`.
+`haus` memory is local-first and file-based under `./.haus-ai/memory`.
 
 ## Commands
 

@@ -33,9 +33,14 @@ All checks must pass. Do not open a PR with a failing `yarn verify`.
 
 ## Add skills
 
-1. add `plugin/skills/<name>/SKILL.md`
-2. register path in `plugin/.claude-plugin/plugin.json`
-3. keep skill guidance scoped and factual
+1. add `plugin/skills/<name>/SKILL.md` (auto-discovered by Claude Code — no registration in `plugin.json` needed)
+2. keep skill guidance scoped and factual
+3. aim for ≤80 lines and a router shape (`## Use when` / `## Do not use when`). Note: `tests/core-skill-shape.test.js` only enforces this on a hardcoded list of **core** skills (`haus-context-router`, `haus-workflow`, `haus-setup-project`, `haus-skill-author`, `haus-global-engineering-rules`). If you intend a new skill to be treated as core, add its path to the `coreSkills` array in that test.
+
+## Add subagents
+
+1. add `plugin/agents/<name>.md` (auto-discovered by Claude Code)
+2. keep agent scope narrow and tools minimal
 
 ## Add hooks
 

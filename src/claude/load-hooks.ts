@@ -82,13 +82,13 @@ function hooksPathOnDisk(): string {
 function strictLoadErrorMessage(missing: boolean): string {
   const p = hooksPathOnDisk();
   if (missing) {
-    return `haus: plugin/hooks/hooks.json missing at ${p}. Ship a complete @haus/ai package. For emergency local dev only, set HAUS_HOOKS_FALLBACK=1 (embedded hooks; not release-safe).`;
+    return `haus: plugin/hooks/hooks.json missing at ${p}. Ship a complete haus package. For emergency local dev only, set HAUS_HOOKS_FALLBACK=1 (embedded hooks; not release-safe).`;
   }
   return `haus: plugin/hooks/hooks.json invalid at ${p}. Fix the file or use HAUS_HOOKS_FALLBACK=1 for local dev only.`;
 }
 
 /**
- * Loads `plugin/hooks/hooks.json` from the installed `@haus/ai` package (SSOT).
+ * Loads `plugin/hooks/hooks.json` from the installed `haus` package (SSOT).
  * @throws if the file is missing or invalid and `allowEmbeddedFallback` is not true.
  */
 export async function loadClaudeHooksSettings(opts?: LoadClaudeHooksOptions): Promise<ClaudeHooksSettings> {

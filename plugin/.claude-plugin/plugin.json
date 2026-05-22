@@ -1,5 +1,5 @@
 {
-  "name": "haus-ai-workflow",
+  "name": "haus-workflow",
   "version": "0.1.0",
   "description": "Haus AI workflow - context routing, guardrails, and skills for Claude Code",
   "author": {
