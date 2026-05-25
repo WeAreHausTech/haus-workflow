@@ -49,7 +49,7 @@ haus apply --write
 haus doctor
 ```
 
-If `haus` commands fail: install the CLI from a clone of `haus-ai-workflow` (`yarn install && yarn build && npm install -g .`) and retry. The CLI is not on npm.
+If `haus` commands fail: install the CLI from a clone of `haus-workflow` (`yarn install && yarn build && npm install -g .`) and retry. The CLI is not on npm.
 
 ## References
 

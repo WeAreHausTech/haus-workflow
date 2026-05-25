@@ -14,8 +14,8 @@ It scans a repo, recommends stack-fit context assets, and writes controlled `.cl
 **Primary: global link from checkout**
 
 ```bash
-git clone https://github.com/WeAreHausTech/haus-ai-workflow.git
-cd haus-ai-workflow
+git clone https://github.com/WeAreHausTech/haus-workflow.git
+cd haus-workflow
 yarn install
 yarn build
 npm install -g .       # uses npm to symlink the `haus` bin into your global path
@@ -44,7 +44,7 @@ node dist/cli.js init
 - reinstall whenever you change versions: `npm install -g .` (or `nvm install <ver> --reinstall-packages-from=current` when adding a new Node version), or
 - add a shell alias that uses whatever Node is active — no per-version install needed:
   ```bash
-  echo 'alias haus="node /absolute/path/to/haus-ai-workflow/dist/cli.js"' >> ~/.zshrc
+  echo 'alias haus="node /absolute/path/to/haus-workflow/dist/cli.js"' >> ~/.zshrc
   source ~/.zshrc
   ```
 
@@ -73,11 +73,11 @@ haus update
 Install the plugin once per machine via Claude Code's `/plugin` system:
 
 ```
-/plugin marketplace add WeAreHausTech/haus-ai-workflow
+/plugin marketplace add WeAreHausTech/haus-workflow
 /plugin install haus-workflow@haus-marketplace
 ```
 
-> **Note:** `WeAreHausTech/haus-ai-workflow` is a **private** GitHub repository. The `marketplace add` step requires authenticated git access on your machine (an SSH key with repo access, or `gh auth login` with the right scopes). Without auth, Claude Code will fail to fetch `.claude-plugin/marketplace.json` and the install won't proceed.
+> **Note:** `WeAreHausTech/haus-workflow` is a **private** GitHub repository. The `marketplace add` step requires authenticated git access on your machine (an SSH key with repo access, or `gh auth login` with the right scopes). Without auth, Claude Code will fail to fetch `.claude-plugin/marketplace.json` and the install won't proceed.
 
 The plugin adds skills (e.g. `/haus-setup-project`) and hooks that inject Haus context automatically into each Claude session.
 After installing the plugin, run `haus init` in each project to scan and generate recommendations, then `haus apply --write` to write `.claude/` files.
