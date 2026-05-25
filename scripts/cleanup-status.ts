@@ -35,7 +35,20 @@ const SKIP_FILES = new Set([
   "tests/cleanup-status.test.js",
 ]);
 
-const MARKER_RE = /HAUS-PRERELEASE-CLEANUP:\s*(.+?)(?:\s*-->)?\s*$/;
+// Real markers must sit inside a comment of one of the three supported forms.
+// Bare mentions inside string literals or prose must not register.
+//   - `//` line comment  (TS/JS/TSX)
+//   - `#`  line comment  (JSON-with-comments, YAML, shell)
+//   - `<!-- ... -->`     (Markdown)
+// Each form requires start-of-line or whitespace before the comment opener,
+// so quoted occurrences like `"// HAUS-PRERELEASE-CLEANUP: ..."` are not
+// matched.
+const MARKER_PATTERNS: RegExp[] = [
+  /(?:^|\s)\/\/\s*HAUS-PRERELEASE-CLEANUP:\s*(.+?)\s*$/,
+  /(?:^|\s)#\s*HAUS-PRERELEASE-CLEANUP:\s*(.+?)\s*$/,
+  /<!--\s*HAUS-PRERELEASE-CLEANUP:\s*(.+?)\s*-->/,
+];
+
 // Spec row format: `- [ ] \`path\` — reason` or `- [x] \`path\` — reason`.
 const SPEC_ROW_RE = /^- \[([ xX])\]\s+`([^`]+)`\s*[—-]\s*(.+)$/;
 
@@ -46,6 +59,7 @@ export type CleanupReport = {
   spec: SpecRow[];
   ok: string[];
   missingSpec: Marker[];
+  missingSpecFiles: string[]; // dedup of missingSpec by file
   orphanSpec: SpecRow[];
 };
 
@@ -85,8 +99,13 @@ function scanMarkers(repoRoot: string): Marker[] {
       if (!text.includes("HAUS-PRERELEASE-CLEANUP:")) continue;
       const lines = text.split(/\r?\n/);
       for (let i = 0; i < lines.length; i++) {
-        const match = MARKER_RE.exec(lines[i]);
-        if (match) markers.push({ file: rel, line: i + 1, reason: match[1].trim() });
+        for (const pattern of MARKER_PATTERNS) {
+          const match = pattern.exec(lines[i]);
+          if (match) {
+            markers.push({ file: rel, line: i + 1, reason: match[1].trim() });
+            break;
+          }
+        }
       }
     }
   }
@@ -126,9 +145,10 @@ export function reconcile(repoRoot: string = REPO_ROOT): CleanupReport {
 
   const ok = [...markerFiles].filter((f) => specFiles.has(f)).sort();
   const missingSpec = markers.filter((m) => !specFiles.has(m.file));
+  const missingSpecFiles = [...new Set(missingSpec.map((m) => m.file))].sort();
   const orphanSpec = spec.filter((r) => !markerFiles.has(r.file) && !r.done);
 
-  return { markers, spec, ok, missingSpec, orphanSpec };
+  return { markers, spec, ok, missingSpec, missingSpecFiles, orphanSpec };
 }
 
 function render(report: CleanupReport): string {
@@ -139,13 +159,18 @@ function render(report: CleanupReport): string {
   lines.push(`Markers found:  ${report.markers.length}`);
   lines.push(`Spec rows:      ${report.spec.length}`);
   lines.push(`OK pairs:       ${report.ok.length}`);
-  lines.push(`MISSING_SPEC:   ${report.missingSpec.length}`);
+  // Counts dedupe by file (spec identity is file-level). Marker-level detail
+  // is still printed under each file below.
+  lines.push(`MISSING_SPEC:   ${report.missingSpecFiles.length}`);
   lines.push(`ORPHAN_SPEC:    ${report.orphanSpec.length}`);
   lines.push("");
-  if (report.missingSpec.length > 0) {
+  if (report.missingSpecFiles.length > 0) {
     lines.push("MISSING_SPEC — markers found, no spec row:");
-    for (const m of report.missingSpec) {
-      lines.push(`  ${m.file}:${m.line}  ${m.reason}`);
+    for (const file of report.missingSpecFiles) {
+      lines.push(`  ${file}`);
+      for (const m of report.missingSpec.filter((mk) => mk.file === file)) {
+        lines.push(`    line ${m.line}: ${m.reason}`);
+      }
     }
     lines.push("");
   }

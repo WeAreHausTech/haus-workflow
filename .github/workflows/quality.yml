@@ -53,5 +53,6 @@ jobs:
         run: yarn curated:audit
 
       - name: Cleanup tracker status
-        continue-on-error: true
+        # Non-blocking by design: the script always exits 0 until P10 flips it.
+        # Don't mask real crashes (tsx resolution, script errors) here.
         run: yarn cleanup:status

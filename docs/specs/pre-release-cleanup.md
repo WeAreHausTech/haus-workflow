@@ -2,7 +2,7 @@
 
 Tracks code, scripts, library data, and docs that exist only as development scaffolding and must be removed (or revisited) before the **v0.1 publish (P10)**.
 
-This file is the **source of truth** for the cleanup tracker. It is reconciled automatically against `// HAUS-PRERELEASE-CLEANUP: <reason>` markers in the codebase by `yarn cleanup:status`.
+This file is the **source of truth** for the cleanup tracker. It is reconciled automatically against `HAUS-PRERELEASE-CLEANUP: <reason>` markers in the codebase (in any of the supported comment forms — see "Marker convention" below) by `yarn cleanup:status`.
 
 ## Marker convention
 

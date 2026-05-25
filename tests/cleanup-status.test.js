@@ -51,7 +51,8 @@ test("MISSING_SPEC: marker without spec row is flagged", () => {
   const out = runIn(tmp);
   assert.match(out, /Markers found:\s+1/);
   assert.match(out, /MISSING_SPEC:\s+1/);
-  assert.match(out, /src\/example\.ts:1\s+P4a sources removal/);
+  assert.match(out, /src\/example\.ts/);
+  assert.match(out, /line 1: P4a sources removal/);
 });
 
 test("ORPHAN_SPEC: spec row without marker is flagged", () => {
@@ -103,7 +104,8 @@ test("markdown HTML-comment marker style is recognised", () => {
   );
   const out = runIn(tmp);
   assert.match(out, /Markers found:\s+1/);
-  assert.match(out, /docs\/note\.md:3\s+doc rewrite in P4c/);
+  assert.match(out, /docs\/note\.md/);
+  assert.match(out, /line 3: doc rewrite in P4c/);
 });
 
 test("spec file is not self-scanned for markers", () => {
@@ -115,6 +117,57 @@ test("spec file is not self-scanned for markers", () => {
   );
   const out = runIn(tmp);
   assert.match(out, /Markers found:\s+0/);
+});
+
+test("marker inside string literal is not matched (no comment prefix)", () => {
+  // Bare `HAUS-PRERELEASE-CLEANUP:` text inside a string literal must not
+  // register — only the supported comment forms count.
+  const tmp = makeTmp();
+  writeFile(tmp, "docs/specs/pre-release-cleanup.md", "# spec\n\n## Markers\n");
+  writeFile(
+    tmp,
+    "src/quoted.ts",
+    'export const msg = "HAUS-PRERELEASE-CLEANUP: bare mention";\n',
+  );
+  const out = runIn(tmp);
+  assert.match(out, /Markers found:\s+0/);
+});
+
+test("inline trailing // marker is matched", () => {
+  const tmp = makeTmp();
+  writeFile(tmp, "docs/specs/pre-release-cleanup.md", "# spec\n\n## Markers\n");
+  writeFile(
+    tmp,
+    "src/inline.ts",
+    "export const dead = 1; // HAUS-PRERELEASE-CLEANUP: dead const P4c\n",
+  );
+  const out = runIn(tmp);
+  assert.match(out, /Markers found:\s+1/);
+  assert.match(out, /src\/inline\.ts/);
+  assert.match(out, /dead const P4c/);
+});
+
+test("multiple markers in one file count as one MISSING_SPEC", () => {
+  // Identity is file-level. Two markers in one file => MISSING_SPEC=1, but
+  // both line-level details are still printed.
+  const tmp = makeTmp();
+  writeFile(tmp, "docs/specs/pre-release-cleanup.md", "# spec\n\n## Markers\n");
+  writeFile(
+    tmp,
+    "src/multi.ts",
+    [
+      "// HAUS-PRERELEASE-CLEANUP: first reason",
+      "export const a = 1;",
+      "// HAUS-PRERELEASE-CLEANUP: second reason",
+      "export const b = 2;",
+      "",
+    ].join("\n"),
+  );
+  const out = runIn(tmp);
+  assert.match(out, /Markers found:\s+2/);
+  assert.match(out, /MISSING_SPEC:\s+1/);
+  assert.match(out, /line 1: first reason/);
+  assert.match(out, /line 3: second reason/);
 });
 
 test("example rows outside ## Markers section are ignored", () => {
