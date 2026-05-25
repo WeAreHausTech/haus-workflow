@@ -9,6 +9,7 @@ import { readJson, writeText } from "../utils/fs.js";
 import { log, warn } from "../utils/logger.js";
 import { claudePath, displayPath, hausPath, packageRoot } from "../utils/paths.js";
 
+import { DEFAULT_HOOKS_CONFIG } from "./load-hooks-config.js";
 import { loadClaudeHooksSettings } from "./load-hooks.js";
 import { assertPostApplySettingsMatchCanonical } from "./verify-hooks-contract.js";
 
@@ -58,6 +59,13 @@ haus context --task "<task>"
   const hookSettings = await loadClaudeHooksSettings();
   await writeManagedJson(root, claudePath(root, "settings.json"), hookSettings, dryRun);
   if (!dryRun) await assertPostApplySettingsMatchCanonical(root, hookSettings);
+  // Emit `.haus-ai/config.json` with the P2 hook gating defaults (both off).
+  // Only created when missing — existing config is left untouched so users'
+  // opt-ins survive subsequent `apply --write` runs.
+  const configPath = hausPath(root, "config.json");
+  if (!(await fs.pathExists(configPath))) {
+    await writeManagedJson(root, configPath, DEFAULT_HOOKS_CONFIG, dryRun);
+  }
   await writeManagedText(root, claudePath(root, "commands", "haus-doctor.md"), "Run `haus doctor`.", dryRun);
   await writeManagedText(
     root,

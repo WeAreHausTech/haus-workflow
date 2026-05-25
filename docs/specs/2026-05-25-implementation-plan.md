@@ -35,7 +35,7 @@ At the end of this plan:
 ## Phase order
 
 ```
-P0 → P1 → P2 → P3 → P4 → P5 → P6 → P7 → P8 → P9 → P10
+P0 → P1 → P2 → P2b → P3 → P4 → P5 → P6 → P7 → P8 → P9 → P10
             ↑ P2 may run in parallel with P1 if a separate hand picks it up;
               otherwise sequential.
 ```
@@ -99,6 +99,27 @@ Correlated PRs (ship in one PR):
 - Report committed.
 - Any "gate" decisions wired into hook contract.
 - Any "drop" decisions feed into P4 removal list.
+
+---
+
+## P2b — Rename `.haus-ai/` → `.haus-workflow/`
+
+**Why now.** Brand consistency with the v0.1 naming locks (`haus-workflow` repo, `haus-workflow-catalog` repo, `@haus-tech/haus-workflow` package, `haus-workflow` plugin). The `.haus-ai/` directory written into user projects is the last `haus-ai` leftover. Better to flip before P3 marking starts — markers placed on `.haus-ai`-mentioning code would otherwise need re-locating. **No migration shim needed** — no users yet.
+
+**Targets** (47 files touched, mechanical rename)
+- `src/utils/paths.ts` — `HAUS_DIR = ".haus-ai"` → `".haus-workflow"`. Constant name stays.
+- 12 other `src/` files referencing the directory literal in messages/paths.
+- 10 tests + `tests/helpers/fixture-runner.js`.
+- 3 scripts (`bench-hooks.ts`, `qa-batch.mjs`, `qa-pass.sh`).
+- 3 plugin skill markdowns.
+- 12 docs (architecture, cli, catalog, commands, validation, memory, user-guide, technical-guide, generated-files, updates, README, CLAUDE.md, hook-cost-report).
+- `.gitignore` — `.haus-ai/` → `.haus-workflow/`.
+- Historical specs (`docs/specs/2026-05-22-*.md`) intentionally retain `.haus-ai` as a historical record (mirrors P0 convention).
+
+**Acceptance**
+- `rg "\.haus-ai"` returns hits only in `docs/specs/2026-05-22-*.md`.
+- `yarn verify` green (goldens unaffected — none reference the directory path).
+- `haus init` in a fresh fixture produces a `.haus-workflow/` directory.
 
 ---
 
@@ -447,6 +468,7 @@ Then publish a fixed `0.1.1` immediately.
 - [ ] P0 — Repo rename to `haus-workflow`
 - [ ] P1 — Cleanup tracker tooling
 - [ ] P2 — Hook cost audit
+- [ ] P2b — Rename `.haus-ai/` → `.haus-workflow/`
 - [ ] P3 — Mark scaffolding
 - [ ] P4a — Remove sources subsystem
 - [ ] P4b — Remove curation + library artifacts

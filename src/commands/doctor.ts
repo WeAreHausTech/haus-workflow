@@ -1,3 +1,4 @@
+import { isHookEnabled, type HookKey } from "../claude/load-hooks-config.js";
 import { verifyProjectSettingsHooksContract } from "../claude/verify-hooks-contract.js";
 import { readContextOrScan } from "../scanner/read-context.js";
 import { readJson } from "../utils/fs.js";
@@ -45,5 +46,13 @@ export async function runDoctor(options?: { hooks?: boolean }): Promise<void> {
     process.exitCode = 1;
   } else {
     log(`- HOOKS OK: ${hooks.message}`);
+  }
+
+  // Per-hook gate state (P2 outcome). Guards are always on; only the
+  // gated UserPromptSubmit hooks have an opt-in flag.
+  const gatedHooks: HookKey[] = ["context", "memoryInject"];
+  for (const key of gatedHooks) {
+    const enabled = await isHookEnabled(root, key);
+    log(`- HOOK ${key}: ${enabled ? "enabled" : "disabled (default)"}`);
   }
 }

@@ -68,6 +68,9 @@ cache/
 
 # Haus AI generated runtime output
 .haus-ai/
+# Claude Code per-developer settings — keep out of the shared repo
+.claude/settings.json
+.claude/settings.local.json
 # Yarn 4 transient state
 .yarn/install-state.gz
 .yarn/cache/

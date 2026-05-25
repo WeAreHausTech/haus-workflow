@@ -1,3 +1,4 @@
+import { isHookEnabled } from "../claude/load-hooks-config.js";
 import { normalizeRecommendation } from "../recommender/explain-recommendation.js";
 import { classifyTaskIntents, pickTaskRelevantRules, type TaskIntent } from "../recommender/task-intent.js";
 import { readContextOrScan } from "../scanner/read-context.js";
@@ -13,6 +14,11 @@ export async function runContext(options: {
   verbose?: boolean;
 }): Promise<void> {
   const root = process.cwd();
+  // Hook-mode short-circuit: per the P2 audit, this hook is gated default-off.
+  // Opt in via `.haus-ai/config.json` -> `hooks.context.enabled = true`.
+  if (options.fromHook && !(await isHookEnabled(root, "context"))) {
+    return;
+  }
   const context = await readContextOrScan(root);
   const summary = (await readText(hausPath(root, "repo-summary.md"))) ?? "";
   const recommendationRaw = await readJson<Recommendation>(hausPath(root, "recommendation.json"));

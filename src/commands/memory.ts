@@ -1,3 +1,4 @@
+import { isHookEnabled } from "../claude/load-hooks-config.js";
 import { appendLearning, ensureMemory, readMemory } from "../memory/memory-store.js";
 import { redactMemory } from "../memory/redact-memory.js";
 import { log } from "../utils/logger.js";
@@ -7,6 +8,11 @@ export async function runMemory(
   options: { text?: string; task?: string; fromHook?: boolean },
 ): Promise<void> {
   const root = process.cwd();
+  // Hook-mode short-circuit for `memory inject`: per the P2 audit, gated default-off.
+  // Opt in via `.haus-ai/config.json` -> `hooks.memoryInject.enabled = true`.
+  if (subcommand === "inject" && options.fromHook && !(await isHookEnabled(root, "memoryInject"))) {
+    return;
+  }
   await ensureMemory(root);
   if (subcommand === "status") {
     log("Memory ready at .haus-ai/memory");
