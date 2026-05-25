@@ -253,7 +253,7 @@ function renderReport(results: Measurement[]): string {
   lines.push("## Follow-up");
   lines.push("");
   lines.push(
-    "- Any **gate-default-off** decisions wire a flag under `.haus-ai/config.json` (`hooks.<id>.enabled`) and a `loadHooksConfig()` helper consulted by the hook wrapper.",
+    "- Any **gate-default-off** decisions add a flag under `.haus-ai/config.json` (`hooks.<key>.enabled`), read by `isHookEnabled(root, key)` from `src/claude/load-hooks-config.ts`. The gated hook's command short-circuits in `--from-hook` mode when the flag is not `true`.",
   );
   lines.push(
     "- Any **drop-candidate** decisions are confirmed by the project lead, then added to `docs/specs/pre-release-cleanup.md` as P4c removal targets.",

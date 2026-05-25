@@ -80,11 +80,11 @@ Decisions are recorded per hook based on the table above plus a judgement on whe
 | `haus guard file-access --from-hook` | **keep** | Real safety value (blocks reading `.env` and other sensitive paths). ~400 ms once per Read/Edit/Write isn't free, but it's the only enforcement point we have for sensitive-path policy. Re-evaluate after we have a faster guard implementation. |
 | `haus guard bash --from-hook` | **keep** | Same reasoning as file-access. Blocking dangerous commands (`rm -rf /`, `:(){:|:&};:`, etc.) is load-bearing for the workflow's safety story. |
 
-## Wiring (follow-up work in this phase)
+## Wiring (shipped in this PR)
 
 For each **gate-default-off** hook:
 
-1. Add a flag in `.haus-ai/config.json`:
+1. `.haus-ai/config.json` carries the flag:
    ```json
    {
      "hooks": {
@@ -93,10 +93,10 @@ For each **gate-default-off** hook:
      }
    }
    ```
-2. Add `src/claude/load-hooks-config.ts` with a `loadHooksConfig(root)` helper that defaults the flag to `false`.
-3. Hook wrapper short-circuits when disabled (exit 0, no stdout).
-4. `haus apply --write` emits the config file (with both flags off) the first time it runs.
-5. `haus doctor` reports each hook's enabled state.
+2. `src/claude/load-hooks-config.ts` exports `isHookEnabled(root, key)` which requires strict boolean `=== true`; anything else (missing file, malformed JSON, fuzzy truthy values) keeps the hook off.
+3. The gated command (`src/commands/context.ts`, `src/commands/memory.ts`) calls `isHookEnabled` at the top of its `--from-hook` path and returns early when disabled (exit 0, no stdout). Non-hook CLI use is unaffected.
+4. `haus apply --write` emits the config file with both flags off on first run; existing config is left untouched.
+5. `haus doctor` prints a per-hook enabled/disabled line.
 
 For the two **keep** hooks: no immediate code change. Track in a follow-up ticket whether to:
 
