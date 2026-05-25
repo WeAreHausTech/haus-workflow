@@ -322,12 +322,14 @@ Set up once during P9a, used every release thereafter.
 2. **Add maintainers** to npm org with publish rights. Use a shared bot account or named accounts with 2FA.
 3. **npm 2FA**: require 2FA-for-publish at org level (`npm access 2fa-required @haus-tech/haus-workflow`).
 4. **npm automation token**: create a granular access token scoped to `@haus-tech/haus-workflow`, publish-only. Add to GitHub repo secrets as `NPM_TOKEN`.
-5. **Add release workflow** `.github/workflows/release.yml`:
+5. **Add release workflow** `.github/workflows/release.yml`. Pin actions to commit SHAs (repo convention, supply-chain hardening — mirror `ci.yml`). Node 22, Yarn 4 via Corepack:
    ```yaml
    name: release
    on:
      push:
        tags: ['v*.*.*']
+   permissions:
+     contents: read
    jobs:
      publish:
        runs-on: ubuntu-latest
@@ -335,20 +337,29 @@ Set up once during P9a, used every release thereafter.
          contents: write
          id-token: write
        steps:
-         - uses: actions/checkout@v4
-         - uses: actions/setup-node@v4
+         - name: Checkout
+           uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+         - name: Setup Node
+           uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
            with:
-             node-version: '20'
-             registry-url: 'https://registry.npmjs.org'
-         - run: yarn install --frozen-lockfile
-         - run: yarn verify
-         - run: npm publish --access public --provenance
+             node-version: "22"
+             registry-url: "https://registry.npmjs.org"
+         - name: Enable Corepack
+           run: corepack enable
+         - name: Install
+           run: yarn install --immutable --check-cache
+         - name: Verify
+           run: yarn verify
+         - name: Publish to npm
+           run: npm publish --access public --provenance
            env:
              NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-         - uses: softprops/action-gh-release@v2
+         - name: Create GitHub release
+           uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
            with:
              generate_release_notes: true
    ```
+   Re-resolve action SHAs at workflow-creation time (`gh api repos/<owner>/<repo>/git/refs/tags/<tag>`) — the SHAs above are pinned at plan-authoring time and may have moved.
 6. **Add `scripts/release.sh`** that wraps the local-only steps so the human flow is one command:
    ```bash
    #!/usr/bin/env bash
