@@ -51,3 +51,7 @@ jobs:
 
       - name: Curated audit
         run: yarn curated:audit
+
+      - name: Cleanup tracker status
+        continue-on-error: true
+        run: yarn cleanup:status

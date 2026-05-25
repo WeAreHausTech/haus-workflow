@@ -27,6 +27,7 @@
     "sources:decisions": "tsx scripts/validate-source-decisions.ts",
     "library:audit": "tsx scripts/library-audit.ts",
     "curated:audit": "tsx scripts/audit-curated.ts",
+    "cleanup:status": "tsx scripts/cleanup-status.ts",
     "pack:local": "yarn pack",
     "publish:dry": "yarn npm publish --dry-run",
     "publish:private": "yarn npm publish --access restricted",
