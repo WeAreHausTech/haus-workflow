@@ -1,6 +1,6 @@
 # Hook cost audit (P2)
 
-Generated: 2026-05-25T13:47:05.244Z
+Generated: 2026-05-25T14:20:34.807Z
 Iterations per hook: 10 (plus 1 warm-up discarded)
 Fixture: `tests/fixtures/repos/nextjs-app` (init + apply --write)
 Node: v22.22.3 on darwin x64
@@ -19,10 +19,10 @@ Thresholds (from the implementation plan):
 
 | Hook | p50 ms | p95 ms | p50 tokens | p95 tokens | exit | Classification |
 |---|---:|---:|---:|---:|---:|---|
-| `haus context --from-hook` | 412 | 422 | 78 | 78 | 0 | gate-default-off |
-| `haus memory inject --from-hook` | 409 | 437 | 23 | 23 | 0 | gate-default-off |
-| `haus guard file-access --from-hook` | 402 | 485 | 0 | 0 | 0 | gate-default-off |
-| `haus guard bash --from-hook` | 401 | 414 | 0 | 0 | 0 | gate-default-off |
+| `haus context --from-hook` | 392 | 397 | 78 | 78 | 0 | gate-default-off |
+| `haus memory inject --from-hook` | 391 | 399 | 23 | 23 | 0 | gate-default-off |
+| `haus guard file-access --from-hook` | 385 | 397 | 0 | 0 | 0 | gate-default-off |
+| `haus guard bash --from-hook` | 390 | 403 | 0 | 0 | 0 | gate-default-off |
 
 ## Per-hook detail
 
@@ -30,7 +30,7 @@ Thresholds (from the implementation plan):
 
 UserPromptSubmit — emits selected rules + token-reduction summary
 
-- Wall ms (sorted): 402, 404, 408, 409, 411, 412, 412, 414, 421, 422
+- Wall ms (sorted): 385, 385, 390, 391, 392, 392, 393, 394, 395, 399
 - Stdout bytes:    313, 313, 313, 313, 313, 313, 313, 313, 313, 313
 - Exit code:       0
 
@@ -38,7 +38,7 @@ UserPromptSubmit — emits selected rules + token-reduction summary
 
 UserPromptSubmit — injects Haus memory (capped at 1200 chars)
 
-- Wall ms (sorted): 402, 408, 409, 409, 409, 409, 411, 412, 430, 437
+- Wall ms (sorted): 388, 389, 389, 390, 390, 393, 393, 398, 398, 400
 - Stdout bytes:    93, 93, 93, 93, 93, 93, 93, 93, 93, 93
 - Exit code:       0
 
@@ -46,7 +46,7 @@ UserPromptSubmit — injects Haus memory (capped at 1200 chars)
 
 PreToolUse(Read|Edit|Write) — denies on sensitive paths
 
-- Wall ms (sorted): 399, 399, 401, 401, 402, 402, 403, 405, 410, 485
+- Wall ms (sorted): 382, 384, 384, 385, 385, 386, 389, 393, 396, 397
 - Stdout bytes:    0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 - Exit code:       0
 
@@ -54,9 +54,11 @@ PreToolUse(Read|Edit|Write) — denies on sensitive paths
 
 PreToolUse(Bash) — denies on dangerous commands
 
-- Wall ms (sorted): 395, 395, 400, 400, 401, 401, 402, 403, 406, 414
+- Wall ms (sorted): 382, 383, 384, 385, 389, 391, 396, 398, 398, 408
 - Stdout bytes:    0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 - Exit code:       0
+
+<!-- BENCH:AUTO-END -->
 
 ## Key observation
 
@@ -69,7 +71,7 @@ For a Claude turn that triggers Bash 5×, Read 3×, Edit 2× plus the UserPrompt
 
 ## Decisions
 
-Decisions are recorded per hook based on the table above plus a judgement on whether the output is load-bearing for Claude's context.
+Decisions are recorded per hook based on the table above plus a judgement on whether the output is load-bearing for Claude's context. (Bench raw cost is measured with both gated hooks force-enabled in the fixture; production behaviour is the gated short-circuit.)
 
 | Hook | Decision | Reasoning |
 |---|---|---|

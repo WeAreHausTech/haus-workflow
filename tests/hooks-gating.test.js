@@ -80,6 +80,19 @@ test("non-hook context invocation is unaffected by the gate", () => {
   assert.match(out, /Haus Context/);
 });
 
+test('isHookEnabled treats "true", 1, {} as disabled (strict boolean only)', () => {
+  // Defends against fuzzy opt-ins from malformed configs.
+  const repo = cloneFixtureToTemp("nextjs-app");
+  runHaus(repo, "init");
+  runHaus(repo, "apply --write");
+  const file = path.join(repo, ".haus-ai", "config.json");
+  for (const bogus of ['"true"', "1", "{}", "null"]) {
+    fs.writeFileSync(file, `{"hooks":{"context":{"enabled":${bogus}}}}`);
+    const out = runHaus(repo, "context --from-hook");
+    assert.equal(out.trim(), "", `expected silent for enabled=${bogus}`);
+  }
+});
+
 test("doctor reports per-hook gate state", () => {
   const repo = cloneFixtureToTemp("nextjs-app");
   runHaus(repo, "init");

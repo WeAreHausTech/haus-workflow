@@ -37,11 +37,12 @@ export const DEFAULT_HOOKS_CONFIG: Required<HooksConfig> = {
 /**
  * Read the config and answer: is this hook enabled?
  *
- * If the file is missing, malformed, or omits the key, returns `false`.
- * That bias is deliberate — a missing config means the project has not
- * opted in, and the hook must stay silent.
+ * The contract is explicitly `enabled: true` (a strict boolean). Anything
+ * else — missing file, malformed JSON, missing key, `"true"`/`1`/`{}` —
+ * keeps the hook off. The bias is deliberate: a missing or fuzzy config
+ * means the project has not opted in, and the hook must stay silent.
  */
 export async function isHookEnabled(root: string, key: HookKey): Promise<boolean> {
   const cfg = await readJson<HooksConfig>(path.join(root, CONFIG_PATH));
-  return Boolean(cfg?.hooks?.[key]?.enabled);
+  return cfg?.hooks?.[key]?.enabled === true;
 }

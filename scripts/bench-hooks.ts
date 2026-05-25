@@ -14,11 +14,15 @@
  *   - `haus guard bash --from-hook`      (PreToolUse Bash)
  *
  * Methodology:
- *   - Build `dist/` if stale, then run `haus init` + `haus apply --write`
- *     inside a tmp copy of `tests/fixtures/repos/nextjs-app` so the hooks
- *     have realistic `.haus-ai/` + `.claude/` state to read.
+ *   - Always rebuild `dist/` before measuring so results match current
+ *     sources (`--no-build` escape hatch for fast re-runs against an
+ *     already-built CLI).
+ *   - Run `haus init` + `haus apply --write` inside a tmp copy of
+ *     `tests/fixtures/repos/nextjs-app` so the hooks have realistic
+ *     `.haus-ai/` + `.claude/` state to read.
  *   - For each hook, run N=10 invocations (one warm-up discarded).
- *   - Record p50 + p95 wall time and stdout byte count.
+ *   - Record p50 + p95 wall time (linear-interpolated; NumPy-style) and
+ *     stdout byte count.
  *   - Token estimate = bytes / 4 (≈ Claude tokenizer rule of thumb;
  *     conservative for ASCII).
  *
@@ -80,8 +84,16 @@ type Measurement = {
   exitCode: number;
 };
 
-function ensureBuild(): void {
-  if (fs.existsSync(CLI)) return;
+function ensureBuild(skipBuild: boolean): void {
+  // Default behaviour: rebuild on every run so the bench always reflects
+  // current sources. `--no-build` opts out for fast re-runs against a known
+  // dist/. Missing dist/ + --no-build is an error.
+  if (skipBuild) {
+    if (!fs.existsSync(CLI)) {
+      throw new Error(`dist/cli.js missing — drop --no-build or run \`yarn build\` first.`);
+    }
+    return;
+  }
   process.stdout.write("Building dist/ ...\n");
   execaSync("yarn", ["build"], { cwd: REPO_ROOT, stdio: "inherit" });
 }
@@ -92,6 +104,18 @@ function setupFixture(): string {
   process.stdout.write(`Setting up fixture at ${tmp}\n`);
   execaSync("node", [CLI, "init"], { cwd: tmp });
   execaSync("node", [CLI, "apply", "--write"], { cwd: tmp });
+  // `apply --write` emits .haus-ai/config.json with both gated hooks off.
+  // The bench MUST measure the raw cost of the hook body — otherwise the
+  // gated hooks would short-circuit and report 0 tokens + a misleadingly
+  // fast wall time. Force-enable all gated hooks for the duration of the
+  // benchmark only.
+  const cfg = {
+    hooks: {
+      context: { enabled: true },
+      memoryInject: { enabled: true },
+    },
+  };
+  fs.writeFileSync(path.join(tmp, ".haus-ai/config.json"), JSON.stringify(cfg, null, 2));
   return tmp;
 }
 
@@ -116,15 +140,33 @@ function measure(cwd: string, hook: HookSpec): Measurement {
     const one = timeOne(cwd, hook);
     wallMs.push(one.ms);
     bytes.push(one.bytes);
-    exitCode = one.exitCode;
+    // Track the worst (max) exit code so a single intermittent failure in
+    // the middle of the loop is still surfaced in the report.
+    if (one.exitCode > exitCode) exitCode = one.exitCode;
   }
   return { hook, wallMs, bytes, exitCode };
 }
 
+/**
+ * Linear-interpolated percentile on a sorted array.
+ *
+ * Position = (p/100) * (n - 1) ∈ [0, n-1]. For non-integer positions,
+ * linearly interpolate between the two flanking samples. This matches
+ * the conventional definition used by NumPy `quantile`, R `quantile`
+ * type 7, Excel `PERCENTILE.INC`, etc., and avoids the upward bias of
+ * `floor(p/100 * n)` (which on 10 samples returned the 6th element for
+ * p50 and the max for p95).
+ */
 function percentile(values: number[], p: number): number {
+  if (values.length === 0) return 0;
+  if (values.length === 1) return values[0];
   const sorted = [...values].sort((a, b) => a - b);
-  const idx = Math.min(sorted.length - 1, Math.floor((p / 100) * sorted.length));
-  return sorted[idx];
+  const pos = (p / 100) * (sorted.length - 1);
+  const lo = Math.floor(pos);
+  const hi = Math.ceil(pos);
+  if (lo === hi) return sorted[lo];
+  const frac = pos - lo;
+  return sorted[lo] + (sorted[hi] - sorted[lo]) * frac;
 }
 
 function median(values: number[]): number {
@@ -191,6 +233,8 @@ function renderReport(results: Measurement[]): string {
     lines.push(`- Exit code:       ${r.exitCode}`);
     lines.push("");
   }
+  lines.push(AUTO_END_MARKER);
+  lines.push("");
   lines.push("## Decisions");
   lines.push("");
   lines.push(
@@ -217,8 +261,36 @@ function renderReport(results: Measurement[]): string {
   return lines.join("\n") + "\n";
 }
 
+/**
+ * Anchor that separates the auto-generated upper section from curated
+ * decision content below. `--overwrite` only replaces content up to and
+ * including this marker; anything after is preserved verbatim. The marker
+ * is an HTML comment so it renders invisibly in the published doc.
+ */
+const AUTO_END_MARKER = "<!-- BENCH:AUTO-END -->";
+
+/**
+ * Build the file content to write. If the existing file has the auto-end
+ * marker, splice fresh auto-generated content above it and keep everything
+ * below it intact. Otherwise (first run, or marker stripped) write the
+ * full rendered report.
+ */
+function buildOutput(results: Measurement[]): string {
+  const fresh = renderReport(results);
+  if (!fs.existsSync(REPORT)) return fresh;
+  const existing = fs.readFileSync(REPORT, "utf8");
+  const existingMarkerAt = existing.indexOf(AUTO_END_MARKER);
+  if (existingMarkerAt === -1) return fresh;
+  const freshMarkerAt = fresh.indexOf(AUTO_END_MARKER);
+  if (freshMarkerAt === -1) return fresh; // safety net
+  const newTop = fresh.slice(0, freshMarkerAt + AUTO_END_MARKER.length);
+  const oldBottom = existing.slice(existingMarkerAt + AUTO_END_MARKER.length);
+  return newTop + oldBottom;
+}
+
 function main(): void {
-  ensureBuild();
+  const skipBuild = process.argv.includes("--no-build");
+  ensureBuild(skipBuild);
   const fixtureRoot = setupFixture();
   try {
     const results: Measurement[] = [];
@@ -226,19 +298,18 @@ function main(): void {
       process.stdout.write(`Measuring ${hook.id} ...\n`);
       results.push(measure(fixtureRoot, hook));
     }
-    const md = renderReport(results);
     fs.mkdirSync(path.dirname(REPORT), { recursive: true });
     const overwrite = process.argv.includes("--overwrite");
-    if (fs.existsSync(REPORT) && !overwrite) {
-      const sidecar = REPORT.replace(/\.md$/, `.rerun-${Date.now()}.md`);
-      fs.writeFileSync(sidecar, md);
-      process.stdout.write(
-        `\nReport already exists; raw output written to sidecar: ${path.relative(REPO_ROOT, sidecar)}\n` +
-          `Use --overwrite to replace the committed report.\n`,
-      );
+    // Default behaviour: refresh only the auto-generated upper section,
+    // preserving everything after the BENCH:AUTO-END marker (curated
+    // decisions, follow-ups, etc.). `--overwrite` clobbers the whole file
+    // back to the template version — use it intentionally.
+    const md = overwrite ? renderReport(results) : buildOutput(results);
+    fs.writeFileSync(REPORT, md);
+    if (overwrite) {
+      process.stdout.write(`\nReport fully overwritten: ${path.relative(REPO_ROOT, REPORT)}\n`);
     } else {
-      fs.writeFileSync(REPORT, md);
-      process.stdout.write(`\nReport written: ${path.relative(REPO_ROOT, REPORT)}\n`);
+      process.stdout.write(`\nReport refreshed (curated section preserved): ${path.relative(REPO_ROOT, REPORT)}\n`);
     }
     process.stdout.write("\n--- Summary ---\n");
     for (const r of results) {

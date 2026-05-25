@@ -60,8 +60,8 @@ haus context --task "<task>"
   await writeManagedJson(root, claudePath(root, "settings.json"), hookSettings, dryRun);
   if (!dryRun) await assertPostApplySettingsMatchCanonical(root, hookSettings);
   // Emit `.haus-ai/config.json` with the P2 hook gating defaults (both off).
-  // Existing config is preserved by writeManagedJson via writeManagedText's
-  // unchanged-content short-circuit; new projects get the defaults written.
+  // Only created when missing — existing config is left untouched so users'
+  // opt-ins survive subsequent `apply --write` runs.
   const configPath = hausPath(root, "config.json");
   if (!(await fs.pathExists(configPath))) {
     await writeManagedJson(root, configPath, DEFAULT_HOOKS_CONFIG, dryRun);
