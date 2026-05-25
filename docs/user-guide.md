@@ -30,13 +30,13 @@ If version is below 22, install/update Node first.
 ## Install Haus AI
 
 `haus` is not published to npm yet. Install it from a clone of the
-[haus-ai-workflow](https://github.com/WeAreHausTech/haus-ai-workflow) repo.
+[haus-workflow](https://github.com/WeAreHausTech/haus-workflow) repo.
 
 **Primary: global link from checkout**
 
 ```bash
-git clone https://github.com/WeAreHausTech/haus-ai-workflow.git
-cd haus-ai-workflow
+git clone https://github.com/WeAreHausTech/haus-workflow.git
+cd haus-workflow
 yarn install
 yarn build
 npm install -g .     # uses npm to symlink the `haus` bin globally
@@ -71,7 +71,7 @@ node dist/cli.js --help
 
 2. **Use a shell alias that resolves to whatever Node is active.** No per-version install needed:
    ```bash
-   echo 'alias haus="node /absolute/path/to/haus-ai-workflow/dist/cli.js"' >> ~/.zshrc
+   echo 'alias haus="node /absolute/path/to/haus-workflow/dist/cli.js"' >> ~/.zshrc
    source ~/.zshrc
    haus --help
    ```
@@ -190,7 +190,7 @@ Install the Claude Code plugin via Claude Code's `/plugin` system (not via `haus
 
 ```bash
 # Add Haus marketplace (once per machine)
-/plugin marketplace add WeAreHausTech/haus-ai-workflow
+/plugin marketplace add WeAreHausTech/haus-workflow
 
 # Install plugin
 /plugin install haus-workflow@haus-marketplace

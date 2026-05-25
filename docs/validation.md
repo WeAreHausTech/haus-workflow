@@ -75,10 +75,10 @@ Run by hand against real internal repos. Never commit paths, snapshots, or findi
 
 ```bash
 cd <repo-or-fixture>
-node /path/to/haus-ai-workflow/dist/cli.js scan --json > /tmp/scan.json
-node /path/to/haus-ai-workflow/dist/cli.js recommend --json > /tmp/rec.json
-node /path/to/haus-ai-workflow/dist/cli.js explain-context --json > /tmp/explain.json
-node /path/to/haus-ai-workflow/dist/cli.js context --task "<task>" --json > /tmp/ctx.json
+node /path/to/haus-workflow/dist/cli.js scan --json > /tmp/scan.json
+node /path/to/haus-workflow/dist/cli.js recommend --json > /tmp/rec.json
+node /path/to/haus-workflow/dist/cli.js explain-context --json > /tmp/explain.json
+node /path/to/haus-workflow/dist/cli.js context --task "<task>" --json > /tmp/ctx.json
 ```
 
 Then evaluate the four outputs against the rubric below.
