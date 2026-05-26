@@ -26,5 +26,5 @@ export async function runUpdate(options: { check?: boolean }): Promise<void> {
   const { before, after } = await applyLock(root);
   log(diffLock(before, after));
   log(summarizeLockDiff(before, after));
-  log("Update applied with backup in .haus-ai/backups/. Run haus doctor.");
+  log("Update applied with backup in .haus-workflow/backups/. Run haus doctor.");
 }

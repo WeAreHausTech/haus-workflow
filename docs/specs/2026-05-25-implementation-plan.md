@@ -93,7 +93,7 @@ Correlated PRs (ship in one PR):
 - `scripts/bench-hooks.ts` — time wall + count stdout tokens for: `haus guard bash --from-hook`, `haus context --from-hook`, `haus memory ingest --from-hook`.
 - Report committed to `docs/specs/2026-05-25-hook-cost-report.md`.
 - Decision row per hook: keep / gate-default-off / drop. Thresholds: drop or gate if >150ms wall or >300 stdout tokens per call without commensurate value.
-- If gated: config flag in `.haus-ai/config.json` (`hooks.guardBash.enabled`, etc.), read by the hook wrapper.
+- If gated: config flag in `.haus-workflow/config.json` (`hooks.guardBash.enabled`, etc.), read by the hook wrapper.
 
 **Acceptance**
 - Report committed.
@@ -102,22 +102,22 @@ Correlated PRs (ship in one PR):
 
 ---
 
-## P2b — Rename `.haus-ai/` → `.haus-workflow/`
+## P2b — Rename `.haus-workflow/` → `.haus-workflow/`
 
-**Why now.** Brand consistency with the v0.1 naming locks (`haus-workflow` repo, `haus-workflow-catalog` repo, `@haus-tech/haus-workflow` package, `haus-workflow` plugin). The `.haus-ai/` directory written into user projects is the last `haus-ai` leftover. Better to flip before P3 marking starts — markers placed on `.haus-ai`-mentioning code would otherwise need re-locating. **No migration shim needed** — no users yet.
+**Why now.** Brand consistency with the v0.1 naming locks (`haus-workflow` repo, `haus-workflow-catalog` repo, `@haus-tech/haus-workflow` package, `haus-workflow` plugin). The `.haus-workflow/` directory written into user projects is the last `haus-ai` leftover. Better to flip before P3 marking starts — markers placed on `.haus-workflow`-mentioning code would otherwise need re-locating. **No migration shim needed** — no users yet.
 
 **Targets** (47 files touched, mechanical rename)
-- `src/utils/paths.ts` — `HAUS_DIR = ".haus-ai"` → `".haus-workflow"`. Constant name stays.
+- `src/utils/paths.ts` — `HAUS_DIR = ".haus-workflow"` → `".haus-workflow"`. Constant name stays.
 - 12 other `src/` files referencing the directory literal in messages/paths.
 - 10 tests + `tests/helpers/fixture-runner.js`.
 - 3 scripts (`bench-hooks.ts`, `qa-batch.mjs`, `qa-pass.sh`).
 - 3 plugin skill markdowns.
 - 12 docs (architecture, cli, catalog, commands, validation, memory, user-guide, technical-guide, generated-files, updates, README, CLAUDE.md, hook-cost-report).
-- `.gitignore` — `.haus-ai/` → `.haus-workflow/`.
-- Historical specs (`docs/specs/2026-05-22-*.md`) intentionally retain `.haus-ai` as a historical record (mirrors P0 convention).
+- `.gitignore` — `.haus-workflow/` → `.haus-workflow/`.
+- Historical specs (`docs/specs/2026-05-22-*.md`) intentionally retain `.haus-workflow` as a historical record (mirrors P0 convention).
 
 **Acceptance**
-- `rg "\.haus-ai"` returns hits only in `docs/specs/2026-05-22-*.md`.
+- `rg "\.haus-workflow"` returns hits only in `docs/specs/2026-05-22-*.md`.
 - `yarn verify` green (goldens unaffected — none reference the directory path).
 - `haus init` in a fresh fixture produces a `.haus-workflow/` directory.
 
@@ -257,7 +257,7 @@ Correlated PRs (ship in one PR):
 **P8a — B4 remote catalog fetch**
 - Implement the design in `docs/specs/2026-05-22-b4-remote-catalog-design.md` against the new catalog repo.
 - Pinned ref strategy: lockfile records commit SHA. `haus update` checks remote `main` head, prompts to bump.
-- Offline fallback: cached catalog under `~/.haus-ai/cache/`.
+- Offline fallback: cached catalog under `~/.haus-workflow/cache/`.
 - Auth: anonymous raw-URL fetch (catalog repo is public after P8, but design must not require auth).
 
 **P8b — `haus plugin update`**
@@ -459,7 +459,7 @@ Then publish a fixed `0.1.1` immediately.
 - **`library/haus/` and `library/templates/`.** Confirm during P6 whether these are runtime data (move to catalog) or CLI-internal (stay).
 - **Plugin version coupling.** P7b assumes plugin is installable as a git checkout. If Claude Code marketplace install model differs, adjust.
 - **Schema versioning policy.** P6 introduces `CATALOG_SCHEMA_VERSION` but the bump policy (semver? integer?) is TBD. Decide in P6.
-- **Hook config flag location.** P2 assumes `.haus-ai/config.json`. Confirm this file exists or create it in P2.
+- **Hook config flag location.** P2 assumes `.haus-workflow/config.json`. Confirm this file exists or create it in P2.
 
 ---
 
@@ -468,7 +468,7 @@ Then publish a fixed `0.1.1` immediately.
 - [ ] P0 — Repo rename to `haus-workflow`
 - [ ] P1 — Cleanup tracker tooling
 - [ ] P2 — Hook cost audit
-- [ ] P2b — Rename `.haus-ai/` → `.haus-workflow/`
+- [ ] P2b — Rename `.haus-workflow/` → `.haus-workflow/`
 - [ ] P3 — Mark scaffolding
 - [ ] P4a — Remove sources subsystem
 - [ ] P4b — Remove curation + library artifacts

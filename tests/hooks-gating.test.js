@@ -7,16 +7,16 @@ import { cloneFixtureToTemp, runHaus } from "./helpers/fixture-runner.js";
 
 // P2 hook gating: `haus context --from-hook` and `haus memory inject --from-hook`
 // must short-circuit (no stdout, no work) unless the project explicitly opts in
-// via `.haus-ai/config.json` -> `hooks.<key>.enabled = true`. The two guards
+// via `.haus-workflow/config.json` -> `hooks.<key>.enabled = true`. The two guards
 // (file-access, bash) are NOT gated and must always run.
 
 function readConfig(repo) {
-  const file = path.join(repo, ".haus-ai", "config.json");
+  const file = path.join(repo, ".haus-workflow", "config.json");
   return JSON.parse(fs.readFileSync(file, "utf8"));
 }
 
 function writeConfig(repo, patch) {
-  const file = path.join(repo, ".haus-ai", "config.json");
+  const file = path.join(repo, ".haus-workflow", "config.json");
   const current = JSON.parse(fs.readFileSync(file, "utf8"));
   const next = {
     ...current,
@@ -25,7 +25,7 @@ function writeConfig(repo, patch) {
   fs.writeFileSync(file, JSON.stringify(next, null, 2));
 }
 
-test("apply --write emits .haus-ai/config.json with both gated hooks default off", () => {
+test("apply --write emits .haus-workflow/config.json with both gated hooks default off", () => {
   const repo = cloneFixtureToTemp("nextjs-app");
   runHaus(repo, "init");
   runHaus(repo, "apply --write");
@@ -85,7 +85,7 @@ test('isHookEnabled treats "true", 1, {} as disabled (strict boolean only)', () 
   const repo = cloneFixtureToTemp("nextjs-app");
   runHaus(repo, "init");
   runHaus(repo, "apply --write");
-  const file = path.join(repo, ".haus-ai", "config.json");
+  const file = path.join(repo, ".haus-workflow", "config.json");
   for (const bogus of ['"true"', "1", "{}", "null"]) {
     fs.writeFileSync(file, `{"hooks":{"context":{"enabled":${bogus}}}}`);
     const out = runHaus(repo, "context --from-hook");

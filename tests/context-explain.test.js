@@ -128,9 +128,9 @@ test("explain-recommendation --json shape is unchanged", () => {
 test("legacy recommendation schema does not crash explain/context", () => {
   const cwd = cloneFixtureToTemp("nextjs-app");
   runHaus(cwd, "scan --json");
-  fs.mkdirSync(path.join(cwd, ".haus-ai"), { recursive: true });
+  fs.mkdirSync(path.join(cwd, ".haus-workflow"), { recursive: true });
   fs.writeFileSync(
-    path.join(cwd, ".haus-ai/recommendation.json"),
+    path.join(cwd, ".haus-workflow/recommendation.json"),
     JSON.stringify(
       {
         mode: "fast",

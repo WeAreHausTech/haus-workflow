@@ -1,7 +1,7 @@
 # haus
 
 `haus` is a Haus-owned Claude Code workflow CLI + plugin package.
-It scans a repo, recommends stack-fit context assets, and writes controlled `.claude` + `.haus-ai` outputs.
+It scans a repo, recommends stack-fit context assets, and writes controlled `.claude` + `.haus-workflow` outputs.
 
 - CLI: `haus`
 - Runtime: Node `>=22`

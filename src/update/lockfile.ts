@@ -61,7 +61,7 @@ export async function applyLock(root: string): Promise<{ before: string; after: 
 
 export function diffLock(before: string, after: string): string {
   if (!hasTextChanged(before, after)) return "No lockfile changes.";
-  return createUnifiedDiff(".haus-ai/haus.lock.json", before, after);
+  return createUnifiedDiff(".haus-workflow/haus.lock.json", before, after);
 }
 
 export async function hasLocalOverrides(root: string): Promise<boolean> {

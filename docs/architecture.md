@@ -3,7 +3,7 @@
 ## Repo overview
 
 `haus` is a Claude Code plugin/CLI workflow tool.
-It scans repositories, recommends context assets, and writes controlled outputs in `./.claude` and `./.haus-ai`.
+It scans repositories, recommends context assets, and writes controlled outputs in `./.claude` and `./.haus-workflow`.
 
 ## Repo structure
 
@@ -29,7 +29,7 @@ It scans repositories, recommends context assets, and writes controlled outputs 
 ## Command flow
 
 1. CLI parses command.
-2. Command module loads inputs from repo + `.haus-ai`.
+2. Command module loads inputs from repo + `.haus-workflow`.
 3. Core module runs (scanner/recommender/writer/update/etc).
 4. Command emits concise output (human or JSON).
 
@@ -39,10 +39,10 @@ It scans repositories, recommends context assets, and writes controlled outputs 
 2. filter sensitive paths
 3. infer roles/stacks/package manager/dependencies
 4. write:
-   - `./.haus-ai/context-map.json`
-   - `./.haus-ai/dependency-map.json`
-   - `./.haus-ai/scan-hashes.json`
-   - `./.haus-ai/repo-summary.md`
+   - `./.haus-workflow/context-map.json`
+   - `./.haus-workflow/dependency-map.json`
+   - `./.haus-workflow/scan-hashes.json`
+   - `./.haus-workflow/repo-summary.md`
 
 ## Recommender flow
 
@@ -50,7 +50,7 @@ It scans repositories, recommends context assets, and writes controlled outputs 
 2. compute score from roles/stacks/goals/requiresAny/signals
 3. apply unsupported-stack and policy penalties
 4. emit recommended + skipped rows with reasons and confidence
-5. write `./.haus-ai/recommendation.json`
+5. write `./.haus-workflow/recommendation.json`
 
 ## Apply / generator flow
 
@@ -58,20 +58,20 @@ It scans repositories, recommends context assets, and writes controlled outputs 
 2. write canonical `./.claude/*` command/rule/settings files
 3. copy selected catalog assets into `./.claude/skills` or `./.claude/agents`
 4. write:
-   - `./.haus-ai/selected-context.json`
-   - `./.haus-ai/haus.lock.json`
+   - `./.haus-workflow/selected-context.json`
+   - `./.haus-workflow/haus.lock.json`
 5. print overwrite summary for changed generated files
 
 ## Update / lockfile flow
 
 1. `update --check` validates lock presence + version fields
-2. `update` backs up lockfile to `./.haus-ai/backups`
+2. `update` backs up lockfile to `./.haus-workflow/backups`
 3. recomputes per-item hashes from lockfile `paths`
 4. prints unified lock diff + summary
 
 ## Memory flow
 
-1. ensure local memory files under `./.haus-ai/memory`
+1. ensure local memory files under `./.haus-workflow/memory`
 2. append redacted notes (`memory add`)
 3. inject compact redacted memory text (`memory inject`)
 4. keep promotion manual (`memory promote`)

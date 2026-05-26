@@ -5,16 +5,16 @@ import os from "node:os";
 import { mkdtempSync, mkdirSync, existsSync, writeFileSync } from "node:fs";
 import { execaSync } from "execa";
 
-test("haus init skips setup when .haus-ai already exists", () => {
+test("haus init skips setup when .haus-workflow already exists", () => {
   const temp = mkdtempSync(path.join(os.tmpdir(), "haus-init-"));
-  mkdirSync(path.join(temp, ".haus-ai"), { recursive: true });
+  mkdirSync(path.join(temp, ".haus-workflow"), { recursive: true });
   const result = execaSync("node", [path.resolve("dist/cli.js"), "init"], { cwd: temp, reject: false });
   assert.equal(result.exitCode, 0);
   assert.equal(result.stdout.includes("already initialized"), true);
   assert.equal(result.stdout.includes("setup-project"), true);
 });
 
-test("haus init runs setup when .haus-ai is missing", () => {
+test("haus init runs setup when .haus-workflow is missing", () => {
   const temp = mkdtempSync(path.join(os.tmpdir(), "haus-init-fresh-"));
   writeFileSync(
     path.join(temp, "package.json"),
@@ -28,5 +28,5 @@ test("haus init runs setup when .haus-ai is missing", () => {
   );
   assert.equal(result.exitCode, 0);
   assert.equal(result.stdout.includes("Initializing"), true);
-  assert.equal(existsSync(path.join(temp, ".haus-ai", "context-map.json")), true);
+  assert.equal(existsSync(path.join(temp, ".haus-workflow", "context-map.json")), true);
 });

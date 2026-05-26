@@ -67,7 +67,7 @@ cache/
 *.code-workspace
 
 # Haus AI generated runtime output
-.haus-ai/
+.haus-workflow/
 # Claude Code per-developer settings — keep out of the shared repo
 .claude/settings.json
 .claude/settings.local.json

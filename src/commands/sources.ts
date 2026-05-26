@@ -47,5 +47,5 @@ export async function runSources(action: "sync" | "report" | "audit", options: {
     log(report);
     return;
   }
-  log(`Source sync ${checkOnly ? "check" : "report"} generated at .haus-ai/sources-report.json`);
+  log(`Source sync ${checkOnly ? "check" : "report"} generated at .haus-workflow/sources-report.json`);
 }

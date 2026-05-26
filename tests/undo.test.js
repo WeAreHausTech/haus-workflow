@@ -6,17 +6,17 @@ import path from "node:path";
 import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
 import { execaSync } from "execa";
 
-test("undo --yes removes .claude and .haus-ai", () => {
+test("undo --yes removes .claude and .haus-workflow", () => {
   const temp = mkdtempSync(path.join(os.tmpdir(), "haus-undo-"));
   mkdirSync(path.join(temp, ".claude"), { recursive: true });
-  mkdirSync(path.join(temp, ".haus-ai"), { recursive: true });
+  mkdirSync(path.join(temp, ".haus-workflow"), { recursive: true });
   writeFileSync(path.join(temp, ".claude/settings.json"), "{}");
-  writeFileSync(path.join(temp, ".haus-ai/context-map.json"), "{}");
+  writeFileSync(path.join(temp, ".haus-workflow/context-map.json"), "{}");
   const cli = path.resolve("dist/cli.js");
   const r = execaSync("node", [cli, "undo", "--yes"], { cwd: temp, reject: false });
   assert.equal(r.exitCode, 0);
   assert.equal(fs.existsSync(path.join(temp, ".claude")), false);
-  assert.equal(fs.existsSync(path.join(temp, ".haus-ai")), false);
+  assert.equal(fs.existsSync(path.join(temp, ".haus-workflow")), false);
 });
 
 test("undo noop when dirs missing", () => {

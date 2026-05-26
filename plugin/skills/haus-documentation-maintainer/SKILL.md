@@ -12,7 +12,7 @@ Maintain docs for the `haus` package whenever behavior changes.
 - command behavior changes
 - dependencies in `package.json` change
 - scanner/recommender/apply/update/memory/security logic changes
-- generated files under `.haus-ai` or `.claude` change
+- generated files under `.haus-workflow` or `.claude` change
 - plugin skills/hooks layout changes
 
 ## Do not use when
@@ -26,7 +26,7 @@ Update docs when any of these change:
 
 - `package.json` runtime dependencies
 - command add/rename/remove in `src/cli.ts` or `src/commands/*`
-- generated file structure in `.haus-ai` or `.claude`
+- generated file structure in `.haus-workflow` or `.claude`
 - plugin structure (`plugin/skills`, `plugin/hooks`, `plugin/.claude-plugin/plugin.json`)
 - scanner or recommender behavior/policies
 - security guardrails

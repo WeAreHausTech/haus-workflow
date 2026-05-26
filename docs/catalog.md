@@ -35,7 +35,7 @@ Curated items require additional fields in the manifest:
 
 Only `reviewStatus: "approved"` items are selected by the recommender and written by apply.
 
-## `.haus-ai/haus.lock.json` hashes
+## `.haus-workflow/haus.lock.json` hashes
 
 Each lock item includes a `hash` field:
 

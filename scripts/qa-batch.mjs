@@ -34,8 +34,8 @@ for (const t of targets) {
   fs.cpSync(path.join(root, "tests/fixtures/repos", t.fixture), tmp, { recursive: true });
   execaSync("node", [cli, "scan", "--json"], { cwd: tmp, stdout: "ignore" });
   execaSync("node", [cli, "recommend", "--json"], { cwd: tmp, stdout: "ignore" });
-  const scan = JSON.parse(fs.readFileSync(path.join(tmp, ".haus-ai/context-map.json"), "utf8"));
-  const rec = JSON.parse(fs.readFileSync(path.join(tmp, ".haus-ai/recommendation.json"), "utf8"));
+  const scan = JSON.parse(fs.readFileSync(path.join(tmp, ".haus-workflow/context-map.json"), "utf8"));
+  const rec = JSON.parse(fs.readFileSync(path.join(tmp, ".haus-workflow/recommendation.json"), "utf8"));
   const taskCtx = {};
   for (const task of t.tasks) {
     const raw = execaSync("node", [cli, "context", "--task", task, "--json"], { cwd: tmp }).stdout;

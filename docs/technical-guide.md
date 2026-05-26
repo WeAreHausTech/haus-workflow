@@ -40,7 +40,7 @@ Do not document unsupported stacks as supported behavior.
 
 ## Local memory
 
-Memory is filesystem-backed in `./.haus-ai/memory`.
+Memory is filesystem-backed in `./.haus-workflow/memory`.
 No remote sync in current implementation.
 
 ## Updates and overrides

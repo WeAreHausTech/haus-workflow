@@ -1,7 +1,7 @@
 /**
  * Per-project hook gating config (P2 outcome).
  *
- * `.haus-ai/config.json` carries a small `hooks.*.enabled` map that the
+ * `.haus-workflow/config.json` carries a small `hooks.*.enabled` map that the
  * non-load-bearing UserPromptSubmit hooks (`context`, `memoryInject`)
  * consult before doing work. Defaults are **off** — the hook is a no-op
  * unless the project opts in.
@@ -24,7 +24,7 @@ export type HooksConfig = {
   hooks?: Partial<Record<HookKey, { enabled?: boolean }>>;
 };
 
-const CONFIG_PATH = ".haus-ai/config.json";
+const CONFIG_PATH = ".haus-workflow/config.json";
 
 /** Default config emitted on `haus apply --write`. Both gated hooks default off. */
 export const DEFAULT_HOOKS_CONFIG: Required<HooksConfig> = {

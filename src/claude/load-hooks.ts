@@ -123,7 +123,7 @@ export async function loadClaudeHooksSettings(opts?: LoadClaudeHooksOptions): Pr
   }
 }
 
-/** Flat list for `.haus-ai/recommended-hooks.json` (ids stable for known commands). */
+/** Flat list for `.haus-workflow/recommended-hooks.json` (ids stable for known commands). */
 export function flattenRecommendedHooks(settings: ClaudeHooksSettings): Array<{ id: string; command: string }> {
   const out: Array<{ id: string; command: string }> = [];
   let generic = 0;

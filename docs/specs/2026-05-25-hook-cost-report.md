@@ -84,7 +84,7 @@ Decisions are recorded per hook based on the table above plus a judgement on whe
 
 For each **gate-default-off** hook:
 
-1. `.haus-ai/config.json` carries the flag:
+1. `.haus-workflow/config.json` carries the flag:
    ```json
    {
      "hooks": {

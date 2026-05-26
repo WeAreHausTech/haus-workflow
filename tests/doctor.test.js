@@ -26,7 +26,7 @@ test("doctor reports hooks OK after apply", () => {
 
 test("doctor prints each shared warning once", () => {
   const temp = mkdtempSync(path.join(os.tmpdir(), "haus-doctor-dedupe-"));
-  mkdirSync(path.join(temp, ".haus-ai"), { recursive: true });
+  mkdirSync(path.join(temp, ".haus-workflow"), { recursive: true });
   const dup = "duplicate warning line for doctor";
   const context = {
     mode: "fast",
@@ -50,9 +50,9 @@ test("doctor prints each shared warning once", () => {
     crossRepoHints: [],
     warnings: [dup]
   };
-  writeFileSync(path.join(temp, ".haus-ai/context-map.json"), JSON.stringify(context, null, 2));
+  writeFileSync(path.join(temp, ".haus-workflow/context-map.json"), JSON.stringify(context, null, 2));
   writeFileSync(
-    path.join(temp, ".haus-ai/recommendation.json"),
+    path.join(temp, ".haus-workflow/recommendation.json"),
     JSON.stringify(
       { mode: "fast", recommended: [], skipped: [], warnings: [dup], estimatedContextTokens: 0 },
       null,
