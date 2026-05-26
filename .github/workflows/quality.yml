@@ -37,21 +37,6 @@ jobs:
       - name: Typecheck scripts
         run: yarn typecheck:scripts
 
-      - name: Catalog audit
-        run: yarn catalog:audit
-
-      - name: Sources audit
-        run: yarn sources:audit
-
-      - name: Sources decisions
-        run: yarn sources:decisions
-
-      - name: Library audit
-        run: yarn library:audit
-
-      - name: Curated audit
-        run: yarn curated:audit
-
       - name: Cleanup tracker status
         # Non-blocking by design: the script always exits 0 until P10 flips it.
         # Don't mask real crashes (tsx resolution, script errors) here.

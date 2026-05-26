@@ -17,7 +17,6 @@ Source of truth: `src/cli.ts`.
 
 ## Explainability
 
-- `haus explain-context [--task <task>] [--json] [--stats]`
 - `haus explain-recommendation [--json]`
 - `haus context [--task <task>] [--from-hook] [--json] [--verbose]` — `--verbose` shows score breakdown per rule
 
@@ -31,9 +30,6 @@ Source of truth: `src/cli.ts`.
 ## Plugin and policy
 
 - `haus plugin validate`
-- `haus sources sync [--check]`
-- `haus sources report`
-- `haus sources audit`
 - `haus guard file-access [--from-hook]`
 - `haus guard bash [--from-hook]`
 

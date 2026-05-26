@@ -44,19 +44,7 @@ jobs:
         run: yarn build
 
       - name: Catalog audit
-        run: yarn catalog:audit
-
-      - name: Sources audit
-        run: yarn sources:audit
-
-      - name: Sources decisions
-        run: yarn sources:decisions
-
-      - name: Library audit
-        run: yarn library:audit
-
-      - name: Curated audit
-        run: yarn curated:audit
+        run: node dist/cli.js catalog-audit
 
       - name: Test
         run: yarn test
@@ -84,7 +72,6 @@ jobs:
             # update --check can return non-zero when no lock entries were selected.
             node "$GITHUB_WORKSPACE/dist/cli.js" update --check || true
           )
-          node dist/cli.js sources audit
 
       - name: Pack
         run: yarn pack

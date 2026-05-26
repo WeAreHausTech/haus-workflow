@@ -169,7 +169,6 @@ Memory is local-only in `./.haus-workflow/memory`.
 Use when you need to understand why rules were selected:
 
 ```bash
-haus explain-context --json
 haus explain-recommendation --json
 haus context --task "build shipping plugin" --json
 ```
@@ -180,7 +179,6 @@ After `haus apply --write`, command docs are generated in:
 
 - `./.claude/commands/haus-doctor.md`
 - `./.claude/commands/haus-review.md`
-- `./.claude/commands/haus-explain-context.md`
 
 Some environments expose these as slash commands. If not, run the CLI commands directly.
 
