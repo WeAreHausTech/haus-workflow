@@ -4,7 +4,7 @@ Source of truth: `src/cli.ts`.
 
 ## Core
 
-- `haus init` — first-run setup; skips if `.haus-ai/` already exists
+- `haus init` — first-run setup; skips if `.haus-workflow/` already exists
 - `haus setup-project [--guided|--fast|--json]`
 - `haus scan [--json]`
 - `haus recommend [--json]`

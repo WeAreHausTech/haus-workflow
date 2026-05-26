@@ -3,7 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-export const HAUS_DIR = ".haus-ai";
+export const HAUS_DIR = ".haus-workflow";
 
 export function cwd(): string {
   return process.cwd();

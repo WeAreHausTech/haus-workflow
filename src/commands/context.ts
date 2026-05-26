@@ -15,7 +15,7 @@ export async function runContext(options: {
 }): Promise<void> {
   const root = process.cwd();
   // Hook-mode short-circuit: per the P2 audit, this hook is gated default-off.
-  // Opt in via `.haus-ai/config.json` -> `hooks.context.enabled = true`.
+  // Opt in via `.haus-workflow/config.json` -> `hooks.context.enabled = true`.
   if (options.fromHook && !(await isHookEnabled(root, "context"))) {
     return;
   }

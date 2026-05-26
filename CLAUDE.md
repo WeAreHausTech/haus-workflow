@@ -1,6 +1,6 @@
 # haus — Claude Code context
 
-Claude Code plugin + CLI that scans repos, recommends context assets, and writes controlled outputs into `.claude/` and `.haus-ai/`.
+Claude Code plugin + CLI that scans repos, recommends context assets, and writes controlled outputs into `.claude/` and `.haus-workflow/`.
 
 ## Build & test
 
@@ -52,7 +52,7 @@ yarn verify         # full gate: typecheck + lint + build + test + prepack
 
 CLI → command module → core module (scanner/recommender/writer) → concise output (human or JSON)
 
-Outputs written to: `.haus-ai/context-map.json`, `.haus-ai/recommendation.json`, `.haus-ai/haus.lock.json`, `.claude/*`
+Outputs written to: `.haus-workflow/context-map.json`, `.haus-workflow/recommendation.json`, `.haus-workflow/haus.lock.json`, `.claude/*`
 
 ## Workflow rules
 

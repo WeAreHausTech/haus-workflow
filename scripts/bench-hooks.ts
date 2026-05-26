@@ -19,7 +19,7 @@
  *     already-built CLI).
  *   - Run `haus init` + `haus apply --write` inside a tmp copy of
  *     `tests/fixtures/repos/nextjs-app` so the hooks have realistic
- *     `.haus-ai/` + `.claude/` state to read.
+ *     `.haus-workflow/` + `.claude/` state to read.
  *   - For each hook, run N=10 invocations (one warm-up discarded).
  *   - Record p50 + p95 wall time (linear-interpolated; NumPy-style) and
  *     stdout byte count.
@@ -104,7 +104,7 @@ function setupFixture(): string {
   process.stdout.write(`Setting up fixture at ${tmp}\n`);
   execaSync("node", [CLI, "init"], { cwd: tmp });
   execaSync("node", [CLI, "apply", "--write"], { cwd: tmp });
-  // `apply --write` emits .haus-ai/config.json with both gated hooks off.
+  // `apply --write` emits .haus-workflow/config.json with both gated hooks off.
   // The bench MUST measure the raw cost of the hook body — otherwise the
   // gated hooks would short-circuit and report 0 tokens + a misleadingly
   // fast wall time. Force-enable all gated hooks for the duration of the
@@ -115,7 +115,7 @@ function setupFixture(): string {
       memoryInject: { enabled: true },
     },
   };
-  fs.writeFileSync(path.join(tmp, ".haus-ai/config.json"), JSON.stringify(cfg, null, 2));
+  fs.writeFileSync(path.join(tmp, ".haus-workflow/config.json"), JSON.stringify(cfg, null, 2));
   return tmp;
 }
 
@@ -253,7 +253,7 @@ function renderReport(results: Measurement[]): string {
   lines.push("## Follow-up");
   lines.push("");
   lines.push(
-    "- Any **gate-default-off** decisions add a flag under `.haus-ai/config.json` (`hooks.<key>.enabled`), read by `isHookEnabled(root, key)` from `src/claude/load-hooks-config.ts`. The gated hook's command short-circuits in `--from-hook` mode when the flag is not `true`.",
+    "- Any **gate-default-off** decisions add a flag under `.haus-workflow/config.json` (`hooks.<key>.enabled`), read by `isHookEnabled(root, key)` from `src/claude/load-hooks-config.ts`. The gated hook's command short-circuits in `--from-hook` mode when the flag is not `true`.",
   );
   lines.push(
     "- Any **drop-candidate** decisions are confirmed by the project lead, then added to `docs/specs/pre-release-cleanup.md` as P4c removal targets.",

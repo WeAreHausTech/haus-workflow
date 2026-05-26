@@ -22,10 +22,10 @@ node "$CLI" scan --json >/dev/null
 node "$CLI" recommend --json >/dev/null
 
 echo "=== $FIXTURE: scan ==="
-node -e "const c=JSON.parse(require('fs').readFileSync('.haus-ai/context-map.json','utf8'));console.log(JSON.stringify({roles:c.repoRoles,stacks:c.detectedStacks},null,2))"
+node -e "const c=JSON.parse(require('fs').readFileSync('.haus-workflow/context-map.json','utf8'));console.log(JSON.stringify({roles:c.repoRoles,stacks:c.detectedStacks},null,2))"
 
 echo "=== $FIXTURE: recommend ==="
-node -e "const r=JSON.parse(require('fs').readFileSync('.haus-ai/recommendation.json','utf8'));console.log(JSON.stringify({selected:r.recommended.map(x=>({id:x.id,c:x.confidenceLevel,reasons:x.reasons.map(y=>y.code)})),skipped:r.skipped.map(x=>x.id)},null,2))"
+node -e "const r=JSON.parse(require('fs').readFileSync('.haus-workflow/recommendation.json','utf8'));console.log(JSON.stringify({selected:r.recommended.map(x=>({id:x.id,c:x.confidenceLevel,reasons:x.reasons.map(y=>y.code)})),skipped:r.skipped.map(x=>x.id)},null,2))"
 
 if [[ -n "$TASK" ]]; then
   echo "=== $FIXTURE: context --task \"$TASK\" ==="

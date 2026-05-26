@@ -2,7 +2,7 @@
 
 - [ ] package.json checked
 - [ ] command files checked
-- [ ] generated files checked (`.haus-ai`, `.claude`)
+- [ ] generated files checked (`.haus-workflow`, `.claude`)
 - [ ] scanner behavior checked
 - [ ] recommender behavior checked
 - [ ] plugin structure checked (`plugin/skills`, `plugin/hooks`, `plugin/.claude-plugin/plugin.json`)

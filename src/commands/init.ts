@@ -8,7 +8,7 @@ import { runSetupProject } from "./setup-project.js";
 
 export async function runInit(options: { fast?: boolean; json?: boolean }): Promise<void> {
   const root = process.cwd();
-  const hausDir = path.join(root, ".haus-ai");
+  const hausDir = path.join(root, ".haus-workflow");
   const alreadyInit = await fs.pathExists(hausDir);
   if (alreadyInit) {
     log("Haus AI already initialized in this project.");

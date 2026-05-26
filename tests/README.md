@@ -21,7 +21,7 @@ Utilities for running the compiled CLI against fixture repos in a temp directory
 
 - `cloneFixtureToTemp(fixtureName)` — copies `tests/fixtures/repos/<name>` to a temp dir, returns the path
 - `runHaus(cwd, command)` — runs `node dist/cli.js <command>` in `cwd`, returns stdout
-- `readHausJson(cwd, fileName)` — reads `.haus-ai/<fileName>` as parsed JSON
+- `readHausJson(cwd, fileName)` — reads `.haus-workflow/<fileName>` as parsed JSON
 - `normalizeRecommendationForGolden(rec)` — stable sort for golden snapshot comparison
 - `normalizeContextForGolden(ctx)` — stable sort for golden snapshot comparison
 

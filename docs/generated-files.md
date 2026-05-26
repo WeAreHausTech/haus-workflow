@@ -1,28 +1,28 @@
 # Generated Files
 
-## `.haus-ai` outputs
+## `.haus-workflow` outputs
 
 Scanner and recommender outputs:
 
-- `./.haus-ai/context-map.json`
-- `./.haus-ai/dependency-map.json`
-- `./.haus-ai/scan-hashes.json`
-- `./.haus-ai/repo-summary.md`
-- `./.haus-ai/recommendation.json`
+- `./.haus-workflow/context-map.json`
+- `./.haus-workflow/dependency-map.json`
+- `./.haus-workflow/scan-hashes.json`
+- `./.haus-workflow/repo-summary.md`
+- `./.haus-workflow/recommendation.json`
 
 Apply/update outputs:
 
-- `./.haus-ai/selected-context.json`
-- `./.haus-ai/haus.lock.json`
-- `./.haus-ai/backups/haus.lock.<timestamp>.json`
+- `./.haus-workflow/selected-context.json`
+- `./.haus-workflow/haus.lock.json`
+- `./.haus-workflow/backups/haus.lock.<timestamp>.json`
 
 Memory outputs:
 
-- `./.haus-ai/memory/index.json`
-- `./.haus-ai/memory/project-learnings.md`
-- `./.haus-ai/memory/decisions.md`
-- `./.haus-ai/memory/recurring-issues.md`
-- `./.haus-ai/memory/client-context.md`
+- `./.haus-workflow/memory/index.json`
+- `./.haus-workflow/memory/project-learnings.md`
+- `./.haus-workflow/memory/decisions.md`
+- `./.haus-workflow/memory/recurring-issues.md`
+- `./.haus-workflow/memory/client-context.md`
 
 ## `.claude` outputs
 

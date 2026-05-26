@@ -26,7 +26,7 @@ export function runHaus(cwd, command) {
 }
 
 export function readHausJson(cwd, fileName) {
-  const file = path.join(cwd, ".haus-ai", fileName);
+  const file = path.join(cwd, ".haus-workflow", fileName);
   return JSON.parse(fs.readFileSync(file, "utf8"));
 }
 

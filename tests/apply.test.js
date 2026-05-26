@@ -45,7 +45,7 @@ test("apply writes claude files and rules", () => {
   assert.equal(rulesSecurity.includes("Never read secrets"), true);
 
   const pkg = JSON.parse(readFileSync(path.resolve("package.json"), "utf8"));
-  const lock = JSON.parse(readFileSync(path.join(temp, ".haus-ai/haus.lock.json"), "utf8"));
+  const lock = JSON.parse(readFileSync(path.join(temp, ".haus-workflow/haus.lock.json"), "utf8"));
   assert.equal(Array.isArray(lock), true);
   assert.equal(lock.length > 0, true);
   for (const row of lock) {

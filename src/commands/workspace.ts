@@ -47,13 +47,13 @@ export async function runWorkspace(action: "init" | "scan"): Promise<void> {
     }
   }
 
-  await writeJson(".haus-ai/workspace-summary.json", {
+  await writeJson(".haus-workflow/workspace-summary.json", {
     generatedAt: new Date().toISOString(),
     repos: summaries,
   });
-  await writeJson(".haus-ai/dependency-ownership-map.json", ownership);
+  await writeJson(".haus-workflow/dependency-ownership-map.json", ownership);
   await writeText(
-    ".haus-ai/cross-repo-summary.md",
+    ".haus-workflow/cross-repo-summary.md",
     `# Cross Repo Summary\n\n${summaries
       .map(
         (repo) =>
@@ -62,6 +62,6 @@ export async function runWorkspace(action: "init" | "scan"): Promise<void> {
       .join("\n")}\n`,
   );
   log(
-    "Workspace scan complete. Wrote .haus-ai/workspace-summary.json, cross-repo-summary.md, dependency-ownership-map.json",
+    "Workspace scan complete. Wrote .haus-workflow/workspace-summary.json, cross-repo-summary.md, dependency-ownership-map.json",
   );
 }

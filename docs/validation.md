@@ -206,7 +206,7 @@ rules where applicable.
 ## PR4: Explainability polish
 
 `haus explain-recommendation` and `haus explain-context` are pure renderers
-over `.haus-ai/recommendation.json`. They never re-run scoring, never call the
+over `.haus-workflow/recommendation.json`. They never re-run scoring, never call the
 catalog, and never widen/narrow the recommended set.
 
 `explain-recommendation` human output groups `Selected` and `Skipped`, with per

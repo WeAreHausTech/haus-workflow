@@ -44,7 +44,7 @@ export async function writeClaudeFiles(root: string, dryRun: boolean): Promise<s
 
 This project uses the Haus AI workflow.
 
-Use \`.haus-ai/context-map.json\`, \`.haus-ai/recommendation.json\`, and \`.haus-ai/repo-summary.md\` before choosing context.
+Use \`.haus-workflow/context-map.json\`, \`.haus-workflow/recommendation.json\`, and \`.haus-workflow/repo-summary.md\` before choosing context.
 
 Use:
 
@@ -59,7 +59,7 @@ haus context --task "<task>"
   const hookSettings = await loadClaudeHooksSettings();
   await writeManagedJson(root, claudePath(root, "settings.json"), hookSettings, dryRun);
   if (!dryRun) await assertPostApplySettingsMatchCanonical(root, hookSettings);
-  // Emit `.haus-ai/config.json` with the P2 hook gating defaults (both off).
+  // Emit `.haus-workflow/config.json` with the P2 hook gating defaults (both off).
   // Only created when missing — existing config is left untouched so users'
   // opt-ins survive subsequent `apply --write` runs.
   const configPath = hausPath(root, "config.json");

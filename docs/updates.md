@@ -7,7 +7,7 @@
 
 ## Lockfile model
 
-Primary file: `./.haus-ai/haus.lock.json`
+Primary file: `./.haus-workflow/haus.lock.json`
 
 Each row tracks:
 
@@ -21,7 +21,7 @@ Each row tracks:
 
 ## Safety behavior
 
-- existing lockfile is backed up to `./.haus-ai/backups`
+- existing lockfile is backed up to `./.haus-workflow/backups`
 - local `.claude/settings.json` override presence is detected
 - update warns that local overrides are preserved
 - lock diff uses unified diff output (`diff` dependency)

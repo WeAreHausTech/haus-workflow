@@ -9,7 +9,7 @@ Haus AI scans your project, recommends context files/rules, then writes controll
 Main output folders:
 
 - `./.claude` (Claude settings/rules/commands)
-- `./.haus-ai` (scan/recommendation/lock/memory metadata)
+- `./.haus-workflow` (scan/recommendation/lock/memory metadata)
 
 ## Before you start
 
@@ -98,7 +98,7 @@ Setup modes:
 haus scan --json
 ```
 
-Writes project detection outputs to `./.haus-ai/*`.
+Writes project detection outputs to `./.haus-workflow/*`.
 
 ### 2) Generate recommendations
 
@@ -106,7 +106,7 @@ Writes project detection outputs to `./.haus-ai/*`.
 haus recommend --json
 ```
 
-Creates `./.haus-ai/recommendation.json` with selected and skipped items, confidence, and reasons.
+Creates `./.haus-workflow/recommendation.json` with selected and skipped items, confidence, and reasons.
 
 ### 3) Preview generated changes
 
@@ -150,7 +150,7 @@ haus update
 Update behavior:
 
 - preserves local `.claude` overrides
-- backs up lockfile under `./.haus-ai/backups`
+- backs up lockfile under `./.haus-workflow/backups`
 - prints unified lockfile diff summary
 
 ## Memory commands
@@ -162,7 +162,7 @@ haus memory inject --task "review checkout flow"
 haus memory promote
 ```
 
-Memory is local-only in `./.haus-ai/memory`.
+Memory is local-only in `./.haus-workflow/memory`.
 
 ## Explain/context commands
 
@@ -218,4 +218,4 @@ haus plugin validate
 haus undo --yes
 ```
 
-Removes `./.claude` and `./.haus-ai` in current project.
+Removes `./.claude` and `./.haus-workflow` in current project.

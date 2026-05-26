@@ -13,7 +13,7 @@ export async function runUndo(options: { yes?: boolean }): Promise<void> {
   const targets = [path.join(root, CLAUDE_DIR), path.join(root, HAUS_DIR)];
   const existing = targets.filter((p) => fs.existsSync(p));
   if (existing.length === 0) {
-    log("Nothing to remove: no .claude/ or .haus-ai/ in this directory.");
+    log("Nothing to remove: no .claude/ or .haus-workflow/ in this directory.");
     return;
   }
   if (!options.yes) {
