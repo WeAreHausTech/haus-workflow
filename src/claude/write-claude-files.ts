@@ -2,6 +2,7 @@ import path from "node:path";
 
 import fs from "fs-extra";
 
+import { CACHE_DIR } from "../catalog/remote-catalog.js";
 import type { Recommendation } from "../types.js";
 import { hashInstalledPaths } from "../update/hash-installed.js";
 import { createUnifiedDiff, hasTextChanged, summarizeDiff } from "../utils/diff.js";
@@ -113,7 +114,8 @@ export async function writeClaudeFiles(root: string, dryRun: boolean): Promise<s
         continue;
       }
     }
-    const sourcePath = path.join(pkgRoot, manifestItem.path);
+    const cachePath = path.join(CACHE_DIR, manifestItem.path);
+    const sourcePath = (await fs.pathExists(cachePath)) ? cachePath : path.join(pkgRoot, manifestItem.path);
     const target = item.type === "agent" ? "agents" : "skills";
     const destination = claudePath(root, target, path.basename(sourcePath));
     if (await fs.pathExists(sourcePath)) {
