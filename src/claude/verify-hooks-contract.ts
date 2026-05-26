@@ -18,16 +18,14 @@ export async function assertPostApplySettingsMatchCanonical(
     throw new Error("haus: post-apply self-check failed: .claude/settings.json missing or unreadable");
   }
   if (!isDeepStrictEqual(canonical, written)) {
-    throw new Error(
-      "haus: post-apply self-check failed: .claude/settings.json does not match plugin/hooks/hooks.json contract",
-    );
+    throw new Error("haus: post-apply self-check failed: .claude/settings.json does not match canonical hook contract");
   }
 }
 
 export type HooksDoctorResult = { ok: boolean; skipped?: boolean; message: string };
 
 /**
- * Compare project `.claude/settings.json` to the canonical plugin hooks file (strict load).
+ * Compare project `.claude/settings.json` to the canonical hook config.
  */
 export async function verifyProjectSettingsHooksContract(root: string): Promise<HooksDoctorResult> {
   const settingsPath = claudePath(root, "settings.json");
@@ -51,8 +49,8 @@ export async function verifyProjectSettingsHooksContract(root: string): Promise<
   if (!isDeepStrictEqual(canonical, project)) {
     return {
       ok: false,
-      message: ".claude/settings.json drifts from plugin/hooks/hooks.json (regenerate with `haus apply --write`).",
+      message: ".claude/settings.json drifts from canonical hook config (regenerate with `haus apply --write`).",
     };
   }
-  return { ok: true, message: "settings.json matches plugin hook contract." };
+  return { ok: true, message: "settings.json matches canonical hook contract." };
 }

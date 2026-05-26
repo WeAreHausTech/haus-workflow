@@ -2,12 +2,11 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import os from "node:os";
 import path from "node:path";
-import { mkdtempSync, mkdirSync, writeFileSync, existsSync, readFileSync } from "node:fs";
+import { mkdtempSync, writeFileSync, existsSync, readFileSync } from "node:fs";
 import { execaSync } from "execa";
 
 function makeFixture() {
   const temp = mkdtempSync(path.join(os.tmpdir(), "haus-setup-"));
-  mkdirSync(path.join(temp, "plugin"), { recursive: true });
   writeFileSync(
     path.join(temp, "package.json"),
     JSON.stringify({ name: "setup-temp", packageManager: "yarn@4.5.3", dependencies: { react: "19.0.0" } }, null, 2),

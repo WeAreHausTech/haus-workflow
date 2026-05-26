@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { mkdtempSync, mkdirSync, writeFileSync, readFileSync } from "node:fs";
+import { mkdtempSync, writeFileSync, readFileSync } from "node:fs";
 import { execaSync } from "execa";
 
 test("generated settings uses haus command", () => {
@@ -17,7 +17,6 @@ test("generated settings uses haus command", () => {
 
 test("apply writes claude files and rules", () => {
   const temp = mkdtempSync(path.join(os.tmpdir(), "haus-apply-"));
-  mkdirSync(path.join(temp, "plugin"), { recursive: true });
   writeFileSync(
     path.join(temp, "package.json"),
     JSON.stringify({ name: "apply-temp", packageManager: "yarn@4.5.3", dependencies: { react: "19.0.0" } }, null, 2)
@@ -56,7 +55,6 @@ test("apply writes claude files and rules", () => {
 
 test("apply reports diff before overwriting generated files", () => {
   const temp = mkdtempSync(path.join(os.tmpdir(), "haus-apply-overwrite-"));
-  mkdirSync(path.join(temp, "plugin"), { recursive: true });
   writeFileSync(
     path.join(temp, "package.json"),
     JSON.stringify({ name: "apply-overwrite", packageManager: "yarn@4.5.3", dependencies: { react: "19.0.0" } }, null, 2)
@@ -74,7 +72,6 @@ test("apply reports diff before overwriting generated files", () => {
 
 test("apply --dry-run shows diffs and does not write files", () => {
   const temp = mkdtempSync(path.join(os.tmpdir(), "haus-dry-run-"));
-  mkdirSync(path.join(temp, "plugin"), { recursive: true });
   writeFileSync(
     path.join(temp, "package.json"),
     JSON.stringify({ name: "dry-run-test", packageManager: "yarn@4.5.3", dependencies: { react: "19.0.0" } }, null, 2)

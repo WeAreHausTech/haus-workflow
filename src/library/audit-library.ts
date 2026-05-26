@@ -21,7 +21,7 @@ const RISKY_INVOCATION_RES: RegExp[] = [
 const BANNED_AGENT_SUBSTRINGS = ["autonomous", "swarm", "delegate", "orchestrat", "marketplace"];
 
 /** Markdown shipped as skills, agents, or catalog (not src/tests/scripts). */
-const SHIPPED_MD_GLOBS = ["library/haus/**/*.md", "plugin/skills/**/*.md", "plugin/agents/**/*.md"] as const;
+const SHIPPED_MD_GLOBS = ["library/haus/**/*.md"] as const;
 
 const MANIFEST_REL = "library/catalog/manifest.json";
 
@@ -154,50 +154,6 @@ function auditCatalogLibraryItems(root: string, items: CatalogItem[]): string[] 
   return failures;
 }
 
-function auditPluginSkills(root: string): string[] {
-  const failures: string[] = [];
-  const skillMds = fg.sync(["plugin/skills/**/SKILL.md"], { cwd: root, absolute: true, onlyFiles: true });
-  for (const skillMd of skillMds) {
-    const rel = path.relative(root, skillMd);
-    const text = fs.readFileSync(skillMd, "utf8");
-    if (!text.includes("## Use when")) {
-      failures.push(`${rel}: missing ## Use when`);
-    }
-    if (!text.includes("## Do not use when")) {
-      failures.push(`${rel}: missing ## Do not use when`);
-    }
-  }
-  return failures;
-}
-
-function auditPluginAgents(root: string): string[] {
-  const failures: string[] = [];
-  const agents = fg.sync(["plugin/agents/*.md"], { cwd: root, absolute: true, onlyFiles: true });
-  for (const abs of agents) {
-    const rel = path.relative(root, abs);
-    const text = fs.readFileSync(abs, "utf8");
-    if (!text.startsWith("---")) {
-      failures.push(`${rel}: missing YAML frontmatter`);
-    }
-    if (!text.includes("## Use when")) {
-      failures.push(`${rel}: missing ## Use when`);
-    }
-    if (!text.includes("## Do not use when")) {
-      failures.push(`${rel}: missing ## Do not use when`);
-    }
-    if (!text.includes("## Verification")) {
-      failures.push(`${rel}: missing ## Verification`);
-    }
-    const lower = text.toLowerCase();
-    for (const ban of BANNED_AGENT_SUBSTRINGS) {
-      if (lower.includes(ban)) {
-        failures.push(`${rel}: contains disallowed phrase "${ban}"`);
-      }
-    }
-  }
-  return failures;
-}
-
 function auditShippedMarkdownAndManifest(root: string): string[] {
   const failures: string[] = [];
   const mdFiles = fg.sync([...SHIPPED_MD_GLOBS], { cwd: root, absolute: true, onlyFiles: true });
@@ -239,16 +195,14 @@ function auditShippedMarkdownAndManifest(root: string): string[] {
 }
 
 /**
- * Structural and policy checks for catalog-backed `library/` items, `plugin/skills`,
- * `plugin/agents`, and shipped markdown under library/haus plus manifest.json.
+ * Structural and policy checks for catalog-backed `library/` items and
+ * shipped markdown under `library/haus` plus `manifest.json`.
  */
 export async function auditLibrary(root: string): Promise<string[]> {
   const items = await loadCatalog(root);
   return [
     ...auditCatalogManifest(root, items),
     ...auditCatalogLibraryItems(root, items),
-    ...auditPluginSkills(root),
-    ...auditPluginAgents(root),
     ...auditShippedMarkdownAndManifest(root),
   ];
 }
