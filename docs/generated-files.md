@@ -1,8 +1,14 @@
 # Generated Files
 
+## Project-root outputs
+
+From `apply --write` / `init`:
+
+- `./CLAUDE.md` — minimal root file with a `<!-- HAUS:BEGIN haus-imports v=1 -->` block that imports the two managed files below. User content outside the block is preserved across runs.
+
 ## `.haus-workflow` outputs
 
-Scanner and recommender outputs:
+### Scanner and recommender
 
 - `./.haus-workflow/context-map.json`
 - `./.haus-workflow/dependency-map.json`
@@ -10,13 +16,15 @@ Scanner and recommender outputs:
 - `./.haus-workflow/repo-summary.md`
 - `./.haus-workflow/recommendation.json`
 
-Apply/update outputs:
+### Apply outputs
 
 - `./.haus-workflow/selected-context.json`
 - `./.haus-workflow/haus.lock.json`
 - `./.haus-workflow/backups/haus.lock.<timestamp>.json`
+- `./.haus-workflow/haus-way-of-work.md` — general Haus engineering rules (HAUS-MANAGED; skip-with-warn if user modified)
+- `./.haus-workflow/project.md` — auto-generated project facts from context-map + recommendation (HAUS-MANAGED; always regenerated)
 
-Memory outputs:
+### Memory outputs
 
 - `./.haus-workflow/memory/index.json`
 - `./.haus-workflow/memory/project-learnings.md`
@@ -28,7 +36,6 @@ Memory outputs:
 
 From `apply --write`:
 
-- `./.claude/CLAUDE.md`
 - `./.claude/settings.json`
 - `./.claude/rules/haus.md`
 - `./.claude/rules/security.md`
@@ -38,7 +45,8 @@ From `apply --write`:
 
 ## Overwrite behavior
 
-- generated writes are deterministic
-- overwrite notices include path + diff line counts
-- paths are printed repo-relative when possible
-- update flow preserves lockfile backups before rewrite
+- Generated writes are deterministic.
+- Overwrite notices include path + diff line counts.
+- Paths are printed repo-relative when possible.
+- Update flow preserves lockfile backups before rewrite.
+- HAUS-MANAGED files with user edits detected via content-hash mismatch; skipped with warning.

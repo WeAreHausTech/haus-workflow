@@ -1,3 +1,4 @@
+import crypto from "node:crypto";
 import path from "node:path";
 
 import fs from "fs-extra";
@@ -44,8 +45,9 @@ export async function runUninstall(options: UninstallOptions = {}): Promise<Unin
       continue;
     }
 
-    if (header.stableId !== entry.stableId && !force) {
-      warn(`Stable-id mismatch on ${entry.destPath} — skipping. Use --force to delete.`);
+    const currentHash = `sha256-${crypto.createHash("sha256").update(content).digest("hex")}`;
+    if (currentHash !== entry.hash && !force) {
+      warn(`Skipping user-edited haus file (hash mismatch): ${entry.destPath} — use --force to delete`);
       result.skipped.push(entry.destPath);
       continue;
     }

@@ -23,6 +23,7 @@ export interface ApplyResult {
   created: string[];
   updated: string[];
   skipped: string[];
+  deleted: string[];
   hookIds: string[];
   drift: boolean;
 }
@@ -100,6 +101,7 @@ export async function applyInstall(options: ApplyOptions = {}): Promise<ApplyRes
     created: [],
     updated: [],
     skipped: [],
+    deleted: [],
     hookIds: [],
     drift: false,
   };
@@ -176,6 +178,26 @@ export async function applyInstall(options: ApplyOptions = {}): Promise<ApplyRes
   const { settings: mergedSettings, addedIds } = mergeHooks(settings, fragments);
   result.hookIds = addedIds;
 
+  // Delete files that were in the old manifest but are no longer in the current package.
+  if (!dryRun && !check && existingManifest) {
+    const currentDestPaths = new Set(sourceFiles.map((f) => f.destPath));
+    for (const entry of existingManifest.files) {
+      if (currentDestPaths.has(entry.destPath)) continue;
+      if (!fs.pathExistsSync(entry.destPath)) continue;
+      const content = await readText(entry.destPath);
+      if (!content) continue;
+      const hasHeader = parseMarkdownHeader(content) !== undefined;
+      const currentHash = hashContent(content);
+      if (hasHeader && currentHash === entry.hash) {
+        await fs.remove(entry.destPath);
+        result.deleted.push(entry.destPath);
+      } else {
+        warn(`Orphaned file ${entry.destPath} was user-modified — leaving in place`);
+        result.skipped.push(entry.destPath);
+      }
+    }
+  }
+
   if (!dryRun && !check) {
     await writeSettings(mergedSettings);
     const manifest = buildManifest(source, manifestFiles, [...(existingManifest?.hooks ?? []), ...addedIds]);
@@ -194,6 +216,10 @@ export function printApplyResult(result: ApplyResult, dryRun: boolean): void {
   if (result.updated.length) {
     log(`${prefix}Updated:`);
     result.updated.forEach((p) => log(`  ~ ${p}`));
+  }
+  if (result.deleted.length) {
+    log(`${prefix}Deleted (orphaned):`);
+    result.deleted.forEach((p) => log(`  x ${p}`));
   }
   if (result.skipped.length) {
     log(`${prefix}Skipped:`);

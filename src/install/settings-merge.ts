@@ -28,6 +28,7 @@ type ClaudeSettings = {
   hooks?: Record<string, ClaudeHookEntry[]>;
   _haus?: {
     hooks: string[];
+    hookCommands?: string[];
   };
   [key: string]: unknown;
 };
@@ -50,12 +51,14 @@ export function mergeHooks(
   fragments: HookFragment[],
 ): { settings: ClaudeSettings; addedIds: string[] } {
   const existing = settings._haus?.hooks ?? [];
+  const existingCommands = settings._haus?.hookCommands ?? [];
   const existingSet = new Set(existing);
 
   const updated = { ...settings };
   updated.hooks = { ...(settings.hooks ?? {}) };
 
   const addedIds: string[] = [];
+  const addedCommands: string[] = [];
 
   for (const fragment of fragments) {
     if (fragment.gate !== "keep") continue;
@@ -71,16 +74,20 @@ export function mergeHooks(
 
     updated.hooks[event] = [...(updated.hooks[event] ?? []), entry];
     addedIds.push(fragment.id);
+    addedCommands.push(fragment.command);
   }
 
   updated._haus = {
     hooks: [...existing, ...addedIds],
+    hookCommands: [...existingCommands, ...addedCommands],
   };
 
   return { settings: updated, addedIds };
 }
 
 export function stripHausHooks(settings: ClaudeSettings): ClaudeSettings {
+  const ownedCommands = new Set(settings._haus?.hookCommands ?? []);
+  // Fall back to prefix match when hookCommands not recorded (older installs).
   const ownedIds = new Set(settings._haus?.hooks ?? []);
   if (ownedIds.size === 0) return settings;
 
@@ -90,7 +97,8 @@ export function stripHausHooks(settings: ClaudeSettings): ClaudeSettings {
   for (const [event, entries] of Object.entries(settings.hooks ?? {})) {
     const kept = (entries as ClaudeHookEntry[]).filter((entry) => {
       const cmd = entry.hooks[0]?.command ?? "";
-      return !isHausCommand(cmd, ownedIds);
+      if (ownedCommands.size > 0) return !ownedCommands.has(cmd);
+      return !cmd.startsWith("haus ");
     });
     if (kept.length > 0) updated.hooks[event] = kept;
   }
@@ -98,10 +106,6 @@ export function stripHausHooks(settings: ClaudeSettings): ClaudeSettings {
   const { _haus: _, ...rest } = updated;
   void _;
   return rest;
-}
-
-function isHausCommand(command: string, _ownedIds: Set<string>): boolean {
-  return command.startsWith("haus ");
 }
 
 export async function loadHooksFragment(fragmentPath: string): Promise<HookFragment[]> {
