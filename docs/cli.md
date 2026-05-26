@@ -15,7 +15,6 @@
 - `haus update --check`
 - `haus update`
 - `haus memory ...`
-- `haus plugin ...`
 - `haus guard ...`
 - `haus catalog-audit`
 - `haus workspace init|scan`

@@ -12,7 +12,6 @@ import { runExplainRecommendation } from "./commands/explain-recommendation.js";
 import { runGuard } from "./commands/guard.js";
 import { runInit } from "./commands/init.js";
 import { runMemory } from "./commands/memory.js";
-import { runPlugin } from "./commands/plugin.js";
 import { runRecommend } from "./commands/recommend.js";
 import { runRefresh } from "./commands/refresh.js";
 import { runScan } from "./commands/scan.js";
@@ -82,9 +81,6 @@ memory
   .option("--from-hook")
   .action((opts) => runMemory("inject", opts));
 memory.command("promote").action(() => runMemory("promote", {}));
-
-const plugin = program.command("plugin");
-plugin.command("validate").action((opts) => runPlugin("validate", opts));
 
 const guard = program.command("guard");
 guard

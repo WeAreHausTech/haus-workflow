@@ -7,7 +7,6 @@
   "files": [
     "dist",
     "library",
-    "plugin",
     "docs/user-guide.md",
     "README.md",
     "LICENSE",

@@ -179,11 +179,6 @@ haus context --task "<task>"
   );
   await writeManagedJson(root, hausPath(root, "haus.lock.json"), lock, false);
 
-  const pluginSrc = path.join(root, "plugin/.claude-plugin/plugin.json");
-  if (await fs.pathExists(pluginSrc)) {
-    await fs.ensureDir(claudePath(root, "plugin"));
-    // TODO(plugin-pack): copy full plugin subtree into project when product requires bundled plugin mirror.
-  }
   return [...new Set(files)];
 }
 

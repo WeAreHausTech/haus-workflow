@@ -1,12 +1,3 @@
-import path from "node:path";
-
-import fs from "fs-extra";
-import { z } from "zod";
-
-import { readJson } from "../utils/fs.js";
-import { warn } from "../utils/logger.js";
-import { packageRoot } from "../utils/paths.js";
-
 /** Shape written to `.claude/settings.json` under `hooks`. */
 export type ClaudeHooksSettings = {
   hooks: {
@@ -15,29 +6,15 @@ export type ClaudeHooksSettings = {
   };
 };
 
-export type LoadClaudeHooksOptions = {
-  /**
-   * When true, missing or invalid `plugin/hooks/hooks.json` uses embedded defaults + warn.
-   * Set `HAUS_HOOKS_FALLBACK=1` for local dev only — never for release installs you trust.
-   * Default false: missing/invalid file throws (avoids silent broken Claude config on `apply --write`).
-   */
-  allowEmbeddedFallback?: boolean;
-};
-
-const HookCommandSchema = z.object({
-  type: z.literal("command"),
-  command: z.string(),
-});
-
-const PluginHooksFileSchema = z.object({
-  hooks: z.object({
-    UserPromptSubmit: z.array(z.object({ hooks: z.array(HookCommandSchema) })),
-    PreToolUse: z.array(z.object({ matcher: z.string(), hooks: z.array(HookCommandSchema) })),
-  }),
-});
-
-/** Last-resort copy when `HAUS_HOOKS_FALLBACK=1` and the plugin file is missing. */
-const EMBEDDED_HOOKS: ClaudeHooksSettings = {
+/**
+ * Canonical hook config — source of truth for `.claude/settings.json`.
+ *
+ * Previously loaded from `plugin/hooks/hooks.json` (removed in P4e). The
+ * hook set is now inlined here. P5 will migrate these into
+ * `library/global/settings/` and write them into `~/.claude/settings.json`
+ * via `haus install`.
+ */
+export const CANONICAL_HOOKS: ClaudeHooksSettings = {
   hooks: {
     UserPromptSubmit: [
       {
@@ -67,60 +44,9 @@ const STABLE_HOOK_IDS: Record<string, string> = {
   "haus guard bash --from-hook || true": "haus.guard-bash",
 };
 
-function validateOrThrow(raw: unknown): ClaudeHooksSettings {
-  const parsed = PluginHooksFileSchema.safeParse(raw);
-  if (!parsed.success) {
-    throw new Error(`Invalid plugin hooks.json: ${parsed.error.message}`);
-  }
-  return parsed.data;
-}
-
-function hooksPathOnDisk(): string {
-  return path.join(packageRoot(), "plugin", "hooks", "hooks.json");
-}
-
-function strictLoadErrorMessage(missing: boolean): string {
-  const p = hooksPathOnDisk();
-  if (missing) {
-    return `haus: plugin/hooks/hooks.json missing at ${p}. Ship a complete haus package. For emergency local dev only, set HAUS_HOOKS_FALLBACK=1 (embedded hooks; not release-safe).`;
-  }
-  return `haus: plugin/hooks/hooks.json invalid at ${p}. Fix the file or use HAUS_HOOKS_FALLBACK=1 for local dev only.`;
-}
-
-/**
- * Loads `plugin/hooks/hooks.json` from the installed `haus` package (SSOT).
- * @throws if the file is missing or invalid and `allowEmbeddedFallback` is not true.
- */
-export async function loadClaudeHooksSettings(opts?: LoadClaudeHooksOptions): Promise<ClaudeHooksSettings> {
-  const allowFallback = opts?.allowEmbeddedFallback === true;
-  const hooksPath = hooksPathOnDisk();
-
-  if (!(await fs.pathExists(hooksPath))) {
-    if (!allowFallback) {
-      throw new Error(strictLoadErrorMessage(true));
-    }
-    warn("haus: plugin/hooks/hooks.json missing; using embedded hook defaults (HAUS_HOOKS_FALLBACK).");
-    return EMBEDDED_HOOKS;
-  }
-
-  const raw = await readJson<unknown>(hooksPath);
-  if (raw == null) {
-    if (!allowFallback) {
-      throw new Error(strictLoadErrorMessage(true));
-    }
-    warn("haus: plugin/hooks/hooks.json empty or unreadable; using embedded hook defaults (HAUS_HOOKS_FALLBACK).");
-    return EMBEDDED_HOOKS;
-  }
-
-  try {
-    return validateOrThrow(raw);
-  } catch (err) {
-    if (!allowFallback) {
-      throw new Error(`${strictLoadErrorMessage(false)} (${String(err)})`);
-    }
-    warn(`haus: invalid hooks file (${hooksPath}); using embedded defaults. ${String(err)}`);
-    return EMBEDDED_HOOKS;
-  }
+/** Returns the canonical hook config. No file I/O — config is inlined. */
+export async function loadClaudeHooksSettings(): Promise<ClaudeHooksSettings> {
+  return CANONICAL_HOOKS;
 }
 
 /** Flat list for `.haus-workflow/recommended-hooks.json` (ids stable for known commands). */

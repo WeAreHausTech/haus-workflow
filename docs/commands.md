@@ -27,9 +27,8 @@ Source of truth: `src/cli.ts`.
 - `haus memory inject [--task <task>] [--from-hook]`
 - `haus memory promote`
 
-## Plugin and policy
+## Guards
 
-- `haus plugin validate`
 - `haus guard file-access [--from-hook]`
 - `haus guard bash [--from-hook]`
 

@@ -7,7 +7,6 @@ import { execaSync } from "execa";
 
 test("doctor reports hooks OK after apply", () => {
   const temp = mkdtempSync(path.join(os.tmpdir(), "haus-doctor-"));
-  mkdirSync(path.join(temp, "plugin"), { recursive: true });
   writeFileSync(
     path.join(temp, "package.json"),
     JSON.stringify({ name: "doc-temp", packageManager: "yarn@4.5.3", dependencies: { react: "19.0.0" } }, null, 2)
@@ -77,7 +76,6 @@ test("doctor --hooks fails when settings missing", () => {
 
 test("doctor --hooks passes after apply", () => {
   const temp = mkdtempSync(path.join(os.tmpdir(), "haus-doctor-hooks-ok-"));
-  mkdirSync(path.join(temp, "plugin"), { recursive: true });
   writeFileSync(
     path.join(temp, "package.json"),
     JSON.stringify({ name: "dh-temp", packageManager: "yarn@4.5.3", dependencies: { react: "19.0.0" } }, null, 2)
@@ -89,5 +87,5 @@ test("doctor --hooks passes after apply", () => {
   execaSync("node", [cli, "apply", "--write"], { cwd: temp });
   const r = execaSync("node", [cli, "doctor", "--hooks"], { cwd: temp, reject: false });
   assert.equal(r.exitCode, 0);
-  assert.equal((r.stdout ?? "").includes("matches plugin hook contract"), true);
+  assert.equal((r.stdout ?? "").includes("matches canonical hook contract"), true);
 });
