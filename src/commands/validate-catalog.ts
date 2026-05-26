@@ -4,6 +4,7 @@ import { readAllowedStacks } from "../catalog/allowed-stacks.js";
 import type { CatalogItem } from "../types.js";
 import { readJson } from "../utils/fs.js";
 import { error, log } from "../utils/logger.js";
+import { packageRoot } from "../utils/paths.js";
 
 const FORBIDDEN = [
   "python",
@@ -26,7 +27,8 @@ const FORBIDDEN = [
 async function auditForbiddenStacks(items: CatalogItem[]): Promise<string[]> {
   const failures: string[] = [];
   for (const item of items) {
-    const text = `${item.id} ${item.tags.join(" ")}`.toLowerCase();
+    const tags = Array.isArray(item.tags) ? item.tags : [];
+    const text = `${item.id} ${tags.join(" ")}`.toLowerCase();
     for (const word of FORBIDDEN) {
       if (text.includes(word)) failures.push(`${item.id}: unsupported stack/tag "${word}"`);
     }
@@ -120,13 +122,12 @@ export async function runValidateCatalog(manifestPath: string | undefined): Prom
     auditForbiddenStacks(items),
   ]);
 
-  // Also run allowed-stacks check against CLI repo's allowlist if available
-  const cliRoot = process.cwd();
-  const allowed = new Set((await readAllowedStacks(cliRoot)).map((x) => x.toLowerCase()));
+  // Allowlist lives in the CLI package, not in the catalog repo.
+  const allowed = new Set((await readAllowedStacks(packageRoot())).map((x) => x.toLowerCase()));
   const tagFailures: string[] = [];
   if (allowed.size > 0) {
     for (const item of items) {
-      for (const tag of item.tags) {
+      for (const tag of Array.isArray(item.tags) ? item.tags : []) {
         if (
           !allowed.has(tag.toLowerCase()) &&
           !tag.includes("-patterns") &&
