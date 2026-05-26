@@ -179,6 +179,42 @@ describe("settings-merge: stripHausHooks", () => {
     const stripped = stripHausHooks(settings);
     assert.deepEqual(stripped, settings);
   });
+
+  it("strips by exact hookCommands when present, preserving non-haus commands", () => {
+    if (!stripHausHooks) return;
+    const settings = {
+      hooks: {
+        PreToolUse: [
+          { matcher: "Bash", hooks: [{ type: "command", command: "haus guard bash --from-hook" }] },
+          { matcher: "Read", hooks: [{ type: "command", command: "my-own-tool check" }] },
+        ],
+      },
+      _haus: {
+        hooks: ["hook.guard.bash"],
+        hookCommands: ["haus guard bash --from-hook"],
+      },
+    };
+    const stripped = stripHausHooks(settings);
+    assert.equal(stripped._haus, undefined);
+    assert.equal(stripped.hooks?.["PreToolUse"]?.length, 1);
+    assert.equal(stripped.hooks?.["PreToolUse"]?.[0].hooks[0].command, "my-own-tool check");
+  });
+
+  it("removes _haus key even when hooks array is empty", () => {
+    if (!stripHausHooks) return;
+    const settings = {
+      hooks: {
+        PreToolUse: [
+          { matcher: "Bash", hooks: [{ type: "command", command: "some-user-hook" }] },
+        ],
+      },
+      _haus: { hooks: [], hookCommands: [] },
+    };
+    const stripped = stripHausHooks(settings);
+    assert.equal(stripped._haus, undefined);
+    // user hook preserved
+    assert.equal(stripped.hooks?.["PreToolUse"]?.length, 1);
+  });
 });
 
 // ---- integration: haus install / uninstall via CLI --------------------------

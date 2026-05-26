@@ -86,10 +86,12 @@ export function mergeHooks(
 }
 
 export function stripHausHooks(settings: ClaudeSettings): ClaudeSettings {
-  const ownedCommands = new Set(settings._haus?.hookCommands ?? []);
-  // Fall back to prefix match when hookCommands not recorded (older installs).
-  const ownedIds = new Set(settings._haus?.hooks ?? []);
-  if (ownedIds.size === 0) return settings;
+  // No _haus block at all — nothing installed by haus, true no-op.
+  if (!settings._haus) return settings;
+
+  const ownedCommands = new Set(settings._haus.hookCommands ?? []);
+  // Fall back to prefix match for old installs that predate hookCommands recording.
+  const usePrefix = ownedCommands.size === 0;
 
   const updated = { ...settings };
   updated.hooks = {};
@@ -97,8 +99,7 @@ export function stripHausHooks(settings: ClaudeSettings): ClaudeSettings {
   for (const [event, entries] of Object.entries(settings.hooks ?? {})) {
     const kept = (entries as ClaudeHookEntry[]).filter((entry) => {
       const cmd = entry.hooks[0]?.command ?? "";
-      if (ownedCommands.size > 0) return !ownedCommands.has(cmd);
-      return !cmd.startsWith("haus ");
+      return usePrefix ? !cmd.startsWith("haus ") : !ownedCommands.has(cmd);
     });
     if (kept.length > 0) updated.hooks[event] = kept;
   }

@@ -150,7 +150,7 @@ export async function applyInstall(options: ApplyOptions = {}): Promise<ApplyRes
           manifestFiles.push(existing);
           continue;
         }
-        if (existing && existing.hash === newHash) {
+        if (existing && existing.hash === newHash && !force) {
           result.skipped.push(entry.destPath);
           manifestFiles.push({ ...existing, hash: newHash });
           continue;
@@ -179,7 +179,7 @@ export async function applyInstall(options: ApplyOptions = {}): Promise<ApplyRes
   result.hookIds = addedIds;
 
   // Delete files that were in the old manifest but are no longer in the current package.
-  if (!dryRun && !check && existingManifest) {
+  if (!check && existingManifest) {
     const currentDestPaths = new Set(sourceFiles.map((f) => f.destPath));
     for (const entry of existingManifest.files) {
       if (currentDestPaths.has(entry.destPath)) continue;
@@ -189,7 +189,7 @@ export async function applyInstall(options: ApplyOptions = {}): Promise<ApplyRes
       const hasHeader = parseMarkdownHeader(content) !== undefined;
       const currentHash = hashContent(content);
       if (hasHeader && currentHash === entry.hash) {
-        await fs.remove(entry.destPath);
+        if (!dryRun) await fs.remove(entry.destPath);
         result.deleted.push(entry.destPath);
       } else {
         warn(`Orphaned file ${entry.destPath} was user-modified — leaving in place`);
