@@ -1,4 +1,5 @@
 ---
+# HAUS-PRERELEASE-CLEANUP: P4e — plugin/ directory removed; surviving skill content relocates to library/global/skills/ in P5.
 name: haus-context-router
 description: Route to minimal relevant context before coding. Use for task-scoped context selection and explainability.
 ---

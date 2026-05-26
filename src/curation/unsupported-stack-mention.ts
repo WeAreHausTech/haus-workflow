@@ -1,3 +1,4 @@
+// HAUS-PRERELEASE-CLEANUP: P4b — curation + library audit artifacts removed before v0.1.
 /**
  * Terms that must not appear as standalone stack signals in source-decisions
  * accepted-idea fields. Matching is identifier-aware: "javascript" does not

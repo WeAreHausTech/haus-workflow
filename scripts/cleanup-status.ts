@@ -31,22 +31,26 @@ const SKIP_DIRS = new Set(["node_modules", "dist", ".git"]);
 const SKIP_FILES = new Set([
   "docs/specs/pre-release-cleanup.md",
   "docs/specs/2026-05-25-implementation-plan.md",
+  "docs/specs/2026-05-26-implementation-plan.md",
   "scripts/cleanup-status.ts",
   "tests/cleanup-status.test.js",
 ]);
 
-// Real markers must sit inside a comment of one of the three supported forms.
+// Real markers must sit inside a comment of one of the supported forms.
 // Bare mentions inside string literals or prose must not register.
 //   - `//` line comment  (TS/JS/TSX)
 //   - `#`  line comment  (JSON-with-comments, YAML, shell)
 //   - `<!-- ... -->`     (Markdown)
-// Each form requires start-of-line or whitespace before the comment opener,
-// so quoted occurrences like `"// HAUS-PRERELEASE-CLEANUP: ..."` are not
-// matched.
+//   - `"_haus_cleanup": "HAUS-PRERELEASE-CLEANUP: ..."` (pure JSON — no
+//     line comments allowed, so the marker rides on an inert top-level key)
+// Each comment-style form requires start-of-line or whitespace before the
+// comment opener, so quoted occurrences like
+// `"// HAUS-PRERELEASE-CLEANUP: ..."` are not matched.
 const MARKER_PATTERNS: RegExp[] = [
   /(?:^|\s)\/\/\s*HAUS-PRERELEASE-CLEANUP:\s*(.+?)\s*$/,
   /(?:^|\s)#\s*HAUS-PRERELEASE-CLEANUP:\s*(.+?)\s*$/,
-  /<!--\s*HAUS-PRERELEASE-CLEANUP:\s*(.+?)\s*-->/,
+  /(?:^|\s)<!--\s*HAUS-PRERELEASE-CLEANUP:\s*(.+?)\s*-->/,
+  /^\s*"_haus_cleanup"\s*:\s*"HAUS-PRERELEASE-CLEANUP:\s*(.+?)\s*"/,
 ];
 
 // Spec row format: `- [ ] \`path\` — reason` or `- [x] \`path\` — reason`.

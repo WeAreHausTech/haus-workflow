@@ -1,3 +1,4 @@
+// HAUS-PRERELEASE-CLEANUP: P4a — sources subsystem removed before v0.1.
 import type { CuratedSource, SourceSyncItem } from "./types.js";
 
 // TODO(M6): Optional network fetch for pinned refs when HAUS_SOURCES_NETWORK=1.

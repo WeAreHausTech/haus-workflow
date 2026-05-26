@@ -1,3 +1,4 @@
+// HAUS-PRERELEASE-CLEANUP: P4b — covers library/curated/ deletion.
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";

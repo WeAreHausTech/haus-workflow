@@ -1,4 +1,5 @@
 ---
+# HAUS-PRERELEASE-CLEANUP: P4e — plugin/ directory removed; surviving agents relocate to library/global/agents/ in P5.
 name: planner
 description: Produce a short implementation plan with files, risks, and validation steps.
 tools: Read, Grep, Glob, Bash

@@ -1,3 +1,4 @@
+// HAUS-PRERELEASE-CLEANUP: P4c — collapse to a single explainability command; explain-recommendation survives.
 import { buildContextExplanation, formatContextHuman } from "../recommender/explain-formatters.js";
 import { normalizeRecommendation } from "../recommender/explain-recommendation.js";
 import { classifyTaskIntents, pickTaskRelevantRules, type TaskIntent } from "../recommender/task-intent.js";

@@ -1,3 +1,4 @@
+// HAUS-PRERELEASE-CLEANUP: P4b — curation + library audit artifacts removed before v0.1.
 import fs from "node:fs";
 import path from "node:path";
 

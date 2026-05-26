@@ -1,3 +1,4 @@
+<!-- HAUS-PRERELEASE-CLEANUP: P4e — plugin/ directory removed; surviving skill content relocates to library/global/skills/ in P5. -->
 # Tests and Validation
 
 Default validation sequence:

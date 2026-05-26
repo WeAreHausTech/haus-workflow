@@ -1,3 +1,4 @@
+// HAUS-PRERELEASE-CLEANUP: P4a — sources subsystem removed before v0.1.
 import path from "node:path";
 
 import YAML from "yaml";

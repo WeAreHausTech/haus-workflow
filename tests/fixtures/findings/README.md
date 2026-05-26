@@ -1,3 +1,4 @@
+<!-- HAUS-PRERELEASE-CLEANUP: P4b — entire tests/fixtures/findings/ removed with validate-findings.ts. -->
 # Validation Findings
 
 Structured QA findings produced by following [docs/validation.md](../../../docs/validation.md).

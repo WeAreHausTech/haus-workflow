@@ -1,3 +1,4 @@
+// HAUS-PRERELEASE-CLEANUP: P4e — tests plugin skill shape; removed with plugin/.
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";

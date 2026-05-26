@@ -1,4 +1,5 @@
 ---
+# HAUS-PRERELEASE-CLEANUP: P4e — plugin/ directory removed; surviving agents relocate to library/global/agents/ in P5.
 name: security-reviewer
 description: Narrow security review for secrets, auth, injection, and unsafe operations in a bounded scope.
 tools: Read, Grep, Glob, Bash
