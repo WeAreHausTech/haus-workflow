@@ -20,6 +20,7 @@ import { runSetupProject } from "./commands/setup-project.js";
 import { runUndo } from "./commands/undo.js";
 import { runUninstallCommand } from "./commands/uninstall.js";
 import { runUpdate } from "./commands/update.js";
+import { runValidateCatalog } from "./commands/validate-catalog.js";
 import { runWorkspace } from "./commands/workspace.js";
 import { error } from "./utils/logger.js";
 import { packageRoot } from "./utils/paths.js";
@@ -72,6 +73,7 @@ program
 program.command("init").option("--fast").option("--json").action(runInit);
 program.command("refresh").action(runRefresh);
 program.command("catalog-audit").action(runCatalogAudit);
+program.command("validate-catalog").argument("[manifest]").action(runValidateCatalog);
 program.command("update").option("--check").action(runUpdate);
 program
   .command("install")

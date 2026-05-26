@@ -127,8 +127,10 @@ export async function writeClaudeFiles(root: string, dryRun: boolean): Promise<s
       files.push(destination);
       const current = installedPathsByItem.get(item.id) ?? [];
       installedPathsByItem.set(item.id, [...current, path.relative(root, destination)]);
+      installedIds.add(item.id);
+    } else {
+      warn(`Skipping ${item.id}: source not found at ${sourcePath} — run \`haus update\` to populate catalog cache`);
     }
-    installedIds.add(item.id);
   }
 
   if (dryRun) return [...new Set(files)];

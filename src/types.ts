@@ -35,7 +35,7 @@ export type CatalogItem = {
   id: string;
   type: "skill" | "agent" | "rule" | "command";
   source: string;
-  version: string;
+  version?: string;
   path: string;
   title?: string;
   tags: string[];

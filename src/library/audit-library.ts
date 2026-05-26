@@ -20,8 +20,8 @@ const RISKY_INVOCATION_RES: RegExp[] = [
 
 const BANNED_AGENT_SUBSTRINGS = ["autonomous", "swarm", "delegate", "orchestrat", "marketplace"];
 
-/** Markdown shipped as skills, agents, or catalog (not src/tests/scripts). */
-const SHIPPED_MD_GLOBS = ["library/haus/**/*.md"] as const;
+/** Markdown shipped with the package (global skills/agents under library/global/). */
+const SHIPPED_MD_GLOBS = ["library/global/**/*.md"] as const;
 
 const MANIFEST_REL = "library/catalog/manifest.json";
 

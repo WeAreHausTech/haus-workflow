@@ -1,7 +1,9 @@
+import os from "node:os";
 import path from "node:path";
 
 import fs from "fs-extra";
 
+import { CATALOG_CACHE_SUBDIR } from "../catalog/constants.js";
 import { createUnifiedDiff, hasTextChanged, summarizeDiff } from "../utils/diff.js";
 import { hashText, writeText } from "../utils/fs.js";
 import { log, warn } from "../utils/logger.js";
@@ -9,7 +11,8 @@ import { displayPath, hausPath, packageRoot } from "../utils/paths.js";
 
 const STABLE_ID = "template.way-of-work";
 const SCHEMA_VERSION = "1";
-const TEMPLATE_REL = "library/templates/claude-md/haus-way-of-work.md";
+const TEMPLATE_REL = "library/global/templates/haus-way-of-work.md";
+const CATALOG_CACHE_TEMPLATE = path.join(os.homedir(), CATALOG_CACHE_SUBDIR, "templates/haus-way-of-work.md");
 
 export function makeWayOfWorkHeader(pkgVersion: string, contentHash: string): string {
   return `<!-- HAUS-MANAGED id=${STABLE_ID} v=${SCHEMA_VERSION} source=@haus-tech/haus-workflow@${pkgVersion} hash=${contentHash} -->`;
@@ -23,11 +26,13 @@ function parseHausManagedHeader(line: string): { id: string; hash?: string } | n
 }
 
 export async function writeWayOfWork(root: string, pkgVersion: string, dryRun: boolean): Promise<string | null> {
-  const pkgRoot = packageRoot();
-  const templatePath = path.join(pkgRoot, TEMPLATE_REL);
+  // Catalog cache (populated by `haus update`) takes precedence over bundled fallback
+  const cachePath = CATALOG_CACHE_TEMPLATE;
+  const packagePath = path.join(packageRoot(), TEMPLATE_REL);
+  const templatePath = (await fs.pathExists(cachePath)) ? cachePath : packagePath;
 
   if (!(await fs.pathExists(templatePath))) {
-    warn(`Way-of-work template not found at ${templatePath} — skipping`);
+    warn(`Way-of-work template not found — run \`haus update\` to fetch from catalog`);
     return null;
   }
 
