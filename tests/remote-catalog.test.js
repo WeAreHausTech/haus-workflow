@@ -5,7 +5,7 @@ import os from "node:os";
 import path from "node:path";
 import fs from "node:fs";
 import { mkdtempSync } from "node:fs";
-import { execa, execaSync } from "execa";
+import { execa } from "execa";
 
 const DIST_CLI = path.resolve("dist/cli.js");
 
