@@ -12,11 +12,13 @@ test("generated claude primitives stay compact routers", () => {
   execaSync("node", [path.resolve("dist/cli.js"), "recommend", "--json"], { cwd });
   execaSync("node", [path.resolve("dist/cli.js"), "apply", "--write"], { cwd });
 
-  const claudemd = fs.readFileSync(path.join(cwd, ".claude/CLAUDE.md"), "utf8");
+  // Root CLAUDE.md is now canonical (P6); .claude/CLAUDE.md is no longer written
+  const claudemd = fs.readFileSync(path.join(cwd, "CLAUDE.md"), "utf8");
   const ruleHaus = fs.readFileSync(path.join(cwd, ".claude/rules/haus.md"), "utf8");
   const cmdDoctor = fs.readFileSync(path.join(cwd, ".claude/commands/haus-doctor.md"), "utf8");
 
-  assert.equal(claudemd.length < 1200, true, "CLAUDE.md should stay tiny");
+  assert.equal(claudemd.length < 300, true, "root CLAUDE.md import block should stay tiny");
+  assert.equal(fs.existsSync(path.join(cwd, ".claude/CLAUDE.md")), false, ".claude/CLAUDE.md should not exist");
   assert.equal(ruleHaus.length < 400, true, "haus rule should stay compact");
   assert.equal(cmdDoctor.length < 200, true, "command router should stay compact");
 });

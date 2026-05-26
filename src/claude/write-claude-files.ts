@@ -12,6 +12,9 @@ import { claudePath, displayPath, hausPath, packageRoot } from "../utils/paths.j
 import { DEFAULT_HOOKS_CONFIG } from "./load-hooks-config.js";
 import { loadClaudeHooksSettings } from "./load-hooks.js";
 import { assertPostApplySettingsMatchCanonical } from "./verify-hooks-contract.js";
+import { writeProjectFacts } from "./write-project-facts.js";
+import { writeRootClaudeMd } from "./write-root-claude-md.js";
+import { writeWayOfWork } from "./write-way-of-work.js";
 
 export async function writeClaudeFiles(root: string, dryRun: boolean): Promise<string[]> {
   const rec = (await readJson<Recommendation>(hausPath(root, "recommendation.json"))) ?? {
@@ -24,36 +27,24 @@ export async function writeClaudeFiles(root: string, dryRun: boolean): Promise<s
     skippedRules: 0,
     estimatedTokenReductionPct: 0,
   };
+  const pkgRoot = packageRoot();
+  const hausVersion = (await readJson<{ version?: string }>(path.join(pkgRoot, "package.json")))?.version ?? "0.0.0";
+
   // Lock and selected-context are only written during actual apply, not dry-run.
   const coreFiles = [
-    claudePath(root, "CLAUDE.md"),
     claudePath(root, "settings.json"),
     claudePath(root, "rules", "haus.md"),
     claudePath(root, "rules", "security.md"),
     claudePath(root, "commands", "haus-doctor.md"),
     claudePath(root, "commands", "haus-review.md"),
   ];
+  const rootClaudeMdPath = await writeRootClaudeMd(root, dryRun);
+  const wayOfWorkPath = await writeWayOfWork(root, hausVersion, dryRun);
+  const projectFactsPath = await writeProjectFacts(root, hausVersion, dryRun);
+  const p6Files = [rootClaudeMdPath, projectFactsPath, ...(wayOfWorkPath ? [wayOfWorkPath] : [])];
   const files = dryRun
-    ? [...coreFiles]
-    : [...coreFiles, hausPath(root, "selected-context.json"), hausPath(root, "haus.lock.json")];
-  await writeManagedText(
-    root,
-    claudePath(root, "CLAUDE.md"),
-    `# Haus AI
-
-This project uses the Haus AI workflow.
-
-Use \`.haus-workflow/context-map.json\`, \`.haus-workflow/recommendation.json\`, and \`.haus-workflow/repo-summary.md\` before choosing context.
-
-Use:
-
-\`\`\`bash
-haus doctor
-haus context --task "<task>"
-\`\`\`
-`,
-    dryRun,
-  );
+    ? [...coreFiles, ...p6Files]
+    : [...coreFiles, ...p6Files, hausPath(root, "selected-context.json"), hausPath(root, "haus.lock.json")];
   const hookSettings = await loadClaudeHooksSettings();
   await writeManagedJson(root, claudePath(root, "settings.json"), hookSettings, dryRun);
   if (!dryRun) await assertPostApplySettingsMatchCanonical(root, hookSettings);
@@ -84,7 +75,6 @@ haus context --task "<task>"
     dryRun,
   );
 
-  const pkgRoot = packageRoot();
   type ManifestItem = {
     id: string;
     path: string;
@@ -150,7 +140,6 @@ haus context --task "<task>"
     installedItems.map((r) => ({ id: r.id, type: r.type, reason: r.reason, confidenceLevel: r.confidenceLevel })),
     false,
   );
-  const hausVersion = (await readJson<{ version?: string }>(path.join(pkgRoot, "package.json")))?.version ?? "0.0.0";
   const lock = await Promise.all(
     installedItems.map(async (r) => {
       const relPaths = installedPathsByItem.get(r.id) ?? [];
