@@ -6,7 +6,8 @@
   "bin": "./dist/cli.js",
   "files": [
     "dist",
-    "library",
+    "library/global",
+    "library/catalog",
     "docs/user-guide.md",
     "README.md",
     "LICENSE",

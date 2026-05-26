@@ -11,12 +11,14 @@ import { runDoctor } from "./commands/doctor.js";
 import { runExplainRecommendation } from "./commands/explain-recommendation.js";
 import { runGuard } from "./commands/guard.js";
 import { runInit } from "./commands/init.js";
+import { runInstall } from "./commands/install.js";
 import { runMemory } from "./commands/memory.js";
 import { runRecommend } from "./commands/recommend.js";
 import { runRefresh } from "./commands/refresh.js";
 import { runScan } from "./commands/scan.js";
 import { runSetupProject } from "./commands/setup-project.js";
 import { runUndo } from "./commands/undo.js";
+import { runUninstallCommand } from "./commands/uninstall.js";
 import { runUpdate } from "./commands/update.js";
 import { runWorkspace } from "./commands/workspace.js";
 import { error } from "./utils/logger.js";
@@ -71,6 +73,13 @@ program.command("init").option("--fast").option("--json").action(runInit);
 program.command("refresh").action(runRefresh);
 program.command("catalog-audit").action(runCatalogAudit);
 program.command("update").option("--check").action(runUpdate);
+program
+  .command("install")
+  .option("--dry-run")
+  .option("--force")
+  .option("--check", "Exit non-zero if any HAUS-MANAGED file is out of date")
+  .action(runInstall);
+program.command("uninstall").option("--force").action(runUninstallCommand);
 
 const memory = program.command("memory");
 memory.command("status").action(() => runMemory("status", {}));
