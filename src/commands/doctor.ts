@@ -6,9 +6,9 @@ import { isHookEnabled, type HookKey } from "../claude/load-hooks-config.js";
 import { verifyProjectSettingsHooksContract } from "../claude/verify-hooks-contract.js";
 import { BLOCK_BEGIN } from "../claude/write-root-claude-md.js";
 import { readContextOrScan } from "../scanner/read-context.js";
-import { readJson, readText } from "../utils/fs.js";
+import { hashText, readJson, readText } from "../utils/fs.js";
 import { error, log, warn } from "../utils/logger.js";
-import { hausPath } from "../utils/paths.js";
+import { hausPath, packageRoot } from "../utils/paths.js";
 
 export async function runDoctor(options?: { hooks?: boolean }): Promise<void> {
   const root = process.cwd();
@@ -78,11 +78,24 @@ export async function runDoctor(options?: { hooks?: boolean }): Promise<void> {
     warn("- .haus-workflow/haus-way-of-work.md: missing (run `haus apply --write`)");
   } else {
     const wayOfWorkContent = await readText(wayOfWorkPath);
-    const hasHeader = wayOfWorkContent?.split("\n")[0]?.includes("HAUS-MANAGED") ?? false;
-    if (!hasHeader) {
+    const firstLine = wayOfWorkContent?.split("\n")[0] ?? "";
+    if (!firstLine.includes("HAUS-MANAGED")) {
       warn("- .haus-workflow/haus-way-of-work.md: no HAUS-MANAGED header (user-owned)");
     } else {
-      log("- .haus-workflow/haus-way-of-work.md: OK");
+      // Compare installed template hash against current package template.
+      const storedHashMatch = firstLine.match(/hash=(sha256-[a-f0-9]+)/);
+      const templatePath = path.join(packageRoot(), "library", "templates", "claude-md", "haus-way-of-work.md");
+      const templateContent = await readText(templatePath);
+      if (storedHashMatch && templateContent) {
+        const currentHash = hashText(templateContent);
+        if (storedHashMatch[1] !== currentHash) {
+          warn("- .haus-workflow/haus-way-of-work.md: stale (template updated — run `haus apply --write`)");
+        } else {
+          log("- .haus-workflow/haus-way-of-work.md: OK");
+        }
+      } else {
+        log("- .haus-workflow/haus-way-of-work.md: OK");
+      }
     }
   }
 
