@@ -2,6 +2,7 @@ import path from "node:path";
 
 import fs from "fs-extra";
 
+import { CACHE_DIR } from "../catalog/remote-catalog.js";
 import type { Recommendation } from "../types.js";
 import { hashInstalledPaths } from "../update/hash-installed.js";
 import { createUnifiedDiff, hasTextChanged, summarizeDiff } from "../utils/diff.js";
@@ -90,6 +91,10 @@ export async function writeClaudeFiles(root: string, dryRun: boolean): Promise<s
     path.join(pkgRoot, "library", "catalog", "manifest.json"),
   )) ?? { items: [] };
   const manifestById = new Map((manifest.items ?? []).map((item) => [item.id, item]));
+  // Cache manifest may have different paths than the bundled manifest (e.g. "skills/xxx" vs
+  // "tests/fixtures/catalog/skills/xxx"). Look up by ID so the cache path is always correct.
+  const cacheManifest = await readJson<{ items?: ManifestItem[] }>(path.join(CACHE_DIR, "manifest.json"));
+  const cacheManifestById = new Map((cacheManifest?.items ?? []).map((item) => [item.id, item]));
   const installedPathsByItem = new Map<string, string[]>();
   // Track which recommended items were actually installed so that skipped
   // curated items (unapproved or blocked) are excluded from the lock and
@@ -113,7 +118,10 @@ export async function writeClaudeFiles(root: string, dryRun: boolean): Promise<s
         continue;
       }
     }
-    const sourcePath = path.join(pkgRoot, manifestItem.path);
+    const cachedItem = cacheManifestById.get(item.id);
+    const cachePath = cachedItem?.path ? path.join(CACHE_DIR, cachedItem.path) : null;
+    const sourcePath =
+      cachePath && (await fs.pathExists(cachePath)) ? cachePath : path.join(pkgRoot, manifestItem.path);
     const target = item.type === "agent" ? "agents" : "skills";
     const destination = claudePath(root, target, path.basename(sourcePath));
     if (await fs.pathExists(sourcePath)) {

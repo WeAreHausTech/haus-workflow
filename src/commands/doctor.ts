@@ -2,6 +2,7 @@ import path from "node:path";
 
 import fs from "fs-extra";
 
+import { getCacheManifestAge } from "../catalog/remote-catalog.js";
 import { isHookEnabled, type HookKey } from "../claude/load-hooks-config.js";
 import { verifyProjectSettingsHooksContract } from "../claude/verify-hooks-contract.js";
 import { BLOCK_BEGIN } from "../claude/write-root-claude-md.js";
@@ -84,7 +85,7 @@ export async function runDoctor(options?: { hooks?: boolean }): Promise<void> {
     } else {
       // Compare installed template hash against current package template.
       const storedHashMatch = firstLine.match(/hash=(sha256-[a-f0-9]+)/);
-      const templatePath = path.join(packageRoot(), "library", "templates", "claude-md", "haus-way-of-work.md");
+      const templatePath = path.join(packageRoot(), "library", "global", "templates", "haus-way-of-work.md");
       const templateContent = await readText(templatePath);
       if (storedHashMatch && templateContent) {
         const currentHash = hashText(templateContent);
@@ -110,6 +111,18 @@ export async function runDoctor(options?: { hooks?: boolean }): Promise<void> {
       warn("- .haus-workflow/project.md: no HAUS-MANAGED header (user-owned)");
     } else {
       log("- .haus-workflow/project.md: OK");
+    }
+  }
+
+  const cacheAgeMs = await getCacheManifestAge();
+  if (cacheAgeMs === null) {
+    warn("- CATALOG CACHE: absent (run `haus update` to populate)");
+  } else {
+    const cacheAgeDays = Math.floor(cacheAgeMs / (1000 * 60 * 60 * 24));
+    if (cacheAgeDays >= 7) {
+      warn(`- CATALOG CACHE: stale (${cacheAgeDays}d old — run \`haus update\`)`);
+    } else {
+      log(`- CATALOG CACHE: OK (${cacheAgeDays}d old)`);
     }
   }
 }
