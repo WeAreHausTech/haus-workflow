@@ -13,7 +13,8 @@ Place a marker on a line owned by the dev-only construct (top of file is fine fo
 | `.ts` / `.js` / `.tsx` | `// HAUS-PRERELEASE-CLEANUP: <one-line reason>` |
 | `.yml` / shell / JSON-with-comments | `# HAUS-PRERELEASE-CLEANUP: <one-line reason>` |
 | pure `.json` | inert top-level key: `"_haus_cleanup": "HAUS-PRERELEASE-CLEANUP: <one-line reason>"` |
-| `.md` | `<!-- HAUS-PRERELEASE-CLEANUP: <one-line reason> -->` |
+| `.md` (no frontmatter) | `<!-- HAUS-PRERELEASE-CLEANUP: <one-line reason> -->` anywhere in the file |
+| `.md` with YAML frontmatter | `# HAUS-PRERELEASE-CLEANUP: <one-line reason>` on its own line **inside** the `---` block — keeps `---` as the true first line so frontmatter parsers don't break |
 
 The marker reason is free-form. Keep it short and reference the phase (e.g. "P4a — sources subsystem removal").
 

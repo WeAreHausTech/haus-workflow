@@ -49,8 +49,8 @@ const SKIP_FILES = new Set([
 const MARKER_PATTERNS: RegExp[] = [
   /(?:^|\s)\/\/\s*HAUS-PRERELEASE-CLEANUP:\s*(.+?)\s*$/,
   /(?:^|\s)#\s*HAUS-PRERELEASE-CLEANUP:\s*(.+?)\s*$/,
-  /<!--\s*HAUS-PRERELEASE-CLEANUP:\s*(.+?)\s*-->/,
-  /"_haus_cleanup"\s*:\s*"HAUS-PRERELEASE-CLEANUP:\s*(.+?)\s*"/,
+  /(?:^|\s)<!--\s*HAUS-PRERELEASE-CLEANUP:\s*(.+?)\s*-->/,
+  /^\s*"_haus_cleanup"\s*:\s*"HAUS-PRERELEASE-CLEANUP:\s*(.+?)\s*"/,
 ];
 
 // Spec row format: `- [ ] \`path\` — reason` or `- [x] \`path\` — reason`.

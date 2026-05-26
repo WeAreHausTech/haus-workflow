@@ -119,6 +119,34 @@ test("spec file is not self-scanned for markers", () => {
   assert.match(out, /Markers found:\s+0/);
 });
 
+test("pure-JSON _haus_cleanup marker is recognised", () => {
+  const tmp = makeTmp();
+  writeFile(tmp, "docs/specs/pre-release-cleanup.md", "# spec\n\n## Markers\n");
+  writeFile(
+    tmp,
+    "plugin/hooks/hooks.json",
+    '{\n  "_haus_cleanup": "HAUS-PRERELEASE-CLEANUP: P4e plugin removal",\n  "hooks": {}\n}\n',
+  );
+  const out = runIn(tmp);
+  assert.match(out, /Markers found:\s+1/);
+  assert.match(out, /plugin\/hooks\/hooks\.json/);
+  assert.match(out, /P4e plugin removal/);
+});
+
+test("_haus_cleanup key inside a TS string is not matched", () => {
+  // Anchored to line start (^\s*) so a quoted occurrence inside a TS string
+  // literal must not fire.
+  const tmp = makeTmp();
+  writeFile(tmp, "docs/specs/pre-release-cleanup.md", "# spec\n\n## Markers\n");
+  writeFile(
+    tmp,
+    "src/example.ts",
+    'const x = \'{"_haus_cleanup": "HAUS-PRERELEASE-CLEANUP: quoted"}\';\n',
+  );
+  const out = runIn(tmp);
+  assert.match(out, /Markers found:\s+0/);
+});
+
 test("marker inside string literal is not matched (no comment prefix)", () => {
   // Bare `HAUS-PRERELEASE-CLEANUP:` text inside a string literal must not
   // register — only the supported comment forms count.
