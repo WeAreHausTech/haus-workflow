@@ -83,8 +83,9 @@ test("apply --dry-run shows diffs and does not write files", () => {
   assert.equal(result.exitCode, 0);
   assert.equal(result.stdout.includes("Dry-run complete"), true);
   assert.equal(result.stdout.includes("none written"), true);
-  // Dry-run should show diff content for new files (lines beginning with +)
-  assert.equal(result.stdout.includes("Haus AI"), true);
-  // No files should have been written to .claude/
+  // Dry-run output should include the haus-imports block being created
+  assert.equal(result.stdout.includes("HAUS:BEGIN haus-imports"), true);
+  // Root CLAUDE.md and .claude/CLAUDE.md should not be written in dry-run
+  assert.equal(fs.existsSync(path.join(temp, "CLAUDE.md")), false);
   assert.equal(fs.existsSync(path.join(temp, ".claude", "CLAUDE.md")), false);
 });
