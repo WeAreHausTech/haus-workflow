@@ -1,3 +1,4 @@
+// HAUS-PRERELEASE-CLEANUP: P4a — sources subsystem removed before v0.1.
 export type SourcePolicy = "rewrite" | "reference" | "candidate-only";
 
 export type SourceStatus = "candidate" | "approved" | "rejected";

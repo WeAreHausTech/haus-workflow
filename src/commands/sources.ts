@@ -1,3 +1,4 @@
+// HAUS-PRERELEASE-CLEANUP: P4a — sources subsystem removed before v0.1.
 import { syncGithubSource } from "../sources/github-source.js";
 import { loadSources } from "../sources/load-sources.js";
 import { syncPrpmSource } from "../sources/prpm-source.js";

@@ -1,4 +1,5 @@
 ---
+# HAUS-PRERELEASE-CLEANUP: P4e — plugin/ directory removed; surviving skill content relocates to library/global/skills/ in P5.
 name: haus-workflow
 description: Run a Haus production-ready coding workflow using only project-relevant context. Use for implementation, debugging, refactoring, testing, review, documentation, and production-readiness checks.
 ---

@@ -1,4 +1,5 @@
 ---
+# HAUS-PRERELEASE-CLEANUP: P4e — plugin/ directory removed; surviving agents relocate to library/global/agents/ in P5.
 name: docs-researcher
 description: Pull minimal official or in-repo documentation for the active task.
 tools: Read, Grep, Glob, Bash

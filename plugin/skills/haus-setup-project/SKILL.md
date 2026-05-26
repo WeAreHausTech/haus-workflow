@@ -1,4 +1,5 @@
 ---
+# HAUS-PRERELEASE-CLEANUP: P4e — plugin/ directory removed; surviving skill content relocates to library/global/skills/ in P5.
 name: haus-setup-project
 description: Set up Haus AI workflow in the current project. Use when the user wants to configure Claude Code, scan a project, install relevant Haus skills, choose agents, set guardrails, or prepare an AI workflow for a repo.
 ---

@@ -1,4 +1,5 @@
 ---
+# HAUS-PRERELEASE-CLEANUP: P4e — plugin/ directory removed; surviving agents relocate to library/global/agents/ in P5.
 name: code-reviewer
 description: Narrow diff review for correctness, regressions, and missing tests.
 tools: Read, Grep, Glob, Bash

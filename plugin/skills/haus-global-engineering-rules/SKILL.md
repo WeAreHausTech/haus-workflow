@@ -1,4 +1,5 @@
 ---
+# HAUS-PRERELEASE-CLEANUP: P4e — plugin/ directory removed; surviving skill content relocates to library/global/skills/ in P5.
 name: haus-global-engineering-rules
 description: Core Haus engineering guardrails for deterministic, secure, minimal-context delivery.
 ---

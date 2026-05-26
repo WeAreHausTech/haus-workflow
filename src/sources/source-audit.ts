@@ -1,3 +1,4 @@
+// HAUS-PRERELEASE-CLEANUP: P4a — sources subsystem removed before v0.1.
 import { loadSources } from "./load-sources.js";
 
 const ALLOWLIST = [

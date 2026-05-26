@@ -1,4 +1,5 @@
 ---
+# HAUS-PRERELEASE-CLEANUP: P4e — plugin/ directory removed; surviving skill content relocates to library/global/skills/ in P5.
 name: haus-documentation-maintainer
 description: Keep Haus AI workflow docs aligned when commands, dependencies, or generated layout change.
 ---

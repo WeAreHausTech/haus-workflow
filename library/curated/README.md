@@ -1,3 +1,4 @@
+<!-- HAUS-PRERELEASE-CLEANUP: P4b — entire library/curated/ directory removed before v0.1. -->
 # library/curated/
 
 This directory holds the **curated external primitives layer** for the `haus` package.

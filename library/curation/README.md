@@ -1,3 +1,4 @@
+<!-- HAUS-PRERELEASE-CLEANUP: P4b — entire library/curation/ directory removed before v0.1. -->
 # Source Curation
 
 External sources are **inspiration** or **reference** inputs. Shipped content is Haus-owned and rewritten.

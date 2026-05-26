@@ -1,3 +1,4 @@
+// HAUS-PRERELEASE-CLEANUP: P4c — paired with explain-context drop.
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
