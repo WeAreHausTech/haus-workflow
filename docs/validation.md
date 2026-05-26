@@ -20,7 +20,6 @@ The recommender (`haus recommend`) and the task-context router (`haus context --
 flowchart LR
     repo[fixture or cloned repo] --> scan[haus scan]
     scan --> recommend[haus recommend]
-    recommend --> explain[haus explain-context]
     recommend --> context[haus context --task]
     context --> qa[manual QA against rubric]
     qa --> finding[tests/fixtures/findings/*.json]
@@ -77,7 +76,6 @@ Run by hand against real internal repos. Never commit paths, snapshots, or findi
 cd <repo-or-fixture>
 node /path/to/haus-workflow/dist/cli.js scan --json > /tmp/scan.json
 node /path/to/haus-workflow/dist/cli.js recommend --json > /tmp/rec.json
-node /path/to/haus-workflow/dist/cli.js explain-context --json > /tmp/explain.json
 node /path/to/haus-workflow/dist/cli.js context --task "<task>" --json > /tmp/ctx.json
 ```
 
@@ -108,68 +106,11 @@ Each axis scored 0-3 (`0` = broken, `3` = perfect):
 
 A score of `<= 2` on any axis triggers a finding.
 
-## Findings
-
-Every QA target produces at least one record in [tests/fixtures/findings/](../tests/fixtures/findings/). Two shapes:
-
-### Issue record
-
-```json
-{
-  "id": "vendure-frontend-bleed-001",
-  "repo": "vendure-monorepo",
-  "status": "issue",
-  "command": "haus context --task \"build shipping plugin\"",
-  "issue": "haus.tailwind-scss-patterns selected during backend plugin task",
-  "expected": "only vendure-plugin, nestjs-graphql, package-manager rules",
-  "actual": ["haus.vendure-plugin-patterns", "haus.tailwind-scss-patterns", "haus.react19-patterns"],
-  "severity": "medium",
-  "rootCauseHypothesis": "stack-match fires on tags 'react' present via root-level package.json devDeps",
-  "proposedFixPR": "PR2|PR3"
-}
-```
-
-Severity scale: `low | medium | high | critical`.
-
-`proposedFixPR` routes the finding into the right follow-up:
-
-- **PR2** scoring calibration (`src/recommender/recommend.ts`)
-- **PR3** context payload precision (`src/commands/context.ts`)
-- **PR4** explain readability (`src/commands/explain-context.ts`, `src/commands/explain-recommendation.ts`)
-- **PR5** regression hardening (`tests/golden/`)
-
-### Clean record
-
-When a target has zero findings:
-
-```json
-{
-  "id": "nextjs-app-clean-001",
-  "repo": "nextjs-app",
-  "status": "clean",
-  "commands": [
-    "haus scan --json",
-    "haus recommend --json",
-    "haus context --task \"build dashboard route\" --json"
-  ],
-  "notes": "No recommendation or context-quality issues found during fixture QA."
-}
-```
-
-## Validating the findings directory
-
-```bash
-yarn tsx scripts/validate-findings.ts
-```
-
-The script asserts required fields per record shape. It does not fail CI; it is informational.
-
 ## Acceptance gate
 
 **Required for PR acceptance:**
 
-- Every synthetic fixture has at least one record in `tests/fixtures/findings/` (issue or clean).
-- `scripts/validate-findings.ts` runs green.
+- Golden tests pass (`yarn test` covers context golden fixtures).
 
 **Not required:**
 
@@ -205,26 +146,9 @@ rules where applicable.
 
 ## PR4: Explainability polish
 
-`haus explain-recommendation` and `haus explain-context` are pure renderers
-over `.haus-workflow/recommendation.json`. They never re-run scoring, never call the
-catalog, and never widen/narrow the recommended set.
+`haus explain-recommendation` is a pure renderer over `.haus-workflow/recommendation.json`.
+It never re-runs scoring, never calls the catalog, and never widens/narrows the recommended set.
 
-`explain-recommendation` human output groups `Selected` and `Skipped`, with per
-rule `confidence`, `selection`, and indented `why:` bullets that include the
-underlying signal (e.g. `stack/dependency match (tag:nestjs)`).
-
-`explain-context --task "<task>"` adds:
-
-- `Task intents` (deterministic classifier output from PR3)
-- `Task signals` (well-known ecosystem/stack tokens spotted in the task text)
-- `Repo signals matched` (ecosystem + tags of rules that survived the task
-  filter)
-- `Included in task context` (per rule: confidence, selection, intents, the
-  human reason for inclusion, and the original recommender why-bullets)
-- `Excluded from task context` (per rule: intents and the human reason for
-  exclusion, e.g. baseline isolation or intent mismatch)
-
-JSON additions are optional, additive fields only (`task`, `taskIntents`,
-`taskSignals`, `repoSignals`, `includedInTask`, `excludedFromTask`). The legacy
-`selected`, `skipped`, `stats` keys remain byte-stable for callers that already
-consume the JSON.
+Human output groups `Selected` and `Skipped`, with per-rule `confidence`, `selection`,
+and indented `why:` bullets that include the underlying signal
+(e.g. `stack/dependency match (tag:nestjs)`).

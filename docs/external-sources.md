@@ -1,5 +1,7 @@
 # External Sources Policy
 
+> **Deprecated (P4b):** The sources subsystem (`library/curation/`, `library/curated/`, `src/sources/`, `yarn sources:*` scripts) was removed in P4. This doc is retained for historical reference only.
+
 ## Core rules
 
 - No auto-install from public repos. No live registry sync.

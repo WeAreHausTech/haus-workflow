@@ -43,6 +43,9 @@ jobs:
       - name: Build
         run: yarn build
 
+      - name: Catalog audit
+        run: node dist/cli.js catalog-audit
+
       - name: Test
         run: yarn test
 

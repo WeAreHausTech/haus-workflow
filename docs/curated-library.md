@@ -1,5 +1,7 @@
 # Curated Library
 
+> **Deprecated (P4b):** The curated library layer (`library/curated/`) and all related audit scripts were removed in P4. This doc is retained for historical reference only.
+
 `haus` is a curated Claude Code distribution. It governs and installs the best available Claude-native components for Haus projects — including external ones where they are better than Haus-authored equivalents.
 
 The curated library layer (`library/curated/`) is the governance mechanism for all external content.

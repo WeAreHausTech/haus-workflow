@@ -34,7 +34,6 @@ From `apply --write`:
 - `./.claude/rules/security.md`
 - `./.claude/commands/haus-doctor.md`
 - `./.claude/commands/haus-review.md`
-- `./.claude/commands/haus-explain-context.md`
 - selected assets in `./.claude/skills` and `./.claude/agents`
 
 ## Overwrite behavior

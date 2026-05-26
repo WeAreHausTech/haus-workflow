@@ -29,37 +29,26 @@ All checks must pass. Do not open a PR with a failing `yarn verify`.
 1. update `library/catalog/manifest.json`
 2. keep `requiresAny`, tags, repo roles accurate
 3. verify unsupported policy and ecosystem compatibility behavior
-4. run `yarn catalog:audit`
+4. run `haus catalog-audit`
 
 ## Add skills
 
-1. add `plugin/skills/<name>/SKILL.md` (auto-discovered by Claude Code — no registration in `plugin.json` needed)
-2. keep skill guidance scoped and factual
-3. aim for ≤80 lines and a router shape (`## Use when` / `## Do not use when`). Note: `tests/core-skill-shape.test.js` only enforces this on a hardcoded list of **core** skills (`haus-context-router`, `haus-workflow`, `haus-setup-project`, `haus-skill-author`, `haus-global-engineering-rules`). If you intend a new skill to be treated as core, add its path to the `coreSkills` array in that test.
+Skills live in `library/global/skills/` (P5 layout — see implementation plan). Keep skill guidance scoped and factual; aim for ≤80 lines and a router shape (`## Use when` / `## Do not use when`).
 
 ## Add subagents
 
-1. add `plugin/agents/<name>.md` (auto-discovered by Claude Code)
-2. keep agent scope narrow and tools minimal
+Agents live in `library/global/agents/` (P5 layout). Keep agent scope narrow and tools minimal.
 
 ## Add hooks
 
-1. update `plugin/hooks/hooks.json`
-2. keep schema valid
-3. verify `haus apply --write` + `haus doctor --hooks`
+1. update `~/.claude/settings.json` via `haus install` (P5 layout)
+2. verify with `haus doctor --hooks`
 
 ## Add tests
 
 - use built-in Node test runner (`node --test`)
 - keep tests deterministic
 - prefer fixture-based coverage for scanner/recommender flows
-
-## Add or update source decisions
-
-1. Follow the curation policy in `docs/curation.md`
-2. Record accepted ideas in `library/curation/source-decisions.json`
-3. Run `yarn sources:decisions` to validate the decision file
-4. Run `yarn library:audit` to verify manifest integrity
 
 ## What not to add (without explicit requirement)
 

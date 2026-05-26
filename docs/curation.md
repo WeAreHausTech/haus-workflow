@@ -1,5 +1,7 @@
 # Curation Policy
 
+> **Deprecated (P4b):** The curation system (`library/curation/`, `yarn sources:decisions`, `yarn library:audit`, `yarn curated:audit`) was removed in P4. This doc is retained for historical reference only.
+
 This file defines how external ideas become Haus-owned skill library content.
 
 ## Inspiration and reference sources

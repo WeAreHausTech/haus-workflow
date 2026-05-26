@@ -53,25 +53,10 @@ Curated items also include provenance fields in the lock: `originSourceId`, `use
 1. Start from official framework docs and official provider materials.
 2. Keep `SKILL.md` short router; move detail to `references/` directory.
 3. Add catalog entry with `source: "haus"`, allowed stack tags, role matches, token estimate.
-4. Run `yarn catalog:audit && yarn library:audit`.
-
-### Curated external item
-
-1. Add source to `library/catalog/sources.yaml` if not present.
-2. Audit upstream source; enumerate primitives into `library/curated/inventory/source-inventory.json`.
-3. Record per-item decision in `library/curated/decisions/curation-decisions.json`.
-4. Create artifact (if copy/adapted/wrapped).
-5. Add manifest entry with all curated fields and `reviewStatus: "approved"`.
-6. Run `yarn curated:audit && yarn library:audit`.
-
-See `docs/curated-library.md` for the full authoring workflow.
+4. Run `haus catalog-audit`.
 
 ## Audit commands
 
 ```bash
-yarn catalog:audit      # validates tags against allowed-stacks.json
-yarn sources:audit      # validates sources.yaml
-yarn sources:decisions  # validates idea-layer source-decisions.json
-yarn library:audit      # validates manifest and skill/agent shapes
-yarn curated:audit      # validates curated inventory, decisions, and manifest gates
+haus catalog-audit      # validates tags against allowed-stacks.json
 ```
