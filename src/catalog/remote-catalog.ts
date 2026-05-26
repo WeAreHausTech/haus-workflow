@@ -42,6 +42,18 @@ export type SyncResult = {
   failed: string[];
 };
 
+function isSafeCatalogPath(itemPath: string): boolean {
+  if (!itemPath || path.isAbsolute(itemPath) || itemPath.includes("\\")) return false;
+  const normalized = path.normalize(itemPath);
+  return !normalized.startsWith("..") && !normalized.includes("/..");
+}
+
+function safeJoin(base: string, itemPath: string): string | null {
+  if (!isSafeCatalogPath(itemPath)) return null;
+  const resolved = path.resolve(base, itemPath);
+  return resolved.startsWith(base + path.sep) || resolved === base ? resolved : null;
+}
+
 export async function syncRemoteCatalog(): Promise<SyncResult> {
   const items = await fetchRemoteManifest();
   if (!items) {
@@ -58,9 +70,20 @@ export async function syncRemoteCatalog(): Promise<SyncResult> {
 
   for (const item of items) {
     if ((item.type !== "skill" && item.type !== "agent") || !item.path) continue;
+    if (!isSafeCatalogPath(item.path)) {
+      warn(`Skipping ${item.id}: invalid path "${item.path}"`);
+      failed.push(item.id);
+      continue;
+    }
 
     if (item.type === "skill") {
-      const dest = path.join(CACHE_DIR, item.path, "SKILL.md");
+      const destDir = safeJoin(CACHE_DIR, item.path);
+      if (!destDir) {
+        warn(`Skipping ${item.id}: path traversal detected`);
+        failed.push(item.id);
+        continue;
+      }
+      const dest = path.join(destDir, "SKILL.md");
       if (await fs.pathExists(dest)) {
         unchanged++;
         continue;
@@ -76,7 +99,12 @@ export async function syncRemoteCatalog(): Promise<SyncResult> {
       await fs.writeFile(dest, text, "utf8");
       newItems.push(item.id);
     } else {
-      const dest = path.join(CACHE_DIR, item.path);
+      const dest = safeJoin(CACHE_DIR, item.path);
+      if (!dest) {
+        warn(`Skipping ${item.id}: path traversal detected`);
+        failed.push(item.id);
+        continue;
+      }
       if (await fs.pathExists(dest)) {
         unchanged++;
         continue;

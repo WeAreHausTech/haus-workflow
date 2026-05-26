@@ -6,6 +6,7 @@ import { applyLock, checkLock, diffLock, hasLocalOverrides } from "../update/loc
 import { readJson } from "../utils/fs.js";
 import { log, warn } from "../utils/logger.js";
 import { packageRoot } from "../utils/paths.js";
+import { compareVersions, normalizeVersion } from "../utils/versions.js";
 
 const NPM_PACKAGE_NAME = "@haus-tech/haus-workflow";
 
@@ -17,8 +18,8 @@ async function checkNpmVersion(currentVersion: string): Promise<void> {
     if (!res.ok) return;
     const data = (await res.json()) as { version?: string };
     const latest = data?.version;
-    if (!latest) return;
-    if (latest !== currentVersion) {
+    if (!latest || !normalizeVersion(latest) || !normalizeVersion(currentVersion)) return;
+    if (compareVersions(latest, currentVersion) > 0) {
       log(`npm update available: ${currentVersion} → ${latest}`);
       log(`Run: npm install -g ${NPM_PACKAGE_NAME}`);
     } else {

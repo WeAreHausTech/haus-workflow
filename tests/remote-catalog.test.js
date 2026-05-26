@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import http from "node:http";
+import net from "node:net";
 import os from "node:os";
 import path from "node:path";
 import fs from "node:fs";
@@ -74,6 +75,17 @@ function makeProjectDir() {
   return temp;
 }
 
+// Returns a port that was briefly bound then closed — guaranteed unreachable (no process listens on it).
+function getClosedPort() {
+  return new Promise((resolve) => {
+    const srv = net.createServer();
+    srv.listen(0, "127.0.0.1", () => {
+      const { port } = srv.address();
+      srv.close(() => resolve(port));
+    });
+  });
+}
+
 // Use async execa (not execaSync) so the Node.js event loop stays alive for mock server.
 async function runCli(args, options = {}) {
   return await execa("node", [DIST_CLI, ...args], { reject: false, ...options });
@@ -126,9 +138,10 @@ test("haus update: catalog sync writes manifest to cache on success", async () =
 
 test("haus update: offline fallback does not crash when server unreachable", async () => {
   const temp = makeProjectDir();
+  const closedPort = await getClosedPort();
   const out = await runCli(["update"], {
     cwd: temp,
-    env: { ...process.env, HAUS_CATALOG_REMOTE_BASE: "http://127.0.0.1:1" },
+    env: { ...process.env, HAUS_CATALOG_REMOTE_BASE: `http://127.0.0.1:${closedPort}` },
   });
   assert.equal(out.exitCode, 0);
   assert.equal(out.stdout.includes("Update applied"), true);
