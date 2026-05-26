@@ -1,0 +1,31 @@
+{
+  "_schema": "haus-hooks-fragment/1",
+  "hooks": [
+    {
+      "id": "hook.guard.file-access",
+      "gate": "keep",
+      "event": "PreToolUse",
+      "matcher": "Read|Edit|Write",
+      "command": "haus guard file-access --from-hook"
+    },
+    {
+      "id": "hook.guard.bash",
+      "gate": "keep",
+      "event": "PreToolUse",
+      "matcher": "Bash",
+      "command": "haus guard bash --from-hook"
+    },
+    {
+      "id": "hook.context",
+      "gate": "gate-default-off",
+      "event": "UserPromptSubmit",
+      "command": "haus context --from-hook"
+    },
+    {
+      "id": "hook.memory-inject",
+      "gate": "gate-default-off",
+      "event": "UserPromptSubmit",
+      "command": "haus memory inject --from-hook"
+    }
+  ]
+}
