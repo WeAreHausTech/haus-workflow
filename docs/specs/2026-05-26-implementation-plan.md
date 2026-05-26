@@ -48,9 +48,9 @@ At the end of this plan:
 ## Phase order
 
 ```
-[done] P0 → P1 → P2 → P2b
-         ↓
-        P3 → P4 → P5 → P6 → P7 → P8 → P9 → P10
+[done] P0 → P1 → P2 → P2b → P3 → P4a–P4e
+                                        ↓
+                               P5 → P6 → P7 → P8 → P9 → P10
 ```
 
 P5 (global install layout) and P6 (root `CLAUDE.md`) can run in parallel if separate hands pick them up; P6 depends on P5 having defined the HAUS-MANAGED marker convention.
@@ -68,6 +68,8 @@ P5 (global install layout) and P6 (root `CLAUDE.md`) can run in parallel if sepa
 - [x] **P1** — Cleanup tracker tooling (`scripts/cleanup-status.ts`, `docs/specs/pre-release-cleanup.md`)
 - [x] **P2** — Hook cost audit (`docs/specs/2026-05-25-hook-cost-report.md`)
 - [x] **P2b** — `.haus-ai/` → `.haus-workflow/` rename
+- [x] **P3** — Scaffolding marked with `HAUS-PRERELEASE-CLEANUP` markers + spec rows (PR #28)
+- [x] **P4a–P4e** — All scaffolding deleted; plugin/ removed; hook config inlined (PR #29, PR #30). Cleanup tracker idle.
 
 The remaining phases below replace the 2026-05-25 versions of P3–P10.
 
@@ -435,12 +437,12 @@ Order matters: catalog public → CLI public → npm publish.
 - [x] P1 — Cleanup tracker tooling
 - [x] P2 — Hook cost audit
 - [x] P2b — `.haus-ai/` → `.haus-workflow/`
-- [ ] P3 — Mark scaffolding (incl. `plugin/`)
-- [ ] P4a — Remove sources subsystem
-- [ ] P4b — Remove curation + library artifacts
-- [ ] P4c — Collapse explainability + drop hooks
-- [ ] P4d — npm tarball trim
-- [ ] P4e — Delete `plugin/` directory; move surviving skills/agents to `library/global/`
+- [x] P3 — Mark scaffolding (incl. `plugin/`) — PR #28
+- [x] P4a — Remove sources subsystem — PR #29
+- [x] P4b — Remove curation + library artifacts — PR #29
+- [x] P4c — Collapse explainability + drop hooks — PR #29
+- [x] P4d — npm tarball trim — PR #29 + PR #30
+- [x] P4e — Delete `plugin/` directory; hook config inlined — PR #30
 - [ ] P5 — Global install layout (`haus install` / `haus uninstall`, HAUS-MANAGED markers, settings.json merge, `haus-workflow` all-in-one skill, 5 legacy skills dropped/outsourced)
 - [ ] P6 — Minimal root `CLAUDE.md` with `@import` to managed `haus-way-of-work.md` + `project.md`
 - [ ] P7 — Catalog repo split (incl. way-of-work template + outsourced skills)
