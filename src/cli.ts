@@ -8,7 +8,6 @@ import { runApply } from "./commands/apply.js";
 import { runCatalogAudit } from "./commands/catalog-audit.js";
 import { runContext } from "./commands/context.js";
 import { runDoctor } from "./commands/doctor.js";
-import { runExplainContext } from "./commands/explain-context.js";
 import { runExplainRecommendation } from "./commands/explain-recommendation.js";
 import { runGuard } from "./commands/guard.js";
 import { runInit } from "./commands/init.js";
@@ -18,7 +17,6 @@ import { runRecommend } from "./commands/recommend.js";
 import { runRefresh } from "./commands/refresh.js";
 import { runScan } from "./commands/scan.js";
 import { runSetupProject } from "./commands/setup-project.js";
-import { runSources } from "./commands/sources.js";
 import { runUndo } from "./commands/undo.js";
 import { runUpdate } from "./commands/update.js";
 import { runWorkspace } from "./commands/workspace.js";
@@ -62,7 +60,6 @@ program.command("setup-project").option("--guided").option("--fast").option("--j
 program.command("doctor").option("--hooks", "Verify .claude/settings.json matches plugin hooks only").action(runDoctor);
 program.command("apply").option("--dry-run").option("--write").action(runApply);
 program.command("undo").option("-y, --yes", "Skip confirmation").action(runUndo);
-program.command("explain-context").option("--task <task>").option("--json").option("--stats").action(runExplainContext);
 program.command("explain-recommendation").option("--json").action(runExplainRecommendation);
 program
   .command("context")
@@ -85,14 +82,6 @@ memory
   .option("--from-hook")
   .action((opts) => runMemory("inject", opts));
 memory.command("promote").action(() => runMemory("promote", {}));
-
-const sources = program.command("sources");
-sources
-  .command("sync")
-  .option("--check")
-  .action((opts) => runSources("sync", opts));
-sources.command("report").action((opts) => runSources("report", opts));
-sources.command("audit").action((opts) => runSources("audit", opts));
 
 const plugin = program.command("plugin");
 plugin.command("validate").action((opts) => runPlugin("validate", opts));

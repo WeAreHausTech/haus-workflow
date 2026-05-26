@@ -42,38 +42,6 @@ Exit code is always 0 (non-blocking until P10 makes it blocking).
 
 <!-- Add rows below this line. Format: - [ ] `<path>` — <reason> -->
 
-### P4a — sources subsystem
-
-- [ ] `src/sources/github-source.ts` — P4a sources subsystem removal.
-- [ ] `src/sources/load-sources.ts` — P4a sources subsystem removal.
-- [ ] `src/sources/prpm-source.ts` — P4a sources subsystem removal.
-- [ ] `src/sources/skillkit-source.ts` — P4a sources subsystem removal.
-- [ ] `src/sources/skills-sh-source.ts` — P4a sources subsystem removal.
-- [ ] `src/sources/source-audit.ts` — P4a sources subsystem removal.
-- [ ] `src/sources/source-report.ts` — P4a sources subsystem removal.
-- [ ] `src/sources/types.ts` — P4a sources subsystem removal.
-- [ ] `src/commands/sources.ts` — P4a CLI `haus sources *` commands removed.
-- [ ] `scripts/audit-sources.ts` — P4a audit script removed.
-- [ ] `scripts/validate-source-decisions.ts` — P4a source-decisions validator removed.
-
-### P4b — curation + library audit artifacts
-
-- [ ] `src/curation/unsupported-stack-mention.ts` — P4b curation module removed.
-- [ ] `scripts/audit-curated.ts` — P4b curated audit removed.
-- [ ] `scripts/library-audit.ts` — P4b library audit removed.
-- [ ] `scripts/verify-no-unsupported-tech.ts` — P4b catalog audit removed.
-- [ ] `scripts/validate-findings.ts` — P4b findings validator removed.
-- [ ] `library/curated/README.md` — P4b covers deletion of entire `library/curated/` directory.
-- [ ] `library/curation/README.md` — P4b covers deletion of entire `library/curation/` directory.
-- [ ] `tests/curated-schema.test.js` — P4b paired with library/curated removal.
-- [ ] `tests/curation-schema.test.js` — P4b paired with library/curation removal.
-- [ ] `tests/fixtures/findings/README.md` — P4b covers deletion of entire `tests/fixtures/findings/` (validate-findings fixtures).
-
-### P4c — collapse explainability
-
-- [ ] `src/commands/explain-context.ts` — P4c collapse to single explainability command; `explain-recommendation` survives.
-- [ ] `tests/context-explain.test.js` — P4c paired with explain-context removal.
-
 ### P4e — `plugin/` directory removal
 
 - [ ] `plugin/.claude-plugin/plugin.json` — P4e plugin manifest removed.

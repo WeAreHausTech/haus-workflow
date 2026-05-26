@@ -32,7 +32,6 @@ export async function writeClaudeFiles(root: string, dryRun: boolean): Promise<s
     claudePath(root, "rules", "security.md"),
     claudePath(root, "commands", "haus-doctor.md"),
     claudePath(root, "commands", "haus-review.md"),
-    claudePath(root, "commands", "haus-explain-context.md"),
   ];
   const files = dryRun
     ? [...coreFiles]
@@ -50,7 +49,6 @@ Use:
 
 \`\`\`bash
 haus doctor
-haus explain-context
 haus context --task "<task>"
 \`\`\`
 `,
@@ -71,12 +69,6 @@ haus context --task "<task>"
     root,
     claudePath(root, "commands", "haus-review.md"),
     'Run `haus context --task "code review"` then review diff.',
-    dryRun,
-  );
-  await writeManagedText(
-    root,
-    claudePath(root, "commands", "haus-explain-context.md"),
-    "Run `haus explain-context`.",
     dryRun,
   );
   await writeManagedText(
