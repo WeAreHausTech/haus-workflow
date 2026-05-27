@@ -3,6 +3,12 @@
 # GitHub releases and CHANGELOG.md are created by release-it running locally
 # (yarn release / scripts/release.sh). This workflow's sole responsibility is
 # npm publish with provenance.
+#
+# Auth: OIDC Trusted Publishing — no NPM_TOKEN secret required.
+# One-time setup: configure this repo as a trusted publisher on
+# npmjs.com → @haus-tech/haus-workflow → Settings → Publishing.
+# The id-token: write permission below grants the workflow an OIDC token
+# that npm accepts in place of a stored secret.
 
 name: Release
 
@@ -52,5 +58,3 @@ jobs:
 
       - name: Publish to npm
         run: npm publish --access public --provenance
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
