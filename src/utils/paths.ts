@@ -41,7 +41,7 @@ export function packageRoot(): string {
     if (existsSync(pkgPath)) {
       try {
         const pkg = JSON.parse(readFileSync(pkgPath, "utf8")) as { name?: string };
-        if (pkg.name === "haus") return dir;
+        if (pkg.name === "haus" || pkg.name === "@haus-tech/haus-workflow") return dir;
       } catch {
         /* ignore */
       }

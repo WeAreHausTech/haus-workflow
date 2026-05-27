@@ -76,9 +76,10 @@ It scans repositories, recommends context assets, and writes controlled outputs 
 3. inject compact redacted memory text (`memory inject`)
 4. keep promotion manual (`memory promote`)
 
-## Plugin / skills / hooks flow
+## Global install / skills / hooks flow
 
-1. plugin entrypoint: `plugin/.claude-plugin/plugin.json`
-2. hook source of truth: `plugin/hooks/hooks.json`
-3. `apply --write` writes `./.claude/settings.json` from hook source
-4. `doctor --hooks` verifies project settings vs canonical hook config
+1. source of truth: `library/global/` (skills, agents, settings-fragments)
+2. `haus install` seeds `~/.claude/` with HAUS-MANAGED files
+3. hook source of truth: `library/global/settings-fragments/hooks.json`
+4. `apply --write` writes `./.claude/settings.json` from hook source
+5. `doctor --hooks` verifies project settings vs canonical hook config
