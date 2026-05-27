@@ -13,44 +13,25 @@ Sourced from full wearehaustech org scan (May 2026). Each task is self-contained
 
 ---
 
-## Phase 1 — Structural foundations (do these first, unblock PHP detection)
+## Phase 1 — Structural foundations
 
-### T1 · Parse composer.json deps into phpDeps
+### T1 · Parse composer.json deps ✅ DONE
 
 **Repos:** `haus-ai-workflow` only
 
-**Context:** `detectStacks` only receives `deps` from `package.json`. All PHP-based detection (Elementor, ACF, SAML2, Redis/Predis, Deployer) is blocked until `composer.json` `require` keys are available as a separate array.
+**Implemented:** `dependencySet(pkg, composer)` in `scan-project.ts` already merges `composer.require` and `composer["require-dev"]` into the shared `deps` array. All PHP packages are available to `detectStacks` via `deps.includes(...)` — no separate `phpDeps` parameter needed.
 
-**Changes — `src/scanner/scan-project.ts`:**
-1. In `scanProject`, after reading `package.json` deps, read `composer.json` if present:
-   ```ts
-   const composerPath = path.join(root, "composer.json");
-   let phpDeps: string[] = [];
-   try {
-     const composer = await readJson<{ require?: Record<string, string> }>(composerPath);
-     phpDeps = Object.keys(composer?.require ?? {});
-   } catch { /* not a PHP project */ }
-   ```
-2. Pass `phpDeps` into `detectRoles` and `detectStacks` as a new parameter.
-3. In `detectStacks` signature: `async function detectStacks(root, deps, phpDeps, files, packageManager)`
-4. Add all subsequent PHP-based detection using `phpDeps.includes(...)`.
-
-**Verification:** `yarn test` passes. Add test fixture with `composer.json` and assert phpDeps are passed through.
+All tasks that previously listed `phpDeps.includes(...)` in their code examples should use `deps.includes(...)` instead.
 
 ---
 
-### T2 · Wire detect-node.ts
+### T2 · detect-node.ts — DROP
 
 **Repos:** `haus-ai-workflow` only
 
-**Context:** `src/scanner/detect-node.ts` exists and has a TODO comment but is never imported or called from `scan-project.ts`.
+**Context:** `src/scanner/detect-node.ts` re-emits `typescript6`, `nextjs`, `react19`, `vite8` — all already handled in `detectStacks`. File has TODO "merge or remove when modular scanner lands." It does **not** detect Node.js runtime.
 
-**Changes — `src/scanner/scan-project.ts`:**
-1. Import `detectNode` from `./detect-node.js`.
-2. Call it after `detectStacks` and merge result into `stacks.tooling`.
-3. Check what `detectNode` currently emits and ensure token naming matches catalog convention (e.g. `node`).
-
-**Verification:** `yarn test` passes. Repo with `.nvmrc` or `engines.node` in `package.json` gets `node` token.
+**Action:** Delete `src/scanner/detect-node.ts`. Node.js runtime detection (`.nvmrc`, `engines.node`) is already handled as a warning in `scanProject`. No wiring needed.
 
 ---
 
@@ -121,46 +102,46 @@ Sourced from full wearehaustech org scan (May 2026). Each task is self-contained
 
 ---
 
-## Phase 3 — WordPress / Elementor stack (requires T1)
+## Phase 3 — WordPress / Elementor stack
 
 ### T5 · Elementor detection via composer deps
 
 **Repos:** `haus-ai-workflow` only (catalog item `haus.wordpress-acf-elementor-jetengine-patterns` already exists)
 
-**Context:** `detectStacks` sets `wordpress` token only if `wp-config.php` exists. Elementor is installed via composer — never detected. All WP Bedrock sites use `wpackagist-plugin/elementor` or `wearehaus/elementor-pro`.
+**Context:** `detectStacks` sets `wordpress` token only if `wp-config.php` exists. Elementor is installed via composer — never detected. All WP Bedrock sites use `wpackagist-plugin/elementor` or `wearehaus/elementor-pro`. Composer deps already in `deps` (T1 done).
 
 **Changes — `src/scanner/scan-project.ts`:**
 ```ts
 // Elementor (free or pro)
 if (
-  phpDeps.includes("wpackagist-plugin/elementor") ||
-  phpDeps.includes("wearehaus/elementor-pro") ||
-  phpDeps.includes("wpackagist-theme/hello-elementor")
+  deps.includes("wpackagist-plugin/elementor") ||
+  deps.includes("wearehaus/elementor-pro") ||
+  deps.includes("wpackagist-theme/hello-elementor")
 ) {
   add("backend", "elementor");
 }
 ```
 
-Also ensure `detectRoles` adds `wordpress-bedrock-site` when `phpDeps.includes("roots/wordpress")` — this unblocks the existing `haus.wordpress-acf-elementor-jetengine-patterns` catalog item which matches on `role: wordpress-bedrock-site`.
+Also ensure `detectRoles` adds `wordpress-bedrock-site` when `deps.includes("roots/wordpress")` — this unblocks the existing `haus.wordpress-acf-elementor-jetengine-patterns` catalog item which matches on `role: wordpress-bedrock-site`.
 
 **Verification:** Test fixture with `composer.json` containing `wearehaus/elementor-pro` gets `backend: ["elementor"]`.
 
 ---
 
-### T6 · Improve ACF Pro + JetEngine detection (requires T1)
+### T6 · Improve ACF Pro + JetEngine detection
 
 **Repos:** `haus-ai-workflow` only (catalog items exist)
 
-**Context:** `haus.wordpress-acf-elementor-jetengine-patterns` exists but triggers only on role, not specific composer deps. Strengthen signal.
+**Context:** `haus.wordpress-acf-elementor-jetengine-patterns` exists but triggers only on role, not specific composer deps. Strengthen signal. Composer deps already in `deps` (T1 done).
 
 **Changes — `src/scanner/scan-project.ts`:**
 ```ts
-if (phpDeps.includes("wearehaus/advanced-custom-fields-pro") || phpDeps.includes("wpackagist-plugin/advanced-custom-fields")) {
+if (deps.includes("wearehaus/advanced-custom-fields-pro") || deps.includes("wpackagist-plugin/advanced-custom-fields")) {
   add("backend", "acf-pro");
 }
-if (phpDeps.includes("wearehaus/jet-engine")) add("backend", "jetengine");
-if (phpDeps.includes("wearehaus/jet-smart-filters")) add("backend", "jetsmartfilters");
-if (phpDeps.includes("wearehaus/gravityforms")) add("backend", "gravityforms");
+if (deps.includes("wearehaus/jet-engine")) add("backend", "jetengine");
+if (deps.includes("wearehaus/jet-smart-filters")) add("backend", "jetsmartfilters");
+if (deps.includes("wearehaus/gravityforms")) add("backend", "gravityforms");
 ```
 
 Update `haus.wordpress-acf-elementor-jetengine-patterns` manifest entry `requiresAny` to add:
@@ -172,16 +153,17 @@ Update `haus.wordpress-acf-elementor-jetengine-patterns` manifest entry `require
 
 ---
 
-### T7 · Redis detection — PHP + JS (requires T1 for PHP side)
+### T7 · Redis detection — PHP + JS
 
 **Repos:** `haus-ai-workflow` only
 
-**Context:** Redis used via `predis/predis` (Laravel) and potentially `ioredis` (Node). Currently undetected. No catalog item needed — handled by existing `haus.database-patterns` after adding token to its `requiresAny`.
+**Context:** Redis used via `predis/predis` (Laravel) and potentially `ioredis` (Node). Currently undetected. No catalog item needed — handled by existing `haus.database-patterns` after adding token to its `requiresAny`. Composer deps already in `deps` (T1 done).
 
 **Changes — `src/scanner/scan-project.ts`:**
 ```ts
-if (phpDeps.includes("predis/predis")) add("databases", "redis");
-if (deps.includes("ioredis") || deps.includes("redis")) add("databases", "redis");
+if (deps.includes("predis/predis") || deps.includes("ioredis") || deps.includes("redis")) {
+  add("databases", "redis");
+}
 ```
 
 Update `library/catalog/manifest.json` entry for `haus.database-patterns` — add `{"stack": "redis"}` to `requiresAny`.
@@ -375,16 +357,16 @@ Update `manifest.json` same entry. Update `SKILL.md` to mention MySQL.
 
 ## Phase 7 — Auth gaps
 
-### T16 · SAML2 detection + catalog item (requires T1)
+### T16 · SAML2 detection + catalog item
 
 **Repos:** both
 
-**Context:** SAML2 used in `prosang-webbokning-3` via `24slides/laravel-saml2` (composer). Laravel + SAML2 = enterprise SSO pattern.
+**Context:** SAML2 used in `prosang-webbokning-3` via `24slides/laravel-saml2` (composer). Laravel + SAML2 = enterprise SSO pattern. Composer deps already in `deps` (T1 done).
 
 **Changes — `haus-ai-workflow`:**
 - `src/scanner/scan-project.ts`:
   ```ts
-  if (phpDeps.includes("24slides/laravel-saml2") || phpDeps.includes("aacotroneo/laravel-saml2")) {
+  if (deps.includes("24slides/laravel-saml2") || deps.includes("aacotroneo/laravel-saml2")) {
     add("auth", "saml2");
   }
   ```
@@ -552,15 +534,15 @@ Manifest + fixture stub for `haus.sentry-patterns`.
 
 ---
 
-### T25 · Deployer PHP detection (requires T1)
+### T25 · Deployer PHP detection
 
 **Repos:** `haus-ai-workflow` only
 
-**Context:** Deployer (`deployer/deployer`) used in all Laravel + WP repos for SSH-based deployment. No catalog item needed — context signal.
+**Context:** Deployer (`deployer/deployer`) used in all Laravel + WP repos for SSH-based deployment. No catalog item needed — context signal. Composer deps already in `deps` (T1 done).
 
 **Changes — `src/scanner/scan-project.ts`:**
 ```ts
-if (phpDeps.includes("deployer/deployer")) add("tooling", "deployer-php");
+if (deps.includes("deployer/deployer")) add("tooling", "deployer-php");
 ```
 
 ---
@@ -627,33 +609,33 @@ Manifest + fixture stub for `haus.supabase-patterns`.
 
 ## Summary table
 
-| Task | Phase | Repos | Deps |
-|------|-------|-------|------|
-| T1 · composer.json parsing | 1 | haus-ai-workflow | — |
-| T2 · wire detect-node.ts | 1 | haus-ai-workflow | — |
-| T3 · Vitest | 2 | both | T1 not required |
-| T4 · Jest | 2 | both | — |
-| T5 · Elementor | 3 | haus-ai-workflow | T1 |
-| T6 · ACF + JetEngine | 3 | haus-ai-workflow | T1 |
-| T7 · Redis | 3 | haus-ai-workflow + catalog update | T1 (PHP side) |
-| T8 · React Router v7 | 4 | both | — |
-| T9 · TypeScript rename | 4 | both | — |
-| T10 · Tailwind token | 4 | haus-ai-workflow | — |
-| T11 · Shadcn token | 4 | haus-ai-workflow | — |
-| T12 · Sanity | 5 | both | — |
-| T13 · Strapi | 5 | both | — |
-| T14 · Prisma | 5 | both | — |
-| T15 · MySQL fix | 6 | haus-ai-workflow + catalog update | — |
-| T16 · SAML2 | 7 | both | T1 |
-| T17 · NextAuth | 7 | both | — |
-| T18 · Expo | 8 | both | — |
-| T19 · Prettier + ESLint enforcement | 9 | both | — |
-| T20 · i18next | 9 | both | — |
-| T21 · BullMQ | 9 | both | — |
-| T22 · Docker | 9 | haus-ai-workflow | — |
-| T23 · PM2 | 9 | haus-ai-workflow | — |
-| T24 · Sentry | 9 | both | — |
-| T25 · Deployer PHP | 9 | haus-ai-workflow | T1 |
-| T26 · Stripe | 10 | both | — |
-| T27 · Qliro | 10 | both | — |
-| T28 · Supabase | 10 | both | — |
+| Task | Phase | Repos | Status |
+|------|-------|-------|--------|
+| T1 · composer.json parsing | 1 | haus-ai-workflow | ✅ Done — `deps` includes PHP packages |
+| T2 · detect-node.ts | 1 | haus-ai-workflow | ❌ Dropped — file is redundant, delete it |
+| T3 · Vitest | 2 | both | ⬜ Todo |
+| T4 · Jest | 2 | both | ⬜ Todo |
+| T5 · Elementor | 3 | haus-ai-workflow | ⬜ Todo |
+| T6 · ACF + JetEngine | 3 | haus-ai-workflow | ⬜ Todo |
+| T7 · Redis | 3 | haus-ai-workflow + catalog update | ⬜ Todo |
+| T8 · React Router v7 | 4 | both | ⬜ Todo |
+| T9 · TypeScript rename | 4 | both | ⬜ Todo |
+| T10 · Tailwind token | 4 | haus-ai-workflow | ⬜ Todo |
+| T11 · Shadcn token | 4 | haus-ai-workflow | ⬜ Todo |
+| T12 · Sanity | 5 | both | ⬜ Todo |
+| T13 · Strapi | 5 | both | ⬜ Todo |
+| T14 · Prisma | 5 | both | ⬜ Todo |
+| T15 · MySQL fix | 6 | haus-ai-workflow + catalog update | ⬜ Todo |
+| T16 · SAML2 | 7 | both | ⬜ Todo |
+| T17 · NextAuth | 7 | both | ⬜ Todo |
+| T18 · Expo | 8 | both | ⬜ Todo |
+| T19 · Prettier + ESLint enforcement | 9 | both | ⬜ Todo |
+| T20 · i18next | 9 | both | ⬜ Todo |
+| T21 · BullMQ | 9 | both | ⬜ Todo |
+| T22 · Docker | 9 | haus-ai-workflow | ⬜ Todo |
+| T23 · PM2 | 9 | haus-ai-workflow | ⬜ Todo |
+| T24 · Sentry | 9 | both | ⬜ Todo |
+| T25 · Deployer PHP | 9 | haus-ai-workflow | ⬜ Todo |
+| T26 · Stripe | 10 | both | ⬜ Todo |
+| T27 · Qliro | 10 | both | ⬜ Todo |
+| T28 · Supabase | 10 | both | ⬜ Todo |
