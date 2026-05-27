@@ -26,10 +26,12 @@ export type LockItem = {
   reviewStatus?: string;
 };
 
-export async function checkLock(root: string): Promise<{ ok: boolean; count: number }> {
-  const lock = (await readJson<Array<{ id: string; version?: string }>>(hausPath(root, "haus.lock.json"))) ?? [];
+export async function checkLock(root: string): Promise<{ ok: boolean; count: number; catalogRef: string | null }> {
+  const lock = (await readJson<LockItem[]>(hausPath(root, "haus.lock.json"))) ?? [];
   const hasValidVersions = lock.every((item) => !item.version || normalizeVersion(item.version) !== null);
-  return { ok: lock.length > 0 && hasValidVersions, count: lock.length };
+  // All items in a lock file share the same catalogRef (set at install time).
+  const catalogRef = lock[0]?.catalogRef ?? null;
+  return { ok: lock.length > 0 && hasValidVersions, count: lock.length, catalogRef };
 }
 
 export async function applyLock(root: string): Promise<{ before: string; after: string }> {

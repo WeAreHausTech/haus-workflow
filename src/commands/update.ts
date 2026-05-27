@@ -1,6 +1,6 @@
 import path from "node:path";
 
-import { syncRemoteCatalog } from "../catalog/remote-catalog.js";
+import { fetchLatestCatalogTag, syncRemoteCatalog } from "../catalog/remote-catalog.js";
 import { diffGeneratedFiles, summarizeLockDiff } from "../update/diff-generated-files.js";
 import { applyLock, checkLock, diffLock, hasLocalOverrides } from "../update/lockfile.js";
 import { fetchNpmVersionStatus } from "../update/npm-version.js";
@@ -15,12 +15,23 @@ export async function runUpdate(options: { check?: boolean }): Promise<void> {
   if (options.check) {
     const pkgJson = await readJson<{ version?: string }>(path.join(packageRoot(), "package.json"));
     const currentVersion = pkgJson?.version ?? "0.0.0";
-    const status = await checkLock(root);
-    const npmVersion = await fetchNpmVersionStatus(currentVersion);
+    const [status, npmVersion, latestCatalogTag] = await Promise.all([
+      checkLock(root),
+      fetchNpmVersionStatus(currentVersion),
+      fetchLatestCatalogTag(),
+    ]);
+    const installedRef = status.catalogRef ?? "main";
+    const catalogRefBehind =
+      latestCatalogTag !== null && installedRef !== latestCatalogTag
+        ? `installed from ${installedRef}, latest tag is ${latestCatalogTag}`
+        : false;
     log(
       JSON.stringify(
         {
           ...status,
+          installedCatalogRef: installedRef,
+          latestCatalogTag,
+          catalogRefBehind,
           localOverrides: await hasLocalOverrides(root),
           summary: diffGeneratedFiles(),
           npmVersion,

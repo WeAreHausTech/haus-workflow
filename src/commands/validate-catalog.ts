@@ -1,13 +1,24 @@
+import fs from "node:fs";
 import path from "node:path";
 
 import { readAllowedStacks } from "../catalog/allowed-stacks.js";
-import { FORBIDDEN_TAGS } from "../catalog/validation-rules.js";
+import {
+  ANY_NPX_PATTERN,
+  ALLOWED_NPX_PATTERN,
+  BANNED_AGENT_PHRASES,
+  FORBIDDEN_TAGS,
+  HTTP_URL_PATTERN,
+  PLACEHOLDER_PATTERN,
+  REQUIRED_AGENT_SECTIONS,
+  REQUIRED_SKILL_SECTIONS,
+  RISKY_INSTALL_PATTERNS,
+} from "../catalog/validation-rules.js";
 import type { CatalogItem } from "../types.js";
 import { readJson } from "../utils/fs.js";
 import { error, log } from "../utils/logger.js";
 import { packageRoot } from "../utils/paths.js";
 
-async function auditForbiddenStacks(items: CatalogItem[]): Promise<string[]> {
+function auditForbiddenStacks(items: CatalogItem[]): string[] {
   const failures: string[] = [];
   for (const item of items) {
     const tags = Array.isArray(item.tags) ? item.tags : [];
@@ -19,7 +30,7 @@ async function auditForbiddenStacks(items: CatalogItem[]): Promise<string[]> {
   return failures;
 }
 
-async function auditManifestStructure(items: CatalogItem[]): Promise<string[]> {
+function auditManifestStructure(items: CatalogItem[]): string[] {
   const failures: string[] = [];
   const seenIds = new Map<string, number>();
   const seenPaths = new Map<string, string>();
@@ -49,7 +60,7 @@ async function auditManifestStructure(items: CatalogItem[]): Promise<string[]> {
       seenIds.set(item.id, i);
     }
 
-    if (item.type === "skill" || item.type === "agent") {
+    if (item.type === "skill" || item.type === "agent" || item.type === "template") {
       if (!item.path) {
         failures.push(`${item.id}: missing path`);
       } else {
@@ -69,7 +80,7 @@ async function auditManifestStructure(items: CatalogItem[]): Promise<string[]> {
       }
 
       for (const ref of item.references ?? []) {
-        if (/^http:\/\//i.test(ref)) {
+        if (HTTP_URL_PATTERN.test(ref)) {
           failures.push(`${item.id}: reference uses insecure http:// URL: ${ref}`);
         }
       }
@@ -79,10 +90,95 @@ async function auditManifestStructure(items: CatalogItem[]): Promise<string[]> {
 }
 
 /**
+ * Checks file existence, required sections, and banned phrases for each item.
+ * Only runs when `manifestDir` is provided (i.e. the catalog files are on disk).
+ */
+function auditShippedFiles(manifestDir: string, items: CatalogItem[]): string[] {
+  const failures: string[] = [];
+  for (const item of items) {
+    if (!item.path) continue;
+    const absPath = path.join(manifestDir, item.path);
+
+    if (item.type === "skill") {
+      const skillMd = path.join(absPath, "SKILL.md");
+      if (!fs.existsSync(skillMd)) {
+        failures.push(`${item.id}: missing ${path.relative(manifestDir, skillMd)}`);
+        continue;
+      }
+      const text = fs.readFileSync(skillMd, "utf8");
+      for (const section of REQUIRED_SKILL_SECTIONS) {
+        if (!text.includes(section)) failures.push(`${item.id}: SKILL.md missing ${section}`);
+      }
+    } else if (item.type === "agent") {
+      if (!fs.existsSync(absPath)) {
+        failures.push(`${item.id}: missing agent file ${item.path}`);
+        continue;
+      }
+      const text = fs.readFileSync(absPath, "utf8");
+      if (!text.startsWith("---")) failures.push(`${item.id}: agent file missing YAML frontmatter`);
+      for (const section of REQUIRED_AGENT_SECTIONS) {
+        if (!text.includes(section)) failures.push(`${item.id}: agent file missing ${section}`);
+      }
+      const lower = text.toLowerCase();
+      for (const phrase of BANNED_AGENT_PHRASES) {
+        if (lower.includes(phrase)) failures.push(`${item.id}: agent file contains disallowed phrase "${phrase}"`);
+      }
+    } else if (item.type === "template") {
+      if (!fs.existsSync(absPath)) {
+        failures.push(`${item.id}: missing template file ${item.path}`);
+      }
+    }
+  }
+  return failures;
+}
+
+/**
+ * Walks skills/ and agents/ dirs looking for placeholder markers and risky install patterns.
+ * Only runs when the catalog directory is available on disk.
+ */
+function auditMarkdownContent(manifestDir: string): string[] {
+  const failures: string[] = [];
+  const dirs = ["skills", "agents"];
+  for (const dir of dirs) {
+    const abs = path.join(manifestDir, dir);
+    if (!fs.existsSync(abs)) continue;
+    walkMd(abs, (file) => {
+      const text = fs.readFileSync(file, "utf8");
+      const rel = path.relative(manifestDir, file);
+      const lines = text.split(/\r?\n/);
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i] ?? "";
+        if (PLACEHOLDER_PATTERN.test(line)) {
+          failures.push(`${rel}:${i + 1}: TODO or placeholder in shipped content`);
+        }
+        if (RISKY_INSTALL_PATTERNS.some((re) => re.test(line))) {
+          failures.push(`${rel}:${i + 1}: risky install pattern`);
+        }
+        if (ANY_NPX_PATTERN.test(line) && !ALLOWED_NPX_PATTERN.test(line)) {
+          failures.push(`${rel}:${i + 1}: disallowed npx (only npx tsx allowed)`);
+        }
+      }
+    });
+  }
+  return failures;
+}
+
+function walkMd(dir: string, fn: (file: string) => void): void {
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) walkMd(full, fn);
+    else if (entry.name.endsWith(".md")) fn(full);
+  }
+}
+
+/**
  * `haus validate-catalog <manifest-path>`
  *
  * Validates a catalog manifest at an explicit path. Used by catalog repo CI:
  *   haus validate-catalog ./manifest.json
+ *
+ * When run from the catalog repo root, also validates file existence,
+ * required sections, banned phrases, and risky install patterns.
  */
 export async function runValidateCatalog(manifestPath: string | undefined): Promise<void> {
   if (!manifestPath) {
@@ -92,6 +188,7 @@ export async function runValidateCatalog(manifestPath: string | undefined): Prom
   }
 
   const abs = path.resolve(process.cwd(), manifestPath);
+  const manifestDir = path.dirname(abs);
   const data = await readJson<{ items: CatalogItem[] }>(abs);
   if (!data?.items) {
     error(`Could not read catalog manifest at ${abs}`);
@@ -100,10 +197,10 @@ export async function runValidateCatalog(manifestPath: string | undefined): Prom
   }
 
   const items = data.items;
-  const [structureFailures, stackFailures] = await Promise.all([
-    auditManifestStructure(items),
-    auditForbiddenStacks(items),
-  ]);
+  const structureFailures = auditManifestStructure(items);
+  const stackFailures = auditForbiddenStacks(items);
+  const fileFailures = auditShippedFiles(manifestDir, items);
+  const contentFailures = auditMarkdownContent(manifestDir);
 
   // Allowlist lives in the CLI package, not in the catalog repo.
   const allowed = new Set((await readAllowedStacks(packageRoot())).map((x) => x.toLowerCase()));
@@ -118,7 +215,9 @@ export async function runValidateCatalog(manifestPath: string | undefined): Prom
           tag !== "security" &&
           tag !== "quality" &&
           tag !== "review" &&
-          tag !== "workflow"
+          tag !== "workflow" &&
+          tag !== "baseline" &&
+          tag !== "project-instructions"
         ) {
           tagFailures.push(`${item.id}: tag not in allowlist: "${tag}"`);
         }
@@ -126,7 +225,7 @@ export async function runValidateCatalog(manifestPath: string | undefined): Prom
     }
   }
 
-  const allFailures = [...structureFailures, ...stackFailures, ...tagFailures];
+  const allFailures = [...structureFailures, ...stackFailures, ...fileFailures, ...contentFailures, ...tagFailures];
   if (allFailures.length) {
     allFailures.forEach((f) => error(f));
     process.exitCode = 1;

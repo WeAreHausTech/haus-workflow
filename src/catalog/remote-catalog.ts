@@ -125,6 +125,29 @@ export async function syncRemoteCatalog(): Promise<SyncResult> {
   return { newItems, unchanged, failed };
 }
 
+const CATALOG_TAGS_API_URL = "https://api.github.com/repos/WeAreHausTech/haus-workflow-catalog/tags";
+
+/**
+ * Fetches the latest release tag from the catalog GitHub repo.
+ * Returns null if the request fails or no tags exist.
+ * Timeout: 5 seconds. Does not throw.
+ */
+export async function fetchLatestCatalogTag(): Promise<string | null> {
+  // Skip in test environments to avoid network calls.
+  if (process.env["HAUS_CATALOG_REMOTE_BASE"]) return null;
+  try {
+    const res = await fetch(CATALOG_TAGS_API_URL, {
+      signal: AbortSignal.timeout(5_000),
+      headers: { Accept: "application/vnd.github+json" },
+    });
+    if (!res.ok) return null;
+    const tags = (await res.json()) as Array<{ name: string }>;
+    return tags[0]?.name ?? null;
+  } catch {
+    return null;
+  }
+}
+
 // Returns milliseconds since the cache manifest was last written, or null if absent.
 export async function getCacheManifestAge(): Promise<number | null> {
   try {
