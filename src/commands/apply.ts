@@ -30,6 +30,7 @@ export async function runApply(options: { dryRun?: boolean; write?: boolean; sel
       log("Recommendation contains no catalog items. Writing core files only.");
       selectedIds = [];
     } else {
+      const items = rec.recommended;
       const choices = items.map((item) => ({
         name: `${item.id}  [${item.confidenceLevel}] — ${item.reason}`,
         value: item.id,
@@ -40,7 +41,7 @@ export async function runApply(options: { dryRun?: boolean; write?: boolean; sel
         choices,
         pageSize: Math.min(20, items.length + 2),
       });
-      selectedIds = chosen;
+      selectedIds = chosen as string[];
       log(`Selected ${selectedIds.length} of ${items.length} catalog items.`);
     }
   }
