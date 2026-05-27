@@ -298,6 +298,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@haus-tech/haus-workflow@workspace:."
   dependencies:
+    "@inquirer/checkbox": "npm:5.1.5"
     "@release-it/conventional-changelog": "npm:11.0.0"
     "@types/fs-extra": "npm:11.0.4"
     "@types/node": "npm:22.19.17"
@@ -376,7 +377,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@inquirer/checkbox@npm:^5.1.4":
+"@inquirer/checkbox@npm:5.1.5, @inquirer/checkbox@npm:^5.1.4":
   version: 5.1.5
   resolution: "@inquirer/checkbox@npm:5.1.5"
   dependencies:

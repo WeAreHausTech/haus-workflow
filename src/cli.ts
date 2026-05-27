@@ -60,7 +60,12 @@ program.command("scan").option("--json").action(runScan);
 program.command("recommend").option("--json").action(runRecommend);
 program.command("setup-project").option("--guided").option("--fast").option("--json").action(runSetupProject);
 program.command("doctor").option("--hooks", "Verify .claude/settings.json matches the hook contract").action(runDoctor);
-program.command("apply").option("--dry-run").option("--write").action(runApply);
+program
+  .command("apply")
+  .option("--dry-run")
+  .option("--write")
+  .option("--select", "Interactively select catalog items before applying")
+  .action(runApply);
 program.command("undo").option("-y, --yes", "Skip confirmation").action(runUndo);
 program.command("explain-recommendation").option("--json").action(runExplainRecommendation);
 program

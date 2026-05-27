@@ -1,15 +1,50 @@
-import { writeClaudeFiles } from "../claude/write-claude-files.js";
-import { log } from "../utils/logger.js";
-import { displayPath } from "../utils/paths.js";
+import checkbox from "@inquirer/checkbox";
 
-export async function runApply(options: { dryRun?: boolean; write?: boolean }): Promise<void> {
+import { writeClaudeFiles } from "../claude/write-claude-files.js";
+import type { Recommendation } from "../types.js";
+import { readJson } from "../utils/fs.js";
+import { error, log } from "../utils/logger.js";
+import { displayPath, hausPath } from "../utils/paths.js";
+
+export async function runApply(options: { dryRun?: boolean; write?: boolean; select?: boolean }): Promise<void> {
   if (!options.dryRun && !options.write) {
     log("Use --dry-run or --write");
     return;
   }
   const root = process.cwd();
   const isDryRun = Boolean(options.dryRun) && !options.write;
-  const files = await writeClaudeFiles(root, isDryRun);
+
+  let selectedIds: string[] | undefined;
+
+  if (options.select) {
+    if (!process.stdin.isTTY) {
+      error("--select requires an interactive terminal (stdin is not a TTY)");
+      process.exitCode = 1;
+      return;
+    }
+    const rec = await readJson<Recommendation>(hausPath(root, "recommendation.json"));
+    const items = rec?.recommended ?? [];
+    if (items.length === 0) {
+      log("No catalog items in recommendation — run `haus recommend` first.");
+      // Still proceed to write core files.
+      selectedIds = [];
+    } else {
+      const choices = items.map((item) => ({
+        name: `${item.id}  [${item.confidenceLevel}] — ${item.reason}`,
+        value: item.id,
+        checked: true,
+      }));
+      const chosen = await checkbox({
+        message: "Select catalog items to apply (space to toggle, enter to confirm):",
+        choices,
+        pageSize: Math.min(20, items.length + 2),
+      });
+      selectedIds = chosen;
+      log(`Selected ${selectedIds.length} of ${items.length} catalog items.`);
+    }
+  }
+
+  const files = await writeClaudeFiles(root, isDryRun, selectedIds);
   if (isDryRun) {
     log(`Dry-run complete — ${files.length} file(s) planned, none written. Run --write to apply.`);
   } else {
