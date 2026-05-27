@@ -11,9 +11,6 @@
     "url": "https://github.com/WeAreHausTech/haus-workflow.git"
   },
   "homepage": "https://github.com/WeAreHausTech/haus-workflow",
-  "bugs": {
-    "url": "https://github.com/WeAreHausTech/haus-workflow/issues"
-  },
   "files": [
     "dist",
     "library/global",
