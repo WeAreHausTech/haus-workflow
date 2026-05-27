@@ -56,17 +56,12 @@ test("writeClaudeFiles selectedIds filter: empty selection skips catalog items b
   const rec = JSON.parse(readFileSync(path.join(temp, ".haus-workflow/recommendation.json"), "utf8"));
   const allItems = rec.recommended ?? [];
 
-  // Inline helper — write a tiny ESM script that calls writeClaudeFiles with selectedIds=[].
-  const helperScript = `
-import { writeClaudeFiles } from "${path.resolve("dist/cli.js").replace(/\\/g, "/")}";
-`.trim();
   // Can't import internals from the single-bundle dist. Use approach: apply all, then
   // re-apply with a trimmed recommendation.json (0 items) and verify lock reflects it.
   // This mirrors the real --select behaviour where selectedIds drives filtering.
 
   // First apply: gets all recommended items.
   execaSync("node", [cli, "apply", "--write"], { cwd: temp });
-  const lockAll = JSON.parse(readFileSync(path.join(temp, ".haus-workflow/haus.lock.json"), "utf8"));
 
   // Trim recommendation to zero catalog items, re-apply, check lock empties.
   writeFileSync(
