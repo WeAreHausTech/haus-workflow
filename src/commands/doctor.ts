@@ -7,6 +7,7 @@ import { isHookEnabled, type HookKey } from "../claude/load-hooks-config.js";
 import { verifyProjectSettingsHooksContract } from "../claude/verify-hooks-contract.js";
 import { BLOCK_BEGIN } from "../claude/write-root-claude-md.js";
 import { readContextOrScan } from "../scanner/read-context.js";
+import { fetchNpmVersionStatus, NPM_PACKAGE_NAME } from "../update/npm-version.js";
 import { hashText, readJson, readText } from "../utils/fs.js";
 import { error, log, warn } from "../utils/logger.js";
 import { hausPath, packageRoot } from "../utils/paths.js";
@@ -124,5 +125,17 @@ export async function runDoctor(options?: { hooks?: boolean }): Promise<void> {
     } else {
       log(`- CATALOG CACHE: OK (${cacheAgeDays}d old)`);
     }
+  }
+
+  const pkgJson = await readJson<{ version?: string }>(path.join(packageRoot(), "package.json"));
+  const currentVersion = pkgJson?.version ?? "0.0.0";
+  const npmStatus = await fetchNpmVersionStatus(currentVersion);
+  if (npmStatus.updateAvailable && npmStatus.latest !== null) {
+    warn(`- CLI UPDATE: ${currentVersion} → ${npmStatus.latest} available (run: npm install -g ${NPM_PACKAGE_NAME})`);
+    process.exitCode = 1;
+  } else if (npmStatus.latest !== null) {
+    log(`- CLI: ${currentVersion} (up to date)`);
+  } else {
+    log(`- CLI: ${currentVersion} (version check unavailable)`);
   }
 }
