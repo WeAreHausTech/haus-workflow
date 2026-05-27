@@ -445,7 +445,7 @@ Order matters: catalog public → CLI public → npm publish.
 - [x] P4e — Delete `plugin/` directory; hook config inlined — PR #30
 - [x] P5 — Global install layout (`haus install` / `haus uninstall`, HAUS-MANAGED markers, settings.json merge, `haus-workflow` all-in-one skill, 5 legacy skills dropped/outsourced)
 - [x] P6 — Minimal root `CLAUDE.md` with `@import` to managed `haus-way-of-work.md` + `project.md`
-- [ ] P7 — Catalog repo split (incl. way-of-work template + outsourced skills)
-- [ ] P8 — B4 remote fetch + `haus update` self-sync
-- [ ] P9 — Public + npm scope
-- [ ] P10 — Pre-publish gate + v0.1 release
+- [x] P7 — Catalog repo split (incl. way-of-work template + outsourced skills) — PR #34
+- [x] P8 — B4 remote fetch + `haus update` self-sync — PR #35
+- [x] P9 — Public + npm scope — PR #36 (P9a code) + P9b manual
+- [x] P10 — Pre-publish gate + v0.1 release — PR #37
