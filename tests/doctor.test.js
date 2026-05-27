@@ -77,7 +77,8 @@ test("doctor reports CLI version line", () => {
   execaSync("node", [cli, "recommend", "--json"], { cwd: temp });
   execaSync("node", [cli, "apply", "--write"], { cwd: temp });
   const r = execaSync("node", [cli, "doctor"], { cwd: temp, reject: false });
-  const out = r.stdout ?? "";
+  // warn() writes to stderr; check both streams since update-available uses warn().
+  const out = (r.stdout ?? "") + (r.stderr ?? "");
   // Should contain a CLI version line (up to date, update available, or check unavailable)
   assert.equal(out.includes("- CLI"), true);
 });

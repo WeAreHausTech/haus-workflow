@@ -1,6 +1,6 @@
 import { compareVersions, normalizeVersion } from "../utils/versions.js";
 
-const NPM_PACKAGE_NAME = "@haus-tech/haus-workflow";
+export const NPM_PACKAGE_NAME = "@haus-tech/haus-workflow";
 
 export type NpmVersionStatus = {
   current: string;

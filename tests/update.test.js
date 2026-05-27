@@ -29,14 +29,19 @@ test("update --check output includes npmVersion field", () => {
   const temp = mkdtempSync(path.join(os.tmpdir(), "haus-update-npmver-"));
   mkdirSync(path.join(temp, ".haus-workflow"), { recursive: true });
   writeFileSync(path.join(temp, "package.json"), JSON.stringify({ name: "npmver-temp", packageManager: "yarn@4.5.3" }, null, 2));
-  writeFileSync(path.join(temp, ".haus-workflow/haus.lock.json"), JSON.stringify([], null, 2));
+  // Valid lock item so checkLock returns ok:true and exit code is 0.
+  writeFileSync(
+    path.join(temp, ".haus-workflow/haus.lock.json"),
+    JSON.stringify([{ id: "x", type: "skill", source: "haus", version: "0.1.0", hash: "sha256-abc", installMode: "copied", paths: [] }], null, 2)
+  );
 
   const r = execaSync("node", [path.resolve("dist/cli.js"), "update", "--check"], { cwd: temp, reject: false });
+  assert.equal(r.exitCode, 0);
   const parsed = JSON.parse(r.stdout);
   assert.equal("npmVersion" in parsed, true);
   assert.equal(typeof parsed.npmVersion.current, "string");
   assert.equal(typeof parsed.npmVersion.updateAvailable, "boolean");
-  // latest may be null if network unavailable — that's OK
+  assert.ok(parsed.npmVersion.latest === null || typeof parsed.npmVersion.latest === "string");
 });
 
 test("update recomputes hash from tracked file paths", () => {
