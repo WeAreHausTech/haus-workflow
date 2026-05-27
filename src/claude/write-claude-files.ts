@@ -126,7 +126,7 @@ export async function writeClaudeFiles(root: string, dryRun: boolean, selectedId
     const cachePath = cachedItem?.path ? path.join(CACHE_DIR, cachedItem.path) : null;
     const sourcePath =
       cachePath && (await fs.pathExists(cachePath)) ? cachePath : path.join(pkgRoot, manifestItem.path);
-    const target = item.type === "agent" ? "agents" : "skills";
+    const target = item.type === "agent" ? "agents" : item.type === "template" ? "templates" : "skills";
     const destination = claudePath(root, target, path.basename(sourcePath));
     if (await fs.pathExists(sourcePath)) {
       if (dryRun) {

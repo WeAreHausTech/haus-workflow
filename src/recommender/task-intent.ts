@@ -303,6 +303,10 @@ export function computeRuleIntents(rule: { id: string; tags?: string[]; ecosyste
     intents.add("admin-ui");
     intents.add("storefront");
   }
+  // Styling and build tool ecosystems are frontend-scoped.
+  if (eco === "tailwind" || eco === "vite") {
+    intents.add("frontend");
+  }
   if (eco === "nx" || eco === "turbo") {
     intents.add("monorepo");
   }

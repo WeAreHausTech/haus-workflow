@@ -1,20 +1,28 @@
 {
   "version": "0.1.0",
-  "_note": "Stable fixture for CLI tests. Decoupled from production catalog repo. Update manually when catalog schema changes.",
   "items": [
     {
       "id": "haus.global-engineering-rules",
+      "version": "1.0.0",
       "source": "haus",
       "type": "skill",
-      "path": "tests/fixtures/catalog/skills/global-engineering-rules",
+      "path": "skills/global-engineering-rules",
       "title": "Haus global engineering rules",
       "purpose": "Provide baseline deterministic engineering, validation, and security guardrails.",
       "whenToUse": "Use as default baseline in supported Haus workflows.",
       "whenNotToUse": "Do not use for unsupported stacks or non-development workflows.",
-      "references": [],
-      "safetyNotes": ["Never read secrets or customer exports."],
+      "references": [
+        "references/conventions.md"
+      ],
+      "safetyNotes": [
+        "Never read secrets or customer exports."
+      ],
       "tokenBudget": 1800,
-      "tags": ["haus", "quality", "security"],
+      "tags": [
+        "haus",
+        "quality",
+        "security"
+      ],
       "repoRoles": [],
       "requiresAny": [],
       "tokenEstimate": 1800,
@@ -23,52 +31,103 @@
     },
     {
       "id": "haus.nextjs-patterns",
+      "version": "1.0.0",
       "source": "haus",
       "type": "skill",
-      "path": "tests/fixtures/catalog/skills/nextjs-patterns",
+      "path": "skills/nextjs-patterns",
       "title": "Haus Next.js patterns",
       "purpose": "Guide Next.js route, server/client boundary, and middleware-safe changes.",
       "whenToUse": "Use for App Router pages, layouts, route handlers, and middleware behavior updates.",
       "whenNotToUse": "Do not use for backend-only or non-Next framework tasks.",
-      "references": ["references/scope.md", "references/workflow.md", "https://nextjs.org/llms.txt"],
+      "references": [
+        "references/conventions.md",
+        "references/scope.md",
+        "references/workflow.md",
+        "https://nextjs.org/llms.txt"
+      ],
       "tokenBudget": 1200,
-      "tags": ["frontend", "nextjs", "react", "typescript"],
-      "repoRoles": ["next-app"],
-      "requiresAny": [{ "stack": "nextjs" }, { "dependency": "next" }],
+      "tags": [
+        "frontend",
+        "nextjs",
+        "react",
+        "typescript"
+      ],
+      "repoRoles": [
+        "next-app"
+      ],
+      "requiresAny": [
+        {
+          "stack": "nextjs"
+        },
+        {
+          "dependency": "next"
+        }
+      ],
       "ecosystem": "nextjs",
       "tokenEstimate": 2600,
       "installMode": "copy-selected"
     },
     {
       "id": "haus.react19-patterns",
+      "version": "1.0.0",
       "source": "haus",
       "type": "skill",
-      "path": "tests/fixtures/catalog/skills/react19-patterns",
+      "path": "skills/react19-patterns",
       "title": "Haus React 19 patterns",
       "purpose": "Guide React component, hook, and state-boundary changes.",
       "whenToUse": "Use for React component behavior, hooks, and UI state flow updates.",
       "whenNotToUse": "Do not use for backend-only changes or framework routing config tasks.",
-      "references": ["references/scope.md", "references/workflow.md", "https://react.dev/"],
+      "references": [
+        "references/conventions.md",
+        "references/scope.md",
+        "references/workflow.md",
+        "https://react.dev/"
+      ],
       "tokenBudget": 1200,
-      "tags": ["frontend", "react", "typescript"],
-      "repoRoles": ["react-app", "next-app", "design-system"],
-      "requiresAny": [{ "stack": "react19" }, { "dependency": "react" }],
+      "tags": [
+        "frontend",
+        "react",
+        "typescript"
+      ],
+      "repoRoles": [
+        "react-app",
+        "next-app",
+        "design-system"
+      ],
+      "requiresAny": [
+        {
+          "stack": "react19"
+        },
+        {
+          "dependency": "react"
+        }
+      ],
       "ecosystem": "react",
       "tokenEstimate": 2200,
       "installMode": "copy-selected"
     },
     {
       "id": "haus.typescript6-patterns",
+      "version": "1.0.0",
       "source": "haus",
       "type": "skill",
-      "path": "tests/fixtures/catalog/skills/typescript6-patterns",
+      "path": "skills/typescript6-patterns",
       "title": "Haus TypeScript patterns",
       "purpose": "Guide TypeScript contract and migration-safe typing changes.",
       "whenToUse": "Use for shared types, DTOs, interface boundaries, and type-safe refactors.",
       "whenNotToUse": "Do not use for runtime-only changes without type-contract impact.",
-      "references": ["references/scope.md", "references/workflow.md", "https://www.typescriptlang.org/docs/handbook/"],
+      "references": [
+        "references/conventions.md",
+        "references/scope.md",
+        "references/workflow.md",
+        "https://www.typescriptlang.org/docs/handbook/"
+      ],
       "tokenBudget": 1200,
-      "tags": ["typescript", "frontend", "backend"],
+      "tags": [
+        "typescript",
+        "frontend",
+        "backend"
+      ],
       "repoRoles": [
         "next-app",
         "react-app",
@@ -78,28 +137,52 @@
         "shared-package"
       ],
       "requiresAny": [
-        { "stack": "typescript" },
-        { "dependency": "typescript" }
+        {
+          "stack": "typescript"
+        },
+        {
+          "dependency": "typescript"
+        }
       ],
       "tokenEstimate": 2200,
-      "installMode": "copy-selected"
+      "installMode": "copy-selected",
+      "ecosystem": "typescript"
     },
     {
       "id": "haus.vite8-patterns",
+      "version": "1.0.0",
       "source": "haus",
       "type": "skill",
-      "path": "tests/fixtures/catalog/skills/vite8-patterns",
+      "path": "skills/vite8-patterns",
       "title": "Haus Vite 8 patterns",
       "purpose": "Guide Vite config, plugin wiring, and deterministic build pipeline changes.",
       "whenToUse": "Use for vite config, alias/plugin, and build mode behavior updates.",
       "whenNotToUse": "Do not use for framework feature logic without build pipeline impact.",
-      "references": ["references/scope.md", "references/workflow.md", "https://vite.dev/guide", "https://vitest.dev/guide"],
+      "references": [
+        "references/conventions.md",
+        "references/scope.md",
+        "references/workflow.md",
+        "https://vite.dev/guide",
+        "https://vitest.dev/guide"
+      ],
       "tokenBudget": 1200,
-      "tags": ["vite8", "frontend", "typescript"],
-      "repoRoles": ["vite-app", "react-app", "vue-app"],
+      "tags": [
+        "vite8",
+        "frontend",
+        "typescript"
+      ],
+      "repoRoles": [
+        "vite-app",
+        "react-app",
+        "vue-app"
+      ],
       "requiresAny": [
-        { "stack": "vite8" },
-        { "dependency": "vite" }
+        {
+          "stack": "vite8"
+        },
+        {
+          "dependency": "vite"
+        }
       ],
       "ecosystem": "vite",
       "tokenEstimate": 1800,
@@ -107,21 +190,42 @@
     },
     {
       "id": "haus.vendure-plugin-patterns",
+      "version": "1.0.0",
       "source": "haus",
       "type": "skill",
-      "path": "tests/fixtures/catalog/skills/vendure-plugin-patterns",
+      "path": "skills/vendure-plugin-patterns",
       "title": "Haus Vendure plugin patterns",
       "purpose": "Guide Vendure plugin boundary, schema, and migration-safe development.",
       "whenToUse": "Use for Vendure plugin resolvers, services, entities, and plugin migrations.",
       "whenNotToUse": "Do not use for storefront-only UI changes or non-Vendure APIs.",
-      "references": ["references/scope.md", "references/workflow.md", "https://docs.vendure.io/llms.txt"],
+      "references": [
+        "references/conventions.md",
+        "references/scope.md",
+        "references/workflow.md",
+        "https://docs.vendure.io/llms.txt"
+      ],
       "tokenBudget": 1200,
-      "tags": ["backend", "vendure", "nestjs", "graphql", "typescript"],
-      "repoRoles": ["vendure-plugin", "vendure-app"],
+      "tags": [
+        "backend",
+        "vendure",
+        "nestjs",
+        "graphql",
+        "typescript"
+      ],
+      "repoRoles": [
+        "vendure-plugin",
+        "vendure-app"
+      ],
       "requiresAny": [
-        { "stack": "vendure3" },
-        { "dependency": "@vendure/core" },
-        { "packageNamePattern": "@haus/vendure-*" }
+        {
+          "stack": "vendure3"
+        },
+        {
+          "dependency": "@vendure/core"
+        },
+        {
+          "packageNamePattern": "@haus/vendure-*"
+        }
       ],
       "ecosystem": "vendure",
       "tokenEstimate": 3400,
@@ -129,20 +233,37 @@
     },
     {
       "id": "haus.laravel-patterns",
+      "version": "1.0.0",
       "source": "haus",
       "type": "skill",
-      "path": "tests/fixtures/catalog/skills/laravel-patterns",
+      "path": "skills/laravel-patterns",
       "title": "Haus Laravel patterns",
       "purpose": "Guide Laravel domain, routing, policy, and persistence changes.",
       "whenToUse": "Use for Laravel controllers/services/models/jobs/policies and route changes.",
       "whenNotToUse": "Do not use for Nova-only admin resource customization tasks.",
-      "references": ["references/scope.md", "references/workflow.md", "https://laravel.com/docs"],
+      "references": [
+        "references/conventions.md",
+        "references/scope.md",
+        "references/workflow.md",
+        "https://laravel.com/docs"
+      ],
       "tokenBudget": 1200,
-      "tags": ["backend", "laravel", "php"],
-      "repoRoles": ["laravel-app", "laravel-nova-app"],
+      "tags": [
+        "backend",
+        "laravel",
+        "php"
+      ],
+      "repoRoles": [
+        "laravel-app",
+        "laravel-nova-app"
+      ],
       "requiresAny": [
-        { "stack": "laravel" },
-        { "dependency": "laravel/framework" }
+        {
+          "stack": "laravel"
+        },
+        {
+          "dependency": "laravel/framework"
+        }
       ],
       "ecosystem": "laravel",
       "tokenEstimate": 2800,
@@ -150,20 +271,37 @@
     },
     {
       "id": "haus.wordpress-patterns",
+      "version": "1.0.0",
       "source": "haus",
       "type": "skill",
-      "path": "tests/fixtures/catalog/skills/wordpress-patterns",
+      "path": "skills/wordpress-patterns",
       "title": "Haus WordPress patterns",
       "purpose": "Guide WordPress hook/template/plugin/theme runtime changes.",
       "whenToUse": "Use for WordPress hook/filter/template/plugin/theme behavior updates.",
       "whenNotToUse": "Do not use for Bedrock-only config bootstrap or non-WP backend tasks.",
-      "references": ["references/scope.md", "references/workflow.md", "https://developer.wordpress.org/"],
+      "references": [
+        "references/conventions.md",
+        "references/scope.md",
+        "references/workflow.md",
+        "https://developer.wordpress.org/"
+      ],
       "tokenBudget": 1200,
-      "tags": ["backend", "wordpress", "php"],
-      "repoRoles": ["wordpress-site", "wordpress-bedrock-site"],
+      "tags": [
+        "backend",
+        "wordpress",
+        "php"
+      ],
+      "repoRoles": [
+        "wordpress-site",
+        "wordpress-bedrock-site"
+      ],
       "requiresAny": [
-        { "stack": "wordpress" },
-        { "dependency": "roots/bedrock" }
+        {
+          "stack": "wordpress"
+        },
+        {
+          "dependency": "roots/bedrock"
+        }
       ],
       "ecosystem": "wordpress",
       "tokenEstimate": 3000,
@@ -171,49 +309,88 @@
     },
     {
       "id": "haus.dotnet-patterns",
+      "version": "1.0.0",
       "source": "haus",
       "type": "skill",
-      "path": "tests/fixtures/catalog/skills/dotnet-patterns",
+      "path": "skills/dotnet-patterns",
       "title": "Haus .NET patterns",
       "purpose": "Guide .NET API/service/domain/persistence layer changes.",
       "whenToUse": "Use for .NET service and endpoint behavior changes with domain impact.",
       "whenNotToUse": "Do not use for frontend-only or non-.NET runtime tasks.",
-      "references": ["references/scope.md", "references/workflow.md"],
+      "references": [
+        "references/conventions.md",
+        "references/scope.md",
+        "references/workflow.md"
+      ],
       "tokenBudget": 1200,
-      "tags": ["backend", "dotnet", "csharp"],
-      "repoRoles": ["dotnet-service"],
-      "requiresAny": [{ "stack": "dotnet" }],
+      "tags": [
+        "backend",
+        "dotnet",
+        "csharp"
+      ],
+      "repoRoles": [
+        "dotnet-service"
+      ],
+      "requiresAny": [
+        {
+          "stack": "dotnet"
+        }
+      ],
       "ecosystem": "dotnet",
       "tokenEstimate": 2600,
       "installMode": "copy-selected"
     },
     {
       "id": "haus.playwright-patterns",
+      "version": "1.0.0",
       "source": "haus",
       "type": "skill",
-      "path": "tests/fixtures/catalog/skills/playwright-patterns",
+      "path": "skills/playwright-patterns",
       "title": "Haus Playwright workflow",
       "purpose": "Guide deterministic E2E browser test flow changes.",
       "whenToUse": "Use for Playwright specs, fixtures, and browser test stability work.",
       "whenNotToUse": "Do not use for unit-only test tasks without browser automation.",
-      "references": ["references/scope.md", "references/workflow.md", "https://playwright.dev/docs/intro"],
+      "references": [
+        "references/conventions.md",
+        "references/scope.md",
+        "references/workflow.md",
+        "https://playwright.dev/docs/intro"
+      ],
       "tokenBudget": 1200,
-      "tags": ["testing", "playwright"],
-      "repoRoles": ["next-app", "react-app", "vue-app", "test-suite"],
+      "tags": [
+        "testing",
+        "playwright"
+      ],
+      "repoRoles": [
+        "next-app",
+        "react-app",
+        "vue-app",
+        "test-suite"
+      ],
       "requiresAny": [
-        { "stack": "playwright" },
-        { "dependency": "@playwright/test" }
+        {
+          "stack": "playwright"
+        },
+        {
+          "dependency": "@playwright/test"
+        }
       ],
       "tokenEstimate": 2200,
-      "installMode": "copy-selected"
+      "installMode": "copy-selected",
+      "ecosystem": "playwright"
     },
     {
       "id": "haus.code-reviewer-agent",
+      "version": "1.0.0",
       "source": "haus",
       "type": "agent",
-      "path": "tests/fixtures/catalog/agents/code-reviewer.md",
+      "path": "agents/code-reviewer.md",
       "title": "Haus code reviewer agent",
-      "tags": ["review", "quality", "security"],
+      "tags": [
+        "review",
+        "quality",
+        "security"
+      ],
       "repoRoles": [],
       "requiresAny": [],
       "tokenEstimate": 1400,
@@ -222,11 +399,16 @@
     },
     {
       "id": "haus.test-reviewer-agent",
+      "version": "1.0.0",
       "source": "haus",
       "type": "agent",
-      "path": "tests/fixtures/catalog/agents/test-reviewer.md",
+      "path": "agents/test-reviewer.md",
       "title": "Haus test reviewer agent",
-      "tags": ["review", "testing", "quality"],
+      "tags": [
+        "review",
+        "testing",
+        "quality"
+      ],
       "repoRoles": [],
       "requiresAny": [],
       "tokenEstimate": 1400,
@@ -234,11 +416,15 @@
     },
     {
       "id": "haus.security-reviewer-agent",
+      "version": "1.0.0",
       "source": "haus",
       "type": "agent",
-      "path": "tests/fixtures/catalog/agents/security-reviewer.md",
+      "path": "agents/security-reviewer.md",
       "title": "Haus security reviewer agent",
-      "tags": ["review", "security"],
+      "tags": [
+        "review",
+        "security"
+      ],
       "repoRoles": [],
       "requiresAny": [],
       "tokenEstimate": 1400,
@@ -246,11 +432,16 @@
     },
     {
       "id": "haus.docs-researcher-agent",
+      "version": "1.0.0",
       "source": "haus",
       "type": "agent",
-      "path": "tests/fixtures/catalog/agents/docs-researcher.md",
+      "path": "agents/docs-researcher.md",
       "title": "Haus docs researcher agent",
-      "tags": ["review", "quality", "workflow"],
+      "tags": [
+        "review",
+        "quality",
+        "workflow"
+      ],
       "repoRoles": [],
       "requiresAny": [],
       "tokenEstimate": 1200,
@@ -258,11 +449,16 @@
     },
     {
       "id": "haus.planner-agent",
+      "version": "1.0.0",
       "source": "haus",
       "type": "agent",
-      "path": "tests/fixtures/catalog/agents/planner.md",
+      "path": "agents/planner.md",
       "title": "Haus planner agent",
-      "tags": ["workflow", "quality", "review"],
+      "tags": [
+        "workflow",
+        "quality",
+        "review"
+      ],
       "repoRoles": [],
       "requiresAny": [],
       "tokenEstimate": 1200,
@@ -270,20 +466,36 @@
     },
     {
       "id": "haus.vendure-app-patterns",
+      "version": "1.0.0",
       "source": "haus",
       "type": "skill",
-      "path": "tests/fixtures/catalog/skills/vendure-app-patterns",
+      "path": "skills/vendure-app-patterns",
       "title": "Haus Vendure app patterns",
       "purpose": "Guide Vendure app-level config, worker, bootstrap, and plugin wiring changes.",
       "whenToUse": "Use for Vendure app config, worker, bootstrap, and system wiring updates.",
       "whenNotToUse": "Do not use for isolated shared plugin package tasks.",
-      "references": ["references/scope.md", "references/workflow.md", "https://docs.vendure.io/llms.txt"],
+      "references": [
+        "references/conventions.md",
+        "references/scope.md",
+        "references/workflow.md",
+        "https://docs.vendure.io/llms.txt"
+      ],
       "tokenBudget": 1200,
-      "tags": ["vendure3", "nestjs", "graphql"],
-      "repoRoles": ["vendure-app"],
+      "tags": [
+        "vendure3",
+        "nestjs",
+        "graphql"
+      ],
+      "repoRoles": [
+        "vendure-app"
+      ],
       "requiresAny": [
-        { "stack": "vendure3" },
-        { "dependency": "@vendure/core" }
+        {
+          "stack": "vendure3"
+        },
+        {
+          "dependency": "@vendure/core"
+        }
       ],
       "ecosystem": "vendure",
       "tokenEstimate": 3200,
@@ -291,21 +503,39 @@
     },
     {
       "id": "haus.nestjs-graphql-patterns",
+      "version": "1.0.0",
       "source": "haus",
       "type": "skill",
-      "path": "tests/fixtures/catalog/skills/nestjs-graphql-patterns",
+      "path": "skills/nestjs-graphql-patterns",
       "title": "Haus NestJS GraphQL patterns",
       "purpose": "Guide resolver/module/guard/DTO-safe GraphQL implementation in NestJS.",
       "whenToUse": "Use for NestJS GraphQL resolver, module, DTO/input, and guard changes.",
       "whenNotToUse": "Do not use for REST-only controller tasks.",
-      "references": ["references/scope.md", "references/workflow.md", "https://docs.nestjs.com/"],
+      "references": [
+        "references/conventions.md",
+        "references/scope.md",
+        "references/workflow.md",
+        "https://docs.nestjs.com/"
+      ],
       "tokenBudget": 1200,
-      "tags": ["nestjs", "graphql", "typescript6"],
-      "repoRoles": ["nestjs-api"],
+      "tags": [
+        "nestjs",
+        "graphql",
+        "typescript6"
+      ],
+      "repoRoles": [
+        "nestjs-api"
+      ],
       "requiresAny": [
-        { "stack": "nestjs" },
-        { "dependency": "@nestjs/core" },
-        { "dependency": "@nestjs/graphql" }
+        {
+          "stack": "nestjs"
+        },
+        {
+          "dependency": "@nestjs/core"
+        },
+        {
+          "dependency": "@nestjs/graphql"
+        }
       ],
       "ecosystem": "nestjs",
       "tokenEstimate": 2600,
@@ -313,21 +543,38 @@
     },
     {
       "id": "haus.nx21-monorepo-patterns",
+      "version": "1.0.0",
       "source": "haus",
       "type": "skill",
-      "path": "tests/fixtures/catalog/skills/nx21-monorepo-patterns",
+      "path": "skills/nx21-monorepo-patterns",
       "title": "Haus Nx 21 monorepo patterns",
       "purpose": "Guide Nx project graph, target pipeline, and workspace boundaries.",
       "whenToUse": "Use for Nx workspace graph, target, and generator configuration updates.",
       "whenNotToUse": "Do not use for app-only feature edits without workspace impact.",
-      "references": ["references/scope.md", "references/workflow.md", "https://nx.dev/docs"],
+      "references": [
+        "references/conventions.md",
+        "references/scope.md",
+        "references/workflow.md",
+        "https://nx.dev/docs"
+      ],
       "tokenBudget": 1200,
-      "tags": ["nx21", "yarn4"],
-      "repoRoles": ["nx-monorepo"],
+      "tags": [
+        "nx21",
+        "yarn4"
+      ],
+      "repoRoles": [
+        "nx-monorepo"
+      ],
       "requiresAny": [
-        { "role": "nx-monorepo" },
-        { "dependency": "nx" },
-        { "packageNamePattern": "@nx/*" }
+        {
+          "role": "nx-monorepo"
+        },
+        {
+          "dependency": "nx"
+        },
+        {
+          "packageNamePattern": "@nx/*"
+        }
       ],
       "ecosystem": "nx",
       "tokenEstimate": 2200,
@@ -335,20 +582,35 @@
     },
     {
       "id": "haus.turbo-monorepo-patterns",
+      "version": "1.0.0",
       "source": "haus",
       "type": "skill",
-      "path": "tests/fixtures/catalog/skills/turbo-monorepo-patterns",
+      "path": "skills/turbo-monorepo-patterns",
       "title": "Haus Turbo monorepo patterns",
       "purpose": "Guide Turbo pipeline and cache-safe monorepo orchestration changes.",
       "whenToUse": "Use for turbo pipeline graph and package task orchestration updates.",
       "whenNotToUse": "Do not use for package-local feature edits without pipeline impact.",
-      "references": ["references/scope.md", "references/workflow.md", "https://turbo.build/repo/docs"],
+      "references": [
+        "references/conventions.md",
+        "references/scope.md",
+        "references/workflow.md",
+        "https://turbo.build/repo/docs"
+      ],
       "tokenBudget": 1200,
-      "tags": ["turbo", "yarn4"],
-      "repoRoles": ["turbo-monorepo"],
+      "tags": [
+        "turbo",
+        "yarn4"
+      ],
+      "repoRoles": [
+        "turbo-monorepo"
+      ],
       "requiresAny": [
-        { "role": "turbo-monorepo" },
-        { "dependency": "turbo" }
+        {
+          "role": "turbo-monorepo"
+        },
+        {
+          "dependency": "turbo"
+        }
       ],
       "ecosystem": "turbo",
       "tokenEstimate": 2200,
@@ -356,22 +618,44 @@
     },
     {
       "id": "haus.tanstack-query-router-patterns",
+      "version": "1.0.0",
       "source": "haus",
       "type": "skill",
-      "path": "tests/fixtures/catalog/skills/tanstack-query-router-patterns",
+      "path": "skills/tanstack-query-router-patterns",
       "title": "Haus TanStack query/router patterns",
       "purpose": "Guide query key, invalidation, and route loader/data-flow changes.",
       "whenToUse": "Use for TanStack query cache behavior and TanStack router flow updates.",
       "whenNotToUse": "Do not use for styling-only component changes.",
-      "references": ["references/scope.md", "references/workflow.md", "https://tanstack.com/query/latest/docs", "https://tanstack.com/router/latest/docs"],
+      "references": [
+        "references/conventions.md",
+        "references/scope.md",
+        "references/workflow.md",
+        "https://tanstack.com/query/latest/docs",
+        "https://tanstack.com/router/latest/docs"
+      ],
       "tokenBudget": 1200,
-      "tags": ["tanstack-query", "tanstack-router", "react19"],
-      "repoRoles": ["next-app", "react-app"],
+      "tags": [
+        "tanstack-query",
+        "tanstack-router",
+        "react19"
+      ],
+      "repoRoles": [
+        "next-app",
+        "react-app"
+      ],
       "requiresAny": [
-        { "dependency": "@tanstack/react-query" },
-        { "dependency": "@tanstack/react-router" },
-        { "dependency": "@tanstack/query-core" },
-        { "packageNamePattern": "@tanstack/*" }
+        {
+          "dependency": "@tanstack/react-query"
+        },
+        {
+          "dependency": "@tanstack/react-router"
+        },
+        {
+          "dependency": "@tanstack/query-core"
+        },
+        {
+          "packageNamePattern": "@tanstack/*"
+        }
       ],
       "ecosystem": "react",
       "tokenEstimate": 2200,
@@ -379,23 +663,47 @@
     },
     {
       "id": "haus.radix-shadcn-patterns",
+      "version": "1.0.0",
       "source": "haus",
       "type": "skill",
-      "path": "tests/fixtures/catalog/skills/radix-shadcn-patterns",
+      "path": "skills/radix-shadcn-patterns",
       "title": "Haus Radix shadcn patterns",
       "purpose": "Guide accessible UI primitive and wrapper behavior changes.",
       "whenToUse": "Use for Radix primitive usage and shadcn wrapper updates.",
       "whenNotToUse": "Do not use for backend/domain logic changes.",
-      "references": ["references/scope.md", "references/workflow.md", "https://ui.shadcn.com/docs", "https://www.radix-ui.com/primitives/docs"],
+      "references": [
+        "references/conventions.md",
+        "references/scope.md",
+        "references/workflow.md",
+        "https://ui.shadcn.com/docs",
+        "https://www.radix-ui.com/primitives/docs"
+      ],
       "tokenBudget": 1200,
-      "tags": ["radix", "shadcn", "react19"],
-      "repoRoles": ["next-app", "react-app"],
+      "tags": [
+        "radix",
+        "shadcn",
+        "react19"
+      ],
+      "repoRoles": [
+        "next-app",
+        "react-app"
+      ],
       "requiresAny": [
-        { "dependency": "@radix-ui/react-dialog" },
-        { "dependency": "@radix-ui/themes" },
-        { "dependency": "shadcn-ui" },
-        { "dependency": "@shadcn/ui" },
-        { "packageNamePattern": "@radix-ui/*" }
+        {
+          "dependency": "@radix-ui/react-dialog"
+        },
+        {
+          "dependency": "@radix-ui/themes"
+        },
+        {
+          "dependency": "shadcn-ui"
+        },
+        {
+          "dependency": "@shadcn/ui"
+        },
+        {
+          "packageNamePattern": "@radix-ui/*"
+        }
       ],
       "ecosystem": "react",
       "tokenEstimate": 1800,
@@ -403,42 +711,76 @@
     },
     {
       "id": "haus.tailwind-scss-patterns",
+      "version": "1.0.0",
       "source": "haus",
       "type": "skill",
-      "path": "tests/fixtures/catalog/skills/tailwind-scss-patterns",
+      "path": "skills/tailwind-scss-patterns",
       "title": "Haus Tailwind SCSS patterns",
       "purpose": "Guide style-system-safe Tailwind and SCSS module changes.",
       "whenToUse": "Use for Tailwind token/utility and SCSS module behavior updates.",
       "whenNotToUse": "Do not use for non-style backend/service changes.",
-      "references": ["references/scope.md", "references/workflow.md", "https://tailwindcss.com/docs"],
-      "tokenBudget": 1200,
-      "tags": ["tailwind", "scss", "react19"],
-      "repoRoles": ["next-app", "react-app", "vite-app"],
-      "requiresAny": [
-        { "dependency": "tailwindcss" },
-        { "dependency": "sass" },
-        { "dependency": "scss" }
+      "references": [
+        "references/conventions.md",
+        "references/scope.md",
+        "references/workflow.md",
+        "https://tailwindcss.com/docs"
       ],
-      "ecosystem": "react",
+      "tokenBudget": 1200,
+      "tags": [
+        "tailwind",
+        "scss",
+        "react19"
+      ],
+      "repoRoles": [
+        "next-app",
+        "react-app",
+        "vite-app"
+      ],
+      "requiresAny": [
+        {
+          "dependency": "tailwindcss"
+        },
+        {
+          "dependency": "sass"
+        },
+        {
+          "dependency": "scss"
+        }
+      ],
+      "ecosystem": "tailwind",
       "tokenEstimate": 1800,
       "installMode": "copy-selected"
     },
     {
       "id": "haus.vue-patterns",
+      "version": "1.0.0",
       "source": "haus",
       "type": "skill",
-      "path": "tests/fixtures/catalog/skills/vue-patterns",
+      "path": "skills/vue-patterns",
       "title": "Haus Vue patterns",
       "purpose": "Guide Vue component/composable/state behavior changes.",
       "whenToUse": "Use for Vue component, composable, route, and state-boundary updates.",
       "whenNotToUse": "Do not use for React/Next-only component work.",
-      "references": ["references/scope.md", "references/workflow.md", "https://vuejs.org/guide"],
+      "references": [
+        "references/conventions.md",
+        "references/scope.md",
+        "references/workflow.md",
+        "https://vuejs.org/guide"
+      ],
       "tokenBudget": 1200,
-      "tags": ["vue"],
-      "repoRoles": ["vue-app"],
+      "tags": [
+        "vue"
+      ],
+      "repoRoles": [
+        "vue-app"
+      ],
       "requiresAny": [
-        { "stack": "vue" },
-        { "dependency": "vue" }
+        {
+          "stack": "vue"
+        },
+        {
+          "dependency": "vue"
+        }
       ],
       "ecosystem": "vue",
       "tokenEstimate": 2000,
@@ -446,19 +788,32 @@
     },
     {
       "id": "haus.laravel-nova-patterns",
+      "version": "1.0.0",
       "source": "haus",
       "type": "skill",
-      "path": "tests/fixtures/catalog/skills/laravel-nova-patterns",
+      "path": "skills/laravel-nova-patterns",
       "title": "Haus Laravel Nova patterns",
       "purpose": "Guide Nova admin resources, actions, and policy-safe field behavior.",
       "whenToUse": "Use for Laravel Nova resources, actions, filters, and admin UI behavior.",
       "whenNotToUse": "Do not use for customer-facing API/domain-only changes.",
-      "references": ["references/scope.md", "references/workflow.md", "https://laravel.com/docs"],
+      "references": [
+        "references/conventions.md",
+        "references/scope.md",
+        "references/workflow.md",
+        "https://laravel.com/docs"
+      ],
       "tokenBudget": 1200,
-      "tags": ["laravel-nova", "laravel"],
-      "repoRoles": ["laravel-nova-app"],
+      "tags": [
+        "laravel-nova",
+        "laravel"
+      ],
+      "repoRoles": [
+        "laravel-nova-app"
+      ],
       "requiresAny": [
-        { "dependency": "laravel/nova" }
+        {
+          "dependency": "laravel/nova"
+        }
       ],
       "ecosystem": "laravel",
       "tokenEstimate": 2600,
@@ -466,20 +821,35 @@
     },
     {
       "id": "haus.wordpress-bedrock-patterns",
+      "version": "1.0.0",
       "source": "haus",
       "type": "skill",
-      "path": "tests/fixtures/catalog/skills/wordpress-bedrock-patterns",
+      "path": "skills/wordpress-bedrock-patterns",
       "title": "Haus WordPress Bedrock patterns",
       "purpose": "Guide Bedrock config/bootstrap and environment-aware WP deployment layout.",
       "whenToUse": "Use for Bedrock config, env loading, and boot path behavior updates.",
       "whenNotToUse": "Do not use for hook/template-only WordPress runtime changes.",
-      "references": ["references/scope.md", "references/workflow.md", "https://developer.wordpress.org/"],
+      "references": [
+        "references/conventions.md",
+        "references/scope.md",
+        "references/workflow.md",
+        "https://developer.wordpress.org/"
+      ],
       "tokenBudget": 1200,
-      "tags": ["wordpress", "bedrock"],
-      "repoRoles": ["wordpress-bedrock-site"],
+      "tags": [
+        "wordpress",
+        "bedrock"
+      ],
+      "repoRoles": [
+        "wordpress-bedrock-site"
+      ],
       "requiresAny": [
-        { "role": "wordpress-bedrock-site" },
-        { "dependency": "roots/bedrock" }
+        {
+          "role": "wordpress-bedrock-site"
+        },
+        {
+          "dependency": "roots/bedrock"
+        }
       ],
       "ecosystem": "wordpress",
       "tokenEstimate": 2600,
@@ -487,21 +857,38 @@
     },
     {
       "id": "haus.wordpress-acf-elementor-jetengine-patterns",
+      "version": "1.0.0",
       "source": "haus",
       "type": "skill",
-      "path": "tests/fixtures/catalog/skills/wordpress-acf-elementor-jetengine-patterns",
+      "path": "skills/wordpress-acf-elementor-jetengine-patterns",
       "title": "Haus WordPress ACF Elementor JetEngine patterns",
       "purpose": "Guide builder-field/meta-template wiring for ACF, Elementor Pro, and JetEngine.",
       "whenToUse": "Use for ACF field groups and Elementor/JetEngine-driven dynamic template behavior.",
       "whenNotToUse": "Do not use for generic WordPress hooks with no builder/meta impact.",
-      "references": ["references/scope.md", "references/workflow.md", "https://developer.wordpress.org/"],
+      "references": [
+        "references/conventions.md",
+        "references/scope.md",
+        "references/workflow.md",
+        "https://developer.wordpress.org/"
+      ],
       "tokenBudget": 1200,
-      "tags": ["wordpress"],
-      "repoRoles": ["wordpress-bedrock-site", "wordpress-vanilla-site"],
+      "tags": [
+        "wordpress"
+      ],
+      "repoRoles": [
+        "wordpress-bedrock-site",
+        "wordpress-vanilla-site"
+      ],
       "requiresAny": [
-        { "role": "wordpress-bedrock-site" },
-        { "role": "wordpress-vanilla-site" },
-        { "stack": "wordpress" }
+        {
+          "role": "wordpress-bedrock-site"
+        },
+        {
+          "role": "wordpress-vanilla-site"
+        },
+        {
+          "stack": "wordpress"
+        }
       ],
       "ecosystem": "wordpress",
       "tokenEstimate": 2600,
@@ -509,123 +896,219 @@
     },
     {
       "id": "haus.dotnet-service-patterns",
+      "version": "1.0.0",
       "source": "haus",
       "type": "skill",
-      "path": "tests/fixtures/catalog/skills/dotnet-service-patterns",
+      "path": "skills/dotnet-service-patterns",
       "title": "Haus dotnet service patterns",
       "purpose": "Guide .NET service-layer contract and orchestration changes.",
       "whenToUse": "Use for .NET service boundary, orchestration, and handler behavior updates.",
       "whenNotToUse": "Do not use for route formatting-only tasks with no service impact.",
-      "references": ["references/scope.md", "references/workflow.md"],
+      "references": [
+        "references/conventions.md",
+        "references/scope.md",
+        "references/workflow.md"
+      ],
       "tokenBudget": 1200,
-      "tags": ["dotnet"],
-      "repoRoles": ["dotnet-service"],
-      "requiresAny": [{ "stack": "dotnet" }, { "role": "dotnet-service" }],
+      "tags": [
+        "dotnet"
+      ],
+      "repoRoles": [
+        "dotnet-service"
+      ],
+      "requiresAny": [
+        {
+          "stack": "dotnet"
+        },
+        {
+          "role": "dotnet-service"
+        }
+      ],
       "ecosystem": "dotnet",
       "tokenEstimate": 2300,
       "installMode": "copy-selected"
     },
     {
       "id": "haus.auth-oidc-azure-bankid-patterns",
+      "version": "1.0.0",
       "source": "haus",
       "type": "skill",
-      "path": "tests/fixtures/catalog/skills/auth-oidc-azure-bankid-patterns",
+      "path": "skills/auth-oidc-azure-bankid-patterns",
       "title": "Haus auth patterns",
       "purpose": "Guide identity-provider auth flow and claim/session lifecycle changes.",
       "whenToUse": "Use for OIDC/Azure AD/BankID login, callback, token, and claim mapping updates.",
       "whenNotToUse": "Do not use for profile CRUD without auth protocol change.",
-      "references": ["references/scope.md", "references/workflow.md"],
+      "references": [
+        "references/conventions.md",
+        "references/scope.md",
+        "references/workflow.md"
+      ],
       "tokenBudget": 1200,
-      "tags": ["oidc", "azure-ad", "bankid"],
+      "tags": [
+        "oidc",
+        "azure-ad",
+        "bankid"
+      ],
       "repoRoles": [],
       "requiresAny": [
-        { "stack": "oidc" },
-        { "stack": "azure-ad" },
-        { "stack": "bankid" }
+        {
+          "stack": "oidc"
+        },
+        {
+          "stack": "azure-ad"
+        },
+        {
+          "stack": "bankid"
+        }
       ],
       "tokenEstimate": 1700,
-      "installMode": "copy-selected"
+      "installMode": "copy-selected",
+      "ecosystem": "auth"
     },
     {
       "id": "haus.database-patterns",
+      "version": "1.0.0",
       "source": "haus",
       "type": "skill",
-      "path": "tests/fixtures/catalog/skills/database-patterns",
+      "path": "skills/database-patterns",
       "title": "Haus database patterns",
       "purpose": "Guide schema/query/index/search changes across supported data engines.",
       "whenToUse": "Use for migrations, query behavior, indexing, and Elasticsearch mapping updates.",
       "whenNotToUse": "Do not use for UI-only changes without persistence/search impact.",
-      "references": ["references/scope.md", "references/workflow.md"],
+      "references": [
+        "references/conventions.md",
+        "references/scope.md",
+        "references/workflow.md"
+      ],
       "tokenBudget": 1200,
-      "tags": ["postgresql", "mariadb", "mssql", "elasticsearch"],
+      "tags": [
+        "postgresql",
+        "mariadb",
+        "mssql",
+        "elasticsearch"
+      ],
       "repoRoles": [],
       "requiresAny": [
-        { "stack": "postgresql" },
-        { "stack": "mariadb" },
-        { "stack": "mssql" },
-        { "stack": "elasticsearch" }
+        {
+          "stack": "postgresql"
+        },
+        {
+          "stack": "mariadb"
+        },
+        {
+          "stack": "mssql"
+        },
+        {
+          "stack": "elasticsearch"
+        }
       ],
       "tokenEstimate": 1700,
-      "installMode": "copy-selected"
+      "installMode": "copy-selected",
+      "ecosystem": "database"
     },
     {
       "id": "haus.package-manager-yarn4-pnpm89",
+      "version": "1.0.0",
       "source": "haus",
       "type": "skill",
-      "path": "tests/fixtures/catalog/skills/package-manager-yarn4-pnpm89",
+      "path": "skills/package-manager-yarn4-pnpm89",
       "title": "Haus package manager patterns",
       "purpose": "Guide deterministic dependency/workspace changes for Yarn4 and pnpm89.",
       "whenToUse": "Use for lockfile, workspace, and package manager configuration changes.",
       "whenNotToUse": "Do not use for feature-only code edits with no dependency/workspace impact.",
-      "references": ["references/scope.md", "references/workflow.md"],
+      "references": [
+        "references/conventions.md",
+        "references/scope.md",
+        "references/workflow.md"
+      ],
       "tokenBudget": 1200,
-      "tags": ["yarn4", "pnpm89"],
+      "tags": [
+        "yarn4",
+        "pnpm89"
+      ],
       "repoRoles": [],
       "requiresAny": [
-        { "stack": "yarn4" },
-        { "stack": "pnpm89" }
+        {
+          "stack": "yarn4"
+        },
+        {
+          "stack": "pnpm89"
+        }
       ],
       "tokenEstimate": 1200,
-      "installMode": "copy-selected"
+      "installMode": "copy-selected",
+      "ecosystem": "packagemanager"
     },
     {
       "id": "haus.testing-library-patterns",
+      "version": "1.0.0",
       "source": "haus",
       "type": "skill",
-      "path": "tests/fixtures/catalog/skills/testing-library-patterns",
+      "path": "skills/testing-library-patterns",
       "title": "Haus testing library patterns",
       "purpose": "Guide user-visible behavior testing with Testing Library.",
       "whenToUse": "Use for component interaction tests with @testing-library tooling.",
       "whenNotToUse": "Do not use for full browser journey tests better served by Playwright.",
-      "references": ["references/scope.md", "references/workflow.md", "https://vitest.dev/guide"],
+      "references": [
+        "references/conventions.md",
+        "references/scope.md",
+        "references/workflow.md",
+        "https://vitest.dev/guide"
+      ],
       "tokenBudget": 1200,
-      "tags": ["testing-library"],
+      "tags": [
+        "testing-library"
+      ],
       "repoRoles": [],
       "requiresAny": [
-        { "stack": "testing-library" },
-        { "dependency": "@testing-library/react" },
-        { "dependency": "@testing-library/dom" },
-        { "packageNamePattern": "@testing-library/*" }
+        {
+          "stack": "testing-library"
+        },
+        {
+          "dependency": "@testing-library/react"
+        },
+        {
+          "dependency": "@testing-library/dom"
+        },
+        {
+          "packageNamePattern": "@testing-library/*"
+        }
       ],
       "tokenEstimate": 1500,
-      "installMode": "copy-selected"
+      "installMode": "copy-selected",
+      "ecosystem": "testing"
     },
     {
       "id": "haus.phpunit-patterns",
+      "version": "1.0.0",
       "source": "haus",
       "type": "skill",
-      "path": "tests/fixtures/catalog/skills/phpunit-patterns",
+      "path": "skills/phpunit-patterns",
       "title": "Haus PHPUnit patterns",
       "purpose": "Guide PHPUnit feature/unit test changes for PHP/Laravel behavior.",
       "whenToUse": "Use for PHPUnit tests tied to backend behavior updates.",
       "whenNotToUse": "Do not use for frontend/browser-only test tasks.",
-      "references": ["references/scope.md", "references/workflow.md", "https://laravel.com/docs"],
+      "references": [
+        "references/conventions.md",
+        "references/scope.md",
+        "references/workflow.md",
+        "https://laravel.com/docs"
+      ],
       "tokenBudget": 1200,
-      "tags": ["phpunit"],
-      "repoRoles": ["laravel-app", "laravel-nova-app"],
+      "tags": [
+        "phpunit"
+      ],
+      "repoRoles": [
+        "laravel-app",
+        "laravel-nova-app"
+      ],
       "requiresAny": [
-        { "stack": "phpunit" },
-        { "dependency": "phpunit/phpunit" }
+        {
+          "stack": "phpunit"
+        },
+        {
+          "dependency": "phpunit/phpunit"
+        }
       ],
       "ecosystem": "laravel",
       "tokenEstimate": 1500,
@@ -633,22 +1116,42 @@
     },
     {
       "id": "haus.storybook-patterns",
+      "version": "1.0.0",
       "source": "haus",
       "type": "skill",
-      "path": "tests/fixtures/catalog/skills/storybook-patterns",
+      "path": "skills/storybook-patterns",
       "title": "Haus Storybook patterns",
       "purpose": "Guide story coverage and component API documentation updates.",
       "whenToUse": "Use for component stories, args/controls, and Storybook config changes.",
       "whenNotToUse": "Do not use for backend/service-only development tasks.",
-      "references": ["references/scope.md", "references/workflow.md", "https://storybook.js.org/docs"],
+      "references": [
+        "references/conventions.md",
+        "references/scope.md",
+        "references/workflow.md",
+        "https://storybook.js.org/docs"
+      ],
       "tokenBudget": 1200,
-      "tags": ["storybook"],
-      "repoRoles": ["react-app", "next-app", "vite-app"],
+      "tags": [
+        "storybook"
+      ],
+      "repoRoles": [
+        "react-app",
+        "next-app",
+        "vite-app"
+      ],
       "requiresAny": [
-        { "stack": "storybook" },
-        { "dependency": "storybook" },
-        { "dependency": "@storybook/react" },
-        { "packageNamePattern": "@storybook/*" }
+        {
+          "stack": "storybook"
+        },
+        {
+          "dependency": "storybook"
+        },
+        {
+          "dependency": "@storybook/react"
+        },
+        {
+          "packageNamePattern": "@storybook/*"
+        }
       ],
       "ecosystem": "react",
       "tokenEstimate": 1500,
@@ -656,41 +1159,81 @@
     },
     {
       "id": "haus.security-review",
+      "version": "1.0.0",
       "source": "haus",
       "type": "skill",
-      "path": "tests/fixtures/catalog/skills/security-review",
+      "path": "skills/security-review",
       "title": "Haus security review",
       "purpose": "Route bounded security review with structured findings and explicit verification.",
       "whenToUse": "Use when the user requests security review, threat check, or hardening on a named scope.",
       "whenNotToUse": "Do not use for unscoped repo sweeps, exploit development, or non-security tasks.",
       "references": [
+        "references/conventions.md",
         "references/output-shape.md",
         "references/scope-signals.md",
         "references/verification.md"
       ],
       "tokenBudget": 800,
-      "tags": ["security", "review"],
+      "tags": [
+        "security",
+        "review"
+      ],
       "repoRoles": [],
       "requiresAny": [],
       "tokenEstimate": 1200,
-      "installMode": "copy-selected"
+      "installMode": "copy-selected",
+      "ecosystem": "security",
+      "default": true
     },
     {
       "id": "haus.production-readiness-review",
+      "version": "1.0.0",
       "source": "haus",
       "type": "skill",
-      "path": "tests/fixtures/catalog/skills/production-readiness-review",
+      "path": "skills/production-readiness-review",
       "title": "Haus production readiness review",
       "purpose": "Route release readiness checks with evidence-based gaps and rollback notes.",
       "whenToUse": "Use when the user asks for ship checklist, release risk review, or go-live readiness on a defined change set.",
       "whenNotToUse": "Do not use for pure feature design with no release surface or undefined release boundary.",
-      "references": ["references/signals.md", "references/evidence.md", "references/rollback.md"],
+      "references": [
+        "references/conventions.md",
+        "references/signals.md",
+        "references/evidence.md",
+        "references/rollback.md"
+      ],
       "tokenBudget": 800,
-      "tags": ["quality", "security", "review"],
+      "tags": [
+        "quality",
+        "security",
+        "review"
+      ],
       "repoRoles": [],
       "requiresAny": [],
       "tokenEstimate": 1200,
-      "installMode": "copy-selected"
+      "installMode": "copy-selected",
+      "ecosystem": "production",
+      "default": true
+    },
+    {
+      "id": "haus.haus-way-of-work",
+      "version": "1.0.0",
+      "source": "haus",
+      "type": "template",
+      "path": "templates/haus-way-of-work.md",
+      "title": "Haus way of work",
+      "purpose": "Universal project instructions: context loading, output discipline, commit hygiene, safety rails, PR workflow.",
+      "whenToUse": "Install in every project using haus-workflow. Always active as baseline project instructions.",
+      "whenNotToUse": "Never skip this template.",
+      "tags": [
+        "workflow",
+        "baseline",
+        "project-instructions"
+      ],
+      "repoRoles": [],
+      "installMode": "copy-selected",
+      "tokenEstimate": 500,
+      "tokenBudget": 600,
+      "default": true
     }
   ]
 }
