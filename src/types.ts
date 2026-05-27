@@ -31,9 +31,11 @@ export type CatalogItemRiskLevel = "low" | "medium" | "high" | "blocked";
 
 export type CatalogItemLicenseConfidence = "high" | "medium" | "low" | "unknown";
 
+// Schema: https://raw.githubusercontent.com/WeAreHausTech/haus-workflow-catalog/main/schema/catalog-item.schema.json
+// Keep this type in sync with catalog-item.schema.json. See haus-workflow-catalog EXECUTION-PLAN.md F5.
 export type CatalogItem = {
   id: string;
-  type: "skill" | "agent" | "rule" | "command";
+  type: "skill" | "agent" | "template" | "rule" | "command";
   source: string;
   version?: string;
   path: string;
