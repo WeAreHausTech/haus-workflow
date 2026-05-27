@@ -9,8 +9,8 @@
 #
 # Delegates entirely to `yarn release` (release-it) with --ci to suppress
 # prompts. release-it handles: version bump, CHANGELOG.md generation from
-# conventional commits, git commit + annotated tag, push, and GitHub release
-# creation. npm publish is handled by release.yml when the tag lands on GitHub.
+# conventional commits, git commit + annotated tag, push, GitHub release
+# creation, and npm publish using the developer's local npm credentials.
 
 set -euo pipefail
 
