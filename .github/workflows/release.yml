@@ -6,11 +6,11 @@ on:
       - "v*.*.*"
 
 permissions:
-  contents: write  # needed to create GitHub release
+  contents: read
   id-token: write  # needed for npm provenance
 
 jobs:
-  release:
+  publish:
     runs-on: ubuntu-latest
 
     steps:
@@ -36,7 +36,6 @@ jobs:
         run: npm pack --dry-run
 
       - name: Validate tag matches package.json version
-        id: version
         run: |
           TAG_VERSION="${GITHUB_REF_NAME#v}"
           PKG_VERSION="$(node -e "process.stdout.write(require('./package.json').version)")"
@@ -44,26 +43,8 @@ jobs:
             echo "Error: tag $GITHUB_REF_NAME does not match package.json version $PKG_VERSION"
             exit 1
           fi
-          echo "version=$TAG_VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Publish to npm
         run: npm publish --access public --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Create GitHub release
-        uses: actions/create-release@0cb9c9b65d5d1901c1f53e5e66eaf4afd303e70e # v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref_name }}
-          release_name: ${{ github.ref_name }}
-          body: |
-            See [CHANGELOG.md](https://github.com/WeAreHausTech/haus-workflow/blob/main/CHANGELOG.md) for details.
-
-            Install:
-            ```bash
-            npm install -g @haus-tech/haus-workflow
-            ```
-          draft: false
-          prerelease: false
