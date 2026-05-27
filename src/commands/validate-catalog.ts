@@ -1,35 +1,18 @@
 import path from "node:path";
 
 import { readAllowedStacks } from "../catalog/allowed-stacks.js";
+import { FORBIDDEN_TAGS } from "../catalog/validation-rules.js";
 import type { CatalogItem } from "../types.js";
 import { readJson } from "../utils/fs.js";
 import { error, log } from "../utils/logger.js";
 import { packageRoot } from "../utils/paths.js";
-
-const FORBIDDEN = [
-  "python",
-  "django",
-  "go",
-  "rust",
-  "java",
-  "spring",
-  "kotlin",
-  "swift",
-  "android",
-  "flutter",
-  "dart",
-  "c++",
-  "perl",
-  "defi",
-  "trading",
-];
 
 async function auditForbiddenStacks(items: CatalogItem[]): Promise<string[]> {
   const failures: string[] = [];
   for (const item of items) {
     const tags = Array.isArray(item.tags) ? item.tags : [];
     const text = `${item.id} ${tags.join(" ")}`.toLowerCase();
-    for (const word of FORBIDDEN) {
+    for (const word of FORBIDDEN_TAGS) {
       if (text.includes(word)) failures.push(`${item.id}: unsupported stack/tag "${word}"`);
     }
   }
