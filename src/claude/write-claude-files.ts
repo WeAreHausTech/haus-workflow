@@ -2,6 +2,7 @@ import path from "node:path";
 
 import fs from "fs-extra";
 
+import { CATALOG_REF } from "../catalog/constants.js";
 import { CACHE_DIR } from "../catalog/remote-catalog.js";
 import type { Recommendation } from "../types.js";
 import { hashInstalledPaths } from "../update/hash-installed.js";
@@ -163,6 +164,7 @@ export async function writeClaudeFiles(root: string, dryRun: boolean, selectedId
         type: r.type,
         source: isCurated ? "curated" : "haus",
         version: hausVersion,
+        catalogRef: CATALOG_REF,
         hash: await hashInstalledPaths(root, relPaths),
         installMode: "copied",
         paths: relPaths,

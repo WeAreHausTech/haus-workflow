@@ -9,6 +9,7 @@
       "type": { "type": "string" },
       "source": { "type": "string", "description": "\"haus\" for Haus-owned items; \"curated\" for approved external items." },
       "version": { "type": "string", "description": "haus package version when the row was written." },
+      "catalogRef": { "type": "string", "description": "Git ref (tag or branch) the catalog was fetched from at install time. Matches HAUS_CATALOG_REF env var, defaults to 'main'." },
       "hash": {
         "type": "string",
         "description": "sha256 digest of installed files listed in paths (see src/update/hash-installed.ts); placeholder when paths is empty."

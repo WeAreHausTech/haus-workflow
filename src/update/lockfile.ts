@@ -13,6 +13,8 @@ export type LockItem = {
   type: string;
   source?: string;
   version?: string;
+  /** Git ref (tag or branch) the catalog was fetched from when this item was installed. */
+  catalogRef?: string;
   hash?: string;
   installMode?: string;
   paths?: string[];
