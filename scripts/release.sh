@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
-# scripts/release.sh — create a release commit + git tag to trigger release.yml
+# scripts/release.sh — create an annotated git tag to trigger release.yml
 #
 # Usage: ./scripts/release.sh <version>
 # Example: ./scripts/release.sh 0.1.0
 #
 # What it does:
-#   1. Validates version argument
-#   2. Checks working tree is clean
-#   3. Confirms package.json version matches (or updates it)
+#   1. Validates version argument (x.y.z)
+#   2. Checks working tree is clean and branch is main
+#   3. Confirms package.json version matches <version> (update it manually if not)
 #   4. Runs yarn verify (typecheck + lint + build + test)
-#   5. Runs npm pack --dry-run
-#   6. Creates a git tag v<version>
-#   7. Pushes tag to origin (triggers release.yml)
+#   5. Runs npm pack --dry-run (tarball content check)
+#   6. Creates annotated tag v<version>
+#   7. Pushes tag to origin (triggers release.yml → npm publish)
 
 set -euo pipefail
 
