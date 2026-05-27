@@ -1,9 +1,19 @@
 {
-  "name": "haus",
+  "name": "@haus-tech/haus-workflow",
   "version": "0.1.0",
-  "description": "Haus AI workflow package for Claude Code.",
+  "description": "Haus AI workflow CLI for Claude Code.",
   "type": "module",
-  "bin": "./dist/cli.js",
+  "bin": {
+    "haus": "./dist/cli.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/WeAreHausTech/haus-workflow.git"
+  },
+  "homepage": "https://github.com/WeAreHausTech/haus-workflow",
+  "bugs": {
+    "url": "https://github.com/WeAreHausTech/haus-workflow/issues"
+  },
   "files": [
     "dist",
     "library/global",
@@ -27,7 +37,7 @@
     "bench:hooks": "tsx scripts/bench-hooks.ts",
     "pack:local": "yarn pack",
     "publish:dry": "yarn npm publish --dry-run",
-    "publish:private": "yarn npm publish --access restricted",
+    "publish:public": "yarn npm publish --access public",
     "prepack": "yarn build",
     "verify": "yarn typecheck && yarn typecheck:scripts && yarn lint && yarn build && yarn test",
     "prepare": "husky",
@@ -64,7 +74,7 @@
     "node": ">=22"
   },
   "publishConfig": {
-    "access": "restricted"
+    "access": "public"
   },
   "packageManager": "yarn@4.15.0",
   "lint-staged": {

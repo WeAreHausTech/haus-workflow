@@ -29,53 +29,31 @@ If version is below 22, install/update Node first.
 
 ## Install Haus AI
 
-`haus` is not published to npm yet. Install it from a clone of the
-[haus-workflow](https://github.com/WeAreHausTech/haus-workflow) repo.
-
-**Primary: global link from checkout**
-
 ```bash
-git clone https://github.com/WeAreHausTech/haus-workflow.git
-cd haus-workflow
-yarn install
-yarn build
-npm install -g .     # uses npm to symlink the `haus` bin globally
+npm install -g @haus-tech/haus-workflow
 haus --help
 ```
 
-**Alternative: install from a packed tarball**
+Seed `~/.claude/` with Haus skills, agents, and hooks (once per machine):
 
 ```bash
-yarn install
-yarn build
-yarn pack            # produces package.tgz
-npm install -g ./package.tgz
-```
-
-If global install is not allowed, run the CLI directly from the checkout:
-
-```bash
-yarn install
-yarn build
-node dist/cli.js --help
+haus install
 ```
 
 ### If you switch Node versions often (nvm, Herd, Volta…)
 
-`npm install -g .` only installs `haus` into the currently active Node version's bin. Switch Node → `haus` disappears. Two options:
+`npm install -g` binds to the currently active Node version. Switch Node → `haus` disappears. Two options:
 
-1. **Re-install per version.** When you change Node, either run `npm install -g .` again from the checkout, or carry globals forward when adding a new Node version:
+1. **Re-install per version.** When you change Node, carry globals forward:
    ```bash
    nvm install <new-version> --reinstall-packages-from=current
    ```
 
-2. **Use a shell alias that resolves to whatever Node is active.** No per-version install needed:
+2. **Use a shell alias.** No per-version install needed:
    ```bash
-   echo 'alias haus="node /absolute/path/to/haus-workflow/dist/cli.js"' >> ~/.zshrc
+   echo 'alias haus="node $(npm root -g)/@haus-tech/haus-workflow/dist/cli.js"' >> ~/.zshrc
    source ~/.zshrc
-   haus --help
    ```
-   Use this if you switch Node versions frequently.
 
 ## Use Haus in a project
 
@@ -131,7 +109,7 @@ haus doctor
 haus doctor --hooks
 ```
 
-`--hooks` checks that project hook settings still match shipped plugin hook contract.
+`--hooks` checks that project hook settings still match the hook contract.
 
 ## Update flow
 
@@ -182,30 +160,9 @@ After `haus apply --write`, command docs are generated in:
 
 Some environments expose these as slash commands. If not, run the CLI commands directly.
 
-## Plugin commands
-
-Install the Claude Code plugin via Claude Code's `/plugin` system (not via `haus`):
-
-```bash
-# Add Haus marketplace (once per machine)
-/plugin marketplace add WeAreHausTech/haus-workflow
-
-# Install plugin
-/plugin install haus-workflow@haus-marketplace
-```
-
-> **Note:** The GitHub repo is **private**. The `marketplace add` step needs authenticated git access on your machine (SSH key with repo access, or `gh auth login`). Without auth, the marketplace fetch will fail.
-
-Validate the local plugin structure:
-
-```bash
-haus plugin validate
-```
-
 ## If something fails
 
-- `haus: command not found` -> reinstall globally or use local `node dist/cli.js ...`
-- `npm install -g .` fails with `EEXIST` at `.../bin/haus` -> a stale symlink (often from a previous `yarn link`) is in the way. Remove it and retry: `rm "<path-from-error>" && npm install -g .`
+- `haus: command not found` -> run `npm install -g @haus-tech/haus-workflow` or check Node version
 - Node engine error -> switch to Node 22+
 - hook mismatch in doctor -> run `haus apply --write` again
 - wrong project scanned -> `cd` into correct project root, rerun
