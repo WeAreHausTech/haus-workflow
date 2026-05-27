@@ -6,7 +6,7 @@
  * parses `docs/specs/pre-release-cleanup.md` for tracked rows, and prints a
  * reconciliation report.
  *
- * Always exits 0 (non-blocking) until P10 makes it blocking at v0.1 publish.
+ * Exits 0 when tracker is idle or all pairs are OK. Exits 1 when MISSING_SPEC or ORPHAN_SPEC issues are found (blocking in CI).
  *
  * Design notes:
  * - Identity = repo-relative file path. Multiple markers in one file collapse
@@ -200,6 +200,6 @@ const invokedDirectly = process.argv[1] && path.resolve(process.argv[1]) === pat
 if (invokedDirectly) {
   const report = reconcile();
   process.stdout.write(render(report) + "\n");
-  // Always exit 0 — non-blocking until P10.
-  process.exit(0);
+  const hasIssues = report.missingSpec.length > 0 || report.orphanSpec.length > 0;
+  process.exit(hasIssues ? 1 : 0);
 }

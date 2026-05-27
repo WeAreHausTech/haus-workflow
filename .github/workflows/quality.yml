@@ -38,6 +38,4 @@ jobs:
         run: yarn typecheck:scripts
 
       - name: Cleanup tracker status
-        # Non-blocking by design: the script always exits 0 until P10 flips it.
-        # Don't mask real crashes (tsx resolution, script errors) here.
         run: yarn cleanup:status
