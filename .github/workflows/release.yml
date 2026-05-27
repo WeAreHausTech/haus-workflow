@@ -1,3 +1,9 @@
+# Release workflow — triggered when a v*.*.* tag is pushed.
+#
+# GitHub releases and CHANGELOG.md are created by release-it running locally
+# (yarn release / scripts/release.sh). This workflow's sole responsibility is
+# npm publish with provenance.
+
 name: Release
 
 on:

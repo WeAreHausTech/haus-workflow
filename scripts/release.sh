@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# scripts/release.sh — non-interactive release for CI / scripted use
+# scripts/release.sh — non-interactive release for scripted / automated use
 #
 # Usage: ./scripts/release.sh <version>
 # Example: ./scripts/release.sh 0.2.0
@@ -7,9 +7,10 @@
 # For interactive releases (recommended for humans) use: yarn release
 # For dry runs use: yarn release:dry
 #
-# This script passes <version> to release-it with --ci (no prompts).
-# release-it will: bump package.json, update CHANGELOG.md, commit, tag, push,
-# and create a GitHub release. npm publish is handled by release.yml on tag push.
+# Delegates entirely to `yarn release` (release-it) with --ci to suppress
+# prompts. release-it handles: version bump, CHANGELOG.md generation from
+# conventional commits, git commit + annotated tag, push, and GitHub release
+# creation. npm publish is handled by release.yml when the tag lands on GitHub.
 
 set -euo pipefail
 
@@ -28,4 +29,4 @@ if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
   exit 1
 fi
 
-yarn release-it "$VERSION" --ci
+yarn release "$VERSION" --ci
