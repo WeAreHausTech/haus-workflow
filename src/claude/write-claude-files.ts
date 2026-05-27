@@ -17,7 +17,7 @@ import { writeProjectFacts } from "./write-project-facts.js";
 import { writeRootClaudeMd } from "./write-root-claude-md.js";
 import { writeWayOfWork } from "./write-way-of-work.js";
 
-export async function writeClaudeFiles(root: string, dryRun: boolean): Promise<string[]> {
+export async function writeClaudeFiles(root: string, dryRun: boolean, selectedIds?: string[]): Promise<string[]> {
   const rec = (await readJson<Recommendation>(hausPath(root, "recommendation.json"))) ?? {
     mode: "fast",
     recommended: [],
@@ -102,7 +102,10 @@ export async function writeClaudeFiles(root: string, dryRun: boolean): Promise<s
   // unapproved artifacts to appear in the written state.
   const installedIds = new Set<string>();
 
-  for (const item of rec.recommended) {
+  const catalogItems =
+    selectedIds !== undefined ? rec.recommended.filter((r) => selectedIds.includes(r.id)) : rec.recommended;
+
+  for (const item of catalogItems) {
     const manifestItem = manifestById.get(item.id);
     if (!manifestItem?.path) continue;
     // Curated items must be approved and not blocked before they are written to disk.
@@ -143,7 +146,7 @@ export async function writeClaudeFiles(root: string, dryRun: boolean): Promise<s
 
   if (dryRun) return [...new Set(files)];
 
-  const installedItems = rec.recommended.filter((r) => installedIds.has(r.id));
+  const installedItems = catalogItems.filter((r) => installedIds.has(r.id));
   await writeManagedJson(
     root,
     hausPath(root, "selected-context.json"),
