@@ -200,6 +200,6 @@ const invokedDirectly = process.argv[1] && path.resolve(process.argv[1]) === pat
 if (invokedDirectly) {
   const report = reconcile();
   process.stdout.write(render(report) + "\n");
-  // Always exit 0 — non-blocking until P10.
-  process.exit(0);
+  const hasIssues = report.missingSpec.length > 0 || report.orphanSpec.length > 0;
+  process.exit(hasIssues ? 1 : 0);
 }
