@@ -12,8 +12,7 @@
     "releaseNotes": null
   },
   "npm": {
-    "publish": true,
-    "access": "public"
+    "publish": false
   },
   "plugins": {
     "@release-it/conventional-changelog": {

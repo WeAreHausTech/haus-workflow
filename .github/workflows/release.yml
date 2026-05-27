@@ -1,12 +1,14 @@
-# Release validation workflow — triggered when a v*.*.* tag is pushed.
+# Release workflow — triggered when a v*.*.* tag is pushed.
 #
-# npm publish is performed locally by the developer via `yarn release`
-# (release-it), which handles: conventional-commit CHANGELOG generation,
-# version bump, git commit + annotated tag, push, GitHub release creation,
-# and `npm publish` using the developer's local npm credentials.
+# GitHub releases and CHANGELOG.md are created by release-it running locally
+# (yarn release / scripts/release.sh). This workflow's sole responsibility is
+# npm publish with provenance.
 #
-# This workflow's sole responsibility is post-tag CI validation:
-# verify the build is clean and the tag version matches package.json.
+# Auth: OIDC Trusted Publishing — no NPM_TOKEN secret required.
+# One-time setup: configure this repo as a trusted publisher on
+# npmjs.com → @haus-tech/haus-workflow → Settings → Publishing.
+# The id-token: write permission below grants the workflow an OIDC token
+# that npm accepts in place of a stored secret.
 
 name: Release
 
@@ -17,9 +19,10 @@ on:
 
 permissions:
   contents: read
+  id-token: write  # needed for npm OIDC trusted publishing
 
 jobs:
-  validate:
+  publish:
     runs-on: ubuntu-latest
 
     steps:
@@ -30,6 +33,7 @@ jobs:
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
           node-version: "22"
+          registry-url: "https://registry.npmjs.org"
 
       - name: Enable Corepack
         run: corepack enable
@@ -51,3 +55,6 @@ jobs:
             echo "Error: tag $GITHUB_REF_NAME does not match package.json version $PKG_VERSION"
             exit 1
           fi
+
+      - name: Publish to npm
+        run: npm publish --access public --provenance
