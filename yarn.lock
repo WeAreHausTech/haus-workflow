@@ -298,7 +298,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@haus-tech/haus-workflow@workspace:."
   dependencies:
-    "@release-it/conventional-changelog": "npm:^11.0.0"
+    "@release-it/conventional-changelog": "npm:11.0.0"
     "@types/fs-extra": "npm:11.0.4"
     "@types/node": "npm:22.19.17"
     "@types/semver": "npm:7.7.1"
@@ -316,7 +316,7 @@ __metadata:
     lint-staged: "npm:17.0.4"
     picomatch: "npm:4.0.4"
     prettier: "npm:3.8.3"
-    release-it: "npm:^20.0.1"
+    release-it: "npm:20.0.1"
     semver: "npm:7.8.0"
     tsup: "npm:8.5.1"
     tsx: "npm:4.21.0"
@@ -813,7 +813,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@release-it/conventional-changelog@npm:^11.0.0":
+"@release-it/conventional-changelog@npm:11.0.0":
   version: 11.0.0
   resolution: "@release-it/conventional-changelog@npm:11.0.0"
   dependencies:
@@ -4581,7 +4581,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"release-it@npm:^20.0.1":
+"release-it@npm:20.0.1":
   version: 20.0.1
   resolution: "release-it@npm:20.0.1"
   dependencies:
