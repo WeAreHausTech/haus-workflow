@@ -25,6 +25,20 @@ test("update check and apply create backup", () => {
   assert.equal(out.includes("Lock item changes") || out.includes("Lock changed:") || out.includes("No lockfile changes."), true);
 });
 
+test("update --check output includes npmVersion field", () => {
+  const temp = mkdtempSync(path.join(os.tmpdir(), "haus-update-npmver-"));
+  mkdirSync(path.join(temp, ".haus-workflow"), { recursive: true });
+  writeFileSync(path.join(temp, "package.json"), JSON.stringify({ name: "npmver-temp", packageManager: "yarn@4.5.3" }, null, 2));
+  writeFileSync(path.join(temp, ".haus-workflow/haus.lock.json"), JSON.stringify([], null, 2));
+
+  const r = execaSync("node", [path.resolve("dist/cli.js"), "update", "--check"], { cwd: temp, reject: false });
+  const parsed = JSON.parse(r.stdout);
+  assert.equal("npmVersion" in parsed, true);
+  assert.equal(typeof parsed.npmVersion.current, "string");
+  assert.equal(typeof parsed.npmVersion.updateAvailable, "boolean");
+  // latest may be null if network unavailable — that's OK
+});
+
 test("update recomputes hash from tracked file paths", () => {
   const temp = mkdtempSync(path.join(os.tmpdir(), "haus-update-paths-"));
   mkdirSync(path.join(temp, ".haus-workflow"), { recursive: true });

@@ -65,6 +65,23 @@ test("doctor prints each shared warning once", () => {
   assert.equal(hits, 1);
 });
 
+test("doctor reports CLI version line", () => {
+  const temp = mkdtempSync(path.join(os.tmpdir(), "haus-doctor-cli-ver-"));
+  writeFileSync(
+    path.join(temp, "package.json"),
+    JSON.stringify({ name: "cliver-temp", packageManager: "yarn@4.5.3", dependencies: { react: "19.0.0" } }, null, 2)
+  );
+  writeFileSync(path.join(temp, "yarn.lock"), "# lock");
+  const cli = path.resolve("dist/cli.js");
+  execaSync("node", [cli, "scan", "--json"], { cwd: temp });
+  execaSync("node", [cli, "recommend", "--json"], { cwd: temp });
+  execaSync("node", [cli, "apply", "--write"], { cwd: temp });
+  const r = execaSync("node", [cli, "doctor"], { cwd: temp, reject: false });
+  const out = r.stdout ?? "";
+  // Should contain a CLI version line (up to date, update available, or check unavailable)
+  assert.equal(out.includes("- CLI"), true);
+});
+
 test("doctor --hooks fails when settings missing", () => {
   const temp = mkdtempSync(path.join(os.tmpdir(), "haus-doctor-hooks-miss-"));
   const cli = path.resolve("dist/cli.js");

@@ -3,43 +3,27 @@ import path from "node:path";
 import { syncRemoteCatalog } from "../catalog/remote-catalog.js";
 import { diffGeneratedFiles, summarizeLockDiff } from "../update/diff-generated-files.js";
 import { applyLock, checkLock, diffLock, hasLocalOverrides } from "../update/lockfile.js";
+import { fetchNpmVersionStatus } from "../update/npm-version.js";
 import { readJson } from "../utils/fs.js";
 import { log, warn } from "../utils/logger.js";
 import { packageRoot } from "../utils/paths.js";
-import { compareVersions, normalizeVersion } from "../utils/versions.js";
 
 const NPM_PACKAGE_NAME = "@haus-tech/haus-workflow";
-
-async function checkNpmVersion(currentVersion: string): Promise<void> {
-  try {
-    const res = await fetch(`https://registry.npmjs.org/${encodeURIComponent(NPM_PACKAGE_NAME)}/latest`, {
-      signal: AbortSignal.timeout(8_000),
-    });
-    if (!res.ok) return;
-    const data = (await res.json()) as { version?: string };
-    const latest = data?.version;
-    if (!latest || !normalizeVersion(latest) || !normalizeVersion(currentVersion)) return;
-    if (compareVersions(latest, currentVersion) > 0) {
-      log(`npm update available: ${currentVersion} → ${latest}`);
-      log(`Run: npm install -g ${NPM_PACKAGE_NAME}`);
-    } else {
-      log(`npm package up to date: ${currentVersion}`);
-    }
-  } catch {
-    // Network unavailable or package not yet published — skip silently
-  }
-}
 
 export async function runUpdate(options: { check?: boolean }): Promise<void> {
   const root = process.cwd();
   if (options.check) {
+    const pkgJson = await readJson<{ version?: string }>(path.join(packageRoot(), "package.json"));
+    const currentVersion = pkgJson?.version ?? "0.0.0";
     const status = await checkLock(root);
+    const npmVersion = await fetchNpmVersionStatus(currentVersion);
     log(
       JSON.stringify(
         {
           ...status,
           localOverrides: await hasLocalOverrides(root),
           summary: diffGeneratedFiles(),
+          npmVersion,
         },
         null,
         2,
@@ -51,7 +35,13 @@ export async function runUpdate(options: { check?: boolean }): Promise<void> {
 
   const pkgJson = await readJson<{ version?: string }>(path.join(packageRoot(), "package.json"));
   const currentVersion = pkgJson?.version ?? "0.0.0";
-  await checkNpmVersion(currentVersion);
+  const npmStatus = await fetchNpmVersionStatus(currentVersion);
+  if (npmStatus.updateAvailable && npmStatus.latest !== null) {
+    log(`npm update available: ${currentVersion} → ${npmStatus.latest}`);
+    log(`Run: npm install -g ${NPM_PACKAGE_NAME}`);
+  } else if (npmStatus.latest !== null) {
+    log(`npm package up to date: ${currentVersion}`);
+  }
 
   if (await hasLocalOverrides(root)) {
     log("Local .claude overrides detected. Preserving local files; only lockfile updated.");
