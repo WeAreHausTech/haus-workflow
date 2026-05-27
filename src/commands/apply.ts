@@ -23,10 +23,11 @@ export async function runApply(options: { dryRun?: boolean; write?: boolean; sel
       return;
     }
     const rec = await readJson<Recommendation>(hausPath(root, "recommendation.json"));
-    const items = rec?.recommended ?? [];
-    if (items.length === 0) {
-      log("No catalog items in recommendation — run `haus recommend` first.");
-      // Still proceed to write core files.
+    if (!rec) {
+      log("No recommendation.json found — run `haus recommend` first. Writing core files only.");
+      selectedIds = [];
+    } else if (rec.recommended.length === 0) {
+      log("Recommendation contains no catalog items. Writing core files only.");
       selectedIds = [];
     } else {
       const choices = items.map((item) => ({

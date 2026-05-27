@@ -44,49 +44,51 @@ test("apply --select is recognised by the CLI (no unknown option error)", () => 
   assert.equal(out.includes("unknown option"), false, `unexpected "unknown option" in: ${out}`);
 });
 
-test("writeClaudeFiles selectedIds filter: empty selection skips catalog items but writes core files", () => {
-  // Run a full apply to get a project with lock entries, then test that running
-  // a helper script that calls writeClaudeFiles with selectedIds=[] writes zero
-  // catalog items to the lock.
-  const temp = makeProject("sel-filter");
+test("writeClaudeFiles selectedIds: directly exercises the filtering code path via tsx", async () => {
+  // Uses `node --import tsx/esm` to import writeClaudeFiles from source and call it
+  // with explicit selectedIds, verifying the selectedIds !== undefined branch is hit.
+  const temp = makeProject("sel-filter-direct");
   execaSync("node", [cli, "scan", "--json"], { cwd: temp });
   execaSync("node", [cli, "recommend", "--json"], { cwd: temp });
 
-  // Read recommendation to find catalog items.
   const rec = JSON.parse(readFileSync(path.join(temp, ".haus-workflow/recommendation.json"), "utf8"));
   const allItems = rec.recommended ?? [];
 
-  // Can't import internals from the single-bundle dist. Use approach: apply all, then
-  // re-apply with a trimmed recommendation.json (0 items) and verify lock reflects it.
-  // This mirrors the real --select behaviour where selectedIds drives filtering.
-
-  // First apply: gets all recommended items.
-  execaSync("node", [cli, "apply", "--write"], { cwd: temp });
-
-  // Trim recommendation to zero catalog items, re-apply, check lock empties.
+  // Write a small inline script that calls writeClaudeFiles with selectedIds=[].
+  // This directly exercises the `selectedIds !== undefined` branch.
+  const helperPath = path.join(temp, "run-write.mts");
+  const srcPath = path.resolve("src/claude/write-claude-files.ts").replace(/\\/g, "/");
   writeFileSync(
-    path.join(temp, ".haus-workflow/recommendation.json"),
-    JSON.stringify({ ...rec, recommended: [] }, null, 2)
+    helperPath,
+    [
+      `import { writeClaudeFiles } from "${srcPath}";`,
+      `const root = process.argv[2];`,
+      `const selectedIds = JSON.parse(process.argv[3]);`,
+      `await writeClaudeFiles(root, false, selectedIds);`,
+    ].join("\n")
   );
-  execaSync("node", [cli, "apply", "--write"], { cwd: temp });
-  const lockEmpty = JSON.parse(readFileSync(path.join(temp, ".haus-workflow/haus.lock.json"), "utf8"));
 
-  // lockAll may have items if catalog items exist; lockEmpty must have none.
-  assert.equal(lockEmpty.length, 0, `expected empty lock after zero-item recommendation, got ${lockEmpty.length}`);
-  // Core files still exist regardless.
+  // Run with selectedIds=[] — should write core files but empty lockfile.
+  execaSync("node", ["--import", "tsx/esm", helperPath, temp, "[]"], {
+    cwd: path.resolve("."),
+    reject: true,
+  });
+
+  const lockEmpty = JSON.parse(readFileSync(path.join(temp, ".haus-workflow/haus.lock.json"), "utf8"));
+  assert.equal(lockEmpty.length, 0, `expected empty lock with selectedIds=[], got ${lockEmpty.length}`);
+  // Core files written regardless of selectedIds.
   assert.equal(existsSync(path.join(temp, ".claude/rules/haus.md")), true);
   assert.equal(existsSync(path.join(temp, ".claude/settings.json")), true);
 
-  // Restore one item to verify partial selection.
+  // Now run with selectedIds=[firstItem.id] — lock should have exactly that one entry.
   if (allItems.length > 0) {
-    const oneItem = allItems[0];
-    writeFileSync(
-      path.join(temp, ".haus-workflow/recommendation.json"),
-      JSON.stringify({ ...rec, recommended: [oneItem] }, null, 2)
-    );
-    execaSync("node", [cli, "apply", "--write"], { cwd: temp });
+    const oneId = allItems[0].id;
+    execaSync("node", ["--import", "tsx/esm", helperPath, temp, JSON.stringify([oneId])], {
+      cwd: path.resolve("."),
+      reject: true,
+    });
     const lockOne = JSON.parse(readFileSync(path.join(temp, ".haus-workflow/haus.lock.json"), "utf8"));
-    assert.equal(lockOne.length, 1, `expected 1 lock entry, got ${lockOne.length}`);
-    assert.equal(lockOne[0].id, oneItem.id);
+    assert.equal(lockOne.length, 1, `expected 1 lock entry for selectedIds=[${oneId}], got ${lockOne.length}`);
+    assert.equal(lockOne[0].id, oneId);
   }
 });
