@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.4.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.3.0...v0.4.0) (2026-05-28)
+
+### Features
+
+* **scanner:** detect react-router-v7, tailwind, shadcn; rename typescript6 → typescript5 (T8-T11) ([d98d813](https://github.com/WeAreHausTech/haus-workflow/commit/d98d813c7e52df68ae7f55ceb23bd9016e2d8308))
+
 ## [0.3.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.2.2...v0.3.0) (2026-05-28)
 
 ### Features
