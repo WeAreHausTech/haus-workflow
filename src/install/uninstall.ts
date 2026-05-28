@@ -1,3 +1,7 @@
+/**
+ * Removes previously installed catalog items from ~/.claude/ using the manifest to
+ * locate haus-owned files, and strips haus hook entries from settings.json.
+ */
 import crypto from "node:crypto";
 import path from "node:path";
 
@@ -10,16 +14,24 @@ import { parseMarkdownHeader } from "./header.js";
 import { globalClaudeDir, hausManifestPath, readManifest } from "./manifest.js";
 import { readSettings, stripHausHooks, writeSettings } from "./settings-merge.js";
 
+/** Options controlling how `runUninstall` behaves. */
 export interface UninstallOptions {
+  /** Delete user-edited haus files even when hash doesn't match the manifest. */
   force?: boolean;
 }
 
+/** Summary of files deleted or skipped during an uninstall. */
 export interface UninstallResult {
   deleted: string[];
   skipped: string[];
+  /** True when haus hook entries were removed from settings.json. */
   hooksStripped: boolean;
 }
 
+/**
+ * Deletes all haus-managed files tracked in the manifest, strips hooks from settings.json,
+ * and removes the manifest file itself. Skips user-owned or user-edited files unless `force`.
+ */
 export async function runUninstall(options: UninstallOptions = {}): Promise<UninstallResult> {
   const { force = false } = options;
   const manifest = await readManifest();
@@ -75,6 +87,7 @@ export async function runUninstall(options: UninstallOptions = {}): Promise<Unin
   return result;
 }
 
+/** Prints a human-readable uninstall summary to the logger. */
 export function printUninstallResult(result: UninstallResult): void {
   if (result.deleted.length) {
     log("Deleted:");
@@ -89,6 +102,7 @@ export function printUninstallResult(result: UninstallResult): void {
   }
 }
 
+/** Removes `dir` if it is empty after deleting a file, to avoid leaving ghost directories. */
 async function pruneEmptyDir(dir: string): Promise<void> {
   try {
     const entries = await fs.readdir(dir);

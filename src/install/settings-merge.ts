@@ -1,3 +1,7 @@
+/**
+ * Merges haus hook fragments into ~/.claude/settings.json without clobbering
+ * user-owned hook entries, and strips them back out on uninstall.
+ */
 import path from "node:path";
 
 import fs from "fs-extra";
@@ -6,26 +10,34 @@ import { readJson, writeJson } from "../utils/fs.js";
 
 import { globalClaudeDir } from "./manifest.js";
 
+/** A single hook entry from the bundled hooks.json fragment file. */
 export interface HookFragment {
+  /** Unique identifier used to track which hooks haus has installed. */
   id: string;
+  /** "keep" means always install; "gate-default-off" means skip unless opted in. */
   gate: "keep" | "gate-default-off";
+  /** Claude Code hook lifecycle event (e.g. "PostToolUse"). */
   event: string;
   matcher?: string;
   command: string;
 }
 
+/** Schema of the bundled library/global/settings-fragments/hooks.json file. */
 export interface HooksFragmentFile {
   _schema: string;
   hooks: HookFragment[];
 }
 
+/** Shape of a single entry in settings.json's hook event arrays. */
 type ClaudeHookEntry = {
   matcher?: string;
   hooks: Array<{ type: string; command: string }>;
 };
 
+/** Subset of ~/.claude/settings.json that haus reads and writes. */
 type ClaudeSettings = {
   hooks?: Record<string, ClaudeHookEntry[]>;
+  /** Haus-private namespace used to track installed hook IDs and commands. */
   _haus?: {
     hooks: string[];
     hookCommands?: string[];
@@ -33,19 +45,27 @@ type ClaudeSettings = {
   [key: string]: unknown;
 };
 
+/** Returns the absolute path to ~/.claude/settings.json. */
 export function settingsJsonPath(): string {
   return path.join(globalClaudeDir(), "settings.json");
 }
 
+/** Reads ~/.claude/settings.json, returning an empty object if missing. */
 export async function readSettings(): Promise<ClaudeSettings> {
   const parsed = await readJson<ClaudeSettings>(settingsJsonPath());
   return parsed ?? {};
 }
 
+/** Writes the given settings object to ~/.claude/settings.json. */
 export async function writeSettings(settings: ClaudeSettings): Promise<void> {
   await writeJson(settingsJsonPath(), settings);
 }
 
+/**
+ * Adds hook fragments with gate="keep" to the settings object, skipping any
+ * already registered by a previous install. Returns the updated settings and the
+ * IDs that were newly added.
+ */
 export function mergeHooks(
   settings: ClaudeSettings,
   fragments: HookFragment[],
@@ -85,6 +105,11 @@ export function mergeHooks(
   return { settings: updated, addedIds };
 }
 
+/**
+ * Returns a copy of settings with all haus-installed hook entries removed,
+ * identified by the recorded command list in `_haus.hookCommands` (or a prefix
+ * fallback for older installs), and the `_haus` namespace key itself deleted.
+ */
 export function stripHausHooks(settings: ClaudeSettings): ClaudeSettings {
   // No _haus block at all — nothing installed by haus, true no-op.
   if (!settings._haus) return settings;
@@ -109,6 +134,7 @@ export function stripHausHooks(settings: ClaudeSettings): ClaudeSettings {
   return rest;
 }
 
+/** Reads and parses the bundled hooks.json fragment file; returns [] if missing or invalid. */
 export async function loadHooksFragment(fragmentPath: string): Promise<HookFragment[]> {
   let raw: unknown;
   try {

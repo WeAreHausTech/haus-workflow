@@ -1,3 +1,7 @@
+/**
+ * Hashes the content of installed files and directories to detect local modifications
+ * since the last `haus install` or `haus update` run.
+ */
 import path from "node:path";
 
 import fg from "fast-glob";
