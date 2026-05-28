@@ -1,3 +1,8 @@
+/**
+ * Orchestrates writing all .claude/ outputs: settings, rules, commands, catalog items, and lock.
+ * Uses a diff-first approach — only writes when content has actually changed.
+ */
+
 import path from "node:path";
 
 import fs from "fs-extra";
@@ -18,6 +23,11 @@ import { writeProjectFacts } from "./write-project-facts.js";
 import { writeRootClaudeMd } from "./write-root-claude-md.js";
 import { writeWayOfWork } from "./write-way-of-work.js";
 
+/**
+ * Write all managed .claude/ files for the project at `root`.
+ * In dry-run mode, logs diffs but does not write anything to disk.
+ * Returns the full set of file paths that were written (or would be written).
+ */
 export async function writeClaudeFiles(root: string, dryRun: boolean, selectedIds?: string[]): Promise<string[]> {
   const rec = (await readJson<Recommendation>(hausPath(root, "recommendation.json"))) ?? {
     mode: "fast",
@@ -188,6 +198,7 @@ export async function writeClaudeFiles(root: string, dryRun: boolean, selectedId
   return [...new Set(files)];
 }
 
+/** Write a text file only when content has changed; in dry-run mode, log the diff instead. */
 async function writeManagedText(root: string, filePath: string, nextText: string, dryRun: boolean): Promise<void> {
   const prev = (await fs.pathExists(filePath)) ? await fs.readFile(filePath, "utf8") : "";
   const printable = displayPath(root, filePath);
@@ -209,6 +220,7 @@ async function writeManagedText(root: string, filePath: string, nextText: string
   await writeText(filePath, nextText);
 }
 
+/** Serialize `value` to pretty-printed JSON then delegate to `writeManagedText`. */
 async function writeManagedJson(root: string, filePath: string, value: unknown, dryRun: boolean): Promise<void> {
   const nextText = `${JSON.stringify(value, null, 2)}\n`;
   await writeManagedText(root, filePath, nextText, dryRun);

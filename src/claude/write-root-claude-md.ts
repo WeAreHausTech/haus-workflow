@@ -1,3 +1,8 @@
+/**
+ * Manages the root CLAUDE.md file: injects (or updates) the haus import block
+ * that pulls in way-of-work.md and project.md without clobbering user content.
+ */
+
 import path from "node:path";
 
 import fs from "fs-extra";
@@ -7,15 +12,22 @@ import { writeText } from "../utils/fs.js";
 import { log } from "../utils/logger.js";
 import { displayPath } from "../utils/paths.js";
 
+/** Opening sentinel for the managed import block inside CLAUDE.md. */
 export const BLOCK_BEGIN = "<!-- HAUS:BEGIN haus-imports v=1 -->";
+/** Closing sentinel for the managed import block inside CLAUDE.md. */
 export const BLOCK_END = "<!-- HAUS:END haus-imports -->";
 
 const IMPORT_CONTENT = `@.haus-workflow/haus-way-of-work.md\n@.haus-workflow/project.md`;
 
+/** Build the full managed import block (sentinels + @-import lines). */
 export function buildImportBlock(): string {
   return `${BLOCK_BEGIN}\n${IMPORT_CONTENT}\n${BLOCK_END}`;
 }
 
+/**
+ * Replace the existing haus block in `existing`, or append `block` if none is present.
+ * User content outside the sentinels is always preserved.
+ */
 export function injectHausBlock(existing: string, block: string): string {
   const beginIdx = existing.indexOf(BLOCK_BEGIN);
   const endIdx = existing.indexOf(BLOCK_END);
@@ -33,6 +45,10 @@ export function injectHausBlock(existing: string, block: string): string {
   return `${trimmed}\n\n${block}\n`;
 }
 
+/**
+ * Write the root CLAUDE.md at `root`, injecting (or refreshing) the haus import block.
+ * Returns the absolute path of CLAUDE.md.
+ */
 export async function writeRootClaudeMd(root: string, dryRun: boolean): Promise<string> {
   const filePath = path.join(root, "CLAUDE.md");
   const block = buildImportBlock();
