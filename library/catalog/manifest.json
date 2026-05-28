@@ -888,6 +888,15 @@
         },
         {
           "stack": "wordpress"
+        },
+        {
+          "stack": "elementor"
+        },
+        {
+          "stack": "acf-pro"
+        },
+        {
+          "stack": "jetengine"
         }
       ],
       "ecosystem": "wordpress",
@@ -985,7 +994,8 @@
         "postgresql",
         "mariadb",
         "mssql",
-        "elasticsearch"
+        "elasticsearch",
+        "redis"
       ],
       "repoRoles": [],
       "requiresAny": [
@@ -1000,6 +1010,9 @@
         },
         {
           "stack": "elasticsearch"
+        },
+        {
+          "stack": "redis"
         }
       ],
       "tokenEstimate": 1700,

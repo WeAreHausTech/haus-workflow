@@ -106,7 +106,7 @@ All tasks that previously listed `phpDeps.includes(...)` in their code examples 
 
 ## Phase 3 — WordPress / Elementor stack
 
-### T5 · Elementor detection via composer deps
+### T5 · Elementor detection via composer deps ✅ DONE
 
 **Repos:** `haus-workflow` only (catalog item `haus.wordpress-acf-elementor-jetengine-patterns` already exists)
 
@@ -130,7 +130,7 @@ Also ensure `detectRoles` adds `wordpress-bedrock-site` when `deps.includes("roo
 
 ---
 
-### T6 · Improve ACF Pro + JetEngine detection
+### T6 · Improve ACF Pro + JetEngine detection ✅ DONE
 
 **Repos:** `haus-workflow` only (catalog items exist)
 
@@ -155,7 +155,7 @@ Update `haus.wordpress-acf-elementor-jetengine-patterns` manifest entry `require
 
 ---
 
-### T7 · Redis detection — PHP + JS
+### T7 · Redis detection — PHP + JS ✅ DONE
 
 **Repos:** `haus-workflow` only
 
@@ -617,9 +617,9 @@ Manifest + fixture stub for `haus.supabase-patterns`.
 | T2 · detect-node.ts | 1 | haus-workflow | ✅ Done — file deleted |
 | T3 · Vitest | 2 | both | ✅ Done |
 | T4 · Jest | 2 | both | ✅ Done |
-| T5 · Elementor | 3 | haus-workflow | ⬜ Todo |
-| T6 · ACF + JetEngine | 3 | haus-workflow | ⬜ Todo |
-| T7 · Redis | 3 | haus-workflow + catalog update | ⬜ Todo |
+| T5 · Elementor | 3 | haus-workflow | ✅ Done |
+| T6 · ACF + JetEngine | 3 | haus-workflow | ✅ Done |
+| T7 · Redis | 3 | haus-workflow + catalog update | ✅ Done |
 | T8 · React Router v7 | 4 | both | ⬜ Todo |
 | T9 · TypeScript rename | 4 | both | ⬜ Todo |
 | T10 · Tailwind token | 4 | haus-workflow | ⬜ Todo |

@@ -501,7 +501,10 @@
       "requiresAny": [
         { "role": "wordpress-bedrock-site" },
         { "role": "wordpress-vanilla-site" },
-        { "stack": "wordpress" }
+        { "stack": "wordpress" },
+        { "stack": "elementor" },
+        { "stack": "acf-pro" },
+        { "stack": "jetengine" }
       ],
       "ecosystem": "wordpress",
       "tokenEstimate": 2600,
@@ -557,13 +560,14 @@
       "whenNotToUse": "Do not use for UI-only changes without persistence/search impact.",
       "references": ["references/scope.md", "references/workflow.md"],
       "tokenBudget": 1200,
-      "tags": ["postgresql", "mariadb", "mssql", "elasticsearch"],
+      "tags": ["postgresql", "mariadb", "mssql", "elasticsearch", "redis"],
       "repoRoles": [],
       "requiresAny": [
         { "stack": "postgresql" },
         { "stack": "mariadb" },
         { "stack": "mssql" },
-        { "stack": "elasticsearch" }
+        { "stack": "elasticsearch" },
+        { "stack": "redis" }
       ],
       "tokenEstimate": 1700,
       "installMode": "copy-selected"

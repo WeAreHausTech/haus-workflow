@@ -152,12 +152,16 @@ function detectRoles(deps: string[], files: string[]): string[] {
   if (files.some((f) => f.endsWith("turbo.json"))) roles.add("turbo-monorepo");
   if (files.some((f) => f.endsWith("artisan")) || deps.includes("laravel/framework")) roles.add("laravel-app");
   if (deps.includes("laravel/nova")) roles.add("laravel-nova-app");
-  if (files.some((f) => f.endsWith("wp-config.php")) && files.some((f) => f.includes("web/app"))) {
+  const hasWpConfig = files.some((f) => f.endsWith("wp-config.php"));
+  const hasBedrockLayout = files.some((f) => f.includes("web/app")) || deps.includes("roots/wordpress");
+  if (hasWpConfig && hasBedrockLayout) {
     roles.add("wordpress-bedrock-site");
     roles.add("wordpress-site");
-  }
-  if (files.some((f) => f.endsWith("wp-config.php")) && !files.some((f) => f.includes("web/app"))) {
+  } else if (hasWpConfig) {
     roles.add("wordpress-vanilla-site");
+    roles.add("wordpress-site");
+  } else if (deps.includes("roots/wordpress")) {
+    roles.add("wordpress-bedrock-site");
     roles.add("wordpress-site");
   }
   if (files.some((f) => f.endsWith(".csproj") || f.endsWith(".sln"))) roles.add("dotnet-service");
@@ -196,7 +200,23 @@ async function detectStacks(
   if (files.some((f) => f.endsWith(".graphql") || f.endsWith("schema.graphql"))) add("backend", "graphql");
   if (deps.includes("laravel/framework")) add("backend", "laravel");
   if (files.some((f) => f.includes("app/Providers/") || f.includes("routes/"))) add("backend", "laravel");
-  if (files.some((f) => f.endsWith("wp-config.php"))) add("backend", "wordpress");
+  if (files.some((f) => f.endsWith("wp-config.php")) || deps.includes("roots/wordpress")) add("backend", "wordpress");
+  if (
+    deps.includes("wpackagist-plugin/elementor") ||
+    deps.includes("wearehaus/elementor-pro") ||
+    deps.includes("wpackagist-theme/hello-elementor")
+  ) {
+    add("backend", "elementor");
+  }
+  if (
+    deps.includes("wearehaus/advanced-custom-fields-pro") ||
+    deps.includes("wpackagist-plugin/advanced-custom-fields")
+  ) {
+    add("backend", "acf-pro");
+  }
+  if (deps.includes("wearehaus/jet-engine")) add("backend", "jetengine");
+  if (deps.includes("wearehaus/jet-smart-filters")) add("backend", "jetsmartfilters");
+  if (deps.includes("wearehaus/gravityforms")) add("backend", "gravityforms");
   if (files.some((f) => f.endsWith(".csproj") || f.endsWith(".sln"))) add("backend", "dotnet");
   if (deps.includes("@playwright/test")) add("testing", "playwright");
   if (files.some((f) => f.includes(".storybook"))) add("testing", "storybook");
@@ -209,6 +229,9 @@ async function detectStacks(
   if (deps.includes("mariadb") || deps.includes("mysql2")) add("databases", "mariadb");
   if (deps.includes("mssql")) add("databases", "mssql");
   if (deps.includes("@elastic/elasticsearch")) add("databases", "elasticsearch");
+  if (deps.includes("predis/predis") || deps.includes("ioredis") || deps.includes("redis")) {
+    add("databases", "redis");
+  }
   if (await hasNeedle(root, files, "openid")) add("auth", "oidc");
   if (await hasNeedle(root, files, "AZURE_AD")) add("auth", "azure-ad");
   if (await hasNeedle(root, files, "BANKID")) add("auth", "bankid");
