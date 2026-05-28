@@ -4,11 +4,11 @@
   "description": "Haus AI workflow CLI for Claude Code.",
   "type": "module",
   "bin": {
-    "haus": "./dist/cli.js"
+    "haus": "dist/cli.js"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/WeAreHausTech/haus-workflow.git"
+    "url": "git+https://github.com/WeAreHausTech/haus-workflow.git"
   },
   "homepage": "https://github.com/WeAreHausTech/haus-workflow",
   "files": [
