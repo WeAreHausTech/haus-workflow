@@ -68,6 +68,9 @@
     "testing-library",
     "phpunit",
     "storybook",
-    "wisest"
+    "wisest",
+    "vitest",
+    "jest",
+    "redis"
   ]
 }
