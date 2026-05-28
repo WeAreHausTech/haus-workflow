@@ -6,10 +6,10 @@ Sourced from full wearehaustech org scan (May 2026). Each task is self-contained
 
 ## How to read this
 
-- **`haus-ai-workflow`** = this repo — scanner code + test fixtures + `library/catalog/manifest.json`
+- **`haus-workflow`** = this repo — scanner code + test fixtures + `library/catalog/manifest.json`
 - **`haus-workflow-catalog`** = separate repo — actual skill content (`skills/*/SKILL.md`, `manifest.json`)
 - Every new stack token requires changes in **both** repos
-- Every detection-only fix (no new skill) only touches `haus-ai-workflow`
+- Every detection-only fix (no new skill) only touches `haus-workflow`
 
 ---
 
@@ -17,7 +17,7 @@ Sourced from full wearehaustech org scan (May 2026). Each task is self-contained
 
 ### T1 · Parse composer.json deps ✅ DONE
 
-**Repos:** `haus-ai-workflow` only
+**Repos:** `haus-workflow` only
 
 **Implemented:** `dependencySet(pkg, composer)` in `scan-project.ts` already merges `composer.require` and `composer["require-dev"]` into the shared `deps` array. All PHP packages are available to `detectStacks` via `deps.includes(...)` — no separate `phpDeps` parameter needed.
 
@@ -27,7 +27,7 @@ All tasks that previously listed `phpDeps.includes(...)` in their code examples 
 
 ### T2 · detect-node.ts — DROP
 
-**Repos:** `haus-ai-workflow` only
+**Repos:** `haus-workflow` only
 
 **Context:** `src/scanner/detect-node.ts` re-emits `typescript6`, `nextjs`, `react19`, `vite8` — all already handled in `detectStacks`. File has TODO "merge or remove when modular scanner lands." It does **not** detect Node.js runtime.
 
@@ -43,7 +43,7 @@ All tasks that previously listed `phpDeps.includes(...)` in their code examples 
 
 **Context:** Vitest is used in 5+ haus repos (`hemglass-ecom`, `cellink-portal`, `haus-tech-vendure-plugins`, `haus-storefront-components`, `haus-commerce-builder`). Currently undetected. Biggest testing gap.
 
-**Changes — `haus-ai-workflow`:**
+**Changes — `haus-workflow`:**
 - `src/scanner/scan-project.ts` → `detectStacks`:
   ```ts
   if (deps.includes("vitest")) add("testing", "vitest");
@@ -86,7 +86,7 @@ All tasks that previously listed `phpDeps.includes(...)` in their code examples 
 
 **Context:** Jest is used in `haus-storefront-components` (Nx setup). Less prevalent than Vitest but present.
 
-**Changes — `haus-ai-workflow`:**
+**Changes — `haus-workflow`:**
 - `src/scanner/scan-project.ts` → `detectStacks`:
   ```ts
   if (deps.includes("jest") || deps.includes("jest-environment-jsdom")) add("testing", "jest");
@@ -106,7 +106,7 @@ All tasks that previously listed `phpDeps.includes(...)` in their code examples 
 
 ### T5 · Elementor detection via composer deps
 
-**Repos:** `haus-ai-workflow` only (catalog item `haus.wordpress-acf-elementor-jetengine-patterns` already exists)
+**Repos:** `haus-workflow` only (catalog item `haus.wordpress-acf-elementor-jetengine-patterns` already exists)
 
 **Context:** `detectStacks` sets `wordpress` token only if `wp-config.php` exists. Elementor is installed via composer — never detected. All WP Bedrock sites use `wpackagist-plugin/elementor` or `wearehaus/elementor-pro`. Composer deps already in `deps` (T1 done).
 
@@ -130,7 +130,7 @@ Also ensure `detectRoles` adds `wordpress-bedrock-site` when `deps.includes("roo
 
 ### T6 · Improve ACF Pro + JetEngine detection
 
-**Repos:** `haus-ai-workflow` only (catalog items exist)
+**Repos:** `haus-workflow` only (catalog items exist)
 
 **Context:** `haus.wordpress-acf-elementor-jetengine-patterns` exists but triggers only on role, not specific composer deps. Strengthen signal. Composer deps already in `deps` (T1 done).
 
@@ -155,7 +155,7 @@ Update `haus.wordpress-acf-elementor-jetengine-patterns` manifest entry `require
 
 ### T7 · Redis detection — PHP + JS
 
-**Repos:** `haus-ai-workflow` only
+**Repos:** `haus-workflow` only
 
 **Context:** Redis used via `predis/predis` (Laravel) and potentially `ioredis` (Node). Currently undetected. No catalog item needed — handled by existing `haus.database-patterns` after adding token to its `requiresAny`. Composer deps already in `deps` (T1 done).
 
@@ -183,7 +183,7 @@ Update `manifest.json` `haus.database-patterns` `requiresAny` to include `{"stac
 
 **Context:** React Router v7 used as SSR framework (like Remix) in `kulturarvvastmanland-audio-walks` and `cellink-portal-frontend`. Key signals: `react-router` dep + `@react-router/node` dep (SSR) or `react-router build` script.
 
-**Changes — `haus-ai-workflow`:**
+**Changes — `haus-workflow`:**
 - `src/scanner/scan-project.ts`:
   ```ts
   if (deps.includes("react-router") && deps.includes("@react-router/node")) {
@@ -208,7 +208,7 @@ Update `manifest.json` `haus.database-patterns` `requiresAny` to include `{"stac
 
 **Context:** User confirmed TypeScript 5.x is correct. The catalog item is currently named `haus.typescript6-patterns` with dir `typescript6-patterns`. Detection signal `{"dependency": "typescript"}` is fine — just rename everything.
 
-**Changes — `haus-ai-workflow`:**
+**Changes — `haus-workflow`:**
 - `library/catalog/manifest.json`: rename id to `haus.typescript5-patterns`, title to "Haus TypeScript 5 patterns", path to `tests/fixtures/catalog/skills/typescript5-patterns`
 - Rename dir `tests/fixtures/catalog/skills/typescript6-patterns/` → `typescript5-patterns/`
 - Add `typescript5` to detectable tokens: `if (deps.includes("typescript")) add("tooling", "typescript5");`
@@ -224,7 +224,7 @@ Update `manifest.json` `haus.database-patterns` `requiresAny` to include `{"stac
 
 ### T10 · Tailwind CSS detection improvement
 
-**Repos:** `haus-ai-workflow` only (catalog item `haus.tailwind-scss-patterns` already exists and matches `{"dependency": "tailwindcss"}`)
+**Repos:** `haus-workflow` only (catalog item `haus.tailwind-scss-patterns` already exists and matches `{"dependency": "tailwindcss"}`)
 
 **Context:** Detection via `requiresAny` dependency match already works. But `detectStacks` never emits a `tailwindcss` stack token — it only has `vite8`, `nextjs` etc. Add the token so context map reflects it.
 
@@ -241,7 +241,7 @@ if (deps.includes("tailwindcss") || files.some(f => f.includes("tailwind.config.
 
 ### T11 · Shadcn/ui detection improvement
 
-**Repos:** `haus-ai-workflow` only (catalog item `haus.radix-shadcn-patterns` already exists)
+**Repos:** `haus-workflow` only (catalog item `haus.radix-shadcn-patterns` already exists)
 
 **Context:** `components.json` is already in SAFE_FILES but never queried in `detectStacks`. Shadcn installs it at root. Add explicit token.
 
@@ -269,7 +269,7 @@ Update `library/catalog/manifest.json` `haus.radix-shadcn-patterns` `requiresAny
 
 **Context:** Sanity v5 used in `new.convendum.se` via `sanity`, `next-sanity`, `@sanity/client`. Growing pattern.
 
-**Changes — `haus-ai-workflow`:**
+**Changes — `haus-workflow`:**
 - `src/scanner/scan-project.ts`:
   ```ts
   if (deps.includes("sanity") || deps.includes("next-sanity") || deps.includes("@sanity/client")) {
@@ -293,7 +293,7 @@ Update `library/catalog/manifest.json` `haus.radix-shadcn-patterns` `requiresAny
 
 **Context:** Strapi 5 used in `cellink-portal`. Key dep: `@strapi/strapi`.
 
-**Changes — `haus-ai-workflow`:**
+**Changes — `haus-workflow`:**
 - `src/scanner/scan-project.ts`:
   ```ts
   if (deps.includes("@strapi/strapi") || deps.some(d => d.startsWith("@strapi/"))) {
@@ -317,7 +317,7 @@ Update `library/catalog/manifest.json` `haus.radix-shadcn-patterns` `requiresAny
 
 **Context:** Prisma 6 ORM used in `samsa` (Next.js app). Common in Next.js + PostgreSQL setups.
 
-**Changes — `haus-ai-workflow`:**
+**Changes — `haus-workflow`:**
 - `src/scanner/scan-project.ts`:
   ```ts
   if (deps.includes("prisma") || deps.includes("@prisma/client")) {
@@ -338,7 +338,7 @@ Update `library/catalog/manifest.json` `haus.radix-shadcn-patterns` `requiresAny
 
 ### T15 · MySQL package detection fix
 
-**Repos:** `haus-ai-workflow` only
+**Repos:** `haus-workflow` only
 
 **Context:** Current code checks `mysql2` and `mariadb` but not `mysql` (the older package). Both `hemglass-ecom` and `livv-ecom` use `mysql`. Should emit `mariadb` token (same catalog item) or add separate `mysql` token. Decision: emit `mysql` token, add to existing `haus.database-patterns` `requiresAny`.
 
@@ -363,7 +363,7 @@ Update `manifest.json` same entry. Update `SKILL.md` to mention MySQL.
 
 **Context:** SAML2 used in `prosang-webbokning-3` via `24slides/laravel-saml2` (composer). Laravel + SAML2 = enterprise SSO pattern. Composer deps already in `deps` (T1 done).
 
-**Changes — `haus-ai-workflow`:**
+**Changes — `haus-workflow`:**
 - `src/scanner/scan-project.ts`:
   ```ts
   if (deps.includes("24slides/laravel-saml2") || deps.includes("aacotroneo/laravel-saml2")) {
@@ -388,7 +388,7 @@ Rename/update `auth-oidc-azure-bankid-patterns` SKILL.md to include SAML2 sectio
 
 **Context:** `next-auth` used in `samsa` (Next.js). Common pattern for Next.js apps needing session auth.
 
-**Changes — `haus-ai-workflow`:**
+**Changes — `haus-workflow`:**
 - `src/scanner/scan-project.ts`:
   ```ts
   if (deps.includes("next-auth") || deps.includes("@auth/core")) add("auth", "next-auth");
@@ -409,7 +409,7 @@ Rename/update `auth-oidc-azure-bankid-patterns` SKILL.md to include SAML2 sectio
 
 **Context:** Expo + expo-router used in `haus-storefront-expo-app` and `haus-storefront-components`. React Native target. Key signal: `expo` dep + `expo-router`.
 
-**Changes — `haus-ai-workflow`:**
+**Changes — `haus-workflow`:**
 - `src/scanner/scan-project.ts`:
   ```ts
   if (deps.includes("expo")) add("frontend", "expo");
@@ -432,7 +432,7 @@ Rename/update `auth-oidc-azure-bankid-patterns` SKILL.md to include SAML2 sectio
 
 **Context:** Both should be in every repo. Goal: detect absence and recommend catalog item that installs `@haus-tech/prettier-config` + `@haus-tech/tech-config` eslint setup. Detected by absence, not presence.
 
-**Changes — `haus-ai-workflow`:**
+**Changes — `haus-workflow`:**
 - `src/scanner/scan-project.ts` — add inverse detection: emit `missing-prettier` / `missing-eslint` tokens when deps absent:
   ```ts
   if (!deps.includes("prettier")) add("tooling", "missing-prettier");
@@ -454,7 +454,7 @@ Rename/update `auth-oidc-azure-bankid-patterns` SKILL.md to include SAML2 sectio
 
 **Context:** `i18next` + `react-i18next` used universally across all TS frontends. High-value skill for translation patterns.
 
-**Changes — `haus-ai-workflow`:**
+**Changes — `haus-workflow`:**
 ```ts
 if (deps.includes("i18next") || deps.includes("react-i18next")) add("tooling", "i18next");
 ```
@@ -472,7 +472,7 @@ Manifest + fixture stub for `haus.i18next-patterns`.
 
 **Context:** BullMQ used in all Vendure backends for job queues. Key dep: `bullmq`.
 
-**Changes — `haus-ai-workflow`:**
+**Changes — `haus-workflow`:**
 ```ts
 if (deps.includes("bullmq")) add("tooling", "bullmq");
 ```
@@ -486,7 +486,7 @@ Manifest + fixture stub for `haus.bullmq-patterns`.
 
 ### T22 · Docker detection
 
-**Repos:** `haus-ai-workflow` only
+**Repos:** `haus-workflow` only
 
 **Context:** Docker used in all Vendure backends. Signal: `Dockerfile` at root or `docker-compose.*`. No dedicated catalog item needed — context signal only (helps recommender score infra-related skills).
 
@@ -503,7 +503,7 @@ Note: `docker-compose.*` is already in SAFE_FILES so it's picked up by `listFile
 
 ### T23 · PM2 detection
 
-**Repos:** `haus-ai-workflow` only
+**Repos:** `haus-workflow` only
 
 **Context:** PM2 used as process manager in Vendure backends. Signal: `pm2` dep or `ecosystem.config.js`.
 
@@ -522,7 +522,7 @@ if (deps.includes("pm2") || files.some(f => f.includes("ecosystem.config"))) {
 
 **Context:** Sentry used in `hemglass-ecom` via `@sentry/node`. Error monitoring pattern.
 
-**Changes — `haus-ai-workflow`:**
+**Changes — `haus-workflow`:**
 ```ts
 if (deps.some(d => d.startsWith("@sentry/"))) add("tooling", "sentry");
 ```
@@ -536,7 +536,7 @@ Manifest + fixture stub for `haus.sentry-patterns`.
 
 ### T25 · Deployer PHP detection
 
-**Repos:** `haus-ai-workflow` only
+**Repos:** `haus-workflow` only
 
 **Context:** Deployer (`deployer/deployer`) used in all Laravel + WP repos for SSH-based deployment. No catalog item needed — context signal. Composer deps already in `deps` (T1 done).
 
@@ -555,7 +555,7 @@ if (deps.includes("deployer/deployer")) add("tooling", "deployer-php");
 
 **Context:** Stripe used in elementor widget repos via `@stripe/react-stripe-js` + `@stripe/stripe-js`. Payment integration pattern.
 
-**Changes — `haus-ai-workflow`:**
+**Changes — `haus-workflow`:**
 ```ts
 if (deps.includes("@stripe/stripe-js") || deps.includes("@stripe/react-stripe-js")) {
   add("tooling", "stripe");
@@ -575,7 +575,7 @@ Manifest + fixture stub for `haus.stripe-patterns`.
 
 **Context:** Qliro (Nordic payment provider) used in `hemglass-ecom` via `@haus-tech/qliro-plugin`.
 
-**Changes — `haus-ai-workflow`:**
+**Changes — `haus-workflow`:**
 ```ts
 if (deps.includes("@haus-tech/qliro-plugin")) add("tooling", "qliro");
 ```
@@ -593,7 +593,7 @@ Manifest + fixture stub for `haus.qliro-patterns`.
 
 **Context:** Supabase used in `hausforge-creative-hub`. BaaS alternative to custom auth/db. Signal: `@supabase/supabase-js`.
 
-**Changes — `haus-ai-workflow`:**
+**Changes — `haus-workflow`:**
 ```ts
 if (deps.includes("@supabase/supabase-js") || deps.some(d => d.startsWith("@supabase/"))) {
   add("databases", "supabase");
@@ -611,31 +611,31 @@ Manifest + fixture stub for `haus.supabase-patterns`.
 
 | Task | Phase | Repos | Status |
 |------|-------|-------|--------|
-| T1 · composer.json parsing | 1 | haus-ai-workflow | ✅ Done — `deps` includes PHP packages |
-| T2 · detect-node.ts | 1 | haus-ai-workflow | ❌ Dropped — file is redundant, delete it |
+| T1 · composer.json parsing | 1 | haus-workflow | ✅ Done — `deps` includes PHP packages |
+| T2 · detect-node.ts | 1 | haus-workflow | ❌ Dropped — file is redundant, delete it |
 | T3 · Vitest | 2 | both | ⬜ Todo |
 | T4 · Jest | 2 | both | ⬜ Todo |
-| T5 · Elementor | 3 | haus-ai-workflow | ⬜ Todo |
-| T6 · ACF + JetEngine | 3 | haus-ai-workflow | ⬜ Todo |
-| T7 · Redis | 3 | haus-ai-workflow + catalog update | ⬜ Todo |
+| T5 · Elementor | 3 | haus-workflow | ⬜ Todo |
+| T6 · ACF + JetEngine | 3 | haus-workflow | ⬜ Todo |
+| T7 · Redis | 3 | haus-workflow + catalog update | ⬜ Todo |
 | T8 · React Router v7 | 4 | both | ⬜ Todo |
 | T9 · TypeScript rename | 4 | both | ⬜ Todo |
-| T10 · Tailwind token | 4 | haus-ai-workflow | ⬜ Todo |
-| T11 · Shadcn token | 4 | haus-ai-workflow | ⬜ Todo |
+| T10 · Tailwind token | 4 | haus-workflow | ⬜ Todo |
+| T11 · Shadcn token | 4 | haus-workflow | ⬜ Todo |
 | T12 · Sanity | 5 | both | ⬜ Todo |
 | T13 · Strapi | 5 | both | ⬜ Todo |
 | T14 · Prisma | 5 | both | ⬜ Todo |
-| T15 · MySQL fix | 6 | haus-ai-workflow + catalog update | ⬜ Todo |
+| T15 · MySQL fix | 6 | haus-workflow + catalog update | ⬜ Todo |
 | T16 · SAML2 | 7 | both | ⬜ Todo |
 | T17 · NextAuth | 7 | both | ⬜ Todo |
 | T18 · Expo | 8 | both | ⬜ Todo |
 | T19 · Prettier + ESLint enforcement | 9 | both | ⬜ Todo |
 | T20 · i18next | 9 | both | ⬜ Todo |
 | T21 · BullMQ | 9 | both | ⬜ Todo |
-| T22 · Docker | 9 | haus-ai-workflow | ⬜ Todo |
-| T23 · PM2 | 9 | haus-ai-workflow | ⬜ Todo |
+| T22 · Docker | 9 | haus-workflow | ⬜ Todo |
+| T23 · PM2 | 9 | haus-workflow | ⬜ Todo |
 | T24 · Sentry | 9 | both | ⬜ Todo |
-| T25 · Deployer PHP | 9 | haus-ai-workflow | ⬜ Todo |
+| T25 · Deployer PHP | 9 | haus-workflow | ⬜ Todo |
 | T26 · Stripe | 10 | both | ⬜ Todo |
 | T27 · Qliro | 10 | both | ⬜ Todo |
 | T28 · Supabase | 10 | both | ⬜ Todo |
