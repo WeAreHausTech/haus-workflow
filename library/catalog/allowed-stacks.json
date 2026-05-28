@@ -83,6 +83,20 @@
     "auth",
     "expo",
     "react-native",
-    "mobile"
+    "mobile",
+    "i18next",
+    "i18n",
+    "bullmq",
+    "queue",
+    "sentry",
+    "observability",
+    "tooling",
+    "prettier",
+    "eslint",
+    "missing-prettier",
+    "missing-eslint",
+    "docker",
+    "pm2",
+    "deployer-php"
   ]
 }

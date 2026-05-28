@@ -213,6 +213,14 @@ async function detectStacks(
   if (deps.includes("prisma") || deps.includes("@prisma/client")) add("backend", "prisma");
   if (deps.includes("expo")) add("frontend", "expo");
   if (deps.includes("react-native")) add("frontend", "react-native");
+  if (deps.includes("i18next") || deps.includes("react-i18next")) add("tooling", "i18next");
+  if (deps.includes("bullmq")) add("tooling", "bullmq");
+  if (files.some((f) => f === "Dockerfile" || f.startsWith("docker-compose"))) add("tooling", "docker");
+  if (deps.includes("pm2") || files.some((f) => f.includes("ecosystem.config"))) add("tooling", "pm2");
+  if (deps.some((d) => d.startsWith("@sentry/"))) add("tooling", "sentry");
+  if (deps.includes("deployer/deployer")) add("tooling", "deployer-php");
+  if (!deps.includes("prettier")) add("tooling", "missing-prettier");
+  if (!deps.includes("eslint")) add("tooling", "missing-eslint");
   if (deps.includes("@vendure/core")) add("backend", "vendure3");
   if (deps.includes("@nestjs/core")) add("backend", "nestjs");
   if (await hasNeedle(root, files, "NestFactory")) add("backend", "nestjs");

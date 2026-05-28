@@ -428,7 +428,7 @@ Rename/update `auth-oidc-azure-bankid-patterns` SKILL.md to include SAML2 sectio
 
 ## Phase 9 — Tooling / infra
 
-### T19 · Prettier + ESLint enforcement catalog items
+### T19 · Prettier + ESLint enforcement catalog items ✅ DONE
 
 **Repos:** both
 
@@ -450,7 +450,7 @@ Rename/update `auth-oidc-azure-bankid-patterns` SKILL.md to include SAML2 sectio
 
 ---
 
-### T20 · i18next detection + catalog item
+### T20 · i18next detection + catalog item ✅ DONE
 
 **Repos:** both
 
@@ -468,7 +468,7 @@ Manifest + fixture stub for `haus.i18next-patterns`.
 
 ---
 
-### T21 · BullMQ detection + catalog item
+### T21 · BullMQ detection + catalog item ✅ DONE
 
 **Repos:** both
 
@@ -486,7 +486,7 @@ Manifest + fixture stub for `haus.bullmq-patterns`.
 
 ---
 
-### T22 · Docker detection
+### T22 · Docker detection ✅ DONE
 
 **Repos:** `haus-workflow` only
 
@@ -503,7 +503,7 @@ Note: `docker-compose.*` is already in SAFE_FILES so it's picked up by `listFile
 
 ---
 
-### T23 · PM2 detection
+### T23 · PM2 detection ✅ DONE
 
 **Repos:** `haus-workflow` only
 
@@ -518,7 +518,7 @@ if (deps.includes("pm2") || files.some(f => f.includes("ecosystem.config"))) {
 
 ---
 
-### T24 · Sentry detection + catalog item
+### T24 · Sentry detection + catalog item ✅ DONE
 
 **Repos:** both
 
@@ -536,7 +536,7 @@ Manifest + fixture stub for `haus.sentry-patterns`.
 
 ---
 
-### T25 · Deployer PHP detection
+### T25 · Deployer PHP detection ✅ DONE
 
 **Repos:** `haus-workflow` only
 
@@ -631,13 +631,13 @@ Manifest + fixture stub for `haus.supabase-patterns`.
 | T16 · SAML2 | 7 | both | ✅ Done |
 | T17 · NextAuth | 7 | both | ✅ Done |
 | T18 · Expo | 8 | both | ✅ Done |
-| T19 · Prettier + ESLint enforcement | 9 | both | ⬜ Todo |
-| T20 · i18next | 9 | both | ⬜ Todo |
-| T21 · BullMQ | 9 | both | ⬜ Todo |
-| T22 · Docker | 9 | haus-workflow | ⬜ Todo |
-| T23 · PM2 | 9 | haus-workflow | ⬜ Todo |
-| T24 · Sentry | 9 | both | ⬜ Todo |
-| T25 · Deployer PHP | 9 | haus-workflow | ⬜ Todo |
+| T19 · Prettier + ESLint enforcement | 9 | both | ✅ Done |
+| T20 · i18next | 9 | both | ✅ Done |
+| T21 · BullMQ | 9 | both | ✅ Done |
+| T22 · Docker | 9 | haus-workflow | ✅ Done |
+| T23 · PM2 | 9 | haus-workflow | ✅ Done |
+| T24 · Sentry | 9 | both | ✅ Done |
+| T25 · Deployer PHP | 9 | haus-workflow | ✅ Done |
 | T26 · Stripe | 10 | both | ⬜ Todo |
 | T27 · Qliro | 10 | both | ⬜ Todo |
 | T28 · Supabase | 10 | both | ⬜ Todo |

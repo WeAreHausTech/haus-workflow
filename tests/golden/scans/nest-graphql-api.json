@@ -5,7 +5,7 @@
     "graphql-api",
     "nestjs-api"
   ],
-  "confidence": 0.64,
+  "confidence": 0.68,
   "detectedStacks": {
     "auth": [],
     "backend": [
@@ -19,6 +19,8 @@
     ],
     "testing": [],
     "tooling": [
+      "missing-eslint",
+      "missing-prettier",
       "typescript5"
     ]
   },

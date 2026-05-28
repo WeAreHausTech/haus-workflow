@@ -5,7 +5,7 @@
     "next-app",
     "react-app"
   ],
-  "confidence": 0.66,
+  "confidence": 0.7,
   "detectedStacks": {
     "auth": [],
     "backend": [],
@@ -21,6 +21,8 @@
       "playwright"
     ],
     "tooling": [
+      "missing-eslint",
+      "missing-prettier",
       "typescript5"
     ]
   },

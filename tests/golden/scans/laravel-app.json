@@ -4,7 +4,7 @@
   "repoRoles": [
     "laravel-app"
   ],
-  "confidence": 0.52,
+  "confidence": 0.56,
   "detectedStacks": {
     "auth": [],
     "backend": [
@@ -16,7 +16,10 @@
     "testing": [
       "phpunit"
     ],
-    "tooling": []
+    "tooling": [
+      "missing-eslint",
+      "missing-prettier"
+    ]
   },
   "dependencies": [
     "laravel/framework",

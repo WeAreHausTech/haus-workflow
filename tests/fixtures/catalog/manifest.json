@@ -153,6 +153,112 @@
       "installMode": "copy-selected"
     },
     {
+      "id": "haus.i18next-patterns",
+      "source": "haus",
+      "type": "skill",
+      "path": "skills/i18next-patterns",
+      "title": "Haus i18next patterns",
+      "purpose": "Guide i18next setup, namespace structure, translation key conventions, and SSR-safe usage.",
+      "whenToUse": "Use for adding/changing translations, configuring i18next, or wiring react-i18next / next-i18next.",
+      "whenNotToUse": "Do not use for non-i18next translation systems or static-only content with no locale.",
+      "references": ["references/scope.md", "references/workflow.md", "https://www.i18next.com/"],
+      "tokenBudget": 1200,
+      "tags": ["i18next", "i18n", "frontend"],
+      "repoRoles": ["next-app", "react-app", "vue-app", "vite-app"],
+      "requiresAny": [
+        { "stack": "i18next" },
+        { "dependency": "i18next" },
+        { "dependency": "react-i18next" }
+      ],
+      "ecosystem": "tooling",
+      "tokenEstimate": 1800,
+      "installMode": "copy-selected"
+    },
+    {
+      "id": "haus.bullmq-patterns",
+      "source": "haus",
+      "type": "skill",
+      "path": "skills/bullmq-patterns",
+      "title": "Haus BullMQ patterns",
+      "purpose": "Guide BullMQ queue, worker, scheduler, and Redis-connection lifecycle changes.",
+      "whenToUse": "Use for BullMQ queue definitions, processors, schedulers, and graceful shutdown.",
+      "whenNotToUse": "Do not use for non-BullMQ job systems or in-process scheduling without Redis.",
+      "references": ["references/scope.md", "references/workflow.md", "https://docs.bullmq.io/"],
+      "tokenBudget": 1200,
+      "tags": ["bullmq", "queue", "backend"],
+      "repoRoles": ["vendure-app", "nestjs-api"],
+      "requiresAny": [
+        { "stack": "bullmq" },
+        { "dependency": "bullmq" }
+      ],
+      "ecosystem": "tooling",
+      "tokenEstimate": 1800,
+      "installMode": "copy-selected"
+    },
+    {
+      "id": "haus.sentry-patterns",
+      "source": "haus",
+      "type": "skill",
+      "path": "skills/sentry-patterns",
+      "title": "Haus Sentry patterns",
+      "purpose": "Guide Sentry SDK setup, error capture, performance tracing, and PII scrubbing.",
+      "whenToUse": "Use for `@sentry/*` SDK init, scope/breadcrumb config, source map upload, and PII redaction.",
+      "whenNotToUse": "Do not use for non-Sentry monitoring (Datadog, New Relic, etc.).",
+      "references": ["references/scope.md", "references/workflow.md", "https://docs.sentry.io/"],
+      "tokenBudget": 1200,
+      "tags": ["sentry", "observability", "tooling"],
+      "repoRoles": ["next-app", "nestjs-api", "vendure-app"],
+      "requiresAny": [
+        { "stack": "sentry" },
+        { "dependency": "@sentry/node" },
+        { "dependency": "@sentry/nextjs" },
+        { "packageNamePattern": "@sentry/*" }
+      ],
+      "ecosystem": "tooling",
+      "tokenEstimate": 1800,
+      "installMode": "copy-selected"
+    },
+    {
+      "id": "haus.prettier-setup",
+      "source": "haus",
+      "type": "skill",
+      "path": "skills/prettier-setup",
+      "title": "Haus Prettier setup",
+      "purpose": "Install `@haus-tech/prettier-config` and wire `.prettierrc` to the shared config.",
+      "whenToUse": "Use when Prettier is missing from a haus repo or when migrating an ad-hoc Prettier config to the shared package.",
+      "whenNotToUse": "Do not use when Prettier is already configured against `@haus-tech/prettier-config`.",
+      "references": ["references/scope.md", "references/workflow.md"],
+      "tokenBudget": 800,
+      "tags": ["prettier", "tooling", "quality"],
+      "repoRoles": [],
+      "requiresAny": [
+        { "stack": "missing-prettier" }
+      ],
+      "ecosystem": "tooling",
+      "tokenEstimate": 1000,
+      "installMode": "copy-selected"
+    },
+    {
+      "id": "haus.eslint-setup",
+      "source": "haus",
+      "type": "skill",
+      "path": "skills/eslint-setup",
+      "title": "Haus ESLint setup",
+      "purpose": "Install `@haus-tech/tech-config` and wire ESLint flat config to the shared rules.",
+      "whenToUse": "Use when ESLint is missing from a haus repo or migrating from a legacy `.eslintrc` to flat config.",
+      "whenNotToUse": "Do not use when ESLint is already configured against `@haus-tech/tech-config`.",
+      "references": ["references/scope.md", "references/workflow.md"],
+      "tokenBudget": 800,
+      "tags": ["eslint", "tooling", "quality"],
+      "repoRoles": [],
+      "requiresAny": [
+        { "stack": "missing-eslint" }
+      ],
+      "ecosystem": "tooling",
+      "tokenEstimate": 1000,
+      "installMode": "copy-selected"
+    },
+    {
       "id": "haus.sanity-patterns",
       "source": "haus",
       "type": "skill",

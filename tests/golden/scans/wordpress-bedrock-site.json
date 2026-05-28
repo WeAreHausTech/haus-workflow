@@ -5,7 +5,7 @@
     "wordpress-bedrock-site",
     "wordpress-site"
   ],
-  "confidence": 0.58,
+  "confidence": 0.62,
   "detectedStacks": {
     "auth": [],
     "backend": [
@@ -15,7 +15,10 @@
     "frontend": [],
     "packageManagers": [],
     "testing": [],
-    "tooling": []
+    "tooling": [
+      "missing-eslint",
+      "missing-prettier"
+    ]
   },
   "dependencies": [
     "roots/bedrock"
