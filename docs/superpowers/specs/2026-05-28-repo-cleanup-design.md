@@ -8,18 +8,19 @@
 
 ## 1. Dead Code Removal
 
-Remove 9 dead scanner modules. All carry `TODO(refactor-scanner)` markers and have zero imports anywhere in `src/` or `tests/`:
+Remove 9 dead scanner modules. All carry `TODO(refactor-scanner)` markers; functionality is re-implemented inline in `scan-project.ts`. `detect-package-manager.ts` is still imported and must be kept.
 
 - `src/scanner/detect-auth.ts`
 - `src/scanner/detect-database.ts`
 - `src/scanner/detect-dotnet.ts`
 - `src/scanner/detect-monorepo.ts`
-- `src/scanner/detect-package-manager.ts`
 - `src/scanner/detect-php.ts`
 - `src/scanner/detect-repo-role.ts`
 - `src/scanner/detect-tests.ts`
 - `src/scanner/dependency-map.ts`
 - `src/scanner/summarize-repo.ts`
+
+Keep: `src/scanner/detect-package-manager.ts` — imported by `scan-project.ts`.
 
 Verify zero imports before each deletion.
 
