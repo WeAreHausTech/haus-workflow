@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.2.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.1.0...v0.2.0) (2026-05-28)
+
+### Features
+
+* **apply:** add --select flag for interactive catalog item picker ([9e0be06](https://github.com/WeAreHausTech/haus-workflow/commit/9e0be060b4c24436a457e4101fd058376af6bc20))
+* **catalog:** support HAUS_CATALOG_REF env var and catalogRef in lock file [F4] ([5f3ad0e](https://github.com/WeAreHausTech/haus-workflow/commit/5f3ad0e7a14ed91c94e03645a467392e8c0ae058))
+* full validate-catalog rules, catalogRef check, fixture sync workflow ([82a06b1](https://github.com/WeAreHausTech/haus-workflow/commit/82a06b12edd7647b8286fc6b5dbf10f6223bc963))
+* handle template type in install pipeline, fix tailwind task intents [F4b+F7] ([0a030e8](https://github.com/WeAreHausTech/haus-workflow/commit/0a030e8b6bd7b8b2e5d136b9d29e1218267d3f41))
+* **p11:** npm version check in haus update --check and haus doctor ([#38](https://github.com/WeAreHausTech/haus-workflow/issues/38)) ([74b3a1d](https://github.com/WeAreHausTech/haus-workflow/commit/74b3a1d444a0cf93683f1bd45c19620a5facd348))
+* **types:** add template to CatalogItem type, link JSON Schema [F5] ([6230c2c](https://github.com/WeAreHausTech/haus-workflow/commit/6230c2c1a27efca0215b78b11921c7d4e24482e1))
+
+### Bug Fixes
+
+* **apply:** distinguish missing vs empty recommendation; test selectedIds via tsx ([a67f323](https://github.com/WeAreHausTech/haus-workflow/commit/a67f32387998cfdd0666750b8b9465478060d178))
+* **apply:** restore items variable reference after refactor ([79695f2](https://github.com/WeAreHausTech/haus-workflow/commit/79695f2fefe30df3602f5dd276542479d151f38f))
+* **tests:** remove unused helperScript and lockAll variables ([2daa57e](https://github.com/WeAreHausTech/haus-workflow/commit/2daa57ea6efb3c7e07533f3e99013b89c887918b))
+
 ## 0.1.0 (2026-05-27)
 
 ### Features
