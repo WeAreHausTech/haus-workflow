@@ -25,13 +25,15 @@ All tasks that previously listed `phpDeps.includes(...)` in their code examples 
 
 ---
 
-### T2 · detect-node.ts — DROP
+### T2 · detect-node.ts — DROP ✅ DONE
 
 **Repos:** `haus-workflow` only
 
 **Context:** `src/scanner/detect-node.ts` re-emits `typescript6`, `nextjs`, `react19`, `vite8` — all already handled in `detectStacks`. File has TODO "merge or remove when modular scanner lands." It does **not** detect Node.js runtime.
 
 **Action:** Delete `src/scanner/detect-node.ts`. Node.js runtime detection (`.nvmrc`, `engines.node`) is already handled as a warning in `scanProject`. No wiring needed.
+
+**Implemented:** File deleted. Zero references in `src/`, `tests/`, `scripts/`. `yarn verify` passes (128 tests).
 
 ---
 
@@ -612,7 +614,7 @@ Manifest + fixture stub for `haus.supabase-patterns`.
 | Task | Phase | Repos | Status |
 |------|-------|-------|--------|
 | T1 · composer.json parsing | 1 | haus-workflow | ✅ Done — `deps` includes PHP packages |
-| T2 · detect-node.ts | 1 | haus-workflow | ❌ Dropped — file is redundant, delete it |
+| T2 · detect-node.ts | 1 | haus-workflow | ✅ Done — file deleted |
 | T3 · Vitest | 2 | both | ⬜ Todo |
 | T4 · Jest | 2 | both | ⬜ Todo |
 | T5 · Elementor | 3 | haus-workflow | ⬜ Todo |
