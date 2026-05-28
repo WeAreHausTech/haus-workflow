@@ -76,6 +76,10 @@
     "strapi",
     "prisma",
     "cms",
-    "database"
+    "database",
+    "mysql",
+    "saml2",
+    "next-auth",
+    "auth"
   ]
 }

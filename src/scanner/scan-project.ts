@@ -245,6 +245,7 @@ async function detectStacks(
   if (deps.includes("jest") || deps.includes("jest-environment-jsdom")) add("testing", "jest");
   if (deps.includes("pg")) add("databases", "postgresql");
   if (deps.includes("mariadb") || deps.includes("mysql2")) add("databases", "mariadb");
+  if (deps.includes("mysql") || deps.includes("mysql2")) add("databases", "mysql");
   if (deps.includes("mssql")) add("databases", "mssql");
   if (deps.includes("@elastic/elasticsearch")) add("databases", "elasticsearch");
   if (deps.includes("predis/predis") || deps.includes("ioredis") || deps.includes("redis")) {
@@ -253,6 +254,10 @@ async function detectStacks(
   if (await hasNeedle(root, files, "openid")) add("auth", "oidc");
   if (await hasNeedle(root, files, "AZURE_AD")) add("auth", "azure-ad");
   if (await hasNeedle(root, files, "BANKID")) add("auth", "bankid");
+  if (deps.includes("24slides/laravel-saml2") || deps.includes("aacotroneo/laravel-saml2")) {
+    add("auth", "saml2");
+  }
+  if (deps.includes("next-auth") || deps.includes("@auth/core")) add("auth", "next-auth");
   if (packageManager === "yarn") add("packageManagers", "yarn4");
   if (packageManager === "pnpm") add("packageManagers", "pnpm89");
   return out;

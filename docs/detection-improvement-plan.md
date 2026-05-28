@@ -338,7 +338,7 @@ Update `library/catalog/manifest.json` `haus.radix-shadcn-patterns` `requiresAny
 
 ## Phase 6 — Database gaps
 
-### T15 · MySQL package detection fix
+### T15 · MySQL package detection fix ✅ DONE
 
 **Repos:** `haus-workflow` only
 
@@ -359,7 +359,7 @@ Update `manifest.json` same entry. Update `SKILL.md` to mention MySQL.
 
 ## Phase 7 — Auth gaps
 
-### T16 · SAML2 detection + catalog item
+### T16 · SAML2 detection + catalog item ✅ DONE
 
 **Repos:** both
 
@@ -384,7 +384,7 @@ Rename/update `auth-oidc-azure-bankid-patterns` SKILL.md to include SAML2 sectio
 
 ---
 
-### T17 · NextAuth.js detection + catalog item
+### T17 · NextAuth.js detection + catalog item ✅ DONE
 
 **Repos:** both
 
@@ -627,9 +627,9 @@ Manifest + fixture stub for `haus.supabase-patterns`.
 | T12 · Sanity | 5 | both | ✅ Done |
 | T13 · Strapi | 5 | both | ✅ Done |
 | T14 · Prisma | 5 | both | ✅ Done |
-| T15 · MySQL fix | 6 | haus-workflow + catalog update | ⬜ Todo |
-| T16 · SAML2 | 7 | both | ⬜ Todo |
-| T17 · NextAuth | 7 | both | ⬜ Todo |
+| T15 · MySQL fix | 6 | haus-workflow + catalog update | ✅ Done |
+| T16 · SAML2 | 7 | both | ✅ Done |
+| T17 · NextAuth | 7 | both | ✅ Done |
 | T18 · Expo | 8 | both | ⬜ Todo |
 | T19 · Prettier + ESLint enforcement | 9 | both | ⬜ Todo |
 | T20 · i18next | 9 | both | ⬜ Todo |

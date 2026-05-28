@@ -624,20 +624,43 @@
       "source": "haus",
       "type": "skill",
       "path": "skills/auth-oidc-azure-bankid-patterns",
-      "title": "Haus auth patterns",
-      "purpose": "Guide identity-provider auth flow and claim/session lifecycle changes.",
-      "whenToUse": "Use for OIDC/Azure AD/BankID login, callback, token, and claim mapping updates.",
+      "title": "Haus enterprise auth patterns (OIDC / Azure AD / BankID / SAML2)",
+      "purpose": "Guide identity-provider auth flow and claim/session lifecycle changes across OIDC, Azure AD, BankID, and SAML2.",
+      "whenToUse": "Use for OIDC/Azure AD/BankID/SAML2 login, callback, token, claim mapping, and SP/IDP metadata updates.",
       "whenNotToUse": "Do not use for profile CRUD without auth protocol change.",
       "references": ["references/scope.md", "references/workflow.md"],
       "tokenBudget": 1200,
-      "tags": ["oidc", "azure-ad", "bankid"],
+      "tags": ["oidc", "azure-ad", "bankid", "saml2"],
       "repoRoles": [],
       "requiresAny": [
         { "stack": "oidc" },
         { "stack": "azure-ad" },
-        { "stack": "bankid" }
+        { "stack": "bankid" },
+        { "stack": "saml2" }
       ],
       "tokenEstimate": 1700,
+      "installMode": "copy-selected"
+    },
+    {
+      "id": "haus.nextauth-patterns",
+      "source": "haus",
+      "type": "skill",
+      "path": "skills/nextauth-patterns",
+      "title": "Haus NextAuth patterns",
+      "purpose": "Guide NextAuth.js / Auth.js provider, session, callback, and middleware changes in Next.js apps.",
+      "whenToUse": "Use for `next-auth` / `@auth/core` provider setup, session strategy, callbacks, JWT, and route protection in Next.js.",
+      "whenNotToUse": "Do not use for Laravel/PHP auth, OIDC outside Next.js, or session-less API tokens.",
+      "references": ["references/scope.md", "references/workflow.md", "https://authjs.dev/"],
+      "tokenBudget": 1200,
+      "tags": ["next-auth", "auth", "nextjs"],
+      "repoRoles": ["next-app"],
+      "requiresAny": [
+        { "stack": "next-auth" },
+        { "dependency": "next-auth" },
+        { "dependency": "@auth/core" }
+      ],
+      "ecosystem": "auth",
+      "tokenEstimate": 2000,
       "installMode": "copy-selected"
     },
     {
@@ -651,11 +674,12 @@
       "whenNotToUse": "Do not use for UI-only changes without persistence/search impact.",
       "references": ["references/scope.md", "references/workflow.md"],
       "tokenBudget": 1200,
-      "tags": ["postgresql", "mariadb", "mssql", "elasticsearch", "redis"],
+      "tags": ["postgresql", "mariadb", "mysql", "mssql", "elasticsearch", "redis"],
       "repoRoles": [],
       "requiresAny": [
         { "stack": "postgresql" },
         { "stack": "mariadb" },
+        { "stack": "mysql" },
         { "stack": "mssql" },
         { "stack": "elasticsearch" },
         { "stack": "redis" }

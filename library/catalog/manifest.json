@@ -1111,13 +1111,13 @@
     },
     {
       "id": "haus.auth-oidc-azure-bankid-patterns",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "source": "haus",
       "type": "skill",
       "path": "skills/auth-oidc-azure-bankid-patterns",
-      "title": "Haus auth patterns",
-      "purpose": "Guide identity-provider auth flow and claim/session lifecycle changes.",
-      "whenToUse": "Use for OIDC/Azure AD/BankID login, callback, token, and claim mapping updates.",
+      "title": "Haus enterprise auth patterns (OIDC / Azure AD / BankID / SAML2)",
+      "purpose": "Guide identity-provider auth flow and claim/session lifecycle changes across OIDC, Azure AD, BankID, and SAML2.",
+      "whenToUse": "Use for OIDC/Azure AD/BankID/SAML2 login, callback, token, claim mapping, and SP/IDP metadata updates.",
       "whenNotToUse": "Do not use for profile CRUD without auth protocol change.",
       "references": [
         "references/conventions.md",
@@ -1128,7 +1128,8 @@
       "tags": [
         "oidc",
         "azure-ad",
-        "bankid"
+        "bankid",
+        "saml2"
       ],
       "repoRoles": [],
       "requiresAny": [
@@ -1140,6 +1141,9 @@
         },
         {
           "stack": "bankid"
+        },
+        {
+          "stack": "saml2"
         }
       ],
       "tokenEstimate": 1700,
@@ -1147,8 +1151,48 @@
       "ecosystem": "auth"
     },
     {
+      "id": "haus.nextauth-patterns",
+      "version": "1.0.0",
+      "source": "haus",
+      "type": "skill",
+      "path": "skills/nextauth-patterns",
+      "title": "Haus NextAuth patterns",
+      "purpose": "Guide NextAuth.js / Auth.js provider, session, callback, and middleware changes in Next.js apps.",
+      "whenToUse": "Use for `next-auth` / `@auth/core` provider setup, session strategy, callbacks, JWT, and route protection in Next.js.",
+      "whenNotToUse": "Do not use for Laravel/PHP auth, OIDC outside Next.js, or session-less API tokens.",
+      "references": [
+        "references/conventions.md",
+        "references/scope.md",
+        "references/workflow.md",
+        "https://authjs.dev/"
+      ],
+      "tokenBudget": 1200,
+      "tags": [
+        "next-auth",
+        "auth",
+        "nextjs"
+      ],
+      "repoRoles": [
+        "next-app"
+      ],
+      "requiresAny": [
+        {
+          "stack": "next-auth"
+        },
+        {
+          "dependency": "next-auth"
+        },
+        {
+          "dependency": "@auth/core"
+        }
+      ],
+      "ecosystem": "auth",
+      "tokenEstimate": 2000,
+      "installMode": "copy-selected"
+    },
+    {
       "id": "haus.database-patterns",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "source": "haus",
       "type": "skill",
       "path": "skills/database-patterns",
@@ -1165,6 +1209,7 @@
       "tags": [
         "postgresql",
         "mariadb",
+        "mysql",
         "mssql",
         "elasticsearch",
         "redis"
@@ -1176,6 +1221,9 @@
         },
         {
           "stack": "mariadb"
+        },
+        {
+          "stack": "mysql"
         },
         {
           "stack": "mssql"
