@@ -1,3 +1,4 @@
+/** `haus apply` — writes recommended catalog items and core Claude files to .claude/. */
 import path from "node:path";
 
 import checkbox from "@inquirer/checkbox";
@@ -14,6 +15,10 @@ async function cacheHasItems(): Promise<boolean> {
   return Array.isArray(data?.items) && data.items.length > 0;
 }
 
+/**
+ * Applies recommended catalog items and core Claude files to the current project.
+ * Requires --dry-run or --write; use --select for interactive item filtering.
+ */
 export async function runApply(options: {
   dryRun?: boolean;
   write?: boolean;

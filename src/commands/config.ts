@@ -1,3 +1,4 @@
+/** `haus config` — enables, disables, or shows the status of a hook setting in .haus-workflow/config.json. */
 import path from "node:path";
 
 import { DEFAULT_HOOKS_CONFIG, type HookKey, type HooksConfig } from "../claude/load-hooks-config.js";
@@ -11,6 +12,10 @@ const HOOK_ALIASES: Record<string, HookKey> = {
   "hook.memory": "memoryInject",
 };
 
+/**
+ * Enables, disables, or prints the status of a hook configuration key.
+ * Persists changes to `.haus-workflow/config.json`.
+ */
 export async function runConfig(
   key: string,
   action: "enable" | "disable" | "status",

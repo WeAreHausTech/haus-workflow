@@ -1,3 +1,4 @@
+/** `haus update` — refreshes the lockfile, syncs the remote catalog cache, and checks for CLI updates. */
 import path from "node:path";
 
 import { fetchLatestCatalogTag, syncRemoteCatalog } from "../catalog/remote-catalog.js";
@@ -10,6 +11,10 @@ import { packageRoot } from "../utils/paths.js";
 
 const NPM_PACKAGE_NAME = "@haus-tech/haus-workflow";
 
+/**
+ * Updates the lockfile and syncs the remote catalog; with --check, reports drift without writing.
+ * Also checks npm for a newer CLI version and reports if one is available.
+ */
 export async function runUpdate(options: { check?: boolean }): Promise<void> {
   const root = process.cwd();
   if (options.check) {

@@ -1,3 +1,4 @@
+/** `haus doctor` — validates project setup: hooks contract, managed files, cache freshness, and CLI version. */
 import path from "node:path";
 
 import fs from "fs-extra";
@@ -12,6 +13,10 @@ import { hashText, readJson, readText } from "../utils/fs.js";
 import { error, log, warn } from "../utils/logger.js";
 import { hausPath, packageRoot } from "../utils/paths.js";
 
+/**
+ * Runs a health check on the current project's Haus AI setup.
+ * With --hooks, only validates the Claude Code hooks contract and exits.
+ */
 export async function runDoctor(options?: { hooks?: boolean }): Promise<void> {
   const root = process.cwd();
 

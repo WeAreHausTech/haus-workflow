@@ -1,3 +1,4 @@
+/** `haus catalog-audit` — checks the bundled catalog manifest for unsupported or forbidden stacks. */
 import { loadCatalog } from "../catalog/load-catalog.js";
 import { error, log } from "../utils/logger.js";
 
@@ -19,6 +20,7 @@ const FORBIDDEN = [
   "trading",
 ];
 
+/** Audits the bundled catalog for forbidden stack/tag names; exits non-zero on any failure. */
 export async function runCatalogAudit(): Promise<void> {
   const items = await loadCatalog(process.cwd());
   const failures: string[] = [];

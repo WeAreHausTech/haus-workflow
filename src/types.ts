@@ -1,5 +1,9 @@
+/** Core shared types used across scanner, recommender, catalog, and writer modules. */
+
+/** Detected package manager for a repository. */
 export type PackageManager = "yarn" | "pnpm" | "npm" | "unknown";
 
+/** Scanned repository context written to .haus-workflow/context-map.json. */
 export type ContextMap = {
   mode: "guided" | "fast";
   generatedAt: string;
@@ -15,24 +19,31 @@ export type ContextMap = {
   warnings: string[];
 };
 
+/** A single matching clause in a catalog item's requiresAny constraint. */
 export type RequiresAnyClause =
   | { stack: string }
   | { dependency: string }
   | { packageNamePattern: string }
   | { role: string };
 
+/** Origin of a catalog item: first-party Haus or curated from an external source. */
 export type CatalogItemSource = "haus" | "curated";
 
+/** How a curated catalog item was incorporated relative to its upstream source. */
 export type CatalogItemUseMode = "copy" | "adapted" | "wrapped" | "rewritten" | "reference-only";
 
+/** Curation review gate; only "approved" items may be recommended and installed. */
 export type CatalogItemReviewStatus = "approved" | "candidate" | "needs-review" | "rejected" | "deprecated";
 
+/** Risk level of shipping a curated item; "blocked" items must never be installed. */
 export type CatalogItemRiskLevel = "low" | "medium" | "high" | "blocked";
 
+/** Confidence level of the license determination for a curated catalog item. */
 export type CatalogItemLicenseConfidence = "high" | "medium" | "low" | "unknown";
 
 // Schema: https://raw.githubusercontent.com/WeAreHausTech/haus-workflow-catalog/main/schema/catalog-item.schema.json
 // Keep this type in sync with catalog-item.schema.json. See haus-workflow-catalog EXECUTION-PLAN.md F5.
+/** A single entry in the catalog manifest describing a skill, agent, template, rule, or command. */
 export type CatalogItem = {
   id: string;
   type: "skill" | "agent" | "template" | "rule" | "command";
@@ -77,6 +88,7 @@ export type CatalogItem = {
   pinnedRef?: string;
 };
 
+/** Scored recommendation result written to .haus-workflow/recommendation.json. */
 export type Recommendation = {
   mode: "guided" | "fast";
   recommended: Array<{

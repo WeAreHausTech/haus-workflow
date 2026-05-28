@@ -1,8 +1,13 @@
+/** `haus memory` — manages the local learning memory store: status, add, inject, and promote subcommands. */
 import { isHookEnabled } from "../claude/load-hooks-config.js";
 import { appendLearning, ensureMemory, readMemory } from "../memory/memory-store.js";
 import { redactMemory } from "../memory/redact-memory.js";
 import { log } from "../utils/logger.js";
 
+/**
+ * Dispatches memory subcommands: status (check store), add (append learning), inject (emit to hook), promote (guide manual promotion).
+ * The inject subcommand is gated default-off via hooks.memoryInject.enabled.
+ */
 export async function runMemory(
   subcommand: "status" | "add" | "inject" | "promote",
   options: { text?: string; task?: string; fromHook?: boolean },

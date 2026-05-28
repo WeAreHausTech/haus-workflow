@@ -1,3 +1,4 @@
+/** `haus workspace` — initializes or scans a multi-repo workspace, writing cross-repo summaries and dependency maps. */
 import path from "node:path";
 
 import YAML from "yaml";
@@ -6,6 +7,10 @@ import { scanProject } from "../scanner/scan-project.js";
 import { readText, writeJson, writeText } from "../utils/fs.js";
 import { error, log } from "../utils/logger.js";
 
+/**
+ * Initializes (creates haus.workspace.yaml) or scans a multi-repo workspace.
+ * Scan writes workspace-summary.json, cross-repo-summary.md, and dependency-ownership-map.json.
+ */
 export async function runWorkspace(action: "init" | "scan"): Promise<void> {
   if (action === "init") {
     await writeText(

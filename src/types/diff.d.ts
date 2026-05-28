@@ -1,3 +1,4 @@
+/** Ambient module declaration for the `diff` package — exposes only the subset of the API used by this project. */
 declare module "diff" {
   export interface PatchOptions {
     context?: number;

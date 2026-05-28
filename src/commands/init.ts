@@ -1,3 +1,4 @@
+/** `haus init` — first-run setup. Delegates to setup-project if .haus-workflow/ does not exist. */
 import path from "node:path";
 
 import fs from "fs-extra";
@@ -6,6 +7,7 @@ import { log } from "../utils/logger.js";
 
 import { runSetupProject } from "./setup-project.js";
 
+/** Initializes Haus AI for the first time; no-ops with a message if already initialized. */
 export async function runInit(options: { fast?: boolean; json?: boolean }): Promise<void> {
   const root = process.cwd();
   const hausDir = path.join(root, ".haus-workflow");
