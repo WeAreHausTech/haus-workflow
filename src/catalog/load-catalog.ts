@@ -1,3 +1,8 @@
+/**
+ * Loads catalog items from the local cache, project-local vendor copy, or bundled snapshot.
+ * Test scenarios can override the source path via HAUS_FIXTURE_CATALOG env var.
+ */
+
 import os from "node:os";
 import path from "node:path";
 
@@ -7,8 +12,14 @@ import { packageRoot } from "../utils/paths.js";
 
 import { CATALOG_CACHE_SUBDIR } from "./constants.js";
 
+/** Absolute path to the user-level catalog cache manifest written by `haus update`. */
 const CACHE_MANIFEST = path.join(os.homedir(), CATALOG_CACHE_SUBDIR, "manifest.json");
 
+/**
+ * Returns catalog items using the first non-empty source found:
+ * HAUS_FIXTURE_CATALOG env var → user cache → project-local vendor copy → bundled package snapshot.
+ * @param root - Absolute path to the project root (used for local vendor lookup).
+ */
 export async function loadCatalog(root: string): Promise<CatalogItem[]> {
   // Env override for isolated test scenarios
   const envPath = process.env["HAUS_FIXTURE_CATALOG"];
