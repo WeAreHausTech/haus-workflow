@@ -26,7 +26,7 @@ Core flow: **scan → recommend → apply**
 | `src/curation/` | Unsupported-stack token detection for source decisions |
 | `src/utils/` | Shared utilities: `logger.ts`, `fs.ts`, `paths.ts`, `audit-checks.ts`, `diff.ts`, `exec.ts`, `prompts.ts`, `versions.ts` |
 | `src/types/` | Local ambient type declarations |
-| `plugin/` | Shipped plugin metadata, hooks, skills, and subagents |
+| `library/global/` | Shipped skills, agents, and hook templates |
 
 ---
 
@@ -109,7 +109,7 @@ The catalog is maintained in a separate repository and fetched by `haus update`.
 ## Global install flow
 
 1. `haus install` seeds `~/.claude/` with HAUS-MANAGED skills, agents, and hooks.
-2. Hook source of truth: `plugin/hooks/hooks.json`.
+2. Hook source of truth: `src/claude/load-hooks.ts` (`CANONICAL_HOOKS`).
 3. `apply --write` writes `.claude/settings.json` from canonical hook config.
 4. `doctor --hooks` verifies project settings against canonical hook contract.
 
