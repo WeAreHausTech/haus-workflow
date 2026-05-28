@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.7.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.6.0...v0.7.0) (2026-05-28)
+
+### Features
+
+* **scanner:** detect expo + react-native (T18) ([290a5ba](https://github.com/WeAreHausTech/haus-workflow/commit/290a5bac13faa8ec515d8dd9363caa2c00ce74cc))
+
 ## [0.6.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.5.0...v0.6.0) (2026-05-28)
 
 ### Features
