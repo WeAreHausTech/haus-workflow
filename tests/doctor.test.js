@@ -5,6 +5,10 @@ import path from "node:path";
 import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
 import { execaSync } from "execa";
 
+// Exempt these tests from `apply`'s empty-cache check by pointing at the
+// vendored fixture catalog. Child processes inherit this env.
+process.env.HAUS_FIXTURE_CATALOG = path.resolve("tests/fixtures/catalog/manifest.json");
+
 test("doctor reports hooks OK after apply", () => {
   const temp = mkdtempSync(path.join(os.tmpdir(), "haus-doctor-"));
   writeFileSync(

@@ -6,6 +6,8 @@ import path from "node:path";
 import { mkdtempSync, writeFileSync, readFileSync } from "node:fs";
 import { execaSync } from "execa";
 
+process.env.HAUS_FIXTURE_CATALOG = path.resolve("tests/fixtures/catalog/manifest.json");
+
 test("generated settings uses haus command", () => {
   const combined = [
     fs.readFileSync("src/claude/write-claude-files.ts", "utf8"),

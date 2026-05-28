@@ -6,6 +6,8 @@ import fs from "node:fs";
 import { mkdtempSync } from "node:fs";
 import { execaSync } from "execa";
 
+process.env.HAUS_FIXTURE_CATALOG = path.resolve("tests/fixtures/catalog/manifest.json");
+
 test("generated claude primitives stay compact routers", () => {
   const cwd = mkdtempSync(path.join(os.tmpdir(), "haus-generated-"));
   execaSync("node", [path.resolve("dist/cli.js"), "scan", "--json"], { cwd });
