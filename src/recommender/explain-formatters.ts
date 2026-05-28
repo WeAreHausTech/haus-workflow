@@ -1,9 +1,15 @@
+/**
+ * Formats recommendation scores into human-readable explain output for `haus explain`
+ * and `haus context`. Includes task-intent routing helpers.
+ */
+
 import type { Recommendation } from "../types.js";
 
 import { computeRuleIntents, type TaskIntent } from "./task-intent.js";
 
 type RecommendedRule = Recommendation["recommended"][number];
 
+/** Stack/library tokens scanned in task text to surface repo-relevant signals. */
 const TASK_SIGNAL_TOKENS = [
   "vendure",
   "nestjs",
@@ -40,6 +46,7 @@ const TASK_SIGNAL_TOKENS = [
   "jwt",
 ];
 
+/** Extract technology tokens from a free-text task description for display in explain output. */
 export function extractTaskSignals(task: string | undefined): string[] {
   if (!task) return [];
   const lc = task.toLowerCase();
@@ -54,6 +61,7 @@ function formatReasonWithSignal(reason: { message: string; signal?: string }): s
   return reason.signal ? `${reason.message} (${reason.signal})` : reason.message;
 }
 
+/** Format a full Recommendation as a human-readable string for terminal output. */
 export function formatRecommendationHuman(rec: Recommendation): string {
   const lines: string[] = [];
   lines.push("Recommendation explanation");
@@ -88,6 +96,7 @@ export function formatRecommendationHuman(rec: Recommendation): string {
 
 type ExclusionReason = "baseline" | "intent-mismatch" | "no-metadata";
 
+/** A recommended rule that was excluded when narrowing to a specific task context. */
 export type TaskExcludedRule = {
   id: string;
   confidenceLevel: "low" | "medium" | "high";
@@ -97,6 +106,7 @@ export type TaskExcludedRule = {
   explanation: string;
 };
 
+/** A recommended rule that survived task-intent filtering. */
 export type TaskIncludedRule = {
   id: string;
   confidenceLevel: "low" | "medium" | "high";
@@ -106,6 +116,7 @@ export type TaskIncludedRule = {
   reasons: string[];
 };
 
+/** Full structured output of `haus context --explain`, combining recommendation stats with task routing details. */
 export type ContextExplanation = {
   selected: Array<{
     id: string;
@@ -178,6 +189,10 @@ function pickExclusionReason(
   };
 }
 
+/**
+ * Build a ContextExplanation that shows which rules were included/excluded for a task.
+ * When no task is provided, returns only the base recommendation stats.
+ */
 export function buildContextExplanation(
   rec: Recommendation,
   task: string | undefined,
@@ -242,6 +257,7 @@ export function buildContextExplanation(
   };
 }
 
+/** Render a ContextExplanation as a human-readable string for terminal output. */
 export function formatContextHuman(
   task: string | undefined,
   explanation: ContextExplanation,

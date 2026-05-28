@@ -1,3 +1,8 @@
+/**
+ * Infers task type (feature, fix, refactor) from a task description to bias catalog scoring.
+ * Provides keyword→intent classification and rule-intent routing for `haus context`.
+ */
+
 import type { Recommendation } from "../types.js";
 
 type RecommendedRule = Recommendation["recommended"][number];
@@ -64,6 +69,7 @@ export function pickTaskRelevantRules(
   return cappedMediumOrHigh.slice(0, 8);
 }
 
+/** Semantic categories a task can belong to, used to filter catalog rules to only relevant ones. */
 export type TaskIntent =
   | "backend"
   | "frontend"
@@ -76,6 +82,7 @@ export type TaskIntent =
   | "docs"
   | "monorepo";
 
+/** Ordered list of all valid TaskIntent values for iteration. */
 export const ALL_INTENTS: readonly TaskIntent[] = [
   "backend",
   "frontend",
@@ -243,6 +250,7 @@ function normalizeTaskForMatching(task: string): string {
     .trim()} `;
 }
 
+/** Classify a free-text task description into the set of TaskIntents it implies. */
 export function classifyTaskIntents(task: string): Set<TaskIntent> {
   const t = normalizeTaskForMatching(task);
   const intents = new Set<TaskIntent>();

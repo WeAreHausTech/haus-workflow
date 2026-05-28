@@ -1,9 +1,15 @@
+/**
+ * Orchestrates scan → score → rank → filter → return recommendations.
+ * Applies unsupported-stack, sensitive-path, and ecosystem-conflict policies before scoring.
+ */
+
 import { loadCatalog } from "../catalog/load-catalog.js";
 import type { ContextMap, Recommendation, RequiresAnyClause } from "../types.js";
 import { runGit } from "../utils/exec.js";
 import { readJson } from "../utils/fs.js";
 import { hausPath } from "../utils/paths.js";
 
+/** Stack tokens that trigger an immediate skip — haus does not support these ecosystems. */
 const UNSUPPORTED = [
   "python",
   "django",
@@ -21,8 +27,10 @@ const UNSUPPORTED = [
   "defi",
   "trading",
 ];
+/** Path fragments that flag a catalog item as sensitive and block it from recommendations. */
 const SENSITIVE = [".env", "secrets", "certs", "customer-data", "exports", ".pem", ".key"];
 
+/** Maps ecosystem names to the repo roles that indicate that ecosystem is present. */
 const ECOSYSTEM_GROUPS: Record<string, string[]> = {
   laravel: ["laravel-app", "laravel-nova-app"],
   wordpress: ["wordpress-site", "wordpress-bedrock-site", "wordpress-vanilla-site"],
@@ -36,6 +44,7 @@ const ECOSYSTEM_GROUPS: Record<string, string[]> = {
   turbo: ["turbo-monorepo"],
 };
 
+/** Backend ecosystems that can act as a dominant backend for conflict detection. */
 const ECOSYSTEM_PRIMARY_BACKENDS = new Set(["laravel", "wordpress", "vendure", "nestjs", "dotnet"]);
 
 /**
@@ -51,12 +60,14 @@ const ECOSYSTEM_COMPATIBLE_BACKENDS: Record<string, Set<string>> = {
   dotnet: new Set(["dotnet"]),
 };
 
+/** A positive scoring signal with its reason code, message, weight and optional signal tag. */
 type ReasonHit = {
   code: string;
   message: string;
   weight: number;
   signal?: string;
 };
+/** A negative scoring signal (penalty) that can reduce or eliminate a recommendation. */
 type SkipHit = {
   code: string;
   message: string;
@@ -64,6 +75,10 @@ type SkipHit = {
   signal?: string;
 };
 
+/**
+ * Run the full recommendation pipeline for a project.
+ * Loads catalog items, scores each against the ContextMap, and returns a ranked Recommendation.
+ */
 export async function recommend(root: string, context: ContextMap): Promise<Recommendation> {
   const items = await loadCatalog(root);
   const setupAnswers = (await readJson<Record<string, string>>(hausPath(root, "setup-answers.json"))) ?? {};
@@ -350,10 +365,12 @@ export async function recommend(root: string, context: ContextMap): Promise<Reco
   };
 }
 
+/** Flatten all detected stacks and repo roles into a single lowercase lookup set. */
 function buildStackSet(context: ContextMap): Set<string> {
   return new Set([...context.repoRoles, ...Object.values(context.detectedStacks).flat()].map((x) => x.toLowerCase()));
 }
 
+/** Derive the set of active ecosystems from the repo's detected roles. */
 function inferRepoEcosystems(roles: string[]): string[] {
   const ecosystems = new Set<string>();
   for (const [eco, roleList] of Object.entries(ECOSYSTEM_GROUPS)) {
@@ -362,6 +379,7 @@ function inferRepoEcosystems(roles: string[]): string[] {
   return [...ecosystems];
 }
 
+/** Return the first backend ecosystem in the list, used as the conflict-detection anchor. */
 function pickDominantBackend(ecosystems: string[]): string | undefined {
   for (const eco of ecosystems) {
     if (ECOSYSTEM_PRIMARY_BACKENDS.has(eco)) return eco;
@@ -373,6 +391,7 @@ function isBackendEcosystem(eco: string): boolean {
   return ECOSYSTEM_PRIMARY_BACKENDS.has(eco);
 }
 
+/** Check whether at least one requiresAny clause is satisfied by the project context. */
 function matchRequiresAny(
   clauses: RequiresAnyClause[],
   ctx: { stackSet: Set<string>; depSet: Set<string>; roleSet: Set<string> },
@@ -406,6 +425,7 @@ function matchRequiresAny(
   return { matched: false };
 }
 
+/** Serialize requiresAny clauses into a human-readable string for skip messages. */
 function describeRequiresAny(clauses: RequiresAnyClause[]): string {
   return clauses
     .map((c) => {
@@ -418,6 +438,7 @@ function describeRequiresAny(clauses: RequiresAnyClause[]): string {
     .join(" | ");
 }
 
+/** Derive a confidence level (low/medium/high) from scoring signals and conflict flags. */
 function computeConfidenceLevel(args: {
   isDefaultBaseline: boolean;
   reasons: ReasonHit[];
@@ -441,12 +462,14 @@ function computeConfidenceLevel(args: {
   return distinctSignals >= 2 ? "medium" : "low";
 }
 
+/** Convert a confidence level to a 0–1 float, with a small bonus for high raw scores. */
 function confidenceLevelToNumber(level: "low" | "medium" | "high", score: number): number {
   const base = level === "high" ? 0.85 : level === "medium" ? 0.6 : 0.3;
   const bonus = Math.min(0.1, Math.max(0, score - 40) / 1000);
   return Number(Math.min(0.99, base + bonus).toFixed(2));
 }
 
+/** Combine context scan warnings with any active security-risk signals into the final warnings list. */
 function mergeRecommendationWarnings(context: ContextMap): string[] {
   const riskLines =
     (context.securityRisks?.length ?? 0) > 0
@@ -455,6 +478,7 @@ function mergeRecommendationWarnings(context: ContextMap): string[] {
   return [...new Set([...context.warnings, ...riskLines])];
 }
 
+/** Read unstaged changed files from git to boost scoring for rules matching active work areas. */
 async function readChangedFiles(root: string): Promise<string[]> {
   if (process.env.HAUS_DISABLE_GIT_SIGNALS === "1") return [];
   try {
