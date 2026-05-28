@@ -1,3 +1,6 @@
+/** String tokens that the bash guard treats as dangerous and will block. */
+
+/** Substrings matched (case-sensitive) against a full bash command string. */
 export const DANGEROUS_COMMANDS = [
   "rm -rf",
   "sudo",
