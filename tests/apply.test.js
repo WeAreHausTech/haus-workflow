@@ -23,9 +23,10 @@ test("apply writes claude files and rules", () => {
   );
   writeFileSync(path.join(temp, "yarn.lock"), "# lock");
 
-  execaSync("node", [path.resolve("dist/cli.js"), "scan", "--json"], { cwd: temp });
-  execaSync("node", [path.resolve("dist/cli.js"), "recommend", "--json"], { cwd: temp });
-  execaSync("node", [path.resolve("dist/cli.js"), "apply", "--write"], { cwd: temp });
+  const env = { ...process.env, HAUS_FIXTURE_CATALOG: path.resolve("tests/fixtures/catalog/manifest.json") };
+  execaSync("node", [path.resolve("dist/cli.js"), "scan", "--json"], { cwd: temp, env });
+  execaSync("node", [path.resolve("dist/cli.js"), "recommend", "--json"], { cwd: temp, env });
+  execaSync("node", [path.resolve("dist/cli.js"), "apply", "--write"], { cwd: temp, env });
 
   const settings = JSON.parse(readFileSync(path.join(temp, ".claude/settings.json"), "utf8"));
   const rulesHaus = readFileSync(path.join(temp, ".claude/rules/haus.md"), "utf8");

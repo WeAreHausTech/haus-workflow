@@ -48,8 +48,9 @@ test("writeClaudeFiles selectedIds: directly exercises the filtering code path v
   // Uses `node --import tsx/esm` to import writeClaudeFiles from source and call it
   // with explicit selectedIds, verifying the selectedIds !== undefined branch is hit.
   const temp = makeProject("sel-filter-direct");
-  execaSync("node", [cli, "scan", "--json"], { cwd: temp });
-  execaSync("node", [cli, "recommend", "--json"], { cwd: temp });
+  const env = { ...process.env, HAUS_FIXTURE_CATALOG: path.resolve("tests/fixtures/catalog/manifest.json") };
+  execaSync("node", [cli, "scan", "--json"], { cwd: temp, env });
+  execaSync("node", [cli, "recommend", "--json"], { cwd: temp, env });
 
   const rec = JSON.parse(readFileSync(path.join(temp, ".haus-workflow/recommendation.json"), "utf8"));
   const allItems = rec.recommended ?? [];
@@ -72,6 +73,7 @@ test("writeClaudeFiles selectedIds: directly exercises the filtering code path v
   execaSync("node", ["--import", "tsx/esm", helperPath, temp, "[]"], {
     cwd: path.resolve("."),
     reject: true,
+    env,
   });
 
   const lockEmpty = JSON.parse(readFileSync(path.join(temp, ".haus-workflow/haus.lock.json"), "utf8"));
@@ -86,6 +88,7 @@ test("writeClaudeFiles selectedIds: directly exercises the filtering code path v
     execaSync("node", ["--import", "tsx/esm", helperPath, temp, JSON.stringify([oneId])], {
       cwd: path.resolve("."),
       reject: true,
+      env,
     });
     const lockOne = JSON.parse(readFileSync(path.join(temp, ".haus-workflow/haus.lock.json"), "utf8"));
     assert.equal(lockOne.length, 1, `expected 1 lock entry for selectedIds=[${oneId}], got ${lockOne.length}`);

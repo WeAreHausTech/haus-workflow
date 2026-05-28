@@ -88,9 +88,9 @@ export async function writeClaudeFiles(root: string, dryRun: boolean, selectedId
     useMode?: string;
     license?: string;
   };
-  const manifest = (await readJson<{ items?: ManifestItem[] }>(
-    path.join(pkgRoot, "library", "catalog", "manifest.json"),
-  )) ?? { items: [] };
+  const fixtureManifestPath = process.env["HAUS_FIXTURE_CATALOG"];
+  const manifestPath = fixtureManifestPath ?? path.join(pkgRoot, "library", "catalog", "manifest.json");
+  const manifest = (await readJson<{ items?: ManifestItem[] }>(manifestPath)) ?? { items: [] };
   const manifestById = new Map((manifest.items ?? []).map((item) => [item.id, item]));
   // Cache manifest may have different paths than the bundled manifest (e.g. "skills/xxx" vs
   // "tests/fixtures/catalog/skills/xxx"). Look up by ID so the cache path is always correct.
