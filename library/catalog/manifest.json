@@ -233,6 +233,53 @@
       "installMode": "copy-selected"
     },
     {
+      "id": "haus.expo-react-native-patterns",
+      "version": "1.0.0",
+      "source": "haus",
+      "type": "skill",
+      "path": "skills/expo-react-native-patterns",
+      "title": "Haus Expo / React Native patterns",
+      "purpose": "Guide Expo Router, React Native component, native module, and EAS build changes.",
+      "whenToUse": "Use for Expo Router routes, RN components, native modules, expo config plugins, and EAS build/submit.",
+      "whenNotToUse": "Do not use for web-only React apps or unrelated mobile native projects (Swift/Kotlin without Expo).",
+      "references": [
+        "references/conventions.md",
+        "references/scope.md",
+        "references/workflow.md",
+        "https://docs.expo.dev/"
+      ],
+      "tokenBudget": 1200,
+      "tags": [
+        "expo",
+        "react-native",
+        "mobile",
+        "react"
+      ],
+      "repoRoles": [
+        "expo-app"
+      ],
+      "requiresAny": [
+        {
+          "stack": "expo"
+        },
+        {
+          "stack": "react-native"
+        },
+        {
+          "role": "expo-app"
+        },
+        {
+          "dependency": "expo"
+        },
+        {
+          "dependency": "react-native"
+        }
+      ],
+      "ecosystem": "mobile",
+      "tokenEstimate": 2200,
+      "installMode": "copy-selected"
+    },
+    {
       "id": "haus.sanity-patterns",
       "version": "1.0.0",
       "source": "haus",

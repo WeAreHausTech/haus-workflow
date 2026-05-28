@@ -405,7 +405,7 @@ Rename/update `auth-oidc-azure-bankid-patterns` SKILL.md to include SAML2 sectio
 
 ## Phase 8 — Mobile
 
-### T18 · Expo / React Native detection + catalog item
+### T18 · Expo / React Native detection + catalog item ✅ DONE
 
 **Repos:** both
 
@@ -630,7 +630,7 @@ Manifest + fixture stub for `haus.supabase-patterns`.
 | T15 · MySQL fix | 6 | haus-workflow + catalog update | ✅ Done |
 | T16 · SAML2 | 7 | both | ✅ Done |
 | T17 · NextAuth | 7 | both | ✅ Done |
-| T18 · Expo | 8 | both | ⬜ Todo |
+| T18 · Expo | 8 | both | ✅ Done |
 | T19 · Prettier + ESLint enforcement | 9 | both | ⬜ Todo |
 | T20 · i18next | 9 | both | ⬜ Todo |
 | T21 · BullMQ | 9 | both | ⬜ Todo |

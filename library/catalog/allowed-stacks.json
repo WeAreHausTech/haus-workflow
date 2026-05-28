@@ -80,6 +80,9 @@
     "mysql",
     "saml2",
     "next-auth",
-    "auth"
+    "auth",
+    "expo",
+    "react-native",
+    "mobile"
   ]
 }
