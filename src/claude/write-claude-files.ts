@@ -90,10 +90,12 @@ export async function writeClaudeFiles(root: string, dryRun: boolean, selectedId
   };
   const fixtureManifestPath = process.env["HAUS_FIXTURE_CATALOG"];
   const manifestPath = fixtureManifestPath ?? path.join(pkgRoot, "library", "catalog", "manifest.json");
+  const manifestDir = path.dirname(manifestPath);
   const manifest = (await readJson<{ items?: ManifestItem[] }>(manifestPath)) ?? { items: [] };
   const manifestById = new Map((manifest.items ?? []).map((item) => [item.id, item]));
-  // Cache manifest may have different paths than the bundled manifest (e.g. "skills/xxx" vs
-  // "tests/fixtures/catalog/skills/xxx"). Look up by ID so the cache path is always correct.
+  // Catalog manifests use paths relative to the manifest's own directory.
+  // Cache manifest in CACHE_DIR, bundled in library/catalog, fixture in tests/fixtures/catalog —
+  // all resolve via `path.join(<dir-of-manifest>, item.path)`.
   const cacheManifest = await readJson<{ items?: ManifestItem[] }>(path.join(CACHE_DIR, "manifest.json"));
   const cacheManifestById = new Map((cacheManifest?.items ?? []).map((item) => [item.id, item]));
   const installedPathsByItem = new Map<string, string[]>();
@@ -125,7 +127,7 @@ export async function writeClaudeFiles(root: string, dryRun: boolean, selectedId
     const cachedItem = cacheManifestById.get(item.id);
     const cachePath = cachedItem?.path ? path.join(CACHE_DIR, cachedItem.path) : null;
     const sourcePath =
-      cachePath && (await fs.pathExists(cachePath)) ? cachePath : path.join(pkgRoot, manifestItem.path);
+      cachePath && (await fs.pathExists(cachePath)) ? cachePath : path.join(manifestDir, manifestItem.path);
     const target = item.type === "agent" ? "agents" : item.type === "template" ? "templates" : "skills";
     const destination = claudePath(root, target, path.basename(sourcePath));
     if (await fs.pathExists(sourcePath)) {

@@ -65,6 +65,7 @@ program
   .option("--dry-run")
   .option("--write")
   .option("--select", "Interactively select catalog items before applying")
+  .option("--allow-empty-cache", "Apply core files only when catalog cache is empty (skip catalog items without error)")
   .action(runApply);
 program.command("undo").option("-y, --yes", "Skip confirmation").action(runUndo);
 program.command("explain-recommendation").option("--json").action(runExplainRecommendation);
