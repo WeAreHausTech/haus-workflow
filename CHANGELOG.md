@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.2](https://github.com/WeAreHausTech/haus-workflow/compare/v0.2.1...v0.2.2) (2026-05-28)
+
+### Bug Fixes
+
+* **apply:** require populated catalog cache; consistent manifest path resolution ([2afc4b3](https://github.com/WeAreHausTech/haus-workflow/commit/2afc4b365763470e427c457da189ff9a26d9c3e9))
+* **release:** upgrade npm to enable OIDC trusted publishing ([eb01d78](https://github.com/WeAreHausTech/haus-workflow/commit/eb01d78d246e0490c9057d96c665f237f05ba556))
+
 ## [0.2.1](https://github.com/WeAreHausTech/haus-workflow/compare/v0.2.0...v0.2.1) (2026-05-28)
 
 ## [0.2.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.1.0...v0.2.0) (2026-05-28)
