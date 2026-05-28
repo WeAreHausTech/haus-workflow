@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.2.2...v0.3.0) (2026-05-28)
+
+### Features
+
+* **catalog:** allow vitest, jest, and redis tags ([ea08ab6](https://github.com/WeAreHausTech/haus-workflow/commit/ea08ab6cbd66a80bbcb94ce99c5d338dbaefc184))
+* **scanner:** detect elementor, ACF/JetEngine, redis (T5-T7) ([262925c](https://github.com/WeAreHausTech/haus-workflow/commit/262925c02e695e9469c9c1ee4e9c03c87f9e1478))
+* **scanner:** detect vitest and jest (T3, T4) ([1b917af](https://github.com/WeAreHausTech/haus-workflow/commit/1b917af88d10c8ca443dd8d6c9b5fe3b27a850fa))
+
 ## [0.2.2](https://github.com/WeAreHausTech/haus-workflow/compare/v0.2.1...v0.2.2) (2026-05-28)
 
 ### Bug Fixes
