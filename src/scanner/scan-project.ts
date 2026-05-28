@@ -1,3 +1,8 @@
+/**
+ * Core project scanner — reads package.json, composer.json, and safe project files,
+ * then writes four outputs to .haus-workflow/: context-map.json, dependency-map.json,
+ * scan-hashes.json, and repo-summary.md.
+ */
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 
@@ -10,6 +15,12 @@ import { satisfiesVersion } from "../utils/versions.js";
 import { detectPackageManager } from "./detect-package-manager.js";
 import type { ScanResult } from "./types.js";
 
+/**
+ * Allowlist of file globs that are safe to read during a scan.
+ * Keeping an explicit list prevents accidental ingestion of large generated
+ * directories (node_modules, .git) and limits the attack surface for path
+ * traversal if the repo contains unexpected symlinks.
+ */
 const SAFE_FILES = [
   "package.json",
   "yarn.lock",
@@ -46,6 +57,11 @@ const SAFE_FILES = [
   "Dockerfile",
 ];
 
+/**
+ * Regex patterns for paths that must never be read, regardless of whether they
+ * match SAFE_FILES.  Covers secrets, credentials, database dumps, and user-uploaded
+ * content that could contain PII.
+ */
 const SENSITIVE = [
   /^\.env(\.|$)/,
   /(^|\/)\.env(\.|$)/,
@@ -64,14 +80,30 @@ const SENSITIVE = [
   /(^|\/)uploads(\/|$)/,
 ];
 
+/** Returns true when a relative file path matches any SENSITIVE pattern. */
 function blocked(rel: string): boolean {
   return SENSITIVE.some((x) => x.test(rel));
 }
 
+/**
+ * Scans the project at `root` and writes four output files to `.haus-workflow/`.
+ *
+ * Outputs written:
+ * - `context-map.json` — full ContextMap (roles, stacks, warnings, …)
+ * - `dependency-map.json` — flat dep lists by ecosystem (node, composer)
+ * - `scan-hashes.json` — SHA-256 of every scanned file for drift detection
+ * - `repo-summary.md` — human-readable one-page summary
+ *
+ * @param root - Absolute path to the project root.
+ * @param mode - `"fast"` skips interactive prompts; `"guided"` enables them.
+ * @returns The full ScanResult including all four artifact fields.
+ */
 export async function scanProject(root: string, mode: "guided" | "fast" = "fast"): Promise<ScanResult> {
   const pkg = await readJson<Record<string, unknown>>(path.join(root, "package.json"));
   const composer = await readJson<Record<string, unknown>>(path.join(root, "composer.json"));
   const files = await listFiles(root, SAFE_FILES);
+  // Remove any file that matched a SAFE_FILES glob but is still sensitive (e.g. a
+  // symlink resolving to a .env file, or an uploads dir matched by a wildcard).
   const safeFiles = files.filter((f) => !blocked(f));
   const deps = dependencySet(pkg, composer);
   const packageManager = detectPackageManager(root, String(pkg?.packageManager ?? ""));
@@ -125,6 +157,10 @@ export async function scanProject(root: string, mode: "guided" | "fast" = "fast"
   return { ...context, dependencyMap, scanHashes, repoSummary };
 }
 
+/**
+ * Merges all dependency keys from package.json (dependencies + devDependencies)
+ * and composer.json (require + require-dev) into a single sorted array.
+ */
 function dependencySet(pkg?: Record<string, unknown>, composer?: Record<string, unknown>): string[] {
   const out = new Set<string>();
   const pushObj = (obj: unknown) => {
@@ -138,6 +174,14 @@ function dependencySet(pkg?: Record<string, unknown>, composer?: Record<string, 
   return [...out].sort();
 }
 
+/**
+ * Derives high-level repo roles from dependency presence and file heuristics.
+ * Each role is a short string (e.g. "next-app", "laravel-app") consumed by the
+ * recommender to select catalog items.  A repo can have multiple roles.
+ *
+ * @param deps - Flat list of all dependency keys (npm + composer).
+ * @param files - Safe, non-sensitive file paths relative to the project root.
+ */
 function detectRoles(deps: string[], files: string[]): string[] {
   const roles = new Set<string>();
   if (deps.includes("next") || files.some((f) => f.includes("next.config."))) roles.add("next-app");
@@ -156,6 +200,8 @@ function detectRoles(deps: string[], files: string[]): string[] {
   if (files.some((f) => f.endsWith("turbo.json"))) roles.add("turbo-monorepo");
   if (files.some((f) => f.endsWith("artisan")) || deps.includes("laravel/framework")) roles.add("laravel-app");
   if (deps.includes("laravel/nova")) roles.add("laravel-nova-app");
+  // WordPress role detection: Bedrock layout (web/app path or roots/wordpress dep)
+  // takes priority over vanilla; both variants also add the generic "wordpress-site" role.
   const hasWpConfig = files.some((f) => f.endsWith("wp-config.php"));
   const hasBedrockLayout = files.some((f) => f.includes("web/app")) || deps.includes("roots/wordpress");
   if (hasWpConfig && hasBedrockLayout) {
@@ -173,6 +219,17 @@ function detectRoles(deps: string[], files: string[]): string[] {
   return [...roles].sort();
 }
 
+/**
+ * Categorises the tech stack into buckets (frontend, backend, databases, testing,
+ * auth, tooling, packageManagers) by matching dependency names and key file paths.
+ * Some entries (e.g. NestJS, Vendure) also do a content search via {@link hasNeedle}
+ * to catch projects where the dep is a peer / not in package.json directly.
+ *
+ * @param root - Absolute project root, passed through to hasNeedle for file reads.
+ * @param deps - Full dependency list (npm + composer).
+ * @param files - Safe file paths relative to root.
+ * @param packageManager - Already-resolved package manager, used to populate packageManagers bucket.
+ */
 async function detectStacks(
   root: string,
   deps: string[],
@@ -188,6 +245,7 @@ async function detectStacks(
     tooling: [],
     packageManagers: [],
   };
+  // Helper keeps buckets duplicate-free without requiring a Set.
   const add = (k: string, v: string) => {
     out[k] ??= [];
     if (!out[k].includes(v)) out[k].push(v);
@@ -230,6 +288,8 @@ async function detectStacks(
   }
   if (deps.includes("@vendure/core")) add("backend", "vendure3");
   if (deps.includes("@nestjs/core")) add("backend", "nestjs");
+  // Content search for NestJS and Vendure because they may be installed as peers
+  // without appearing in the top-level package.json (e.g. in a monorepo).
   if (await hasNeedle(root, files, "NestFactory")) add("backend", "nestjs");
   if (await hasNeedle(root, files, "@VendurePlugin")) add("backend", "vendure3");
   if (deps.includes("graphql") || deps.includes("@nestjs/graphql")) add("backend", "graphql");
@@ -269,6 +329,8 @@ async function detectStacks(
   if (deps.includes("predis/predis") || deps.includes("ioredis") || deps.includes("redis")) {
     add("databases", "redis");
   }
+  // Auth detection uses content search because env-var names and import paths
+  // are more reliable indicators than package names for these protocols.
   if (await hasNeedle(root, files, "openid")) add("auth", "oidc");
   if (await hasNeedle(root, files, "AZURE_AD")) add("auth", "azure-ad");
   if (await hasNeedle(root, files, "BANKID")) add("auth", "bankid");
@@ -281,6 +343,15 @@ async function detectStacks(
   return out;
 }
 
+/**
+ * Searches the first 300 candidate files for a literal string needle.
+ * The 300-file cap keeps scan time predictable on large monorepos — content
+ * search is only a fallback for cases where dep names are unreliable.
+ *
+ * @param root - Absolute project root.
+ * @param files - Full safe file list; filtered internally to code/config extensions.
+ * @param needle - Literal string to search for (case-sensitive).
+ */
 async function hasNeedle(root: string, files: string[], needle: string): Promise<boolean> {
   const candidates = files.filter(
     (f) =>
@@ -296,18 +367,26 @@ async function hasNeedle(root: string, files: string[], needle: string): Promise
       const content = await readFile(path.join(root, rel), "utf8");
       if (content.includes(needle)) return true;
     } catch {
+      // File may have been deleted or be unreadable — skip and continue.
       continue;
     }
   }
   return false;
 }
 
+/**
+ * Computes a 0–0.99 confidence score based on how many roles and stack entries
+ * were detected.  More signals → higher confidence.
+ * Formula: 0.4 base + 0.08 per role + 0.02 per stack entry, capped at 0.99.
+ * Returns 0.15 when no roles were found (minimal signal).
+ */
 function computeConfidence(roles: string[], stacks: Record<string, string[]>): number {
   const stackCount = Object.values(stacks).reduce((sum, arr) => sum + arr.length, 0);
   if (roles.length === 0) return 0.15;
   return Math.min(0.99, Number((0.4 + roles.length * 0.08 + stackCount * 0.02).toFixed(2)));
 }
 
+/** Renders a concise markdown summary of the context map for repo-summary.md. */
 function renderSummary(context: ContextMap): string {
   return `# Repo summary
 
