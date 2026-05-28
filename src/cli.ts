@@ -6,6 +6,7 @@ import { Command } from "commander";
 
 import { runApply } from "./commands/apply.js";
 import { runCatalogAudit } from "./commands/catalog-audit.js";
+import { runConfig } from "./commands/config.js";
 import { runContext } from "./commands/context.js";
 import { runDoctor } from "./commands/doctor.js";
 import { runExplainRecommendation } from "./commands/explain-recommendation.js";
@@ -108,6 +109,20 @@ guard
   .command("bash")
   .option("--from-hook")
   .action((opts) => runGuard("bash", opts));
+
+const config = program.command("config");
+config
+  .command("enable <key>")
+  .description("Enable a hook (hook.context, hook.memory)")
+  .action((key: string) => runConfig(key, "enable"));
+config
+  .command("disable <key>")
+  .description("Disable a hook (hook.context, hook.memory)")
+  .action((key: string) => runConfig(key, "disable"));
+config
+  .command("status <key>")
+  .description("Show current state of a hook (hook.context, hook.memory)")
+  .action((key: string) => runConfig(key, "status"));
 
 const workspace = program.command("workspace");
 workspace.command("init").action(() => runWorkspace("init"));
