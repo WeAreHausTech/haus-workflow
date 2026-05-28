@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.8.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.7.0...v0.8.0) (2026-05-28)
+
+### Features
+
+* **scanner:** tooling detection (T19-T25) ([2ae293b](https://github.com/WeAreHausTech/haus-workflow/commit/2ae293b69cf97be15017021e16703e19aa3c2223))
+
 ## [0.7.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.6.0...v0.7.0) (2026-05-28)
 
 ### Features
