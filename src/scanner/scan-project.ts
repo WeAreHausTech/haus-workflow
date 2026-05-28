@@ -221,6 +221,13 @@ async function detectStacks(
   if (deps.includes("deployer/deployer")) add("tooling", "deployer-php");
   if (!deps.includes("prettier")) add("tooling", "missing-prettier");
   if (!deps.includes("eslint")) add("tooling", "missing-eslint");
+  if (deps.includes("@stripe/stripe-js") || deps.includes("@stripe/react-stripe-js")) {
+    add("tooling", "stripe");
+  }
+  if (deps.includes("@haus-tech/qliro-plugin")) add("tooling", "qliro");
+  if (deps.includes("@supabase/supabase-js") || deps.some((d) => d.startsWith("@supabase/"))) {
+    add("databases", "supabase");
+  }
   if (deps.includes("@vendure/core")) add("backend", "vendure3");
   if (deps.includes("@nestjs/core")) add("backend", "nestjs");
   if (await hasNeedle(root, files, "NestFactory")) add("backend", "nestjs");

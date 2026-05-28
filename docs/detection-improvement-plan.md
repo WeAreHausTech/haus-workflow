@@ -551,7 +551,7 @@ if (deps.includes("deployer/deployer")) add("tooling", "deployer-php");
 
 ## Phase 10 — Payments
 
-### T26 · Stripe detection + catalog item
+### T26 · Stripe detection + catalog item ✅ DONE
 
 **Repos:** both
 
@@ -571,7 +571,7 @@ Manifest + fixture stub for `haus.stripe-patterns`.
 
 ---
 
-### T27 · Qliro detection + catalog item
+### T27 · Qliro detection + catalog item ✅ DONE
 
 **Repos:** both
 
@@ -589,7 +589,7 @@ Manifest + fixture stub for `haus.qliro-patterns`.
 
 ---
 
-### T28 · Supabase detection + catalog item
+### T28 · Supabase detection + catalog item ✅ DONE
 
 **Repos:** both
 
@@ -638,6 +638,6 @@ Manifest + fixture stub for `haus.supabase-patterns`.
 | T23 · PM2 | 9 | haus-workflow | ✅ Done |
 | T24 · Sentry | 9 | both | ✅ Done |
 | T25 · Deployer PHP | 9 | haus-workflow | ✅ Done |
-| T26 · Stripe | 10 | both | ⬜ Todo |
-| T27 · Qliro | 10 | both | ⬜ Todo |
-| T28 · Supabase | 10 | both | ⬜ Todo |
+| T26 · Stripe | 10 | both | ✅ Done |
+| T27 · Qliro | 10 | both | ✅ Done |
+| T28 · Supabase | 10 | both | ✅ Done |

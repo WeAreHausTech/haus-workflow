@@ -97,6 +97,10 @@
     "missing-eslint",
     "docker",
     "pm2",
-    "deployer-php"
+    "deployer-php",
+    "stripe",
+    "qliro",
+    "supabase",
+    "payments"
   ]
 }

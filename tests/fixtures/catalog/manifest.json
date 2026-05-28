@@ -259,6 +259,71 @@
       "installMode": "copy-selected"
     },
     {
+      "id": "haus.stripe-patterns",
+      "source": "haus",
+      "type": "skill",
+      "path": "skills/stripe-patterns",
+      "title": "Haus Stripe patterns",
+      "purpose": "Guide Stripe Elements, Checkout, webhook handling, and PCI-safe integration changes.",
+      "whenToUse": "Use for `@stripe/stripe-js` / `@stripe/react-stripe-js` integrations, payment intents, webhooks, and Checkout.",
+      "whenNotToUse": "Do not use for non-Stripe payment providers (Qliro, Klarna, etc.).",
+      "references": ["references/scope.md", "references/workflow.md", "https://docs.stripe.com/"],
+      "tokenBudget": 1200,
+      "tags": ["stripe", "payments", "tooling"],
+      "repoRoles": ["next-app", "react-app", "vendure-plugin"],
+      "requiresAny": [
+        { "stack": "stripe" },
+        { "dependency": "@stripe/stripe-js" },
+        { "dependency": "@stripe/react-stripe-js" }
+      ],
+      "ecosystem": "payments",
+      "tokenEstimate": 2000,
+      "installMode": "copy-selected"
+    },
+    {
+      "id": "haus.qliro-patterns",
+      "source": "haus",
+      "type": "skill",
+      "path": "skills/qliro-patterns",
+      "title": "Haus Qliro patterns",
+      "purpose": "Guide Qliro Checkout integration via @haus-tech/qliro-plugin in Vendure storefronts.",
+      "whenToUse": "Use for Qliro Checkout flow, order callbacks, refund handling, and merchant API config.",
+      "whenNotToUse": "Do not use for non-Nordic payment providers or Stripe-only flows.",
+      "references": ["references/scope.md", "references/workflow.md"],
+      "tokenBudget": 1200,
+      "tags": ["qliro", "payments", "tooling"],
+      "repoRoles": ["vendure-app", "vendure-plugin", "next-app"],
+      "requiresAny": [
+        { "stack": "qliro" },
+        { "dependency": "@haus-tech/qliro-plugin" }
+      ],
+      "ecosystem": "payments",
+      "tokenEstimate": 1800,
+      "installMode": "copy-selected"
+    },
+    {
+      "id": "haus.supabase-patterns",
+      "source": "haus",
+      "type": "skill",
+      "path": "skills/supabase-patterns",
+      "title": "Haus Supabase patterns",
+      "purpose": "Guide Supabase client wiring, Row-Level Security, edge functions, and auth integration.",
+      "whenToUse": "Use for `@supabase/supabase-js` queries, RLS policies, edge functions, and Supabase Auth flows.",
+      "whenNotToUse": "Do not use for non-Supabase BaaS (Firebase, AWS Amplify) or self-hosted Postgres without Supabase.",
+      "references": ["references/scope.md", "references/workflow.md", "https://supabase.com/docs"],
+      "tokenBudget": 1200,
+      "tags": ["supabase", "database", "backend"],
+      "repoRoles": ["next-app", "react-app"],
+      "requiresAny": [
+        { "stack": "supabase" },
+        { "dependency": "@supabase/supabase-js" },
+        { "packageNamePattern": "@supabase/*" }
+      ],
+      "ecosystem": "database",
+      "tokenEstimate": 2000,
+      "installMode": "copy-selected"
+    },
+    {
       "id": "haus.sanity-patterns",
       "source": "haus",
       "type": "skill",
