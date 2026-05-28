@@ -8,7 +8,7 @@
       ],
       "forbiddenSelectedIds": [
         "haus.react19-patterns",
-        "haus.typescript6-patterns",
+        "haus.typescript5-patterns",
         "haus.nextjs-patterns",
         "haus.playwright-patterns"
       ],

@@ -5,7 +5,7 @@
       "expectedSelectedIds": [
         "haus.nextjs-patterns",
         "haus.react19-patterns",
-        "haus.typescript6-patterns"
+        "haus.typescript5-patterns"
       ],
       "forbiddenSelectedIds": [
         "haus.playwright-patterns",

@@ -2,7 +2,7 @@
   "expectedSelectedIds": [
     "haus.nestjs-graphql-patterns",
     "haus.package-manager-yarn4-pnpm89",
-    "haus.typescript6-patterns"
+    "haus.typescript5-patterns"
   ],
   "forbiddenSelectedIds": [
     "haus.nx21-monorepo-patterns",

@@ -2,6 +2,9 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import path from "node:path";
 import fs from "node:fs";
+
+process.env.HAUS_FIXTURE_CATALOG = path.resolve("tests/fixtures/catalog/manifest.json");
+
 import {
   cloneFixtureToTemp,
   normalizeContextForGolden,

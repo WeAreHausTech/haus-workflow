@@ -1,19 +1,39 @@
 {
   "mode": "fast",
   "packageManager": "yarn",
-  "repoRoles": ["graphql-api", "nestjs-api"],
-  "confidence": 0.62,
+  "repoRoles": [
+    "graphql-api",
+    "nestjs-api"
+  ],
+  "confidence": 0.64,
   "detectedStacks": {
     "auth": [],
-    "backend": ["graphql", "nestjs"],
+    "backend": [
+      "graphql",
+      "nestjs"
+    ],
     "databases": [],
     "frontend": [],
-    "packageManagers": ["yarn4"],
+    "packageManagers": [
+      "yarn4"
+    ],
     "testing": [],
-    "tooling": []
+    "tooling": [
+      "typescript5"
+    ]
   },
-  "dependencies": ["@nestjs/core", "@nestjs/graphql", "graphql", "typescript"],
-  "securityRisks": ["Missing env template"],
+  "dependencies": [
+    "@nestjs/core",
+    "@nestjs/graphql",
+    "graphql",
+    "typescript"
+  ],
+  "securityRisks": [
+    "Missing env template"
+  ],
   "crossRepoHints": [],
-  "warnings": ["No .env.example found", "No package.json test script found"]
+  "warnings": [
+    "No .env.example found",
+    "No package.json test script found"
+  ]
 }

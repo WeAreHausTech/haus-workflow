@@ -22,7 +22,7 @@ test("allowed-stacks includes canonical machine-stable tokens", () => {
     "nextjs",
     "react19",
     "vite8",
-    "typescript6",
+    "typescript5",
     "tanstack-query",
     "tanstack-router",
     "radix-ui",

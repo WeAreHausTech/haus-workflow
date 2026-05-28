@@ -1,19 +1,33 @@
 {
   "mode": "fast",
   "packageManager": "unknown",
-  "repoRoles": ["laravel-app"],
+  "repoRoles": [
+    "laravel-app"
+  ],
   "confidence": 0.52,
   "detectedStacks": {
     "auth": [],
-    "backend": ["laravel"],
+    "backend": [
+      "laravel"
+    ],
     "databases": [],
     "frontend": [],
     "packageManagers": [],
-    "testing": ["phpunit"],
+    "testing": [
+      "phpunit"
+    ],
     "tooling": []
   },
-  "dependencies": ["laravel/framework", "phpunit/phpunit"],
-  "securityRisks": ["Missing env template"],
+  "dependencies": [
+    "laravel/framework",
+    "phpunit/phpunit"
+  ],
+  "securityRisks": [
+    "Missing env template"
+  ],
   "crossRepoHints": [],
-  "warnings": ["No .env.example found", "No package.json test script found"]
+  "warnings": [
+    "No .env.example found",
+    "No package.json test script found"
+  ]
 }

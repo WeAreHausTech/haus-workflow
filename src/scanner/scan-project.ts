@@ -143,6 +143,7 @@ function detectRoles(deps: string[], files: string[]): string[] {
   if (deps.includes("next") || files.some((f) => f.includes("next.config."))) roles.add("next-app");
   if (deps.includes("react")) roles.add("react-app");
   if (deps.includes("vite") || files.some((f) => f.includes("vite.config."))) roles.add("vite-app");
+  if (deps.includes("react-router") && deps.includes("@react-router/node")) roles.add("react-router-app");
   if (deps.includes("@vendure/core")) roles.add("vendure-app");
   if (deps.some((d) => d.startsWith("@haus/vendure-")) || files.some((f) => f.includes("vendure-config")))
     roles.add("vendure-plugin");
@@ -192,6 +193,14 @@ async function detectStacks(
   if (deps.includes("react")) add("frontend", "react19");
   if (deps.includes("vue")) add("frontend", "vue");
   if (deps.includes("vite")) add("frontend", "vite8");
+  if (deps.includes("react-router") && deps.includes("@react-router/node")) add("frontend", "react-router-v7");
+  if (deps.includes("tailwindcss") || files.some((f) => f.includes("tailwind.config."))) {
+    add("frontend", "tailwindcss");
+  }
+  if (files.some((f) => f.endsWith("components.json")) && deps.includes("class-variance-authority")) {
+    add("frontend", "shadcn");
+  }
+  if (deps.includes("typescript")) add("tooling", "typescript5");
   if (deps.includes("@vendure/core")) add("backend", "vendure3");
   if (deps.includes("@nestjs/core")) add("backend", "nestjs");
   if (await hasNeedle(root, files, "NestFactory")) add("backend", "nestjs");

@@ -2,6 +2,9 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
+
+process.env.HAUS_FIXTURE_CATALOG = path.resolve("tests/fixtures/catalog/manifest.json");
+
 import { cloneFixtureToTemp, runHaus } from "./helpers/fixture-runner.js";
 
 const goldenDir = path.resolve("tests/golden/context");

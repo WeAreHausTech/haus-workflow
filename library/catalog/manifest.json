@@ -107,12 +107,12 @@
       "installMode": "copy-selected"
     },
     {
-      "id": "haus.typescript6-patterns",
-      "version": "1.0.0",
+      "id": "haus.typescript5-patterns",
+      "version": "1.1.0",
       "source": "haus",
       "type": "skill",
-      "path": "skills/typescript6-patterns",
-      "title": "Haus TypeScript patterns",
+      "path": "skills/typescript5-patterns",
+      "title": "Haus TypeScript 5 patterns",
       "purpose": "Guide TypeScript contract and migration-safe typing changes.",
       "whenToUse": "Use for shared types, DTOs, interface boundaries, and type-safe refactors.",
       "whenNotToUse": "Do not use for runtime-only changes without type-contract impact.",
@@ -137,6 +137,9 @@
         "shared-package"
       ],
       "requiresAny": [
+        {
+          "stack": "typescript5"
+        },
         {
           "stack": "typescript"
         },
@@ -186,6 +189,47 @@
       ],
       "ecosystem": "vite",
       "tokenEstimate": 1800,
+      "installMode": "copy-selected"
+    },
+    {
+      "id": "haus.react-router-v7-patterns",
+      "version": "1.0.0",
+      "source": "haus",
+      "type": "skill",
+      "path": "skills/react-router-v7-patterns",
+      "title": "Haus React Router v7 patterns",
+      "purpose": "Guide React Router v7 SSR route, loader, and action boundary changes.",
+      "whenToUse": "Use for routes, loaders, actions, and SSR config in React Router v7 apps.",
+      "whenNotToUse": "Do not use for Next.js App Router or Remix v1 codebases.",
+      "references": [
+        "references/conventions.md",
+        "references/scope.md",
+        "references/workflow.md",
+        "https://reactrouter.com/start/framework/installation"
+      ],
+      "tokenBudget": 1200,
+      "tags": [
+        "frontend",
+        "react",
+        "typescript"
+      ],
+      "repoRoles": [
+        "react-router-app",
+        "react-app"
+      ],
+      "requiresAny": [
+        {
+          "stack": "react-router-v7"
+        },
+        {
+          "role": "react-router-app"
+        },
+        {
+          "dependency": "@react-router/node"
+        }
+      ],
+      "ecosystem": "react",
+      "tokenEstimate": 2000,
       "installMode": "copy-selected"
     },
     {
@@ -521,7 +565,7 @@
       "tags": [
         "nestjs",
         "graphql",
-        "typescript6"
+        "typescript5"
       ],
       "repoRoles": [
         "nestjs-api"
@@ -663,7 +707,7 @@
     },
     {
       "id": "haus.radix-shadcn-patterns",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "source": "haus",
       "type": "skill",
       "path": "skills/radix-shadcn-patterns",
@@ -689,6 +733,9 @@
         "react-app"
       ],
       "requiresAny": [
+        {
+          "stack": "shadcn"
+        },
         {
           "dependency": "@radix-ui/react-dialog"
         },
@@ -857,7 +904,7 @@
     },
     {
       "id": "haus.wordpress-acf-elementor-jetengine-patterns",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "source": "haus",
       "type": "skill",
       "path": "skills/wordpress-acf-elementor-jetengine-patterns",
@@ -976,7 +1023,7 @@
     },
     {
       "id": "haus.database-patterns",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "source": "haus",
       "type": "skill",
       "path": "skills/database-patterns",

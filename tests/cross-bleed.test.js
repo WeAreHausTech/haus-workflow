@@ -86,7 +86,7 @@ const cases = [
     task: "create new lib",
     forbid: new Set([
       "haus.react19-patterns",
-      "haus.typescript6-patterns",
+      "haus.typescript5-patterns",
       "haus.nextjs-patterns"
     ]),
     forbidLabel: "implementation"
@@ -97,7 +97,7 @@ const cases = [
     task: "add shared package",
     forbid: new Set([
       "haus.react19-patterns",
-      "haus.typescript6-patterns",
+      "haus.typescript5-patterns",
       "haus.nextjs-patterns"
     ]),
     forbidLabel: "implementation"

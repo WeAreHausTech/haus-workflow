@@ -179,7 +179,7 @@ Update `manifest.json` `haus.database-patterns` `requiresAny` to include `{"stac
 
 ## Phase 4 — Frontend framework gaps
 
-### T8 · React Router v7 detection + catalog item
+### T8 · React Router v7 detection + catalog item ✅ DONE
 
 **Repos:** both
 
@@ -204,7 +204,7 @@ Update `manifest.json` `haus.database-patterns` `requiresAny` to include `{"stac
 
 ---
 
-### T9 · TypeScript catalog item rename (typescript6 → typescript5)
+### T9 · TypeScript catalog item rename (typescript6 → typescript5) ✅ DONE
 
 **Repos:** both
 
@@ -224,7 +224,7 @@ Update `manifest.json` `haus.database-patterns` `requiresAny` to include `{"stac
 
 ---
 
-### T10 · Tailwind CSS detection improvement
+### T10 · Tailwind CSS detection improvement ✅ DONE
 
 **Repos:** `haus-workflow` only (catalog item `haus.tailwind-scss-patterns` already exists and matches `{"dependency": "tailwindcss"}`)
 
@@ -241,7 +241,7 @@ if (deps.includes("tailwindcss") || files.some(f => f.includes("tailwind.config.
 
 ---
 
-### T11 · Shadcn/ui detection improvement
+### T11 · Shadcn/ui detection improvement ✅ DONE
 
 **Repos:** `haus-workflow` only (catalog item `haus.radix-shadcn-patterns` already exists)
 
@@ -620,10 +620,10 @@ Manifest + fixture stub for `haus.supabase-patterns`.
 | T5 · Elementor | 3 | haus-workflow | ✅ Done |
 | T6 · ACF + JetEngine | 3 | haus-workflow | ✅ Done |
 | T7 · Redis | 3 | haus-workflow + catalog update | ✅ Done |
-| T8 · React Router v7 | 4 | both | ⬜ Todo |
-| T9 · TypeScript rename | 4 | both | ⬜ Todo |
-| T10 · Tailwind token | 4 | haus-workflow | ⬜ Todo |
-| T11 · Shadcn token | 4 | haus-workflow | ⬜ Todo |
+| T8 · React Router v7 | 4 | both | ✅ Done |
+| T9 · TypeScript rename | 4 | both | ✅ Done |
+| T10 · Tailwind token | 4 | haus-workflow | ✅ Done |
+| T11 · Shadcn token | 4 | haus-workflow | ✅ Done |
 | T12 · Sanity | 5 | both | ⬜ Todo |
 | T13 · Strapi | 5 | both | ⬜ Todo |
 | T14 · Prisma | 5 | both | ⬜ Todo |

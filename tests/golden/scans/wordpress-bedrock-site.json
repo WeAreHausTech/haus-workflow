@@ -1,19 +1,31 @@
 {
   "mode": "fast",
   "packageManager": "unknown",
-  "repoRoles": ["wordpress-bedrock-site", "wordpress-site"],
+  "repoRoles": [
+    "wordpress-bedrock-site",
+    "wordpress-site"
+  ],
   "confidence": 0.58,
   "detectedStacks": {
     "auth": [],
-    "backend": ["wordpress"],
+    "backend": [
+      "wordpress"
+    ],
     "databases": [],
     "frontend": [],
     "packageManagers": [],
     "testing": [],
     "tooling": []
   },
-  "dependencies": ["roots/bedrock"],
-  "securityRisks": ["Missing env template"],
+  "dependencies": [
+    "roots/bedrock"
+  ],
+  "securityRisks": [
+    "Missing env template"
+  ],
   "crossRepoHints": [],
-  "warnings": ["No .env.example found", "No package.json test script found"]
+  "warnings": [
+    "No .env.example found",
+    "No package.json test script found"
+  ]
 }

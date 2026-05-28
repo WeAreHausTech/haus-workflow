@@ -1,19 +1,39 @@
 {
   "mode": "fast",
   "packageManager": "yarn",
-  "repoRoles": ["nx-monorepo", "react-app"],
-  "confidence": 0.6,
+  "repoRoles": [
+    "nx-monorepo",
+    "react-app"
+  ],
+  "confidence": 0.62,
   "detectedStacks": {
     "auth": [],
     "backend": [],
     "databases": [],
-    "frontend": ["react19"],
-    "packageManagers": ["yarn4"],
+    "frontend": [
+      "react19"
+    ],
+    "packageManagers": [
+      "yarn4"
+    ],
     "testing": [],
-    "tooling": []
+    "tooling": [
+      "typescript5"
+    ]
   },
-  "dependencies": ["@nx/workspace", "react", "typescript"],
-  "securityRisks": ["Missing env template"],
-  "crossRepoHints": ["Monorepo orchestration detected"],
-  "warnings": ["No .env.example found", "No package.json test script found"]
+  "dependencies": [
+    "@nx/workspace",
+    "react",
+    "typescript"
+  ],
+  "securityRisks": [
+    "Missing env template"
+  ],
+  "crossRepoHints": [
+    "Monorepo orchestration detected"
+  ],
+  "warnings": [
+    "No .env.example found",
+    "No package.json test script found"
+  ]
 }
