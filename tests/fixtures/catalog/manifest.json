@@ -611,6 +611,47 @@
       "installMode": "copy-selected"
     },
     {
+      "id": "haus.vitest-patterns",
+      "source": "haus",
+      "type": "skill",
+      "path": "skills/vitest-patterns",
+      "title": "Haus Vitest patterns",
+      "purpose": "Guide Vitest unit/integration test structure, mocking, and coverage config.",
+      "whenToUse": "Use when writing or modifying Vitest tests in TypeScript/JS frontends and Node services.",
+      "whenNotToUse": "Do not use for Jest, Playwright, or PHPUnit test tasks.",
+      "references": ["references/scope.md", "references/workflow.md", "https://vitest.dev/guide/"],
+      "tokenBudget": 1200,
+      "tags": ["testing", "vitest", "typescript"],
+      "repoRoles": ["next-app", "react-app", "vue-app", "vite-app", "vendure-app", "vendure-plugin"],
+      "requiresAny": [
+        { "stack": "vitest" },
+        { "dependency": "vitest" }
+      ],
+      "tokenEstimate": 1500,
+      "installMode": "copy-selected"
+    },
+    {
+      "id": "haus.jest-patterns",
+      "source": "haus",
+      "type": "skill",
+      "path": "skills/jest-patterns",
+      "title": "Haus Jest patterns",
+      "purpose": "Guide Jest unit/integration test structure, mocking, and Nx-style setup.",
+      "whenToUse": "Use when writing or modifying Jest tests, including Nx workspace projects.",
+      "whenNotToUse": "Do not use for Vitest, Playwright, or PHPUnit test tasks.",
+      "references": ["references/scope.md", "references/workflow.md", "https://jestjs.io/docs/getting-started"],
+      "tokenBudget": 1200,
+      "tags": ["testing", "jest", "typescript"],
+      "repoRoles": ["next-app", "react-app", "nx-monorepo"],
+      "requiresAny": [
+        { "stack": "jest" },
+        { "dependency": "jest" },
+        { "dependency": "jest-environment-jsdom" }
+      ],
+      "tokenEstimate": 1500,
+      "installMode": "copy-selected"
+    },
+    {
       "id": "haus.phpunit-patterns",
       "source": "haus",
       "type": "skill",

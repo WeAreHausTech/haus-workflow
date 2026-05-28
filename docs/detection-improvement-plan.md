@@ -39,7 +39,7 @@ All tasks that previously listed `phpDeps.includes(...)` in their code examples 
 
 ## Phase 2 — Testing tokens (high impact, no dependencies)
 
-### T3 · Vitest detection + catalog item
+### T3 · Vitest detection + catalog item ✅ DONE
 
 **Repos:** both
 
@@ -82,7 +82,7 @@ All tasks that previously listed `phpDeps.includes(...)` in their code examples 
 
 ---
 
-### T4 · Jest detection + catalog item
+### T4 · Jest detection + catalog item ✅ DONE
 
 **Repos:** both
 
@@ -615,8 +615,8 @@ Manifest + fixture stub for `haus.supabase-patterns`.
 |------|-------|-------|--------|
 | T1 · composer.json parsing | 1 | haus-workflow | ✅ Done — `deps` includes PHP packages |
 | T2 · detect-node.ts | 1 | haus-workflow | ✅ Done — file deleted |
-| T3 · Vitest | 2 | both | ⬜ Todo |
-| T4 · Jest | 2 | both | ⬜ Todo |
+| T3 · Vitest | 2 | both | ✅ Done |
+| T4 · Jest | 2 | both | ✅ Done |
 | T5 · Elementor | 3 | haus-workflow | ⬜ Todo |
 | T6 · ACF + JetEngine | 3 | haus-workflow | ⬜ Todo |
 | T7 · Redis | 3 | haus-workflow + catalog update | ⬜ Todo |

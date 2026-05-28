@@ -203,6 +203,8 @@ async function detectStacks(
   if (deps.some((d) => d.startsWith("@testing-library/"))) add("testing", "testing-library");
   if (files.some((f) => f.endsWith("phpunit.xml"))) add("testing", "phpunit");
   if (deps.some((d) => d.startsWith("@storybook/"))) add("testing", "storybook");
+  if (deps.includes("vitest")) add("testing", "vitest");
+  if (deps.includes("jest") || deps.includes("jest-environment-jsdom")) add("testing", "jest");
   if (deps.includes("pg")) add("databases", "postgresql");
   if (deps.includes("mariadb") || deps.includes("mysql2")) add("databases", "mariadb");
   if (deps.includes("mssql")) add("databases", "mssql");
