@@ -6,6 +6,8 @@ import path from "node:path";
 import { mkdtempSync, writeFileSync, readFileSync, existsSync } from "node:fs";
 import { execaSync } from "execa";
 
+process.env.HAUS_FIXTURE_CATALOG = path.resolve("tests/fixtures/catalog/manifest.json");
+
 const BLOCK_BEGIN = "<!-- HAUS:BEGIN haus-imports v=1 -->";
 const BLOCK_END = "<!-- HAUS:END haus-imports -->";
 
