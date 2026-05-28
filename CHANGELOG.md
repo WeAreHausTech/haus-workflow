@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.5.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.4.0...v0.5.0) (2026-05-28)
+
+### Features
+
+* **scanner:** detect sanity, strapi, prisma (T12-T14) ([d2f3235](https://github.com/WeAreHausTech/haus-workflow/commit/d2f32359de33f85176085dfcd5c68685b2d4a5fc))
+
 ## [0.4.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.3.0...v0.4.0) (2026-05-28)
 
 ### Features
