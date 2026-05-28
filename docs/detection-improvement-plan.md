@@ -265,7 +265,7 @@ Update `library/catalog/manifest.json` `haus.radix-shadcn-patterns` `requiresAny
 
 ## Phase 5 — CMS / headless
 
-### T12 · Sanity v5 detection + catalog item
+### T12 · Sanity v5 detection + catalog item ✅ DONE
 
 **Repos:** both
 
@@ -289,7 +289,7 @@ Update `library/catalog/manifest.json` `haus.radix-shadcn-patterns` `requiresAny
 
 ---
 
-### T13 · Strapi 5 detection + catalog item
+### T13 · Strapi 5 detection + catalog item ✅ DONE
 
 **Repos:** both
 
@@ -313,7 +313,7 @@ Update `library/catalog/manifest.json` `haus.radix-shadcn-patterns` `requiresAny
 
 ---
 
-### T14 · Prisma detection + catalog item
+### T14 · Prisma detection + catalog item ✅ DONE
 
 **Repos:** both
 
@@ -624,9 +624,9 @@ Manifest + fixture stub for `haus.supabase-patterns`.
 | T9 · TypeScript rename | 4 | both | ✅ Done |
 | T10 · Tailwind token | 4 | haus-workflow | ✅ Done |
 | T11 · Shadcn token | 4 | haus-workflow | ✅ Done |
-| T12 · Sanity | 5 | both | ⬜ Todo |
-| T13 · Strapi | 5 | both | ⬜ Todo |
-| T14 · Prisma | 5 | both | ⬜ Todo |
+| T12 · Sanity | 5 | both | ✅ Done |
+| T13 · Strapi | 5 | both | ✅ Done |
+| T14 · Prisma | 5 | both | ✅ Done |
 | T15 · MySQL fix | 6 | haus-workflow + catalog update | ⬜ Todo |
 | T16 · SAML2 | 7 | both | ⬜ Todo |
 | T17 · NextAuth | 7 | both | ⬜ Todo |

@@ -71,6 +71,11 @@
     "wisest",
     "vitest",
     "jest",
-    "redis"
+    "redis",
+    "sanity",
+    "strapi",
+    "prisma",
+    "cms",
+    "database"
   ]
 }

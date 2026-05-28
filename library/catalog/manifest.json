@@ -233,6 +233,131 @@
       "installMode": "copy-selected"
     },
     {
+      "id": "haus.sanity-patterns",
+      "version": "1.0.0",
+      "source": "haus",
+      "type": "skill",
+      "path": "skills/sanity-patterns",
+      "title": "Haus Sanity patterns",
+      "purpose": "Guide Sanity v3/v5 schema, Studio config, GROQ query, and Next.js integration changes.",
+      "whenToUse": "Use for Sanity schema, Studio plugin, GROQ query, or next-sanity integration updates.",
+      "whenNotToUse": "Do not use for Strapi, WordPress, or other CMS work.",
+      "references": [
+        "references/conventions.md",
+        "references/scope.md",
+        "references/workflow.md",
+        "https://www.sanity.io/docs"
+      ],
+      "tokenBudget": 1200,
+      "tags": [
+        "sanity",
+        "backend",
+        "cms"
+      ],
+      "repoRoles": [
+        "sanity-studio",
+        "next-app"
+      ],
+      "requiresAny": [
+        {
+          "stack": "sanity"
+        },
+        {
+          "role": "sanity-studio"
+        },
+        {
+          "dependency": "sanity"
+        },
+        {
+          "dependency": "next-sanity"
+        }
+      ],
+      "ecosystem": "cms",
+      "tokenEstimate": 2000,
+      "installMode": "copy-selected"
+    },
+    {
+      "id": "haus.strapi-patterns",
+      "version": "1.0.0",
+      "source": "haus",
+      "type": "skill",
+      "path": "skills/strapi-patterns",
+      "title": "Haus Strapi patterns",
+      "purpose": "Guide Strapi v5 content type, controller, service, and policy changes.",
+      "whenToUse": "Use for Strapi content type schemas, controllers, services, and policies in v5.",
+      "whenNotToUse": "Do not use for Sanity, WordPress, or other CMS work.",
+      "references": [
+        "references/conventions.md",
+        "references/scope.md",
+        "references/workflow.md",
+        "https://docs.strapi.io/dev-docs/intro"
+      ],
+      "tokenBudget": 1200,
+      "tags": [
+        "strapi",
+        "backend",
+        "cms"
+      ],
+      "repoRoles": [
+        "strapi-app"
+      ],
+      "requiresAny": [
+        {
+          "stack": "strapi"
+        },
+        {
+          "role": "strapi-app"
+        },
+        {
+          "dependency": "@strapi/strapi"
+        }
+      ],
+      "ecosystem": "cms",
+      "tokenEstimate": 2000,
+      "installMode": "copy-selected"
+    },
+    {
+      "id": "haus.prisma-patterns",
+      "version": "1.0.0",
+      "source": "haus",
+      "type": "skill",
+      "path": "skills/prisma-patterns",
+      "title": "Haus Prisma patterns",
+      "purpose": "Guide Prisma schema, migration, and query-safe ORM changes.",
+      "whenToUse": "Use for prisma/schema.prisma updates, migrations, and PrismaClient query changes.",
+      "whenNotToUse": "Do not use for non-Prisma ORM tasks or pure DB schema work without Prisma.",
+      "references": [
+        "references/conventions.md",
+        "references/scope.md",
+        "references/workflow.md",
+        "https://www.prisma.io/docs"
+      ],
+      "tokenBudget": 1200,
+      "tags": [
+        "prisma",
+        "backend",
+        "database"
+      ],
+      "repoRoles": [
+        "next-app",
+        "nestjs-api"
+      ],
+      "requiresAny": [
+        {
+          "stack": "prisma"
+        },
+        {
+          "dependency": "@prisma/client"
+        },
+        {
+          "dependency": "prisma"
+        }
+      ],
+      "ecosystem": "database",
+      "tokenEstimate": 2000,
+      "installMode": "copy-selected"
+    },
+    {
       "id": "haus.vendure-plugin-patterns",
       "version": "1.0.0",
       "source": "haus",

@@ -144,6 +144,8 @@ function detectRoles(deps: string[], files: string[]): string[] {
   if (deps.includes("react")) roles.add("react-app");
   if (deps.includes("vite") || files.some((f) => f.includes("vite.config."))) roles.add("vite-app");
   if (deps.includes("react-router") && deps.includes("@react-router/node")) roles.add("react-router-app");
+  if (deps.includes("sanity")) roles.add("sanity-studio");
+  if (deps.includes("@strapi/strapi") || deps.some((d) => d.startsWith("@strapi/"))) roles.add("strapi-app");
   if (deps.includes("@vendure/core")) roles.add("vendure-app");
   if (deps.some((d) => d.startsWith("@haus/vendure-")) || files.some((f) => f.includes("vendure-config")))
     roles.add("vendure-plugin");
@@ -201,6 +203,13 @@ async function detectStacks(
     add("frontend", "shadcn");
   }
   if (deps.includes("typescript")) add("tooling", "typescript5");
+  if (deps.includes("sanity") || deps.includes("next-sanity") || deps.includes("@sanity/client")) {
+    add("backend", "sanity");
+  }
+  if (deps.includes("@strapi/strapi") || deps.some((d) => d.startsWith("@strapi/"))) {
+    add("backend", "strapi");
+  }
+  if (deps.includes("prisma") || deps.includes("@prisma/client")) add("backend", "prisma");
   if (deps.includes("@vendure/core")) add("backend", "vendure3");
   if (deps.includes("@nestjs/core")) add("backend", "nestjs");
   if (await hasNeedle(root, files, "NestFactory")) add("backend", "nestjs");
