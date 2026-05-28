@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.6.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.5.0...v0.6.0) (2026-05-28)
+
+### Features
+
+* **scanner:** detect mysql, saml2, next-auth (T15-T17) ([13694e1](https://github.com/WeAreHausTech/haus-workflow/commit/13694e12895b2bb470c7a01adc10a3fc91bb3e42))
+
 ## [0.5.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.4.0...v0.5.0) (2026-05-28)
 
 ### Features
