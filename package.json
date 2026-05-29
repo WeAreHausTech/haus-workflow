@@ -30,8 +30,6 @@
     "format:write": "prettier --write src scripts",
     "typecheck": "tsc --noEmit",
     "typecheck:scripts": "tsc --noEmit --project tsconfig.scripts.json",
-    "cleanup:status": "tsx scripts/cleanup-status.ts",
-    "bench:hooks": "tsx scripts/bench-hooks.ts",
     "pack:local": "yarn pack",
     "publish:dry": "npm pack --dry-run",
     "publish:public": "yarn npm publish --access public",

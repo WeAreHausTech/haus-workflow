@@ -1,6 +1,6 @@
 # haus — Claude Code context
 
-Claude Code plugin + CLI that scans repos, recommends context assets, and writes controlled outputs into `.claude/` and `.haus-workflow/`.
+CLI that scans repos, recommends context assets, and writes controlled outputs into `.claude/` and `.haus-workflow/`.
 
 ## Build & test
 
@@ -29,7 +29,6 @@ yarn verify         # full gate: typecheck + lint + build + test + prepack
 | `src/sources/` | External source sync, audit, and report |
 | `src/curation/` | Unsupported-stack token detection for source-decision validation |
 | `src/types/` | Local type declarations (e.g. `diff.d.ts`) |
-| `plugin/` | Shipped plugin metadata, hooks, skills |
 | `library/catalog/manifest.json` | Catalog items used by recommender/apply |
 | `tests/` | Node built-in test runner, no framework (see `tests/README.md`) |
 | `scripts/` | Audit + QA scripts (not part of the build) |
