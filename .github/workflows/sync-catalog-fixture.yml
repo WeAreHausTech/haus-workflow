@@ -1,7 +1,8 @@
 name: Sync catalog fixture
 
 on:
-  workflow_dispatch:       # triggered by haus-workflow-catalog CI on manifest.json changes
+  repository_dispatch:
+    types: [sync-catalog-fixture]  # fired by haus-workflow-catalog when manifest.json changes on main
 
 permissions:
   contents: write
