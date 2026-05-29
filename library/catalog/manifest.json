@@ -407,14 +407,14 @@
     },
     {
       "id": "haus.prettier-setup",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "source": "haus",
       "type": "skill",
       "path": "skills/prettier-setup",
       "title": "Haus Prettier setup",
-      "purpose": "Install `@haus-tech/prettier-config` and wire `.prettierrc` to the shared config.",
-      "whenToUse": "Use when Prettier is missing from a haus repo or when migrating an ad-hoc Prettier config to the shared package.",
-      "whenNotToUse": "Do not use when Prettier is already configured against `@haus-tech/prettier-config`.",
+      "purpose": "Install `@haus-tech/tech-config` and wire `.prettierrc` to the shared prettier config via the `/prettier` subpath export.",
+      "whenToUse": "Use when Prettier is missing from a haus repo, when migrating an ad-hoc config, or when migrating from the deprecated `@haus-tech/prettier-config`.",
+      "whenNotToUse": "Do not use when Prettier is already configured against `@haus-tech/tech-config/prettier`.",
       "references": [
         "references/conventions.md",
         "references/scope.md",
@@ -438,7 +438,7 @@
     },
     {
       "id": "haus.eslint-setup",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "source": "haus",
       "type": "skill",
       "path": "skills/eslint-setup",
