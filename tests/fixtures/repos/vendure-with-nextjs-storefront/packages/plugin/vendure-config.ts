@@ -1,5 +1,5 @@
-import { VendureConfig } from "@vendure/core";
+import { VendureConfig } from '@vendure/core'
 
 export const config: Partial<VendureConfig> = {
-  apiOptions: {}
-};
+  apiOptions: {},
+}

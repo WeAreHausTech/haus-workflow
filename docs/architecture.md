@@ -10,22 +10,22 @@ Core flow: **scan → recommend → apply**
 
 ## Repo structure
 
-| Path | Purpose |
-|---|---|
-| `src/cli.ts` | CLI entry, command registration, Node engine check |
-| `src/commands/` | One file per CLI command (thin handlers only) |
-| `src/scanner/` | Repo detection and context-map generation |
-| `src/recommender/` | Recommendation scoring and explainability |
-| `src/claude/` | Generated file writer and hook contract checks |
-| `src/update/` | Lockfile checks, hash refresh, backup, diff summary |
-| `src/memory/` | Local memory store and redaction |
-| `src/security/` | Guardrails for sensitive paths and dangerous bash |
-| `src/catalog/` | Catalog manifest loader and allowed-stack validation |
-| `src/library/` | Catalog/library audit logic |
-| `src/utils/` | Shared utilities: `logger.ts`, `fs.ts`, `paths.ts`, `audit-checks.ts`, `diff.ts`, `exec.ts`, `prompts.ts`, `versions.ts` |
-| `src/types/` | Local ambient type declarations |
-| `library/global/` | Shipped skills, agents, and hook templates |
-| `library/catalog/` | Bundled catalog manifest (fallback when remote cache is absent) |
+| Path               | Purpose                                                                                                                  |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------ |
+| `src/cli.ts`       | CLI entry, command registration, Node engine check                                                                       |
+| `src/commands/`    | One file per CLI command (thin handlers only)                                                                            |
+| `src/scanner/`     | Repo detection and context-map generation                                                                                |
+| `src/recommender/` | Recommendation scoring and explainability                                                                                |
+| `src/claude/`      | Generated file writer and hook contract checks                                                                           |
+| `src/update/`      | Lockfile checks, hash refresh, backup, diff summary                                                                      |
+| `src/memory/`      | Local memory store and redaction                                                                                         |
+| `src/security/`    | Guardrails for sensitive paths and dangerous bash                                                                        |
+| `src/catalog/`     | Catalog manifest loader and allowed-stack validation                                                                     |
+| `src/library/`     | Catalog/library audit logic                                                                                              |
+| `src/utils/`       | Shared utilities: `logger.ts`, `fs.ts`, `paths.ts`, `audit-checks.ts`, `diff.ts`, `exec.ts`, `prompts.ts`, `versions.ts` |
+| `src/types/`       | Local ambient type declarations                                                                                          |
+| `library/global/`  | Shipped skills, agents, and hook templates                                                                               |
+| `library/catalog/` | Bundled catalog manifest (fallback when remote cache is absent)                                                          |
 
 ---
 
@@ -116,13 +116,13 @@ The catalog is maintained in a separate repository and fetched by `haus update`.
 
 ## Output files
 
-| File | Written by |
-|---|---|
-| `.haus-workflow/context-map.json` | `scan` |
-| `.haus-workflow/dependency-map.json` | `scan` |
-| `.haus-workflow/scan-hashes.json` | `scan` |
-| `.haus-workflow/repo-summary.md` | `scan` |
-| `.haus-workflow/recommendation.json` | `recommend` |
-| `.haus-workflow/selected-context.json` | `apply` |
-| `.haus-workflow/haus.lock.json` | `apply` |
-| `.claude/*` | `apply` |
+| File                                   | Written by  |
+| -------------------------------------- | ----------- |
+| `.haus-workflow/context-map.json`      | `scan`      |
+| `.haus-workflow/dependency-map.json`   | `scan`      |
+| `.haus-workflow/scan-hashes.json`      | `scan`      |
+| `.haus-workflow/repo-summary.md`       | `scan`      |
+| `.haus-workflow/recommendation.json`   | `recommend` |
+| `.haus-workflow/selected-context.json` | `apply`     |
+| `.haus-workflow/haus.lock.json`        | `apply`     |
+| `.claude/*`                            | `apply`     |

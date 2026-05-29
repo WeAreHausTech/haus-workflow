@@ -1,10 +1,13 @@
 /** `haus doctor` — validates project setup: hooks contract, managed files, cache freshness, and CLI version. */
+import os from 'node:os'
 import path from 'node:path'
 
 import fs from 'fs-extra'
 
+import { CATALOG_CACHE_SUBDIR } from '../catalog/constants.js'
 import { getCacheManifestAge } from '../catalog/remote-catalog.js'
 import { isHookEnabled, type HookKey } from '../claude/load-hooks-config.js'
+import { normaliseLF } from '../claude/managed-template.js'
 import { verifyProjectSettingsHooksContract } from '../claude/verify-hooks-contract.js'
 import { BLOCK_BEGIN } from '../claude/write-root-claude-md.js'
 import { readContextOrScan } from '../scanner/read-context.js'
@@ -79,39 +82,41 @@ export async function runDoctor(options?: { hooks?: boolean }): Promise<void> {
     log('- CLAUDE.md: import block present')
   }
 
-  const wayOfWorkPath = hausPath(root, 'haus-way-of-work.md')
-  const wayOfWorkExists = await fs.pathExists(wayOfWorkPath)
-  if (!wayOfWorkExists) {
-    warn('- .haus-workflow/haus-way-of-work.md: missing (run `haus apply --write`)')
+  const workflowPath = hausPath(root, 'WORKFLOW.md')
+  const workflowExists = await fs.pathExists(workflowPath)
+  if (!workflowExists) {
+    warn('- .haus-workflow/WORKFLOW.md: missing (run `haus apply --write`)')
   } else {
-    const wayOfWorkContent = await readText(wayOfWorkPath)
-    const firstLine = wayOfWorkContent?.split('\n')[0] ?? ''
+    const workflowContent = await readText(workflowPath)
+    const firstLine = workflowContent?.split('\n')[0] ?? ''
     if (!firstLine.includes('HAUS-MANAGED')) {
-      warn('- .haus-workflow/haus-way-of-work.md: no HAUS-MANAGED header (user-owned)')
+      log('- .haus-workflow/WORKFLOW.md: OK (user-owned)')
     } else {
-      // Compare installed template hash against current package template.
+      // Compare installed template hash against current template — prefer catalog cache (same as writeWorkflow).
       const storedHashMatch = firstLine.match(/hash=(sha256-[a-f0-9]+)/)
-      const templatePath = path.join(
-        packageRoot(),
-        'library',
-        'global',
-        'templates',
-        'haus-way-of-work.md',
-      )
+      const cachePath = path.join(os.homedir(), CATALOG_CACHE_SUBDIR, 'templates/agentic-workflow-standard.md')
+      const bundledPath = path.join(packageRoot(), 'library', 'global', 'templates', 'agentic-workflow-standard.md')
+      const templatePath = (await fs.pathExists(cachePath)) ? cachePath : bundledPath
       const templateContent = await readText(templatePath)
       if (storedHashMatch && templateContent) {
-        const currentHash = hashText(templateContent)
+        const currentHash = hashText(normaliseLF(templateContent))
         if (storedHashMatch[1] !== currentHash) {
-          warn(
-            '- .haus-workflow/haus-way-of-work.md: stale (template updated — run `haus apply --write`)',
-          )
+          warn('- .haus-workflow/WORKFLOW.md: stale (template updated — run `haus apply --write`)')
         } else {
-          log('- .haus-workflow/haus-way-of-work.md: OK')
+          log('- .haus-workflow/WORKFLOW.md: OK')
         }
       } else {
-        log('- .haus-workflow/haus-way-of-work.md: OK')
+        log('- .haus-workflow/WORKFLOW.md: OK')
       }
     }
+  }
+
+  const workflowConfigPath = hausPath(root, 'workflow-config.md')
+  const workflowConfigExists = await fs.pathExists(workflowConfigPath)
+  if (!workflowConfigExists) {
+    warn('- .haus-workflow/workflow-config.md: missing (run `haus apply --write`)')
+  } else {
+    log('- .haus-workflow/workflow-config.md: OK (project-owned)')
   }
 
   const projectMdPath = hausPath(root, 'project.md')

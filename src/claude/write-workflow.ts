@@ -1,5 +1,5 @@
 /**
- * Writes .haus-workflow/haus-way-of-work.md from the bundled (or cached) template.
+ * Writes .haus-workflow/WORKFLOW.md from the bundled (or cached) template.
  * Skips the write if the file was modified by the user or the content is already up to date.
  */
 
@@ -14,34 +14,28 @@ import { hashText, writeText } from '../utils/fs.js'
 import { log, warn } from '../utils/logger.js'
 import { displayPath, hausPath, packageRoot } from '../utils/paths.js'
 
+import { normaliseLF, parseHausManagedHeader } from './managed-template.js'
+
 /** Stable id embedded in the HAUS-MANAGED header — identifies this file on re-apply. */
-const STABLE_ID = 'template.way-of-work'
+const STABLE_ID = 'template.workflow'
 const SCHEMA_VERSION = '1'
-const TEMPLATE_REL = 'library/global/templates/haus-way-of-work.md'
+const TEMPLATE_REL = 'library/global/templates/agentic-workflow-standard.md'
 const CATALOG_CACHE_TEMPLATE = path.join(
   os.homedir(),
   CATALOG_CACHE_SUBDIR,
-  'templates/haus-way-of-work.md',
+  'templates/agentic-workflow-standard.md',
 )
 
 /** Build the HAUS-MANAGED header line, embedding the content hash for tamper detection. */
-export function makeWayOfWorkHeader(pkgVersion: string, contentHash: string): string {
+export function makeWorkflowHeader(pkgVersion: string, contentHash: string): string {
   return `<!-- HAUS-MANAGED id=${STABLE_ID} v=${SCHEMA_VERSION} source=@haus-tech/haus-workflow@${pkgVersion} hash=${contentHash} -->`
 }
 
-/** Parse a HAUS-MANAGED header line; returns null when the line is not a managed header. */
-function parseHausManagedHeader(line: string): { id: string; hash?: string } | null {
-  const match = line.match(/<!-- HAUS-MANAGED id=([\w.:-]+)/)
-  if (!match) return null
-  const hashMatch = line.match(/hash=(sha256-[a-f0-9]+)/)
-  return { id: match[1], hash: hashMatch?.[1] }
-}
-
 /**
- * Write .haus-workflow/haus-way-of-work.md at `root`.
+ * Write .haus-workflow/WORKFLOW.md at `root`.
  * Returns null (and warns) when the template is missing or the file was user-modified.
  */
-export async function writeWayOfWork(
+export async function writeWorkflow(
   root: string,
   pkgVersion: string,
   dryRun: boolean,
@@ -52,16 +46,16 @@ export async function writeWayOfWork(
   const templatePath = (await fs.pathExists(cachePath)) ? cachePath : packagePath
 
   if (!(await fs.pathExists(templatePath))) {
-    warn(`Way-of-work template not found — run \`haus update\` to fetch from catalog`)
+    warn(`Workflow template not found — run \`haus update\` to fetch from catalog`)
     return null
   }
 
   const templateContent = await fs.readFile(templatePath, 'utf8')
-  const contentHash = hashText(templateContent)
-  const header = makeWayOfWorkHeader(pkgVersion, contentHash)
+  const contentHash = hashText(normaliseLF(templateContent))
+  const header = makeWorkflowHeader(pkgVersion, contentHash)
   const next = `${header}\n${templateContent}`
 
-  const destPath = hausPath(root, 'haus-way-of-work.md')
+  const destPath = hausPath(root, 'WORKFLOW.md')
   const printable = displayPath(root, destPath)
 
   if (await fs.pathExists(destPath)) {
@@ -80,7 +74,7 @@ export async function writeWayOfWork(
     }
 
     const existingContent = existing.slice(firstLine.length + 1)
-    if (parsed.hash && hashText(existingContent) !== parsed.hash) {
+    if (parsed.hash && hashText(normaliseLF(existingContent)) !== parsed.hash) {
       warn(`${printable}: content modified by user — skipping. Use --force to overwrite.`)
       return null
     }

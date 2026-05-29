@@ -30,7 +30,11 @@
       "purpose": "Guide Next.js route, server/client boundary, and middleware-safe changes.",
       "whenToUse": "Use for App Router pages, layouts, route handlers, and middleware behavior updates.",
       "whenNotToUse": "Do not use for backend-only or non-Next framework tasks.",
-      "references": ["references/scope.md", "references/workflow.md", "https://nextjs.org/llms.txt"],
+      "references": [
+        "references/scope.md",
+        "references/workflow.md",
+        "https://nextjs.org/llms.txt"
+      ],
       "tokenBudget": 1200,
       "tags": ["frontend", "nextjs", "react", "typescript"],
       "repoRoles": ["next-app"],
@@ -66,7 +70,11 @@
       "purpose": "Guide TypeScript contract and migration-safe typing changes.",
       "whenToUse": "Use for shared types, DTOs, interface boundaries, and type-safe refactors.",
       "whenNotToUse": "Do not use for runtime-only changes without type-contract impact.",
-      "references": ["references/scope.md", "references/workflow.md", "https://www.typescriptlang.org/docs/handbook/"],
+      "references": [
+        "references/scope.md",
+        "references/workflow.md",
+        "https://www.typescriptlang.org/docs/handbook/"
+      ],
       "tokenBudget": 1200,
       "tags": ["typescript", "frontend", "backend"],
       "repoRoles": [
@@ -94,14 +102,16 @@
       "purpose": "Guide Vite config, plugin wiring, and deterministic build pipeline changes.",
       "whenToUse": "Use for vite config, alias/plugin, and build mode behavior updates.",
       "whenNotToUse": "Do not use for framework feature logic without build pipeline impact.",
-      "references": ["references/scope.md", "references/workflow.md", "https://vite.dev/guide", "https://vitest.dev/guide"],
+      "references": [
+        "references/scope.md",
+        "references/workflow.md",
+        "https://vite.dev/guide",
+        "https://vitest.dev/guide"
+      ],
       "tokenBudget": 1200,
       "tags": ["vite8", "frontend", "typescript"],
       "repoRoles": ["vite-app", "react-app", "vue-app"],
-      "requiresAny": [
-        { "stack": "vite8" },
-        { "dependency": "vite" }
-      ],
+      "requiresAny": [{ "stack": "vite8" }, { "dependency": "vite" }],
       "ecosystem": "vite",
       "tokenEstimate": 1800,
       "installMode": "copy-selected"
@@ -115,7 +125,11 @@
       "purpose": "Guide React Router v7 SSR route, loader, and action boundary changes.",
       "whenToUse": "Use for routes, loaders, actions, and SSR config in React Router v7 apps.",
       "whenNotToUse": "Do not use for Next.js App Router or Remix v1 codebases.",
-      "references": ["references/scope.md", "references/workflow.md", "https://reactrouter.com/start/framework/installation"],
+      "references": [
+        "references/scope.md",
+        "references/workflow.md",
+        "https://reactrouter.com/start/framework/installation"
+      ],
       "tokenBudget": 1200,
       "tags": ["frontend", "react", "typescript"],
       "repoRoles": ["react-router-app", "react-app"],
@@ -187,10 +201,7 @@
       "tokenBudget": 1200,
       "tags": ["bullmq", "queue", "backend"],
       "repoRoles": ["vendure-app", "nestjs-api"],
-      "requiresAny": [
-        { "stack": "bullmq" },
-        { "dependency": "bullmq" }
-      ],
+      "requiresAny": [{ "stack": "bullmq" }, { "dependency": "bullmq" }],
       "ecosystem": "tooling",
       "tokenEstimate": 1800,
       "installMode": "copy-selected"
@@ -231,9 +242,7 @@
       "tokenBudget": 800,
       "tags": ["prettier", "tooling", "quality"],
       "repoRoles": [],
-      "requiresAny": [
-        { "stack": "missing-prettier" }
-      ],
+      "requiresAny": [{ "stack": "missing-prettier" }],
       "ecosystem": "tooling",
       "tokenEstimate": 1000,
       "installMode": "copy-selected"
@@ -251,9 +260,7 @@
       "tokenBudget": 800,
       "tags": ["eslint", "tooling", "quality"],
       "repoRoles": [],
-      "requiresAny": [
-        { "stack": "missing-eslint" }
-      ],
+      "requiresAny": [{ "stack": "missing-eslint" }],
       "ecosystem": "tooling",
       "tokenEstimate": 1000,
       "installMode": "copy-selected"
@@ -293,10 +300,7 @@
       "tokenBudget": 1200,
       "tags": ["qliro", "payments", "tooling"],
       "repoRoles": ["vendure-app", "vendure-plugin", "next-app"],
-      "requiresAny": [
-        { "stack": "qliro" },
-        { "dependency": "@haus-tech/qliro-plugin" }
-      ],
+      "requiresAny": [{ "stack": "qliro" }, { "dependency": "@haus-tech/qliro-plugin" }],
       "ecosystem": "payments",
       "tokenEstimate": 1800,
       "installMode": "copy-selected"
@@ -355,7 +359,11 @@
       "purpose": "Guide Strapi v5 content type, controller, service, and policy changes.",
       "whenToUse": "Use for Strapi content type schemas, controllers, services, and policies in v5.",
       "whenNotToUse": "Do not use for Sanity, WordPress, or other CMS work.",
-      "references": ["references/scope.md", "references/workflow.md", "https://docs.strapi.io/dev-docs/intro"],
+      "references": [
+        "references/scope.md",
+        "references/workflow.md",
+        "https://docs.strapi.io/dev-docs/intro"
+      ],
       "tokenBudget": 1200,
       "tags": ["strapi", "backend", "cms"],
       "repoRoles": ["strapi-app"],
@@ -399,7 +407,11 @@
       "purpose": "Guide Vendure plugin boundary, schema, and migration-safe development.",
       "whenToUse": "Use for Vendure plugin resolvers, services, entities, and plugin migrations.",
       "whenNotToUse": "Do not use for storefront-only UI changes or non-Vendure APIs.",
-      "references": ["references/scope.md", "references/workflow.md", "https://docs.vendure.io/llms.txt"],
+      "references": [
+        "references/scope.md",
+        "references/workflow.md",
+        "https://docs.vendure.io/llms.txt"
+      ],
       "tokenBudget": 1200,
       "tags": ["backend", "vendure", "nestjs", "graphql", "typescript"],
       "repoRoles": ["vendure-plugin", "vendure-app"],
@@ -425,10 +437,7 @@
       "tokenBudget": 1200,
       "tags": ["backend", "laravel", "php"],
       "repoRoles": ["laravel-app", "laravel-nova-app"],
-      "requiresAny": [
-        { "stack": "laravel" },
-        { "dependency": "laravel/framework" }
-      ],
+      "requiresAny": [{ "stack": "laravel" }, { "dependency": "laravel/framework" }],
       "ecosystem": "laravel",
       "tokenEstimate": 2800,
       "installMode": "copy-selected"
@@ -442,14 +451,15 @@
       "purpose": "Guide WordPress hook/template/plugin/theme runtime changes.",
       "whenToUse": "Use for WordPress hook/filter/template/plugin/theme behavior updates.",
       "whenNotToUse": "Do not use for Bedrock-only config bootstrap or non-WP backend tasks.",
-      "references": ["references/scope.md", "references/workflow.md", "https://developer.wordpress.org/"],
+      "references": [
+        "references/scope.md",
+        "references/workflow.md",
+        "https://developer.wordpress.org/"
+      ],
       "tokenBudget": 1200,
       "tags": ["backend", "wordpress", "php"],
       "repoRoles": ["wordpress-site", "wordpress-bedrock-site"],
-      "requiresAny": [
-        { "stack": "wordpress" },
-        { "dependency": "roots/bedrock" }
-      ],
+      "requiresAny": [{ "stack": "wordpress" }, { "dependency": "roots/bedrock" }],
       "ecosystem": "wordpress",
       "tokenEstimate": 3000,
       "installMode": "copy-selected"
@@ -481,14 +491,15 @@
       "purpose": "Guide deterministic E2E browser test flow changes.",
       "whenToUse": "Use for Playwright specs, fixtures, and browser test stability work.",
       "whenNotToUse": "Do not use for unit-only test tasks without browser automation.",
-      "references": ["references/scope.md", "references/workflow.md", "https://playwright.dev/docs/intro"],
+      "references": [
+        "references/scope.md",
+        "references/workflow.md",
+        "https://playwright.dev/docs/intro"
+      ],
       "tokenBudget": 1200,
       "tags": ["testing", "playwright"],
       "repoRoles": ["next-app", "react-app", "vue-app", "test-suite"],
-      "requiresAny": [
-        { "stack": "playwright" },
-        { "dependency": "@playwright/test" }
-      ],
+      "requiresAny": [{ "stack": "playwright" }, { "dependency": "@playwright/test" }],
       "tokenEstimate": 2200,
       "installMode": "copy-selected"
     },
@@ -562,14 +573,15 @@
       "purpose": "Guide Vendure app-level config, worker, bootstrap, and plugin wiring changes.",
       "whenToUse": "Use for Vendure app config, worker, bootstrap, and system wiring updates.",
       "whenNotToUse": "Do not use for isolated shared plugin package tasks.",
-      "references": ["references/scope.md", "references/workflow.md", "https://docs.vendure.io/llms.txt"],
+      "references": [
+        "references/scope.md",
+        "references/workflow.md",
+        "https://docs.vendure.io/llms.txt"
+      ],
       "tokenBudget": 1200,
       "tags": ["vendure3", "nestjs", "graphql"],
       "repoRoles": ["vendure-app"],
-      "requiresAny": [
-        { "stack": "vendure3" },
-        { "dependency": "@vendure/core" }
-      ],
+      "requiresAny": [{ "stack": "vendure3" }, { "dependency": "@vendure/core" }],
       "ecosystem": "vendure",
       "tokenEstimate": 3200,
       "installMode": "copy-selected"
@@ -627,14 +639,15 @@
       "purpose": "Guide Turbo pipeline and cache-safe monorepo orchestration changes.",
       "whenToUse": "Use for turbo pipeline graph and package task orchestration updates.",
       "whenNotToUse": "Do not use for package-local feature edits without pipeline impact.",
-      "references": ["references/scope.md", "references/workflow.md", "https://turbo.build/repo/docs"],
+      "references": [
+        "references/scope.md",
+        "references/workflow.md",
+        "https://turbo.build/repo/docs"
+      ],
       "tokenBudget": 1200,
       "tags": ["turbo", "yarn4"],
       "repoRoles": ["turbo-monorepo"],
-      "requiresAny": [
-        { "role": "turbo-monorepo" },
-        { "dependency": "turbo" }
-      ],
+      "requiresAny": [{ "role": "turbo-monorepo" }, { "dependency": "turbo" }],
       "ecosystem": "turbo",
       "tokenEstimate": 2200,
       "installMode": "copy-selected"
@@ -648,7 +661,12 @@
       "purpose": "Guide query key, invalidation, and route loader/data-flow changes.",
       "whenToUse": "Use for TanStack query cache behavior and TanStack router flow updates.",
       "whenNotToUse": "Do not use for styling-only component changes.",
-      "references": ["references/scope.md", "references/workflow.md", "https://tanstack.com/query/latest/docs", "https://tanstack.com/router/latest/docs"],
+      "references": [
+        "references/scope.md",
+        "references/workflow.md",
+        "https://tanstack.com/query/latest/docs",
+        "https://tanstack.com/router/latest/docs"
+      ],
       "tokenBudget": 1200,
       "tags": ["tanstack-query", "tanstack-router", "react19"],
       "repoRoles": ["next-app", "react-app"],
@@ -671,7 +689,12 @@
       "purpose": "Guide accessible UI primitive and wrapper behavior changes.",
       "whenToUse": "Use for Radix primitive usage and shadcn wrapper updates.",
       "whenNotToUse": "Do not use for backend/domain logic changes.",
-      "references": ["references/scope.md", "references/workflow.md", "https://ui.shadcn.com/docs", "https://www.radix-ui.com/primitives/docs"],
+      "references": [
+        "references/scope.md",
+        "references/workflow.md",
+        "https://ui.shadcn.com/docs",
+        "https://www.radix-ui.com/primitives/docs"
+      ],
       "tokenBudget": 1200,
       "tags": ["radix", "shadcn", "react19"],
       "repoRoles": ["next-app", "react-app"],
@@ -696,7 +719,11 @@
       "purpose": "Guide style-system-safe Tailwind and SCSS module changes.",
       "whenToUse": "Use for Tailwind token/utility and SCSS module behavior updates.",
       "whenNotToUse": "Do not use for non-style backend/service changes.",
-      "references": ["references/scope.md", "references/workflow.md", "https://tailwindcss.com/docs"],
+      "references": [
+        "references/scope.md",
+        "references/workflow.md",
+        "https://tailwindcss.com/docs"
+      ],
       "tokenBudget": 1200,
       "tags": ["tailwind", "scss", "react19"],
       "repoRoles": ["next-app", "react-app", "vite-app"],
@@ -722,10 +749,7 @@
       "tokenBudget": 1200,
       "tags": ["vue"],
       "repoRoles": ["vue-app"],
-      "requiresAny": [
-        { "stack": "vue" },
-        { "dependency": "vue" }
-      ],
+      "requiresAny": [{ "stack": "vue" }, { "dependency": "vue" }],
       "ecosystem": "vue",
       "tokenEstimate": 2000,
       "installMode": "copy-selected"
@@ -743,9 +767,7 @@
       "tokenBudget": 1200,
       "tags": ["laravel-nova", "laravel"],
       "repoRoles": ["laravel-nova-app"],
-      "requiresAny": [
-        { "dependency": "laravel/nova" }
-      ],
+      "requiresAny": [{ "dependency": "laravel/nova" }],
       "ecosystem": "laravel",
       "tokenEstimate": 2600,
       "installMode": "copy-selected"
@@ -759,14 +781,15 @@
       "purpose": "Guide Bedrock config/bootstrap and environment-aware WP deployment layout.",
       "whenToUse": "Use for Bedrock config, env loading, and boot path behavior updates.",
       "whenNotToUse": "Do not use for hook/template-only WordPress runtime changes.",
-      "references": ["references/scope.md", "references/workflow.md", "https://developer.wordpress.org/"],
+      "references": [
+        "references/scope.md",
+        "references/workflow.md",
+        "https://developer.wordpress.org/"
+      ],
       "tokenBudget": 1200,
       "tags": ["wordpress", "bedrock"],
       "repoRoles": ["wordpress-bedrock-site"],
-      "requiresAny": [
-        { "role": "wordpress-bedrock-site" },
-        { "dependency": "roots/bedrock" }
-      ],
+      "requiresAny": [{ "role": "wordpress-bedrock-site" }, { "dependency": "roots/bedrock" }],
       "ecosystem": "wordpress",
       "tokenEstimate": 2600,
       "installMode": "copy-selected"
@@ -780,7 +803,11 @@
       "purpose": "Guide builder-field/meta-template wiring for ACF, Elementor Pro, and JetEngine.",
       "whenToUse": "Use for ACF field groups and Elementor/JetEngine-driven dynamic template behavior.",
       "whenNotToUse": "Do not use for generic WordPress hooks with no builder/meta impact.",
-      "references": ["references/scope.md", "references/workflow.md", "https://developer.wordpress.org/"],
+      "references": [
+        "references/scope.md",
+        "references/workflow.md",
+        "https://developer.wordpress.org/"
+      ],
       "tokenBudget": 1200,
       "tags": ["wordpress"],
       "repoRoles": ["wordpress-bedrock-site", "wordpress-vanilla-site"],
@@ -895,10 +922,7 @@
       "tokenBudget": 1200,
       "tags": ["yarn4", "pnpm89"],
       "repoRoles": [],
-      "requiresAny": [
-        { "stack": "yarn4" },
-        { "stack": "pnpm89" }
-      ],
+      "requiresAny": [{ "stack": "yarn4" }, { "stack": "pnpm89" }],
       "tokenEstimate": 1200,
       "installMode": "copy-selected"
     },
@@ -936,11 +960,15 @@
       "references": ["references/scope.md", "references/workflow.md", "https://vitest.dev/guide/"],
       "tokenBudget": 1200,
       "tags": ["testing", "vitest", "typescript"],
-      "repoRoles": ["next-app", "react-app", "vue-app", "vite-app", "vendure-app", "vendure-plugin"],
-      "requiresAny": [
-        { "stack": "vitest" },
-        { "dependency": "vitest" }
+      "repoRoles": [
+        "next-app",
+        "react-app",
+        "vue-app",
+        "vite-app",
+        "vendure-app",
+        "vendure-plugin"
       ],
+      "requiresAny": [{ "stack": "vitest" }, { "dependency": "vitest" }],
       "tokenEstimate": 1500,
       "installMode": "copy-selected"
     },
@@ -953,7 +981,11 @@
       "purpose": "Guide Jest unit/integration test structure, mocking, and Nx-style setup.",
       "whenToUse": "Use when writing or modifying Jest tests, including Nx workspace projects.",
       "whenNotToUse": "Do not use for Vitest, Playwright, or PHPUnit test tasks.",
-      "references": ["references/scope.md", "references/workflow.md", "https://jestjs.io/docs/getting-started"],
+      "references": [
+        "references/scope.md",
+        "references/workflow.md",
+        "https://jestjs.io/docs/getting-started"
+      ],
       "tokenBudget": 1200,
       "tags": ["testing", "jest", "typescript"],
       "repoRoles": ["next-app", "react-app", "nx-monorepo"],
@@ -978,10 +1010,7 @@
       "tokenBudget": 1200,
       "tags": ["phpunit"],
       "repoRoles": ["laravel-app", "laravel-nova-app"],
-      "requiresAny": [
-        { "stack": "phpunit" },
-        { "dependency": "phpunit/phpunit" }
-      ],
+      "requiresAny": [{ "stack": "phpunit" }, { "dependency": "phpunit/phpunit" }],
       "ecosystem": "laravel",
       "tokenEstimate": 1500,
       "installMode": "copy-selected"
@@ -995,7 +1024,11 @@
       "purpose": "Guide story coverage and component API documentation updates.",
       "whenToUse": "Use for component stories, args/controls, and Storybook config changes.",
       "whenNotToUse": "Do not use for backend/service-only development tasks.",
-      "references": ["references/scope.md", "references/workflow.md", "https://storybook.js.org/docs"],
+      "references": [
+        "references/scope.md",
+        "references/workflow.md",
+        "https://storybook.js.org/docs"
+      ],
       "tokenBudget": 1200,
       "tags": ["storybook"],
       "repoRoles": ["react-app", "next-app", "vite-app"],

@@ -15,11 +15,11 @@ name: Release
 on:
   push:
     tags:
-      - "v*.*.*"
+      - 'v*.*.*'
 
 permissions:
   contents: read
-  id-token: write  # needed for npm OIDC trusted publishing
+  id-token: write # needed for npm OIDC trusted publishing
 
 jobs:
   publish:
@@ -32,8 +32,8 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
-          node-version: "22"
-          registry-url: "https://registry.npmjs.org"
+          node-version: '22'
+          registry-url: 'https://registry.npmjs.org'
 
       - name: Upgrade npm (OIDC trusted publishing requires npm >= 11.5.1)
         run: npm install -g npm@latest

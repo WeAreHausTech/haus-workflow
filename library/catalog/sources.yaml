@@ -3,8 +3,8 @@ sources:
     url: https://github.com/anthropics/skills
     policy: reference
     status: approved
-    pinnedVersion: "2026-05-01"
-    pinnedHash: "sha256-candidate-anthropic"
+    pinnedVersion: '2026-05-01'
+    pinnedHash: 'sha256-candidate-anthropic'
     license: MIT
     notes: official provider skill examples and formats only
     containsStacks:
@@ -18,8 +18,8 @@ sources:
     url: https://github.com/obra/superpowers
     policy: rewrite
     status: approved
-    pinnedVersion: "2026-05-01"
-    pinnedHash: "sha256-candidate-superpowers"
+    pinnedVersion: '2026-05-01'
+    pinnedHash: 'sha256-candidate-superpowers'
     license: MIT
     notes: curate workflow patterns then rewrite into haus-owned skills
     containsStacks:
@@ -35,8 +35,8 @@ sources:
     url: https://ecc.tools/skills
     policy: candidate-only
     status: candidate
-    pinnedVersion: "2026-05-01"
-    pinnedHash: "sha256-candidate-ecc"
+    pinnedVersion: '2026-05-01'
+    pinnedHash: 'sha256-candidate-ecc'
     license: unknown
     notes: candidate source only pending legal review
     containsStacks:
@@ -51,8 +51,8 @@ sources:
     url: https://skills.sh/
     policy: candidate-only
     status: candidate
-    pinnedVersion: "2026-05-01"
-    pinnedHash: "sha256-candidate-skills-sh"
+    pinnedVersion: '2026-05-01'
+    pinnedHash: 'sha256-candidate-skills-sh'
     license: unknown
     notes: discovery index only
     containsStacks:
@@ -66,8 +66,8 @@ sources:
     url: https://prpm.dev/
     policy: candidate-only
     status: candidate
-    pinnedVersion: "2026-05-01"
-    pinnedHash: "sha256-candidate-prpm"
+    pinnedVersion: '2026-05-01'
+    pinnedHash: 'sha256-candidate-prpm'
     license: unknown
     notes: discovery index only
     containsStacks:
@@ -81,8 +81,8 @@ sources:
     url: https://github.com/jeffallan
     policy: candidate-only
     status: candidate
-    pinnedVersion: "2026-05-01"
-    pinnedHash: "sha256-candidate-jeffallan"
+    pinnedVersion: '2026-05-01'
+    pinnedHash: 'sha256-candidate-jeffallan'
     license: unknown
     notes: organization and naming ideas only
     containsStacks:
@@ -97,8 +97,8 @@ sources:
     url: https://skillkit.dev/
     policy: candidate-only
     status: candidate
-    pinnedVersion: "2026-05-01"
-    pinnedHash: "sha256-candidate-skillkit"
+    pinnedVersion: '2026-05-01'
+    pinnedHash: 'sha256-candidate-skillkit'
     license: unknown
     notes: packaging and validation inspiration only
     containsStacks:
@@ -113,8 +113,8 @@ sources:
     url: https://voltagent.dev/
     policy: candidate-only
     status: candidate
-    pinnedVersion: "2026-05-01"
-    pinnedHash: "sha256-candidate-voltagent"
+    pinnedVersion: '2026-05-01'
+    pinnedHash: 'sha256-candidate-voltagent'
     license: unknown
     notes: Python-first agent framework; all primitives rejected due to unsupported stack
     containsStacks:
@@ -128,8 +128,8 @@ sources:
     url: https://everything.cc/
     policy: candidate-only
     status: candidate
-    pinnedVersion: "2026-05-01"
-    pinnedHash: "sha256-candidate-everything-cc"
+    pinnedVersion: '2026-05-01'
+    pinnedHash: 'sha256-candidate-everything-cc'
     license: unknown
     notes: community Claude skill collection index; discovery reference only
     containsStacks:
@@ -143,8 +143,8 @@ sources:
     url: https://docs.anthropic.com/
     policy: reference
     status: approved
-    pinnedVersion: "2026-05-01"
-    pinnedHash: "sha256-candidate-claude-docs"
+    pinnedVersion: '2026-05-01'
+    pinnedHash: 'sha256-candidate-claude-docs'
     license: unknown
     notes: official Anthropic documentation; reference-only, no artifact copy
     containsStacks:
@@ -160,8 +160,8 @@ sources:
     url: https://docs.vendure.io/
     policy: reference
     status: approved
-    pinnedVersion: "2026-05-13"
-    pinnedHash: "sha256-candidate-vendure-docs"
+    pinnedVersion: '2026-05-13'
+    pinnedHash: 'sha256-candidate-vendure-docs'
     license: unknown
     notes: official Vendure documentation; reference-only, includes llms.txt
     containsStacks:
@@ -174,8 +174,8 @@ sources:
     url: https://nextjs.org/
     policy: reference
     status: approved
-    pinnedVersion: "2026-05-13"
-    pinnedHash: "sha256-candidate-nextjs-docs"
+    pinnedVersion: '2026-05-13'
+    pinnedHash: 'sha256-candidate-nextjs-docs'
     license: unknown
     notes: official Next.js documentation; reference-only, includes llms.txt
     containsStacks:
@@ -188,8 +188,8 @@ sources:
     url: https://laravel.com/
     policy: reference
     status: approved
-    pinnedVersion: "2026-05-13"
-    pinnedHash: "sha256-candidate-laravel-docs"
+    pinnedVersion: '2026-05-13'
+    pinnedHash: 'sha256-candidate-laravel-docs'
     license: unknown
     notes: official Laravel documentation; reference-only
     containsStacks:
@@ -202,8 +202,8 @@ sources:
     url: https://tailwindcss.com/
     policy: reference
     status: approved
-    pinnedVersion: "2026-05-13"
-    pinnedHash: "sha256-candidate-tailwind-docs"
+    pinnedVersion: '2026-05-13'
+    pinnedHash: 'sha256-candidate-tailwind-docs'
     license: unknown
     notes: official Tailwind CSS documentation; reference-only
     containsStacks:
@@ -216,8 +216,8 @@ sources:
     url: https://ui.shadcn.com/
     policy: reference
     status: approved
-    pinnedVersion: "2026-05-13"
-    pinnedHash: "sha256-candidate-shadcn-docs"
+    pinnedVersion: '2026-05-13'
+    pinnedHash: 'sha256-candidate-shadcn-docs'
     license: unknown
     notes: official shadcn/ui documentation; reference-only
     containsStacks:
@@ -230,8 +230,8 @@ sources:
     url: https://www.radix-ui.com/
     policy: reference
     status: approved
-    pinnedVersion: "2026-05-13"
-    pinnedHash: "sha256-candidate-radix-docs"
+    pinnedVersion: '2026-05-13'
+    pinnedHash: 'sha256-candidate-radix-docs'
     license: unknown
     notes: official Radix UI primitives documentation; reference-only
     containsStacks:
@@ -244,8 +244,8 @@ sources:
     url: https://playwright.dev/
     policy: reference
     status: approved
-    pinnedVersion: "2026-05-13"
-    pinnedHash: "sha256-candidate-playwright-docs"
+    pinnedVersion: '2026-05-13'
+    pinnedHash: 'sha256-candidate-playwright-docs'
     license: unknown
     notes: official Playwright documentation; reference-only
     containsStacks:
@@ -258,8 +258,8 @@ sources:
     url: https://tanstack.com/
     policy: reference
     status: approved
-    pinnedVersion: "2026-05-13"
-    pinnedHash: "sha256-candidate-tanstack-docs"
+    pinnedVersion: '2026-05-13'
+    pinnedHash: 'sha256-candidate-tanstack-docs'
     license: unknown
     notes: official TanStack (Query + Router) documentation; reference-only
     containsStacks:
@@ -273,8 +273,8 @@ sources:
     url: https://docs.nestjs.com/
     policy: reference
     status: approved
-    pinnedVersion: "2026-05-13"
-    pinnedHash: "sha256-candidate-nestjs-docs"
+    pinnedVersion: '2026-05-13'
+    pinnedHash: 'sha256-candidate-nestjs-docs'
     license: unknown
     notes: official NestJS documentation; reference-only
     containsStacks:
@@ -287,8 +287,8 @@ sources:
     url: https://nx.dev/
     policy: reference
     status: approved
-    pinnedVersion: "2026-05-13"
-    pinnedHash: "sha256-candidate-nx-docs"
+    pinnedVersion: '2026-05-13'
+    pinnedHash: 'sha256-candidate-nx-docs'
     license: unknown
     notes: official Nx documentation; reference-only
     containsStacks:
@@ -301,8 +301,8 @@ sources:
     url: https://turbo.build/
     policy: reference
     status: approved
-    pinnedVersion: "2026-05-13"
-    pinnedHash: "sha256-candidate-turbo-docs"
+    pinnedVersion: '2026-05-13'
+    pinnedHash: 'sha256-candidate-turbo-docs'
     license: unknown
     notes: official Turborepo documentation; reference-only
     containsStacks:
@@ -315,8 +315,8 @@ sources:
     url: https://vite.dev/
     policy: reference
     status: approved
-    pinnedVersion: "2026-05-13"
-    pinnedHash: "sha256-candidate-vite-docs"
+    pinnedVersion: '2026-05-13'
+    pinnedHash: 'sha256-candidate-vite-docs'
     license: unknown
     notes: official Vite documentation; reference-only
     containsStacks:
@@ -329,8 +329,8 @@ sources:
     url: https://vuejs.org/
     policy: reference
     status: approved
-    pinnedVersion: "2026-05-13"
-    pinnedHash: "sha256-candidate-vue-docs"
+    pinnedVersion: '2026-05-13'
+    pinnedHash: 'sha256-candidate-vue-docs'
     license: unknown
     notes: official Vue.js documentation; reference-only
     containsStacks:
@@ -343,8 +343,8 @@ sources:
     url: https://developer.wordpress.org/
     policy: reference
     status: approved
-    pinnedVersion: "2026-05-13"
-    pinnedHash: "sha256-candidate-wordpress-dev-docs"
+    pinnedVersion: '2026-05-13'
+    pinnedHash: 'sha256-candidate-wordpress-dev-docs'
     license: unknown
     notes: official WordPress developer documentation; reference-only
     containsStacks:
@@ -357,8 +357,8 @@ sources:
     url: https://vitest.dev/
     policy: reference
     status: approved
-    pinnedVersion: "2026-05-13"
-    pinnedHash: "sha256-candidate-vitest-docs"
+    pinnedVersion: '2026-05-13'
+    pinnedHash: 'sha256-candidate-vitest-docs'
     license: unknown
     notes: official Vitest documentation; reference-only
     containsStacks:
@@ -371,8 +371,8 @@ sources:
     url: https://www.typescriptlang.org/
     policy: reference
     status: approved
-    pinnedVersion: "2026-05-13"
-    pinnedHash: "sha256-candidate-typescript-docs"
+    pinnedVersion: '2026-05-13'
+    pinnedHash: 'sha256-candidate-typescript-docs'
     license: unknown
     notes: official TypeScript documentation; reference-only
     containsStacks:
@@ -385,8 +385,8 @@ sources:
     url: https://storybook.js.org/
     policy: reference
     status: approved
-    pinnedVersion: "2026-05-13"
-    pinnedHash: "sha256-candidate-storybook-docs"
+    pinnedVersion: '2026-05-13'
+    pinnedHash: 'sha256-candidate-storybook-docs'
     license: unknown
     notes: official Storybook documentation; reference-only
     containsStacks:
@@ -399,8 +399,8 @@ sources:
     url: https://react.dev/
     policy: reference
     status: approved
-    pinnedVersion: "2026-05-13"
-    pinnedHash: "sha256-candidate-react-docs"
+    pinnedVersion: '2026-05-13'
+    pinnedHash: 'sha256-candidate-react-docs'
     license: unknown
     notes: official React documentation; reference-only
     containsStacks:

@@ -1,8 +1,9 @@
-<!-- HAUS-MANAGED id=agent.haus-code-reviewer v=1 source=@haus-tech/haus-workflow@0.1.0 -->
----
+## <!-- HAUS-MANAGED id=agent.haus-code-reviewer v=1 source=@haus-tech/haus-workflow@0.1.0 -->
+
 name: haus-code-reviewer
 description: Narrow diff review for correctness, regressions, and missing tests.
 tools: Read, Grep, Glob, Bash
+
 ---
 
 You are the Haus code reviewer. Work only from the user-supplied diff or explicitly listed paths.

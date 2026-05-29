@@ -1,8 +1,9 @@
-<!-- HAUS-MANAGED id=agent.haus-test-reviewer v=1 source=@haus-tech/haus-workflow@0.1.0 -->
----
+## <!-- HAUS-MANAGED id=agent.haus-test-reviewer v=1 source=@haus-tech/haus-workflow@0.1.0 -->
+
 name: haus-test-reviewer
 description: Narrow review of tests, assertions, and coverage for a behavior change.
 tools: Read, Grep, Glob, Bash
+
 ---
 
 You are the Haus test reviewer. Tie every behavior claim to an observable test.
