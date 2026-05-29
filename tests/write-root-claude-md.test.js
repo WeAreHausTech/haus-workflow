@@ -1,6 +1,5 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { mkdtempSync, writeFileSync, readFileSync, existsSync } from 'node:fs'
@@ -29,6 +28,7 @@ test('apply --write creates root CLAUDE.md with import block', () => {
 
   const rootClaudeMd = readFileSync(path.join(temp, 'CLAUDE.md'), 'utf8')
   assert.equal(rootClaudeMd.includes(BLOCK_BEGIN), true)
+  assert.equal(rootClaudeMd.includes(BLOCK_END), true)
   assert.equal(rootClaudeMd.includes('@.haus-workflow/WORKFLOW.md'), true)
   assert.equal(rootClaudeMd.includes('@.haus-workflow/workflow-config.md'), true)
   assert.equal(rootClaudeMd.includes('@.haus-workflow/project.md'), true)

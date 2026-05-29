@@ -1,8 +1,10 @@
 /** `haus doctor` — validates project setup: hooks contract, managed files, cache freshness, and CLI version. */
+import os from 'node:os'
 import path from 'node:path'
 
 import fs from 'fs-extra'
 
+import { CATALOG_CACHE_SUBDIR } from '../catalog/constants.js'
 import { getCacheManifestAge } from '../catalog/remote-catalog.js'
 import { isHookEnabled, type HookKey } from '../claude/load-hooks-config.js'
 import { normaliseLF } from '../claude/managed-template.js'
@@ -90,15 +92,11 @@ export async function runDoctor(options?: { hooks?: boolean }): Promise<void> {
     if (!firstLine.includes('HAUS-MANAGED')) {
       log('- .haus-workflow/WORKFLOW.md: OK (user-owned)')
     } else {
-      // Compare installed template hash against current package template.
+      // Compare installed template hash against current template — prefer catalog cache (same as writeWorkflow).
       const storedHashMatch = firstLine.match(/hash=(sha256-[a-f0-9]+)/)
-      const templatePath = path.join(
-        packageRoot(),
-        'library',
-        'global',
-        'templates',
-        'agentic-workflow-standard.md',
-      )
+      const cachePath = path.join(os.homedir(), CATALOG_CACHE_SUBDIR, 'templates/agentic-workflow-standard.md')
+      const bundledPath = path.join(packageRoot(), 'library', 'global', 'templates', 'agentic-workflow-standard.md')
+      const templatePath = (await fs.pathExists(cachePath)) ? cachePath : bundledPath
       const templateContent = await readText(templatePath)
       if (storedHashMatch && templateContent) {
         const currentHash = hashText(normaliseLF(templateContent))
