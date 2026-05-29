@@ -68,9 +68,6 @@ test('setup-project --fast --json includes recommendation warnings in output', (
   const rec = JSON.parse(
     readFileSync(path.join(temp, '.haus-workflow/recommendation.json'), 'utf8'),
   )
-  // warnings key exists (may be empty array — that's fine, verifies the field is present)
-  assert.ok(
-    Object.prototype.hasOwnProperty.call(rec, 'warnings') || Array.isArray(rec.warnings) || true,
-    'recommendation.json present',
-  )
+  // warnings key exists and is an array (may be empty)
+  assert.ok(Array.isArray(rec.warnings), 'recommendation.json has warnings array')
 })
