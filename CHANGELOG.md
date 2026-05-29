@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.10.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.9.0...v0.10.0) (2026-05-29)
+
+### Features
+
+* Add config command to manage hooks ([1f2c7b4](https://github.com/WeAreHausTech/haus-workflow/commit/1f2c7b4ced3437ef4468759ec7bfc4d8adbf3efc))
+
+### Bug Fixes
+
+* address PR review — remove stale module refs, fix plugin-era wording in docs and commands ([6520321](https://github.com/WeAreHausTech/haus-workflow/commit/6520321e1790a304036984c387fdf59d4febe3dd))
+
 ## [0.9.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.8.0...v0.9.0) (2026-05-28)
 
 ### Features
