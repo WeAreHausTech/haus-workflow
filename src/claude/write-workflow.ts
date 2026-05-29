@@ -12,8 +12,9 @@ import { CATALOG_CACHE_SUBDIR } from '../catalog/constants.js'
 import { createUnifiedDiff, hasTextChanged, summarizeDiff } from '../utils/diff.js'
 import { hashText, writeText } from '../utils/fs.js'
 import { log, warn } from '../utils/logger.js'
-import { normaliseLF, parseHausManagedHeader } from './managed-template.js'
 import { displayPath, hausPath, packageRoot } from '../utils/paths.js'
+
+import { normaliseLF, parseHausManagedHeader } from './managed-template.js'
 
 /** Stable id embedded in the HAUS-MANAGED header — identifies this file on re-apply. */
 const STABLE_ID = 'template.workflow'

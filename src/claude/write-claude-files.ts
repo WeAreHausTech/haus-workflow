@@ -21,8 +21,8 @@ import { loadClaudeHooksSettings } from './load-hooks.js'
 import { assertPostApplySettingsMatchCanonical } from './verify-hooks-contract.js'
 import { writeProjectFacts } from './write-project-facts.js'
 import { writeRootClaudeMd } from './write-root-claude-md.js'
-import { writeWorkflow } from './write-workflow.js'
 import { writeWorkflowConfig } from './write-workflow-config.js'
+import { writeWorkflow } from './write-workflow.js'
 
 /**
  * Write all managed .claude/ files for the project at `root`.
