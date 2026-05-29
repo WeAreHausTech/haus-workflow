@@ -1,22 +1,31 @@
+/** Path helpers for .haus-workflow/, .claude/, and package-root locations. */
+
 import { existsSync, readFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+/** The directory name where haus-workflow stores its outputs. */
 export const HAUS_DIR = ".haus-workflow";
 
 export function cwd(): string {
   return process.cwd();
 }
 
+/** Resolve a path inside .haus-workflow/ for the given project root. */
 export function hausPath(root: string, ...parts: string[]): string {
   return path.join(root, HAUS_DIR, ...parts);
 }
 
+/** Resolve a path inside .claude/ for the given project root. */
 export function claudePath(root: string, ...parts: string[]): string {
   return path.join(root, ".claude", ...parts);
 }
 
+/**
+ * Return a human-readable path: project-relative if inside root,
+ * home-relative (~/) if inside HOME, otherwise absolute.
+ */
 export function displayPath(root: string, targetPath: string): string {
   const rel = path.relative(root, targetPath).replace(/\\/g, "/");
   if (rel && !rel.startsWith("../") && rel !== "..") {

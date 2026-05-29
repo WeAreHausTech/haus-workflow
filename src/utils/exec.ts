@@ -1,5 +1,8 @@
+/** Shell execution helpers — run external commands and git without throwing on non-zero exits. */
+
 import { execa, type Options as ExecaOptions } from "execa";
 
+/** Structured result returned by every command execution. */
 export type CommandResult = {
   command: string;
   args: string[];
@@ -8,6 +11,10 @@ export type CommandResult = {
   exitCode: number;
 };
 
+/**
+ * Run an arbitrary shell command, never throwing on non-zero exit codes.
+ * Throws only if the process itself cannot be spawned.
+ */
 export async function runCommand(
   command: string,
   args: string[] = [],
@@ -15,7 +22,7 @@ export async function runCommand(
 ): Promise<CommandResult> {
   try {
     const result = await execa(command, args, {
-      reject: false,
+      reject: false, // non-zero exits are returned, not thrown
       ...options,
     });
     return {
@@ -31,10 +38,12 @@ export async function runCommand(
   }
 }
 
+/** Convenience wrapper for git commands. */
 export async function runGit(args: string[], options: ExecaOptions = {}): Promise<CommandResult> {
   return runCommand("git", args, options);
 }
 
+/** Check whether a CLI tool is available on PATH by running `<command> --version`. */
 export async function commandExists(command: string): Promise<boolean> {
   try {
     const result = await runCommand(command, ["--version"]);

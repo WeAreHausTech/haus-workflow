@@ -1,3 +1,4 @@
+/** `haus context` — emits task-scoped context (roles, selected rules, token estimate) for the current repo. */
 import { isHookEnabled } from "../claude/load-hooks-config.js";
 import { normalizeRecommendation } from "../recommender/explain-recommendation.js";
 import { classifyTaskIntents, pickTaskRelevantRules, type TaskIntent } from "../recommender/task-intent.js";
@@ -7,6 +8,10 @@ import { readJson, readText } from "../utils/fs.js";
 import { log } from "../utils/logger.js";
 import { hausPath } from "../utils/paths.js";
 
+/**
+ * Emits task-scoped context including repo roles, selected rules, and token reduction estimate.
+ * When called from a hook, output is truncated and gated by hooks.context.enabled.
+ */
 export async function runContext(options: {
   task?: string;
   fromHook?: boolean;

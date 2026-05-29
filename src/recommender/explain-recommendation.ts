@@ -1,5 +1,11 @@
+/**
+ * Orchestrates the explain flow for a single Recommendation: normalizes legacy
+ * shapes and builds the structured ExplainRecommendation used by `haus explain`.
+ */
+
 import type { Recommendation } from "../types.js";
 
+/** Loose input shape that covers both current and legacy recommendation.json formats. */
 type RecommendationLike = Partial<Recommendation> & {
   recommended?: Array<{
     id: string;
@@ -21,6 +27,7 @@ type RecommendationLike = Partial<Recommendation> & {
   }>;
 };
 
+/** Output shape for the `haus explain` command. */
 type ExplainRecommendation = {
   selected: Array<{
     id: string;
@@ -41,6 +48,10 @@ type ExplainRecommendation = {
   };
 };
 
+/**
+ * Coerce a legacy or current recommendation.json into the canonical Recommendation shape.
+ * Fills in missing fields with safe defaults so downstream code can assume a consistent schema.
+ */
 export function normalizeRecommendation(input: RecommendationLike): Recommendation {
   const recommended = (input.recommended ?? []).map((item) => {
     const normalizedReasons = item.reasons?.map((reason) => ({
@@ -101,6 +112,7 @@ export function normalizeRecommendation(input: RecommendationLike): Recommendati
   };
 }
 
+/** Build a structured explain output from a normalized Recommendation. */
 export function buildRecommendationExplanation(recommendation: Recommendation): ExplainRecommendation {
   return {
     selected: recommendation.recommended.map((item) => ({

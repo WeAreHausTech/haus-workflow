@@ -16,7 +16,6 @@
     "library/global",
     "library/catalog",
     "tests/fixtures/catalog",
-    "docs/user-guide.md",
     "README.md",
     "CHANGELOG.md",
     "LICENSE",

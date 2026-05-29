@@ -1,3 +1,8 @@
+/**
+ * Defines the canonical hook configuration written to .claude/settings.json.
+ * The hook set is inlined here (no external file) so it is always in sync with the package.
+ */
+
 /** Shape written to `.claude/settings.json` under `hooks`. */
 export type ClaudeHooksSettings = {
   hooks: {
@@ -37,6 +42,7 @@ export const CANONICAL_HOOKS: ClaudeHooksSettings = {
   },
 };
 
+/** Maps known hook commands to stable IDs used in recommended-hooks.json. */
 const STABLE_HOOK_IDS: Record<string, string> = {
   "haus context --from-hook || true": "haus.context-hook",
   "haus memory inject --from-hook || true": "haus.memory-hook",

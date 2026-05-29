@@ -1,3 +1,7 @@
+/**
+ * Applies bundled catalog items to ~/.claude/: copies skill/agent files, merges hook settings,
+ * and writes the install manifest. Supports dry-run, force, and check modes.
+ */
 import crypto from "node:crypto";
 import path from "node:path";
 
@@ -11,27 +15,37 @@ import { buildMarkdownHeader, parseMarkdownHeader, stampMarkdown } from "./heade
 import { buildManifest, globalClaudeDir, type ManifestFile, readManifest, writeManifest } from "./manifest.js";
 import { loadHooksFragment, mergeHooks, readSettings, writeSettings } from "./settings-merge.js";
 
+/** Manifest schema version written into each installed file header and manifest entry. */
 const SCHEMA_VERSION = "1";
 
+/** Options controlling how `applyInstall` behaves. */
 export interface ApplyOptions {
+  /** Simulate all changes without writing any files. */
   dryRun?: boolean;
+  /** Overwrite user-edited haus-managed files. */
   force?: boolean;
+  /** Only detect drift — no writes. */
   check?: boolean;
 }
 
+/** Summary of files created, updated, skipped, or deleted during an install. */
 export interface ApplyResult {
   created: string[];
   updated: string[];
   skipped: string[];
   deleted: string[];
+  /** Hook IDs registered into settings.json during this run. */
   hookIds: string[];
+  /** True when check mode detected hash drift between installed files and source. */
   drift: boolean;
 }
 
+/** Returns a sha256 prefixed hash of the given string content. */
 function hashContent(content: string): string {
   return `sha256-${crypto.createHash("sha256").update(content).digest("hex")}`;
 }
 
+/** Reads package.json to build a "name@version" source string for stamping installed files. */
 function sourceVersion(): string {
   try {
     const pkgPath = path.join(packageRoot(), "package.json");
@@ -42,16 +56,20 @@ function sourceVersion(): string {
   }
 }
 
+/** Absolute path to the bundled library/global directory inside this package. */
 function globalSrcDir(): string {
   return path.join(packageRoot(), "library", "global");
 }
 
+/** Mapping from a bundled source file to its install destination. */
 interface SourceFile {
+  /** Stable identifier used in headers and the manifest (e.g. "skill.caveman"). */
   stableId: string;
   srcRelPath: string;
   destPath: string;
 }
 
+/** Enumerates all skills and agents found under `srcDir` into SourceFile entries. */
 function collectSourceFiles(srcDir: string, claudeDir: string): SourceFile[] {
   const entries: SourceFile[] = [];
 
@@ -85,6 +103,10 @@ function collectSourceFiles(srcDir: string, claudeDir: string): SourceFile[] {
   return entries;
 }
 
+/**
+ * Core install routine: stamps and copies all bundled files to ~/.claude/,
+ * merges hooks into settings.json, deletes orphaned files, and saves the manifest.
+ */
 export async function applyInstall(options: ApplyOptions = {}): Promise<ApplyResult> {
   const { dryRun = false, force = false, check = false } = options;
 
@@ -207,6 +229,7 @@ export async function applyInstall(options: ApplyOptions = {}): Promise<ApplyRes
   return result;
 }
 
+/** Prints a human-readable install summary to the logger. */
 export function printApplyResult(result: ApplyResult, dryRun: boolean): void {
   const prefix = dryRun ? "[dry-run] " : "";
   if (result.created.length) {
@@ -233,6 +256,7 @@ export function printApplyResult(result: ApplyResult, dryRun: boolean): void {
   }
 }
 
+/** Thin re-export of `buildMarkdownHeader` with flat parameters for external callers. */
 export function buildMarkdownHeaderExport(stableId: string, schemaVersion: string, source: string): string {
   return buildMarkdownHeader({ stableId, schemaVersion, source });
 }

@@ -1,3 +1,8 @@
+/**
+ * Fetches the catalog manifest from the remote haus-workflow-catalog repo via git tag.
+ * Caches downloaded content under ~/.claude/haus/catalog-cache/ (overridable in tests).
+ */
+
 import os from "node:os";
 import path from "node:path";
 
@@ -15,6 +20,7 @@ export const CACHE_DIR =
 const REMOTE_BASE = process.env["HAUS_CATALOG_REMOTE_BASE"] ?? `${CATALOG_REPO_URL}/${CATALOG_REF}`;
 const REMOTE_MANIFEST_URL = `${REMOTE_BASE}/manifest.json`;
 
+/** Fetches raw text from a URL; returns null on any network or HTTP error. Timeout: 10 s. */
 async function fetchText(url: string): Promise<string | null> {
   try {
     const res = await fetch(url, { signal: AbortSignal.timeout(10_000) });
@@ -25,6 +31,7 @@ async function fetchText(url: string): Promise<string | null> {
   }
 }
 
+/** Downloads and parses the remote manifest; returns null if fetch or parse fails. */
 export async function fetchRemoteManifest(): Promise<CatalogItem[] | null> {
   const text = await fetchText(REMOTE_MANIFEST_URL);
   if (!text) return null;
@@ -36,24 +43,34 @@ export async function fetchRemoteManifest(): Promise<CatalogItem[] | null> {
   }
 }
 
+/** Result summary returned by syncRemoteCatalog. */
 export type SyncResult = {
+  /** IDs of items downloaded for the first time. */
   newItems: string[];
+  /** Count of items already present in the cache (skipped). */
   unchanged: number;
+  /** IDs of items that could not be fetched or had invalid paths. */
   failed: string[];
 };
 
+/** Guards against path traversal: rejects absolute paths, backslashes, and `..` segments. */
 function isSafeCatalogPath(itemPath: string): boolean {
   if (!itemPath || path.isAbsolute(itemPath) || itemPath.includes("\\")) return false;
   const normalized = path.normalize(itemPath);
   return !normalized.startsWith("..") && !normalized.includes("/..");
 }
 
+/** Resolves itemPath under base; returns null if the result escapes the base directory. */
 function safeJoin(base: string, itemPath: string): string | null {
   if (!isSafeCatalogPath(itemPath)) return null;
   const resolved = path.resolve(base, itemPath);
   return resolved.startsWith(base + path.sep) || resolved === base ? resolved : null;
 }
 
+/**
+ * Fetches the remote manifest and downloads any new skill/agent files into the local cache.
+ * Skips items that already exist; logs a warning and falls back to the bundled catalog on failure.
+ */
 export async function syncRemoteCatalog(): Promise<SyncResult> {
   const items = await fetchRemoteManifest();
   if (!items) {
@@ -148,7 +165,7 @@ export async function fetchLatestCatalogTag(): Promise<string | null> {
   }
 }
 
-// Returns milliseconds since the cache manifest was last written, or null if absent.
+/** Returns milliseconds since the cache manifest was last written, or null if absent. */
 export async function getCacheManifestAge(): Promise<number | null> {
   try {
     const stat = await fs.stat(path.join(CACHE_DIR, "manifest.json"));

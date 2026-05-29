@@ -1,3 +1,4 @@
+/** `haus undo` — removes .claude/ and .haus-workflow/ from the current project after confirmation. */
 import path from "node:path";
 
 import fs from "fs-extra";
@@ -8,6 +9,7 @@ import { confirm } from "../utils/prompts.js";
 
 const CLAUDE_DIR = ".claude";
 
+/** Deletes .claude/ and .haus-workflow/ from the project root; prompts for confirmation unless --yes is passed. */
 export async function runUndo(options: { yes?: boolean }): Promise<void> {
   const root = process.cwd();
   const targets = [path.join(root, CLAUDE_DIR), path.join(root, HAUS_DIR)];

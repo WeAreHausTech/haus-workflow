@@ -1,3 +1,4 @@
+/** `haus setup-project` — interactive or fast full setup: scan, recommend, and optionally apply Claude files. */
 import { flattenRecommendedHooks, loadClaudeHooksSettings } from "../claude/load-hooks.js";
 import { verifyProjectSettingsHooksContract } from "../claude/verify-hooks-contract.js";
 import { writeClaudeFiles } from "../claude/write-claude-files.js";
@@ -19,6 +20,10 @@ const GUIDED_QUESTIONS = [
   "Do you want a minimal, standard, or strict setup?",
 ];
 
+/**
+ * Runs full project setup: optional guided Q&A, scan, recommend, doctor summary, and apply.
+ * Prompts the user to confirm before writing files unless --json is passed.
+ */
 export async function runSetupProject(options: { guided?: boolean; fast?: boolean; json?: boolean }): Promise<void> {
   const root = process.cwd();
   let mode: "guided" | "fast" = options.guided ? "guided" : "fast";

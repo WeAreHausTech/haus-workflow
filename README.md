@@ -1,8 +1,8 @@
 # haus
 
-Claude Code workflow CLI for Haus projects. Scans a repo, recommends stack-fit context assets, and writes controlled `.claude/` and `.haus-workflow/` outputs so Claude works with safer, stack-aware guidance.
+CLI that scans a project, recommends AI context assets for the stack, and writes controlled outputs into `.claude/` and `.haus-workflow/`.
 
-> **Internal Haus tool.** Open-source but unsupported for external use.
+> **Internal Haus tool.**
 
 ---
 
@@ -27,7 +27,7 @@ Run once inside each project:
 haus init
 ```
 
-This scans the repo, recommends context assets, and writes `.claude/` and `.haus-workflow/`.
+Scans the repo, recommends context assets, and writes `.claude/` and `.haus-workflow/`.
 
 ---
 
@@ -35,35 +35,32 @@ This scans the repo, recommends context assets, and writes `.claude/` and `.haus
 
 ```bash
 haus init              # first-run setup (scan → recommend → apply)
-haus setup-project     # re-run setup on an existing project
+haus setup-project     # re-run setup on existing project
+haus scan              # scan repo and write context-map
+haus recommend         # score and recommend catalog items
 haus apply --dry-run   # preview what would be written
 haus apply --write     # write .claude/ files
 haus update            # sync remote catalog + refresh lockfile
 haus update --check    # check for updates without applying
 haus doctor            # health check: hooks, CLAUDE.md, catalog cache
+haus config            # manage hook configuration
+haus memory            # view project memory store
+haus guard             # test bash/file-access guards
 haus uninstall         # remove Haus-managed files from ~/.claude/
 ```
 
 ---
 
-## Contributing
+## Development
 
 ```bash
 yarn install
 yarn verify   # typecheck + lint + build + test
+yarn dev <cmd>  # run CLI without building (tsx)
 ```
 
-See [docs/contributing.md](docs/contributing.md).
+### Internal docs
 
----
-
-## Docs
-
-- [User guide](docs/user-guide.md)
 - [Architecture](docs/architecture.md)
-- [Commands](docs/commands.md)
-- [Global install layout](docs/global-install.md)
-- [Generated files](docs/generated-files.md)
-- [Updates and lockfile](docs/updates.md)
+- [CLI reference](docs/cli.md)
 - [Security](docs/security.md)
-- [Memory](docs/memory.md)

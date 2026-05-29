@@ -1,3 +1,4 @@
+/** Audits the bundled library catalog for structural correctness, provenance, and content safety. Run during prepack via scripts/. */
 import fs from "node:fs";
 import path from "node:path";
 

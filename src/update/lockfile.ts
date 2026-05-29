@@ -1,3 +1,7 @@
+/**
+ * Reads and writes .haus-workflow/haus.lock.json, which tracks the installed catalog
+ * items, their versions, paths, and content hashes.
+ */
 import { mkdir, readFile, copyFile } from "node:fs/promises";
 import path from "node:path";
 
@@ -8,6 +12,7 @@ import { normalizeVersion } from "../utils/versions.js";
 
 import { hashInstalledPaths } from "./hash-installed.js";
 
+/** A single entry in the haus lockfile representing an installed catalog item. */
 export type LockItem = {
   id: string;
   type: string;
@@ -26,6 +31,7 @@ export type LockItem = {
   reviewStatus?: string;
 };
 
+/** Validates the lockfile and returns item count and the catalogRef used at install time. */
 export async function checkLock(root: string): Promise<{ ok: boolean; count: number; catalogRef: string | null }> {
   const lock = (await readJson<LockItem[]>(hausPath(root, "haus.lock.json"))) ?? [];
   const hasValidVersions = lock.every((item) => !item.version || normalizeVersion(item.version) !== null);
@@ -34,6 +40,10 @@ export async function checkLock(root: string): Promise<{ ok: boolean; count: num
   return { ok: lock.length > 0 && hasValidVersions, count: lock.length, catalogRef };
 }
 
+/**
+ * Re-hashes all installed paths for every lock item, writes the updated lockfile,
+ * and creates a timestamped backup of the previous one.
+ */
 export async function applyLock(root: string): Promise<{ before: string; after: string }> {
   const lockPath = hausPath(root, "haus.lock.json");
   let before = "[]";
@@ -63,11 +73,13 @@ export async function applyLock(root: string): Promise<{ before: string; after: 
   return { before, after };
 }
 
+/** Returns a unified diff of the lockfile before and after an apply, or a "no changes" message. */
 export function diffLock(before: string, after: string): string {
   if (!hasTextChanged(before, after)) return "No lockfile changes.";
   return createUnifiedDiff(".haus-workflow/haus.lock.json", before, after);
 }
 
+/** Returns true when a project-level .claude/settings.json exists, indicating local overrides. */
 export async function hasLocalOverrides(root: string): Promise<boolean> {
   try {
     await readFile(path.join(root, ".claude", "settings.json"), "utf8");

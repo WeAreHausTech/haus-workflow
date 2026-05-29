@@ -1,3 +1,9 @@
+/** Path patterns that the file-access guard treats as sensitive and will block. */
+
+/**
+ * Glob-like substrings matched against a candidate file path.
+ * Wildcards (`*`) are stripped before the substring check.
+ */
 export const SENSITIVE_PATHS = [
   ".env",
   ".env.*",

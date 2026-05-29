@@ -1,3 +1,4 @@
+/** `haus validate-catalog` — validates a catalog manifest at an explicit path for use in catalog repo CI. */
 import fs from "node:fs";
 import path from "node:path";
 

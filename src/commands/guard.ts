@@ -1,3 +1,4 @@
+/** `haus guard` — PreToolUse hook that blocks dangerous bash commands and sensitive file-access paths. */
 import { readFileSync } from "node:fs";
 
 import { DANGEROUS_COMMANDS } from "../security/dangerous-commands.js";
@@ -19,6 +20,10 @@ function deny(reason: string): void {
   log(JSON.stringify({ permissionDecision: "deny", permissionDecisionReason: reason }));
 }
 
+/**
+ * Reads a Claude Code hook payload from stdin and denies the tool call if it violates security rules.
+ * Outputs a JSON `{ permissionDecision: "deny", ... }` response when blocking.
+ */
 export async function runGuard(kind: "file-access" | "bash", _options: { fromHook?: boolean }): Promise<void> {
   const raw = stdin();
   let payload: Record<string, unknown> = {};

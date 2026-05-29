@@ -1,4 +1,7 @@
 /**
+ * Shared validation rule constants for catalog items — mirrored from haus-workflow-catalog.
+ * Used by validate-catalog.ts and the prepack audit scripts.
+ *
  * Catalog validation rules — mirrored from haus-workflow-catalog.
  *
  * SYNC REQUIRED: these constants must stay in sync with

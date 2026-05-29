@@ -1,3 +1,8 @@
+/**
+ * Writes .haus-workflow/haus-way-of-work.md from the bundled (or cached) template.
+ * Skips the write if the file was modified by the user or the content is already up to date.
+ */
+
 import os from "node:os";
 import path from "node:path";
 
@@ -9,15 +14,18 @@ import { hashText, writeText } from "../utils/fs.js";
 import { log, warn } from "../utils/logger.js";
 import { displayPath, hausPath, packageRoot } from "../utils/paths.js";
 
+/** Stable id embedded in the HAUS-MANAGED header — identifies this file on re-apply. */
 const STABLE_ID = "template.way-of-work";
 const SCHEMA_VERSION = "1";
 const TEMPLATE_REL = "library/global/templates/haus-way-of-work.md";
 const CATALOG_CACHE_TEMPLATE = path.join(os.homedir(), CATALOG_CACHE_SUBDIR, "templates/haus-way-of-work.md");
 
+/** Build the HAUS-MANAGED header line, embedding the content hash for tamper detection. */
 export function makeWayOfWorkHeader(pkgVersion: string, contentHash: string): string {
   return `<!-- HAUS-MANAGED id=${STABLE_ID} v=${SCHEMA_VERSION} source=@haus-tech/haus-workflow@${pkgVersion} hash=${contentHash} -->`;
 }
 
+/** Parse a HAUS-MANAGED header line; returns null when the line is not a managed header. */
 function parseHausManagedHeader(line: string): { id: string; hash?: string } | null {
   const match = line.match(/<!-- HAUS-MANAGED id=([\w.:-]+)/);
   if (!match) return null;
@@ -25,6 +33,10 @@ function parseHausManagedHeader(line: string): { id: string; hash?: string } | n
   return { id: match[1], hash: hashMatch?.[1] };
 }
 
+/**
+ * Write .haus-workflow/haus-way-of-work.md at `root`.
+ * Returns null (and warns) when the template is missing or the file was user-modified.
+ */
 export async function writeWayOfWork(root: string, pkgVersion: string, dryRun: boolean): Promise<string | null> {
   // Catalog cache (populated by `haus update`) takes precedence over bundled fallback
   const cachePath = CATALOG_CACHE_TEMPLATE;

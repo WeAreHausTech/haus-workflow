@@ -1,3 +1,8 @@
+/**
+ * Generates .haus-workflow/project.md from the scan context (stacks, roles, recommendations, warnings).
+ * The file carries a HAUS-MANAGED header so apply can detect and diff it safely.
+ */
+
 import path from "node:path";
 
 import fs from "fs-extra";
@@ -8,13 +13,19 @@ import { readJson, writeText } from "../utils/fs.js";
 import { log } from "../utils/logger.js";
 import { displayPath, hausPath } from "../utils/paths.js";
 
+/** Stable id embedded in the HAUS-MANAGED header, used to recognise the file on re-apply. */
 const STABLE_ID = "generated.project-facts";
 const SCHEMA_VERSION = "1";
 
+/** Build the HTML comment header that marks this file as haus-managed. */
 function makeHeader(pkgVersion: string): string {
   return `<!-- HAUS-MANAGED id=${STABLE_ID} v=${SCHEMA_VERSION} source=@haus-tech/haus-workflow@${pkgVersion} -->`;
 }
 
+/**
+ * Render the full markdown content for project.md from scan context and recommendation.
+ * Pure function — no I/O; designed to be testable in isolation.
+ */
 export function renderProjectFacts(ctx: ContextMap, rec: Recommendation, pkgVersion: string): string {
   const header = makeHeader(pkgVersion);
 
@@ -65,6 +76,11 @@ ${warnSection}
 `;
 }
 
+/**
+ * Write .haus-workflow/project.md for the project at `root`.
+ * Reads context-map.json and recommendation.json; skips the write when content is unchanged.
+ * Returns the absolute path of the destination file.
+ */
 export async function writeProjectFacts(root: string, pkgVersion: string, dryRun: boolean): Promise<string> {
   const ctx = (await readJson<ContextMap>(hausPath(root, "context-map.json"))) ?? {
     mode: "fast" as const,
