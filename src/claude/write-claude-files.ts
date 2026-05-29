@@ -21,7 +21,8 @@ import { loadClaudeHooksSettings } from './load-hooks.js'
 import { assertPostApplySettingsMatchCanonical } from './verify-hooks-contract.js'
 import { writeProjectFacts } from './write-project-facts.js'
 import { writeRootClaudeMd } from './write-root-claude-md.js'
-import { writeWayOfWork } from './write-way-of-work.js'
+import { writeWorkflow } from './write-workflow.js'
+import { writeWorkflowConfig } from './write-workflow-config.js'
 
 /**
  * Write all managed .claude/ files for the project at `root`.
@@ -56,9 +57,15 @@ export async function writeClaudeFiles(
     claudePath(root, 'commands', 'haus-review.md'),
   ]
   const rootClaudeMdPath = await writeRootClaudeMd(root, dryRun)
-  const wayOfWorkPath = await writeWayOfWork(root, hausVersion, dryRun)
+  const workflowPath = await writeWorkflow(root, hausVersion, dryRun)
+  const workflowConfigPath = await writeWorkflowConfig(root, dryRun)
   const projectFactsPath = await writeProjectFacts(root, hausVersion, dryRun)
-  const p6Files = [rootClaudeMdPath, projectFactsPath, ...(wayOfWorkPath ? [wayOfWorkPath] : [])]
+  const p6Files = [
+    rootClaudeMdPath,
+    projectFactsPath,
+    ...(workflowPath ? [workflowPath] : []),
+    ...(workflowConfigPath ? [workflowConfigPath] : []),
+  ]
   const files = dryRun
     ? [...coreFiles, ...p6Files]
     : [
