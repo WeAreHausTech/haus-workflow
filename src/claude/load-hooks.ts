@@ -6,10 +6,10 @@
 /** Shape written to `.claude/settings.json` under `hooks`. */
 export type ClaudeHooksSettings = {
   hooks: {
-    UserPromptSubmit: Array<{ hooks: Array<{ type: "command"; command: string }> }>;
-    PreToolUse: Array<{ matcher: string; hooks: Array<{ type: "command"; command: string }> }>;
-  };
-};
+    UserPromptSubmit: Array<{ hooks: Array<{ type: 'command'; command: string }> }>
+    PreToolUse: Array<{ matcher: string; hooks: Array<{ type: 'command'; command: string }> }>
+  }
+}
 
 /**
  * Canonical hook config — source of truth for `.claude/settings.json`.
@@ -24,52 +24,54 @@ export const CANONICAL_HOOKS: ClaudeHooksSettings = {
     UserPromptSubmit: [
       {
         hooks: [
-          { type: "command", command: "haus context --from-hook || true" },
-          { type: "command", command: "haus memory inject --from-hook || true" },
+          { type: 'command', command: 'haus context --from-hook || true' },
+          { type: 'command', command: 'haus memory inject --from-hook || true' },
         ],
       },
     ],
     PreToolUse: [
       {
-        matcher: "Read|Edit|Write",
-        hooks: [{ type: "command", command: "haus guard file-access --from-hook || true" }],
+        matcher: 'Read|Edit|Write',
+        hooks: [{ type: 'command', command: 'haus guard file-access --from-hook || true' }],
       },
       {
-        matcher: "Bash",
-        hooks: [{ type: "command", command: "haus guard bash --from-hook || true" }],
+        matcher: 'Bash',
+        hooks: [{ type: 'command', command: 'haus guard bash --from-hook || true' }],
       },
     ],
   },
-};
+}
 
 /** Maps known hook commands to stable IDs used in recommended-hooks.json. */
 const STABLE_HOOK_IDS: Record<string, string> = {
-  "haus context --from-hook || true": "haus.context-hook",
-  "haus memory inject --from-hook || true": "haus.memory-hook",
-  "haus guard file-access --from-hook || true": "haus.guard-file",
-  "haus guard bash --from-hook || true": "haus.guard-bash",
-};
+  'haus context --from-hook || true': 'haus.context-hook',
+  'haus memory inject --from-hook || true': 'haus.memory-hook',
+  'haus guard file-access --from-hook || true': 'haus.guard-file',
+  'haus guard bash --from-hook || true': 'haus.guard-bash',
+}
 
 /** Returns the canonical hook config. No file I/O — config is inlined. */
 export async function loadClaudeHooksSettings(): Promise<ClaudeHooksSettings> {
-  return CANONICAL_HOOKS;
+  return CANONICAL_HOOKS
 }
 
 /** Flat list for `.haus-workflow/recommended-hooks.json` (ids stable for known commands). */
-export function flattenRecommendedHooks(settings: ClaudeHooksSettings): Array<{ id: string; command: string }> {
-  const out: Array<{ id: string; command: string }> = [];
-  let generic = 0;
+export function flattenRecommendedHooks(
+  settings: ClaudeHooksSettings,
+): Array<{ id: string; command: string }> {
+  const out: Array<{ id: string; command: string }> = []
+  let generic = 0
   for (const block of settings.hooks.UserPromptSubmit) {
     for (const h of block.hooks) {
-      const id = STABLE_HOOK_IDS[h.command] ?? `haus.hook.user-${generic++}`;
-      out.push({ id, command: h.command });
+      const id = STABLE_HOOK_IDS[h.command] ?? `haus.hook.user-${generic++}`
+      out.push({ id, command: h.command })
     }
   }
   for (const block of settings.hooks.PreToolUse) {
     for (const h of block.hooks) {
-      const id = STABLE_HOOK_IDS[h.command] ?? `haus.hook.pre-${generic++}`;
-      out.push({ id, command: h.command });
+      const id = STABLE_HOOK_IDS[h.command] ?? `haus.hook.pre-${generic++}`
+      out.push({ id, command: h.command })
     }
   }
-  return out;
+  return out
 }

@@ -3,68 +3,68 @@
  * Caches downloaded content under ~/.claude/haus/catalog-cache/ (overridable in tests).
  */
 
-import os from "node:os";
-import path from "node:path";
+import os from 'node:os'
+import path from 'node:path'
 
-import fs from "fs-extra";
+import fs from 'fs-extra'
 
-import type { CatalogItem } from "../types.js";
-import { warn } from "../utils/logger.js";
+import type { CatalogItem } from '../types.js'
+import { warn } from '../utils/logger.js'
 
-import { CATALOG_CACHE_SUBDIR, CATALOG_REF, CATALOG_REPO_URL } from "./constants.js";
+import { CATALOG_CACHE_SUBDIR, CATALOG_REF, CATALOG_REPO_URL } from './constants.js'
 
 // HAUS_CATALOG_CACHE_DIR_OVERRIDE redirects cache writes/reads for isolated tests.
 export const CACHE_DIR =
-  process.env["HAUS_CATALOG_CACHE_DIR_OVERRIDE"] ?? path.join(os.homedir(), CATALOG_CACHE_SUBDIR);
+  process.env['HAUS_CATALOG_CACHE_DIR_OVERRIDE'] ?? path.join(os.homedir(), CATALOG_CACHE_SUBDIR)
 // HAUS_CATALOG_REMOTE_BASE allows tests to point at a local mock server.
-const REMOTE_BASE = process.env["HAUS_CATALOG_REMOTE_BASE"] ?? `${CATALOG_REPO_URL}/${CATALOG_REF}`;
-const REMOTE_MANIFEST_URL = `${REMOTE_BASE}/manifest.json`;
+const REMOTE_BASE = process.env['HAUS_CATALOG_REMOTE_BASE'] ?? `${CATALOG_REPO_URL}/${CATALOG_REF}`
+const REMOTE_MANIFEST_URL = `${REMOTE_BASE}/manifest.json`
 
 /** Fetches raw text from a URL; returns null on any network or HTTP error. Timeout: 10 s. */
 async function fetchText(url: string): Promise<string | null> {
   try {
-    const res = await fetch(url, { signal: AbortSignal.timeout(10_000) });
-    if (!res.ok) return null;
-    return await res.text();
+    const res = await fetch(url, { signal: AbortSignal.timeout(10_000) })
+    if (!res.ok) return null
+    return await res.text()
   } catch {
-    return null;
+    return null
   }
 }
 
 /** Downloads and parses the remote manifest; returns null if fetch or parse fails. */
 export async function fetchRemoteManifest(): Promise<CatalogItem[] | null> {
-  const text = await fetchText(REMOTE_MANIFEST_URL);
-  if (!text) return null;
+  const text = await fetchText(REMOTE_MANIFEST_URL)
+  if (!text) return null
   try {
-    const data = JSON.parse(text) as { items?: CatalogItem[] };
-    return data?.items?.length ? data.items : null;
+    const data = JSON.parse(text) as { items?: CatalogItem[] }
+    return data?.items?.length ? data.items : null
   } catch {
-    return null;
+    return null
   }
 }
 
 /** Result summary returned by syncRemoteCatalog. */
 export type SyncResult = {
   /** IDs of items downloaded for the first time. */
-  newItems: string[];
+  newItems: string[]
   /** Count of items already present in the cache (skipped). */
-  unchanged: number;
+  unchanged: number
   /** IDs of items that could not be fetched or had invalid paths. */
-  failed: string[];
-};
+  failed: string[]
+}
 
 /** Guards against path traversal: rejects absolute paths, backslashes, and `..` segments. */
 function isSafeCatalogPath(itemPath: string): boolean {
-  if (!itemPath || path.isAbsolute(itemPath) || itemPath.includes("\\")) return false;
-  const normalized = path.normalize(itemPath);
-  return !normalized.startsWith("..") && !normalized.includes("/..");
+  if (!itemPath || path.isAbsolute(itemPath) || itemPath.includes('\\')) return false
+  const normalized = path.normalize(itemPath)
+  return !normalized.startsWith('..') && !normalized.includes('/..')
 }
 
 /** Resolves itemPath under base; returns null if the result escapes the base directory. */
 function safeJoin(base: string, itemPath: string): string | null {
-  if (!isSafeCatalogPath(itemPath)) return null;
-  const resolved = path.resolve(base, itemPath);
-  return resolved.startsWith(base + path.sep) || resolved === base ? resolved : null;
+  if (!isSafeCatalogPath(itemPath)) return null
+  const resolved = path.resolve(base, itemPath)
+  return resolved.startsWith(base + path.sep) || resolved === base ? resolved : null
 }
 
 /**
@@ -72,77 +72,81 @@ function safeJoin(base: string, itemPath: string): string | null {
  * Skips items that already exist; logs a warning and falls back to the bundled catalog on failure.
  */
 export async function syncRemoteCatalog(): Promise<SyncResult> {
-  const items = await fetchRemoteManifest();
+  const items = await fetchRemoteManifest()
   if (!items) {
-    warn("Remote catalog fetch failed — using bundled catalog");
-    return { newItems: [], unchanged: 0, failed: [] };
+    warn('Remote catalog fetch failed — using bundled catalog')
+    return { newItems: [], unchanged: 0, failed: [] }
   }
 
-  await fs.ensureDir(CACHE_DIR);
-  await fs.writeFile(path.join(CACHE_DIR, "manifest.json"), `${JSON.stringify({ items }, null, 2)}\n`, "utf8");
+  await fs.ensureDir(CACHE_DIR)
+  await fs.writeFile(
+    path.join(CACHE_DIR, 'manifest.json'),
+    `${JSON.stringify({ items }, null, 2)}\n`,
+    'utf8',
+  )
 
-  const newItems: string[] = [];
-  let unchanged = 0;
-  const failed: string[] = [];
+  const newItems: string[] = []
+  let unchanged = 0
+  const failed: string[] = []
 
   for (const item of items) {
-    if ((item.type !== "skill" && item.type !== "agent") || !item.path) continue;
+    if ((item.type !== 'skill' && item.type !== 'agent') || !item.path) continue
     if (!isSafeCatalogPath(item.path)) {
-      warn(`Skipping ${item.id}: invalid path "${item.path}"`);
-      failed.push(item.id);
-      continue;
+      warn(`Skipping ${item.id}: invalid path "${item.path}"`)
+      failed.push(item.id)
+      continue
     }
 
-    if (item.type === "skill") {
-      const destDir = safeJoin(CACHE_DIR, item.path);
+    if (item.type === 'skill') {
+      const destDir = safeJoin(CACHE_DIR, item.path)
       if (!destDir) {
-        warn(`Skipping ${item.id}: path traversal detected`);
-        failed.push(item.id);
-        continue;
+        warn(`Skipping ${item.id}: path traversal detected`)
+        failed.push(item.id)
+        continue
       }
-      const dest = path.join(destDir, "SKILL.md");
+      const dest = path.join(destDir, 'SKILL.md')
       if (await fs.pathExists(dest)) {
-        unchanged++;
-        continue;
+        unchanged++
+        continue
       }
-      const url = `${REMOTE_BASE}/${item.path}/SKILL.md`;
-      const text = await fetchText(url);
+      const url = `${REMOTE_BASE}/${item.path}/SKILL.md`
+      const text = await fetchText(url)
       if (!text) {
-        warn(`Failed to fetch content for ${item.id}`);
-        failed.push(item.id);
-        continue;
+        warn(`Failed to fetch content for ${item.id}`)
+        failed.push(item.id)
+        continue
       }
-      await fs.ensureDir(path.dirname(dest));
-      await fs.writeFile(dest, text, "utf8");
-      newItems.push(item.id);
+      await fs.ensureDir(path.dirname(dest))
+      await fs.writeFile(dest, text, 'utf8')
+      newItems.push(item.id)
     } else {
-      const dest = safeJoin(CACHE_DIR, item.path);
+      const dest = safeJoin(CACHE_DIR, item.path)
       if (!dest) {
-        warn(`Skipping ${item.id}: path traversal detected`);
-        failed.push(item.id);
-        continue;
+        warn(`Skipping ${item.id}: path traversal detected`)
+        failed.push(item.id)
+        continue
       }
       if (await fs.pathExists(dest)) {
-        unchanged++;
-        continue;
+        unchanged++
+        continue
       }
-      const url = `${REMOTE_BASE}/${item.path}`;
-      const text = await fetchText(url);
+      const url = `${REMOTE_BASE}/${item.path}`
+      const text = await fetchText(url)
       if (!text) {
-        warn(`Failed to fetch content for ${item.id}`);
-        failed.push(item.id);
-        continue;
+        warn(`Failed to fetch content for ${item.id}`)
+        failed.push(item.id)
+        continue
       }
-      await fs.ensureDir(path.dirname(dest));
-      await fs.writeFile(dest, text, "utf8");
-      newItems.push(item.id);
+      await fs.ensureDir(path.dirname(dest))
+      await fs.writeFile(dest, text, 'utf8')
+      newItems.push(item.id)
     }
   }
 
-  return { newItems, unchanged, failed };
+  return { newItems, unchanged, failed }
 }
 
-const CATALOG_TAGS_API_URL = "https://api.github.com/repos/WeAreHausTech/haus-workflow-catalog/tags";
+const CATALOG_TAGS_API_URL = 'https://api.github.com/repos/WeAreHausTech/haus-workflow-catalog/tags'
 
 /**
  * Fetches the latest release tag from the catalog GitHub repo.
@@ -151,26 +155,26 @@ const CATALOG_TAGS_API_URL = "https://api.github.com/repos/WeAreHausTech/haus-wo
  */
 export async function fetchLatestCatalogTag(): Promise<string | null> {
   // Skip in test environments to avoid network calls.
-  if (process.env["HAUS_CATALOG_REMOTE_BASE"]) return null;
+  if (process.env['HAUS_CATALOG_REMOTE_BASE']) return null
   try {
     const res = await fetch(CATALOG_TAGS_API_URL, {
       signal: AbortSignal.timeout(5_000),
-      headers: { Accept: "application/vnd.github+json" },
-    });
-    if (!res.ok) return null;
-    const tags = (await res.json()) as Array<{ name: string }>;
-    return tags[0]?.name ?? null;
+      headers: { Accept: 'application/vnd.github+json' },
+    })
+    if (!res.ok) return null
+    const tags = (await res.json()) as Array<{ name: string }>
+    return tags[0]?.name ?? null
   } catch {
-    return null;
+    return null
   }
 }
 
 /** Returns milliseconds since the cache manifest was last written, or null if absent. */
 export async function getCacheManifestAge(): Promise<number | null> {
   try {
-    const stat = await fs.stat(path.join(CACHE_DIR, "manifest.json"));
-    return Date.now() - stat.mtimeMs;
+    const stat = await fs.stat(path.join(CACHE_DIR, 'manifest.json'))
+    return Date.now() - stat.mtimeMs
   } catch {
-    return null;
+    return null
   }
 }

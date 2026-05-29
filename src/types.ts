@@ -1,124 +1,129 @@
 /** Core shared types used across scanner, recommender, catalog, and writer modules. */
 
 /** Detected package manager for a repository. */
-export type PackageManager = "yarn" | "pnpm" | "npm" | "unknown";
+export type PackageManager = 'yarn' | 'pnpm' | 'npm' | 'unknown'
 
 /** Scanned repository context written to .haus-workflow/context-map.json. */
 export type ContextMap = {
-  mode: "guided" | "fast";
-  generatedAt: string;
-  root: string;
-  repoName: string;
-  packageManager: PackageManager;
-  repoRoles: string[];
-  confidence: number;
-  detectedStacks: Record<string, string[]>;
-  dependencies: string[];
-  securityRisks: string[];
-  crossRepoHints: string[];
-  warnings: string[];
-};
+  mode: 'guided' | 'fast'
+  generatedAt: string
+  root: string
+  repoName: string
+  packageManager: PackageManager
+  repoRoles: string[]
+  confidence: number
+  detectedStacks: Record<string, string[]>
+  dependencies: string[]
+  securityRisks: string[]
+  crossRepoHints: string[]
+  warnings: string[]
+}
 
 /** A single matching clause in a catalog item's requiresAny constraint. */
 export type RequiresAnyClause =
   | { stack: string }
   | { dependency: string }
   | { packageNamePattern: string }
-  | { role: string };
+  | { role: string }
 
 /** Origin of a catalog item: first-party Haus or curated from an external source. */
-export type CatalogItemSource = "haus" | "curated";
+export type CatalogItemSource = 'haus' | 'curated'
 
 /** How a curated catalog item was incorporated relative to its upstream source. */
-export type CatalogItemUseMode = "copy" | "adapted" | "wrapped" | "rewritten" | "reference-only";
+export type CatalogItemUseMode = 'copy' | 'adapted' | 'wrapped' | 'rewritten' | 'reference-only'
 
 /** Curation review gate; only "approved" items may be recommended and installed. */
-export type CatalogItemReviewStatus = "approved" | "candidate" | "needs-review" | "rejected" | "deprecated";
+export type CatalogItemReviewStatus =
+  | 'approved'
+  | 'candidate'
+  | 'needs-review'
+  | 'rejected'
+  | 'deprecated'
 
 /** Risk level of shipping a curated item; "blocked" items must never be installed. */
-export type CatalogItemRiskLevel = "low" | "medium" | "high" | "blocked";
+export type CatalogItemRiskLevel = 'low' | 'medium' | 'high' | 'blocked'
 
 /** Confidence level of the license determination for a curated catalog item. */
-export type CatalogItemLicenseConfidence = "high" | "medium" | "low" | "unknown";
+export type CatalogItemLicenseConfidence = 'high' | 'medium' | 'low' | 'unknown'
 
 // Schema: https://raw.githubusercontent.com/WeAreHausTech/haus-workflow-catalog/main/schema/catalog-item.schema.json
 // Keep this type in sync with catalog-item.schema.json. See haus-workflow-catalog EXECUTION-PLAN.md F5.
 /** A single entry in the catalog manifest describing a skill, agent, template, rule, or command. */
 export type CatalogItem = {
-  id: string;
-  type: "skill" | "agent" | "template" | "rule" | "command";
-  source: string;
-  version?: string;
-  path: string;
-  title?: string;
-  tags: string[];
-  repoRoles: string[];
-  installMode?: "copy-selected" | "plugin-only";
-  purpose?: string;
-  whenToUse?: string;
-  whenNotToUse?: string;
-  references?: string[];
-  safetyNotes?: string[];
-  sourceInfluences?: Array<{ source: string; idea: string }>;
-  intents?: string[];
-  tokenBudget?: number;
-  tokenEstimate: number;
+  id: string
+  type: 'skill' | 'agent' | 'template' | 'rule' | 'command'
+  source: string
+  version?: string
+  path: string
+  title?: string
+  tags: string[]
+  repoRoles: string[]
+  installMode?: 'copy-selected' | 'plugin-only'
+  purpose?: string
+  whenToUse?: string
+  whenNotToUse?: string
+  references?: string[]
+  safetyNotes?: string[]
+  sourceInfluences?: Array<{ source: string; idea: string }>
+  intents?: string[]
+  tokenBudget?: number
+  tokenEstimate: number
   /** When true, recommender applies a baseline score so the item is selected unless policy blocks it. */
-  default?: boolean;
+  default?: boolean
   /** When present and non-empty, at least one clause must match the scanned context, otherwise the rule is skipped with `requires-any-unsatisfied`. */
-  requiresAny?: RequiresAnyClause[];
+  requiresAny?: RequiresAnyClause[]
   /** Optional ecosystem family identifier (e.g. `wordpress`, `laravel`, `vendure`, `nextjs`, `nestjs`, `dotnet`, `nx`, `turbo`). Used by recommender for cross-ecosystem conflict detection. */
-  ecosystem?: string;
+  ecosystem?: string
   // Curated external provenance — present when source === "curated"
   /** References sources.yaml id for this item's origin. */
-  originSourceId?: string;
+  originSourceId?: string
   /** Direct URL to the upstream source item (file, folder, or page). */
-  originUrl?: string;
+  originUrl?: string
   /** SPDX license identifier, e.g. "MIT", "Apache-2.0". */
-  license?: string;
+  license?: string
   /** Confidence level of the license determination. */
-  licenseConfidence?: CatalogItemLicenseConfidence;
+  licenseConfidence?: CatalogItemLicenseConfidence
   /** How this item was incorporated: verbatim copy, adapted for Haus, wrapped, rewritten, or reference-only. */
-  useMode?: CatalogItemUseMode;
+  useMode?: CatalogItemUseMode
   /** Risk level of shipping this item. Blocked items must not install. */
-  riskLevel?: CatalogItemRiskLevel;
+  riskLevel?: CatalogItemRiskLevel
   /** Review gate status. Only "approved" items may be recommended and installed. */
-  reviewStatus?: CatalogItemReviewStatus;
+  reviewStatus?: CatalogItemReviewStatus
   /** Git SHA or version tag pinning the upstream source this item was derived from. */
-  pinnedRef?: string;
-};
+  pinnedRef?: string
+}
 
 /** Scored recommendation result written to .haus-workflow/recommendation.json. */
 export type Recommendation = {
-  mode: "guided" | "fast";
+  mode: 'guided' | 'fast'
   recommended: Array<{
-    id: string;
-    type: string;
-    reason: string;
-    reasons: Array<{ code: string; message: string; weight: number; signal?: string }>;
-    confidence: number;
-    confidenceLevel: "low" | "medium" | "high";
-    selectionMode: "baseline" | "matched";
-    install: boolean;
-    score: number;
+    id: string
+    type: string
+    reason: string
+    reasons: Array<{ code: string; message: string; weight: number; signal?: string }>
+    confidence: number
+    confidenceLevel: 'low' | 'medium' | 'high'
+    selectionMode: 'baseline' | 'matched'
+    install: boolean
+    score: number
     scoreBreakdown: {
-      bonuses: Array<{ code: string; message: string; weight: number; signal?: string }>;
-      penalties: Array<{ code: string; message: string; penalty: number; signal?: string }>;
-      finalScore: number;
-    };
+      bonuses: Array<{ code: string; message: string; weight: number; signal?: string }>
+      penalties: Array<{ code: string; message: string; penalty: number; signal?: string }>
+      finalScore: number
+    }
     /** Catalog tags echoed for downstream task-intent routing. Additive optional field. */
-    tags?: string[];
+    tags?: string[]
     /** Catalog ecosystem family echoed for downstream task-intent routing. Additive optional field. */
-    ecosystem?: string;
-  }>;
+    ecosystem?: string
+  }>
   skipped: Array<{
-    id: string;
-    reason: string;
-    skipReasons: Array<{ code: string; message: string; penalty: number; signal?: string }>;
-  }>;
-  warnings: string[];
-  estimatedContextTokens: number;
-  selectedRules: number;
-  skippedRules: number;
-  estimatedTokenReductionPct: number;
-};
+    id: string
+    reason: string
+    skipReasons: Array<{ code: string; message: string; penalty: number; signal?: string }>
+  }>
+  warnings: string[]
+  estimatedContextTokens: number
+  selectedRules: number
+  skippedRules: number
+  estimatedTokenReductionPct: number
+}

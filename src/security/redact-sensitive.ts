@@ -1,6 +1,6 @@
 /** Strips secret-like values from strings before they appear in outputs or memory. */
 
-import { SECRET_PATTERNS } from "./secret-patterns.js";
+import { SECRET_PATTERNS } from './secret-patterns.js'
 
 /**
  * Replaces all secret-like substrings in `input` with `[REDACTED]`.
@@ -9,5 +9,5 @@ import { SECRET_PATTERNS } from "./secret-patterns.js";
  */
 export function redactSensitive(input: string): string {
   // Apply each pattern in sequence so all secret types are covered
-  return SECRET_PATTERNS.reduce((acc, pattern) => acc.replace(pattern, "[REDACTED]"), input);
+  return SECRET_PATTERNS.reduce((acc, pattern) => acc.replace(pattern, '[REDACTED]'), input)
 }

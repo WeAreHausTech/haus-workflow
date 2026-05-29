@@ -1,6 +1,6 @@
 /** Guard that blocks file-path access matching known sensitive path patterns. */
 
-import { SENSITIVE_PATHS } from "./sensitive-paths.js";
+import { SENSITIVE_PATHS } from './sensitive-paths.js'
 
 /**
  * Returns a block message if `candidate` matches a sensitive path pattern, otherwise `undefined`.
@@ -8,7 +8,7 @@ import { SENSITIVE_PATHS } from "./sensitive-paths.js";
  */
 export function guardFileAccess(candidate: string): string | undefined {
   // Strip glob wildcards before substring matching — patterns like "*.pem" become ".pem"
-  const matched = SENSITIVE_PATHS.find((token) => candidate.includes(token.replace("*", "")));
-  if (matched) return `Blocked sensitive path: ${candidate}`;
-  return undefined;
+  const matched = SENSITIVE_PATHS.find((token) => candidate.includes(token.replace('*', '')))
+  if (matched) return `Blocked sensitive path: ${candidate}`
+  return undefined
 }

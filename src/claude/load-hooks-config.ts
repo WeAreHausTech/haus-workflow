@@ -14,17 +14,17 @@
  * motivated this gating.
  */
 
-import path from "node:path";
+import path from 'node:path'
 
-import { readJson } from "../utils/fs.js";
+import { readJson } from '../utils/fs.js'
 
-export type HookKey = "context" | "memoryInject";
+export type HookKey = 'context' | 'memoryInject'
 
 export type HooksConfig = {
-  hooks?: Partial<Record<HookKey, { enabled?: boolean }>>;
-};
+  hooks?: Partial<Record<HookKey, { enabled?: boolean }>>
+}
 
-const CONFIG_PATH = ".haus-workflow/config.json";
+const CONFIG_PATH = '.haus-workflow/config.json'
 
 /** Default config emitted on `haus apply --write`. Both gated hooks default off. */
 export const DEFAULT_HOOKS_CONFIG: Required<HooksConfig> = {
@@ -32,7 +32,7 @@ export const DEFAULT_HOOKS_CONFIG: Required<HooksConfig> = {
     context: { enabled: false },
     memoryInject: { enabled: false },
   },
-};
+}
 
 /**
  * Read the config and answer: is this hook enabled?
@@ -43,6 +43,6 @@ export const DEFAULT_HOOKS_CONFIG: Required<HooksConfig> = {
  * means the project has not opted in, and the hook must stay silent.
  */
 export async function isHookEnabled(root: string, key: HookKey): Promise<boolean> {
-  const cfg = await readJson<HooksConfig>(path.join(root, CONFIG_PATH));
-  return cfg?.hooks?.[key]?.enabled === true;
+  const cfg = await readJson<HooksConfig>(path.join(root, CONFIG_PATH))
+  return cfg?.hooks?.[key]?.enabled === true
 }

@@ -1,7 +1,7 @@
 /** Ambient module declaration for the `diff` package — exposes only the subset of the API used by this project. */
-declare module "diff" {
+declare module 'diff' {
   export interface PatchOptions {
-    context?: number;
+    context?: number
   }
   export function createTwoFilesPatch(
     oldFileName: string,
@@ -11,5 +11,5 @@ declare module "diff" {
     oldHeader?: string,
     newHeader?: string,
     options?: PatchOptions,
-  ): string;
+  ): string
 }

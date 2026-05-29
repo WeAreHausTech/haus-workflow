@@ -1,8 +1,6 @@
-# haus
+# Haus Workflow
 
-CLI that scans a project, recommends AI context assets for the stack, and writes controlled outputs into `.claude/` and `.haus-workflow/`.
-
-> **Internal Haus tool.**
+> Internal Haus tool. Open-source but unsupported for external use. No external issues, PRs, or roadmap commitments accepted.
 
 ---
 

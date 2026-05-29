@@ -5,12 +5,12 @@
  * This is the stable external contract; internal lockfile I/O uses `LockItem` from lockfile.ts.
  */
 export type LockfileItem = {
-  id: string;
-  type: string;
-  source: string;
-  version: string;
+  id: string
+  type: string
+  source: string
+  version: string
   /** sha256 hash of the installed file content at the time of the last update. */
-  hash: string;
-  installMode: string;
-  paths: string[];
-};
+  hash: string
+  installMode: string
+  paths: string[]
+}
