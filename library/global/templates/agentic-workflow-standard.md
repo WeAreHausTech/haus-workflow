@@ -138,7 +138,7 @@ Gate every commit on (parallel):
 1. Type check
 2. Lint
 3. Format
-4. Secret scan: `git diff --cached | grep -iE "(password|secret|token|api_key)\\s*[:=]\\s*['\"]"`
+4. Secret scan: `! git diff --cached | grep -iE "(password|secret|token|api_key)\\s*[:=]\\s*['\"]"`
 
 Gate unit tests on pre-push (slow). Never gate E2E in hooks.
 
