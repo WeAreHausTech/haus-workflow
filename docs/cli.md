@@ -42,7 +42,7 @@ Materialize catalog assets into `.claude/`.
 - `--select` — interactively select catalog items before applying
 - `--allow-empty-cache` — apply core files only when catalog cache is empty (skip catalog items without error)
 
-After writing `.claude/settings.json`, apply runs a self-check that it matches the canonical hook config in `plugin/hooks/hooks.json`. Throws on drift.
+After writing `.claude/settings.json`, apply runs a self-check that it matches `CANONICAL_HOOKS` in `src/claude/load-hooks.ts`. Throws on drift.
 
 ### `haus update [--check]`
 

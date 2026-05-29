@@ -22,11 +22,10 @@ Core flow: **scan → recommend → apply**
 | `src/security/` | Guardrails for sensitive paths and dangerous bash |
 | `src/catalog/` | Catalog manifest loader and allowed-stack validation |
 | `src/library/` | Catalog/library audit logic |
-| `src/sources/` | External source sync, audit, and report |
-| `src/curation/` | Unsupported-stack token detection for source decisions |
 | `src/utils/` | Shared utilities: `logger.ts`, `fs.ts`, `paths.ts`, `audit-checks.ts`, `diff.ts`, `exec.ts`, `prompts.ts`, `versions.ts` |
 | `src/types/` | Local ambient type declarations |
 | `library/global/` | Shipped skills, agents, and hook templates |
+| `library/catalog/` | Bundled catalog manifest (fallback when remote cache is absent) |
 
 ---
 
