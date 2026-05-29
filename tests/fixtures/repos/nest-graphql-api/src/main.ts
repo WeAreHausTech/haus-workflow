@@ -1,7 +1,7 @@
-import { NestFactory } from "@nestjs/core";
+import { NestFactory } from '@nestjs/core'
 
 async function bootstrap() {
-  await NestFactory.create({});
+  await NestFactory.create({})
 }
 
-void bootstrap();
+void bootstrap()
