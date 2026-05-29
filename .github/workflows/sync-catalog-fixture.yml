@@ -1,9 +1,7 @@
 name: Sync catalog fixture
 
 on:
-  schedule:
-    - cron: '0 6 * * 1'   # weekly Monday 06:00 UTC
-  workflow_dispatch:       # allow manual trigger
+  workflow_dispatch:       # triggered by haus-workflow-catalog CI on manifest.json changes
 
 permissions:
   contents: write
