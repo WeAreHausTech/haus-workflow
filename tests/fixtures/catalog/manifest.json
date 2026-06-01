@@ -3,25 +3,6 @@
   "_note": "Stable fixture for CLI tests. Decoupled from production catalog repo. Update manually when catalog schema changes.",
   "items": [
     {
-      "id": "haus.global-engineering-rules",
-      "source": "haus",
-      "type": "skill",
-      "path": "skills/global-engineering-rules",
-      "title": "Haus global engineering rules",
-      "purpose": "Provide baseline deterministic engineering, validation, and security guardrails.",
-      "whenToUse": "Use as default baseline in supported Haus workflows.",
-      "whenNotToUse": "Do not use for unsupported stacks or non-development workflows.",
-      "references": [],
-      "safetyNotes": ["Never read secrets or customer exports."],
-      "tokenBudget": 1800,
-      "tags": ["haus", "quality", "security"],
-      "repoRoles": [],
-      "requiresAny": [],
-      "tokenEstimate": 1800,
-      "installMode": "copy-selected",
-      "default": true
-    },
-    {
       "id": "haus.nextjs-patterns",
       "source": "haus",
       "type": "skill",

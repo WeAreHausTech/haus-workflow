@@ -2,28 +2,6 @@
   "version": "2.1.0",
   "items": [
     {
-      "id": "haus.global-engineering-rules",
-      "version": "1.0.0",
-      "source": "haus",
-      "type": "skill",
-      "path": "skills/global-engineering-rules",
-      "title": "Haus global engineering rules",
-      "purpose": "Provide baseline deterministic engineering, validation, and security guardrails.",
-      "whenToUse": "Use as default baseline in supported Haus workflows.",
-      "whenNotToUse": "Do not use for unsupported stacks or non-development workflows.",
-      "references": ["references/conventions.md"],
-      "safetyNotes": ["Never read secrets or customer exports."],
-      "tokenBudget": 1800,
-      "tags": ["haus", "quality", "security"],
-      "repoRoles": [],
-      "requiresAny": [],
-      "tokenEstimate": 1800,
-      "installMode": "copy-selected",
-      "default": true,
-      "reviewStatus": "approved",
-      "riskLevel": "low"
-    },
-    {
       "id": "haus.nextjs-patterns",
       "version": "1.0.0",
       "source": "haus",
