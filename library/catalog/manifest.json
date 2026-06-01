@@ -1,5 +1,5 @@
 {
-  "version": "2.1.0",
+  "version": "2.2.0",
   "items": [
     {
       "id": "haus.nextjs-patterns",
@@ -18,8 +18,15 @@
         "https://nextjs.org/llms.txt"
       ],
       "tokenBudget": 1200,
-      "tags": ["frontend", "nextjs", "react", "typescript"],
-      "repoRoles": ["next-app"],
+      "tags": [
+        "frontend",
+        "nextjs",
+        "react",
+        "typescript"
+      ],
+      "repoRoles": [
+        "next-app"
+      ],
       "requiresAny": [
         {
           "stack": "nextjs"
@@ -51,8 +58,16 @@
         "https://react.dev/"
       ],
       "tokenBudget": 1200,
-      "tags": ["frontend", "react", "typescript"],
-      "repoRoles": ["react-app", "next-app", "design-system"],
+      "tags": [
+        "frontend",
+        "react",
+        "typescript"
+      ],
+      "repoRoles": [
+        "react-app",
+        "next-app",
+        "design-system"
+      ],
       "requiresAny": [
         {
           "stack": "react19"
@@ -84,7 +99,11 @@
         "https://www.typescriptlang.org/docs/handbook/"
       ],
       "tokenBudget": 1200,
-      "tags": ["typescript", "frontend", "backend"],
+      "tags": [
+        "typescript",
+        "frontend",
+        "backend"
+      ],
       "repoRoles": [
         "next-app",
         "react-app",
@@ -128,8 +147,16 @@
         "https://vitest.dev/guide"
       ],
       "tokenBudget": 1200,
-      "tags": ["vite8", "frontend", "typescript"],
-      "repoRoles": ["vite-app", "react-app", "vue-app"],
+      "tags": [
+        "vite8",
+        "frontend",
+        "typescript"
+      ],
+      "repoRoles": [
+        "vite-app",
+        "react-app",
+        "vue-app"
+      ],
       "requiresAny": [
         {
           "stack": "vite8"
@@ -161,8 +188,15 @@
         "https://reactrouter.com/start/framework/installation"
       ],
       "tokenBudget": 1200,
-      "tags": ["frontend", "react", "typescript"],
-      "repoRoles": ["react-router-app", "react-app"],
+      "tags": [
+        "frontend",
+        "react",
+        "typescript"
+      ],
+      "repoRoles": [
+        "react-router-app",
+        "react-app"
+      ],
       "requiresAny": [
         {
           "stack": "react-router-v7"
@@ -197,8 +231,15 @@
         "https://docs.expo.dev/"
       ],
       "tokenBudget": 1200,
-      "tags": ["expo", "react-native", "mobile", "react"],
-      "repoRoles": ["expo-app"],
+      "tags": [
+        "expo",
+        "react-native",
+        "mobile",
+        "react"
+      ],
+      "repoRoles": [
+        "expo-app"
+      ],
       "requiresAny": [
         {
           "stack": "expo"
@@ -239,8 +280,17 @@
         "https://www.i18next.com/"
       ],
       "tokenBudget": 1200,
-      "tags": ["i18next", "i18n", "frontend"],
-      "repoRoles": ["next-app", "react-app", "vue-app", "vite-app"],
+      "tags": [
+        "i18next",
+        "i18n",
+        "frontend"
+      ],
+      "repoRoles": [
+        "next-app",
+        "react-app",
+        "vue-app",
+        "vite-app"
+      ],
       "requiresAny": [
         {
           "stack": "i18next"
@@ -275,8 +325,15 @@
         "https://docs.bullmq.io/"
       ],
       "tokenBudget": 1200,
-      "tags": ["bullmq", "queue", "backend"],
-      "repoRoles": ["vendure-app", "nestjs-api"],
+      "tags": [
+        "bullmq",
+        "queue",
+        "backend"
+      ],
+      "repoRoles": [
+        "vendure-app",
+        "nestjs-api"
+      ],
       "requiresAny": [
         {
           "stack": "bullmq"
@@ -308,8 +365,16 @@
         "https://docs.sentry.io/"
       ],
       "tokenBudget": 1200,
-      "tags": ["sentry", "observability", "tooling"],
-      "repoRoles": ["next-app", "nestjs-api", "vendure-app"],
+      "tags": [
+        "sentry",
+        "observability",
+        "tooling"
+      ],
+      "repoRoles": [
+        "next-app",
+        "nestjs-api",
+        "vendure-app"
+      ],
       "requiresAny": [
         {
           "stack": "sentry"
@@ -340,9 +405,17 @@
       "purpose": "Install `@haus-tech/tech-config` and wire `.prettierrc` to the shared prettier config via the `/prettier` subpath export.",
       "whenToUse": "Use when Prettier is missing from a haus repo, when migrating an ad-hoc config, or when migrating from the deprecated `@haus-tech/prettier-config`.",
       "whenNotToUse": "Do not use when Prettier is already configured against `@haus-tech/tech-config/prettier`.",
-      "references": ["references/conventions.md", "references/scope.md", "references/workflow.md"],
+      "references": [
+        "references/conventions.md",
+        "references/scope.md",
+        "references/workflow.md"
+      ],
       "tokenBudget": 800,
-      "tags": ["prettier", "tooling", "quality"],
+      "tags": [
+        "prettier",
+        "tooling",
+        "quality"
+      ],
       "repoRoles": [],
       "requiresAny": [
         {
@@ -365,9 +438,17 @@
       "purpose": "Install `@haus-tech/tech-config` and wire ESLint flat config to the shared rules.",
       "whenToUse": "Use when ESLint is missing from a haus repo or migrating from a legacy `.eslintrc` to flat config.",
       "whenNotToUse": "Do not use when ESLint is already configured against `@haus-tech/tech-config`.",
-      "references": ["references/conventions.md", "references/scope.md", "references/workflow.md"],
+      "references": [
+        "references/conventions.md",
+        "references/scope.md",
+        "references/workflow.md"
+      ],
       "tokenBudget": 800,
-      "tags": ["eslint", "tooling", "quality"],
+      "tags": [
+        "eslint",
+        "tooling",
+        "quality"
+      ],
       "repoRoles": [],
       "requiresAny": [
         {
@@ -397,8 +478,16 @@
         "https://docs.stripe.com/"
       ],
       "tokenBudget": 1200,
-      "tags": ["stripe", "payments", "tooling"],
-      "repoRoles": ["next-app", "react-app", "vendure-plugin"],
+      "tags": [
+        "stripe",
+        "payments",
+        "tooling"
+      ],
+      "repoRoles": [
+        "next-app",
+        "react-app",
+        "vendure-plugin"
+      ],
       "requiresAny": [
         {
           "stack": "stripe"
@@ -426,10 +515,22 @@
       "purpose": "Guide Qliro Checkout integration via @haus-tech/qliro-plugin in Vendure storefronts.",
       "whenToUse": "Use for Qliro Checkout flow, order callbacks, refund handling, and merchant API config.",
       "whenNotToUse": "Do not use for non-Nordic payment providers or Stripe-only flows.",
-      "references": ["references/conventions.md", "references/scope.md", "references/workflow.md"],
+      "references": [
+        "references/conventions.md",
+        "references/scope.md",
+        "references/workflow.md"
+      ],
       "tokenBudget": 1200,
-      "tags": ["qliro", "payments", "tooling"],
-      "repoRoles": ["vendure-app", "vendure-plugin", "next-app"],
+      "tags": [
+        "qliro",
+        "payments",
+        "tooling"
+      ],
+      "repoRoles": [
+        "vendure-app",
+        "vendure-plugin",
+        "next-app"
+      ],
       "requiresAny": [
         {
           "stack": "qliro"
@@ -461,8 +562,15 @@
         "https://supabase.com/docs"
       ],
       "tokenBudget": 1200,
-      "tags": ["supabase", "database", "backend"],
-      "repoRoles": ["next-app", "react-app"],
+      "tags": [
+        "supabase",
+        "database",
+        "backend"
+      ],
+      "repoRoles": [
+        "next-app",
+        "react-app"
+      ],
       "requiresAny": [
         {
           "stack": "supabase"
@@ -497,8 +605,15 @@
         "https://www.sanity.io/docs"
       ],
       "tokenBudget": 1200,
-      "tags": ["sanity", "backend", "cms"],
-      "repoRoles": ["sanity-studio", "next-app"],
+      "tags": [
+        "sanity",
+        "backend",
+        "cms"
+      ],
+      "repoRoles": [
+        "sanity-studio",
+        "next-app"
+      ],
       "requiresAny": [
         {
           "stack": "sanity"
@@ -536,8 +651,14 @@
         "https://docs.strapi.io/dev-docs/intro"
       ],
       "tokenBudget": 1200,
-      "tags": ["strapi", "backend", "cms"],
-      "repoRoles": ["strapi-app"],
+      "tags": [
+        "strapi",
+        "backend",
+        "cms"
+      ],
+      "repoRoles": [
+        "strapi-app"
+      ],
       "requiresAny": [
         {
           "stack": "strapi"
@@ -572,8 +693,15 @@
         "https://www.prisma.io/docs"
       ],
       "tokenBudget": 1200,
-      "tags": ["prisma", "backend", "database"],
-      "repoRoles": ["next-app", "nestjs-api"],
+      "tags": [
+        "prisma",
+        "backend",
+        "database"
+      ],
+      "repoRoles": [
+        "next-app",
+        "nestjs-api"
+      ],
       "requiresAny": [
         {
           "stack": "prisma"
@@ -608,8 +736,17 @@
         "https://docs.vendure.io/llms.txt"
       ],
       "tokenBudget": 1200,
-      "tags": ["backend", "vendure", "nestjs", "graphql", "typescript"],
-      "repoRoles": ["vendure-plugin", "vendure-app"],
+      "tags": [
+        "backend",
+        "vendure",
+        "nestjs",
+        "graphql",
+        "typescript"
+      ],
+      "repoRoles": [
+        "vendure-plugin",
+        "vendure-app"
+      ],
       "requiresAny": [
         {
           "stack": "vendure3"
@@ -644,8 +781,15 @@
         "https://laravel.com/docs"
       ],
       "tokenBudget": 1200,
-      "tags": ["backend", "laravel", "php"],
-      "repoRoles": ["laravel-app", "laravel-nova-app"],
+      "tags": [
+        "backend",
+        "laravel",
+        "php"
+      ],
+      "repoRoles": [
+        "laravel-app",
+        "laravel-nova-app"
+      ],
       "requiresAny": [
         {
           "stack": "laravel"
@@ -677,8 +821,15 @@
         "https://developer.wordpress.org/"
       ],
       "tokenBudget": 1200,
-      "tags": ["backend", "wordpress", "php"],
-      "repoRoles": ["wordpress-site", "wordpress-bedrock-site"],
+      "tags": [
+        "backend",
+        "wordpress",
+        "php"
+      ],
+      "repoRoles": [
+        "wordpress-site",
+        "wordpress-bedrock-site"
+      ],
       "requiresAny": [
         {
           "stack": "wordpress"
@@ -703,10 +854,20 @@
       "purpose": "Guide .NET API/service/domain/persistence layer changes.",
       "whenToUse": "Use for .NET service and endpoint behavior changes with domain impact.",
       "whenNotToUse": "Do not use for frontend-only or non-.NET runtime tasks.",
-      "references": ["references/conventions.md", "references/scope.md", "references/workflow.md"],
+      "references": [
+        "references/conventions.md",
+        "references/scope.md",
+        "references/workflow.md"
+      ],
       "tokenBudget": 1200,
-      "tags": ["backend", "dotnet", "csharp"],
-      "repoRoles": ["dotnet-service"],
+      "tags": [
+        "backend",
+        "dotnet",
+        "csharp"
+      ],
+      "repoRoles": [
+        "dotnet-service"
+      ],
       "requiresAny": [
         {
           "stack": "dotnet"
@@ -735,8 +896,16 @@
         "https://playwright.dev/docs/intro"
       ],
       "tokenBudget": 1200,
-      "tags": ["testing", "playwright"],
-      "repoRoles": ["next-app", "react-app", "vue-app", "test-suite"],
+      "tags": [
+        "testing",
+        "playwright"
+      ],
+      "repoRoles": [
+        "next-app",
+        "react-app",
+        "vue-app",
+        "test-suite"
+      ],
       "requiresAny": [
         {
           "stack": "playwright"
@@ -758,7 +927,11 @@
       "type": "agent",
       "path": "agents/code-reviewer.md",
       "title": "Haus code reviewer agent",
-      "tags": ["review", "quality", "security"],
+      "tags": [
+        "review",
+        "quality",
+        "security"
+      ],
       "repoRoles": [],
       "requiresAny": [],
       "tokenEstimate": 1400,
@@ -774,7 +947,11 @@
       "type": "agent",
       "path": "agents/test-reviewer.md",
       "title": "Haus test reviewer agent",
-      "tags": ["review", "testing", "quality"],
+      "tags": [
+        "review",
+        "testing",
+        "quality"
+      ],
       "repoRoles": [],
       "requiresAny": [],
       "tokenEstimate": 1400,
@@ -789,7 +966,10 @@
       "type": "agent",
       "path": "agents/security-reviewer.md",
       "title": "Haus security reviewer agent",
-      "tags": ["review", "security"],
+      "tags": [
+        "review",
+        "security"
+      ],
       "repoRoles": [],
       "requiresAny": [],
       "tokenEstimate": 1400,
@@ -804,7 +984,11 @@
       "type": "agent",
       "path": "agents/docs-researcher.md",
       "title": "Haus docs researcher agent",
-      "tags": ["review", "quality", "workflow"],
+      "tags": [
+        "review",
+        "quality",
+        "workflow"
+      ],
       "repoRoles": [],
       "requiresAny": [],
       "tokenEstimate": 1200,
@@ -819,7 +1003,11 @@
       "type": "agent",
       "path": "agents/planner.md",
       "title": "Haus planner agent",
-      "tags": ["workflow", "quality", "review"],
+      "tags": [
+        "workflow",
+        "quality",
+        "review"
+      ],
       "repoRoles": [],
       "requiresAny": [],
       "tokenEstimate": 1200,
@@ -844,8 +1032,14 @@
         "https://docs.vendure.io/llms.txt"
       ],
       "tokenBudget": 1200,
-      "tags": ["vendure3", "nestjs", "graphql"],
-      "repoRoles": ["vendure-app"],
+      "tags": [
+        "vendure3",
+        "nestjs",
+        "graphql"
+      ],
+      "repoRoles": [
+        "vendure-app"
+      ],
       "requiresAny": [
         {
           "stack": "vendure3"
@@ -877,8 +1071,14 @@
         "https://docs.nestjs.com/"
       ],
       "tokenBudget": 1200,
-      "tags": ["nestjs", "graphql", "typescript5"],
-      "repoRoles": ["nestjs-api"],
+      "tags": [
+        "nestjs",
+        "graphql",
+        "typescript5"
+      ],
+      "repoRoles": [
+        "nestjs-api"
+      ],
       "requiresAny": [
         {
           "stack": "nestjs"
@@ -913,8 +1113,13 @@
         "https://nx.dev/docs"
       ],
       "tokenBudget": 1200,
-      "tags": ["nx21", "yarn4"],
-      "repoRoles": ["nx-monorepo"],
+      "tags": [
+        "nx21",
+        "yarn4"
+      ],
+      "repoRoles": [
+        "nx-monorepo"
+      ],
       "requiresAny": [
         {
           "role": "nx-monorepo"
@@ -949,8 +1154,13 @@
         "https://turbo.build/repo/docs"
       ],
       "tokenBudget": 1200,
-      "tags": ["turbo", "yarn4"],
-      "repoRoles": ["turbo-monorepo"],
+      "tags": [
+        "turbo",
+        "yarn4"
+      ],
+      "repoRoles": [
+        "turbo-monorepo"
+      ],
       "requiresAny": [
         {
           "role": "turbo-monorepo"
@@ -983,8 +1193,15 @@
         "https://tanstack.com/router/latest/docs"
       ],
       "tokenBudget": 1200,
-      "tags": ["tanstack-query", "tanstack-router", "react19"],
-      "repoRoles": ["next-app", "react-app"],
+      "tags": [
+        "tanstack-query",
+        "tanstack-router",
+        "react19"
+      ],
+      "repoRoles": [
+        "next-app",
+        "react-app"
+      ],
       "requiresAny": [
         {
           "dependency": "@tanstack/react-query"
@@ -1023,8 +1240,15 @@
         "https://www.radix-ui.com/primitives/docs"
       ],
       "tokenBudget": 1200,
-      "tags": ["radix", "shadcn", "react19"],
-      "repoRoles": ["next-app", "react-app"],
+      "tags": [
+        "radix",
+        "shadcn",
+        "react19"
+      ],
+      "repoRoles": [
+        "next-app",
+        "react-app"
+      ],
       "requiresAny": [
         {
           "stack": "shadcn"
@@ -1068,8 +1292,16 @@
         "https://tailwindcss.com/docs"
       ],
       "tokenBudget": 1200,
-      "tags": ["tailwind", "scss", "react19"],
-      "repoRoles": ["next-app", "react-app", "vite-app"],
+      "tags": [
+        "tailwind",
+        "scss",
+        "react19"
+      ],
+      "repoRoles": [
+        "next-app",
+        "react-app",
+        "vite-app"
+      ],
       "requiresAny": [
         {
           "dependency": "tailwindcss"
@@ -1104,8 +1336,12 @@
         "https://vuejs.org/guide"
       ],
       "tokenBudget": 1200,
-      "tags": ["vue"],
-      "repoRoles": ["vue-app"],
+      "tags": [
+        "vue"
+      ],
+      "repoRoles": [
+        "vue-app"
+      ],
       "requiresAny": [
         {
           "stack": "vue"
@@ -1137,8 +1373,13 @@
         "https://laravel.com/docs"
       ],
       "tokenBudget": 1200,
-      "tags": ["laravel-nova", "laravel"],
-      "repoRoles": ["laravel-nova-app"],
+      "tags": [
+        "laravel-nova",
+        "laravel"
+      ],
+      "repoRoles": [
+        "laravel-nova-app"
+      ],
       "requiresAny": [
         {
           "dependency": "laravel/nova"
@@ -1167,8 +1408,13 @@
         "https://developer.wordpress.org/"
       ],
       "tokenBudget": 1200,
-      "tags": ["wordpress", "bedrock"],
-      "repoRoles": ["wordpress-bedrock-site"],
+      "tags": [
+        "wordpress",
+        "bedrock"
+      ],
+      "repoRoles": [
+        "wordpress-bedrock-site"
+      ],
       "requiresAny": [
         {
           "role": "wordpress-bedrock-site"
@@ -1200,8 +1446,13 @@
         "https://developer.wordpress.org/"
       ],
       "tokenBudget": 1200,
-      "tags": ["wordpress"],
-      "repoRoles": ["wordpress-bedrock-site", "wordpress-vanilla-site"],
+      "tags": [
+        "wordpress"
+      ],
+      "repoRoles": [
+        "wordpress-bedrock-site",
+        "wordpress-vanilla-site"
+      ],
       "requiresAny": [
         {
           "role": "wordpress-bedrock-site"
@@ -1238,10 +1489,18 @@
       "purpose": "Guide .NET service-layer contract and orchestration changes.",
       "whenToUse": "Use for .NET service boundary, orchestration, and handler behavior updates.",
       "whenNotToUse": "Do not use for route formatting-only tasks with no service impact.",
-      "references": ["references/conventions.md", "references/scope.md", "references/workflow.md"],
+      "references": [
+        "references/conventions.md",
+        "references/scope.md",
+        "references/workflow.md"
+      ],
       "tokenBudget": 1200,
-      "tags": ["dotnet"],
-      "repoRoles": ["dotnet-service"],
+      "tags": [
+        "dotnet"
+      ],
+      "repoRoles": [
+        "dotnet-service"
+      ],
       "requiresAny": [
         {
           "stack": "dotnet"
@@ -1266,9 +1525,18 @@
       "purpose": "Guide identity-provider auth flow and claim/session lifecycle changes across OIDC, Azure AD, BankID, and SAML2.",
       "whenToUse": "Use for OIDC/Azure AD/BankID/SAML2 login, callback, token, claim mapping, and SP/IDP metadata updates.",
       "whenNotToUse": "Do not use for profile CRUD without auth protocol change.",
-      "references": ["references/conventions.md", "references/scope.md", "references/workflow.md"],
+      "references": [
+        "references/conventions.md",
+        "references/scope.md",
+        "references/workflow.md"
+      ],
       "tokenBudget": 1200,
-      "tags": ["oidc", "azure-ad", "bankid", "saml2"],
+      "tags": [
+        "oidc",
+        "azure-ad",
+        "bankid",
+        "saml2"
+      ],
       "repoRoles": [],
       "requiresAny": [
         {
@@ -1307,8 +1575,14 @@
         "https://authjs.dev/"
       ],
       "tokenBudget": 1200,
-      "tags": ["next-auth", "auth", "nextjs"],
-      "repoRoles": ["next-app"],
+      "tags": [
+        "next-auth",
+        "auth",
+        "nextjs"
+      ],
+      "repoRoles": [
+        "next-app"
+      ],
       "requiresAny": [
         {
           "stack": "next-auth"
@@ -1336,9 +1610,20 @@
       "purpose": "Guide schema/query/index/search changes across supported data engines.",
       "whenToUse": "Use for migrations, query behavior, indexing, and Elasticsearch mapping updates.",
       "whenNotToUse": "Do not use for UI-only changes without persistence/search impact.",
-      "references": ["references/conventions.md", "references/scope.md", "references/workflow.md"],
+      "references": [
+        "references/conventions.md",
+        "references/scope.md",
+        "references/workflow.md"
+      ],
       "tokenBudget": 1200,
-      "tags": ["postgresql", "mariadb", "mysql", "mssql", "elasticsearch", "redis"],
+      "tags": [
+        "postgresql",
+        "mariadb",
+        "mysql",
+        "mssql",
+        "elasticsearch",
+        "redis"
+      ],
       "repoRoles": [],
       "requiresAny": [
         {
@@ -1376,9 +1661,16 @@
       "purpose": "Guide deterministic dependency/workspace changes for Yarn4 and pnpm89.",
       "whenToUse": "Use for lockfile, workspace, and package manager configuration changes.",
       "whenNotToUse": "Do not use for feature-only code edits with no dependency/workspace impact.",
-      "references": ["references/conventions.md", "references/scope.md", "references/workflow.md"],
+      "references": [
+        "references/conventions.md",
+        "references/scope.md",
+        "references/workflow.md"
+      ],
       "tokenBudget": 1200,
-      "tags": ["yarn4", "pnpm89"],
+      "tags": [
+        "yarn4",
+        "pnpm89"
+      ],
       "repoRoles": [],
       "requiresAny": [
         {
@@ -1411,7 +1703,9 @@
         "https://vitest.dev/guide"
       ],
       "tokenBudget": 1200,
-      "tags": ["testing-library"],
+      "tags": [
+        "testing-library"
+      ],
       "repoRoles": [],
       "requiresAny": [
         {
@@ -1450,7 +1744,11 @@
         "https://vitest.dev/guide/"
       ],
       "tokenBudget": 1200,
-      "tags": ["testing", "vitest", "typescript"],
+      "tags": [
+        "testing",
+        "vitest",
+        "typescript"
+      ],
       "repoRoles": [
         "next-app",
         "react-app",
@@ -1490,8 +1788,16 @@
         "https://jestjs.io/docs/getting-started"
       ],
       "tokenBudget": 1200,
-      "tags": ["testing", "jest", "typescript"],
-      "repoRoles": ["next-app", "react-app", "nx-monorepo"],
+      "tags": [
+        "testing",
+        "jest",
+        "typescript"
+      ],
+      "repoRoles": [
+        "next-app",
+        "react-app",
+        "nx-monorepo"
+      ],
       "requiresAny": [
         {
           "stack": "jest"
@@ -1526,8 +1832,13 @@
         "https://laravel.com/docs"
       ],
       "tokenBudget": 1200,
-      "tags": ["phpunit"],
-      "repoRoles": ["laravel-app", "laravel-nova-app"],
+      "tags": [
+        "phpunit"
+      ],
+      "repoRoles": [
+        "laravel-app",
+        "laravel-nova-app"
+      ],
       "requiresAny": [
         {
           "stack": "phpunit"
@@ -1559,8 +1870,14 @@
         "https://storybook.js.org/docs"
       ],
       "tokenBudget": 1200,
-      "tags": ["storybook"],
-      "repoRoles": ["react-app", "next-app", "vite-app"],
+      "tags": [
+        "storybook"
+      ],
+      "repoRoles": [
+        "react-app",
+        "next-app",
+        "vite-app"
+      ],
       "requiresAny": [
         {
           "stack": "storybook"
@@ -1598,7 +1915,10 @@
         "references/verification.md"
       ],
       "tokenBudget": 800,
-      "tags": ["security", "review"],
+      "tags": [
+        "security",
+        "review"
+      ],
       "repoRoles": [],
       "requiresAny": [],
       "tokenEstimate": 1200,
@@ -1625,7 +1945,11 @@
         "references/rollback.md"
       ],
       "tokenBudget": 800,
-      "tags": ["quality", "security", "review"],
+      "tags": [
+        "quality",
+        "security",
+        "review"
+      ],
       "repoRoles": [],
       "requiresAny": [],
       "tokenEstimate": 1200,
@@ -1645,7 +1969,11 @@
       "purpose": "General agentic development workflow: feature loop, NEVER rules, testing standards, ADR, subagent patterns, security, accessibility.",
       "whenToUse": "Install in every project using haus-workflow.",
       "whenNotToUse": "Never skip this template.",
-      "tags": ["workflow", "baseline", "project-instructions"],
+      "tags": [
+        "workflow",
+        "baseline",
+        "project-instructions"
+      ],
       "repoRoles": [],
       "installMode": "copy-selected",
       "tokenEstimate": 2200,
