@@ -1,5 +1,5 @@
 {
-  "version": "0.1.0",
+  "version": "2.1.0",
   "items": [
     {
       "id": "haus.global-engineering-rules",
@@ -19,7 +19,9 @@
       "requiresAny": [],
       "tokenEstimate": 1800,
       "installMode": "copy-selected",
-      "default": true
+      "default": true,
+      "reviewStatus": "approved",
+      "riskLevel": "low"
     },
     {
       "id": "haus.nextjs-patterns",
@@ -50,7 +52,9 @@
       ],
       "ecosystem": "nextjs",
       "tokenEstimate": 2600,
-      "installMode": "copy-selected"
+      "installMode": "copy-selected",
+      "reviewStatus": "approved",
+      "riskLevel": "low"
     },
     {
       "id": "haus.react19-patterns",
@@ -81,7 +85,9 @@
       ],
       "ecosystem": "react",
       "tokenEstimate": 2200,
-      "installMode": "copy-selected"
+      "installMode": "copy-selected",
+      "reviewStatus": "approved",
+      "riskLevel": "low"
     },
     {
       "id": "haus.typescript5-patterns",
@@ -122,7 +128,9 @@
       ],
       "tokenEstimate": 2200,
       "installMode": "copy-selected",
-      "ecosystem": "typescript"
+      "ecosystem": "typescript",
+      "reviewStatus": "approved",
+      "riskLevel": "low"
     },
     {
       "id": "haus.vite8-patterns",
@@ -154,7 +162,9 @@
       ],
       "ecosystem": "vite",
       "tokenEstimate": 1800,
-      "installMode": "copy-selected"
+      "installMode": "copy-selected",
+      "reviewStatus": "approved",
+      "riskLevel": "low"
     },
     {
       "id": "haus.react-router-v7-patterns",
@@ -188,7 +198,9 @@
       ],
       "ecosystem": "react",
       "tokenEstimate": 2000,
-      "installMode": "copy-selected"
+      "installMode": "copy-selected",
+      "reviewStatus": "approved",
+      "riskLevel": "low"
     },
     {
       "id": "haus.expo-react-native-patterns",
@@ -228,7 +240,9 @@
       ],
       "ecosystem": "mobile",
       "tokenEstimate": 2200,
-      "installMode": "copy-selected"
+      "installMode": "copy-selected",
+      "reviewStatus": "approved",
+      "riskLevel": "low"
     },
     {
       "id": "haus.i18next-patterns",
@@ -262,7 +276,9 @@
       ],
       "ecosystem": "tooling",
       "tokenEstimate": 1800,
-      "installMode": "copy-selected"
+      "installMode": "copy-selected",
+      "reviewStatus": "approved",
+      "riskLevel": "low"
     },
     {
       "id": "haus.bullmq-patterns",
@@ -293,7 +309,9 @@
       ],
       "ecosystem": "tooling",
       "tokenEstimate": 1800,
-      "installMode": "copy-selected"
+      "installMode": "copy-selected",
+      "reviewStatus": "approved",
+      "riskLevel": "low"
     },
     {
       "id": "haus.sentry-patterns",
@@ -330,7 +348,9 @@
       ],
       "ecosystem": "tooling",
       "tokenEstimate": 1800,
-      "installMode": "copy-selected"
+      "installMode": "copy-selected",
+      "reviewStatus": "approved",
+      "riskLevel": "low"
     },
     {
       "id": "haus.prettier-setup",
@@ -353,7 +373,9 @@
       ],
       "ecosystem": "tooling",
       "tokenEstimate": 1000,
-      "installMode": "copy-selected"
+      "installMode": "copy-selected",
+      "reviewStatus": "approved",
+      "riskLevel": "low"
     },
     {
       "id": "haus.eslint-setup",
@@ -376,7 +398,9 @@
       ],
       "ecosystem": "tooling",
       "tokenEstimate": 1000,
-      "installMode": "copy-selected"
+      "installMode": "copy-selected",
+      "reviewStatus": "approved",
+      "riskLevel": "low"
     },
     {
       "id": "haus.stripe-patterns",
@@ -410,7 +434,9 @@
       ],
       "ecosystem": "payments",
       "tokenEstimate": 2000,
-      "installMode": "copy-selected"
+      "installMode": "copy-selected",
+      "reviewStatus": "approved",
+      "riskLevel": "medium"
     },
     {
       "id": "haus.qliro-patterns",
@@ -436,7 +462,9 @@
       ],
       "ecosystem": "payments",
       "tokenEstimate": 1800,
-      "installMode": "copy-selected"
+      "installMode": "copy-selected",
+      "reviewStatus": "approved",
+      "riskLevel": "medium"
     },
     {
       "id": "haus.supabase-patterns",
@@ -470,7 +498,9 @@
       ],
       "ecosystem": "database",
       "tokenEstimate": 2000,
-      "installMode": "copy-selected"
+      "installMode": "copy-selected",
+      "reviewStatus": "approved",
+      "riskLevel": "low"
     },
     {
       "id": "haus.sanity-patterns",
@@ -507,7 +537,9 @@
       ],
       "ecosystem": "cms",
       "tokenEstimate": 2000,
-      "installMode": "copy-selected"
+      "installMode": "copy-selected",
+      "reviewStatus": "approved",
+      "riskLevel": "low"
     },
     {
       "id": "haus.strapi-patterns",
@@ -541,7 +573,9 @@
       ],
       "ecosystem": "cms",
       "tokenEstimate": 2000,
-      "installMode": "copy-selected"
+      "installMode": "copy-selected",
+      "reviewStatus": "approved",
+      "riskLevel": "low"
     },
     {
       "id": "haus.prisma-patterns",
@@ -575,7 +609,9 @@
       ],
       "ecosystem": "database",
       "tokenEstimate": 2000,
-      "installMode": "copy-selected"
+      "installMode": "copy-selected",
+      "reviewStatus": "approved",
+      "riskLevel": "low"
     },
     {
       "id": "haus.vendure-plugin-patterns",
@@ -609,7 +645,9 @@
       ],
       "ecosystem": "vendure",
       "tokenEstimate": 3400,
-      "installMode": "copy-selected"
+      "installMode": "copy-selected",
+      "reviewStatus": "approved",
+      "riskLevel": "low"
     },
     {
       "id": "haus.laravel-patterns",
@@ -640,7 +678,9 @@
       ],
       "ecosystem": "laravel",
       "tokenEstimate": 2800,
-      "installMode": "copy-selected"
+      "installMode": "copy-selected",
+      "reviewStatus": "approved",
+      "riskLevel": "low"
     },
     {
       "id": "haus.wordpress-patterns",
@@ -671,7 +711,9 @@
       ],
       "ecosystem": "wordpress",
       "tokenEstimate": 3000,
-      "installMode": "copy-selected"
+      "installMode": "copy-selected",
+      "reviewStatus": "approved",
+      "riskLevel": "low"
     },
     {
       "id": "haus.dotnet-patterns",
@@ -694,7 +736,9 @@
       ],
       "ecosystem": "dotnet",
       "tokenEstimate": 2600,
-      "installMode": "copy-selected"
+      "installMode": "copy-selected",
+      "reviewStatus": "approved",
+      "riskLevel": "low"
     },
     {
       "id": "haus.playwright-patterns",
@@ -725,7 +769,9 @@
       ],
       "tokenEstimate": 2200,
       "installMode": "copy-selected",
-      "ecosystem": "playwright"
+      "ecosystem": "playwright",
+      "reviewStatus": "approved",
+      "riskLevel": "low"
     },
     {
       "id": "haus.code-reviewer-agent",
@@ -739,7 +785,9 @@
       "requiresAny": [],
       "tokenEstimate": 1400,
       "installMode": "copy-selected",
-      "default": true
+      "default": true,
+      "reviewStatus": "approved",
+      "riskLevel": "low"
     },
     {
       "id": "haus.test-reviewer-agent",
@@ -752,7 +800,9 @@
       "repoRoles": [],
       "requiresAny": [],
       "tokenEstimate": 1400,
-      "installMode": "copy-selected"
+      "installMode": "copy-selected",
+      "reviewStatus": "approved",
+      "riskLevel": "low"
     },
     {
       "id": "haus.security-reviewer-agent",
@@ -765,7 +815,9 @@
       "repoRoles": [],
       "requiresAny": [],
       "tokenEstimate": 1400,
-      "installMode": "copy-selected"
+      "installMode": "copy-selected",
+      "reviewStatus": "approved",
+      "riskLevel": "low"
     },
     {
       "id": "haus.docs-researcher-agent",
@@ -778,7 +830,9 @@
       "repoRoles": [],
       "requiresAny": [],
       "tokenEstimate": 1200,
-      "installMode": "copy-selected"
+      "installMode": "copy-selected",
+      "reviewStatus": "approved",
+      "riskLevel": "low"
     },
     {
       "id": "haus.planner-agent",
@@ -791,7 +845,9 @@
       "repoRoles": [],
       "requiresAny": [],
       "tokenEstimate": 1200,
-      "installMode": "copy-selected"
+      "installMode": "copy-selected",
+      "reviewStatus": "approved",
+      "riskLevel": "low"
     },
     {
       "id": "haus.vendure-app-patterns",
@@ -822,7 +878,9 @@
       ],
       "ecosystem": "vendure",
       "tokenEstimate": 3200,
-      "installMode": "copy-selected"
+      "installMode": "copy-selected",
+      "reviewStatus": "approved",
+      "riskLevel": "low"
     },
     {
       "id": "haus.nestjs-graphql-patterns",
@@ -856,7 +914,9 @@
       ],
       "ecosystem": "nestjs",
       "tokenEstimate": 2600,
-      "installMode": "copy-selected"
+      "installMode": "copy-selected",
+      "reviewStatus": "approved",
+      "riskLevel": "low"
     },
     {
       "id": "haus.nx21-monorepo-patterns",
@@ -890,7 +950,9 @@
       ],
       "ecosystem": "nx",
       "tokenEstimate": 2200,
-      "installMode": "copy-selected"
+      "installMode": "copy-selected",
+      "reviewStatus": "approved",
+      "riskLevel": "low"
     },
     {
       "id": "haus.turbo-monorepo-patterns",
@@ -921,7 +983,9 @@
       ],
       "ecosystem": "turbo",
       "tokenEstimate": 2200,
-      "installMode": "copy-selected"
+      "installMode": "copy-selected",
+      "reviewStatus": "approved",
+      "riskLevel": "low"
     },
     {
       "id": "haus.tanstack-query-router-patterns",
@@ -959,7 +1023,9 @@
       ],
       "ecosystem": "react",
       "tokenEstimate": 2200,
-      "installMode": "copy-selected"
+      "installMode": "copy-selected",
+      "reviewStatus": "approved",
+      "riskLevel": "low"
     },
     {
       "id": "haus.radix-shadcn-patterns",
@@ -1003,7 +1069,9 @@
       ],
       "ecosystem": "react",
       "tokenEstimate": 1800,
-      "installMode": "copy-selected"
+      "installMode": "copy-selected",
+      "reviewStatus": "approved",
+      "riskLevel": "low"
     },
     {
       "id": "haus.tailwind-scss-patterns",
@@ -1037,7 +1105,9 @@
       ],
       "ecosystem": "tailwind",
       "tokenEstimate": 1800,
-      "installMode": "copy-selected"
+      "installMode": "copy-selected",
+      "reviewStatus": "approved",
+      "riskLevel": "low"
     },
     {
       "id": "haus.vue-patterns",
@@ -1068,7 +1138,9 @@
       ],
       "ecosystem": "vue",
       "tokenEstimate": 2000,
-      "installMode": "copy-selected"
+      "installMode": "copy-selected",
+      "reviewStatus": "approved",
+      "riskLevel": "low"
     },
     {
       "id": "haus.laravel-nova-patterns",
@@ -1096,7 +1168,9 @@
       ],
       "ecosystem": "laravel",
       "tokenEstimate": 2600,
-      "installMode": "copy-selected"
+      "installMode": "copy-selected",
+      "reviewStatus": "approved",
+      "riskLevel": "low"
     },
     {
       "id": "haus.wordpress-bedrock-patterns",
@@ -1127,7 +1201,9 @@
       ],
       "ecosystem": "wordpress",
       "tokenEstimate": 2600,
-      "installMode": "copy-selected"
+      "installMode": "copy-selected",
+      "reviewStatus": "approved",
+      "riskLevel": "low"
     },
     {
       "id": "haus.wordpress-acf-elementor-jetengine-patterns",
@@ -1170,7 +1246,9 @@
       ],
       "ecosystem": "wordpress",
       "tokenEstimate": 2600,
-      "installMode": "copy-selected"
+      "installMode": "copy-selected",
+      "reviewStatus": "approved",
+      "riskLevel": "low"
     },
     {
       "id": "haus.dotnet-service-patterns",
@@ -1196,7 +1274,9 @@
       ],
       "ecosystem": "dotnet",
       "tokenEstimate": 2300,
-      "installMode": "copy-selected"
+      "installMode": "copy-selected",
+      "reviewStatus": "approved",
+      "riskLevel": "low"
     },
     {
       "id": "haus.auth-oidc-azure-bankid-patterns",
@@ -1228,7 +1308,9 @@
       ],
       "tokenEstimate": 1700,
       "installMode": "copy-selected",
-      "ecosystem": "auth"
+      "ecosystem": "auth",
+      "reviewStatus": "approved",
+      "riskLevel": "medium"
     },
     {
       "id": "haus.nextauth-patterns",
@@ -1262,7 +1344,9 @@
       ],
       "ecosystem": "auth",
       "tokenEstimate": 2000,
-      "installMode": "copy-selected"
+      "installMode": "copy-selected",
+      "reviewStatus": "approved",
+      "riskLevel": "medium"
     },
     {
       "id": "haus.database-patterns",
@@ -1300,11 +1384,13 @@
       ],
       "tokenEstimate": 1700,
       "installMode": "copy-selected",
-      "ecosystem": "database"
+      "ecosystem": "database",
+      "reviewStatus": "approved",
+      "riskLevel": "low"
     },
     {
       "id": "haus.package-manager-yarn4-pnpm89",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "source": "haus",
       "type": "skill",
       "path": "skills/package-manager-yarn4-pnpm89",
@@ -1326,7 +1412,9 @@
       ],
       "tokenEstimate": 1200,
       "installMode": "copy-selected",
-      "ecosystem": "packagemanager"
+      "ecosystem": "packagemanager",
+      "reviewStatus": "approved",
+      "riskLevel": "low"
     },
     {
       "id": "haus.testing-library-patterns",
@@ -1363,7 +1451,9 @@
       ],
       "tokenEstimate": 1500,
       "installMode": "copy-selected",
-      "ecosystem": "testing"
+      "ecosystem": "testing",
+      "reviewStatus": "approved",
+      "riskLevel": "low"
     },
     {
       "id": "haus.vitest-patterns",
@@ -1399,8 +1489,11 @@
           "dependency": "vitest"
         }
       ],
+      "ecosystem": "testing",
       "tokenEstimate": 1500,
-      "installMode": "copy-selected"
+      "installMode": "copy-selected",
+      "reviewStatus": "approved",
+      "riskLevel": "low"
     },
     {
       "id": "haus.jest-patterns",
@@ -1432,8 +1525,11 @@
           "dependency": "jest-environment-jsdom"
         }
       ],
+      "ecosystem": "testing",
       "tokenEstimate": 1500,
-      "installMode": "copy-selected"
+      "installMode": "copy-selected",
+      "reviewStatus": "approved",
+      "riskLevel": "low"
     },
     {
       "id": "haus.phpunit-patterns",
@@ -1464,7 +1560,9 @@
       ],
       "ecosystem": "laravel",
       "tokenEstimate": 1500,
-      "installMode": "copy-selected"
+      "installMode": "copy-selected",
+      "reviewStatus": "approved",
+      "riskLevel": "low"
     },
     {
       "id": "haus.storybook-patterns",
@@ -1501,7 +1599,9 @@
       ],
       "ecosystem": "storybook",
       "tokenEstimate": 1500,
-      "installMode": "copy-selected"
+      "installMode": "copy-selected",
+      "reviewStatus": "approved",
+      "riskLevel": "low"
     },
     {
       "id": "haus.security-review",
@@ -1526,7 +1626,9 @@
       "tokenEstimate": 1200,
       "installMode": "copy-selected",
       "ecosystem": "security",
-      "default": true
+      "default": true,
+      "reviewStatus": "approved",
+      "riskLevel": "low"
     },
     {
       "id": "haus.production-readiness-review",
@@ -1551,24 +1653,28 @@
       "tokenEstimate": 1200,
       "installMode": "copy-selected",
       "ecosystem": "production",
-      "default": true
+      "default": true,
+      "reviewStatus": "approved",
+      "riskLevel": "low"
     },
     {
-      "id": "haus.haus-way-of-work",
+      "id": "haus.agentic-workflow-standard",
       "version": "1.0.0",
       "source": "haus",
       "type": "template",
-      "path": "templates/haus-way-of-work.md",
-      "title": "Haus way of work",
-      "purpose": "Universal project instructions: context loading, output discipline, commit hygiene, safety rails, PR workflow.",
-      "whenToUse": "Install in every project using haus-workflow. Always active as baseline project instructions.",
+      "path": "templates/agentic-workflow-standard.md",
+      "title": "Agentic workflow standard",
+      "purpose": "General agentic development workflow: feature loop, NEVER rules, testing standards, ADR, subagent patterns, security, accessibility.",
+      "whenToUse": "Install in every project using haus-workflow.",
       "whenNotToUse": "Never skip this template.",
       "tags": ["workflow", "baseline", "project-instructions"],
       "repoRoles": [],
       "installMode": "copy-selected",
-      "tokenEstimate": 500,
-      "tokenBudget": 600,
-      "default": true
+      "tokenEstimate": 2200,
+      "tokenBudget": 2400,
+      "default": true,
+      "reviewStatus": "approved",
+      "riskLevel": "low"
     }
   ]
 }
