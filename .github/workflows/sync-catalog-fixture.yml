@@ -6,6 +6,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
   sync:
@@ -28,11 +29,20 @@ jobs:
             echo "changed=true" >> $GITHUB_OUTPUT
           fi
 
-      - name: Commit updated fixture
+      - name: Commit updated fixture and open PR
         if: steps.diff.outputs.changed == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          BRANCH="chore/sync-catalog-fixture-${{ github.run_id }}"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
           git add library/catalog/manifest.json
           git commit -m "chore(catalog): sync fixture from haus-workflow-catalog main"
-          git push
+          git push origin "$BRANCH"
+          gh pr create \
+            --base main \
+            --head "$BRANCH" \
+            --title "chore(catalog): sync fixture from haus-workflow-catalog main" \
+            --body "Automated sync of \`library/catalog/manifest.json\` from the latest \`main\` of [haus-workflow-catalog](https://github.com/WeAreHausTech/haus-workflow-catalog)."
