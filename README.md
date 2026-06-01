@@ -15,6 +15,34 @@ haus install
 
 `haus install` seeds `~/.claude/` with Haus-managed skills, agents, and hooks.
 
+**Prefer Claude over the terminal?** Paste this prompt into a Claude Code session:
+
+```
+Install the haus-workflow CLI globally and run haus install to seed ~/.claude/ with the Haus skills and hooks.
+
+Steps:
+1. Run: npm install -g @haus-tech/haus-workflow
+2. Run: haus install
+3. Confirm which files were written to ~/.claude/
+```
+
+---
+
+## haus-workflow skill
+
+Once installed, Claude Code gains a `/haus-workflow` slash command.
+
+```
+/haus-workflow          # interactive menu — pick setup, update, refresh, etc.
+/haus-workflow init     # first-time project setup
+/haus-workflow apply    # refresh .claude/ and regenerate CLAUDE.md imports
+/haus-workflow update   # update npm package + catalog + ~/.claude/
+/haus-workflow catalog  # fetch only latest catalog
+/haus-workflow doctor   # health check for drift
+```
+
+Without an argument, the skill presents a menu so you can pick the task. With an argument, it runs immediately.
+
 ---
 
 ## Per-project setup
