@@ -38,13 +38,15 @@ haus scan              # scan repo and write context-map
 haus recommend         # score and recommend catalog items
 haus apply --dry-run   # preview what would be written
 haus apply --write     # write .claude/ files
-haus update            # sync remote catalog + refresh lockfile
-haus update --check    # check for updates without applying
-haus doctor            # health check: hooks, CLAUDE.md, catalog cache
-haus config            # manage hook configuration
-haus memory            # view project memory store
-haus guard             # test bash/file-access guards
-haus uninstall         # remove Haus-managed files from ~/.claude/
+haus context --task "<task>"  # select context rules for a specific task
+haus update                   # sync remote catalog + refresh lockfile
+haus update --check           # check for updates without applying
+haus undo                     # undo last applied changes
+haus doctor                   # health check: hooks, CLAUDE.md, catalog cache
+haus config                   # manage hook configuration
+haus memory                   # view project memory store
+haus guard                    # test bash/file-access guards
+haus uninstall                # remove Haus-managed files from ~/.claude/
 ```
 
 ---
@@ -62,3 +64,4 @@ yarn dev <cmd>  # run CLI without building (tsx)
 - [Architecture](docs/architecture.md)
 - [CLI reference](docs/cli.md)
 - [Security](docs/security.md)
+- [Developer scripts](docs/dev.md)

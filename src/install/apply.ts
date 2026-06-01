@@ -93,19 +93,6 @@ function collectSourceFiles(srcDir: string, claudeDir: string): SourceFile[] {
     }
   }
 
-  const agentsDir = path.join(srcDir, 'agents')
-  if (fs.pathExistsSync(agentsDir)) {
-    for (const agentFile of fs.readdirSync(agentsDir)) {
-      if (!agentFile.endsWith('.md')) continue
-      const agentName = agentFile.replace(/\.md$/, '')
-      entries.push({
-        stableId: `agent.${agentName}`,
-        srcRelPath: path.join('library', 'global', 'agents', agentFile),
-        destPath: path.join(claudeDir, 'agents', agentFile),
-      })
-    }
-  }
-
   return entries
 }
 

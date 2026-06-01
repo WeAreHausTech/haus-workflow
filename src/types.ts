@@ -75,7 +75,7 @@ export type CatalogItem = {
   /** Optional ecosystem family identifier (e.g. `wordpress`, `laravel`, `vendure`, `nextjs`, `nestjs`, `dotnet`, `nx`, `turbo`). Used by recommender for cross-ecosystem conflict detection. */
   ecosystem?: string
   // Curated external provenance — present when source === "curated"
-  /** References sources.yaml id for this item's origin. */
+  /** Catalog source id for this item's origin (e.g. `anthropic-skills`). */
   originSourceId?: string
   /** Direct URL to the upstream source item (file, folder, or page). */
   originUrl?: string
