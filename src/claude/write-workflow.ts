@@ -3,12 +3,11 @@
  * Skips the write if the file was modified by the user or the content is already up to date.
  */
 
-import os from 'node:os'
 import path from 'node:path'
 
 import fs from 'fs-extra'
 
-import { CATALOG_CACHE_SUBDIR } from '../catalog/constants.js'
+import { CACHE_DIR } from '../catalog/remote-catalog.js'
 import { createUnifiedDiff, hasTextChanged, summarizeDiff } from '../utils/diff.js'
 import { hashText, writeText } from '../utils/fs.js'
 import { log, warn } from '../utils/logger.js'
@@ -20,11 +19,7 @@ import { normaliseLF, parseHausManagedHeader } from './managed-template.js'
 const STABLE_ID = 'template.workflow'
 const SCHEMA_VERSION = '1'
 const TEMPLATE_REL = 'library/global/templates/agentic-workflow-standard.md'
-const CATALOG_CACHE_TEMPLATE = path.join(
-  os.homedir(),
-  CATALOG_CACHE_SUBDIR,
-  'templates/agentic-workflow-standard.md',
-)
+const CATALOG_CACHE_TEMPLATE = path.join(CACHE_DIR, 'templates/agentic-workflow-standard.md')
 
 /** Build the HAUS-MANAGED header line, embedding the content hash for tamper detection. */
 export function makeWorkflowHeader(pkgVersion: string, contentHash: string): string {
