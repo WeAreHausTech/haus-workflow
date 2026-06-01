@@ -2,10 +2,19 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import os from 'node:os'
 import path from 'node:path'
-import { mkdtempSync, writeFileSync, readFileSync, existsSync } from 'node:fs'
+import { mkdtempSync, mkdirSync, copyFileSync, writeFileSync, readFileSync, existsSync } from 'node:fs'
 import { execaSync } from 'execa'
 
 process.env.HAUS_FIXTURE_CATALOG = path.resolve('tests/fixtures/catalog/manifest.json')
+
+// Seed a temp catalog cache with the fixture template so writeWorkflow can find it.
+const _testCacheDir = mkdtempSync(path.join(os.tmpdir(), 'haus-cache-'))
+mkdirSync(path.join(_testCacheDir, 'templates'), { recursive: true })
+copyFileSync(
+  path.resolve('tests/fixtures/templates/agentic-workflow-standard.md'),
+  path.join(_testCacheDir, 'templates', 'agentic-workflow-standard.md'),
+)
+process.env.HAUS_CATALOG_CACHE_DIR_OVERRIDE = _testCacheDir
 
 const BLOCK_BEGIN = '<!-- HAUS:BEGIN haus-imports v=1 -->'
 const BLOCK_END = '<!-- HAUS:END haus-imports -->'
