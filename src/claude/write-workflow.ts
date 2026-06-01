@@ -1,5 +1,5 @@
 /**
- * Writes .haus-workflow/WORKFLOW.md from the bundled (or cached) template.
+ * Writes .haus-workflow/WORKFLOW.md from the catalog-cached template.
  * Skips the write if the file was modified by the user or the content is already up to date.
  */
 
@@ -11,14 +11,13 @@ import { CACHE_DIR } from '../catalog/remote-catalog.js'
 import { createUnifiedDiff, hasTextChanged, summarizeDiff } from '../utils/diff.js'
 import { hashText, writeText } from '../utils/fs.js'
 import { log, warn } from '../utils/logger.js'
-import { displayPath, hausPath, packageRoot } from '../utils/paths.js'
+import { displayPath, hausPath } from '../utils/paths.js'
 
 import { normaliseLF, parseHausManagedHeader } from './managed-template.js'
 
 /** Stable id embedded in the HAUS-MANAGED header — identifies this file on re-apply. */
 const STABLE_ID = 'template.workflow'
 const SCHEMA_VERSION = '1'
-const TEMPLATE_REL = 'library/global/templates/agentic-workflow-standard.md'
 const CATALOG_CACHE_TEMPLATE = path.join(CACHE_DIR, 'templates/agentic-workflow-standard.md')
 
 /** Build the HAUS-MANAGED header line, embedding the content hash for tamper detection. */
@@ -35,15 +34,12 @@ export async function writeWorkflow(
   pkgVersion: string,
   dryRun: boolean,
 ): Promise<string | null> {
-  // Catalog cache (populated by `haus update`) takes precedence over bundled fallback
-  const cachePath = CATALOG_CACHE_TEMPLATE
-  const packagePath = path.join(packageRoot(), TEMPLATE_REL)
-  const templatePath = (await fs.pathExists(cachePath)) ? cachePath : packagePath
-
-  if (!(await fs.pathExists(templatePath))) {
+  if (!(await fs.pathExists(CATALOG_CACHE_TEMPLATE))) {
     warn(`Workflow template not found — run \`haus update\` to fetch from catalog`)
     return null
   }
+
+  const templatePath = CATALOG_CACHE_TEMPLATE
 
   const templateContent = await fs.readFile(templatePath, 'utf8')
   const contentHash = hashText(normaliseLF(templateContent))
