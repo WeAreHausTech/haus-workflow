@@ -7,6 +7,7 @@ import path from 'node:path'
 
 import fs from 'fs-extra'
 
+import { buildDenyRules } from '../security/deny-rules.js'
 import { readText, writeText } from '../utils/fs.js'
 import { log, warn } from '../utils/logger.js'
 import { packageRoot } from '../utils/paths.js'
@@ -19,7 +20,13 @@ import {
   readManifest,
   writeManifest,
 } from './manifest.js'
-import { loadHooksFragment, mergeHooks, readSettings, writeSettings } from './settings-merge.js'
+import {
+  loadHooksFragment,
+  mergeDenyRules,
+  mergeHooks,
+  readSettings,
+  writeSettings,
+} from './settings-merge.js'
 
 /** Manifest schema version written into each installed file header and manifest entry. */
 const SCHEMA_VERSION = '1'
@@ -190,7 +197,9 @@ export async function applyInstall(options: ApplyOptions = {}): Promise<ApplyRes
   const fragmentPath = path.join(srcDir, 'settings-fragments', 'hooks.json')
   const fragments = await loadHooksFragment(fragmentPath)
   const settings = await readSettings()
-  const { settings: mergedSettings, addedIds } = mergeHooks(settings, fragments)
+  const { settings: hookSettings, addedIds } = mergeHooks(settings, fragments)
+  // Write the deterministic NEVER rules into permissions.deny (WORKFLOW.md "enforce in both").
+  const { settings: mergedSettings } = mergeDenyRules(hookSettings, buildDenyRules())
   result.hookIds = addedIds
 
   // Delete files that were in the old manifest but are no longer in the current package.

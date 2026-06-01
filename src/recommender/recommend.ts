@@ -4,6 +4,7 @@
  */
 
 import { loadCatalog } from '../catalog/load-catalog.js'
+import { SENSITIVE_ITEM_KEYWORDS } from '../security/sensitive-paths.js'
 import type { ContextMap, Recommendation, RequiresAnyClause } from '../types.js'
 import { runGit } from '../utils/exec.js'
 import { readJson } from '../utils/fs.js'
@@ -27,8 +28,6 @@ const UNSUPPORTED = [
   'defi',
   'trading',
 ]
-/** Path fragments that flag a catalog item as sensitive and block it from recommendations. */
-const SENSITIVE = ['.env', 'secrets', 'certs', 'customer-data', 'exports', '.pem', '.key']
 
 /** Maps ecosystem names to the repo roles that indicate that ecosystem is present. */
 const ECOSYSTEM_GROUPS: Record<string, string[]> = {
@@ -285,7 +284,7 @@ export async function recommend(root: string, context: ContextMap): Promise<Reco
       }
     }
 
-    if (SENSITIVE.some((x) => blob.includes(x))) {
+    if (SENSITIVE_ITEM_KEYWORDS.some((x) => blob.includes(x))) {
       pushSkipReason('sensitive-policy', 'Sensitive content policy block', 100)
     }
 

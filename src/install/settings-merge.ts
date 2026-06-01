@@ -34,13 +34,22 @@ type ClaudeHookEntry = {
   hooks: Array<{ type: string; command: string }>
 }
 
+/** Claude Code `permissions` block (deny/ask/allow rule-string arrays). */
+type ClaudePermissions = {
+  deny?: string[]
+  allow?: string[]
+  ask?: string[]
+}
+
 /** Subset of ~/.claude/settings.json that haus reads and writes. */
 type ClaudeSettings = {
   hooks?: Record<string, ClaudeHookEntry[]>
-  /** Haus-private namespace used to track installed hook IDs and commands. */
+  permissions?: ClaudePermissions
+  /** Haus-private namespace used to track installed hook IDs, commands, and deny rules. */
   _haus?: {
     hooks: string[]
     hookCommands?: string[]
+    denyRules?: string[]
   }
   [key: string]: unknown
 }
@@ -100,9 +109,75 @@ export function mergeHooks(
   updated._haus = {
     hooks: [...existing, ...addedIds],
     hookCommands: [...existingCommands, ...addedCommands],
+    // Preserve deny-rule tracking so hook and deny merges are order-independent.
+    ...(settings._haus?.denyRules ? { denyRules: settings._haus.denyRules } : {}),
   }
 
   return { settings: updated, addedIds }
+}
+
+/**
+ * Adds `permissions.deny` rule strings to the settings object, skipping any
+ * already present (whether user-defined or haus-installed). Tracks only the
+ * newly-added rules under `_haus.denyRules` so they can be cleanly stripped on
+ * uninstall without touching the user's own deny rules. Idempotent.
+ */
+export function mergeDenyRules(
+  settings: ClaudeSettings,
+  rules: string[],
+): { settings: ClaudeSettings; addedRules: string[] } {
+  const existingDeny = settings.permissions?.deny ?? []
+  const seen = new Set(existingDeny)
+  const trackedDeny = settings._haus?.denyRules ?? []
+
+  const addedRules: string[] = []
+  for (const rule of rules) {
+    if (seen.has(rule)) continue
+    seen.add(rule)
+    addedRules.push(rule)
+  }
+
+  const updated: ClaudeSettings = { ...settings }
+  updated.permissions = {
+    ...(settings.permissions ?? {}),
+    deny: [...existingDeny, ...addedRules],
+  }
+  updated._haus = {
+    hooks: settings._haus?.hooks ?? [],
+    ...(settings._haus?.hookCommands ? { hookCommands: settings._haus.hookCommands } : {}),
+    denyRules: [...trackedDeny, ...addedRules],
+  }
+
+  return { settings: updated, addedRules }
+}
+
+/**
+ * Returns a copy of settings with haus-installed deny rules removed (identified
+ * by `_haus.denyRules`), leaving user-defined deny rules intact. Cleans up empty
+ * `permissions`/`deny` containers and drops the `_haus` namespace if nothing else
+ * is tracked there.
+ */
+export function stripHausDeny(settings: ClaudeSettings): ClaudeSettings {
+  const prevHaus = settings._haus
+  if (!prevHaus?.denyRules || prevHaus.denyRules.length === 0) return settings
+
+  const ownedSet = new Set(prevHaus.denyRules)
+  const updated: ClaudeSettings = { ...settings }
+
+  const remainingDeny = (settings.permissions?.deny ?? []).filter((rule) => !ownedSet.has(rule))
+  const permissions: ClaudePermissions = { ...(settings.permissions ?? {}) }
+  if (remainingDeny.length > 0) permissions.deny = remainingDeny
+  else delete permissions.deny
+  if (Object.keys(permissions).length > 0) updated.permissions = permissions
+  else delete updated.permissions
+
+  const haus = { ...prevHaus }
+  delete haus.denyRules
+  const stillTracking = (haus.hooks?.length ?? 0) > 0 || (haus.hookCommands?.length ?? 0) > 0
+  if (stillTracking) updated._haus = haus
+  else delete updated._haus
+
+  return updated
 }
 
 /**
