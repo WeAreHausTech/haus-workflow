@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.11.1](https://github.com/WeAreHausTech/haus-workflow/compare/v0.11.0...v0.11.1) (2026-06-01)
+
+### Bug Fixes
+
+* return null from writeWorkflowConfig when file exists ([9ad36c1](https://github.com/WeAreHausTech/haus-workflow/commit/9ad36c1800023737d4a65feaeca1dc10fb5f797b))
+
 ## [0.11.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.10.1...v0.11.0) (2026-06-01)
 
 ### Features
