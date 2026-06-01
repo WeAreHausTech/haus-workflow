@@ -93,7 +93,13 @@ export async function runDoctor(options?: { hooks?: boolean }): Promise<void> {
       // Compare installed template hash against current template — prefer catalog cache (same as writeWorkflow).
       const storedHashMatch = firstLine.match(/hash=(sha256-[a-f0-9]+)/)
       const cachePath = path.join(CACHE_DIR, 'templates/agentic-workflow-standard.md')
-      const bundledPath = path.join(packageRoot(), 'library', 'global', 'templates', 'agentic-workflow-standard.md')
+      const bundledPath = path.join(
+        packageRoot(),
+        'library',
+        'global',
+        'templates',
+        'agentic-workflow-standard.md',
+      )
       const templatePath = (await fs.pathExists(cachePath)) ? cachePath : bundledPath
       const templateContent = await readText(templatePath)
       if (storedHashMatch && templateContent) {
