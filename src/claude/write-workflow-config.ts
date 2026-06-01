@@ -64,7 +64,7 @@ export async function writeWorkflowConfig(root: string, dryRun: boolean): Promis
 
   if (await fs.pathExists(destPath)) {
     if (dryRun) log(printable + ': exists (project-owned, skipping)')
-    return destPath
+    return null
   }
 
   const ctx = (await readJson<ContextMap>(hausPath(root, 'context-map.json'))) ?? {
