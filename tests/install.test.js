@@ -4,24 +4,19 @@ import os from 'node:os'
 import path from 'node:path'
 import { afterEach, beforeEach, describe, it } from 'node:test'
 
-// These tests import from dist/ — run `yarn build` first.
-
-let parseMarkdownHeader, buildMarkdownHeader, stampMarkdown, hasHausHeader
-let mergeHooks, stripHausHooks
-
-try {
-  ;({ parseMarkdownHeader, buildMarkdownHeader, stampMarkdown, hasHausHeader } =
-    await import('../dist/install/header.js'))
-  ;({ mergeHooks, stripHausHooks } = await import('../dist/install/settings-merge.js'))
-} catch {
-  // dist not built — tests will be skipped gracefully via the describe blocks below
-}
+// Unit tests import TypeScript source directly via tsx (see package.json "test").
+import {
+  parseMarkdownHeader,
+  buildMarkdownHeader,
+  stampMarkdown,
+  hasHausHeader,
+} from '../src/install/header.js'
+import { mergeHooks, stripHausHooks } from '../src/install/settings-merge.js'
 
 // ---- header.ts tests --------------------------------------------------------
 
 describe('header: parseMarkdownHeader', () => {
   it('parses a valid HAUS-MANAGED header', () => {
-    if (!parseMarkdownHeader) return
     const content =
       '<!-- HAUS-MANAGED id=skill.haus-workflow v=1 source=haus@0.1.0 -->\nrest of file'
     const h = parseMarkdownHeader(content)
@@ -31,19 +26,16 @@ describe('header: parseMarkdownHeader', () => {
   })
 
   it('returns undefined for content without header', () => {
-    if (!parseMarkdownHeader) return
     assert.equal(parseMarkdownHeader('no header here'), undefined)
   })
 
   it('returns undefined for partial header', () => {
-    if (!parseMarkdownHeader) return
     assert.equal(parseMarkdownHeader('<!-- HAUS-MANAGED id=foo -->'), undefined)
   })
 })
 
 describe('header: buildMarkdownHeader', () => {
   it('builds a well-formed header line', () => {
-    if (!buildMarkdownHeader) return
     const line = buildMarkdownHeader({
       stableId: 'agent.haus-planner',
       schemaVersion: '1',
@@ -59,7 +51,6 @@ describe('header: buildMarkdownHeader', () => {
 
 describe('header: stampMarkdown', () => {
   it('prepends header to content without one', () => {
-    if (!stampMarkdown) return
     const result = stampMarkdown('body text', {
       stableId: 'x',
       schemaVersion: '1',
@@ -70,7 +61,6 @@ describe('header: stampMarkdown', () => {
   })
 
   it('replaces existing header, preserving body', () => {
-    if (!stampMarkdown) return
     const original = '<!-- HAUS-MANAGED id=x v=1 source=haus@0.0.1 -->\nbody'
     const result = stampMarkdown(original, {
       stableId: 'x',
@@ -85,12 +75,10 @@ describe('header: stampMarkdown', () => {
 
 describe('header: hasHausHeader', () => {
   it('returns true for managed content', () => {
-    if (!hasHausHeader) return
     assert.ok(hasHausHeader('<!-- HAUS-MANAGED id=x v=1 source=y@0.1.0 -->\nfoo'))
   })
 
   it('returns false for unmanaged content', () => {
-    if (!hasHausHeader) return
     assert.ok(!hasHausHeader('# just a markdown file'))
   })
 })
@@ -114,7 +102,6 @@ const GATED_FRAGMENT = {
 
 describe('settings-merge: mergeHooks', () => {
   it('adds keep hooks to empty settings', () => {
-    if (!mergeHooks) return
     const { settings, addedIds } = mergeHooks({}, [KEEP_FRAGMENT, GATED_FRAGMENT])
     assert.deepEqual(addedIds, ['hook.guard.bash'])
     assert.ok(Array.isArray(settings.hooks?.['PreToolUse']))
@@ -123,20 +110,17 @@ describe('settings-merge: mergeHooks', () => {
   })
 
   it('skips gate-default-off hooks', () => {
-    if (!mergeHooks) return
     const { settings } = mergeHooks({}, [GATED_FRAGMENT])
     assert.equal((settings.hooks?.['UserPromptSubmit'] ?? []).length, 0)
   })
 
   it('does not duplicate already-installed hooks', () => {
-    if (!mergeHooks) return
     const existing = { _haus: { hooks: ['hook.guard.bash'] } }
     const { addedIds } = mergeHooks(existing, [KEEP_FRAGMENT])
     assert.deepEqual(addedIds, [])
   })
 
   it('preserves user-added hooks in other events', () => {
-    if (!mergeHooks) return
     const existing = {
       hooks: {
         PostToolUse: [{ hooks: [{ type: 'command', command: 'my-custom-hook' }] }],
@@ -150,7 +134,6 @@ describe('settings-merge: mergeHooks', () => {
 
 describe('settings-merge: stripHausHooks', () => {
   it('removes haus hook entries and _haus block', () => {
-    if (!stripHausHooks) return
     const settings = {
       hooks: {
         PreToolUse: [
@@ -168,7 +151,6 @@ describe('settings-merge: stripHausHooks', () => {
   })
 
   it('no-ops on settings with no _haus block', () => {
-    if (!stripHausHooks) return
     const settings = {
       hooks: { PreToolUse: [] },
     }
@@ -177,7 +159,6 @@ describe('settings-merge: stripHausHooks', () => {
   })
 
   it('strips by exact hookCommands when present, preserving non-haus commands', () => {
-    if (!stripHausHooks) return
     const settings = {
       hooks: {
         PreToolUse: [
@@ -197,7 +178,6 @@ describe('settings-merge: stripHausHooks', () => {
   })
 
   it('removes _haus key even when hooks array is empty', () => {
-    if (!stripHausHooks) return
     const settings = {
       hooks: {
         PreToolUse: [{ matcher: 'Bash', hooks: [{ type: 'command', command: 'some-user-hook' }] }],
@@ -227,13 +207,7 @@ describe('haus install --dry-run (CLI integration)', () => {
   it('exits 0 with dry-run output (smoke test)', async () => {
     // This test just verifies the command can be imported and called without throwing.
     // Full end-to-end against a real ~/.claude/ is done manually per P5 acceptance.
-    const { applyInstall } = await import('../dist/install/apply.js').catch(() => ({
-      applyInstall: null,
-    }))
-    if (!applyInstall) return // dist not built
-
-    // Patch globalClaudeDir to use tmpDir so we don't touch real ~/.claude/
-    // (integration smoke only — real paths tested manually)
+    const { applyInstall } = await import('../src/install/apply.js')
     assert.ok(typeof applyInstall === 'function')
   })
 })
