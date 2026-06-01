@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.11.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.10.1...v0.11.0) (2026-06-01)
+
+### Features
+
+* add agentic workflow standard — replace haus-way-of-work ([a5d2fba](https://github.com/WeAreHausTech/haus-workflow/commit/a5d2fba7ff866403586a1d0f79885184458a3fe1))
+
+### Bug Fixes
+
+* **ci:** sync-catalog-fixture creates PR instead of pushing to main ([547e604](https://github.com/WeAreHausTech/haus-workflow/commit/547e60490b7dac6b3ce47ca6d862cb75d6e83b89))
+* **lint:** correct import order in write-claude-files, write-workflow, doctor ([edff887](https://github.com/WeAreHausTech/haus-workflow/commit/edff8877675fa6c604f9707043659130b044fede))
+* negate secret-scan grep in bundled template ([1b7e226](https://github.com/WeAreHausTech/haus-workflow/commit/1b7e22631ea7680ad54ee9675ca70f4fcef9e989))
+* remove unused imports, add BLOCK_END assertion, use cache-precedence in doctor ([cc566d5](https://github.com/WeAreHausTech/haus-workflow/commit/cc566d51d816f3c65550b7f791b06d8b3318603f))
+* **test:** remove no-op || true from warnings assertion ([9929d5c](https://github.com/WeAreHausTech/haus-workflow/commit/9929d5c2030e70b41a4c165bff87b3b45ca6753d))
+* use CACHE_DIR from remote-catalog for template path resolution ([4d8b784](https://github.com/WeAreHausTech/haus-workflow/commit/4d8b784303ff8c76d4ef2d55bac3fbd6c77efd9a))
+
 ## [0.10.1](https://github.com/WeAreHausTech/haus-workflow/compare/v0.10.0...v0.10.1) (2026-05-29)
 
 ## [0.10.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.9.0...v0.10.0) (2026-05-29)
