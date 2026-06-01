@@ -3,10 +3,14 @@ name: Sync catalog fixture
 on:
   repository_dispatch:
     types: [sync-catalog-fixture] # fired by haus-workflow-catalog when manifest.json changes on main
+  workflow_dispatch:
 
 permissions:
   contents: write
   pull-requests: write
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
 
 jobs:
   sync:
