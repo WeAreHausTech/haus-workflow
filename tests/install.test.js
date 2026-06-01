@@ -193,21 +193,36 @@ describe('settings-merge: stripHausHooks', () => {
 
 // ---- integration: haus install / uninstall via CLI --------------------------
 
-describe('haus install --dry-run (CLI integration)', () => {
+describe('applyInstall dry-run (real invocation, stubbed HOME)', () => {
   let tmpDir
+  let prevHome
+  let prevUserProfile
 
   beforeEach(() => {
     tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'haus-install-test-'))
+    // Stub the home dir so globalClaudeDir() (os.homedir()) can never touch a real ~/.claude.
+    prevHome = process.env.HOME
+    prevUserProfile = process.env.USERPROFILE
+    process.env.HOME = tmpDir
+    process.env.USERPROFILE = tmpDir
   })
 
   afterEach(() => {
+    if (prevHome === undefined) delete process.env.HOME
+    else process.env.HOME = prevHome
+    if (prevUserProfile === undefined) delete process.env.USERPROFILE
+    else process.env.USERPROFILE = prevUserProfile
     fs.rmSync(tmpDir, { recursive: true, force: true })
   })
 
-  it('exits 0 with dry-run output (smoke test)', async () => {
-    // This test just verifies the command can be imported and called without throwing.
-    // Full end-to-end against a real ~/.claude/ is done manually per P5 acceptance.
+  it('stages bundled skills for creation but writes nothing to ~/.claude', async () => {
     const { applyInstall } = await import('../src/install/apply.js')
-    assert.ok(typeof applyInstall === 'function')
+    const result = await applyInstall({ dryRun: true })
+
+    // Bundled global skills are reported as "would create".
+    assert.ok(result.created.length > 0, 'expected bundled skills to be staged for creation')
+    assert.equal(result.drift, false)
+    // Dry-run must not write anything — not even the .claude directory.
+    assert.equal(fs.existsSync(path.join(tmpDir, '.claude')), false)
   })
 })
