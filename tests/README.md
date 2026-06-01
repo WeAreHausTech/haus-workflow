@@ -8,12 +8,12 @@ yarn test
 
 ## Structure
 
-| Path | Contents |
-|---|---|
-| `tests/*.test.js` | Unit and integration tests |
-| `tests/helpers/` | Shared test utilities |
-| `tests/fixtures/` | Static fixture repos used by tests |
-| `tests/golden/` | Golden output snapshots for scan/recommend/context |
+| Path              | Contents                                           |
+| ----------------- | -------------------------------------------------- |
+| `tests/*.test.js` | Unit and integration tests                         |
+| `tests/helpers/`  | Shared test utilities                              |
+| `tests/fixtures/` | Static fixture repos used by tests                 |
+| `tests/golden/`   | Golden output snapshots for scan/recommend/context |
 
 ## helpers/fixture-runner.js
 
@@ -33,19 +33,19 @@ Tests that use `fixture-runner.js` require a built `dist/` — run `yarn build &
 
 Full fixture repos scanned by integration tests and golden tests. Each subdirectory is a minimal repo skeleton:
 
-| Fixture | Stack |
-|---|---|
-| `laravel-app` | Laravel (PHP, Composer, PHPUnit) |
-| `laravel-with-react-frontend` | Laravel + React (pnpm) |
-| `nest-graphql-api` | NestJS + GraphQL (Yarn) |
-| `nextjs-app` | Next.js (pnpm) |
-| `nx-workspace` | Nx monorepo (Yarn) |
-| `orphan-graphql-config` | GraphQL config without backend (pnpm) |
-| `turbo-monorepo` | Turborepo (Yarn) |
-| `vendure-monorepo` | Vendure e-commerce (Yarn) |
-| `vendure-with-nextjs-storefront` | Vendure + Next.js storefront (Yarn) |
-| `wordpress-bedrock-site` | WordPress Bedrock (Composer) |
-| `wordpress-with-node-tooling` | WordPress + Node tooling (pnpm) |
+| Fixture                          | Stack                                 |
+| -------------------------------- | ------------------------------------- |
+| `laravel-app`                    | Laravel (PHP, Composer, PHPUnit)      |
+| `laravel-with-react-frontend`    | Laravel + React (pnpm)                |
+| `nest-graphql-api`               | NestJS + GraphQL (Yarn)               |
+| `nextjs-app`                     | Next.js (pnpm)                        |
+| `nx-workspace`                   | Nx monorepo (Yarn)                    |
+| `orphan-graphql-config`          | GraphQL config without backend (pnpm) |
+| `turbo-monorepo`                 | Turborepo (Yarn)                      |
+| `vendure-monorepo`               | Vendure e-commerce (Yarn)             |
+| `vendure-with-nextjs-storefront` | Vendure + Next.js storefront (Yarn)   |
+| `wordpress-bedrock-site`         | WordPress Bedrock (Composer)          |
+| `wordpress-with-node-tooling`    | WordPress + Node tooling (pnpm)       |
 
 ### fixtures/findings/
 

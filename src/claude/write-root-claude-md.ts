@@ -17,7 +17,7 @@ export const BLOCK_BEGIN = '<!-- HAUS:BEGIN haus-imports v=1 -->'
 /** Closing sentinel for the managed import block inside CLAUDE.md. */
 export const BLOCK_END = '<!-- HAUS:END haus-imports -->'
 
-const IMPORT_CONTENT = `@.haus-workflow/haus-way-of-work.md\n@.haus-workflow/project.md`
+const IMPORT_CONTENT = `@.haus-workflow/WORKFLOW.md\n@.haus-workflow/workflow-config.md\n@.haus-workflow/project.md`
 
 /** Build the full managed import block (sentinels + @-import lines). */
 export function buildImportBlock(): string {

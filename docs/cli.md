@@ -90,7 +90,9 @@ Remove HAUS-MANAGED files from `~/.claude/`.
 ## Configuration
 
 ### `haus config enable <key>`
+
 ### `haus config disable <key>`
+
 ### `haus config status <key>`
 
 Manage hook configuration. Keys: `hook.context`, `hook.memory`.
@@ -100,8 +102,11 @@ Manage hook configuration. Keys: `hook.context`, `hook.memory`.
 ## Memory
 
 ### `haus memory status`
+
 ### `haus memory add <text>`
+
 ### `haus memory inject [--task <task>] [--from-hook]`
+
 ### `haus memory promote`
 
 Manage the local project memory store under `.haus-workflow/memory/`.
@@ -123,6 +128,7 @@ Block dangerous bash command tokens. Returns an explicit deny reason payload.
 ## Workspace
 
 ### `haus workspace init`
+
 ### `haus workspace scan`
 
 Multi-project workspace operations.
