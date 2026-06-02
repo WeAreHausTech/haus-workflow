@@ -101,6 +101,7 @@ program
   .option('--dry-run')
   .option('--force')
   .option('--check', 'Exit non-zero if any HAUS-MANAGED file is out of date')
+  .option('--postinstall', 'Run by the npm postinstall hook; prints a plain-language change notice')
   .action(runInstall)
 program.command('uninstall').option('--force').action(runUninstallCommand)
 
