@@ -13,7 +13,6 @@ import { runExplainRecommendation } from './commands/explain-recommendation.js'
 import { runGuard } from './commands/guard.js'
 import { runInit } from './commands/init.js'
 import { runInstall } from './commands/install.js'
-import { runMemory } from './commands/memory.js'
 import { runRecommend } from './commands/recommend.js'
 import { runRefresh } from './commands/refresh.js'
 import { runScan } from './commands/scan.js'
@@ -105,16 +104,6 @@ program
   .action(runInstall)
 program.command('uninstall').option('--force').action(runUninstallCommand)
 
-const memory = program.command('memory')
-memory.command('status').action(() => runMemory('status', {}))
-memory.command('add <text>').action((text) => runMemory('add', { text }))
-memory
-  .command('inject')
-  .option('--task <task>')
-  .option('--from-hook')
-  .action((opts) => runMemory('inject', opts))
-memory.command('promote').action(() => runMemory('promote', {}))
-
 const guard = program.command('guard')
 guard
   .command('file-access')
@@ -128,15 +117,15 @@ guard
 const config = program.command('config')
 config
   .command('enable <key>')
-  .description('Enable a hook (hook.context, hook.memory)')
+  .description('Enable a hook (hook.context)')
   .action((key: string) => runConfig(key, 'enable'))
 config
   .command('disable <key>')
-  .description('Disable a hook (hook.context, hook.memory)')
+  .description('Disable a hook (hook.context)')
   .action((key: string) => runConfig(key, 'disable'))
 config
   .command('status <key>')
-  .description('Show current state of a hook (hook.context, hook.memory)')
+  .description('Show current state of a hook (hook.context)')
   .action((key: string) => runConfig(key, 'status'))
 
 const workspace = program.command('workspace')

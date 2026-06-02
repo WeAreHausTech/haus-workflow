@@ -127,6 +127,8 @@ export type Recommendation = {
     tags?: string[]
     /** Catalog ecosystem family echoed for downstream task-intent routing. Additive optional field. */
     ecosystem?: string
+    /** Catalog token estimate echoed for token-budget enforcement in the router. Additive optional field. */
+    tokenEstimate?: number
   }>
   skipped: Array<{
     id: string

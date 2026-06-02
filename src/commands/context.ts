@@ -3,6 +3,7 @@ import { isHookEnabled } from '../claude/load-hooks-config.js'
 import { normalizeRecommendation } from '../recommender/explain-recommendation.js'
 import {
   classifyTaskIntents,
+  DEFAULT_CONTEXT_TOKEN_BUDGET,
   pickTaskRelevantRules,
   type TaskIntent,
 } from '../recommender/task-intent.js'
@@ -39,7 +40,9 @@ export async function runContext(options: {
     (recommendationRaw?.recommended ?? []).map((item) => [item.id, item.scoreBreakdown]),
   )
   const taskIntents = options.task ? classifyTaskIntents(options.task) : new Set<TaskIntent>()
-  const selected = pickTaskRelevantRules(recommendation, options.task, taskIntents)
+  const selected = pickTaskRelevantRules(recommendation, options.task, taskIntents, {
+    tokenBudget: DEFAULT_CONTEXT_TOKEN_BUDGET,
+  })
   const payload = {
     task: options.task ?? 'not provided',
     taskIntents: [...taskIntents].sort(),

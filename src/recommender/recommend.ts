@@ -352,6 +352,7 @@ export async function recommend(root: string, context: ContextMap): Promise<Reco
         },
         tags: item.tags,
         ecosystem: item.ecosystem,
+        tokenEstimate: item.tokenEstimate,
       })
     } else {
       if (skipReasons.length === 0) {

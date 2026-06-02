@@ -20,12 +20,6 @@
       "gate": "gate-default-off",
       "event": "UserPromptSubmit",
       "command": "haus context --from-hook"
-    },
-    {
-      "id": "hook.memory-inject",
-      "gate": "gate-default-off",
-      "event": "UserPromptSubmit",
-      "command": "haus memory inject --from-hook"
     }
   ]
 }
