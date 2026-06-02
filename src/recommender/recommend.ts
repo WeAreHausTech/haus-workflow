@@ -497,11 +497,27 @@ function confidenceLevelToNumber(level: 'low' | 'medium' | 'high', score: number
 
 /** Combine context scan warnings with any active security-risk signals into the final warnings list. */
 function mergeRecommendationWarnings(context: ContextMap): string[] {
+  // Surface detectionStatus as a clear, leading message. Baseline (stack-agnostic
+  // workflow + security) guidance still applies to unknown/partial repos, so this
+  // informs rather than drops recommendations.
+  const markers = context.unsupportedSignals?.join(', ')
+  const statusLines =
+    context.detectionStatus === 'unknown'
+      ? [
+          markers
+            ? `Stack not recognised — detected ${markers}, which haus does not support. Only stack-agnostic workflow and security guidance is applied.`
+            : 'Stack not recognised — no supported framework detected. Only stack-agnostic workflow and security guidance is applied.',
+        ]
+      : context.detectionStatus === 'partial' && markers
+        ? [
+            `Partially supported — found unsupported ${markers} alongside recognised stacks; guidance covers the supported parts only.`,
+          ]
+        : []
   const riskLines =
     (context.securityRisks?.length ?? 0) > 0
       ? [`Scan reported security signals: ${context.securityRisks.join('; ')}`]
       : []
-  return [...new Set([...context.warnings, ...riskLines])]
+  return [...new Set([...statusLines, ...context.warnings, ...riskLines])]
 }
 
 /** Read unstaged changed files from git to boost scoring for rules matching active work areas. */

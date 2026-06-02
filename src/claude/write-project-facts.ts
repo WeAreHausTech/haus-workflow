@@ -104,6 +104,8 @@ export async function writeProjectFacts(
     securityRisks: [],
     crossRepoHints: [],
     warnings: [],
+    detectionStatus: 'unknown' as const,
+    unsupportedSignals: [],
   }
   const rec = (await readJson<Recommendation>(hausPath(root, 'recommendation.json'))) ?? {
     mode: 'fast' as const,

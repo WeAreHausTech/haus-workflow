@@ -7,13 +7,14 @@ import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
 import { SENSITIVE_PATH_REGEXES } from '../security/sensitive-paths.js'
-import type { ContextMap, PackageManager } from '../types.js'
+import type { ContextMap } from '../types.js'
 import { isRecord } from '../utils/audit-checks.js'
 import { hashText, listFiles, readJson, writeJson, writeText } from '../utils/fs.js'
 import { hausPath } from '../utils/paths.js'
 import { satisfiesVersion } from '../utils/versions.js'
 
 import { detectPackageManager } from './detect-package-manager.js'
+import { runDetection } from './detection-registry.js'
 import type { ScanResult } from './types.js'
 
 /**
@@ -56,7 +57,56 @@ const SAFE_FILES = [
   '**/*.sln',
   'docker-compose.*',
   'Dockerfile',
+  // Unsupported-ecosystem markers — matched by PRESENCE only (never content-read; none
+  // match the content-blob extensions). Drive detectionStatus / unsupportedSignals.
+  'requirements.txt',
+  'pyproject.toml',
+  'go.mod',
+  'Cargo.toml',
+  'pom.xml',
+  'build.gradle',
+  'build.gradle.kts',
+  'Gemfile',
 ]
+
+/**
+ * Marker files whose presence signals an ecosystem haus does not support. Mapped to a
+ * short signal name surfaced in ContextMap.unsupportedSignals and the unsupported-repo
+ * messaging. Presence only — contents are never inspected for detection.
+ */
+const UNSUPPORTED_MARKERS: Record<string, string> = {
+  'requirements.txt': 'python',
+  'pyproject.toml': 'python',
+  'go.mod': 'go',
+  'Cargo.toml': 'rust',
+  'pom.xml': 'java',
+  'build.gradle': 'java',
+  'build.gradle.kts': 'java',
+  Gemfile: 'ruby',
+}
+
+/** Stack names that are not, on their own, evidence of a supported stack. */
+const WEAK_STACK_SIGNALS = new Set(['missing-prettier', 'missing-eslint'])
+
+/**
+ * Classifies how confidently haus recognises the repo. `unknown` when no role and no
+ * meaningful stack signal were found (the package-manager bucket and the missing-tool
+ * markers do not count); `partial` when real signals coexist with unsupported-ecosystem
+ * markers; `supported` otherwise.
+ */
+function computeDetectionStatus(
+  roles: string[],
+  stacks: Record<string, string[]>,
+  unsupportedSignals: string[],
+): ContextMap['detectionStatus'] {
+  const hasRealStack = Object.entries(stacks).some(
+    ([bucket, names]) =>
+      bucket !== 'packageManagers' && names.some((n) => !WEAK_STACK_SIGNALS.has(n)),
+  )
+  const hasRealSignal = roles.length > 0 || hasRealStack
+  if (!hasRealSignal) return 'unknown'
+  return unsupportedSignals.length > 0 ? 'partial' : 'supported'
+}
 
 /** Returns true when a relative file path matches any sensitive-path regex. */
 function blocked(rel: string): boolean {
@@ -88,8 +138,13 @@ export async function scanProject(
   const safeFiles = files.filter((f) => !blocked(f))
   const deps = dependencySet(pkg, composer)
   const packageManager = detectPackageManager(root, String(pkg?.packageManager ?? ''))
-  const roles = detectRoles(deps, safeFiles)
-  const stacks = await detectStacks(root, deps, safeFiles, packageManager)
+  const contentBlob = await buildContentBlob(root, safeFiles)
+  const detection = runDetection({ deps: new Set(deps), files: safeFiles, contentBlob })
+  const roles = finalizeRoles(detection.roles, deps, safeFiles)
+  const stacks = detection.stacks
+  // Package-manager bucket is input-driven (resolved PM), not a dep/file signal.
+  if (packageManager === 'yarn') stacks.packageManagers.push('yarn4')
+  if (packageManager === 'pnpm') stacks.packageManagers.push('pnpm89')
   const warnings: string[] = []
   const securityRisks: string[] = []
   const crossRepoHints: string[] = []
@@ -108,6 +163,17 @@ export async function scanProject(
   if (safeFiles.some((f) => f.includes('wp-content/uploads')))
     securityRisks.push('Uploads directory present')
 
+  const unsupportedSignals = [
+    ...new Set(
+      safeFiles
+        .map((f) => UNSUPPORTED_MARKERS[path.basename(f)])
+        .filter((s): s is string => Boolean(s)),
+    ),
+  ].sort()
+  // detectionStatus / unsupportedSignals are structured fields — the recommender and
+  // doctor render the human-facing message from them, so no prose warning is pushed here.
+  const detectionStatus = computeDetectionStatus(roles, stacks, unsupportedSignals)
+
   const context: ContextMap = {
     mode,
     generatedAt: new Date().toISOString(),
@@ -121,6 +187,8 @@ export async function scanProject(
     securityRisks,
     crossRepoHints,
     warnings,
+    detectionStatus,
+    unsupportedSignals,
   }
 
   const dependencyMap = {
@@ -165,39 +233,16 @@ function dependencySet(
 }
 
 /**
- * Derives high-level repo roles from dependency presence and file heuristics.
- * Each role is a short string (e.g. "next-app", "laravel-app") consumed by the
- * recommender to select catalog items.  A repo can have multiple roles.
+ * Applies the WordPress role precedence that the registry does not model, then sorts.
+ * Bedrock layout (web/app path or roots/wordpress dep) wins over vanilla; both variants
+ * also add the generic "wordpress-site" role. All other roles come from the registry.
  *
- * @param deps - Flat list of all dependency keys (npm + composer).
+ * @param registryRoles - Roles already detected by {@link runDetection}.
+ * @param deps - Flat dependency list (npm + composer).
  * @param files - Safe, non-sensitive file paths relative to the project root.
  */
-function detectRoles(deps: string[], files: string[]): string[] {
-  const roles = new Set<string>()
-  if (deps.includes('next') || files.some((f) => f.includes('next.config.'))) roles.add('next-app')
-  if (deps.includes('react')) roles.add('react-app')
-  if (deps.includes('vite') || files.some((f) => f.includes('vite.config.'))) roles.add('vite-app')
-  if (deps.includes('react-router') && deps.includes('@react-router/node'))
-    roles.add('react-router-app')
-  if (deps.includes('sanity')) roles.add('sanity-studio')
-  if (deps.includes('@strapi/strapi') || deps.some((d) => d.startsWith('@strapi/')))
-    roles.add('strapi-app')
-  if (deps.includes('expo')) roles.add('expo-app')
-  if (deps.includes('@vendure/core')) roles.add('vendure-app')
-  if (
-    deps.some((d) => d.startsWith('@haus/vendure-')) ||
-    files.some((f) => f.includes('vendure-config'))
-  )
-    roles.add('vendure-plugin')
-  if (deps.includes('@nestjs/core')) roles.add('nestjs-api')
-  if (deps.includes('graphql') || deps.includes('@nestjs/graphql')) roles.add('graphql-api')
-  if (files.some((f) => f.endsWith('nx.json'))) roles.add('nx-monorepo')
-  if (files.some((f) => f.endsWith('turbo.json'))) roles.add('turbo-monorepo')
-  if (files.some((f) => f.endsWith('artisan')) || deps.includes('laravel/framework'))
-    roles.add('laravel-app')
-  if (deps.includes('laravel/nova')) roles.add('laravel-nova-app')
-  // WordPress role detection: Bedrock layout (web/app path or roots/wordpress dep)
-  // takes priority over vanilla; both variants also add the generic "wordpress-site" role.
+function finalizeRoles(registryRoles: string[], deps: string[], files: string[]): string[] {
+  const roles = new Set(registryRoles)
   const hasWpConfig = files.some((f) => f.endsWith('wp-config.php'))
   const hasBedrockLayout =
     files.some((f) => f.includes('web/app')) || deps.includes('roots/wordpress')
@@ -211,154 +256,19 @@ function detectRoles(deps: string[], files: string[]): string[] {
     roles.add('wordpress-bedrock-site')
     roles.add('wordpress-site')
   }
-  if (files.some((f) => f.endsWith('.csproj') || f.endsWith('.sln'))) roles.add('dotnet-service')
-  if (deps.includes('express')) roles.add('express-service')
   return [...roles].sort()
 }
 
 /**
- * Categorises the tech stack into buckets (frontend, backend, databases, testing,
- * auth, tooling, packageManagers) by matching dependency names and key file paths.
- * Some entries (e.g. NestJS, Vendure) also do a content search via {@link hasNeedle}
- * to catch projects where the dep is a peer / not in package.json directly.
- *
- * @param root - Absolute project root, passed through to hasNeedle for file reads.
- * @param deps - Full dependency list (npm + composer).
- * @param files - Safe file paths relative to root.
- * @param packageManager - Already-resolved package manager, used to populate packageManagers bucket.
- */
-async function detectStacks(
-  root: string,
-  deps: string[],
-  files: string[],
-  packageManager: PackageManager,
-): Promise<Record<string, string[]>> {
-  const out: Record<string, string[]> = {
-    backend: [],
-    frontend: [],
-    databases: [],
-    testing: [],
-    auth: [],
-    tooling: [],
-    packageManagers: [],
-  }
-  // Helper keeps buckets duplicate-free without requiring a Set.
-  const add = (k: string, v: string) => {
-    out[k] ??= []
-    if (!out[k].includes(v)) out[k].push(v)
-  }
-  if (deps.includes('next')) add('frontend', 'nextjs')
-  if (deps.includes('react')) add('frontend', 'react19')
-  if (deps.includes('vue')) add('frontend', 'vue')
-  if (deps.includes('vite')) add('frontend', 'vite8')
-  if (deps.includes('react-router') && deps.includes('@react-router/node'))
-    add('frontend', 'react-router-v7')
-  if (deps.includes('tailwindcss') || files.some((f) => f.includes('tailwind.config.'))) {
-    add('frontend', 'tailwindcss')
-  }
-  if (
-    files.some((f) => f.endsWith('components.json')) &&
-    deps.includes('class-variance-authority')
-  ) {
-    add('frontend', 'shadcn')
-  }
-  if (deps.includes('typescript')) add('tooling', 'typescript5')
-  if (deps.includes('sanity') || deps.includes('next-sanity') || deps.includes('@sanity/client')) {
-    add('backend', 'sanity')
-  }
-  if (deps.includes('@strapi/strapi') || deps.some((d) => d.startsWith('@strapi/'))) {
-    add('backend', 'strapi')
-  }
-  if (deps.includes('prisma') || deps.includes('@prisma/client')) add('backend', 'prisma')
-  if (deps.includes('expo')) add('frontend', 'expo')
-  if (deps.includes('react-native')) add('frontend', 'react-native')
-  if (deps.includes('i18next') || deps.includes('react-i18next')) add('tooling', 'i18next')
-  if (deps.includes('bullmq')) add('tooling', 'bullmq')
-  if (files.some((f) => f === 'Dockerfile' || f.startsWith('docker-compose')))
-    add('tooling', 'docker')
-  if (deps.includes('pm2') || files.some((f) => f.includes('ecosystem.config')))
-    add('tooling', 'pm2')
-  if (deps.some((d) => d.startsWith('@sentry/'))) add('tooling', 'sentry')
-  if (deps.includes('deployer/deployer')) add('tooling', 'deployer-php')
-  if (!deps.includes('prettier')) add('tooling', 'missing-prettier')
-  if (!deps.includes('eslint')) add('tooling', 'missing-eslint')
-  if (deps.includes('@stripe/stripe-js') || deps.includes('@stripe/react-stripe-js')) {
-    add('tooling', 'stripe')
-  }
-  if (deps.includes('@haus-tech/qliro-plugin')) add('tooling', 'qliro')
-  if (deps.includes('@supabase/supabase-js') || deps.some((d) => d.startsWith('@supabase/'))) {
-    add('databases', 'supabase')
-  }
-  if (deps.includes('@vendure/core')) add('backend', 'vendure3')
-  if (deps.includes('@nestjs/core')) add('backend', 'nestjs')
-  // Content search for NestJS and Vendure because they may be installed as peers
-  // without appearing in the top-level package.json (e.g. in a monorepo).
-  if (await hasNeedle(root, files, 'NestFactory')) add('backend', 'nestjs')
-  if (await hasNeedle(root, files, '@VendurePlugin')) add('backend', 'vendure3')
-  if (deps.includes('graphql') || deps.includes('@nestjs/graphql')) add('backend', 'graphql')
-  if (files.some((f) => f.endsWith('.graphql') || f.endsWith('schema.graphql')))
-    add('backend', 'graphql')
-  if (deps.includes('laravel/framework')) add('backend', 'laravel')
-  if (files.some((f) => f.includes('app/Providers/') || f.includes('routes/')))
-    add('backend', 'laravel')
-  if (files.some((f) => f.endsWith('wp-config.php')) || deps.includes('roots/wordpress'))
-    add('backend', 'wordpress')
-  if (
-    deps.includes('wpackagist-plugin/elementor') ||
-    deps.includes('wearehaus/elementor-pro') ||
-    deps.includes('wpackagist-theme/hello-elementor')
-  ) {
-    add('backend', 'elementor')
-  }
-  if (
-    deps.includes('wearehaus/advanced-custom-fields-pro') ||
-    deps.includes('wpackagist-plugin/advanced-custom-fields')
-  ) {
-    add('backend', 'acf-pro')
-  }
-  if (deps.includes('wearehaus/jet-engine')) add('backend', 'jetengine')
-  if (deps.includes('wearehaus/jet-smart-filters')) add('backend', 'jetsmartfilters')
-  if (deps.includes('wearehaus/gravityforms')) add('backend', 'gravityforms')
-  if (files.some((f) => f.endsWith('.csproj') || f.endsWith('.sln'))) add('backend', 'dotnet')
-  if (deps.includes('@playwright/test')) add('testing', 'playwright')
-  if (files.some((f) => f.includes('.storybook'))) add('testing', 'storybook')
-  if (deps.some((d) => d.startsWith('@testing-library/'))) add('testing', 'testing-library')
-  if (files.some((f) => f.endsWith('phpunit.xml'))) add('testing', 'phpunit')
-  if (deps.some((d) => d.startsWith('@storybook/'))) add('testing', 'storybook')
-  if (deps.includes('vitest')) add('testing', 'vitest')
-  if (deps.includes('jest') || deps.includes('jest-environment-jsdom')) add('testing', 'jest')
-  if (deps.includes('pg')) add('databases', 'postgresql')
-  if (deps.includes('mariadb') || deps.includes('mysql2')) add('databases', 'mariadb')
-  if (deps.includes('mysql') || deps.includes('mysql2')) add('databases', 'mysql')
-  if (deps.includes('mssql')) add('databases', 'mssql')
-  if (deps.includes('@elastic/elasticsearch')) add('databases', 'elasticsearch')
-  if (deps.includes('predis/predis') || deps.includes('ioredis') || deps.includes('redis')) {
-    add('databases', 'redis')
-  }
-  // Auth detection uses content search because env-var names and import paths
-  // are more reliable indicators than package names for these protocols.
-  if (await hasNeedle(root, files, 'openid')) add('auth', 'oidc')
-  if (await hasNeedle(root, files, 'AZURE_AD')) add('auth', 'azure-ad')
-  if (await hasNeedle(root, files, 'BANKID')) add('auth', 'bankid')
-  if (deps.includes('24slides/laravel-saml2') || deps.includes('aacotroneo/laravel-saml2')) {
-    add('auth', 'saml2')
-  }
-  if (deps.includes('next-auth') || deps.includes('@auth/core')) add('auth', 'next-auth')
-  if (packageManager === 'yarn') add('packageManagers', 'yarn4')
-  if (packageManager === 'pnpm') add('packageManagers', 'pnpm89')
-  return out
-}
-
-/**
- * Searches the first 300 candidate files for a literal string needle.
- * The 300-file cap keeps scan time predictable on large monorepos — content
- * search is only a fallback for cases where dep names are unreliable.
+ * Builds a single content blob from the first 300 candidate files (code/config
+ * extensions), read ONCE. The registry's `content` signals search this blob instead of
+ * re-reading every file per needle. The 300-file cap keeps scan time predictable on
+ * large monorepos; files are joined with newlines so no needle matches across a boundary.
  *
  * @param root - Absolute project root.
  * @param files - Full safe file list; filtered internally to code/config extensions.
- * @param needle - Literal string to search for (case-sensitive).
  */
-async function hasNeedle(root: string, files: string[], needle: string): Promise<boolean> {
+async function buildContentBlob(root: string, files: string[]): Promise<string> {
   const candidates = files.filter(
     (f) =>
       f.endsWith('.ts') ||
@@ -368,16 +278,25 @@ async function hasNeedle(root: string, files: string[], needle: string): Promise
       f.endsWith('.yml') ||
       f.endsWith('.yaml'),
   )
-  for (const rel of candidates.slice(0, 300)) {
-    try {
-      const content = await readFile(path.join(root, rel), 'utf8')
-      if (content.includes(needle)) return true
-    } catch {
-      // File may have been deleted or be unreadable — skip and continue.
-      continue
-    }
+  // Read in bounded chunks rather than one big Promise.all — 300 concurrent opens can
+  // exhaust file descriptors (EMFILE) on some systems; chunking keeps the one-pass win.
+  const slice = candidates.slice(0, 300)
+  const CHUNK = 24
+  const parts: string[] = []
+  for (let i = 0; i < slice.length; i += CHUNK) {
+    const batch = await Promise.all(
+      slice.slice(i, i + CHUNK).map(async (rel) => {
+        try {
+          return await readFile(path.join(root, rel), 'utf8')
+        } catch {
+          // File may have been deleted or be unreadable — skip and continue.
+          return ''
+        }
+      }),
+    )
+    parts.push(...batch)
   }
-  return false
+  return parts.join('\n')
 }
 
 /**
