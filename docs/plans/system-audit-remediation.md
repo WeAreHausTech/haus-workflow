@@ -28,7 +28,7 @@ The single highest-value finding: **the CLI's headline security principle — "e
 | 1 | **WS1** — Security: `permissions.deny` + `SENSITIVE` 3→1 + guard backstop + catalog `haus.lefthook-security` | ✅ merged | #47 / cat #2 |
 | 2 | **WS8** — `validation-rules` → shared JSON + synced fixture | ✅ merged | #49 / cat #3 |
 | 3 | **WS3** — detection registry + `detectionStatus` + unsupported signal | ✅ merged | #50 |
-| 4 | **WS4** — `workflow-config.md` auto-fill | ⬜ | — |
+| 4 | **WS4** — `workflow-config.md` auto-fill | ✅ merged | #51 |
 | 5 | **WS2** — delete memory store + token-budget router | ⬜ | — |
 | 6 | **WS6** — non-dev desktop UX | ⬜ | — |
 | 7 | **WS5** — full-auto postinstall + `prepare` fix | ⬜ | — |
@@ -65,6 +65,11 @@ The single highest-value finding: **the CLI's headline security principle — "e
 - **`src/scanner/derive-from-manifest.ts`** — anti-drift: coverage test asserts every bundled-manifest item is recognisable (dependency clause / known role / registry-producible stack). New undetectable item → test fails.
 - Behavior locked by a **golden characterization test** (`detection-golden.json`, 11 fixtures, byte-identical). New `python-only` fixture → `unknown` / `['python']`.
 - **WS3-discovered follow-ups (not yet done):** recommender's `UNSUPPORTED` list duplicates catalog `FORBIDDEN_TAGS` (fold into shared validation-rules JSON); catalog `{stack:typescript}` vs scanner `typescript5` naming (items match via dependency clause, no current gap).
+
+### WS4 — done (CLI #51, merged)
+- **`src/claude/derive-workflow-config.ts`** — script-first inference: real `package.json` script wins (typecheck, lint, lint:fix, format:check, test:e2e); else reconstruct from a present dep/config (tsc/eslint/prettier/playwright/cypress), per-pm format (`npx --no-install` / `yarn` / `pnpm exec`); never guesses an absent tool. Detects validation library, pre-commit tool, doc paths. Un-inferable → honest placeholder.
+- **`haus apply --refill-config`** — fills still-blank `<!-- fill in` lines of an existing config; never touches user-edited lines. Threaded cli → apply → write-claude-files → writeWorkflowConfig. `doctor` warns with unfilled-field count.
+- Write-once preserved; derive skipped on the common exists-no-refill path (no extra I/O).
 
 ---
 
