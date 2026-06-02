@@ -48,7 +48,9 @@ function binCmd(pm: PackageManager, bin: string, args: string): string {
   const tail = args ? ` ${args}` : ''
   if (pm === 'yarn') return `yarn ${bin}${tail}`
   if (pm === 'pnpm') return `pnpm exec ${bin}${tail}`
-  return `npx ${bin}${tail}` // npm / unknown
+  // --no-install: run only the locally-installed bin, never fetch from the registry
+  // (matches "don't guess tools that aren't installed" + airgap/supply-chain safety).
+  return `npx --no-install ${bin}${tail}` // npm / unknown
 }
 
 /**

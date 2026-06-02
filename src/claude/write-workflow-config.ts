@@ -160,6 +160,13 @@ export async function writeWorkflowConfig(
   const printable = displayPath(root, destPath)
   const exists = await fs.pathExists(destPath)
 
+  // Skip the (disk-touching) derivation entirely on the common path: file already
+  // present and not refilling. Project-owned from first write.
+  if (exists && !opts.refill) {
+    if (dryRun) log(printable + ': exists (project-owned, skipping)')
+    return null
+  }
+
   const ctx = (await readJson<ContextMap>(hausPath(root, 'context-map.json'))) ?? {
     ...FALLBACK_CONTEXT,
     root,
@@ -168,10 +175,6 @@ export async function writeWorkflowConfig(
   const values = await deriveWorkflowConfig(root, ctx)
 
   if (exists) {
-    if (!opts.refill) {
-      if (dryRun) log(printable + ': exists (project-owned, skipping)')
-      return null
-    }
     const current = await fs.readFile(destPath, 'utf8')
     const refilled = refillContent(current, values)
     if (refilled === current) {
