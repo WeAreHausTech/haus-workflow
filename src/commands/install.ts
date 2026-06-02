@@ -32,13 +32,18 @@ export async function runInstall(options: {
       if (options.postinstall) {
         // npm just installed haus globally and ran this automatically. The user did
         // not type a command, so spell out exactly what we changed and how to undo it.
+        // Distinguish added vs updated, and phrase settings as "ensured present" so an
+        // idempotent re-run doesn't read as a fresh change.
         log('haus configured Claude Code for you:')
+        const parts = []
+        if (result.created.length) parts.push(`${result.created.length} file(s) added`)
+        if (result.updated.length) parts.push(`${result.updated.length} file(s) updated`)
         log(
-          total > 0
-            ? `  • ${total} file(s) added to ~/.claude (skills, slash commands)`
+          parts.length
+            ? `  • ${parts.join(', ')} in ~/.claude (skills, slash commands)`
             : '  • already up to date — no files changed',
         )
-        log(`  • merged hooks + security rules into ~/.claude/settings.json`)
+        log(`  • ensured hooks + security rules are present in ~/.claude/settings.json`)
         log('Undo any time with:  haus uninstall')
         log('Disable this on install:  HAUS_NO_POSTINSTALL=1')
       } else {
