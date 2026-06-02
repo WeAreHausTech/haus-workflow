@@ -67,11 +67,11 @@ export async function runDoctor(options?: { hooks?: boolean }): Promise<void> {
   if (hooks.skipped) {
     ok(`- HOOKS: (skipped) ${hooks.message}`)
   } else if (!hooks.ok) {
-    detail.push({ stream: 'log', text: `- HOOKS FAIL: ${hooks.message}` })
-    attention.push({
-      sentence: "The Claude Code hooks don't match what haus expects",
-      fix: 'haus apply --write',
-    })
+    flag(
+      `- HOOKS FAIL: ${hooks.message}`,
+      "The Claude Code hooks don't match what haus expects",
+      'haus apply --write',
+    )
     process.exitCode = 1
   } else {
     ok(`- HOOKS OK: ${hooks.message}`)
@@ -104,18 +104,19 @@ export async function runDoctor(options?: { hooks?: boolean }): Promise<void> {
       'haus apply --write',
     )
   } else {
-    ok('- CLAUDE.md: import block present')
     const beginIdx = rootClaudeMdContent.indexOf(BLOCK_BEGIN)
-    const endIdx = rootClaudeMdContent.indexOf(BLOCK_END)
-    if (endIdx <= beginIdx) {
+    // Search for END *after* BEGIN so unrelated earlier text can't satisfy the close.
+    const endIdx = rootClaudeMdContent.indexOf(BLOCK_END, beginIdx + BLOCK_BEGIN.length)
+    if (endIdx < 0) {
       // BEGIN without a matching END: the block is malformed, not a clean bridge.
       // Don't scan to EOF (that would capture @-imports in the user's own notes).
       flag(
         '- CLAUDE.md: haus import block is not closed (run `haus apply --write` to repair)',
-        "The haus import block in CLAUDE.md is broken, so its guidance may not load",
+        'The haus import block in CLAUDE.md is broken, so its guidance may not load',
         'haus apply --write',
       )
     } else {
+      ok('- CLAUDE.md: import block present')
       const block = rootClaudeMdContent.slice(beginIdx, endIdx + BLOCK_END.length)
       const importTargets = [...block.matchAll(/@\.haus-workflow\/(\S+)/g)].map((m) => m[1])
       for (const target of importTargets) {
@@ -249,14 +250,15 @@ export async function runDoctor(options?: { hooks?: boolean }): Promise<void> {
     ok(`- CLI: ${currentVersion} (version check unavailable)`)
   }
 
-  // Verdict line first, then the per-item plain-language attention list, then detail.
-  log('Haus Doctor')
+  // The very first line is the plain-language verdict (the only line a non-dev
+  // needs); the "Haus Doctor" title and developer detail follow beneath.
   if (attention.length === 0) {
     log('✅ Your project is set up and healthy.')
   } else {
     log(`⚠️ ${attention.length} thing(s) need attention:`)
-    for (const a of attention) log(`  • ${a.sentence} — fix: \`${a.fix}\``)
+    for (const a of attention) log(`  • ${a.sentence} — fix: ${a.fix}`)
   }
+  log('Haus Doctor')
   for (const line of detail) {
     if (line.stream === 'warn') warn(line.text)
     else log(line.text)

@@ -10,6 +10,8 @@ export function guardBash(command: string): string | undefined {
   // Substring match — any dangerous token anywhere in the command triggers a block
   const matched = DANGEROUS_COMMANDS.find((token) => command.includes(token))
   // Plain-language reason (non-devs hit these) that still names what was blocked.
-  if (matched) return `I didn't run that — it can permanently change or delete things: \`${command}\``
+  // No backticks: this string is emitted as a JSON permissionDecisionReason that the
+  // UI may render as Markdown, so backticks in the command itself could break formatting.
+  if (matched) return `I didn't run that — it can permanently change or delete things: ${command}`
   return undefined
 }
