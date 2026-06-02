@@ -26,7 +26,7 @@ The single highest-value finding: **the CLI's headline security principle — "e
 | --- | --- | --- | --- |
 | 0 | **WS0** — Test-harness fix (run unit tests via `tsx` against `src/`). *Inserted prerequisite — not in the original numbering.* | ✅ merged | #46 |
 | 1 | **WS1** — Security: `permissions.deny` + `SENSITIVE` 3→1 + guard backstop + catalog `haus.lefthook-security` | ✅ merged | #47 / cat #2 |
-| 2 | **WS8** — `validation-rules` → shared JSON + synced fixture | ⬜ | — |
+| 2 | **WS8** — `validation-rules` → shared JSON + synced fixture | ✅ merged | #49 / cat #3 |
 | 3 | **WS3** — detection registry + `detectionStatus` + unsupported signal | ⬜ | — |
 | 4 | **WS4** — `workflow-config.md` auto-fill | ⬜ | — |
 | 5 | **WS2** — delete memory store + token-budget router | ⬜ | — |
@@ -49,6 +49,14 @@ The single highest-value finding: **the CLI's headline security principle — "e
 - `guard.test.js` rewritten to real invocation; `secret-patterns`/`redact-sensitive` kept (hook-time redaction).
 - Catalog: `haus.lefthook-security` template (gitleaks-optional + added-lines-only grep) + deny-syntax doc fix in `agentic-workflow-standard.md` / `.claude/WORKFLOW.md`.
 - **New WS8 input discovered:** CI's `haus validate-catalog` enforces a **tag allowlist** (`readAllowedStacks` + specials) that the catalog's local `validate.mjs` does NOT — local-green ≠ CI-green. WS8's "single source" must cover the tag check too, not just the shared constants.
+
+### WS8 — done (CLI #49 + catalog #3, merged)
+- **Canonical `validation-rules.json`** at the catalog repo root owns all rule data (forbidden tags, banned phrases, required sections, install-pattern regexes as `{source,flags}`, **and** the stack allowlist). CLI gets it as a synced fixture `library/catalog/validation-rules.json` — same mechanism as `manifest.json`. Recorded as **ADR-0001** (`docs/adr/`); reverses the prior "allowlist lives in the CLI" choice.
+- Both `scripts/validation-rules.mjs` (catalog) and `src/catalog/validation-rules.ts` (CLI) are now **thin loaders** — no rule values in code. CLI inlines the JSON at build time (validation is release-coupled, unlike runtime-fetched content).
+- **Tag-allowlist drift killed:** one shared `isTagAllowed`/`auditDisallowedTags` evaluator (mirrored both languages). Catalog `validate.mjs` now enforces the allowlist too, so a tag passing local can't fail CLI CI (the WS1 incident). Collapsed *three* divergent allowlist checks → one.
+- Deleted dead `src/catalog/validate-catalog.ts` + `allowed-stacks.ts` + `allowed-stacks.json`.
+- Drift backstops: `validate.mjs` asserts `.claude/WORKFLOW.md` byte-identical to `templates/agentic-workflow-standard.md`; `sync-catalog-fixture` + `dispatch-fixture-sync` now cover `validation-rules.json`.
+- Behavior note: pattern-suffix match tightened `includes('-patterns')` → `endsWith(suffix)` — identical for the current catalog (all `-patterns` tags suffix-final), matches `PATTERN_TAG_SUFFIXES` intent.
 
 ---
 
