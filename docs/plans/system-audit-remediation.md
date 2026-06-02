@@ -25,7 +25,7 @@ The single highest-value finding: **the CLI's headline security principle — "e
 | Order | Workstream | Status | PR |
 | --- | --- | --- | --- |
 | 0 | **WS0** — Test-harness fix (run unit tests via `tsx` against `src/`). *Inserted prerequisite — not in the original numbering.* | ✅ merged | #46 |
-| 1 | **WS1** — Security: `permissions.deny` + `SENSITIVE` 3→1 + guard backstop + catalog `haus.lefthook-security` | 🚧 in progress | — |
+| 1 | **WS1** — Security: `permissions.deny` + `SENSITIVE` 3→1 + guard backstop + catalog `haus.lefthook-security` | ✅ merged | #47 / cat #2 |
 | 2 | **WS8** — `validation-rules` → shared JSON + synced fixture | ⬜ | — |
 | 3 | **WS3** — detection registry + `detectionStatus` + unsupported signal | ⬜ | — |
 | 4 | **WS4** — `workflow-config.md` auto-fill | ⬜ | — |
@@ -41,19 +41,14 @@ The single highest-value finding: **the CLI's headline security principle — "e
 - `tests/install.test.js`: imports `dist`→`src`, removed skip-guards; rewrote the install smoke into a real `applyInstall({ dryRun: true })` test with stubbed `HOME` (hermetic, writes nothing).
 - **Why it mattered:** without it, every internals unit test (incl. WS1's) passes vacuously. Verified via mutation (0→1 fail).
 
-### WS1 — in progress (NOT yet committed/pushed; lives in a local `git stash` on the author's machine)
-Done so far:
-- New `src/security/deny-rules.ts` — `buildDenyRules()` derives `permissions.deny` strings from the SAME static lists the guards use: `DANGEROUS_COMMANDS` → `Bash(<cmd>:*)`; `SENSITIVE_PATHS` → `Read/Edit/Write(<glob>)`, directory entries → `<dir>/**`. (DRY: deny rules + guards share one source.)
-- `src/install/settings-merge.ts` — added `mergeDenyRules()` + `stripHausDeny()`, a `permissions` type, and `_haus.denyRules` tracking; made hook/deny `_haus` tracking order-independent.
-- `tests/deny-rules.test.js` — RED confirmed against current code (module missing).
-- **Confirmed CC deny syntax (docs/en/permissions.md):** Bash = `Bash(x:*)` prefix match; file tools = gitignore globs (`Read(*.pem)`, `Write(.env)`, `Read(secrets/**)`) — **not** `:*`. WORKFLOW.md's `Write(.env:*)` file examples are wrong → fix in a doc pass (catalog `templates/agentic-workflow-standard.md` + CLI `.claude/WORKFLOW.md`).
-
-Remaining for WS1:
-- Verify deny test GREEN; wire `mergeDenyRules(buildDenyRules())` into `applyInstall` (global ~/.claude) **and** the project `apply` settings path; call `stripHausDeny` on uninstall (order: deny strip before `stripHausHooks`, which deletes the whole `_haus` block).
-- Consolidate `SENSITIVE` 3→1: `security/sensitive-paths.ts` owns canonical data; `scanner/scan-project.ts` keeps anchored-regex semantics, `recommender/recommend.ts` + `guard-file-access` import — behavior-preserving (see §A.1 for the three differing formats).
-- Rewrite `tests/guard.test.js` from source-substring checks to real `guardBash`/`guardFileAccess` invocation.
-- Add catalog `haus.lefthook-security` template + `manifest.json` entry.
-- `yarn verify` green.
+### WS1 — done (CLI #47 + catalog #2, merged)
+- `src/security/deny-rules.ts` — `buildDenyRules()` derives `permissions.deny` from the SAME lists the guards use: `DANGEROUS_COMMANDS` → `Bash(<cmd>:*)`; `SENSITIVE_PATHS` → `Read/Edit/Write(<glob>)`, dirs → `<dir>/**`.
+- `settings-merge.ts` `mergeDenyRules`/`stripHausDeny` (+ `_haus.denyRules`, order-independent) → wired into `applyInstall` (global) and `runUninstall`.
+- Project `apply` writes deny via the canonical `loadClaudeHooksSettings()` so the writer + both contract verifiers stay consistent.
+- `SENSITIVE` 3→1: `security/sensitive-paths.ts` exports `SENSITIVE_PATHS` (guard), `SENSITIVE_PATH_REGEXES` (scanner), `SENSITIVE_ITEM_KEYWORDS` (recommender). Behaviour-preserving.
+- `guard.test.js` rewritten to real invocation; `secret-patterns`/`redact-sensitive` kept (hook-time redaction).
+- Catalog: `haus.lefthook-security` template (gitleaks-optional + added-lines-only grep) + deny-syntax doc fix in `agentic-workflow-standard.md` / `.claude/WORKFLOW.md`.
+- **New WS8 input discovered:** CI's `haus validate-catalog` enforces a **tag allowlist** (`readAllowedStacks` + specials) that the catalog's local `validate.mjs` does NOT — local-green ≠ CI-green. WS8's "single source" must cover the tag check too, not just the shared constants.
 
 ---
 
