@@ -13,6 +13,7 @@
   "homepage": "https://github.com/WeAreHausTech/haus-workflow",
   "files": [
     "dist",
+    "scripts/postinstall.mjs",
     "library/global",
     "library/catalog",
     "tests/fixtures/catalog",
@@ -37,7 +38,8 @@
     "release:dry": "GITHUB_TOKEN=$(gh auth token) release-it --dry-run",
     "prepack": "yarn build",
     "verify": "yarn typecheck && yarn typecheck:scripts && yarn lint && yarn build && yarn test",
-    "prepare": "husky",
+    "postinstall": "node ./scripts/postinstall.mjs || true",
+    "prepare": "husky || true",
     "security:audit": "yarn npm audit -A -R --severity high --environment production"
   },
   "dependencies": {
