@@ -78,6 +78,10 @@ program
     '--allow-empty-cache',
     'Apply core files only when catalog cache is empty (skip catalog items without error)',
   )
+  .option(
+    '--refill-config',
+    'Fill still-blank fields in an existing workflow-config.md without touching edited ones',
+  )
   .action(runApply)
 program.command('undo').option('-y, --yes', 'Skip confirmation').action(runUndo)
 program.command('explain-recommendation').option('--json').action(runExplainRecommendation)

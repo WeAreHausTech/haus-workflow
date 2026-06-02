@@ -120,7 +120,15 @@ export async function runDoctor(options?: { hooks?: boolean }): Promise<void> {
   if (!workflowConfigExists) {
     warn('- .haus-workflow/workflow-config.md: missing (run `haus apply --write`)')
   } else {
-    log('- .haus-workflow/workflow-config.md: OK (project-owned)')
+    const cfg = await fs.readFile(workflowConfigPath, 'utf8')
+    const unfilled = cfg.split('\n').filter((l) => l.includes('<!-- fill in')).length
+    if (unfilled > 0) {
+      warn(
+        `- .haus-workflow/workflow-config.md: ${unfilled} field(s) still unfilled (run \`haus apply --refill-config\` to auto-fill detectable ones)`,
+      )
+    } else {
+      log('- .haus-workflow/workflow-config.md: OK (project-owned)')
+    }
   }
 
   const projectMdPath = hausPath(root, 'project.md')
