@@ -2,10 +2,10 @@
 import fs from 'node:fs'
 import path from 'node:path'
 
-import { readAllowedStacks } from '../catalog/allowed-stacks.js'
 import {
   ANY_NPX_PATTERN,
   ALLOWED_NPX_PATTERN,
+  auditDisallowedTags,
   BANNED_AGENT_PHRASES,
   FORBIDDEN_TAGS,
   HTTP_URL_PATTERN,
@@ -17,7 +17,6 @@ import {
 import type { CatalogItem } from '../types.js'
 import { readJson } from '../utils/fs.js'
 import { error, log } from '../utils/logger.js'
-import { packageRoot } from '../utils/paths.js'
 
 function auditForbiddenStacks(items: CatalogItem[]): string[] {
   const failures: string[] = []
@@ -204,28 +203,9 @@ export async function runValidateCatalog(manifestPath: string | undefined): Prom
   const fileFailures = auditShippedFiles(manifestDir, items)
   const contentFailures = auditMarkdownContent(manifestDir)
 
-  // Allowlist lives in the CLI package, not in the catalog repo.
-  const allowed = new Set((await readAllowedStacks(packageRoot())).map((x) => x.toLowerCase()))
-  const tagFailures: string[] = []
-  if (allowed.size > 0) {
-    for (const item of items) {
-      for (const tag of Array.isArray(item.tags) ? item.tags : []) {
-        if (
-          !allowed.has(tag.toLowerCase()) &&
-          !tag.includes('-patterns') &&
-          tag !== 'haus' &&
-          tag !== 'security' &&
-          tag !== 'quality' &&
-          tag !== 'review' &&
-          tag !== 'workflow' &&
-          tag !== 'baseline' &&
-          tag !== 'project-instructions'
-        ) {
-          tagFailures.push(`${item.id}: tag not in allowlist: "${tag}"`)
-        }
-      }
-    }
-  }
+  // Allowlist (stacks + meta tags + pattern suffixes) comes from the synced
+  // validation-rules.json, the same source the catalog repo validates against.
+  const tagFailures = auditDisallowedTags(items)
 
   const allFailures = [
     ...structureFailures,
