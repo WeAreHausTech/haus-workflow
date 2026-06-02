@@ -225,4 +225,33 @@ describe('applyInstall dry-run (real invocation, stubbed HOME)', () => {
     // Dry-run must not write anything — not even the .claude directory.
     assert.equal(fs.existsSync(path.join(tmpDir, '.claude')), false)
   })
+
+  it('writes permissions.deny with the NEVER rules on a real install', async () => {
+    const { applyInstall } = await import('../src/install/apply.js')
+    await applyInstall({})
+    const settings = JSON.parse(
+      fs.readFileSync(path.join(tmpDir, '.claude', 'settings.json'), 'utf8'),
+    )
+    assert.ok(Array.isArray(settings.permissions?.deny), 'permissions.deny should be written')
+    assert.ok(settings.permissions.deny.includes('Bash(rm -rf:*)'))
+    assert.ok(settings.permissions.deny.includes('Bash(git push --force:*)'))
+    assert.ok(
+      settings.permissions.deny.some((r) => r.startsWith('Read(') && r.includes('.pem')),
+      'expected a Read deny for *.pem',
+    )
+    assert.ok((settings._haus?.denyRules?.length ?? 0) > 0, 'deny rules should be tracked in _haus')
+  })
+
+  it('strips haus deny rules on uninstall, leaving none behind', async () => {
+    const { applyInstall } = await import('../src/install/apply.js')
+    const { runUninstall } = await import('../src/install/uninstall.js')
+    await applyInstall({})
+    await runUninstall({ force: true })
+    const settings = JSON.parse(
+      fs.readFileSync(path.join(tmpDir, '.claude', 'settings.json'), 'utf8'),
+    )
+    const deny = settings.permissions?.deny ?? []
+    assert.ok(!deny.includes('Bash(rm -rf:*)'), 'haus deny rules should be stripped on uninstall')
+    assert.equal(settings._haus?.denyRules, undefined)
+  })
 })

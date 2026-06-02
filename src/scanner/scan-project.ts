@@ -6,6 +6,7 @@
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
+import { SENSITIVE_PATH_REGEXES } from '../security/sensitive-paths.js'
 import type { ContextMap, PackageManager } from '../types.js'
 import { isRecord } from '../utils/audit-checks.js'
 import { hashText, listFiles, readJson, writeJson, writeText } from '../utils/fs.js'
@@ -57,32 +58,9 @@ const SAFE_FILES = [
   'Dockerfile',
 ]
 
-/**
- * Regex patterns for paths that must never be read, regardless of whether they
- * match SAFE_FILES.  Covers secrets, credentials, database dumps, and user-uploaded
- * content that could contain PII.
- */
-const SENSITIVE = [
-  /^\.env(\.|$)/,
-  /(^|\/)\.env(\.|$)/,
-  /\.pem$/,
-  /\.key$/,
-  /\.p12$/,
-  /\.pfx$/,
-  /\.sql$/,
-  /\.dump$/,
-  /customer-data/,
-  /exports/,
-  /certs/,
-  /secrets/,
-  /(^|\/)storage\/logs(\/|$)/,
-  /(^|\/)wp-content\/uploads(\/|$)/,
-  /(^|\/)uploads(\/|$)/,
-]
-
-/** Returns true when a relative file path matches any SENSITIVE pattern. */
+/** Returns true when a relative file path matches any sensitive-path regex. */
 function blocked(rel: string): boolean {
-  return SENSITIVE.some((x) => x.test(rel))
+  return SENSITIVE_PATH_REGEXES.some((x) => x.test(rel))
 }
 
 /**

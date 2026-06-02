@@ -50,6 +50,9 @@ test('apply writes claude files and rules', () => {
   assert.equal(pre[0].hooks[0].command, 'haus guard file-access --from-hook || true')
   assert.equal(pre[1].matcher, 'Bash')
   assert.equal(pre[1].hooks[0].command, 'haus guard bash --from-hook || true')
+  // Deterministic deny rules are written into project settings.json (WS1).
+  assert.equal(Array.isArray(settings.permissions?.deny), true)
+  assert.equal(settings.permissions.deny.includes('Bash(rm -rf:*)'), true)
   assert.equal(rulesHaus.includes('Keep context minimal'), true)
   assert.equal(rulesSecurity.includes('Never read secrets'), true)
 

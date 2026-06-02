@@ -3,12 +3,15 @@
  * The hook set is inlined here (no external file) so it is always in sync with the package.
  */
 
-/** Shape written to `.claude/settings.json` under `hooks`. */
+import { buildDenyRules } from '../security/deny-rules.js'
+
+/** Shape written to `.claude/settings.json` under `hooks` (+ deterministic deny rules). */
 export type ClaudeHooksSettings = {
   hooks: {
     UserPromptSubmit: Array<{ hooks: Array<{ type: 'command'; command: string }> }>
     PreToolUse: Array<{ matcher: string; hooks: Array<{ type: 'command'; command: string }> }>
   }
+  permissions?: { deny: string[] }
 }
 
 /**
@@ -50,9 +53,13 @@ const STABLE_HOOK_IDS: Record<string, string> = {
   'haus guard bash --from-hook || true': 'haus.guard-bash',
 }
 
-/** Returns the canonical hook config. No file I/O — config is inlined. */
+/**
+ * Returns the canonical project settings: inlined hooks plus the deterministic
+ * `permissions.deny` rules (WORKFLOW.md "enforce in both"). One source so the
+ * writer and both contract verifiers stay consistent.
+ */
 export async function loadClaudeHooksSettings(): Promise<ClaudeHooksSettings> {
-  return CANONICAL_HOOKS
+  return { ...CANONICAL_HOOKS, permissions: { deny: buildDenyRules() } }
 }
 
 /** Flat list for `.haus-workflow/recommended-hooks.json` (ids stable for known commands). */
