@@ -28,4 +28,6 @@ Template tamper detection and hash-based update logic (`src/claude/write-workflo
 
 ## Pre-commit tool
 
-Husky (`prepare` script in package.json)
+Lefthook (`lefthook.yml`; installed via the `prepare` script). pre-commit gates
+lint + format + typecheck + secret scan (gitleaks + grep); pre-push runs tests.
+This dogfoods the standard haus ships (`haus.lefthook-security`).

@@ -39,7 +39,7 @@
     "prepack": "yarn build",
     "verify": "yarn typecheck && yarn typecheck:scripts && yarn lint && yarn build && yarn test",
     "postinstall": "node ./scripts/postinstall.mjs || true",
-    "prepare": "husky || true",
+    "prepare": "lefthook install || true",
     "security:audit": "yarn npm audit -A -R --severity high --environment production"
   },
   "dependencies": {
@@ -64,8 +64,7 @@
     "@typescript-eslint/parser": "8.59.3",
     "eslint": "9.39.4",
     "eslint-plugin-import": "2.32.0",
-    "husky": "9.1.7",
-    "lint-staged": "17.0.4",
+    "lefthook": "1.13.6",
     "prettier": "3.8.3",
     "release-it": "20.0.1",
     "tsup": "8.5.1",
@@ -79,10 +78,9 @@
     "access": "public"
   },
   "packageManager": "yarn@4.15.0",
-  "lint-staged": {
-    "**/*.ts": [
-      "eslint",
-      "prettier --write"
-    ]
+  "dependenciesMeta": {
+    "lefthook": {
+      "built": true
+    }
   }
 }

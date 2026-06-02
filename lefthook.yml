@@ -1,0 +1,46 @@
+# Lefthook git hooks for haus-workflow.
+#
+# haus ships the agentic workflow standard that mandates Lefthook (Go binary,
+# faster than Husky, agent-readable fail_text) — so we run it ourselves. The
+# gitleaks + secret-grep stages mirror the `haus.lefthook-security` template haus
+# ships to users, so we run the config we publish.
+#
+# Install with `lefthook install` (the `prepare` script does this automatically).
+
+pre-commit:
+  parallel: true
+  commands:
+    lint:
+      glob: '*.{ts,mjs}'
+      run: yarn eslint {staged_files}
+      fail_text: 'Lint failed. Run `yarn lint` to see details (or `yarn eslint --fix <file>`), re-stage, then commit.'
+    format:
+      glob: '*.{ts,mjs,json,md,yml,yaml}'
+      run: yarn prettier --write {staged_files}
+      stage_fixed: true
+      fail_text: 'Prettier could not format a staged file. Fix the syntax error it reports, re-stage, then commit.'
+    typecheck:
+      run: yarn typecheck
+      fail_text: 'Type errors found. Fix all type errors (`yarn typecheck` to list them) before committing.'
+    gitleaks:
+      # Runs only when gitleaks is installed — a missing binary never fails the commit.
+      run: |
+        if command -v gitleaks >/dev/null 2>&1; then
+          gitleaks protect --staged --redact --no-banner
+        fi
+      fail_text: 'gitleaks found a likely secret in staged changes. Remove it, re-stage, and commit. Install gitleaks: https://github.com/gitleaks/gitleaks#installing'
+    secret-grep:
+      # Always-on baseline. Scans ADDED lines only (deleting a leaked secret is never
+      # blocked) for inline credential assignments.
+      run: |
+        added="$(git diff --cached --no-color -U0 | grep -E '^\+' | grep -vE '^\+\+\+')"
+        if printf '%s\n' "$added" | grep -iqE "(password|secret|token|api_key)[[:space:]]*[:=]"; then
+          exit 1
+        fi
+      fail_text: 'A staged line looks like an inline credential (password/secret/token/api_key). Move it to an environment variable or secret manager, then re-stage.'
+
+pre-push:
+  commands:
+    test:
+      run: yarn test
+      fail_text: 'Tests failed. Fix the failing tests (`yarn test`) before pushing.'
