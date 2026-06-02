@@ -33,6 +33,7 @@ export async function writeClaudeFiles(
   root: string,
   dryRun: boolean,
   selectedIds?: string[],
+  opts: { refillConfig?: boolean } = {},
 ): Promise<string[]> {
   const rec = (await readJson<Recommendation>(hausPath(root, 'recommendation.json'))) ?? {
     mode: 'fast',
@@ -58,7 +59,9 @@ export async function writeClaudeFiles(
   ]
   const rootClaudeMdPath = await writeRootClaudeMd(root, dryRun)
   const workflowPath = await writeWorkflow(root, hausVersion, dryRun)
-  const workflowConfigPath = await writeWorkflowConfig(root, dryRun)
+  const workflowConfigPath = await writeWorkflowConfig(root, dryRun, {
+    refill: opts.refillConfig,
+  })
   const projectFactsPath = await writeProjectFacts(root, hausVersion, dryRun)
   const p6Files = [
     rootClaudeMdPath,

@@ -24,6 +24,7 @@ export async function runApply(options: {
   write?: boolean
   select?: boolean
   allowEmptyCache?: boolean
+  refillConfig?: boolean
 }): Promise<void> {
   if (!options.dryRun && !options.write) {
     log('Use --dry-run or --write')
@@ -88,7 +89,9 @@ export async function runApply(options: {
     }
   }
 
-  const files = await writeClaudeFiles(root, isDryRun, selectedIds)
+  const files = await writeClaudeFiles(root, isDryRun, selectedIds, {
+    refillConfig: options.refillConfig,
+  })
   if (isDryRun) {
     log(`Dry-run complete — ${files.length} file(s) planned, none written. Run --write to apply.`)
   } else {
