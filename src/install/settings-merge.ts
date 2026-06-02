@@ -45,11 +45,12 @@ type ClaudePermissions = {
 type ClaudeSettings = {
   hooks?: Record<string, ClaudeHookEntry[]>
   permissions?: ClaudePermissions
-  /** Haus-private namespace used to track installed hook IDs, commands, and deny rules. */
+  /** Haus-private namespace used to track installed hook IDs, commands, and deny/allow rules. */
   _haus?: {
     hooks: string[]
     hookCommands?: string[]
     denyRules?: string[]
+    allowRules?: string[]
   }
   [key: string]: unknown
 }
@@ -109,8 +110,9 @@ export function mergeHooks(
   updated._haus = {
     hooks: [...existing, ...addedIds],
     hookCommands: [...existingCommands, ...addedCommands],
-    // Preserve deny-rule tracking so hook and deny merges are order-independent.
+    // Preserve deny/allow tracking so hook, deny, and allow merges are order-independent.
     ...(settings._haus?.denyRules ? { denyRules: settings._haus.denyRules } : {}),
+    ...(settings._haus?.allowRules ? { allowRules: settings._haus.allowRules } : {}),
   }
 
   return { settings: updated, addedIds }
@@ -146,9 +148,78 @@ export function mergeDenyRules(
     hooks: settings._haus?.hooks ?? [],
     ...(settings._haus?.hookCommands ? { hookCommands: settings._haus.hookCommands } : {}),
     denyRules: [...trackedDeny, ...addedRules],
+    ...(settings._haus?.allowRules ? { allowRules: settings._haus.allowRules } : {}),
   }
 
   return { settings: updated, addedRules }
+}
+
+/**
+ * Adds `permissions.allow` rule strings to the settings object, skipping any
+ * already present (whether user-defined or haus-installed). Tracks only the
+ * newly-added rules under `_haus.allowRules` so they can be cleanly stripped on
+ * uninstall without touching the user's own allow rules. Idempotent.
+ */
+export function mergeAllowRules(
+  settings: ClaudeSettings,
+  rules: string[],
+): { settings: ClaudeSettings; addedRules: string[] } {
+  const existingAllow = settings.permissions?.allow ?? []
+  const seen = new Set(existingAllow)
+  const trackedAllow = settings._haus?.allowRules ?? []
+
+  const addedRules: string[] = []
+  for (const rule of rules) {
+    if (seen.has(rule)) continue
+    seen.add(rule)
+    addedRules.push(rule)
+  }
+
+  const updated: ClaudeSettings = { ...settings }
+  updated.permissions = {
+    ...(settings.permissions ?? {}),
+    allow: [...existingAllow, ...addedRules],
+  }
+  updated._haus = {
+    hooks: settings._haus?.hooks ?? [],
+    ...(settings._haus?.hookCommands ? { hookCommands: settings._haus.hookCommands } : {}),
+    ...(settings._haus?.denyRules ? { denyRules: settings._haus.denyRules } : {}),
+    allowRules: [...trackedAllow, ...addedRules],
+  }
+
+  return { settings: updated, addedRules }
+}
+
+/**
+ * Returns a copy of settings with haus-installed allow rules removed (identified
+ * by `_haus.allowRules`), leaving user-defined allow rules intact. Cleans up empty
+ * `permissions`/`allow` containers and drops the `_haus` namespace if nothing else
+ * is tracked there.
+ */
+export function stripHausAllow(settings: ClaudeSettings): ClaudeSettings {
+  const prevHaus = settings._haus
+  if (!prevHaus?.allowRules || prevHaus.allowRules.length === 0) return settings
+
+  const ownedSet = new Set(prevHaus.allowRules)
+  const updated: ClaudeSettings = { ...settings }
+
+  const remainingAllow = (settings.permissions?.allow ?? []).filter((rule) => !ownedSet.has(rule))
+  const permissions: ClaudePermissions = { ...(settings.permissions ?? {}) }
+  if (remainingAllow.length > 0) permissions.allow = remainingAllow
+  else delete permissions.allow
+  if (Object.keys(permissions).length > 0) updated.permissions = permissions
+  else delete updated.permissions
+
+  const haus = { ...prevHaus }
+  delete haus.allowRules
+  const stillTracking =
+    (haus.hooks?.length ?? 0) > 0 ||
+    (haus.hookCommands?.length ?? 0) > 0 ||
+    (haus.denyRules?.length ?? 0) > 0
+  if (stillTracking) updated._haus = haus
+  else delete updated._haus
+
+  return updated
 }
 
 /**
@@ -173,7 +244,10 @@ export function stripHausDeny(settings: ClaudeSettings): ClaudeSettings {
 
   const haus = { ...prevHaus }
   delete haus.denyRules
-  const stillTracking = (haus.hooks?.length ?? 0) > 0 || (haus.hookCommands?.length ?? 0) > 0
+  const stillTracking =
+    (haus.hooks?.length ?? 0) > 0 ||
+    (haus.hookCommands?.length ?? 0) > 0 ||
+    (haus.allowRules?.length ?? 0) > 0
   if (stillTracking) updated._haus = haus
   else delete updated._haus
 

@@ -1,7 +1,6 @@
 /** `haus guard` — PreToolUse hook that blocks dangerous bash commands and sensitive file-access paths. */
 import { readFileSync } from 'node:fs'
 
-import { DANGEROUS_COMMANDS } from '../security/dangerous-commands.js'
 import { guardBash } from '../security/guard-bash.js'
 import { guardFileAccess } from '../security/guard-file-access.js'
 import { isRecord } from '../utils/audit-checks.js'
@@ -44,16 +43,19 @@ export async function runGuard(
 
   if (kind === 'file-access') {
     const candidate = String(toolInput.path ?? toolInput.file_path ?? '')
-    if (guardFileAccess(candidate)) {
-      deny(`Blocked sensitive path: ${candidate}`)
+    const reason = guardFileAccess(candidate)
+    if (reason) {
+      // Emit the guard's own plain-language reason (the human reads this).
+      deny(reason)
       process.exitCode = 1
       return
     }
     return
   }
   const command = String(toolInput.command ?? '')
-  if (guardBash(command) || DANGEROUS_COMMANDS.some((token) => command.includes(token))) {
-    deny(`Blocked dangerous command: ${command}`)
+  const reason = guardBash(command)
+  if (reason) {
+    deny(reason)
     process.exitCode = 1
   }
 }

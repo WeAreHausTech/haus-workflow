@@ -102,7 +102,14 @@ export async function writeClaudeFiles(
   await writeManagedText(
     root,
     claudePath(root, 'rules', 'haus.md'),
-    '- Keep context minimal.\n- Follow project conventions.\n',
+    '- Keep context minimal.\n' +
+      '- Follow project conventions.\n' +
+      '\n' +
+      '## Driving haus\n' +
+      'When the user asks to set up, configure, check, or fix the project, run ' +
+      '`haus setup-project` or `haus doctor` and narrate results in plain language — ' +
+      'never make them use a terminal or read JSON. The `/haus-setup`, `/haus-doctor`, ' +
+      'and `/haus-fix` commands do the same.\n',
     dryRun,
   )
   await writeManagedText(

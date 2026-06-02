@@ -12,6 +12,7 @@ import { readText, writeText } from '../utils/fs.js'
 import { log, warn } from '../utils/logger.js'
 import { packageRoot } from '../utils/paths.js'
 
+import { buildAllowRules } from './allow-rules.js'
 import { buildMarkdownHeader, parseMarkdownHeader, stampMarkdown } from './header.js'
 import {
   buildManifest,
@@ -22,6 +23,7 @@ import {
 } from './manifest.js'
 import {
   loadHooksFragment,
+  mergeAllowRules,
   mergeDenyRules,
   mergeHooks,
   readSettings,
@@ -82,7 +84,7 @@ interface SourceFile {
   destPath: string
 }
 
-/** Enumerates all skills and agents found under `srcDir` into SourceFile entries. */
+/** Enumerates all skills and global slash commands under `srcDir` into SourceFile entries. */
 function collectSourceFiles(srcDir: string, claudeDir: string): SourceFile[] {
   const entries: SourceFile[] = []
 
@@ -97,6 +99,22 @@ function collectSourceFiles(srcDir: string, claudeDir: string): SourceFile[] {
           destPath: path.join(claudeDir, 'skills', skillName, 'SKILL.md'),
         })
       }
+    }
+  }
+
+  // Global slash commands: flat `*.md` → ~/.claude/commands/<name>.md (CC discovers
+  // commands flat; the command name is the filename). Seeded by install so haus is
+  // discoverable in the `/` menu of every project, even before first setup (WS6).
+  const commandsDir = path.join(srcDir, 'commands')
+  if (fs.pathExistsSync(commandsDir)) {
+    for (const fileName of fs.readdirSync(commandsDir)) {
+      if (!fileName.endsWith('.md')) continue
+      const commandName = fileName.slice(0, -'.md'.length)
+      entries.push({
+        stableId: `command.${commandName}`,
+        srcRelPath: path.join('library', 'global', 'commands', fileName),
+        destPath: path.join(claudeDir, 'commands', fileName),
+      })
     }
   }
 
@@ -199,7 +217,9 @@ export async function applyInstall(options: ApplyOptions = {}): Promise<ApplyRes
   const settings = await readSettings()
   const { settings: hookSettings, addedIds } = mergeHooks(settings, fragments)
   // Write the deterministic NEVER rules into permissions.deny (WORKFLOW.md "enforce in both").
-  const { settings: mergedSettings } = mergeDenyRules(hookSettings, buildDenyRules())
+  const { settings: deniedSettings } = mergeDenyRules(hookSettings, buildDenyRules())
+  // Pre-allow haus's own scoped subcommands so non-devs aren't prompted on every step (WS6).
+  const { settings: mergedSettings } = mergeAllowRules(deniedSettings, buildAllowRules())
   result.hookIds = addedIds
 
   // Delete files that were in the old manifest but are no longer in the current package.

@@ -53,6 +53,9 @@ test('apply writes claude files and rules', () => {
   assert.equal(Array.isArray(settings.permissions?.deny), true)
   assert.equal(settings.permissions.deny.includes('Bash(rm -rf:*)'), true)
   assert.equal(rulesHaus.includes('Keep context minimal'), true)
+  // WS6: managed rule carries the natural-language "Driving haus" trigger.
+  assert.equal(rulesHaus.includes('Driving haus'), true)
+  assert.equal(rulesHaus.includes('haus setup-project'), true)
   assert.equal(rulesSecurity.includes('Never read secrets'), true)
 
   const pkg = JSON.parse(readFileSync(path.resolve('package.json'), 'utf8'))
