@@ -3,6 +3,14 @@
 /** Detected package manager for a repository. */
 export type PackageManager = 'yarn' | 'pnpm' | 'npm' | 'unknown'
 
+/**
+ * How confidently haus recognises the repo's stack.
+ * - `supported`: at least one known role/stack and no unsupported-ecosystem markers.
+ * - `partial`: known signals AND unsupported markers coexist (e.g. a Python service with a React frontend).
+ * - `unknown`: no known role/stack signal — haus cannot confidently guide this repo.
+ */
+export type DetectionStatus = 'supported' | 'partial' | 'unknown'
+
 /** Scanned repository context written to .haus-workflow/context-map.json. */
 export type ContextMap = {
   mode: 'guided' | 'fast'
@@ -17,6 +25,10 @@ export type ContextMap = {
   securityRisks: string[]
   crossRepoHints: string[]
   warnings: string[]
+  /** Confidence bucket for stack recognition (drives unsupported-repo messaging). */
+  detectionStatus: DetectionStatus
+  /** Markers of unsupported ecosystems found in the repo (e.g. ["python"]). Empty when none. */
+  unsupportedSignals: string[]
 }
 
 /** A single matching clause in a catalog item's requiresAny constraint. */

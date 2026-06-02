@@ -80,6 +80,8 @@ export async function writeWorkflowConfig(root: string, dryRun: boolean): Promis
     securityRisks: [],
     crossRepoHints: [],
     warnings: [],
+    detectionStatus: 'unknown' as const,
+    unsupportedSignals: [],
   }
 
   const content = buildWorkflowConfig(ctx)
