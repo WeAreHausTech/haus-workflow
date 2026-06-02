@@ -27,7 +27,7 @@ The single highest-value finding: **the CLI's headline security principle — "e
 | 0 | **WS0** — Test-harness fix (run unit tests via `tsx` against `src/`). *Inserted prerequisite — not in the original numbering.* | ✅ merged | #46 |
 | 1 | **WS1** — Security: `permissions.deny` + `SENSITIVE` 3→1 + guard backstop + catalog `haus.lefthook-security` | ✅ merged | #47 / cat #2 |
 | 2 | **WS8** — `validation-rules` → shared JSON + synced fixture | ✅ merged | #49 / cat #3 |
-| 3 | **WS3** — detection registry + `detectionStatus` + unsupported signal | ⬜ | — |
+| 3 | **WS3** — detection registry + `detectionStatus` + unsupported signal | ✅ merged | #50 |
 | 4 | **WS4** — `workflow-config.md` auto-fill | ⬜ | — |
 | 5 | **WS2** — delete memory store + token-budget router | ⬜ | — |
 | 6 | **WS6** — non-dev desktop UX | ⬜ | — |
@@ -57,6 +57,14 @@ The single highest-value finding: **the CLI's headline security principle — "e
 - Deleted dead `src/catalog/validate-catalog.ts` + `allowed-stacks.ts` + `allowed-stacks.json`.
 - Drift backstops: `validate.mjs` asserts `.claude/WORKFLOW.md` byte-identical to `templates/agentic-workflow-standard.md`; `sync-catalog-fixture` + `dispatch-fixture-sync` now cover `validation-rules.json`.
 - Behavior note: pattern-suffix match tightened `includes('-patterns')` → `endsWith(suffix)` — identical for the current catalog (all `-patterns` tags suffix-final), matches `PATTERN_TAG_SUFFIXES` intent.
+
+### WS3 — done (CLI #50, merged)
+- **`src/scanner/detection-registry.ts`** — typed `DetectionRule[]` + `runDetection()` evaluator replaces the `detectRoles`/`detectStacks` if-chains. Signals: dependency, depPrefix, depAbsent, file (endsWith/includes/equals/startsWith), content; grouped `all` (AND) / `any` (OR). Bucket is type-checked (`StackBucket`). Rules ordered to preserve `detectedStacks` insertion order.
+- **Content index built once** (`buildContentBlob`, chunked reads) — old `hasNeedle` re-read ≤300 files per needle (5×).
+- **`detectionStatus` (`supported|partial|unknown`) + `unsupportedSignals`** on `ContextMap` — from scanner signals + presence-only marker files (requirements.txt, go.mod, Cargo.toml, pom.xml, build.gradle, Gemfile). Recommender renders a clear unknown/partial message but keeps stack-agnostic baseline.
+- **`src/scanner/derive-from-manifest.ts`** — anti-drift: coverage test asserts every bundled-manifest item is recognisable (dependency clause / known role / registry-producible stack). New undetectable item → test fails.
+- Behavior locked by a **golden characterization test** (`detection-golden.json`, 11 fixtures, byte-identical). New `python-only` fixture → `unknown` / `['python']`.
+- **WS3-discovered follow-ups (not yet done):** recommender's `UNSUPPORTED` list duplicates catalog `FORBIDDEN_TAGS` (fold into shared validation-rules JSON); catalog `{stack:typescript}` vs scanner `typescript5` naming (items match via dependency clause, no current gap).
 
 ---
 
