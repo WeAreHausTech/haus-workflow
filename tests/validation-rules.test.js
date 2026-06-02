@@ -54,7 +54,7 @@ test('baseline + project-instructions are NOT in allowedStacks but ARE always-al
   assert.equal(PATTERN_TAG_SUFFIXES.includes('-patterns'), true)
 })
 
-test('CLI fixture is byte-identical to a parsed canonical shape (no stale regex drift)', () => {
+test('CLI fixture has every required key (a malformed sync would drop one)', () => {
   const json = JSON.parse(fs.readFileSync('library/catalog/validation-rules.json', 'utf8'))
   // Required keys present — a malformed sync would drop one.
   for (const key of [
