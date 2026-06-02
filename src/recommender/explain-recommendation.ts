@@ -19,6 +19,7 @@ type RecommendationLike = Partial<Recommendation> & {
     score?: number
     tags?: string[]
     ecosystem?: string
+    tokenEstimate?: number
   }>
   skipped?: Array<{
     id: string
@@ -82,6 +83,7 @@ export function normalizeRecommendation(input: RecommendationLike): Recommendati
       },
       tags: item.tags,
       ecosystem: item.ecosystem,
+      tokenEstimate: item.tokenEstimate,
     }
   })
 

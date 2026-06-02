@@ -5,6 +5,7 @@ import {
   pickTaskRelevantRules,
   DEFAULT_CONTEXT_TOKEN_BUDGET,
 } from '../src/recommender/task-intent.ts'
+import { normalizeRecommendation } from '../src/recommender/explain-recommendation.ts'
 
 const rule = (id, score, tokenEstimate, selectionMode = 'matched') => ({
   id,
@@ -67,4 +68,25 @@ test('output preserves original order of kept rules', () => {
 test('DEFAULT_CONTEXT_TOKEN_BUDGET is a positive number', () => {
   assert.equal(typeof DEFAULT_CONTEXT_TOKEN_BUDGET, 'number')
   assert.ok(DEFAULT_CONTEXT_TOKEN_BUDGET > 0)
+})
+
+test('normalizeRecommendation preserves tokenEstimate so the budget can trim', () => {
+  // Regression: `haus context` feeds normalizeRecommendation() output into
+  // pickTaskRelevantRules. If normalize drops tokenEstimate, applyTokenBudget
+  // sees 0 for every rule and the budget silently never trims.
+  const normalized = normalizeRecommendation({
+    mode: 'fast',
+    recommended: [
+      { id: 'a', score: 10, tokenEstimate: 5000, selectionMode: 'matched' },
+      { id: 'b', score: 5, tokenEstimate: 5000, selectionMode: 'matched' },
+      { id: 'c', score: 1, tokenEstimate: 5000, selectionMode: 'matched' },
+    ],
+    skipped: [],
+  })
+  assert.deepEqual(
+    normalized.recommended.map((x) => x.tokenEstimate),
+    [5000, 5000, 5000],
+  )
+  const out = pickTaskRelevantRules(normalized, undefined, new Set(), { tokenBudget: 11000 })
+  assert.deepEqual(out.map((x) => x.id), ['a', 'b'])
 })
