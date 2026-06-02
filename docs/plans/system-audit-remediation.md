@@ -30,7 +30,7 @@ The single highest-value finding: **the CLI's headline security principle — "e
 | 3 | **WS3** — detection registry + `detectionStatus` + unsupported signal | ✅ merged | #50 |
 | 4 | **WS4** — `workflow-config.md` auto-fill | ✅ merged | #51 |
 | 5 | **WS2** — delete memory store + token-budget router | ✅ merged | #52 / cat #6 |
-| 6 | **WS6** — non-dev desktop UX | ⬜ | — |
+| 6 | **WS6** — non-dev desktop UX | ✅ merged | #54 |
 | 7 | **WS5** — full-auto postinstall + `prepare` fix | ⬜ | — |
 | 8 | **WS10** — CLI Husky→Lefthook (+ minimal catalog hook) | ⬜ | — |
 | 9 | **WS7** — code-quality cleanup (file splits, renames, dead code) | ⬜ | — |
@@ -76,6 +76,15 @@ The single highest-value finding: **the CLI's headline security principle — "e
 - **Token budget made real** — `tokenEstimate?` added to recommended items (`types.ts`), echoed from catalog in `recommend.ts`, preserved through `normalizeRecommendation()`. `applyTokenBudget()` in `task-intent.ts` drops lowest-scoring non-baseline rules until cumulative estimate ≤ `DEFAULT_CONTEXT_TOKEN_BUDGET` (12000); baselines never dropped, input order preserved. `haus context` passes the budget.
 - **Catalog**: `haus.memory-conventions` template (native-memory practice + `anthropic-skills:consolidate-memory` for periodic merge); manifest 2.2.0→2.3.0.
 - **Two real Copilot bugs caught + fixed pre-merge:** (1) `normalizeRecommendation` dropped `tokenEstimate` → budget silently never trimmed on the real `haus context` path; (2) bundled install fragment still carried the removed `memory inject` hook. Both fixed with regression tests (135 tests total).
+
+### WS6 — done (CLI #54, merged)
+- **Global slash commands** — `install` seeds `library/global/commands/{haus-setup,haus-doctor,haus-fix}.md` flat into `~/.claude/commands/*.md` (new `command.*` stableId; `collectSourceFiles` reuses the skill copy/stamp/manifest/orphan-cleanup machinery). Discoverable in the `/` menu of every project before first setup. Command bodies are frontmatter-free so the line-1 HAUS-MANAGED stamp stays harmless.
+- **Scoped `permissions.allow`** — `mergeAllowRules`/`stripHausAllow` + `_haus.allowRules` mirror the WS1 deny machinery; pre-allows the six `Bash(haus <sub>:*)` subcommands (setup-project/apply/doctor/scan/context/recommend), never a blanket `Bash(haus:*)`. Stripped on uninstall (chain: `stripHausHooks(stripHausAllow(stripHausDeny()))`). All three `_haus` trackers preserved order-independently across merges.
+- **NL trigger** — "Driving haus" block in `.claude/rules/haus.md` (kept compact; threshold 600). No edit to the user's global `~/.claude/CLAUDE.md` (locked decision); slash commands are the reliable discovery path.
+- **Conversational setup** — `setup-project` skips the readline prompt for any question already answered in `.haus-workflow/setup-answers.json`, so the agent supplies answers from chat. TTY path unchanged.
+- **Plain language** — `src/scanner/role-labels.ts` (`friendlyRole` + `describeRepo`, honest on `unknown`/`partial`) feeds `renderSummary`; `doctor` prints a single ✅/⚠️ verdict line FIRST, each issue → sentence + fix command; guard deny messages rewritten plainly (no backticks — JSON reason is rendered as Markdown) while still naming the blocked command/path; `guard.ts` now emits the guard-returned message (DRY); de-jargoned `project.md` / `workflow-config.md` headers.
+- **WS9 fold** — `doctor` validates each `@.haus-workflow/*` import target resolves (the sole context bridge) and flags a malformed/unclosed block; `BLOCK_END` searched after `BLOCK_BEGIN`.
+- **Five Copilot findings fixed pre-merge:** verdict-not-first, OK-logged-before-validating import block, HOOKS-fail bypassing `flag()`, and backticks around untrusted command/path in the two guard reasons. `yarn verify` green (160 tests).
 
 ---
 
