@@ -1637,7 +1637,7 @@
     },
     {
       "id": "haus.agentic-workflow-standard",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "source": "haus",
       "type": "template",
       "path": "templates/agentic-workflow-standard.md",
@@ -1651,6 +1651,25 @@
       "tokenEstimate": 2200,
       "tokenBudget": 2400,
       "default": true,
+      "reviewStatus": "approved",
+      "riskLevel": "low"
+    },
+    {
+      "id": "haus.lefthook-security",
+      "version": "1.0.0",
+      "source": "haus",
+      "type": "template",
+      "path": "templates/lefthook-security.yml",
+      "title": "Lefthook security pre-commit",
+      "purpose": "Commit-time secret scanning (gitleaks + grep fallback) wired via Lefthook, complementing haus's runtime guards and settings.json deny rules.",
+      "whenToUse": "Projects that want a commit-time secret-detection net alongside haus's real-time PreToolUse guards.",
+      "whenNotToUse": "Repos that already run a secret-scanning pre-commit hook, or that cannot install gitleaks.",
+      "tags": ["security", "workflow"],
+      "repoRoles": [],
+      "installMode": "copy-selected",
+      "tokenEstimate": 220,
+      "tokenBudget": 320,
+      "default": false,
       "reviewStatus": "approved",
       "riskLevel": "low"
     }
