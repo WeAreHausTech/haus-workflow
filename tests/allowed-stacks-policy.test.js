@@ -3,9 +3,9 @@ import assert from 'node:assert/strict'
 import fs from 'node:fs'
 
 test('allowed-stacks includes canonical machine-stable tokens', () => {
-  const raw = fs.readFileSync('library/catalog/allowed-stacks.json', 'utf8')
+  const raw = fs.readFileSync('library/catalog/validation-rules.json', 'utf8')
   const parsed = JSON.parse(raw)
-  const stacks = new Set((parsed.stacks ?? []).map((x) => String(x)))
+  const stacks = new Set((parsed.allowedStacks ?? []).map((x) => String(x)))
 
   const required = [
     'expressjs',

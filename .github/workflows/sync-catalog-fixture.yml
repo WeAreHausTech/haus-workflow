@@ -15,16 +15,19 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Fetch latest catalog manifest
+      - name: Fetch latest catalog fixtures
         run: |
           curl -fsSL \
             https://raw.githubusercontent.com/WeAreHausTech/haus-workflow-catalog/main/manifest.json \
             -o library/catalog/manifest.json
+          curl -fsSL \
+            https://raw.githubusercontent.com/WeAreHausTech/haus-workflow-catalog/main/validation-rules.json \
+            -o library/catalog/validation-rules.json
 
       - name: Check for changes
         id: diff
         run: |
-          if git diff --quiet library/catalog/manifest.json; then
+          if git diff --quiet library/catalog/manifest.json library/catalog/validation-rules.json; then
             echo "changed=false" >> $GITHUB_OUTPUT
           else
             echo "changed=true" >> $GITHUB_OUTPUT
@@ -39,11 +42,11 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git checkout -b "$BRANCH"
-          git add library/catalog/manifest.json
-          git commit -m "chore(catalog): sync fixture from haus-workflow-catalog main"
+          git add library/catalog/manifest.json library/catalog/validation-rules.json
+          git commit -m "chore(catalog): sync fixtures from haus-workflow-catalog main"
           git push origin "$BRANCH"
           gh pr create \
             --base main \
             --head "$BRANCH" \
-            --title "chore(catalog): sync fixture from haus-workflow-catalog main" \
-            --body "Automated sync of \`library/catalog/manifest.json\` from the latest \`main\` of [haus-workflow-catalog](https://github.com/WeAreHausTech/haus-workflow-catalog)."
+            --title "chore(catalog): sync fixtures from haus-workflow-catalog main" \
+            --body "Automated sync of \`library/catalog/manifest.json\` and \`library/catalog/validation-rules.json\` from the latest \`main\` of [haus-workflow-catalog](https://github.com/WeAreHausTech/haus-workflow-catalog)."

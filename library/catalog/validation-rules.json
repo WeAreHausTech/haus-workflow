@@ -1,5 +1,35 @@
 {
-  "stacks": [
+  "forbiddenTags": [
+    "python",
+    "django",
+    "go",
+    "rust",
+    "java",
+    "spring",
+    "kotlin",
+    "swift",
+    "android",
+    "flutter",
+    "dart",
+    "c++",
+    "perl",
+    "defi",
+    "trading"
+  ],
+  "bannedAgentPhrases": ["autonomous", "swarm", "delegate", "orchestrat", "marketplace"],
+  "requiredSkillSections": ["## Use when", "## Do not use when"],
+  "requiredAgentSections": ["## Use when", "## Do not use when", "## Verification"],
+  "riskyInstallPatterns": [
+    { "source": "\\bnpx\\s+-y\\b", "flags": "i" },
+    { "source": "\\bnpx\\s+--yes\\b", "flags": "i" },
+    { "source": "\\byarn\\s+dlx\\b", "flags": "i" },
+    { "source": "\\bpnpm\\s+dlx\\b", "flags": "i" }
+  ],
+  "allowedNpxPattern": { "source": "\\bnpx\\s+tsx\\b", "flags": "i" },
+  "anyNpxPattern": { "source": "\\bnpx\\s+\\S+", "flags": "i" },
+  "httpUrlPattern": { "source": "^http:\\/\\/", "flags": "i" },
+  "placeholderPattern": { "source": "\\bTODO\\b|\\bPLACEHOLDER\\b", "flags": "i" },
+  "allowedStacks": [
     "haus",
     "security",
     "quality",
@@ -102,5 +132,15 @@
     "qliro",
     "supabase",
     "payments"
-  ]
+  ],
+  "alwaysAllowedTags": [
+    "haus",
+    "security",
+    "quality",
+    "review",
+    "workflow",
+    "baseline",
+    "project-instructions"
+  ],
+  "patternTagSuffixes": ["-patterns"]
 }
