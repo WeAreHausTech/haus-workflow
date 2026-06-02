@@ -31,7 +31,7 @@ The single highest-value finding: **the CLI's headline security principle — "e
 | 4 | **WS4** — `workflow-config.md` auto-fill | ✅ merged | #51 |
 | 5 | **WS2** — delete memory store + token-budget router | ✅ merged | #52 / cat #6 |
 | 6 | **WS6** — non-dev desktop UX | ✅ merged | #54 |
-| 7 | **WS5** — full-auto postinstall + `prepare` fix | ⬜ | — |
+| 7 | **WS5** — full-auto postinstall + `prepare` fix | ✅ merged | #55 |
 | 8 | **WS10** — CLI Husky→Lefthook (+ minimal catalog hook) | ⬜ | — |
 | 9 | **WS7** — code-quality cleanup (file splits, renames, dead code) | ⬜ | — |
 | — | **WS9** — detectability hardening (folds into WS1/WS2/WS6/WS7) | ⬜ | — |
@@ -85,6 +85,12 @@ The single highest-value finding: **the CLI's headline security principle — "e
 - **Plain language** — `src/scanner/role-labels.ts` (`friendlyRole` + `describeRepo`, honest on `unknown`/`partial`) feeds `renderSummary`; `doctor` prints a single ✅/⚠️ verdict line FIRST, each issue → sentence + fix command; guard deny messages rewritten plainly (no backticks — JSON reason is rendered as Markdown) while still naming the blocked command/path; `guard.ts` now emits the guard-returned message (DRY); de-jargoned `project.md` / `workflow-config.md` headers.
 - **WS9 fold** — `doctor` validates each `@.haus-workflow/*` import target resolves (the sole context bridge) and flags a malformed/unclosed block; `BLOCK_END` searched after `BLOCK_BEGIN`.
 - **Five Copilot findings fixed pre-merge:** verdict-not-first, OK-logged-before-validating import block, HOOKS-fail bypassing `flag()`, and backticks around untrusted command/path in the two guard reasons. `yarn verify` green (160 tests).
+
+### WS5 — done (CLI #55, merged)
+- **`scripts/postinstall.mjs`** (plain Node ESM, shipped via `package.json#files`) — exported pure gate `shouldRunPostinstall({env,distExists,srcExists})` → `{run,reason}`, then spawns `node <pkgRoot>/dist/cli.js install --postinstall`. Runs ONLY when global + `!CI` + `HAUS_NO_POSTINSTALL!=='1'` + dist present + **src absent** (own-repo dev-checkout guard; published `files` omit `src/`). Double non-fatal: shell `|| true` + try/catch that always `exit(0)`. Direct-invocation guarded so `import` in tests never runs `main()`.
+- **`install --postinstall`** — plain-language notice (added/updated counts shown separately, "already up to date" on a repeat run, settings phrased "ensured present"), `haus uninstall` undo, `HAUS_NO_POSTINSTALL=1` disable; detailed file list suppressed in this mode to keep npm output clean.
+- **`package.json`** — `postinstall` script, `prepare: husky` → `husky || true` (fixes the latent git-install crash regardless of the WS10 tool swap), script added to `files`.
+- **Copilot fixes pre-merge:** notice no longer lumps updates as "added"; settings reads "ensured present" (idempotent-safe). `yarn verify` green (170 tests). Manual: `npm pack` ships the script; dev-checkout run no-ops (exit 0).
 
 ---
 
