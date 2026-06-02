@@ -2,7 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import os from 'node:os'
 import path from 'node:path'
-import { mkdtempSync, mkdirSync, writeFileSync } from 'node:fs'
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs'
 import { execaSync } from 'execa'
 
 // Exempt these tests from `apply`'s empty-cache check by pointing at the
@@ -74,6 +74,48 @@ test('doctor prints each shared warning once', () => {
   assert.equal(r.exitCode, 0)
   const hits = (r.stdout ?? '').split(dup).length - 1
   assert.equal(hits, 1)
+})
+
+test('doctor prints a healthy verdict line after apply (WS6)', () => {
+  const temp = mkdtempSync(path.join(os.tmpdir(), 'haus-doctor-verdict-'))
+  writeFileSync(
+    path.join(temp, 'package.json'),
+    JSON.stringify(
+      { name: 'verdict-temp', packageManager: 'yarn@4.5.3', dependencies: { react: '19.0.0' } },
+      null,
+      2,
+    ),
+  )
+  writeFileSync(path.join(temp, 'yarn.lock'), '# lock')
+  const cli = path.resolve('dist/cli.js')
+  execaSync('node', [cli, 'scan', '--json'], { cwd: temp })
+  execaSync('node', [cli, 'recommend', '--json'], { cwd: temp })
+  execaSync('node', [cli, 'apply', '--write'], { cwd: temp })
+  const r = execaSync('node', [cli, 'doctor'], { cwd: temp, reject: false })
+  assert.match(r.stdout ?? '', /✅ Your project is set up and healthy\.|⚠️ \d+ thing/)
+})
+
+test('doctor flags a broken CLAUDE.md import target with a fix (WS6)', () => {
+  const temp = mkdtempSync(path.join(os.tmpdir(), 'haus-doctor-bridge-'))
+  writeFileSync(
+    path.join(temp, 'package.json'),
+    JSON.stringify(
+      { name: 'bridge-temp', packageManager: 'yarn@4.5.3', dependencies: { react: '19.0.0' } },
+      null,
+      2,
+    ),
+  )
+  writeFileSync(path.join(temp, 'yarn.lock'), '# lock')
+  const cli = path.resolve('dist/cli.js')
+  execaSync('node', [cli, 'scan', '--json'], { cwd: temp })
+  execaSync('node', [cli, 'recommend', '--json'], { cwd: temp })
+  execaSync('node', [cli, 'apply', '--write'], { cwd: temp })
+  // Break the bridge: delete an @-imported target file.
+  rmSync(path.join(temp, '.haus-workflow', 'project.md'))
+  const r = execaSync('node', [cli, 'doctor'], { cwd: temp, reject: false })
+  const out = `${r.stdout ?? ''}${r.stderr ?? ''}`
+  assert.match(out, /project\.md/)
+  assert.match(r.stdout ?? '', /⚠️ \d+ thing/)
 })
 
 test('doctor reports CLI version line', () => {

@@ -254,4 +254,54 @@ describe('applyInstall dry-run (real invocation, stubbed HOME)', () => {
     assert.ok(!deny.includes('Bash(rm -rf:*)'), 'haus deny rules should be stripped on uninstall')
     assert.equal(settings._haus?.denyRules, undefined)
   })
+
+  it('seeds global slash commands flat into ~/.claude/commands and tracks them (WS6)', async () => {
+    const { applyInstall } = await import('../src/install/apply.js')
+    await applyInstall({})
+    const commandsDir = path.join(tmpDir, '.claude', 'commands')
+    for (const name of ['haus-setup', 'haus-doctor', 'haus-fix']) {
+      const file = path.join(commandsDir, `${name}.md`)
+      assert.ok(fs.existsSync(file), `expected ${name}.md to be seeded`)
+      // Frontmatter-free body: the haus stamp on line 1 is a harmless HTML comment.
+      assert.ok(fs.readFileSync(file, 'utf8').startsWith('<!-- HAUS-MANAGED id=command.'))
+    }
+    const manifest = JSON.parse(
+      fs.readFileSync(path.join(tmpDir, '.claude', 'haus', 'install-manifest.json'), 'utf8'),
+    )
+    const ids = manifest.files.map((f) => f.stableId)
+    assert.ok(ids.includes('command.haus-setup'))
+    assert.ok(ids.includes('command.haus-doctor'))
+    assert.ok(ids.includes('command.haus-fix'))
+  })
+
+  it('writes scoped permissions.allow for haus subcommands, never a blanket allow (WS6)', async () => {
+    const { applyInstall } = await import('../src/install/apply.js')
+    await applyInstall({})
+    const settings = JSON.parse(
+      fs.readFileSync(path.join(tmpDir, '.claude', 'settings.json'), 'utf8'),
+    )
+    const allow = settings.permissions?.allow ?? []
+    assert.ok(allow.includes('Bash(haus setup-project:*)'))
+    assert.ok(allow.includes('Bash(haus doctor:*)'))
+    assert.ok(!allow.includes('Bash(haus:*)'), 'must not pre-allow a blanket Bash(haus:*)')
+    assert.ok((settings._haus?.allowRules?.length ?? 0) > 0, 'allow rules tracked in _haus')
+  })
+
+  it('strips haus allow rules and removes seeded commands on uninstall (WS6)', async () => {
+    const { applyInstall } = await import('../src/install/apply.js')
+    const { runUninstall } = await import('../src/install/uninstall.js')
+    await applyInstall({})
+    await runUninstall({ force: true })
+    const settings = JSON.parse(
+      fs.readFileSync(path.join(tmpDir, '.claude', 'settings.json'), 'utf8'),
+    )
+    const allow = settings.permissions?.allow ?? []
+    assert.ok(!allow.includes('Bash(haus doctor:*)'), 'haus allow rules stripped on uninstall')
+    assert.equal(settings._haus?.allowRules, undefined)
+    assert.equal(
+      fs.existsSync(path.join(tmpDir, '.claude', 'commands', 'haus-setup.md')),
+      false,
+      'seeded command should be removed on uninstall',
+    )
+  })
 })

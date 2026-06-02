@@ -15,6 +15,7 @@ import { satisfiesVersion } from '../utils/versions.js'
 
 import { detectPackageManager } from './detect-package-manager.js'
 import { runDetection } from './detection-registry.js'
+import { describeRepo } from './role-labels.js'
 import type { ScanResult } from './types.js'
 
 /**
@@ -314,6 +315,8 @@ function computeConfidence(roles: string[], stacks: Record<string, string[]>): n
 /** Renders a concise markdown summary of the context map for repo-summary.md. */
 function renderSummary(context: ContextMap): string {
   return `# Repo summary
+
+${describeRepo(context)}
 
 - Repo: ${context.repoName}
 - Package manager: ${context.packageManager}

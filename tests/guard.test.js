@@ -15,6 +15,12 @@ describe('guardBash', () => {
     assert.equal(guardBash('yarn test'), undefined)
     assert.equal(guardBash('git status'), undefined)
   })
+
+  it('explains the block in plain language while still naming the command (WS6)', () => {
+    const msg = guardBash('rm -rf /tmp/x')
+    assert.match(msg, /didn't run that/i)
+    assert.match(msg, /rm -rf \/tmp\/x/)
+  })
 })
 
 describe('guardFileAccess', () => {
@@ -27,5 +33,11 @@ describe('guardFileAccess', () => {
   it('allows an ordinary path', () => {
     assert.equal(guardFileAccess('src/index.ts'), undefined)
     assert.equal(guardFileAccess('README.md'), undefined)
+  })
+
+  it('explains the block in plain language while still naming the path (WS6)', () => {
+    const msg = guardFileAccess('config/app.pem')
+    assert.match(msg, /didn't open/i)
+    assert.match(msg, /config\/app\.pem/)
   })
 })

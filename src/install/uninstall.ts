@@ -12,7 +12,13 @@ import { log, warn } from '../utils/logger.js'
 
 import { parseMarkdownHeader } from './header.js'
 import { globalClaudeDir, hausManifestPath, readManifest } from './manifest.js'
-import { readSettings, stripHausDeny, stripHausHooks, writeSettings } from './settings-merge.js'
+import {
+  readSettings,
+  stripHausAllow,
+  stripHausDeny,
+  stripHausHooks,
+  writeSettings,
+} from './settings-merge.js'
 
 /** Options controlling how `runUninstall` behaves. */
 export interface UninstallOptions {
@@ -72,8 +78,9 @@ export async function runUninstall(options: UninstallOptions = {}): Promise<Unin
   }
 
   const settings = await readSettings()
-  // Strip deny rules first (keeps _haus if hooks remain), then hooks (deletes _haus).
-  const stripped = stripHausHooks(stripHausDeny(settings))
+  // Strip allow + deny rules first (each keeps _haus if other tracking remains),
+  // then hooks last (deletes the _haus namespace).
+  const stripped = stripHausHooks(stripHausAllow(stripHausDeny(settings)))
   await writeSettings(stripped)
   result.hooksStripped = true
 

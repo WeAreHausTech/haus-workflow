@@ -48,8 +48,16 @@ export async function runSetupProject(options: {
         merged[question] = existing[question] ?? 'pending-user-answer'
         continue
       }
+      // If an answer was pre-supplied (e.g. the agent wrote setup-answers.json
+      // conversationally on the user's behalf), use it and skip the readline prompt.
+      // TTY users with no pre-filled answer are still prompted as before.
+      const prefilled = existing[question]
+      if (prefilled && prefilled !== 'pending-user-answer' && prefilled !== 'no-answer') {
+        merged[question] = prefilled
+        continue
+      }
       const answer = await ask(question)
-      merged[question] = answer || existing[question] || 'no-answer'
+      merged[question] = answer || prefilled || 'no-answer'
     }
     await writeJson(hausPath(root, 'setup-answers.json'), merged)
   }

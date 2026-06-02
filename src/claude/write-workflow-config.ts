@@ -62,12 +62,13 @@ function buildWorkflowConfig(v: WorkflowConfigValues): string {
   const f = fields(v)
   const byPrefix = (p: string) => line(f.find((x) => x.prefix === p)!)
   return (
-    '# Project workflow configuration\n' +
+    '# How this project works (commands & conventions)\n' +
     '\n' +
-    '> Project-specific values for the workflow standard in WORKFLOW.md.\n' +
-    '> Edit freely — this file is project-owned and will not be overwritten by haus.\n' +
-    '> Values are auto-detected on first setup; `haus apply --refill-config` fills any\n' +
-    "> still-blank fields without touching ones you've edited.\n" +
+    '> The everyday commands and conventions for this project — the build, test, and\n' +
+    '> lint commands, where docs live, and so on. This file is yours to edit and haus\n' +
+    '> will not overwrite it. haus fills in what it can detect on first setup;\n' +
+    '> `haus apply --refill-config` fills any still-blank fields without touching\n' +
+    "> anything you've edited.\n" +
     '\n' +
     '## Source-of-truth documents\n' +
     byPrefix('- Spec: ') +
