@@ -11,7 +11,8 @@ import { unrecognisableItems, isItemRecognisable } from '../src/scanner/derive-f
  * detect, this fails — forcing a registry rule or a dependency-backed clause.
  */
 test('every bundled-manifest item is recognisable by the detection registry', () => {
-  const manifest = JSON.parse(fs.readFileSync('library/catalog/manifest.json', 'utf8'))
+  const manifestPath = new URL('../library/catalog/manifest.json', import.meta.url)
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'))
   const orphans = unrecognisableItems(manifest.items)
   assert.deepEqual(
     orphans.map((i) => i.id),

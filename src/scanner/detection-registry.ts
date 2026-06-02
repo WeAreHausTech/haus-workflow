@@ -34,8 +34,8 @@ export const content = (value: string): DetectionSignal => ({ kind: 'content', v
 export interface DetectionRule {
   /** Repo role to add when matched (e.g. "next-app"). */
   role?: string
-  /** Bucketed stack entry to add when matched, as [bucket, name]. */
-  stack?: readonly [bucket: string, name: string]
+  /** Bucketed stack entry to add when matched, as [bucket, name]. Bucket is type-checked. */
+  stack?: readonly [bucket: StackBucket, name: string]
   /** All signals must match (AND). */
   all?: DetectionSignal[]
   /** At least one signal must match (OR). */
@@ -62,6 +62,9 @@ export const STACK_BUCKETS = [
   'tooling',
   'packageManagers',
 ] as const
+
+/** A valid detectedStacks bucket — constrains rule definitions so a typo won't compile. */
+export type StackBucket = (typeof STACK_BUCKETS)[number]
 
 function matchSignal(sig: DetectionSignal, ctx: DetectionContext): boolean {
   switch (sig.kind) {

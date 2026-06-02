@@ -505,8 +505,8 @@ function mergeRecommendationWarnings(context: ContextMap): string[] {
     context.detectionStatus === 'unknown'
       ? [
           markers
-            ? `Stack not recognised — detected ${markers}, which haus does not support. Only stack-agnostic workflow and security guidance applies.`
-            : 'Stack not recognised — no supported framework detected. Only stack-agnostic workflow and security guidance applies.',
+            ? `Stack not recognised — detected ${markers}, which haus does not support. Only stack-agnostic workflow and security guidance is applied.`
+            : 'Stack not recognised — no supported framework detected. Only stack-agnostic workflow and security guidance is applied.',
         ]
       : context.detectionStatus === 'partial' && markers
         ? [

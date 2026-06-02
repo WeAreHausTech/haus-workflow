@@ -278,16 +278,24 @@ async function buildContentBlob(root: string, files: string[]): Promise<string> 
       f.endsWith('.yml') ||
       f.endsWith('.yaml'),
   )
-  const parts = await Promise.all(
-    candidates.slice(0, 300).map(async (rel) => {
-      try {
-        return await readFile(path.join(root, rel), 'utf8')
-      } catch {
-        // File may have been deleted or be unreadable — skip and continue.
-        return ''
-      }
-    }),
-  )
+  // Read in bounded chunks rather than one big Promise.all — 300 concurrent opens can
+  // exhaust file descriptors (EMFILE) on some systems; chunking keeps the one-pass win.
+  const slice = candidates.slice(0, 300)
+  const CHUNK = 24
+  const parts: string[] = []
+  for (let i = 0; i < slice.length; i += CHUNK) {
+    const batch = await Promise.all(
+      slice.slice(i, i + CHUNK).map(async (rel) => {
+        try {
+          return await readFile(path.join(root, rel), 'utf8')
+        } catch {
+          // File may have been deleted or be unreadable — skip and continue.
+          return ''
+        }
+      }),
+    )
+    parts.push(...batch)
+  }
   return parts.join('\n')
 }
 
