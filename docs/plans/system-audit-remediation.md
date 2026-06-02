@@ -29,7 +29,7 @@ The single highest-value finding: **the CLI's headline security principle — "e
 | 2 | **WS8** — `validation-rules` → shared JSON + synced fixture | ✅ merged | #49 / cat #3 |
 | 3 | **WS3** — detection registry + `detectionStatus` + unsupported signal | ✅ merged | #50 |
 | 4 | **WS4** — `workflow-config.md` auto-fill | ✅ merged | #51 |
-| 5 | **WS2** — delete memory store + token-budget router | ⬜ | — |
+| 5 | **WS2** — delete memory store + token-budget router | ✅ merged | #52 / cat #6 |
 | 6 | **WS6** — non-dev desktop UX | ⬜ | — |
 | 7 | **WS5** — full-auto postinstall + `prepare` fix | ⬜ | — |
 | 8 | **WS10** — CLI Husky→Lefthook (+ minimal catalog hook) | ⬜ | — |
@@ -70,6 +70,12 @@ The single highest-value finding: **the CLI's headline security principle — "e
 - **`src/claude/derive-workflow-config.ts`** — script-first inference: real `package.json` script wins (typecheck, lint, lint:fix, format:check, test:e2e); else reconstruct from a present dep/config (tsc/eslint/prettier/playwright/cypress), per-pm format (`npx --no-install` / `yarn` / `pnpm exec`); never guesses an absent tool. Detects validation library, pre-commit tool, doc paths. Un-inferable → honest placeholder.
 - **`haus apply --refill-config`** — fills still-blank `<!-- fill in` lines of an existing config; never touches user-edited lines. Threaded cli → apply → write-claude-files → writeWorkflowConfig. `doctor` warns with unfilled-field count.
 - Write-once preserved; derive skipped on the common exists-no-refill path (no extra I/O).
+
+### WS2 — done (CLI #52, catalog #6, merged)
+- **Memory store deleted** — removed `src/memory/memory-store.ts`, `redact-memory.ts`, `src/commands/memory.ts`, `tests/memory.test.js`; dropped the `haus memory` CLI surface, the `memory inject` UserPromptSubmit hook (CANONICAL_HOOKS + STABLE_HOOK_IDS + bundled `library/global/settings-fragments/hooks.json`), the `memoryInject` gate (`load-hooks-config`, `doctor`), and the `hook.memory` config alias. Native Claude Code `MEMORY.md` supersedes. Kept `src/security/redact-sensitive.ts` (hook-time redactor — different concern).
+- **Token budget made real** — `tokenEstimate?` added to recommended items (`types.ts`), echoed from catalog in `recommend.ts`, preserved through `normalizeRecommendation()`. `applyTokenBudget()` in `task-intent.ts` drops lowest-scoring non-baseline rules until cumulative estimate ≤ `DEFAULT_CONTEXT_TOKEN_BUDGET` (12000); baselines never dropped, input order preserved. `haus context` passes the budget.
+- **Catalog**: `haus.memory-conventions` template (native-memory practice + `anthropic-skills:consolidate-memory` for periodic merge); manifest 2.2.0→2.3.0.
+- **Two real Copilot bugs caught + fixed pre-merge:** (1) `normalizeRecommendation` dropped `tokenEstimate` → budget silently never trimmed on the real `haus context` path; (2) bundled install fragment still carried the removed `memory inject` hook. Both fixed with regression tests (135 tests total).
 
 ---
 
