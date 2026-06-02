@@ -63,7 +63,7 @@ export async function runDoctor(options?: { hooks?: boolean }): Promise<void> {
 
   // Per-hook gate state (P2 outcome). Guards are always on; only the
   // gated UserPromptSubmit hooks have an opt-in flag.
-  const gatedHooks: HookKey[] = ['context', 'memoryInject']
+  const gatedHooks: HookKey[] = ['context']
   for (const key of gatedHooks) {
     const enabled = await isHookEnabled(root, key)
     log(`- HOOK ${key}: ${enabled ? 'enabled' : 'disabled (default)'}`)

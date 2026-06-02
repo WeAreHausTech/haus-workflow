@@ -42,9 +42,8 @@ test('apply writes claude files and rules', () => {
   const rulesSecurity = readFileSync(path.join(temp, '.claude/rules/security.md'), 'utf8')
 
   const ups = settings.hooks.UserPromptSubmit[0].hooks
-  assert.equal(ups.length, 2)
+  assert.equal(ups.length, 1)
   assert.equal(ups[0].command, 'haus context --from-hook || true')
-  assert.equal(ups[1].command, 'haus memory inject --from-hook || true')
   const pre = settings.hooks.PreToolUse
   assert.equal(pre[0].matcher, 'Read|Edit|Write')
   assert.equal(pre[0].hooks[0].command, 'haus guard file-access --from-hook || true')

@@ -13,7 +13,6 @@ const CONFIG_PATH = '.haus-workflow/config.json'
 
 const HOOK_ALIASES: Record<string, HookKey> = {
   'hook.context': 'context',
-  'hook.memory': 'memoryInject',
 }
 
 /**

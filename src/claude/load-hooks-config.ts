@@ -2,9 +2,8 @@
  * Per-project hook gating config (P2 outcome).
  *
  * `.haus-workflow/config.json` carries a small `hooks.*.enabled` map that the
- * non-load-bearing UserPromptSubmit hooks (`context`, `memoryInject`)
- * consult before doing work. Defaults are **off** — the hook is a no-op
- * unless the project opts in.
+ * non-load-bearing `context` UserPromptSubmit hook consults before doing work.
+ * Default is **off** — the hook is a no-op unless the project opts in.
  *
  * The two safety guards (`guard file-access`, `guard bash`) are NOT gated
  * here: they're load-bearing for the workflow's safety story and stay on
@@ -18,7 +17,7 @@ import path from 'node:path'
 
 import { readJson } from '../utils/fs.js'
 
-export type HookKey = 'context' | 'memoryInject'
+export type HookKey = 'context'
 
 export type HooksConfig = {
   hooks?: Partial<Record<HookKey, { enabled?: boolean }>>
@@ -26,11 +25,10 @@ export type HooksConfig = {
 
 const CONFIG_PATH = '.haus-workflow/config.json'
 
-/** Default config emitted on `haus apply --write`. Both gated hooks default off. */
+/** Default config emitted on `haus apply --write`. The gated hook defaults off. */
 export const DEFAULT_HOOKS_CONFIG: Required<HooksConfig> = {
   hooks: {
     context: { enabled: false },
-    memoryInject: { enabled: false },
   },
 }
 

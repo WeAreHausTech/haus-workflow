@@ -26,10 +26,7 @@ export const CANONICAL_HOOKS: ClaudeHooksSettings = {
   hooks: {
     UserPromptSubmit: [
       {
-        hooks: [
-          { type: 'command', command: 'haus context --from-hook || true' },
-          { type: 'command', command: 'haus memory inject --from-hook || true' },
-        ],
+        hooks: [{ type: 'command', command: 'haus context --from-hook || true' }],
       },
     ],
     PreToolUse: [
@@ -48,7 +45,6 @@ export const CANONICAL_HOOKS: ClaudeHooksSettings = {
 /** Maps known hook commands to stable IDs used in recommended-hooks.json. */
 const STABLE_HOOK_IDS: Record<string, string> = {
   'haus context --from-hook || true': 'haus.context-hook',
-  'haus memory inject --from-hook || true': 'haus.memory-hook',
   'haus guard file-access --from-hook || true': 'haus.guard-file',
   'haus guard bash --from-hook || true': 'haus.guard-bash',
 }
