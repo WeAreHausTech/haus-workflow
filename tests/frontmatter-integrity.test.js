@@ -6,10 +6,13 @@ import path from 'node:path'
 import { mkdtempSync, writeFileSync } from 'node:fs'
 import { execaSync } from 'execa'
 
-// WS9 (folded into WS7): Claude Code only registers a skill/agent when its YAML
-// frontmatter is on line 1. haus copies catalog skill/agent files verbatim — this
-// guard fails loudly if any write path ever prepends a header (e.g. a HAUS-MANAGED
-// stamp), which would silently de-register the primitive.
+// WS9 (folded into WS7): Claude Code only registers a skill/agent when its content
+// starts at line 1 (YAML frontmatter for real catalog items). haus must copy these
+// files VERBATIM — this guard fails loudly if any write path ever prepends a header
+// (e.g. a HAUS-MANAGED stamp), which would push real frontmatter off line 1 and
+// silently de-register the primitive. The assertion is on "no injected header" rather
+// than "=== ---" so it holds for the comment-stub fixtures too (env without a populated
+// catalog cache falls back to those stubs).
 
 const FIXTURE = path.resolve('tests/fixtures/catalog/manifest.json')
 
@@ -50,10 +53,11 @@ test('apply copies skills/agents with YAML frontmatter intact on line 1', () => 
 
   for (const file of primitives) {
     const firstLine = fs.readFileSync(file, 'utf8').split('\n')[0]
-    assert.equal(
-      firstLine.trim(),
-      '---',
-      `${path.relative(temp, file)} must start with YAML frontmatter (---) on line 1, got: ${firstLine}`,
+    // The regression we guard: a haus-managed stamp prepended ahead of the file's own
+    // line 1 (which, for a real catalog item, is its YAML `---` frontmatter).
+    assert.ok(
+      !firstLine.includes('HAUS-MANAGED'),
+      `${path.relative(temp, file)} has a haus header injected on line 1 — this de-registers the primitive: ${firstLine}`,
     )
   }
 })
