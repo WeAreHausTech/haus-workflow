@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdtempSync, writeFileSync, readFileSync, rmSync } from 'node:fs'
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync } from 'node:fs'
 import path from 'node:path'
 import os from 'node:os'
 
@@ -59,5 +59,20 @@ test('deep-context.json roles make a role-gated skill eligible (pass 2)', () => 
   const pass3 = recommend(temp)
   assert.equal(ids(pass3.recommended).has('haus.nx21-monorepo-patterns'), false)
 
+  rmSync(temp, { recursive: true, force: true })
+})
+
+test('malformed deep-context.json is ignored, not thrown on', () => {
+  const temp = reactRepo()
+  mkdirSync(path.join(temp, '.haus-workflow'), { recursive: true })
+  // LLM wrote the wrong shape: roles a string, stacks a string, patterns a number.
+  writeFileSync(
+    path.join(temp, '.haus-workflow', 'deep-context.json'),
+    JSON.stringify({ source: 'writing-documentation', roles: 'nx-monorepo', stacks: 'oops', patterns: 5 }),
+  )
+  // Must not throw; enrichment is simply ignored (headless path stays alive).
+  const out = recommend(temp)
+  assert.ok(Array.isArray(out.recommended), 'recommend should return normally')
+  assert.equal(ids(out.recommended).has('haus.nx21-monorepo-patterns'), false)
   rmSync(temp, { recursive: true, force: true })
 })
