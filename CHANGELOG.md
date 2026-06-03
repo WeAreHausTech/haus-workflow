@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.13.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.12.1...v0.13.0) (2026-06-03)
+
+### Features
+
+- **recommender:** binary eligibility + docs-skill integration ([0f26431](https://github.com/WeAreHausTech/haus-workflow/commit/0f26431f3b338fbe344ee734d43d7d27837337f2))
+- **recommender:** binary eligibility + docs-skill integration ([ee61a6b](https://github.com/WeAreHausTech/haus-workflow/commit/ee61a6be3a976759c3d430b97f5c82cd5e5248fc))
+
+### Bug Fixes
+
+- **recommender:** defensively parse deep-context.json shapes ([5b20c53](https://github.com/WeAreHausTech/haus-workflow/commit/5b20c53531105e8216e7359569284d2f3af9026e))
+- **recommender:** defensively parse deep-context.json shapes ([ecbe6b4](https://github.com/WeAreHausTech/haus-workflow/commit/ecbe6b48e116da84a8ab9a0995ce8aed0c00dea6))
+
 ## [0.12.1](https://github.com/WeAreHausTech/haus-workflow/compare/v0.12.0...v0.12.1) (2026-06-03)
 
 ### Bug Fixes
