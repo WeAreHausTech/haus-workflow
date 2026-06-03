@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.13.1](https://github.com/WeAreHausTech/haus-workflow/compare/v0.13.0...v0.13.1) (2026-06-03)
+
+### Bug Fixes
+
+- **catalog:** download skill reference files into cache ([#63](https://github.com/WeAreHausTech/haus-workflow/issues/63)) ([db67180](https://github.com/WeAreHausTech/haus-workflow/commit/db671807273a45e97d5f5cd9505b43284d7b7389))
+
 ## [0.13.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.12.1...v0.13.0) (2026-06-03)
 
 ### Features
