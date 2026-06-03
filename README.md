@@ -10,21 +10,18 @@ Requires Node 22+.
 
 ```bash
 npm install -g @haus-tech/haus-workflow
-haus install
 ```
 
-`haus install` seeds `~/.claude/` with Haus-managed skills, agents, and hooks.
+A **global** install auto-runs `haus install` via a postinstall hook — it seeds
+`~/.claude/` with Haus-managed skills, global slash commands, and hooks, merges
+security rules into `~/.claude/settings.json`, and prints a notice of what changed.
+It is non-fatal, idempotent, and global-only. Skip it with `HAUS_NO_POSTINSTALL=1`;
+re-run or repair any time with `haus install`. Undo with `haus uninstall`.
 
-**Prefer Claude over the terminal?** Paste this prompt into a Claude Code session:
-
-```
-Install the haus-workflow CLI globally and run haus install to seed ~/.claude/ with the Haus skills and hooks.
-
-Steps:
-1. Run: npm install -g @haus-tech/haus-workflow
-2. Run: haus install
-3. Confirm which files were written to ~/.claude/
-```
+**Driving it from Claude Code (no terminal):** once installed, every project's `/`
+menu has `/haus-setup`, `/haus-doctor`, and `/haus-fix`. Run `/haus-setup` (or just
+ask "set up my project") and the agent scans, asks a few plain-language questions,
+and configures the repo for you.
 
 ---
 
@@ -66,16 +63,19 @@ haus scan              # scan repo and write context-map
 haus recommend         # score and recommend catalog items
 haus apply --dry-run   # preview what would be written
 haus apply --write     # write .claude/ files
-haus context --task "<task>"  # select context rules for a specific task
+haus apply --refill-config    # fill still-blank workflow-config.md fields, keep edits
+haus context --task "<task>"  # select context rules for a task (token-budgeted)
 haus update                   # sync remote catalog + refresh lockfile
 haus update --check           # check for updates without applying
 haus undo                     # undo last applied changes
-haus doctor                   # health check: hooks, CLAUDE.md, catalog cache
+haus doctor                   # health check: hooks, CLAUDE.md, imports, catalog cache
 haus config                   # manage hook configuration
-haus memory                   # view project memory store
 haus guard                    # test bash/file-access guards
 haus uninstall                # remove Haus-managed files from ~/.claude/
 ```
+
+> Cross-session learnings use Claude Code's **native memory** (`MEMORY.md`); haus
+> ships no memory store — see the `haus.memory-conventions` catalog doc.
 
 ---
 

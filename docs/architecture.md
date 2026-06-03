@@ -18,9 +18,9 @@ Core flow: **scan → recommend → apply**
 | `src/recommender/` | Recommendation scoring and explainability                                                                                |
 | `src/claude/`      | Generated file writer and hook contract checks                                                                           |
 | `src/update/`      | Lockfile checks, hash refresh, backup, diff summary                                                                      |
-| `src/memory/`      | Local memory store and redaction                                                                                         |
-| `src/security/`    | Guardrails for sensitive paths and dangerous bash                                                                        |
-| `src/catalog/`     | Catalog manifest loader and allowed-stack validation                                                                     |
+| `src/install/`     | Global `~/.claude/` install/uninstall: file copy + manifest, settings merge (hooks, deny/allow), postinstall gate        |
+| `src/security/`    | Guardrails for sensitive paths and dangerous bash; derives `permissions.deny` from the same lists                        |
+| `src/catalog/`     | Catalog manifest loader and validation (rules from the synced `validation-rules.json` fixture)                           |
 | `src/library/`     | Catalog/library audit logic                                                                                              |
 | `src/utils/`       | Shared utilities: `logger.ts`, `fs.ts`, `paths.ts`, `audit-checks.ts`, `diff.ts`, `exec.ts`, `prompts.ts`, `versions.ts` |
 | `src/types/`       | Local ambient type declarations                                                                                          |
@@ -53,8 +53,12 @@ Core flow: **scan → recommend → apply**
 
 1. Collect safe files with `fast-glob`.
 2. Filter sensitive paths.
-3. Infer roles, stacks, package manager, and dependencies.
-4. Write:
+3. Infer roles, stacks, package manager, and dependencies via the data-driven
+   `detection-registry` (a typed `DetectionRule[]`), with dependency signals derivable
+   from the catalog manifest so scanner and catalog can't drift.
+4. Classify `detectionStatus` (`supported` | `partial` | `unknown`) and record
+   `unsupportedSignals` from presence-only markers (e.g. `requirements.txt`, `go.mod`).
+5. Write:
    - `.haus-workflow/context-map.json`
    - `.haus-workflow/dependency-map.json`
    - `.haus-workflow/scan-hashes.json`
@@ -96,21 +100,27 @@ The catalog is maintained in a separate repository and fetched by `haus update`.
 
 ---
 
-## Memory flow
+## Memory
 
-1. Ensure local memory files under `.haus-workflow/memory/`.
-2. Append redacted notes (`memory add`).
-3. Inject compact redacted memory text (`memory inject`).
-4. Keep promotion manual (`memory promote`).
+haus ships no memory store. Cross-session learnings use Claude Code's native
+`MEMORY.md`; the `haus.memory-conventions` catalog template documents the practice.
+The hook-time redactor (`src/security/redact-sensitive.ts`) is retained — a separate
+concern from any store.
 
 ---
 
 ## Global install flow
 
-1. `haus install` seeds `~/.claude/` with HAUS-MANAGED skills, agents, and hooks.
-2. Hook source of truth: `src/claude/load-hooks.ts` (`CANONICAL_HOOKS`).
-3. `apply --write` writes `.claude/settings.json` from canonical hook config.
-4. `doctor --hooks` verifies project settings against canonical hook contract.
+1. `haus install` seeds `~/.claude/` with HAUS-MANAGED skills and global slash commands
+   (`~/.claude/commands/*.md`), tracked in `~/.claude/haus/install-manifest.json`.
+2. `settings-merge` merges hooks plus `permissions.deny` and scoped `permissions.allow`
+   into `~/.claude/settings.json`, tracking haus-added entries under `_haus` so
+   `uninstall` strips exactly those (leaving user entries intact).
+3. A **global** `npm i -g` auto-runs this via `scripts/postinstall.mjs` (global-only,
+   CI-skipping, non-fatal, idempotent; `HAUS_NO_POSTINSTALL=1` opts out).
+4. Hook source of truth: `src/claude/load-hooks.ts` (`CANONICAL_HOOKS`); `apply --write`
+   writes project `.claude/settings.json` from it and self-checks for drift.
+5. `doctor --hooks` verifies project settings against the canonical hook contract.
 
 ---
 

@@ -24,3 +24,17 @@ node scripts/qa-batch.mjs
 ```
 
 Requires a built `dist/` (`yarn build`). Results land in `tmp/qa-out/` (gitignored).
+
+## postinstall.mjs
+
+The npm postinstall entry (shipped in the package). On a **global** install it runs
+`haus install --postinstall`; otherwise it's a no-op. The gate is a pure, exported
+`shouldRunPostinstall()` (unit-tested in `tests/postinstall.test.js`); the whole script
+is fail-open (always exits 0). Not a manual QA script — documented here as the one
+`scripts/` file that ships to consumers.
+
+## Git hooks (Lefthook)
+
+`lefthook.yml` defines pre-commit (lint, format, typecheck, gitleaks + secret-grep) and
+pre-push (test). Installed by the `prepare` script (`lefthook install`). Replaces the
+former Husky setup; dogfoods the standard haus ships.
