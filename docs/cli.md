@@ -29,7 +29,7 @@ Output: `.haus-workflow/context-map.json`, `.haus-workflow/dependency-map.json`,
 
 ### `haus recommend [--json]`
 
-Score and recommend catalog items for the detected stack. Includes `recommended[]` with `reasons[]`, `confidence`, `confidenceLevel`, `score`, and `skipped[]` with `skipReasons[]`.
+Recommend catalog items for the detected stack via binary eligibility (policy gates + match signals; no scores). Includes `recommended[]` with `reasons[]` and `selectionMode`, and `skipped[]` with `skipReasons[]`. If `.haus-workflow/deep-context.json` is present (written by the `writing-documentation` skill), its signals are merged in for a second-pass recommendation.
 
 Output: `.haus-workflow/recommendation.json`
 

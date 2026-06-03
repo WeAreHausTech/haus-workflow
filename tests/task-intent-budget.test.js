@@ -7,17 +7,18 @@ import {
 } from '../src/recommender/task-intent.ts'
 import { normalizeRecommendation } from '../src/recommender/explain-recommendation.ts'
 
-const rule = (id, score, tokenEstimate, selectionMode = 'matched') => ({
+// `evidence` = number of positive match signals; the budget keeps the rules with
+// the most evidence (binary eligibility has no numeric score to rank by).
+const rule = (id, evidence, tokenEstimate, selectionMode = 'matched') => ({
   id,
   type: 'skill',
   reason: '',
-  reasons: [],
-  confidence: 0.8,
-  confidenceLevel: 'high',
+  reasons: Array.from({ length: evidence }, (_, i) => ({
+    code: `signal-${i}`,
+    message: `signal ${i}`,
+  })),
   selectionMode,
   install: true,
-  score,
-  scoreBreakdown: { bonuses: [], penalties: [], finalScore: score },
   tags: [],
   tokenEstimate,
 })
@@ -39,9 +40,9 @@ test('no budget → returns all rules unchanged', () => {
   assert.deepEqual(out.map((x) => x.id), ['a', 'b', 'c'])
 })
 
-test('budget drops lowest-scoring rules until cumulative estimate fits', () => {
+test('budget drops lowest-evidence rules until cumulative estimate fits', () => {
   const r = rec([rule('a', 10, 5000), rule('b', 5, 5000), rule('c', 1, 5000)])
-  // Budget 11000 fits two 5000-token rules; lowest score (c) dropped.
+  // Budget 11000 fits two 5000-token rules; least evidence (c) dropped.
   const out = pickTaskRelevantRules(r, undefined, new Set(), { tokenBudget: 11000 })
   assert.deepEqual(out.map((x) => x.id), ['a', 'b'])
 })
@@ -60,7 +61,7 @@ test('budget never drops baseline rules even if over budget', () => {
 
 test('output preserves original order of kept rules', () => {
   const r = rec([rule('a', 1, 4000), rule('b', 9, 4000), rule('c', 5, 4000)])
-  // Budget 8000 keeps the two highest scores (b, c) — but in original order a-first? a dropped.
+  // Budget 8000 keeps the two highest-evidence rules (b, c) in original order; a dropped.
   const out = pickTaskRelevantRules(r, undefined, new Set(), { tokenBudget: 8000 })
   assert.deepEqual(out.map((x) => x.id), ['b', 'c'])
 })

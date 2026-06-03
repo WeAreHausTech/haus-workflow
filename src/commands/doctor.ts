@@ -196,24 +196,6 @@ export async function runDoctor(options?: { hooks?: boolean }): Promise<void> {
     }
   }
 
-  const projectMdPath = hausPath(root, 'project.md')
-  const projectMdExists = await fs.pathExists(projectMdPath)
-  if (!projectMdExists) {
-    flag(
-      '- .haus-workflow/project.md: missing (run `haus apply --write`)',
-      'The project facts file is missing',
-      'haus apply --write',
-    )
-  } else {
-    const projectMdContent = await readText(projectMdPath)
-    const hasHeader = projectMdContent?.split('\n')[0]?.includes('HAUS-MANAGED') ?? false
-    if (!hasHeader) {
-      ok('- .haus-workflow/project.md: no HAUS-MANAGED header (user-owned)')
-    } else {
-      ok('- .haus-workflow/project.md: OK')
-    }
-  }
-
   const cacheAgeMs = await getCacheManifestAge()
   if (cacheAgeMs === null) {
     flag(

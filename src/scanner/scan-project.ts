@@ -21,7 +21,7 @@ import {
   dependencySet,
   finalizeRoles,
 } from './detection.js'
-import { buildContentBlob, computeConfidence, renderSummary } from './render.js'
+import { buildContentBlob, renderSummary } from './render.js'
 import type { ScanResult } from './types.js'
 
 /**
@@ -138,7 +138,6 @@ export async function scanProject(
     repoName: String(pkg?.name ?? path.basename(root)),
     packageManager,
     repoRoles: roles,
-    confidence: computeConfidence(roles, stacks),
     detectedStacks: stacks,
     dependencies: deps,
     securityRisks,

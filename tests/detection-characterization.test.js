@@ -26,7 +26,6 @@ for (const fixture of Object.keys(golden)) {
     const result = await scanProject(tmp, 'fast')
     assert.deepEqual(result.repoRoles, golden[fixture].repoRoles, 'repoRoles drift')
     assert.deepEqual(result.detectedStacks, golden[fixture].detectedStacks, 'detectedStacks drift')
-    assert.equal(result.confidence, golden[fixture].confidence, 'confidence drift')
     fs.rmSync(tmp, { recursive: true, force: true })
   })
 }

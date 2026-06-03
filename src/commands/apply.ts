@@ -51,7 +51,7 @@ export async function runApply(options: {
     } else {
       const items = rec.recommended
       const choices = items.map((item) => ({
-        name: `${item.id}  [${item.confidenceLevel}] — ${item.reason}`,
+        name: `${item.id}  [${item.selectionMode}] — ${item.reason}`,
         value: item.id,
         checked: true,
       }))

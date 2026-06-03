@@ -2,7 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import os from 'node:os'
 import path from 'node:path'
-import { mkdtempSync, mkdirSync, copyFileSync, writeFileSync, readFileSync, existsSync } from 'node:fs'
+import { mkdtempSync, mkdirSync, copyFileSync, writeFileSync, readFileSync, existsSync, rmSync } from 'node:fs'
 import { execaSync } from 'execa'
 
 process.env.HAUS_FIXTURE_CATALOG = path.resolve('tests/fixtures/catalog/manifest.json')
@@ -40,14 +40,12 @@ test('apply --write creates root CLAUDE.md with import block', () => {
   assert.equal(rootClaudeMd.includes(BLOCK_END), true)
   assert.equal(rootClaudeMd.includes('@.haus-workflow/WORKFLOW.md'), true)
   assert.equal(rootClaudeMd.includes('@.haus-workflow/workflow-config.md'), true)
-  assert.equal(rootClaudeMd.includes('@.haus-workflow/project.md'), true)
+  // project.md is no longer imported (removed): deep docs are owned by the docs skill, on-demand.
+  assert.equal(rootClaudeMd.includes('@.haus-workflow/project.md'), false)
+  assert.equal(existsSync(path.join(temp, '.haus-workflow', 'project.md')), false)
 
-  assert.equal(existsSync(path.join(temp, '.haus-workflow', 'project.md')), true)
   assert.equal(existsSync(path.join(temp, '.haus-workflow', 'WORKFLOW.md')), true)
   assert.equal(existsSync(path.join(temp, '.haus-workflow', 'workflow-config.md')), true)
-
-  const projectMd = readFileSync(path.join(temp, '.haus-workflow', 'project.md'), 'utf8')
-  assert.equal(projectMd.startsWith('<!-- HAUS-MANAGED id=generated.project-facts'), true)
 
   const workflow = readFileSync(path.join(temp, '.haus-workflow', 'WORKFLOW.md'), 'utf8')
   assert.equal(workflow.startsWith('<!-- HAUS-MANAGED id=template.workflow'), true)
@@ -95,6 +93,53 @@ test('apply --write preserves user content outside haus block', () => {
   assert.equal(result.includes('# My project'), true)
   assert.equal(result.includes('Some user content above the haus block.'), true)
   assert.equal(result.includes(BLOCK_BEGIN), true)
+})
+
+test('skill-written CLAUDE.md body and haus import block coexist across re-apply', () => {
+  const temp = mkdtempSync(path.join(os.tmpdir(), 'haus-p6-skillbody-'))
+  writeFileSync(
+    path.join(temp, 'package.json'),
+    JSON.stringify({ name: 'p6-skillbody', packageManager: 'yarn@4.5.3' }, null, 2),
+  )
+
+  // Simulate the writing-documentation skill having authored a lean CLAUDE.md body:
+  // commands table + conventions + an on-demand link to docs/SUMMARY.md.
+  const skillBody = [
+    '# p6-skillbody',
+    '',
+    'A test project.',
+    '',
+    '## Commands',
+    '',
+    '| Command | Action |',
+    '| ------- | ------ |',
+    '| `yarn dev` | Run locally |',
+    '',
+    '## Docs',
+    '',
+    '[docs/SUMMARY.md](docs/SUMMARY.md)',
+    '',
+  ].join('\n')
+  writeFileSync(path.join(temp, 'CLAUDE.md'), skillBody)
+
+  execaSync('node', [path.resolve('dist/cli.js'), 'scan', '--json'], { cwd: temp })
+  execaSync('node', [path.resolve('dist/cli.js'), 'recommend', '--json'], { cwd: temp })
+  execaSync('node', [path.resolve('dist/cli.js'), 'apply', '--write'], { cwd: temp })
+
+  const first = readFileSync(path.join(temp, 'CLAUDE.md'), 'utf8')
+  // Skill body survives.
+  assert.equal(first.includes('## Commands'), true)
+  assert.equal(first.includes('[docs/SUMMARY.md](docs/SUMMARY.md)'), true)
+  // Haus block injected, importing only methodology + config (not project.md).
+  assert.equal(first.includes(BLOCK_BEGIN), true)
+  assert.equal(first.includes('@.haus-workflow/WORKFLOW.md'), true)
+  assert.equal(first.includes('@.haus-workflow/project.md'), false)
+
+  // Re-apply is idempotent.
+  execaSync('node', [path.resolve('dist/cli.js'), 'apply', '--write'], { cwd: temp })
+  const second = readFileSync(path.join(temp, 'CLAUDE.md'), 'utf8')
+  assert.equal(first, second)
+  rmSync(temp, { recursive: true, force: true })
 })
 
 test('apply --write skips WORKFLOW.md when user modified it', () => {
