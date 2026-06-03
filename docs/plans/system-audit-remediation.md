@@ -33,8 +33,8 @@ The single highest-value finding: **the CLI's headline security principle — "e
 | 6     | **WS6** — non-dev desktop UX                                                                                                   | ✅ merged | #54          |
 | 7     | **WS5** — full-auto postinstall + `prepare` fix                                                                                | ✅ merged | #55          |
 | 8     | **WS10** — CLI Husky→Lefthook (+ minimal catalog hook)                                                                         | ✅ merged | #56 / cat #7 |
-| 9     | **WS7** — code-quality cleanup (file splits, renames, dead code)                                                               | ⬜        | —            |
-| —     | **WS9** — detectability hardening (folds into WS1/WS2/WS6/WS7)                                                                 | ⬜        | —            |
+| 9     | **WS7** — code-quality cleanup (file splits, renames, dead code)                                                               | ✅ merged | #57          |
+| —     | **WS9** — detectability hardening (folded into WS1/WS3/WS6/WS7)                                                                | ✅ folded | (in hosts)   |
 
 ### WS0 — done (PR #46, merged)
 
@@ -106,6 +106,25 @@ The single highest-value finding: **the CLI's headline security principle — "e
 - **Catalog minimal hook** — `lefthook.yml`: pre-commit = `yarn validate` + format (staged, `stage_fixed`) + lint (`scripts/*.mjs`), each `fail_text`; `prepare: lefthook install`; `lefthook` devDep + `dependenciesMeta` build opt-in. CI (`validate.yml`) unchanged — correctness floor; hook is fast local feedback.
 - **Two repo-`private` distinction:** CLI is published to npm so its `prepare` keeps `|| true` (consumers' `node_modules` have no `.git`, lefthook isn't a runtime dep); catalog is npm-`private:true` (never installed as a dep — `prepare` runs only on contributor clone + CI, both with `.git`), so per Copilot #7 the `|| true` was dropped to surface real install errors. GitHub visibility (both public) is irrelevant to this.
 - Verified live in both repos: secret-grep/validate hooks fire on commit; `yarn verify` (CLI) + `yarn validate` (catalog) green.
+
+### WS7 — done (CLI #57, merged)
+
+- **Dead code removed:** `scoreCatalogItem()` (`score-catalog-item.ts`, no runtime caller) + `recommender/types.ts` (`RecommendationScore`, used only by it).
+- **`recommend.ts` 540→353** — extracted `ecosystem.ts` (groups + backend-conflict helpers), `policies.ts` (`UNSUPPORTED`, `matchRequiresAny`, `describeRequiresAny`, `mergeRecommendationWarnings`), `scoring.ts` (`ReasonHit`/`SkipHit`, confidence derivation, `readChangedFiles`). `recommend()` orchestrates. Renamed `blob`→`itemSearchText`.
+- **`scan-project.ts` 326→170** — extracted `detection.ts` (dep set, role finalize, detection status, `collectUnsupportedSignals`, `blocked`) + `render.ts` (content-blob index, confidence, summary). Renamed `out`→`depNames`.
+- **`task-intent.ts` 395→14 barrel** — split into `task-classification.ts` + `rule-selection.ts`; barrel re-exports the public API so every import path is unchanged.
+- **WS9 fold:** `tests/frontmatter-integrity.test.js` asserts `apply` injects no `HAUS-MANAGED` header ahead of a skill/agent's line 1 (would de-register the primitive). Adversarial review confirmed every moved symbol byte-identical, no export dropped, clean DAGs — zero behaviour change.
+- **CI catch:** initial test asserted `=== '---'`, which only passed locally (catalog cache shadowed the comment-stub fixtures); reworked to the env-independent "no injected header" invariant. `yarn verify` green (177 tests).
+
+### WS9 — folded, not a standalone PR
+
+Detectability-hardening items landed inside their host workstreams: rules-import/floor-version notes (WS1), `detectionStatus` honesty (WS3), doctor import-bridge check (WS6), frontmatter-integrity guard (WS7). The only deferred item is the **optional `_haus`→sidecar move** (relocate haus's tracking metadata out of the CC-validated `settings.json`) — speculative hardening with real uninstall-migration risk and no current payoff; left as backlog.
+
+---
+
+## ✅ Plan complete
+
+All 10 workstreams merged (WS0, WS1, WS8, WS3, WS4, WS2, WS6, WS5, WS10, WS7); WS9 folded into hosts. Tail backlog: optional `_haus`→sidecar move (low priority, no current need).
 
 ---
 
@@ -314,7 +333,7 @@ A non-dev faced with "Allow haus to run?" on every step will stall or bail. `hau
 
 - New [src/scanner/role-labels.ts](../../src/scanner/role-labels.ts) friendly map (`vendure-plugin` → "a Vendure plugin"); `renderSummary` → a plain-language paragraph incl. `detectionStatus` ("I couldn't fully recognise this stack" when `unknown`).
 - `doctor.ts` → a single green/amber verdict line ("✅ Your project is set up and healthy" / "⚠️ 2 things need attention") mapping each WARN/FAIL to a sentence + the exact fix command; keep the detailed output beneath for devs.
-- **Guard-block messages** — non-devs _will_ trigger these, and "PreToolUse deny: SENSITIVE_PATH match" is alarming and opaque. Rewrite the deny reasons in `guardBash`/`guardFileAccess` and the WS1 `permissions.deny` rationale as plain sentences: "I didn't run that — it permanently deletes files" / "I didn't open that file because it looks like it holds secrets." Security clarity first: still say _what_ was blocked. (Spans WS1.)
+- **Guard-block messages** — non-devs _will_ trigger these, and "PreToolUse deny: SENSITIVE*PATH match" is alarming and opaque. Rewrite the deny reasons in `guardBash`/`guardFileAccess` and the WS1 `permissions.deny` rationale as plain sentences: "I didn't run that — it permanently deletes files" / "I didn't open that file because it looks like it holds secrets." Security clarity first: still say \_what* was blocked. (Spans WS1.)
 
 **f. Done/healthy signal + readable generated files.**
 Setup ends with one chat line: "✅ Your project is configured — I added N guardrails and M coding helpers. Run `/haus-doctor` any time to re-check." De-jargon the headers of files a curious non-dev may open (`project.md`, `workflow-config.md`) in [src/claude/write-project-facts.ts](../../src/claude/write-project-facts.ts) / [src/claude/write-workflow-config.ts](../../src/claude/write-workflow-config.ts).
