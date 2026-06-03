@@ -94,6 +94,35 @@ function safeJoin(base: string, itemPath: string): string | null {
   return resolved.startsWith(base + path.sep) || resolved === base ? resolved : null
 }
 
+/** True for a reference entry that points at an external resource rather than a bundled file. */
+function isExternalReference(ref: string): boolean {
+  return /^[a-z][a-z0-9+.-]*:\/\//i.test(ref)
+}
+
+/**
+ * Downloads a skill's nested reference files (e.g. `references/conventions.md`) into the
+ * cache alongside its SKILL.md. External URL references are skipped. Idempotent: only
+ * fetches files that are not already cached, so it safely backfills older partial caches.
+ */
+async function downloadSkillReferences(item: CatalogItem, destDir: string): Promise<void> {
+  for (const ref of item.references ?? []) {
+    if (isExternalReference(ref)) continue
+    const refDest = safeJoin(destDir, ref)
+    if (!refDest) {
+      warn(`Skipping reference "${ref}" for ${item.id}: path traversal detected`)
+      continue
+    }
+    if (await fs.pathExists(refDest)) continue
+    const text = await fetchText(`${REMOTE_BASE}/${item.path}/${ref}`)
+    if (text === null) {
+      warn(`Failed to fetch reference "${ref}" for ${item.id}`)
+      continue
+    }
+    await fs.ensureDir(path.dirname(refDest))
+    await fs.writeFile(refDest, text, 'utf8')
+  }
+}
+
 /**
  * Fetches the remote manifest and downloads any new skill/agent files into the local cache.
  * Skips items that already exist; logs a warning and falls back to the bundled catalog on failure.
@@ -134,6 +163,9 @@ export async function syncRemoteCatalog(): Promise<SyncResult> {
       }
       const dest = path.join(destDir, 'SKILL.md')
       if (await fs.pathExists(dest)) {
+        // SKILL.md already cached, but earlier versions never downloaded the skill's
+        // nested reference files — backfill any that are still missing.
+        await downloadSkillReferences(item, destDir)
         unchanged++
         continue
       }
@@ -146,6 +178,7 @@ export async function syncRemoteCatalog(): Promise<SyncResult> {
       }
       await fs.ensureDir(path.dirname(dest))
       await fs.writeFile(dest, text, 'utf8')
+      await downloadSkillReferences(item, destDir)
       newItems.push(item.id)
     } else {
       const dest = safeJoin(CACHE_DIR, item.path)

@@ -22,6 +22,11 @@ const FIXTURE_MANIFEST = {
       repoRoles: [],
       tokenEstimate: 1000,
       requiresAny: [{ dependency: 'react' }],
+      references: [
+        'references/conventions.md',
+        'references/scope.md',
+        'https://react.dev/',
+      ],
     },
     {
       id: 'haus.code-reviewer-agent',
@@ -95,6 +100,8 @@ test('haus update: catalog sync writes manifest to cache on success', async () =
   const { server, port } = await startMockServer({
     '/manifest.json': { body: JSON.stringify(FIXTURE_MANIFEST) },
     '/skills/react19-patterns/SKILL.md': { body: FIXTURE_SKILL_MD },
+    '/skills/react19-patterns/references/conventions.md': { body: '# conventions' },
+    '/skills/react19-patterns/references/scope.md': { body: '# scope' },
     '/agents/code-reviewer.md': { body: FIXTURE_AGENT_MD },
   })
 
@@ -124,6 +131,23 @@ test('haus update: catalog sync writes manifest to cache on success', async () =
       fs.existsSync(path.join(cacheDir, 'skills/react19-patterns/SKILL.md')),
       true,
       'skill SKILL.md not cached',
+    )
+    // Skill nested reference files written (regression: only SKILL.md was cached)
+    assert.equal(
+      fs.existsSync(path.join(cacheDir, 'skills/react19-patterns/references/conventions.md')),
+      true,
+      'skill reference conventions.md not cached',
+    )
+    assert.equal(
+      fs.existsSync(path.join(cacheDir, 'skills/react19-patterns/references/scope.md')),
+      true,
+      'skill reference scope.md not cached',
+    )
+    // External URL references must NOT be written to the cache
+    assert.equal(
+      fs.existsSync(path.join(cacheDir, 'skills/react19-patterns/https:')),
+      false,
+      'external URL reference should not be cached',
     )
     // Agent content written
     assert.equal(
@@ -163,8 +187,10 @@ test('haus update: no duplicate downloads for already-cached items', async () =>
   const temp = makeProjectDir()
 
   // Pre-populate the skill so it appears already cached
-  fs.mkdirSync(path.join(cacheDir, 'skills/react19-patterns'), { recursive: true })
+  fs.mkdirSync(path.join(cacheDir, 'skills/react19-patterns/references'), { recursive: true })
   fs.writeFileSync(path.join(cacheDir, 'skills/react19-patterns/SKILL.md'), FIXTURE_SKILL_MD)
+  fs.writeFileSync(path.join(cacheDir, 'skills/react19-patterns/references/conventions.md'), 'x')
+  fs.writeFileSync(path.join(cacheDir, 'skills/react19-patterns/references/scope.md'), 'x')
 
   try {
     const out = await runCli(['update'], {
