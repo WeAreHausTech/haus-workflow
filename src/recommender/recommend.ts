@@ -49,11 +49,19 @@ export async function recommend(root: string, context: ContextMap): Promise<Reco
   const scannerDeps = new Set(context.dependencies.map((d) => d.toLowerCase()))
 
   // Deep (LLM) signal sets — defensively parsed; tagged distinctly when matched.
-  const deepRoles = new Set((deep.roles ?? []).map((r) => r.toLowerCase()))
+  // deep-context.json is LLM-authored, so every field may be the wrong shape:
+  // coerce to string[] and never let a bad shape throw and break the headless path.
+  const toStrings = (v: unknown): string[] =>
+    Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : []
+  const deepStackValues =
+    deep.stacks && typeof deep.stacks === 'object' && !Array.isArray(deep.stacks)
+      ? Object.values(deep.stacks).flatMap(toStrings)
+      : []
+  const deepRoles = new Set(toStrings(deep.roles).map((r) => r.toLowerCase()))
   const deepStacks = new Set(
-    [...(deep.roles ?? []), ...Object.values(deep.stacks ?? {}).flat(), ...(deep.patterns ?? [])]
-      .filter((x): x is string => typeof x === 'string')
-      .map((x) => x.toLowerCase()),
+    [...toStrings(deep.roles), ...deepStackValues, ...toStrings(deep.patterns)].map((x) =>
+      x.toLowerCase(),
+    ),
   )
 
   // Merged sets drive matching; the per-token origin drives the signal prefix.
