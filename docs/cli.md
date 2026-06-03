@@ -33,7 +33,7 @@ Score and recommend catalog items for the detected stack. Includes `recommended[
 
 Output: `.haus-workflow/recommendation.json`
 
-### `haus apply [--dry-run] [--write] [--select] [--allow-empty-cache]`
+### `haus apply [--dry-run] [--write] [--select] [--allow-empty-cache] [--refill-config]`
 
 Materialize catalog assets into `.claude/`.
 
@@ -41,6 +41,7 @@ Materialize catalog assets into `.claude/`.
 - `--write` — write `.claude/` files, `.haus-workflow/selected-context.json`, and `.haus-workflow/haus.lock.json`
 - `--select` — interactively select catalog items before applying
 - `--allow-empty-cache` — apply core files only when catalog cache is empty (skip catalog items without error)
+- `--refill-config` — fill still-blank `<!-- fill in -->` fields in `workflow-config.md` from auto-detected values, without touching fields you've edited
 
 After writing `.claude/settings.json`, apply runs a self-check that it matches `CANONICAL_HOOKS` in `src/claude/load-hooks.ts`. Throws on drift.
 
@@ -57,7 +58,10 @@ Sync remote catalog and refresh lockfile.
 
 ### `haus doctor [--hooks]`
 
-Health check: hooks, `CLAUDE.md`, catalog cache.
+Health check: hooks, `CLAUDE.md` import block (and that each `@.haus-workflow/*`
+target resolves), managed files, catalog cache, CLI version. Prints a single
+plain-language verdict line first (`✅ healthy` / `⚠️ N things need attention`,
+each mapped to a fix command), with developer detail beneath.
 
 - `--hooks` — verify `.claude/settings.json` matches the canonical hook contract; exits non-zero if missing or drifted
 
@@ -67,23 +71,33 @@ Render explainability data directly from `.haus-workflow/recommendation.json` (n
 
 ### `haus context --task "<task>" [--json] [--verbose] [--from-hook]`
 
-Return task-scoped selected rules plus context minimization stats.
+Return task-scoped selected rules plus context minimization stats. Selection narrows
+the recommended set by classified task intents, then trims to a token budget
+(`DEFAULT_CONTEXT_TOKEN_BUDGET`, 12k) — lowest-scoring non-baseline rules drop first;
+baselines are never dropped.
 
 ---
 
 ## Global install
 
-### `haus install [--dry-run] [--force] [--check]`
+### `haus install [--dry-run] [--force] [--check] [--postinstall]`
 
-Seed `~/.claude/` with HAUS-MANAGED skills, agents, and hooks.
+Seed `~/.claude/` with HAUS-MANAGED skills, global slash commands, and hooks, and
+merge `permissions.deny` (+ scoped `permissions.allow`) into `~/.claude/settings.json`.
 
 - `--dry-run` — preview files that would be written
 - `--force` — overwrite existing files
 - `--check` — exit non-zero if any HAUS-MANAGED file is out of date
+- `--postinstall` — used by the npm postinstall hook: prints a plain-language notice of
+  what changed plus how to undo/disable; suppresses the verbose file list
+
+Runs automatically on a **global** `npm i -g @haus-tech/haus-workflow` (via
+`scripts/postinstall.mjs`): global-only, CI-skipping, non-fatal, idempotent. Disable
+with `HAUS_NO_POSTINSTALL=1`.
 
 ### `haus uninstall [--force]`
 
-Remove HAUS-MANAGED files from `~/.claude/`.
+Remove HAUS-MANAGED files from `~/.claude/` and strip haus-added hooks + deny/allow rules.
 
 ---
 
@@ -95,21 +109,10 @@ Remove HAUS-MANAGED files from `~/.claude/`.
 
 ### `haus config status <key>`
 
-Manage hook configuration. Keys: `hook.context`, `hook.memory`.
+Manage hook configuration. Keys: `hook.context`.
 
----
-
-## Memory
-
-### `haus memory status`
-
-### `haus memory add <text>`
-
-### `haus memory inject [--task <task>] [--from-hook]`
-
-### `haus memory promote`
-
-Manage the local project memory store under `.haus-workflow/memory/`.
+> Cross-session memory uses Claude Code's native `MEMORY.md` — haus ships no memory
+> command or store (see the `haus.memory-conventions` catalog doc).
 
 ---
 
@@ -152,3 +155,15 @@ Audit local catalog manifest for issues.
 ### `haus validate-catalog [manifest]`
 
 Validate a catalog manifest file.
+
+---
+
+## Global slash commands (Claude Code)
+
+`haus install` seeds `~/.claude/commands/` so these appear in the `/` menu of every
+project — including before first setup, the main discovery path for non-developers:
+
+- `/haus-setup` — agent runs `haus setup-project --fast --json`, narrates detection in
+  plain language, asks the guided questions as chat, writes the answers, then applies.
+- `/haus-doctor` — agent runs `haus doctor` and relays the verdict in plain language.
+- `/haus-fix` — agent runs `haus doctor` then applies each suggested fix.
