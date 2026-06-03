@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.1](https://github.com/WeAreHausTech/haus-workflow/compare/v0.12.0...v0.12.1) (2026-06-03)
+
+### Bug Fixes
+
+- **template:** address review — dry-run safety, empty-body, hermetic test ([6744f94](https://github.com/WeAreHausTech/haus-workflow/commit/6744f94104b03de51829962c25b7706d3d0124bf))
+- **template:** fetch workflow standard from catalog when cache is empty ([0168f5e](https://github.com/WeAreHausTech/haus-workflow/commit/0168f5ed028f8d3bf6588297d5472511cf4813b6))
+
 ## [0.12.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.11.1...v0.12.0) (2026-06-03)
 
 ### Features
