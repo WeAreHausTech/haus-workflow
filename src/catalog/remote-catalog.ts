@@ -43,6 +43,25 @@ export async function fetchRemoteManifest(): Promise<CatalogItem[] | null> {
   }
 }
 
+/** Relative path of the workflow standard template within the catalog. */
+export const WORKFLOW_TEMPLATE_REL = 'templates/agentic-workflow-standard.md'
+
+/**
+ * Ensures the workflow standard template is present in the cache, fetching it from the
+ * remote catalog on demand when missing. Returns the cached file path, or null when it
+ * cannot be obtained (e.g. offline with no prior cache). Lets `haus init` write
+ * WORKFLOW.md on a fresh install without a separate `haus update` step.
+ */
+export async function ensureWorkflowTemplate(): Promise<string | null> {
+  const dest = path.join(CACHE_DIR, WORKFLOW_TEMPLATE_REL)
+  if (await fs.pathExists(dest)) return dest
+  const text = await fetchText(`${REMOTE_BASE}/${WORKFLOW_TEMPLATE_REL}`)
+  if (!text) return null
+  await fs.ensureDir(path.dirname(dest))
+  await fs.writeFile(dest, text, 'utf8')
+  return dest
+}
+
 /** Result summary returned by syncRemoteCatalog. */
 export type SyncResult = {
   /** IDs of items downloaded for the first time. */
@@ -90,7 +109,8 @@ export async function syncRemoteCatalog(): Promise<SyncResult> {
   const failed: string[] = []
 
   for (const item of items) {
-    if ((item.type !== 'skill' && item.type !== 'agent') || !item.path) continue
+    if ((item.type !== 'skill' && item.type !== 'agent' && item.type !== 'template') || !item.path)
+      continue
     if (!isSafeCatalogPath(item.path)) {
       warn(`Skipping ${item.id}: invalid path "${item.path}"`)
       failed.push(item.id)
