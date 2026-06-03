@@ -47,19 +47,27 @@ export async function fetchRemoteManifest(): Promise<CatalogItem[] | null> {
 export const WORKFLOW_TEMPLATE_REL = 'templates/agentic-workflow-standard.md'
 
 /**
- * Ensures the workflow standard template is present in the cache, fetching it from the
- * remote catalog on demand when missing. Returns the cached file path, or null when it
- * cannot be obtained (e.g. offline with no prior cache). Lets `haus init` write
+ * Resolves the workflow standard template content, using the cache when present and
+ * otherwise fetching it from the remote catalog on demand. Returns the content, or null
+ * when it cannot be obtained (e.g. offline with no prior cache). Lets `haus init` write
  * WORKFLOW.md on a fresh install without a separate `haus update` step.
+ *
+ * Distinguishes a failed fetch (null) from a successful empty body (''), and honours the
+ * dry-run contract: when `dryRun` is set, a freshly fetched template is NOT written to
+ * the cache (no filesystem side effects during a preview).
  */
-export async function ensureWorkflowTemplate(): Promise<string | null> {
+export async function readWorkflowTemplate(
+  opts: { dryRun?: boolean } = {},
+): Promise<string | null> {
   const dest = path.join(CACHE_DIR, WORKFLOW_TEMPLATE_REL)
-  if (await fs.pathExists(dest)) return dest
+  if (await fs.pathExists(dest)) return fs.readFile(dest, 'utf8')
   const text = await fetchText(`${REMOTE_BASE}/${WORKFLOW_TEMPLATE_REL}`)
-  if (!text) return null
-  await fs.ensureDir(path.dirname(dest))
-  await fs.writeFile(dest, text, 'utf8')
-  return dest
+  if (text === null) return null
+  if (!opts.dryRun) {
+    await fs.ensureDir(path.dirname(dest))
+    await fs.writeFile(dest, text, 'utf8')
+  }
+  return text
 }
 
 /** Result summary returned by syncRemoteCatalog. */

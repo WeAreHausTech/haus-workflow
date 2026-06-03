@@ -249,7 +249,8 @@ test('haus doctor: reports catalog cache absent when override cache dir is empty
   )
   fs.writeFileSync(path.join(temp, 'yarn.lock'), '# lock')
   // Closed-port remote so the on-demand workflow-template fetch fails fast (hermetic).
-  const offline = { ...process.env, HAUS_CATALOG_REMOTE_BASE: 'http://127.0.0.1:1' }
+  const closedPort = await getClosedPort()
+  const offline = { ...process.env, HAUS_CATALOG_REMOTE_BASE: `http://127.0.0.1:${closedPort}` }
   await runCli(['scan', '--json'], { cwd: temp, env: offline })
   await runCli(['apply', '--write'], { cwd: temp, env: offline })
 

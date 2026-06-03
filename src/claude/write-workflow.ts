@@ -5,7 +5,7 @@
 
 import fs from 'fs-extra'
 
-import { ensureWorkflowTemplate } from '../catalog/remote-catalog.js'
+import { readWorkflowTemplate } from '../catalog/remote-catalog.js'
 import { createUnifiedDiff, hasTextChanged, summarizeDiff } from '../utils/diff.js'
 import { hashText, writeText } from '../utils/fs.js'
 import { log, warn } from '../utils/logger.js'
@@ -31,17 +31,17 @@ export async function writeWorkflow(
   pkgVersion: string,
   dryRun: boolean,
 ): Promise<string | null> {
-  // Fetch the workflow template from the catalog on demand (cached after first fetch),
-  // so a fresh `haus init` can write WORKFLOW.md without a prior `haus update`.
-  const templatePath = await ensureWorkflowTemplate()
-  if (!templatePath) {
+  // Resolve the workflow template from the catalog on demand (cached after first fetch),
+  // so a fresh `haus init` can write WORKFLOW.md without a prior `haus update`. In dry-run
+  // mode this does not write to the cache.
+  const templateContent = await readWorkflowTemplate({ dryRun })
+  if (templateContent === null) {
     warn(
       `Workflow template could not be fetched from the catalog — check your network, then re-run \`haus apply --write\` (or \`haus update\`)`,
     )
     return null
   }
 
-  const templateContent = await fs.readFile(templatePath, 'utf8')
   const contentHash = hashText(normaliseLF(templateContent))
   const header = makeWorkflowHeader(pkgVersion, contentHash)
   const next = `${header}\n${templateContent}`
