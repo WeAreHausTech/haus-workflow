@@ -33,12 +33,6 @@ export async function runContext(options: {
   const summary = (await readText(hausPath(root, 'repo-summary.md'))) ?? ''
   const recommendationRaw = await readJson<Recommendation>(hausPath(root, 'recommendation.json'))
   const recommendation = recommendationRaw ? normalizeRecommendation(recommendationRaw) : undefined
-  // Build a lookup from the raw recommended items so --verbose can surface the
-  // original scoreBreakdown (including penalties), which normalizeRecommendation
-  // strips when reconstructing from legacy format.
-  const rawBreakdownById = new Map(
-    (recommendationRaw?.recommended ?? []).map((item) => [item.id, item.scoreBreakdown]),
-  )
   const taskIntents = options.task ? classifyTaskIntents(options.task) : new Set<TaskIntent>()
   const selected = pickTaskRelevantRules(recommendation, options.task, taskIntents, {
     tokenBudget: DEFAULT_CONTEXT_TOKEN_BUDGET,
@@ -49,10 +43,9 @@ export async function runContext(options: {
     roles: context.repoRoles,
     selectedRules: selected.map((x) => ({
       id: x.id,
-      confidenceLevel: x.confidenceLevel,
       selectionMode: x.selectionMode,
       reasons: x.reasons.map((reason) => reason.message),
-      ...(options.verbose ? { scoreBreakdown: rawBreakdownById.get(x.id) } : {}),
+      ...(options.verbose ? { signals: x.reasons.map((r) => r.signal).filter(Boolean) } : {}),
     })),
     skippedCount: recommendation?.skippedRules ?? 0,
     estimatedTokenReductionPct: recommendation?.estimatedTokenReductionPct ?? 0,
@@ -75,15 +68,8 @@ export async function runContext(options: {
     ...payload.selectedRules.flatMap((rule) => {
       const reasonLine = `- ${rule.id}: ${rule.reasons.join(', ')}`
       if (!options.verbose) return [reasonLine]
-      const breakdown = rawBreakdownById.get(rule.id)
-      if (!breakdown) return [reasonLine]
-      const bonuses = (breakdown.bonuses ?? []).map(
-        (b) => `  + ${b.code}(+${b.weight})${b.signal ? ` [${b.signal}]` : ''}`,
-      )
-      const penalties = (breakdown.penalties ?? []).map(
-        (p) => `  - ${p.code}(${p.penalty})${p.signal ? ` [${p.signal}]` : ''}`,
-      )
-      return [reasonLine, ...bonuses, ...penalties]
+      const signals = (rule.signals ?? []).map((s) => `  • ${s}`)
+      return [reasonLine, ...signals]
     }),
     summary,
   ]

@@ -15,7 +15,7 @@ Core flow: **scan → recommend → apply**
 | `src/cli.ts`       | CLI entry, command registration, Node engine check                                                                       |
 | `src/commands/`    | One file per CLI command (thin handlers only)                                                                            |
 | `src/scanner/`     | Repo detection and context-map generation                                                                                |
-| `src/recommender/` | Recommendation scoring and explainability                                                                                |
+| `src/recommender/` | Binary eligibility recommendation and explainability                                                                     |
 | `src/claude/`      | Generated file writer and hook contract checks                                                                           |
 | `src/update/`      | Lockfile checks, hash refresh, backup, diff summary                                                                      |
 | `src/install/`     | Global `~/.claude/` install/uninstall: file copy + manifest, settings merge (hooks, deny/allow), postinstall gate        |
@@ -68,11 +68,21 @@ Core flow: **scan → recommend → apply**
 
 ## Recommender flow
 
+Eligibility is **binary** — no numeric scores or confidence. Policy gates are hard
+include/exclude; positive match signals make an item eligible.
+
 1. Load catalog manifest items (fetched remotely via `haus update`).
-2. Compute score from roles, stacks, goals, `requiresAny`, and signals.
-3. Apply unsupported-stack and policy penalties.
-4. Emit recommended and skipped rows with reasons and confidence.
+2. Apply policy gates (unsupported stack, curated approval/risk, source trust,
+   sensitive content, required role, `requiresAny`) — a failed gate skips the item.
+3. Collect positive match signals (catalog default, role, stack, goal, package
+   manager, config signal, changed file). If `.haus-workflow/deep-context.json`
+   exists, its LLM-discovered roles/stacks/patterns are merged in (tagged `deep:…`).
+4. Recommend the item iff it is a catalog default OR has ≥1 match signal; emit
+   recommended and skipped rows with reasons.
 5. Write `.haus-workflow/recommendation.json`.
+
+The `deep-context.json` file is written by the `writing-documentation` skill's deep
+scan; a second `recommend` pass picks up skills the shallow scanner missed.
 
 ---
 
