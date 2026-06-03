@@ -19,7 +19,6 @@ import { claudePath, displayPath, hausPath, packageRoot } from '../utils/paths.j
 import { DEFAULT_HOOKS_CONFIG } from './load-hooks-config.js'
 import { loadClaudeHooksSettings } from './load-hooks.js'
 import { assertPostApplySettingsMatchCanonical } from './verify-hooks-contract.js'
-import { writeProjectFacts } from './write-project-facts.js'
 import { writeRootClaudeMd } from './write-root-claude-md.js'
 import { writeWorkflowConfig } from './write-workflow-config.js'
 import { writeWorkflow } from './write-workflow.js'
@@ -62,10 +61,8 @@ export async function writeClaudeFiles(
   const workflowConfigPath = await writeWorkflowConfig(root, dryRun, {
     refill: opts.refillConfig,
   })
-  const projectFactsPath = await writeProjectFacts(root, hausVersion, dryRun)
   const p6Files = [
     rootClaudeMdPath,
-    projectFactsPath,
     ...(workflowPath ? [workflowPath] : []),
     ...(workflowConfigPath ? [workflowConfigPath] : []),
   ]
@@ -211,7 +208,7 @@ export async function writeClaudeFiles(
       id: r.id,
       type: r.type,
       reason: r.reason,
-      confidenceLevel: r.confidenceLevel,
+      selectionMode: r.selectionMode,
     })),
     false,
   )

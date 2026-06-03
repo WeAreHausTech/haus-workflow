@@ -78,7 +78,6 @@ export function formatRecommendationHuman(rec: Recommendation): string {
   if (rec.recommended.length === 0) lines.push('  (none)')
   for (const item of rec.recommended) {
     lines.push(`- ${item.id}`)
-    lines.push(`    confidence: ${item.confidenceLevel} (${item.confidence.toFixed(2)})`)
     lines.push(`    selection: ${item.selectionMode}`)
     lines.push('    why:')
     for (const reason of item.reasons) lines.push(`      - ${formatReasonWithSignal(reason)}`)
@@ -99,7 +98,6 @@ type ExclusionReason = 'baseline' | 'intent-mismatch' | 'no-metadata'
 /** A recommended rule that was excluded when narrowing to a specific task context. */
 export type TaskExcludedRule = {
   id: string
-  confidenceLevel: 'low' | 'medium' | 'high'
   selectionMode: 'baseline' | 'matched'
   ruleIntents: TaskIntent[]
   exclusionReason: ExclusionReason
@@ -109,7 +107,6 @@ export type TaskExcludedRule = {
 /** A recommended rule that survived task-intent filtering. */
 export type TaskIncludedRule = {
   id: string
-  confidenceLevel: 'low' | 'medium' | 'high'
   selectionMode: 'baseline' | 'matched'
   ruleIntents: TaskIntent[]
   inclusionReason: string
@@ -120,8 +117,6 @@ export type TaskIncludedRule = {
 export type ContextExplanation = {
   selected: Array<{
     id: string
-    confidence: number
-    confidenceLevel: 'low' | 'medium' | 'high'
     selectionMode: 'baseline' | 'matched'
     reasons: string[]
   }>
@@ -201,8 +196,6 @@ export function buildContextExplanation(
 ): ContextExplanation {
   const selected = rec.recommended.map((item) => ({
     id: item.id,
-    confidence: item.confidence,
-    confidenceLevel: item.confidenceLevel,
     selectionMode: item.selectionMode,
     reasons: item.reasons.map((reason) => reason.message),
   }))
@@ -226,7 +219,6 @@ export function buildContextExplanation(
       includedRules.push(rule)
       includedInTask.push({
         id: rule.id,
-        confidenceLevel: rule.confidenceLevel,
         selectionMode: rule.selectionMode,
         ruleIntents: [...ruleIntents].sort(),
         inclusionReason: pickInclusionReason(rule, taskIntents, ruleIntents),
@@ -236,7 +228,6 @@ export function buildContextExplanation(
       const { code, explanation } = pickExclusionReason(rule, taskIntents, ruleIntents)
       excludedFromTask.push({
         id: rule.id,
-        confidenceLevel: rule.confidenceLevel,
         selectionMode: rule.selectionMode,
         ruleIntents: [...ruleIntents].sort(),
         exclusionReason: code,
@@ -287,7 +278,6 @@ export function formatContextHuman(
     } else {
       for (const item of explanation.includedInTask) {
         lines.push(`- ${item.id}`)
-        lines.push(`    confidence: ${item.confidenceLevel}`)
         lines.push(`    selection: ${item.selectionMode}`)
         lines.push(
           `    intents: ${item.ruleIntents.length ? item.ruleIntents.join(', ') : '(none)'}`,
@@ -317,7 +307,6 @@ export function formatContextHuman(
     if (explanation.selected.length === 0) lines.push('  (none)')
     for (const item of explanation.selected) {
       lines.push(`- ${item.id}`)
-      lines.push(`    confidence: ${item.confidenceLevel} (${item.confidence.toFixed(2)})`)
       lines.push(`    selection: ${item.selectionMode}`)
       lines.push('    why:')
       for (const reason of item.reasons) lines.push(`      - ${reason}`)

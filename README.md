@@ -60,7 +60,7 @@ Scans the repo, recommends context assets, and writes `.claude/` and `.haus-work
 haus init              # first-run setup (scan → recommend → apply)
 haus setup-project     # re-run setup on existing project
 haus scan              # scan repo and write context-map
-haus recommend         # score and recommend catalog items
+haus recommend         # recommend catalog items (binary eligibility)
 haus apply --dry-run   # preview what would be written
 haus apply --write     # write .claude/ files
 haus apply --refill-config    # fill still-blank workflow-config.md fields, keep edits

@@ -15,33 +15,19 @@ import fs from 'fs-extra'
 import type { ContextMap, PackageManager } from '../types.js'
 import { readJson } from '../utils/fs.js'
 
-/** Resolved workflow-config values. `null` = not inferable → writer emits a placeholder. */
+/**
+ * Resolved workflow-config values bound by the workflow methodology. `null` = not
+ * inferable → writer emits a placeholder. Everyday dev commands (lint, typecheck,
+ * format, build) are owned by CLAUDE.md/docs (the writing-documentation skill), not here.
+ */
 export interface WorkflowConfigValues {
   test: string
   testE2E: string | null
-  typecheck: string | null
-  lint: string | null
-  lintFix: string | null
-  formatCheck: string | null
-  securityAudit: string
-  validationLibrary: string | null
   preCommitTool: string | null
   specPath: string | null
   designPath: string | null
   uxPath: string | null
 }
-
-/** Validation libraries recognised by dependency name, in preference order. */
-const VALIDATION_LIBS = [
-  'zod',
-  'valibot',
-  'yup',
-  'joi',
-  '@hapi/joi',
-  'class-validator',
-  'superstruct',
-  'ajv',
-]
 
 /** Formats a node-bin invocation appropriate to the package manager. */
 function binCmd(pm: PackageManager, bin: string, args: string): string {
@@ -75,9 +61,6 @@ export async function deriveWorkflowConfig(
   const hasDep = (name: string): boolean => deps.has(name)
   const exists = (rel: string): boolean => fs.pathExistsSync(path.join(root, rel))
 
-  const hasTypeScript = hasDep('typescript') || exists('tsconfig.json')
-  const hasEslint = hasDep('eslint')
-  const hasPrettier = hasDep('prettier')
   const hasPlaywright = hasDep('@playwright/test') || stacks.includes('playwright')
   const hasCypress = hasDep('cypress')
 
@@ -96,18 +79,6 @@ export async function deriveWorkflowConfig(
       firstScript('test:e2e', 'e2e', 'test:integration') ??
       (hasPlaywright ? binCmd(pm, 'playwright', 'test') : null) ??
       (hasCypress ? binCmd(pm, 'cypress', 'run') : null),
-    typecheck:
-      firstScript('typecheck', 'type-check', 'tsc') ??
-      (hasTypeScript ? binCmd(pm, 'tsc', '--noEmit') : null),
-    lint: script('lint') ?? (hasEslint ? binCmd(pm, 'eslint', '.') : null),
-    lintFix:
-      firstScript('lint:fix', 'lint-fix') ??
-      (scripts.lint ? `${pm} run lint -- --fix` : hasEslint ? binCmd(pm, 'eslint', '. --fix') : null),
-    formatCheck:
-      firstScript('format:check', 'format-check', 'prettier:check') ??
-      (hasPrettier ? binCmd(pm, 'prettier', '--check .') : null),
-    securityAudit: `${pm} audit`,
-    validationLibrary: VALIDATION_LIBS.find((lib) => deps.has(lib)) ?? null,
     preCommitTool,
     specPath: exists('docs/SPEC.md') ? 'docs/SPEC.md' : null,
     designPath: exists('docs/DESIGN.md') ? 'docs/DESIGN.md' : null,

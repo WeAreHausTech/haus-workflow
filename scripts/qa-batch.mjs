@@ -54,9 +54,8 @@ for (const t of targets) {
     stacks: scan.detectedStacks,
     selected: rec.recommended.map((x) => ({
       id: x.id,
-      c: x.confidenceLevel,
+      mode: x.selectionMode,
       reasons: x.reasons.map((y) => y.code),
-      score: x.score,
     })),
     skipped: rec.skipped.map((x) => x.id),
     tasks: Object.fromEntries(

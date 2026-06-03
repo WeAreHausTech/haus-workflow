@@ -37,13 +37,12 @@ function fields(v: WorkflowConfigValues): Field[] {
     { prefix: '- Design: ', value: v.designPath, hint: 'path, e.g. docs/DESIGN.md' },
     { prefix: '- UX flows: ', value: v.uxPath, hint: 'path, e.g. docs/UX.md' },
     { prefix: '- Test (unit + integration): ', value: v.test, hint: 'command', code: true },
-    { prefix: '- Test (E2E): ', value: v.testE2E, hint: 'command, e.g. playwright test', code: true },
-    { prefix: '- Type check: ', value: v.typecheck, hint: 'command, e.g. tsc --noEmit', code: true },
-    { prefix: '- Lint: ', value: v.lint, hint: 'command, e.g. eslint .', code: true },
-    { prefix: '- Lint fix: ', value: v.lintFix, hint: 'command, e.g. eslint . --fix', code: true },
-    { prefix: '- Format check: ', value: v.formatCheck, hint: 'command, e.g. prettier --check .', code: true },
-    { prefix: '- Security audit: ', value: v.securityAudit, hint: 'command', code: true },
-    { prefix: '- Library: ', value: v.validationLibrary, hint: 'e.g. zod, yup, joi' },
+    {
+      prefix: '- Test (E2E): ',
+      value: v.testE2E,
+      hint: 'command, e.g. playwright test',
+      code: true,
+    },
     { prefix: '- Tool: ', value: v.preCommitTool, hint: 'e.g. lefthook, husky' },
   ]
 }
@@ -62,13 +61,15 @@ function buildWorkflowConfig(v: WorkflowConfigValues): string {
   const f = fields(v)
   const byPrefix = (p: string) => line(f.find((x) => x.prefix === p)!)
   return (
-    '# How this project works (commands & conventions)\n' +
+    '# How this project works (workflow methodology bindings)\n' +
     '\n' +
-    '> The everyday commands and conventions for this project — the build, test, and\n' +
-    '> lint commands, where docs live, and so on. This file is yours to edit and haus\n' +
-    '> will not overwrite it. haus fills in what it can detect on first setup;\n' +
-    '> `haus apply --refill-config` fills any still-blank fields without touching\n' +
-    "> anything you've edited.\n" +
+    '> The few project-specific values the workflow standard (WORKFLOW.md) binds to:\n' +
+    '> where the source-of-truth docs live, the test commands the TDD/verification gate\n' +
+    '> runs, the highest-stakes logic, and the pre-commit tool. This file is yours to\n' +
+    '> edit and haus will not overwrite it.\n' +
+    '>\n' +
+    '> Everyday commands (dev, build, lint, typecheck, format) and project documentation\n' +
+    '> live in `CLAUDE.md` + `docs/` — run **`/docs`** to generate/refresh them.\n' +
     '\n' +
     '## Source-of-truth documents\n' +
     byPrefix('- Spec: ') +
@@ -78,24 +79,10 @@ function buildWorkflowConfig(v: WorkflowConfigValues): string {
     byPrefix('- UX flows: ') +
     '\n' +
     '\n' +
-    '## Commands\n' +
+    '## Test commands (TDD / verification gate)\n' +
     byPrefix('- Test (unit + integration): ') +
     '\n' +
     byPrefix('- Test (E2E): ') +
-    '\n' +
-    byPrefix('- Type check: ') +
-    '\n' +
-    byPrefix('- Lint: ') +
-    '\n' +
-    byPrefix('- Lint fix: ') +
-    '\n' +
-    byPrefix('- Format check: ') +
-    '\n' +
-    byPrefix('- Security audit: ') +
-    '\n' +
-    '\n' +
-    '## Validation library\n' +
-    byPrefix('- Library: ') +
     '\n' +
     '\n' +
     '## Highest-stakes logic\n' +
@@ -134,7 +121,6 @@ const FALLBACK_CONTEXT: ContextMap = {
   repoName: '',
   packageManager: 'unknown',
   repoRoles: [],
-  confidence: 0,
   detectedStacks: {},
   dependencies: [],
   securityRisks: [],
