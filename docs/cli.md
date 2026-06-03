@@ -60,8 +60,9 @@ Sync remote catalog and refresh lockfile.
 
 Health check: hooks, `CLAUDE.md` import block (and that each `@.haus-workflow/*`
 target resolves), managed files, catalog cache, CLI version. Prints a single
-plain-language verdict line first (`✅ healthy` / `⚠️ N things need attention`,
-each mapped to a fix command), with developer detail beneath.
+plain-language verdict line first — `✅ Your project is set up and healthy.` or
+`⚠️ N thing(s) need attention:` followed by each issue mapped to a fix command —
+with developer detail beneath.
 
 - `--hooks` — verify `.claude/settings.json` matches the canonical hook contract; exits non-zero if missing or drifted
 
