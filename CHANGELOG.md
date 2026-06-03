@@ -1,25 +1,46 @@
 # Changelog
 
+## [0.12.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.11.1...v0.12.0) (2026-06-03)
+
+### Features
+
+- **install:** full-auto postinstall on global npm install + prepare crash fix ([aa5cfb2](https://github.com/WeAreHausTech/haus-workflow/commit/aa5cfb2a6be50f6513ef344ecef514d0cbf4c8de)), closes [package.json#files](https://github.com/WeAreHausTech/package.json/issues/files)
+- **memory+router:** delete in-repo memory store, enforce token budget ([d54e220](https://github.com/WeAreHausTech/haus-workflow/commit/d54e2208c7e3636bf5481733d0a4268f08346286))
+- **scanner:** data-driven detection registry + detectionStatus ([6951a72](https://github.com/WeAreHausTech/haus-workflow/commit/6951a72490a53b3643ebfd8f329d49a4cafc5e06))
+- **security:** write permissions.deny + consolidate SENSITIVE (WS1, partial) ([32baf77](https://github.com/WeAreHausTech/haus-workflow/commit/32baf7792e2298ac7dc2f45489a326cf5be009e3))
+- **security:** write permissions.deny into project .claude/settings.json (WS1) ([c2e6a23](https://github.com/WeAreHausTech/haus-workflow/commit/c2e6a2324fb708de2162b699362c06deba82dcc7))
+- **ux:** non-developer desktop UX — slash commands, scoped allow, plain language ([3d95a1b](https://github.com/WeAreHausTech/haus-workflow/commit/3d95a1b581cc40deb117406a86acd91f7853f645))
+- **workflow-config:** auto-fill commands from the repo + --refill-config ([2c16bbe](https://github.com/WeAreHausTech/haus-workflow/commit/2c16bbed464efa4ca1d0895e5d3f3b1ad2dd89f3))
+
+### Bug Fixes
+
+- **catalog:** skip id-less items in tag audit ([d04b5ab](https://github.com/WeAreHausTech/haus-workflow/commit/d04b5aba54264f1cf4fe10236aa144c2b0edfb10)), closes [#3](https://github.com/WeAreHausTech/haus-workflow/issues/3)
+- **context:** preserve tokenEstimate in normalize; drop stale memory hook from install fragment ([63e980c](https://github.com/WeAreHausTech/haus-workflow/commit/63e980cc5e9d3951e45fbaef8c5747cb74276933))
+- **doctor,guard:** verdict truly first; well-formed import check; flag() for hooks; drop backticks in guard reasons ([d562199](https://github.com/WeAreHausTech/haus-workflow/commit/d5621996b49fa331b5d895ed13197a8f797883eb))
+- **install:** postinstall notice distinguishes added vs updated; settings 'ensured present' ([e3737b8](https://github.com/WeAreHausTech/haus-workflow/commit/e3737b82d83b2cc44a354ea635fd9e6606c99839))
+- **scanner:** address PR [#50](https://github.com/WeAreHausTech/haus-workflow/issues/50) review — chunked reads, typed bucket, hermetic test ([385de24](https://github.com/WeAreHausTech/haus-workflow/commit/385de2413ff55e2040b1a7fb16bb4543d0477e22))
+- **workflow-config:** skip derive on existing-no-refill; npx --no-install ([5688f02](https://github.com/WeAreHausTech/haus-workflow/commit/5688f02e5664a9c3475158ea82d1b60837b5ed5a)), closes [#51](https://github.com/WeAreHausTech/haus-workflow/issues/51)
+
 ## [0.11.1](https://github.com/WeAreHausTech/haus-workflow/compare/v0.11.0...v0.11.1) (2026-06-01)
 
 ### Bug Fixes
 
-* return null from writeWorkflowConfig when file exists ([9ad36c1](https://github.com/WeAreHausTech/haus-workflow/commit/9ad36c1800023737d4a65feaeca1dc10fb5f797b))
+- return null from writeWorkflowConfig when file exists ([9ad36c1](https://github.com/WeAreHausTech/haus-workflow/commit/9ad36c1800023737d4a65feaeca1dc10fb5f797b))
 
 ## [0.11.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.10.1...v0.11.0) (2026-06-01)
 
 ### Features
 
-* add agentic workflow standard — replace haus-way-of-work ([a5d2fba](https://github.com/WeAreHausTech/haus-workflow/commit/a5d2fba7ff866403586a1d0f79885184458a3fe1))
+- add agentic workflow standard — replace haus-way-of-work ([a5d2fba](https://github.com/WeAreHausTech/haus-workflow/commit/a5d2fba7ff866403586a1d0f79885184458a3fe1))
 
 ### Bug Fixes
 
-* **ci:** sync-catalog-fixture creates PR instead of pushing to main ([547e604](https://github.com/WeAreHausTech/haus-workflow/commit/547e60490b7dac6b3ce47ca6d862cb75d6e83b89))
-* **lint:** correct import order in write-claude-files, write-workflow, doctor ([edff887](https://github.com/WeAreHausTech/haus-workflow/commit/edff8877675fa6c604f9707043659130b044fede))
-* negate secret-scan grep in bundled template ([1b7e226](https://github.com/WeAreHausTech/haus-workflow/commit/1b7e22631ea7680ad54ee9675ca70f4fcef9e989))
-* remove unused imports, add BLOCK_END assertion, use cache-precedence in doctor ([cc566d5](https://github.com/WeAreHausTech/haus-workflow/commit/cc566d51d816f3c65550b7f791b06d8b3318603f))
-* **test:** remove no-op || true from warnings assertion ([9929d5c](https://github.com/WeAreHausTech/haus-workflow/commit/9929d5c2030e70b41a4c165bff87b3b45ca6753d))
-* use CACHE_DIR from remote-catalog for template path resolution ([4d8b784](https://github.com/WeAreHausTech/haus-workflow/commit/4d8b784303ff8c76d4ef2d55bac3fbd6c77efd9a))
+- **ci:** sync-catalog-fixture creates PR instead of pushing to main ([547e604](https://github.com/WeAreHausTech/haus-workflow/commit/547e60490b7dac6b3ce47ca6d862cb75d6e83b89))
+- **lint:** correct import order in write-claude-files, write-workflow, doctor ([edff887](https://github.com/WeAreHausTech/haus-workflow/commit/edff8877675fa6c604f9707043659130b044fede))
+- negate secret-scan grep in bundled template ([1b7e226](https://github.com/WeAreHausTech/haus-workflow/commit/1b7e22631ea7680ad54ee9675ca70f4fcef9e989))
+- remove unused imports, add BLOCK_END assertion, use cache-precedence in doctor ([cc566d5](https://github.com/WeAreHausTech/haus-workflow/commit/cc566d51d816f3c65550b7f791b06d8b3318603f))
+- **test:** remove no-op || true from warnings assertion ([9929d5c](https://github.com/WeAreHausTech/haus-workflow/commit/9929d5c2030e70b41a4c165bff87b3b45ca6753d))
+- use CACHE_DIR from remote-catalog for template path resolution ([4d8b784](https://github.com/WeAreHausTech/haus-workflow/commit/4d8b784303ff8c76d4ef2d55bac3fbd6c77efd9a))
 
 ## [0.10.1](https://github.com/WeAreHausTech/haus-workflow/compare/v0.10.0...v0.10.1) (2026-05-29)
 
