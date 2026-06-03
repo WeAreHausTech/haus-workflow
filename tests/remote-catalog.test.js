@@ -197,6 +197,49 @@ test('haus update --check: reports status JSON, does not run catalog sync', asyn
   assert.equal(out.stdout.includes('Update applied'), false)
 })
 
+test('apply --write fetches the workflow template from the catalog when cache is empty', async () => {
+  // Regression: a fresh install has an empty cache. writeWorkflow must fetch the
+  // template from the catalog on demand instead of failing to find it (0.12.0 bug).
+  const TEMPLATE_BODY = '# Agentic Development Workflow Standard\n\nMethodology body.\n'
+  const { server, port } = await startMockServer({
+    '/templates/agentic-workflow-standard.md': { body: TEMPLATE_BODY },
+  })
+  const cacheDir = mkdtempSync(path.join(os.tmpdir(), 'haus-tmpl-cache-'))
+  const temp = makeProjectDir()
+  fs.writeFileSync(
+    path.join(temp, 'package.json'),
+    JSON.stringify({ name: 'tmpl-fetch', packageManager: 'yarn@4.5.3' }, null, 2),
+  )
+  fs.writeFileSync(path.join(temp, 'yarn.lock'), '# lock')
+
+  try {
+    const env = {
+      ...process.env,
+      HAUS_CATALOG_REMOTE_BASE: `http://127.0.0.1:${port}`,
+      HAUS_CATALOG_CACHE_DIR_OVERRIDE: cacheDir,
+    }
+    await runCli(['scan', '--json'], { cwd: temp, env })
+    await runCli(['recommend', '--json'], { cwd: temp, env })
+    // --allow-empty-cache writes core files (incl. WORKFLOW.md) without catalog items,
+    // mirroring the fresh-install init path that triggered the 0.12.0 bug.
+    const out = await runCli(['apply', '--write', '--allow-empty-cache'], { cwd: temp, env })
+    assert.equal(out.exitCode, 0, `apply failed:\n${out.stdout}\n${out.stderr}`)
+
+    // Template cached from the remote...
+    assert.equal(
+      fs.existsSync(path.join(cacheDir, 'templates/agentic-workflow-standard.md')),
+      true,
+      'template not cached from remote',
+    )
+    // ...and WORKFLOW.md written with the managed header + fetched body.
+    const workflow = fs.readFileSync(path.join(temp, '.haus-workflow', 'WORKFLOW.md'), 'utf8')
+    assert.equal(workflow.startsWith('<!-- HAUS-MANAGED id=template.workflow'), true)
+    assert.equal(workflow.includes('Methodology body.'), true)
+  } finally {
+    await stopServer(server)
+  }
+})
+
 test('haus doctor: reports catalog cache absent when override cache dir is empty', async () => {
   const temp = mkdtempSync(path.join(os.tmpdir(), 'haus-doc-p8-'))
   fs.mkdirSync(path.join(temp, '.haus-workflow'), { recursive: true })
@@ -205,8 +248,11 @@ test('haus doctor: reports catalog cache absent when override cache dir is empty
     JSON.stringify({ name: 'doc-p8', packageManager: 'yarn@4.5.3' }, null, 2),
   )
   fs.writeFileSync(path.join(temp, 'yarn.lock'), '# lock')
-  await runCli(['scan', '--json'], { cwd: temp })
-  await runCli(['apply', '--write'], { cwd: temp })
+  // Closed-port remote so the on-demand workflow-template fetch fails fast (hermetic).
+  const closedPort = await getClosedPort()
+  const offline = { ...process.env, HAUS_CATALOG_REMOTE_BASE: `http://127.0.0.1:${closedPort}` }
+  await runCli(['scan', '--json'], { cwd: temp, env: offline })
+  await runCli(['apply', '--write'], { cwd: temp, env: offline })
 
   // Fresh empty cache dir — no manifest.json inside
   const emptyCache = mkdtempSync(path.join(os.tmpdir(), 'haus-empty-cache-'))

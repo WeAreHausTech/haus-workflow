@@ -3,11 +3,9 @@
  * Skips the write if the file was modified by the user or the content is already up to date.
  */
 
-import path from 'node:path'
-
 import fs from 'fs-extra'
 
-import { CACHE_DIR } from '../catalog/remote-catalog.js'
+import { readWorkflowTemplate } from '../catalog/remote-catalog.js'
 import { createUnifiedDiff, hasTextChanged, summarizeDiff } from '../utils/diff.js'
 import { hashText, writeText } from '../utils/fs.js'
 import { log, warn } from '../utils/logger.js'
@@ -18,7 +16,6 @@ import { normaliseLF, parseHausManagedHeader } from './managed-template.js'
 /** Stable id embedded in the HAUS-MANAGED header — identifies this file on re-apply. */
 const STABLE_ID = 'template.workflow'
 const SCHEMA_VERSION = '1'
-const CATALOG_CACHE_TEMPLATE = path.join(CACHE_DIR, 'templates/agentic-workflow-standard.md')
 
 /** Build the HAUS-MANAGED header line, embedding the content hash for tamper detection. */
 export function makeWorkflowHeader(pkgVersion: string, contentHash: string): string {
@@ -34,14 +31,17 @@ export async function writeWorkflow(
   pkgVersion: string,
   dryRun: boolean,
 ): Promise<string | null> {
-  if (!(await fs.pathExists(CATALOG_CACHE_TEMPLATE))) {
-    warn(`Workflow template not found — run \`haus update\` to fetch from catalog`)
+  // Resolve the workflow template from the catalog on demand (cached after first fetch),
+  // so a fresh `haus init` can write WORKFLOW.md without a prior `haus update`. In dry-run
+  // mode this does not write to the cache.
+  const templateContent = await readWorkflowTemplate({ dryRun })
+  if (templateContent === null) {
+    warn(
+      `Workflow template could not be fetched from the catalog — check your network, then re-run \`haus apply --write\` (or \`haus update\`)`,
+    )
     return null
   }
 
-  const templatePath = CATALOG_CACHE_TEMPLATE
-
-  const templateContent = await fs.readFile(templatePath, 'utf8')
   const contentHash = hashText(normaliseLF(templateContent))
   const header = makeWorkflowHeader(pkgVersion, contentHash)
   const next = `${header}\n${templateContent}`
