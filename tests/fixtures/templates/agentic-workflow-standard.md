@@ -142,7 +142,7 @@ Gate every commit on (parallel):
 
 Gate unit tests on pre-push (slow). Never gate E2E in hooks.
 
-See `workflow-config.md` for this project's exact hook commands.
+See `lefthook.yml` (or your pre-commit config) for this project's exact hook commands.
 
 ```yaml
 pre-commit:
@@ -216,7 +216,7 @@ Each fact has exactly one home. Never duplicate across layers.
 | Auto memory (`MEMORY.md`)   | Learnings the agent discovers (build quirks, debug insights, patterns) | First ~200 lines / 25 KB loaded. Accumulates without manual edits. |
 | ADR (`docs/adr/`)           | Architectural decisions, library choices, policy                       | On demand. Permanent, write-once.                                  |
 | Runbook (`docs/runbook.md`) | Failure modes + exact fix                                              | On demand. Permanent, append-only.                                 |
-| `workflow-config.md`        | Project-specific commands, doc paths, tool choices                     | Loaded with WORKFLOW.md. Project-owned.                            |
+| `workflow-config.md`        | Doc paths, test commands, highest-stakes, tool choices                 | Loaded with WORKFLOW.md. Project-owned.                            |
 
 Rule of thumb: ADR for WHY, runbook for HOW TO FIX, memory for what was LEARNED, `AGENTS.md` for the stable RULES, `workflow-config.md` for the project-specific VALUES.
 

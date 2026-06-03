@@ -1,37 +1,37 @@
 /**
- * Orchestrates scan → score → rank → filter → return recommendations.
- * Applies unsupported-stack, sensitive-path, and ecosystem-conflict policies before scoring.
+ * Orchestrates scan → policy-gate → eligibility → return recommendations.
+ *
+ * Eligibility is BINARY: an item is recommended iff it passes every policy gate
+ * (unsupported/curated/sensitive/source/required-role/requiresAny) AND is a
+ * catalog default OR has at least one positive match signal. No scores, no
+ * confidence — the gates are correctness/security, the signals are eligibility.
+ *
+ * A second pass picks up the writing-documentation skill's deep-context.json
+ * (LLM-discovered roles/stacks/patterns) so skills the shallow scanner missed
+ * become eligible. Absent that file, output is identical to the scanner-only pass.
  */
 
 import { loadCatalog } from '../catalog/load-catalog.js'
 import { SENSITIVE_ITEM_KEYWORDS } from '../security/sensitive-paths.js'
-import type { ContextMap, Recommendation } from '../types.js'
+import type { ContextMap, DeepContext, Recommendation } from '../types.js'
 import { readJson } from '../utils/fs.js'
 import { hausPath } from '../utils/paths.js'
 
-import {
-  ECOSYSTEM_COMPATIBLE_BACKENDS,
-  inferRepoEcosystems,
-  isBackendEcosystem,
-  pickDominantBackend,
-} from './ecosystem.js'
+import { readChangedFiles } from './git-signal.js'
 import {
   UNSUPPORTED,
   describeRequiresAny,
   matchRequiresAny,
   mergeRecommendationWarnings,
 } from './policies.js'
-import {
-  type ReasonHit,
-  type SkipHit,
-  computeConfidenceLevel,
-  confidenceLevelToNumber,
-  readChangedFiles,
-} from './scoring.js'
+
+/** A positive eligibility signal: why an item matched the project context. */
+type ReasonHit = { code: string; message: string; signal?: string }
 
 /**
  * Run the full recommendation pipeline for a project.
- * Loads catalog items, scores each against the ContextMap, and returns a ranked Recommendation.
+ * Loads catalog items, gates and matches each against the ContextMap (plus any
+ * deep-context enrichment), and returns the eligible set.
  */
 export async function recommend(root: string, context: ContextMap): Promise<Recommendation> {
   const items = await loadCatalog(root)
@@ -41,115 +41,128 @@ export async function recommend(root: string, context: ContextMap): Promise<Reco
     (await readJson<{ items?: Array<{ id: string; status?: string }> }>(
       hausPath(root, 'sources-report.json'),
     )) ?? {}
-  const stackSet = buildStackSet(context)
-  const depSet = new Set(context.dependencies.map((d) => d.toLowerCase()))
-  const roleSet = new Set(context.repoRoles.map((r) => r.toLowerCase()))
-  const repoEcosystems = inferRepoEcosystems(context.repoRoles)
-  const dominantBackendEcosystem = pickDominantBackend(repoEcosystems)
+  const deep = (await readJson<DeepContext>(hausPath(root, 'deep-context.json'))) ?? {}
+
+  // Scanner (shallow) signal sets.
+  const scannerStacks = buildStackSet(context)
+  const scannerRoles = new Set(context.repoRoles.map((r) => r.toLowerCase()))
+  const scannerDeps = new Set(context.dependencies.map((d) => d.toLowerCase()))
+
+  // Deep (LLM) signal sets — defensively parsed; tagged distinctly when matched.
+  const deepRoles = new Set((deep.roles ?? []).map((r) => r.toLowerCase()))
+  const deepStacks = new Set(
+    [...(deep.roles ?? []), ...Object.values(deep.stacks ?? {}).flat(), ...(deep.patterns ?? [])]
+      .filter((x): x is string => typeof x === 'string')
+      .map((x) => x.toLowerCase()),
+  )
+
+  // Merged sets drive matching; the per-token origin drives the signal prefix.
+  const roleSet = new Set([...scannerRoles, ...deepRoles])
+  const stackSet = new Set([...scannerStacks, ...deepStacks])
+  const depSet = scannerDeps
 
   const recommended: Recommendation['recommended'] = []
   const skipped: Recommendation['skipped'] = []
   const goals = Object.values(setupAnswers).join(' ').toLowerCase()
   const sourceTrust = new Map((sources.items ?? []).map((x) => [x.id, x.status ?? 'candidate']))
   const changedFiles = await readChangedFiles(root)
-  const securityRiskCount = context.securityRisks?.length ?? 0
+
+  const skip = (id: string, code: string, message: string, signal?: string) => {
+    skipped.push({ id, reason: message, skipReasons: [{ code, message, signal }] })
+  }
+  const roleSignal = (name: string) =>
+    scannerRoles.has(name.toLowerCase()) ? `role:${name}` : `deep:role:${name}`
+  const stackSignal = (name: string) =>
+    scannerStacks.has(name.toLowerCase()) ? `tag:${name}` : `deep:tag:${name}`
 
   for (const item of items) {
     const itemSearchText = `${item.id} ${item.tags.join(' ')}`.toLowerCase()
+
+    // ---- Policy gates (hard include/exclude — correctness & security) ----
     if (UNSUPPORTED.some((x) => itemSearchText.includes(x))) {
-      skipped.push({
-        id: item.id,
-        reason: 'Unsupported stack policy',
-        skipReasons: [
-          {
-            code: 'unsupported-policy',
-            message: 'Unsupported stack policy',
-            penalty: 100,
-          },
-        ],
-      })
+      skip(item.id, 'unsupported-policy', 'Unsupported stack policy')
       continue
     }
-
-    // Curated items must be explicitly approved before they can be recommended.
     if (item.source === 'curated') {
       const rs = item.reviewStatus
       if (!rs || rs !== 'approved') {
-        skipped.push({
-          id: item.id,
-          reason: `Curated item not approved (reviewStatus=${rs ?? 'unset'})`,
-          skipReasons: [
-            {
-              code: 'curated-not-approved',
-              message: `Curated item requires reviewStatus:approved (got ${rs ?? 'unset'})`,
-              penalty: 100,
-              signal: `reviewStatus:${rs ?? 'unset'}`,
-            },
-          ],
-        })
+        skip(
+          item.id,
+          'curated-not-approved',
+          `Curated item requires reviewStatus:approved (got ${rs ?? 'unset'})`,
+          `reviewStatus:${rs ?? 'unset'}`,
+        )
         continue
       }
       if (item.riskLevel === 'blocked') {
-        skipped.push({
-          id: item.id,
-          reason: 'Curated item risk level is blocked',
-          skipReasons: [
-            {
-              code: 'curated-risk-blocked',
-              message: 'Curated item riskLevel is blocked',
-              penalty: 100,
-              signal: 'riskLevel:blocked',
-            },
-          ],
-        })
+        skip(
+          item.id,
+          'curated-risk-blocked',
+          'Curated item riskLevel is blocked',
+          'riskLevel:blocked',
+        )
         continue
       }
     }
+    if (SENSITIVE_ITEM_KEYWORDS.some((x) => itemSearchText.includes(x))) {
+      skip(item.id, 'sensitive-policy', 'Sensitive content policy block')
+      continue
+    }
+    const trust = sourceTrust.get(item.source)
+    if (trust === 'candidate' || trust === 'rejected') {
+      skip(item.id, 'source-trust', 'Source trust policy block', `trust:${trust}`)
+      continue
+    }
+    if (item.source && item.source !== 'haus' && trust !== 'approved') {
+      skip(item.id, 'source-approval', 'Source not approved', `source:${item.source}`)
+      continue
+    }
+    if (item.id === 'haus.nx21-monorepo-patterns' && !roleSet.has('nx-monorepo')) {
+      skip(
+        item.id,
+        'required-role-missing',
+        'Required role missing: nx-monorepo',
+        'role:nx-monorepo',
+      )
+      continue
+    }
+    if (item.id === 'haus.turbo-monorepo-patterns' && !roleSet.has('turbo-monorepo')) {
+      skip(
+        item.id,
+        'required-role-missing',
+        'Required role missing: turbo-monorepo',
+        'role:turbo-monorepo',
+      )
+      continue
+    }
 
+    // ---- Eligibility signals ----
     const isDefaultBaseline = item.default === true
     const reasons: ReasonHit[] = []
-    const skipReasons: SkipHit[] = []
-    let score = 0
+    const push = (code: string, message: string, signal?: string) =>
+      reasons.push({ code, message, signal })
 
-    const pushReason = (code: string, message: string, weight: number, signal?: string) => {
-      score += weight
-      reasons.push({ code, message, weight, signal })
-    }
-    const pushSkipReason = (code: string, message: string, penalty: number, signal?: string) => {
-      score -= penalty
-      skipReasons.push({ code, message, penalty, signal })
-    }
-
-    if (isDefaultBaseline) {
-      pushReason('default-baseline', 'catalog default baseline', 25, 'policy:default')
-    }
+    if (isDefaultBaseline) push('default-baseline', 'catalog default baseline', 'policy:default')
 
     const roleMatch = item.repoRoles.find((r) => roleSet.has(r.toLowerCase()))
-    if (roleMatch) {
-      pushReason('repo-role-match', 'repo role match', 40, `role:${roleMatch}`)
-    }
+    if (roleMatch) push('repo-role-match', 'repo role match', roleSignal(roleMatch))
 
     const tagMatch = item.tags.find((t) => stackSet.has(t.toLowerCase()))
-    if (tagMatch) {
-      pushReason('stack-match', 'stack/dependency match', 30, `tag:${tagMatch}`)
-    }
+    if (tagMatch) push('stack-match', 'stack/dependency match', stackSignal(tagMatch))
 
     const goalMatch = item.tags.find(
       (t) => goals.includes(t) || goals.includes(t.replace(/-/g, ' ')),
     )
-    if (goalMatch) {
-      pushReason('goal-match', 'guided goal match', 15, `goal:${goalMatch}`)
-    }
+    if (goalMatch) push('goal-match', 'guided goal match', `goal:${goalMatch}`)
 
     if (
       item.tags.includes(context.packageManager) ||
       item.tags.includes(`${context.packageManager}4`) ||
       item.tags.includes(`${context.packageManager}89`)
     ) {
-      pushReason(
+      push(
         'package-manager-match',
         'package manager match',
-        10,
         `packageManager:${context.packageManager}`,
       )
     }
@@ -157,168 +170,47 @@ export async function recommend(root: string, context: ContextMap): Promise<Reco
     const configSignal = item.tags.find((t) =>
       context.warnings.join(' ').toLowerCase().includes(t.toLowerCase()),
     )
-    if (configSignal) {
-      pushReason('config-signal-match', 'config signal match', 20, `warning:${configSignal}`)
-    }
+    if (configSignal) push('config-signal-match', 'config signal match', `warning:${configSignal}`)
 
     const changedMatch = changedFiles.find((f) => f.includes(item.id.split('.').pop() ?? ''))
-    if (changedMatch) {
-      pushReason('changed-file-match', 'changed file match', 10, `changedFile:${changedMatch}`)
-    }
+    if (changedMatch)
+      push('changed-file-match', 'changed file match', `changedFile:${changedMatch}`)
 
-    if (item.id === 'haus.nx21-monorepo-patterns' && !roleSet.has('nx-monorepo')) {
-      skipped.push({
-        id: item.id,
-        reason: 'Required role missing: nx-monorepo',
-        skipReasons: [
-          {
-            code: 'required-role-missing',
-            message: 'Required role missing: nx-monorepo',
-            penalty: 100,
-            signal: 'role:nx-monorepo',
-          },
-        ],
-      })
-      continue
-    }
-    if (item.id === 'haus.turbo-monorepo-patterns' && !roleSet.has('turbo-monorepo')) {
-      skipped.push({
-        id: item.id,
-        reason: 'Required role missing: turbo-monorepo',
-        skipReasons: [
-          {
-            code: 'required-role-missing',
-            message: 'Required role missing: turbo-monorepo',
-            penalty: 100,
-            signal: 'role:turbo-monorepo',
-          },
-        ],
-      })
-      continue
-    }
-
+    // ---- requiresAny gate (eligibility constraint) ----
     const requiresAny = item.requiresAny ?? []
     if (requiresAny.length > 0) {
-      const satisfied = matchRequiresAny(requiresAny, {
-        stackSet,
-        depSet,
-        roleSet,
-      })
+      const satisfied = matchRequiresAny(requiresAny, { stackSet, depSet, roleSet })
       if (!satisfied.matched) {
         const description = describeRequiresAny(requiresAny)
-        skipped.push({
-          id: item.id,
-          reason: `requiresAny unsatisfied: needs ${description}`,
-          skipReasons: [
-            {
-              code: 'requires-any-unsatisfied',
-              message: `requiresAny unsatisfied: needs ${description}`,
-              penalty: 100,
-              signal: description,
-            },
-          ],
-        })
+        skip(
+          item.id,
+          'requires-any-unsatisfied',
+          `requiresAny unsatisfied: needs ${description}`,
+          description,
+        )
         continue
       }
       if (!reasons.some((r) => r.code === 'stack-match')) {
-        pushReason('requires-any-match', 'requires-any signal match', 25, satisfied.signal)
+        push('requires-any-match', 'requires-any signal match', satisfied.signal)
       }
     }
 
-    if (item.ecosystem && dominantBackendEcosystem && isBackendEcosystem(item.ecosystem)) {
-      const compat =
-        ECOSYSTEM_COMPATIBLE_BACKENDS[dominantBackendEcosystem] ??
-        new Set([dominantBackendEcosystem])
-      if (!compat.has(item.ecosystem)) {
-        pushSkipReason(
-          'ecosystem-conflict',
-          `ecosystem conflict: rule ecosystem=${item.ecosystem} but repo dominant backend=${dominantBackendEcosystem}`,
-          40,
-          `ecosystem:${item.ecosystem}->${dominantBackendEcosystem}`,
-        )
-      }
-    }
-
-    if (SENSITIVE_ITEM_KEYWORDS.some((x) => itemSearchText.includes(x))) {
-      pushSkipReason('sensitive-policy', 'Sensitive content policy block', 100)
-    }
-
-    const trust = sourceTrust.get(item.source)
-    if (trust === 'candidate' || trust === 'rejected') {
-      pushSkipReason('source-trust', 'Source trust policy block', 100)
-    }
-    if (item.source && item.source !== 'haus' && trust !== 'approved') {
-      pushSkipReason('source-approval', 'Source not approved', 100)
-    }
-    if (
-      securityRiskCount > 0 &&
-      !isDefaultBaseline &&
-      (item.tags.includes('security') || item.id.includes('security'))
-    ) {
-      pushSkipReason(
-        'security-risk-penalty',
-        'Security-tagged item penalized by active risk signals',
-        20,
-      )
-    }
-
-    const positiveReasonCodes = new Set(
-      reasons.map((r) => r.code).filter((c) => c !== 'default-baseline'),
-    )
-    const hasRoleSignal = positiveReasonCodes.has('repo-role-match')
-    const hasDepOrStackSignal =
-      positiveReasonCodes.has('stack-match') || positiveReasonCodes.has('requires-any-match')
-
-    if (hasRoleSignal && !hasDepOrStackSignal && !isDefaultBaseline && requiresAny.length === 0) {
-      pushSkipReason(
-        'role-only-bleed-guard',
-        'role match without dep/stack signal (role-only bleed)',
-        25,
-        roleMatch ? `role:${roleMatch}` : undefined,
-      )
-    }
-
-    const minScore = isDefaultBaseline ? 1 : 40
-    if (score >= minScore) {
-      const confidenceLevel = computeConfidenceLevel({
-        isDefaultBaseline,
-        reasons,
-        hasEcosystemConflict: skipReasons.some((s) => s.code === 'ecosystem-conflict'),
-        score,
-      })
-      const confidence = confidenceLevelToNumber(confidenceLevel, score)
+    // ---- Binary decision: default OR any positive evidence ----
+    const hasEvidence = reasons.some((r) => r.code !== 'default-baseline')
+    if (isDefaultBaseline || hasEvidence) {
       recommended.push({
         id: item.id,
         type: item.type,
-        reason: reasons.length ? reasons.map((x) => x.message).join(', ') : `score=${score}`,
+        reason: reasons.length ? reasons.map((x) => x.message).join(', ') : 'eligible',
         reasons,
-        confidence,
-        confidenceLevel,
-        selectionMode:
-          isDefaultBaseline && reasons.every((r) => r.code === 'default-baseline')
-            ? 'baseline'
-            : 'matched',
+        selectionMode: isDefaultBaseline && !hasEvidence ? 'baseline' : 'matched',
         install: true,
-        score,
-        scoreBreakdown: {
-          bonuses: reasons,
-          penalties: skipReasons,
-          finalScore: score,
-        },
         tags: item.tags,
         ecosystem: item.ecosystem,
         tokenEstimate: item.tokenEstimate,
       })
     } else {
-      if (skipReasons.length === 0) {
-        skipReasons.push({
-          code: 'no-role-stack-match',
-          message: 'No role/stack match',
-          penalty: 0,
-        })
-      }
-      const primary = skipReasons[0]
-      skipped.push({ id: item.id, reason: primary.message, skipReasons })
+      skip(item.id, 'no-role-stack-match', 'No role/stack match')
     }
   }
 

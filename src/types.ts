@@ -19,7 +19,6 @@ export type ContextMap = {
   repoName: string
   packageManager: PackageManager
   repoRoles: string[]
-  confidence: number
   detectedStacks: Record<string, string[]>
   dependencies: string[]
   securityRisks: string[]
@@ -80,7 +79,7 @@ export type CatalogItem = {
   intents?: string[]
   tokenBudget?: number
   tokenEstimate: number
-  /** When true, recommender applies a baseline score so the item is selected unless policy blocks it. */
+  /** When true, the item is eligible by default (selected unless a policy gate blocks it). */
   default?: boolean
   /** When present and non-empty, at least one clause must match the scanned context, otherwise the rule is skipped with `requires-any-unsatisfied`. */
   requiresAny?: RequiresAnyClause[]
@@ -105,24 +104,29 @@ export type CatalogItem = {
   pinnedRef?: string
 }
 
-/** Scored recommendation result written to .haus-workflow/recommendation.json. */
+/**
+ * Deep-comprehension signals emitted by the writing-documentation skill to
+ * .haus-workflow/deep-context.json. LLM-authored — read defensively. Feeds the
+ * second recommendation pass so skills the shallow scanner missed become eligible.
+ */
+export type DeepContext = {
+  generatedAt?: string
+  source?: string
+  roles?: string[]
+  stacks?: Record<string, string[]>
+  patterns?: string[]
+}
+
+/** Eligibility recommendation result written to .haus-workflow/recommendation.json. */
 export type Recommendation = {
   mode: 'guided' | 'fast'
   recommended: Array<{
     id: string
     type: string
     reason: string
-    reasons: Array<{ code: string; message: string; weight: number; signal?: string }>
-    confidence: number
-    confidenceLevel: 'low' | 'medium' | 'high'
+    reasons: Array<{ code: string; message: string; signal?: string }>
     selectionMode: 'baseline' | 'matched'
     install: boolean
-    score: number
-    scoreBreakdown: {
-      bonuses: Array<{ code: string; message: string; weight: number; signal?: string }>
-      penalties: Array<{ code: string; message: string; penalty: number; signal?: string }>
-      finalScore: number
-    }
     /** Catalog tags echoed for downstream task-intent routing. Additive optional field. */
     tags?: string[]
     /** Catalog ecosystem family echoed for downstream task-intent routing. Additive optional field. */
@@ -133,7 +137,7 @@ export type Recommendation = {
   skipped: Array<{
     id: string
     reason: string
-    skipReasons: Array<{ code: string; message: string; penalty: number; signal?: string }>
+    skipReasons: Array<{ code: string; message: string; signal?: string }>
   }>
   warnings: string[]
   estimatedContextTokens: number

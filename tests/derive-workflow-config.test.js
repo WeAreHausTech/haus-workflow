@@ -23,53 +23,37 @@ const ctx = (over = {}) => ({
   ...over,
 })
 
-test('prefers real package.json scripts over reconstructed commands', async () => {
+test('prefers real package.json test scripts over reconstructed commands', async () => {
   const root = tmpRepo({
     'package.json': JSON.stringify({
       scripts: {
         test: 'vitest run',
-        typecheck: 'tsc -p .',
-        lint: 'eslint src',
-        'lint:fix': 'eslint src --fix',
-        'format:check': 'prettier --check .',
         'test:e2e': 'playwright test',
       },
     }),
   })
   const v = await deriveWorkflowConfig(root, ctx({ packageManager: 'yarn' }))
   assert.equal(v.test, 'yarn run test')
-  assert.equal(v.typecheck, 'yarn run typecheck')
-  assert.equal(v.lint, 'yarn run lint')
-  assert.equal(v.lintFix, 'yarn run lint:fix')
-  assert.equal(v.formatCheck, 'yarn run format:check')
   assert.equal(v.testE2E, 'yarn run test:e2e')
   fs.rmSync(root, { recursive: true, force: true })
 })
 
-test('reconstructs commands from deps/config when no script exists (npm → npx)', async () => {
+test('reconstructs the E2E command from deps when no script exists (npm → npx)', async () => {
   const root = tmpRepo({
     'package.json': JSON.stringify({ scripts: {} }),
-    'tsconfig.json': '{}',
   })
   const v = await deriveWorkflowConfig(
     root,
-    ctx({ dependencies: ['eslint', 'prettier', 'typescript', '@playwright/test', 'zod'] }),
+    ctx({ dependencies: ['@playwright/test'] }),
   )
-  assert.equal(v.typecheck, 'npx --no-install tsc --noEmit')
-  assert.equal(v.lint, 'npx --no-install eslint .')
-  assert.equal(v.lintFix, 'npx --no-install eslint . --fix')
-  assert.equal(v.formatCheck, 'npx --no-install prettier --check .')
   assert.equal(v.testE2E, 'npx --no-install playwright test')
-  assert.equal(v.validationLibrary, 'zod')
   fs.rmSync(root, { recursive: true, force: true })
 })
 
 test('leaves un-inferable fields null (no tool installed)', async () => {
   const root = tmpRepo({ 'package.json': JSON.stringify({ scripts: {} }) })
   const v = await deriveWorkflowConfig(root, ctx())
-  assert.equal(v.lint, null)
-  assert.equal(v.typecheck, null)
-  assert.equal(v.validationLibrary, null)
+  assert.equal(v.testE2E, null)
   assert.equal(v.preCommitTool, null)
   assert.equal(v.specPath, null)
   fs.rmSync(root, { recursive: true, force: true })
@@ -89,38 +73,38 @@ test('detects pre-commit tool and doc paths', async () => {
   fs.rmSync(docs, { recursive: true, force: true })
 })
 
-test('first write produces real commands, not placeholders', async () => {
+test('first write produces real test commands, not placeholders', async () => {
   const root = tmpRepo({
-    'package.json': JSON.stringify({ scripts: { typecheck: 'tsc --noEmit', lint: 'eslint .' } }),
+    'package.json': JSON.stringify({ scripts: { test: 'vitest run', 'test:e2e': 'playwright test' } }),
   })
   const dest = await writeWorkflowConfig(root, false)
   const out = fs.readFileSync(dest, 'utf8')
-  assert.match(out, /- Type check: `npm run typecheck`/)
-  assert.match(out, /- Lint: `npm run lint`/)
+  assert.match(out, /- Test \(unit \+ integration\): `npm run test`/)
+  assert.match(out, /- Test \(E2E\): `npm run test:e2e`/)
   fs.rmSync(root, { recursive: true, force: true })
 })
 
 test('refill fills newly-detectable blank fields but preserves user-edited lines', async () => {
-  // First write with NO scripts → Type check / Lint are placeholders.
+  // First write with NO scripts/deps → Test (E2E) and Tool are placeholders.
   const root = tmpRepo({ 'package.json': JSON.stringify({ scripts: {} }) })
   await writeWorkflowConfig(root, false)
   const dest = path.join(root, '.haus-workflow', 'workflow-config.md')
 
-  // Now the repo gains scripts (detectable), and the user hand-edits the Lint line.
+  // Now the repo gains an e2e script (detectable), and the user hand-edits the Tool line.
   fs.writeFileSync(
     path.join(root, 'package.json'),
-    JSON.stringify({ scripts: { typecheck: 'tsc --noEmit', lint: 'eslint .' } }),
+    JSON.stringify({ scripts: { 'test:e2e': 'playwright test' } }),
   )
   fs.writeFileSync(
     dest,
-    fs.readFileSync(dest, 'utf8').replace(/- Lint: .*/, '- Lint: `my-custom-linter`'),
+    fs.readFileSync(dest, 'utf8').replace(/- Tool: .*/, '- Tool: `my-custom-hook-runner`'),
   )
 
   const result = await writeWorkflowConfig(root, false, { refill: true })
   assert.ok(result, 'refill should write when there are fillable blanks')
   const out = fs.readFileSync(dest, 'utf8')
-  assert.match(out, /- Type check: `npm run typecheck`/, 'blank field filled')
-  assert.match(out, /- Lint: `my-custom-linter`/, 'user edit preserved')
+  assert.match(out, /- Test \(E2E\): `npm run test:e2e`/, 'blank field filled')
+  assert.match(out, /- Tool: `my-custom-hook-runner`/, 'user edit preserved')
   fs.rmSync(root, { recursive: true, force: true })
 })
 

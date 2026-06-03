@@ -111,10 +111,10 @@ test('doctor flags a broken CLAUDE.md import target with a fix (WS6)', () => {
   execaSync('node', [cli, 'recommend', '--json'], { cwd: temp })
   execaSync('node', [cli, 'apply', '--write'], { cwd: temp })
   // Break the bridge: delete an @-imported target file.
-  rmSync(path.join(temp, '.haus-workflow', 'project.md'))
+  rmSync(path.join(temp, '.haus-workflow', 'workflow-config.md'))
   const r = execaSync('node', [cli, 'doctor'], { cwd: temp, reject: false })
   const out = `${r.stdout ?? ''}${r.stderr ?? ''}`
-  assert.match(out, /project\.md/)
+  assert.match(out, /workflow-config\.md/)
   assert.match(r.stdout ?? '', /⚠️ \d+ thing/)
 })
 

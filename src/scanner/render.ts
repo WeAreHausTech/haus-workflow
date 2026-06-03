@@ -47,18 +47,6 @@ export async function buildContentBlob(root: string, files: string[]): Promise<s
   return parts.join('\n')
 }
 
-/**
- * Computes a 0–0.99 confidence score based on how many roles and stack entries
- * were detected.  More signals → higher confidence.
- * Formula: 0.4 base + 0.08 per role + 0.02 per stack entry, capped at 0.99.
- * Returns 0.15 when no roles were found (minimal signal).
- */
-export function computeConfidence(roles: string[], stacks: Record<string, string[]>): number {
-  const stackCount = Object.values(stacks).reduce((sum, arr) => sum + arr.length, 0)
-  if (roles.length === 0) return 0.15
-  return Math.min(0.99, Number((0.4 + roles.length * 0.08 + stackCount * 0.02).toFixed(2)))
-}
-
 /** Renders a concise markdown summary of the context map for repo-summary.md. */
 export function renderSummary(context: ContextMap): string {
   return `# Repo summary

@@ -1,6 +1,8 @@
 /**
  * Manages the root CLAUDE.md file: injects (or updates) the haus import block
- * that pulls in way-of-work.md and project.md without clobbering user content.
+ * that pulls in the workflow methodology + config without clobbering user content.
+ * Deep project documentation is owned by the writing-documentation skill (docs/),
+ * loaded on demand — not @-imported here, to keep per-session context lean.
  */
 
 import path from 'node:path'
@@ -17,7 +19,7 @@ export const BLOCK_BEGIN = '<!-- HAUS:BEGIN haus-imports v=1 -->'
 /** Closing sentinel for the managed import block inside CLAUDE.md. */
 export const BLOCK_END = '<!-- HAUS:END haus-imports -->'
 
-const IMPORT_CONTENT = `@.haus-workflow/WORKFLOW.md\n@.haus-workflow/workflow-config.md\n@.haus-workflow/project.md`
+const IMPORT_CONTENT = `@.haus-workflow/WORKFLOW.md\n@.haus-workflow/workflow-config.md`
 
 /** Build the full managed import block (sentinels + @-import lines). */
 export function buildImportBlock(): string {

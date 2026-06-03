@@ -11,12 +11,9 @@ type RecommendationLike = Partial<Recommendation> & {
     id: string
     type?: string
     reason?: string
-    reasons?: Array<{ message?: string; code?: string; weight?: number; signal?: string }>
-    confidence?: number
-    confidenceLevel?: 'low' | 'medium' | 'high'
+    reasons?: Array<{ message?: string; code?: string; signal?: string }>
     selectionMode?: 'baseline' | 'matched'
     install?: boolean
-    score?: number
     tags?: string[]
     ecosystem?: string
     tokenEstimate?: number
@@ -24,7 +21,7 @@ type RecommendationLike = Partial<Recommendation> & {
   skipped?: Array<{
     id: string
     reason?: string
-    skipReasons?: Array<{ message?: string; code?: string; penalty?: number; signal?: string }>
+    skipReasons?: Array<{ message?: string; code?: string; signal?: string }>
   }>
 }
 
@@ -32,15 +29,13 @@ type RecommendationLike = Partial<Recommendation> & {
 type ExplainRecommendation = {
   selected: Array<{
     id: string
-    confidence: number
-    confidenceLevel: 'low' | 'medium' | 'high'
     selectionMode: 'baseline' | 'matched'
     reasons: string[]
   }>
   skipped: Array<{
     id: string
     reasons: string[]
-    reasonDetails?: Array<{ code: string; message: string; penalty: number; signal?: string }>
+    reasonDetails?: Array<{ code: string; message: string; signal?: string }>
   }>
   stats: {
     selectedRules: number
@@ -51,36 +46,22 @@ type ExplainRecommendation = {
 
 /**
  * Coerce a legacy or current recommendation.json into the canonical Recommendation shape.
- * Fills in missing fields with safe defaults so downstream code can assume a consistent schema.
+ * Tolerates legacy files that still carry score/confidence fields by ignoring them.
  */
 export function normalizeRecommendation(input: RecommendationLike): Recommendation {
   const recommended = (input.recommended ?? []).map((item) => {
     const normalizedReasons = item.reasons?.map((reason) => ({
       code: reason.code ?? 'legacy-reason',
       message: reason.message ?? item.reason ?? 'legacy recommendation reason',
-      weight: reason.weight ?? 0,
       ...(reason.signal ? { signal: reason.signal } : {}),
-    })) ?? [
-      { code: 'legacy-reason', message: item.reason ?? 'legacy recommendation reason', weight: 0 },
-    ]
-    const confidence = item.confidence ?? 0
+    })) ?? [{ code: 'legacy-reason', message: item.reason ?? 'legacy recommendation reason' }]
     return {
       id: item.id,
       type: item.type ?? 'skill',
       reason: item.reason ?? normalizedReasons.map((reason) => reason.message).join(', '),
       reasons: normalizedReasons,
-      confidence,
-      confidenceLevel:
-        item.confidenceLevel ??
-        (confidence >= 0.75 ? 'high' : confidence >= 0.4 ? 'medium' : 'low'),
       selectionMode: item.selectionMode ?? 'matched',
       install: item.install ?? true,
-      score: item.score ?? 0,
-      scoreBreakdown: {
-        bonuses: normalizedReasons,
-        penalties: [],
-        finalScore: item.score ?? 0,
-      },
       tags: item.tags,
       ecosystem: item.ecosystem,
       tokenEstimate: item.tokenEstimate,
@@ -93,15 +74,8 @@ export function normalizeRecommendation(input: RecommendationLike): Recommendati
     skipReasons: item.skipReasons?.map((reason) => ({
       code: reason.code ?? 'legacy-skip-reason',
       message: reason.message ?? item.reason ?? 'legacy skipped reason',
-      penalty: reason.penalty ?? 0,
       ...(reason.signal ? { signal: reason.signal } : {}),
-    })) ?? [
-      {
-        code: 'legacy-skip-reason',
-        message: item.reason ?? 'legacy skipped reason',
-        penalty: 0,
-      },
-    ],
+    })) ?? [{ code: 'legacy-skip-reason', message: item.reason ?? 'legacy skipped reason' }],
   }))
 
   return {
@@ -128,8 +102,6 @@ export function buildRecommendationExplanation(
   return {
     selected: recommendation.recommended.map((item) => ({
       id: item.id,
-      confidence: item.confidence,
-      confidenceLevel: item.confidenceLevel,
       selectionMode: item.selectionMode,
       reasons: item.reasons.map((reason) => reason.message),
     })),
@@ -139,7 +111,6 @@ export function buildRecommendationExplanation(
       reasonDetails: item.skipReasons.map((reason) => ({
         code: reason.code,
         message: reason.message,
-        penalty: reason.penalty,
         ...(reason.signal ? { signal: reason.signal } : {}),
       })),
     })),
