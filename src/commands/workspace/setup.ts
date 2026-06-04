@@ -219,7 +219,8 @@ export async function runWorkspaceSetup(
   }
 
   // Workspace manifest — derived/advisory record of per-repo setup state. Written
-  // on --write (not dryRun) and records every outcome, including failures. Repos
+  // on --write (not dryRun). Records each processed repo's outcome; failures land
+  // here only under --continue-on-error (fail-fast throws before this block). Repos
   // skipped this run (e.g. `--only`) carry forward their prior entry, else `pending`.
   if (apply && !options.dryRun) {
     const statusByName = new Map(statuses.map((s) => [s.name, s]))

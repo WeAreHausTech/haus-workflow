@@ -30,6 +30,7 @@ export type DriftKind =
   | 'version-mismatch'
   | 'missing-claude'
   | 'missing-lock'
+  | 'invalid-lock'
   | 'failed'
 
 export type WorkspaceDriftItem = {
@@ -89,21 +90,25 @@ export async function runWorkspaceDoctor(
     detail.push({ stream: 'warn', text: `- ${item.repo}: ${item.detail}` })
   }
 
+  // No manifest → a single workspace-level flag; skip the per-repo checks, which
+  // would otherwise pile a missing-claude/missing-lock item onto every repo and
+  // bury the one actionable message ("run setup").
   if (!manifest) {
     flag({
       repo: '(workspace)',
       kind: 'no-manifest',
       detail: 'No workspace.manifest.json — run `haus workspace setup --write` first.',
     })
+    return emit({ workspaceRoot, manifest, drift, detail, json: opts.json })
   }
 
-  const manifestByName = new Map((manifest?.repos ?? []).map((r) => [r.name, r]))
+  const manifestByName = new Map(manifest.repos.map((r) => [r.name, r]))
 
   for (const repo of yamlRepos) {
     const repoRoot = path.resolve(workspaceRoot, repo.path)
     const entry = manifestByName.get(repo.name)
 
-    if (manifest && !entry) {
+    if (!entry) {
       flag({
         repo: repo.name,
         kind: 'missing-from-manifest',
@@ -144,14 +149,39 @@ export async function runWorkspaceDoctor(
         kind: 'missing-lock',
         detail: 'Missing .haus-workflow/haus.lock.json — run `haus workspace setup --write`.',
       })
-    } else if (!lock.ok) {
-      ok(`- ${repo.name}: lock present but empty/invalid`)
+    } else if (lock.count > 0 && !lock.ok) {
+      // Present with items but invalid (e.g. a malformed version) — corruption, not
+      // "not set up". An empty lock (count 0) is left as info: a repo may legitimately
+      // have no catalog items, so flagging it would be a false positive.
+      flag({
+        repo: repo.name,
+        kind: 'invalid-lock',
+        detail: 'haus.lock.json present but invalid — re-run `haus workspace setup --write`.',
+      })
     } else {
       ok(`- ${repo.name}: OK (${lock.count} lock item(s))`)
     }
   }
 
-  if (opts.json) {
+  return emit({ workspaceRoot, manifest, drift, detail, json: opts.json })
+}
+
+type DetailLine = { stream: 'log' | 'warn'; text: string }
+
+/**
+ * Render the report (json or buffered human verdict-then-detail), set a non-zero
+ * exit on any drift, and return the structured result. Shared by the normal path
+ * and the early no-manifest return so both behave identically.
+ */
+function emit(args: {
+  workspaceRoot: string
+  manifest: WorkspaceManifest | undefined
+  drift: WorkspaceDriftItem[]
+  detail: DetailLine[]
+  json?: boolean
+}): WorkspaceDoctorResult {
+  const { workspaceRoot, manifest, drift, detail } = args
+  if (args.json) {
     log(JSON.stringify({ manifest: manifest ?? null, drift }, null, 2))
   } else {
     if (drift.length === 0) {

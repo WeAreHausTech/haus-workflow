@@ -75,11 +75,20 @@ async function scanWorkspace(workspaceRoot: string, opts: { json?: boolean }): P
     process.exitCode = 1
     return
   }
-  const config = YAML.parse(configText) as {
+  let config: {
     repos?: Array<{ name: string; path: string; role?: string }>
     relationships?: unknown[]
   }
-  const repos = config.repos ?? []
+  try {
+    config = (YAML.parse(configText) as typeof config) ?? {}
+  } catch {
+    error(
+      `Malformed ${WORKSPACE_FILE}. Fix the YAML or re-run \`haus workspace discover --write\`.`,
+    )
+    process.exitCode = 1
+    return
+  }
+  const repos = Array.isArray(config.repos) ? config.repos : []
   if (repos.length === 0) {
     error(`No repos configured in ${WORKSPACE_FILE}.`)
     process.exitCode = 1

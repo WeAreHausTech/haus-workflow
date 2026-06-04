@@ -252,7 +252,7 @@ test(
 )
 
 test(
-  'workspace doctor flags a missing manifest entirely',
+  'workspace doctor flags a missing manifest with a single workspace-level item',
   withExitCode(async () => {
     const ws = makeWorkspace()
     // Never ran setup → no manifest at all.
@@ -262,7 +262,55 @@ test(
       result.drift.some((d) => d.kind === 'no-manifest'),
       'missing manifest flagged',
     )
+    // No per-repo noise: the only drift is the workspace-level no-manifest flag.
+    assert.equal(result.drift.length, 1, 'no per-repo drift piled on top of no-manifest')
     assert.equal(process.exitCode, 1)
+  }),
+)
+
+test(
+  'workspace doctor flags an invalid (corrupt) lockfile',
+  withExitCode(async () => {
+    const ws = makeWorkspace()
+    await runWorkspaceSetup(ws, { mode: 'fast', write: true })
+
+    // Corrupt one repo's lock: a present item with an unparseable version → checkLock !ok, count > 0.
+    writeFileSync(
+      path.join(ws, 'api', '.haus-workflow', 'haus.lock.json'),
+      JSON.stringify([{ id: 'x', type: 'rule', version: 'not-a-version' }], null, 2),
+    )
+
+    const result = await runWorkspaceDoctor(ws)
+    assert.ok(
+      result.drift.some((d) => d.repo === 'acme-api' && d.kind === 'invalid-lock'),
+      'corrupt lock flagged as invalid-lock',
+    )
+    assert.equal(process.exitCode, 1)
+  }),
+)
+
+test(
+  'workspace setup --only carries forward prior entries verbatim (preserves stamps)',
+  withExitCode(async () => {
+    const ws = makeWorkspace()
+    // First full run stamps both repos.
+    await runWorkspaceSetup(ws, { mode: 'fast', write: true })
+    const before = await readManifest(ws)
+    const apiBefore = before.repos.find((r) => r.name === 'acme-api')
+
+    // Second run touches only the frontend; api must keep its original stamp.
+    await runWorkspaceSetup(ws, { mode: 'fast', write: true, only: ['acme-frontend'] })
+    const after = await readManifest(ws)
+    const apiAfter = after.repos.find((r) => r.name === 'acme-api')
+
+    assert.equal(apiAfter.status, 'ok', 'excluded repo keeps ok status')
+    assert.equal(
+      apiAfter.lastSetupAt,
+      apiBefore.lastSetupAt,
+      'excluded repo keeps its original lastSetupAt (not re-stamped)',
+    )
+    assert.equal(apiAfter.hausVersionAtSetup, apiBefore.hausVersionAtSetup)
+    assert.equal(apiAfter.lockItemCount, apiBefore.lockItemCount)
   }),
 )
 
