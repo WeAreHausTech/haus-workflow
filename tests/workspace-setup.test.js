@@ -258,6 +258,84 @@ test(
   }),
 )
 
+test(
+  'runWorkspaceSetup --only excluding the root repo still writes WORKSPACE.md (no CLAUDE.md clobber)',
+  withExitCode(async () => {
+    const ws = mkdtempSync(path.join(os.tmpdir(), 'haus-ws-only-collide-'))
+    // Root repo at `.` plus a nested member; run --only on the nested one.
+    writeRepo(ws, {
+      name: 'root-repo',
+      packageManager: 'yarn@4.5.3',
+      dependencies: { react: '19.0.0' },
+    })
+    writeRepo(path.join(ws, 'api'), {
+      name: 'acme-api',
+      packageManager: 'yarn@4.5.3',
+      dependencies: { '@nestjs/core': '10.0.0' },
+    })
+    writeYaml(
+      ws,
+      [
+        'client: solo',
+        'repos:',
+        '  - name: root-repo',
+        '    path: .',
+        '    role: frontend',
+        '  - name: acme-api',
+        '    path: api',
+        '    role: backend',
+        'relationships: []',
+        '',
+      ].join('\n'),
+    )
+
+    await runWorkspaceSetup(ws, { mode: 'fast', write: true, only: ['acme-api'] })
+
+    // collision derives from the full config, so the aggregate must NOT inject
+    // into the root repo's CLAUDE.md — it lands in WORKSPACE.md.
+    assert.ok(
+      existsSync(path.join(ws, '.haus-workflow/WORKSPACE.md')),
+      'root repo in config forces WORKSPACE.md even when --only excludes it',
+    )
+    // The root repo was excluded by --only so it isn't set up here; either way the
+    // workspace block must never appear in the root repo's CLAUDE.md.
+    const claudeMdPath = path.join(ws, 'CLAUDE.md')
+    if (existsSync(claudeMdPath)) {
+      assert.ok(
+        !readFileSync(claudeMdPath, 'utf8').includes('@.haus-workflow/cross-repo-summary.md'),
+        'workspace block must not be injected into the root repo CLAUDE.md',
+      )
+    }
+  }),
+)
+
+test(
+  'runWorkspaceSetup flags a non-zero exit on malformed yaml instead of throwing',
+  withExitCode(async () => {
+    const ws = mkdtempSync(path.join(os.tmpdir(), 'haus-ws-bad-yaml-'))
+    writeYaml(ws, 'client: x\nrepos: [ this: is, : broken\n  -\n')
+    // Must not throw — surfaces a friendly error + exit code.
+    await runWorkspaceSetup(ws, { mode: 'fast', write: true })
+    assert.equal(process.exitCode, 1, 'malformed yaml sets non-zero exit')
+  }),
+)
+
+test(
+  'runWorkspaceSetup write+dryRun previews without writing aggregate artifacts',
+  withExitCode(async () => {
+    const ws = makeWorkspace()
+    await runWorkspaceSetup(ws, { mode: 'fast', write: true, dryRun: true })
+    assert.ok(
+      !existsSync(path.join(ws, '.haus-workflow/workspace-summary.json')),
+      'dryRun must not write workspace aggregate JSON',
+    )
+    assert.ok(
+      !existsSync(path.join(ws, 'CLAUDE.md')),
+      'dryRun must not write the workspace CLAUDE.md',
+    )
+  }),
+)
+
 test('resolveWorkspaceRoot walks up to the directory holding haus.workspace.yaml', () => {
   const ws = mkdtempSync(path.join(os.tmpdir(), 'haus-ws-resolve-'))
   writeYaml(ws, 'client: x\nrepos: []\nrelationships: []\n')

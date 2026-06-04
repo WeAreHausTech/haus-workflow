@@ -80,12 +80,29 @@ export function resolveWorkspaceRoot(start: string = process.cwd()): string {
 }
 
 function parseWorkspaceYaml(text: string): WorkspaceYaml | undefined {
-  const parsed = YAML.parse(text) as Partial<WorkspaceYaml> | null
+  let parsed: unknown
+  try {
+    parsed = YAML.parse(text)
+  } catch {
+    // Malformed yaml — surface a friendly error upstream instead of a stack trace.
+    return undefined
+  }
   if (!parsed || typeof parsed !== 'object') return undefined
+  const obj = parsed as Partial<WorkspaceYaml>
+  // Validate repo entries up front so a bad shape can't crash `path.resolve` later.
+  const repos = Array.isArray(obj.repos)
+    ? (obj.repos as unknown[]).filter(
+        (r): r is RepoEntry =>
+          typeof r === 'object' &&
+          r !== null &&
+          typeof (r as RepoEntry).name === 'string' &&
+          typeof (r as RepoEntry).path === 'string',
+      )
+    : []
   return {
-    client: typeof parsed.client === 'string' ? parsed.client : 'unknown',
-    repos: Array.isArray(parsed.repos) ? (parsed.repos as RepoEntry[]) : [],
-    relationships: Array.isArray(parsed.relationships) ? parsed.relationships : [],
+    client: typeof obj.client === 'string' ? obj.client : 'unknown',
+    repos,
+    relationships: Array.isArray(obj.relationships) ? obj.relationships : [],
   }
 }
 
@@ -163,16 +180,24 @@ export async function runWorkspaceSetup(
   // Writing the aggregate layer requires --write (default is preview-only).
   const written: string[] = []
   if (apply && aggregateInputs.length > 0) {
-    const artifacts = await writeWorkspaceArtifacts(
-      workspaceRoot,
-      aggregateInputs,
-      config.relationships,
-    )
-    written.push(...artifacts)
-    const collision = repos.some((r) => isRootRepo(workspaceRoot, r.path))
+    // Collision + member listing are derived from the FULL config, not the
+    // (possibly `--only`-filtered) run set: a root repo (`path: .`) excluded by
+    // `--only` must still force WORKSPACE.md so we never clobber its CLAUDE.md
+    // (the workspace block reuses the same managed sentinels).
+    const collision = config.repos.some((r) => isRootRepo(workspaceRoot, r.path))
+    // The aggregate JSON/MD have no diff-only mode; under dryRun, skip them and
+    // let writeWorkspaceClaudeMd preview the document diff without writing.
+    if (!options.dryRun) {
+      const artifacts = await writeWorkspaceArtifacts(
+        workspaceRoot,
+        aggregateInputs,
+        config.relationships,
+      )
+      written.push(...artifacts)
+    }
     const docPath = await writeWorkspaceClaudeMd(workspaceRoot, {
       client: config.client,
-      members: repos.map((r) => ({ name: r.name, path: r.path })),
+      members: config.repos.map((r) => ({ name: r.name, path: r.path })),
       collision,
       dryRun: options.dryRun,
     })
