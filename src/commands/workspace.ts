@@ -11,15 +11,15 @@
  * - `setup`    — per-repo setup loop + workspace layer + manifest.
  * - `doctor`   — workspace drift report.
  */
+import { existsSync, statSync } from 'node:fs'
 import path from 'node:path'
-
-import YAML from 'yaml'
 
 import { scanProject } from '../scanner/scan-project.js'
 import { readText, writeText } from '../utils/fs.js'
 import { error, log } from '../utils/logger.js'
 
 import { writeWorkspaceArtifacts, type WorkspaceRepoInput } from './workspace/aggregate.js'
+import { parseWorkspaceConfig, WORKSPACE_FILE } from './workspace/config.js'
 import { runDiscover } from './workspace/discover.js'
 import { runWorkspaceDoctor } from './workspace/doctor.js'
 import { resolveWorkspaceRoot, runWorkspaceSetup } from './workspace/setup.js'
@@ -38,8 +38,6 @@ export type WorkspaceOptions = {
   maxDepth?: string | number
   client?: string
 }
-
-const WORKSPACE_FILE = 'haus.workspace.yaml'
 
 /** Normalize a comma-or-space separated `--only` value into a name list. */
 function normalizeOnly(only: WorkspaceOptions['only']): string[] | undefined {
@@ -75,33 +73,32 @@ async function scanWorkspace(workspaceRoot: string, opts: { json?: boolean }): P
     process.exitCode = 1
     return
   }
-  let config: {
-    repos?: Array<{ name: string; path: string; role?: string }>
-    relationships?: unknown[]
-  }
-  try {
-    config = (YAML.parse(configText) as typeof config) ?? {}
-  } catch {
+  const config = parseWorkspaceConfig(configText)
+  if (!config) {
     error(
       `Malformed ${WORKSPACE_FILE}. Fix the YAML or re-run \`haus workspace discover --write\`.`,
     )
     process.exitCode = 1
     return
   }
-  const repos = Array.isArray(config.repos) ? config.repos : []
-  if (repos.length === 0) {
+  if (config.repos.length === 0) {
     error(`No repos configured in ${WORKSPACE_FILE}.`)
     process.exitCode = 1
     return
   }
 
   const inputs: WorkspaceRepoInput[] = []
-  for (const repo of repos) {
+  for (const repo of config.repos) {
     const repoRoot = path.resolve(workspaceRoot, repo.path)
+    // Guard a misconfigured path before fast-glob (a non-directory cwd throws ENOTDIR
+    // on Linux) so a bad entry surfaces a clean message, not a stack trace.
+    if (!existsSync(repoRoot) || !statSync(repoRoot).isDirectory()) {
+      throw new Error(`Repo path is not a directory: ${repo.path}`)
+    }
     const result = await scanProject(repoRoot, 'fast')
     inputs.push({ name: repo.name, path: repo.path, context: result })
   }
-  const written = await writeWorkspaceArtifacts(workspaceRoot, inputs, config.relationships ?? [])
+  const written = await writeWorkspaceArtifacts(workspaceRoot, inputs, config.relationships)
   if (opts.json) {
     log(JSON.stringify({ written }, null, 2))
   } else {

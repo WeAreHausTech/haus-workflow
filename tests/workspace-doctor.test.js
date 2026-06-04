@@ -315,6 +315,35 @@ test(
 )
 
 test(
+  'workspace setup warns and downgrades excluded repos when the manifest is unreadable',
+  withExitCode(async () => {
+    const ws = makeWorkspace()
+    await runWorkspaceSetup(ws, { mode: 'fast', write: true })
+
+    // Corrupt the manifest on disk, then re-run --only on one repo. The excluded
+    // repo can't carry its prior entry forward, so it downgrades to pending and a
+    // warning is surfaced (rather than silently losing history).
+    writeFileSync(manifestPath(ws), '{ not valid json', 'utf8')
+    const warnings = []
+    const origWarn = console.warn
+    console.warn = (...args) => warnings.push(args.join(' '))
+    try {
+      await runWorkspaceSetup(ws, { mode: 'fast', write: true, only: ['acme-frontend'] })
+    } finally {
+      console.warn = origWarn
+    }
+
+    assert.ok(
+      warnings.some((w) => /unreadable/i.test(w)),
+      'an unreadable manifest is surfaced as a warning',
+    )
+    const after = await readManifest(ws)
+    const api = after.repos.find((r) => r.name === 'acme-api')
+    assert.equal(api.status, 'pending', 'excluded repo downgrades to pending on lost history')
+  }),
+)
+
+test(
   'workspace doctor --json returns manifest + drift array shape',
   withExitCode(async () => {
     const ws = makeWorkspace()

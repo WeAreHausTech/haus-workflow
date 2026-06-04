@@ -124,3 +124,30 @@ test('runWorkspace scan without yaml sets a non-zero exit instead of throwing', 
     assert.equal(process.exitCode, 1)
   })()
 })
+
+test('runWorkspace scan with malformed yaml sets a non-zero exit instead of throwing', async () => {
+  const dir = mkdtempSync(path.join(os.tmpdir(), 'haus-ws-badyaml-'))
+  writeFileSync(path.join(dir, 'haus.workspace.yaml'), 'repos: [ this: is, : broken\n  -\n')
+  await inWorkspace(dir, async () => {
+    await runWorkspace('scan')
+    assert.equal(process.exitCode, 1)
+  })()
+})
+
+test('runWorkspace scan throws a clean error when a repo path is not a directory', async () => {
+  const ws = makeWorkspace()
+  writeFileSync(path.join(ws, 'not-a-dir'), 'regular file')
+  writeFileSync(
+    path.join(ws, 'haus.workspace.yaml'),
+    ['client: acme', 'repos:', '  - name: bad', '    path: not-a-dir', 'relationships: []', ''].join(
+      '\n',
+    ),
+  )
+  await inWorkspace(ws, async () => {
+    await assert.rejects(
+      () => runWorkspace('scan'),
+      /not a directory/,
+      'a non-directory repo path surfaces a clean message',
+    )
+  })()
+})

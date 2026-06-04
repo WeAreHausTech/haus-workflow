@@ -13,16 +13,12 @@
 import { existsSync } from 'node:fs'
 import path from 'node:path'
 
-import YAML from 'yaml'
-
 import { checkLock } from '../../update/lockfile.js'
-import { readText } from '../../utils/fs.js'
 import { log, warn } from '../../utils/logger.js'
 import { claudePath, hausPath } from '../../utils/paths.js'
 
+import { readWorkspaceConfig } from './config.js'
 import { hausVersion, readManifest, type WorkspaceManifest } from './manifest.js'
-
-const WORKSPACE_FILE = 'haus.workspace.yaml'
 
 export type DriftKind =
   | 'no-manifest'
@@ -45,28 +41,6 @@ export type WorkspaceDoctorResult = {
   drift: WorkspaceDriftItem[]
 }
 
-type YamlRepo = { name: string; path: string; role?: string }
-
-function parseYamlRepos(text: string | undefined): YamlRepo[] {
-  if (!text) return []
-  let parsed: unknown
-  try {
-    parsed = YAML.parse(text)
-  } catch {
-    return []
-  }
-  if (!parsed || typeof parsed !== 'object') return []
-  const repos = (parsed as { repos?: unknown }).repos
-  if (!Array.isArray(repos)) return []
-  return repos.filter(
-    (r): r is YamlRepo =>
-      typeof r === 'object' &&
-      r !== null &&
-      typeof (r as YamlRepo).name === 'string' &&
-      typeof (r as YamlRepo).path === 'string',
-  )
-}
-
 /**
  * Run the workspace drift report.
  *
@@ -78,7 +52,7 @@ export async function runWorkspaceDoctor(
   opts: { json?: boolean } = {},
 ): Promise<WorkspaceDoctorResult> {
   const manifest = await readManifest(workspaceRoot)
-  const yamlRepos = parseYamlRepos(await readText(path.join(workspaceRoot, WORKSPACE_FILE)))
+  const yamlRepos = (await readWorkspaceConfig(workspaceRoot))?.repos ?? []
   const currentVersion = hausVersion()
   const drift: WorkspaceDriftItem[] = []
 
