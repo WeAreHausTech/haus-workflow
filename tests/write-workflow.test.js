@@ -4,7 +4,8 @@
  * IMPORTANT: remote-catalog.ts resolves CACHE_DIR and REMOTE_BASE at module load time.
  * These env vars MUST be set before the first import of write-workflow / remote-catalog.
  * We use top-level await to start the mock server, set env vars, then dynamically import.
- * The server is kept alive for all tests and closed via process.on('exit').
+ * The server stays alive for all tests and is closed in the node:test after() hook.
+ * Previous env var values are captured and restored in the same after() hook.
  */
 
 import test, { after } from 'node:test'
@@ -49,6 +50,10 @@ const { sharedServer, sharedPort } = await new Promise((resolve) => {
   })
 })
 
+// Capture previous values so we can restore them after all tests complete
+const prevRemoteBase = process.env.HAUS_CATALOG_REMOTE_BASE
+const prevCacheDir = process.env.HAUS_CATALOG_CACHE_DIR_OVERRIDE
+
 // Set env vars before importing remote-catalog / write-workflow
 process.env.HAUS_CATALOG_REMOTE_BASE = `http://127.0.0.1:${sharedPort}`
 process.env.HAUS_CATALOG_CACHE_DIR_OVERRIDE = sharedCacheDir
@@ -56,10 +61,14 @@ process.env.HAUS_CATALOG_CACHE_DIR_OVERRIDE = sharedCacheDir
 // Dynamic import so that module-level constants in remote-catalog.ts pick up the env vars
 const { makeWorkflowHeader, writeWorkflow } = await import('../src/claude/write-workflow.js')
 
-// Close server after all tests complete
+// Close server and restore env vars after all tests complete
 after(() => {
   sharedServer.close()
   fs.rmSync(sharedCacheDir, { recursive: true, force: true })
+  if (prevRemoteBase === undefined) delete process.env.HAUS_CATALOG_REMOTE_BASE
+  else process.env.HAUS_CATALOG_REMOTE_BASE = prevRemoteBase
+  if (prevCacheDir === undefined) delete process.env.HAUS_CATALOG_CACHE_DIR_OVERRIDE
+  else process.env.HAUS_CATALOG_CACHE_DIR_OVERRIDE = prevCacheDir
 })
 
 // ---------------------------------------------------------------------------
