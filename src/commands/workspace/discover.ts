@@ -22,7 +22,7 @@ import { error, log } from '../../utils/logger.js'
 
 export type DiscoveredRepo = {
   name: string
-  /** Path relative to the workspace root (posix-style separators preserved by path.join). */
+  /** Path relative to the workspace root, posix-separated (derived from fast-glob / path.posix). */
   path: string
   role: string
 }
@@ -42,7 +42,6 @@ export type WorkspaceConfig = {
 export type DiscoverOptions = {
   maxDepth?: number
   write?: boolean
-  dryRun?: boolean
   json?: boolean
   client?: string
 }
