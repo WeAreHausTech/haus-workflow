@@ -49,13 +49,12 @@ jobs:
       - name: Test
         run: yarn test
 
-      # Coverage (non-blocking visibility — gate flips to blocking in Phase 5).
+      # Coverage gate (Phase 5: now BLOCKING — ratchet passes at the baseline
+      # floor of 54, so a regression below floor fails the build).
       - name: Coverage
-        continue-on-error: true
         run: yarn test:coverage
 
       - name: Coverage ratchet
-        continue-on-error: true
         run: node scripts/coverage-ratchet.mjs
 
       - name: CLI smoke checks
@@ -84,3 +83,47 @@ jobs:
 
       - name: Pack
         run: yarn pack
+
+  # Regression-test gate: a `fix:` commit must ship a test. A bug fixed without a
+  # test will silently regress; this forces the regression test into the same PR.
+  fix-needs-test:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          fetch-depth: 0
+
+      - name: Require a test for fix commits
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=100 origin "$BASE_REF"
+          RANGE="origin/$BASE_REF..HEAD"
+
+          # Any commit whose subject starts with `fix:` or `fix(`...
+          FIX_COMMITS="$(git log --format=%s "$RANGE" | grep -E '^fix(\(|:)' || true)"
+          if [ -z "$FIX_COMMITS" ]; then
+            echo "No fix: commits in $RANGE — gate not applicable."
+            exit 0
+          fi
+          echo "Found fix commits:"
+          echo "$FIX_COMMITS"
+
+          # Escape hatch: explicit opt-out in the PR body.
+          if printf '%s' "$PR_BODY" | grep -qF '[skip-regression-test]'; then
+            echo "::notice::[skip-regression-test] present in PR body — skipping the fix-needs-test gate. A regression test should still follow."
+            exit 0
+          fi
+
+          # The PR diff must touch at least one path under tests/.
+          if git diff --name-only "$RANGE" | grep -qE '^tests/'; then
+            echo "A fix commit is present and the PR touches tests/ — gate satisfied."
+            exit 0
+          fi
+
+          echo "::error::This PR contains a fix: commit but changes no file under tests/. Add a regression test, or put [skip-regression-test] in the PR body with justification."
+          exit 1
