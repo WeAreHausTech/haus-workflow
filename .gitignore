@@ -71,6 +71,9 @@ cache/
 # Claude Code per-developer settings — keep out of the shared repo
 .claude/settings.json
 .claude/settings.local.json
+# Claude Code local worktrees and scratch dirs — never committed
+.claude/worktrees/
+.claire/
 # Yarn 4 transient state
 .yarn/install-state.gz
 .yarn/cache/
