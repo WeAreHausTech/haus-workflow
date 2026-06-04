@@ -63,10 +63,12 @@ test('setup core writes scan + recommendation + hooks + rules artifacts', () => 
 // In --json mode the core runs with apply:false → no Claude files written.
 test('setup core in json/preview mode does not write .claude/ files', () => {
   const temp = makeFixture()
-  execaSync('node', [path.resolve('dist/cli.js'), 'setup-project', '--fast', '--json'], {
-    cwd: temp,
-    reject: false,
-  })
+  const r = execaSync(
+    'node',
+    [path.resolve('dist/cli.js'), 'setup-project', '--fast', '--json'],
+    { cwd: temp, reject: false },
+  )
+  assert.equal(r.exitCode, 0, `stderr: ${r.stderr}`)
   assert.ok(
     !existsSync(path.join(temp, '.claude/CLAUDE.md')),
     'preview mode must not write Claude files',

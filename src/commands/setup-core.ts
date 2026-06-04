@@ -2,9 +2,9 @@
  * Shared setup pipeline parameterized on an explicit `root`.
  *
  * This is the single source of truth for the scan → recommend → apply flow.
- * `setup-project` wraps it with interactive mode choice + a confirm() gate;
- * the workspace setup loop calls it once per member repo so every repo gets
- * byte-identical output to `haus setup-project`.
+ * `setup-project` wraps it with interactive mode choice + a confirm() gate.
+ * The upcoming workspace setup loop will call it once per member repo so every
+ * repo gets byte-identical output to `haus setup-project`.
  */
 import { flattenRecommendedHooks, loadClaudeHooksSettings } from '../claude/load-hooks.js'
 import { verifyProjectSettingsHooksContract } from '../claude/verify-hooks-contract.js'
@@ -83,14 +83,15 @@ export async function runSetupCore(root: string, opts: SetupCoreOptions): Promis
   const warningLines = [...new Set([...context.warnings, ...(recommendation.warnings ?? [])])]
   log(`Repo: ${context.repoName}`)
   for (const warning of warningLines) log(`- WARN: ${warning}`)
-  let hooksOk = false
+  // `skipped` implies ok:true (no settings.json to check) — report the doctor's
+  // ok status so "skipped but ok" is not mistaken for a failure.
+  const hooksOk = hooks.ok
   if (hooks.skipped) {
     log(`- HOOKS: (skipped) ${hooks.message}`)
   } else if (!hooks.ok) {
     log(`- HOOKS FAIL: ${hooks.message}`)
     process.exitCode = 1
   } else {
-    hooksOk = true
     log(`- HOOKS OK: ${hooks.message}`)
   }
 
@@ -122,14 +123,13 @@ export async function runSetupCore(root: string, opts: SetupCoreOptions): Promis
 
   // Post-apply doctor check
   const hooksAfter = await verifyProjectSettingsHooksContract(root)
-  let hooksOkAfter = false
+  const hooksOkAfter = hooksAfter.ok
   if (hooksAfter.skipped) {
     log(`- HOOKS: (skipped) ${hooksAfter.message}`)
   } else if (!hooksAfter.ok) {
     log(`- HOOKS FAIL: ${hooksAfter.message}`)
     process.exitCode = 1
   } else {
-    hooksOkAfter = true
     log(`- HOOKS OK: ${hooksAfter.message}`)
   }
 
