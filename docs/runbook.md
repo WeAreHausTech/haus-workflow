@@ -20,8 +20,8 @@ catalog `catalog-item.schema.json` added/removed/renamed a field; the curated
 fixture (`tests/fixtures/catalog/manifest.json`) no longer matches the
 contract. **Fix:** edit the fixture to drop the removed field or add the newly
 required one (keep it a minimal curated subset). If the new required field is
-deliberately omitted, add it to `requiredOmitExempt` in `contract-check.mjs`
-**and** the offline test's exemption — a conscious decoupling decision.
+deliberately omitted, add it to `requiredOmitExempt` in `contract-check.mjs` — a
+conscious decoupling decision.
 
 ## Coverage ratchet says raise the floor
 

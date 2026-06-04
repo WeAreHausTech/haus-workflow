@@ -69,20 +69,37 @@ function readJson(absPath) {
   return JSON.parse(readFileSync(absPath, 'utf8'))
 }
 
+/**
+ * Tags an error as originating from reaching/parsing the LIVE catalog (vs a
+ * local file/programmer error). Only NetworkError is tolerated in advisory mode;
+ * everything else is a real failure that must surface.
+ */
+class NetworkError extends Error {}
+
 async function fetchJson(path) {
   const url = rawUrl(path)
-  const res = await fetch(url, { headers: { 'user-agent': 'haus-contract-check' } })
-  if (!res.ok) throw new Error(`fetch ${url} -> HTTP ${res.status}`)
-  return res.json()
+  try {
+    const res = await fetch(url, { headers: { 'user-agent': 'haus-contract-check' } })
+    if (!res.ok) throw new NetworkError(`fetch ${url} -> HTTP ${res.status}`)
+    return await res.json()
+  } catch (err) {
+    if (err instanceof NetworkError) throw err
+    throw new NetworkError(`fetch/parse ${url} failed: ${err instanceof Error ? err.message : err}`)
+  }
 }
 async function fetchJsonOrNull(path) {
   // Returns null on 404 (resource absent in catalog) without throwing, so
   // callers can SKIP rather than treat "not present yet" as a network failure.
   const url = rawUrl(path)
-  const res = await fetch(url, { headers: { 'user-agent': 'haus-contract-check' } })
-  if (res.status === 404) return null
-  if (!res.ok) throw new Error(`fetch ${url} -> HTTP ${res.status}`)
-  return res.json()
+  try {
+    const res = await fetch(url, { headers: { 'user-agent': 'haus-contract-check' } })
+    if (res.status === 404) return null
+    if (!res.ok) throw new NetworkError(`fetch ${url} -> HTTP ${res.status}`)
+    return await res.json()
+  } catch (err) {
+    if (err instanceof NetworkError) throw err
+    throw new NetworkError(`fetch/parse ${url} failed: ${err instanceof Error ? err.message : err}`)
+  }
 }
 
 /** Collect the set of property names a JSON-schema object node declares. */
@@ -267,6 +284,13 @@ async function main() {
     await checkLockSchema()
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err)
+    // Only network/fetch errors are tolerated in advisory mode. A local error
+    // (bad JSON in committed files, fs failure, programmer bug) is a real
+    // breakage and must fail even on PR — never masked as "couldn't reach catalog".
+    if (!(err instanceof NetworkError)) {
+      console.error(`contract-check: local error (not a network issue): ${msg}`)
+      process.exit(1)
+    }
     if (STRICT) {
       console.error(`contract-check: network/fetch error under STRICT mode: ${msg}`)
       process.exit(1)

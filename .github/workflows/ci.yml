@@ -101,7 +101,10 @@ jobs:
           BASE_REF: ${{ github.event.pull_request.base.ref }}
         run: |
           set -euo pipefail
-          git fetch --no-tags --depth=100 origin "$BASE_REF"
+          # checkout uses fetch-depth: 0, so fetch the base ref unshallowed —
+          # a depth cap could truncate history before the merge-base on long
+          # branches and make the range incomplete.
+          git fetch --no-tags origin "$BASE_REF"
           RANGE="origin/$BASE_REF..HEAD"
 
           # Any commit whose subject starts with `fix:` or `fix(`...
