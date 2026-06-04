@@ -20,23 +20,15 @@ import { scanProject } from '../../scanner/scan-project.js'
 import { mapWithConcurrency, readJson, readText, writeText } from '../../utils/fs.js'
 import { error, log } from '../../utils/logger.js'
 
+import { parseWorkspaceConfig, type RepoEntry, type WorkspaceConfig } from './config.js'
+
+export type { RepoEntry, WorkspaceConfig } from './config.js'
+
 export type DiscoveredRepo = {
   name: string
   /** Path relative to the workspace root, posix-separated (derived from fast-glob / path.posix). */
   path: string
   role: string
-}
-
-export type RepoEntry = {
-  name: string
-  path: string
-  role?: string
-}
-
-export type WorkspaceConfig = {
-  client: string
-  repos: RepoEntry[]
-  relationships: unknown[]
 }
 
 export type DiscoverOptions = {
@@ -123,17 +115,6 @@ export async function discoverRepos(
   })
 }
 
-function parseWorkspaceYaml(text: string | undefined): WorkspaceConfig | undefined {
-  if (!text) return undefined
-  const parsed = YAML.parse(text) as Partial<WorkspaceConfig> | null
-  if (!parsed || typeof parsed !== 'object') return undefined
-  return {
-    client: typeof parsed.client === 'string' ? parsed.client : 'unknown',
-    repos: Array.isArray(parsed.repos) ? parsed.repos : [],
-    relationships: Array.isArray(parsed.relationships) ? parsed.relationships : [],
-  }
-}
-
 /**
  * Merge discovered repos into an existing config by `path`.
  *
@@ -192,7 +173,18 @@ export async function runDiscover(
   opts: DiscoverOptions = {},
 ): Promise<void> {
   const yamlPath = path.join(workspaceRoot, 'haus.workspace.yaml')
-  const existing = parseWorkspaceYaml(await readText(yamlPath))
+  const existingText = await readText(yamlPath)
+  const existing = parseWorkspaceConfig(existingText)
+  // A present-but-unparseable yaml would be silently treated as "no existing config"
+  // and clobbered on --write, dropping the user's client/relationships/edits. Refuse
+  // rather than overwrite — the user must fix or remove the file first.
+  if (existingText && !existing) {
+    error(
+      'Existing haus.workspace.yaml is malformed — fix or remove it before running discover (refusing to overwrite).',
+    )
+    process.exitCode = 1
+    return
+  }
   const discovered = await discoverRepos(workspaceRoot, opts.maxDepth ?? DEFAULT_MAX_DEPTH)
   if (discovered.length === 0) {
     error('No repos discovered under the workspace root.')

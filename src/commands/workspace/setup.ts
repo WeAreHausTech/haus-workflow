@@ -17,24 +17,23 @@
 import { existsSync, statSync } from 'node:fs'
 import path from 'node:path'
 
-import YAML from 'yaml'
-
 import { writeWorkspaceClaudeMd } from '../../claude/write-workspace-claude-md.js'
 import { readContextOrScan } from '../../scanner/read-context.js'
 import type { ContextMap } from '../../types.js'
+import { checkLock } from '../../update/lockfile.js'
 import { readText } from '../../utils/fs.js'
-import { error, log } from '../../utils/logger.js'
+import { error, log, warn } from '../../utils/logger.js'
 import { runSetupCore } from '../setup-core.js'
 
 import { writeWorkspaceArtifacts, type WorkspaceRepoInput } from './aggregate.js'
-
-type RepoEntry = { name: string; path: string; role?: string }
-
-type WorkspaceYaml = {
-  client: string
-  repos: RepoEntry[]
-  relationships: unknown[]
-}
+import { parseWorkspaceConfig, WORKSPACE_FILE } from './config.js'
+import {
+  buildManifest,
+  manifestPath,
+  readManifest,
+  writeWorkspaceManifest,
+  type ManifestRepoInput,
+} from './manifest.js'
 
 export type WorkspaceSetupOptions = {
   mode?: 'guided' | 'fast'
@@ -62,8 +61,6 @@ export type WorkspaceSetupResult = {
   written: string[]
 }
 
-const WORKSPACE_FILE = 'haus.workspace.yaml'
-
 /**
  * Resolve the workspace root by walking up from `start` until a directory
  * containing `haus.workspace.yaml` is found. Falls back to `start` when none is
@@ -76,33 +73,6 @@ export function resolveWorkspaceRoot(start: string = process.cwd()): string {
     const parent = path.dirname(dir)
     if (parent === dir) return path.resolve(start)
     dir = parent
-  }
-}
-
-function parseWorkspaceYaml(text: string): WorkspaceYaml | undefined {
-  let parsed: unknown
-  try {
-    parsed = YAML.parse(text)
-  } catch {
-    // Malformed yaml — surface a friendly error upstream instead of a stack trace.
-    return undefined
-  }
-  if (!parsed || typeof parsed !== 'object') return undefined
-  const obj = parsed as Partial<WorkspaceYaml>
-  // Validate repo entries up front so a bad shape can't crash `path.resolve` later.
-  const repos = Array.isArray(obj.repos)
-    ? (obj.repos as unknown[]).filter(
-        (r): r is RepoEntry =>
-          typeof r === 'object' &&
-          r !== null &&
-          typeof (r as RepoEntry).name === 'string' &&
-          typeof (r as RepoEntry).path === 'string',
-      )
-    : []
-  return {
-    client: typeof obj.client === 'string' ? obj.client : 'unknown',
-    repos,
-    relationships: Array.isArray(obj.relationships) ? obj.relationships : [],
   }
 }
 
@@ -129,7 +99,7 @@ export async function runWorkspaceSetup(
     process.exitCode = 1
     return { workspaceRoot, statuses: [], written: [] }
   }
-  const config = parseWorkspaceYaml(configText)
+  const config = parseWorkspaceConfig(configText)
   if (!config || config.repos.length === 0) {
     error(`No repos configured in ${WORKSPACE_FILE}.`)
     process.exitCode = 1
@@ -209,6 +179,78 @@ export async function runWorkspaceSetup(
       dryRun: options.dryRun,
     })
     written.push(docPath)
+  }
+
+  // Workspace manifest — derived/advisory record of per-repo setup state. Written
+  // on --write (not dryRun). Records each processed repo's outcome; failures land
+  // here only under --continue-on-error (fail-fast throws before this block). Repos
+  // skipped this run (e.g. `--only`) carry forward their prior entry, else `pending`.
+  if (apply && !options.dryRun) {
+    const statusByName = new Map(statuses.map((s) => [s.name, s]))
+    const prior = await readManifest(workspaceRoot)
+    // A present-but-unreadable manifest would silently drop prior per-repo state for
+    // repos skipped this run (e.g. `--only`), downgrading them to `pending`. Surface
+    // it so the lost history is visible rather than quietly discarded.
+    if (!prior && existsSync(manifestPath(workspaceRoot))) {
+      warn(
+        'Existing workspace.manifest.json is unreadable — prior per-repo state will not be carried forward.',
+      )
+    }
+    const priorByName = new Map((prior?.repos ?? []).map((r) => [r.name, r]))
+    const manifestRepos: ManifestRepoInput[] = []
+    for (const repo of config.repos) {
+      const status = statusByName.get(repo.name)
+      const role = repo.role ?? status?.roles?.[0] ?? 'auto'
+      if (status?.status === 'ok') {
+        const lock = await checkLock(path.resolve(workspaceRoot, repo.path))
+        manifestRepos.push({
+          name: repo.name,
+          path: repo.path,
+          role,
+          status: 'ok',
+          lockItemCount: lock.count,
+          catalogRef: lock.catalogRef,
+        })
+      } else if (status?.status === 'failed') {
+        manifestRepos.push({
+          name: repo.name,
+          path: repo.path,
+          role,
+          status: 'failed',
+          lockItemCount: 0,
+          catalogRef: null,
+          error: status.error,
+        })
+      } else {
+        // Not processed this run — preserve the prior entry verbatim, else pending.
+        const carried = priorByName.get(repo.name)
+        manifestRepos.push(
+          carried
+            ? {
+                name: carried.name,
+                path: carried.path,
+                role: carried.role,
+                status: carried.status,
+                lockItemCount: carried.lockItemCount,
+                catalogRef: carried.catalogRef,
+                lastSetupAt: carried.lastSetupAt,
+                hausVersionAtSetup: carried.hausVersionAtSetup,
+                ...(carried.error ? { error: carried.error } : {}),
+              }
+            : {
+                name: repo.name,
+                path: repo.path,
+                role,
+                status: 'pending',
+                lockItemCount: 0,
+                catalogRef: null,
+              },
+        )
+      }
+    }
+    const manifest = buildManifest({ client: config.client, repos: manifestRepos })
+    const manifestFile = await writeWorkspaceManifest(workspaceRoot, manifest)
+    written.push(manifestFile)
   }
 
   const ok = statuses.filter((s) => s.status === 'ok').length

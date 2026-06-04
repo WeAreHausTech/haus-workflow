@@ -181,6 +181,28 @@ test('runDiscover --write persists yaml and merges with an existing edited file'
   assert.ok(text.includes('from: frontend'), 'relationships carried through')
 })
 
+test('runDiscover refuses to overwrite a malformed existing yaml', async () => {
+  const ws = makeWorkspace()
+  const malformed = 'client: acme\nrepos: [ broken: , : \n  -\n'
+  writeFileSync(path.join(ws, 'haus.workspace.yaml'), malformed)
+  const prev = process.exitCode
+  process.exitCode = 0
+  const origErr = console.error
+  console.error = () => {}
+  try {
+    await runDiscover(ws, { write: true })
+    assert.equal(process.exitCode, 1, 'malformed existing yaml sets non-zero exit')
+    assert.equal(
+      readFileSync(path.join(ws, 'haus.workspace.yaml'), 'utf8'),
+      malformed,
+      'malformed yaml left untouched (not clobbered)',
+    )
+  } finally {
+    console.error = origErr
+    process.exitCode = prev
+  }
+})
+
 test('runDiscover without --write does not persist yaml', async () => {
   const ws = makeWorkspace()
   await runDiscover(ws, {})
