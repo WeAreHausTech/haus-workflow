@@ -49,6 +49,15 @@ jobs:
       - name: Test
         run: yarn test
 
+      # Coverage (non-blocking visibility — gate flips to blocking in Phase 5).
+      - name: Coverage
+        continue-on-error: true
+        run: yarn test:coverage
+
+      - name: Coverage ratchet
+        continue-on-error: true
+        run: node scripts/coverage-ratchet.mjs
+
       - name: CLI smoke checks
         run: |
           TMP_DIR="$(mktemp -d)"
