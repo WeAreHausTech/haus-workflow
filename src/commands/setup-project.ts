@@ -1,14 +1,10 @@
 /** `haus setup-project` — interactive or fast full setup: scan, recommend, and optionally apply Claude files. */
-import { flattenRecommendedHooks, loadClaudeHooksSettings } from '../claude/load-hooks.js'
-import { verifyProjectSettingsHooksContract } from '../claude/verify-hooks-contract.js'
-import { writeClaudeFiles } from '../claude/write-claude-files.js'
-import { recommend } from '../recommender/recommend.js'
-import { readContextOrScan } from '../scanner/read-context.js'
-import { scanProject } from '../scanner/scan-project.js'
 import { readJson, writeJson } from '../utils/fs.js'
 import { log } from '../utils/logger.js'
-import { displayPath, hausPath } from '../utils/paths.js'
+import { hausPath } from '../utils/paths.js'
 import { ask, confirm } from '../utils/prompts.js'
+
+import { runSetupCore } from './setup-core.js'
 
 const GUIDED_QUESTIONS = [
   'What is this project for?',
@@ -62,70 +58,13 @@ export async function runSetupProject(options: {
     await writeJson(hausPath(root, 'setup-answers.json'), merged)
   }
 
-  // Scan
-  const scanResult = await scanProject(root, mode)
-  if (options.json) {
-    log(JSON.stringify(scanResult, null, 2))
-  } else {
-    log('Haus scan complete')
-    log(`Roles: ${scanResult.repoRoles.join(', ') || 'unknown'}`)
-    log(`Package manager: ${scanResult.packageManager}`)
-  }
-
-  // Recommend
-  const context = await readContextOrScan(root)
-  const recommendation = await recommend(root, context)
-  await writeJson(hausPath(root, 'recommendation.json'), recommendation)
-  const hookSettings = await loadClaudeHooksSettings()
-  await writeJson(hausPath(root, 'recommended-hooks.json'), flattenRecommendedHooks(hookSettings))
-  await writeJson(hausPath(root, 'recommended-rules.json'), [
-    { id: 'haus.rule.context-minimal', enabled: true },
-    { id: 'haus.rule.security', enabled: true },
-  ])
-  if (options.json) {
-    log(JSON.stringify(recommendation, null, 2))
-  } else {
-    log('Haus recommendation ready')
-    log(`Recommended: ${recommendation.recommended.length}`)
-    log(`Skipped: ${recommendation.skipped.length}`)
-  }
-
-  // Doctor summary
-  const hooks = await verifyProjectSettingsHooksContract(root)
-  const warningLines = [...new Set([...context.warnings, ...(recommendation.warnings ?? [])])]
-  log(`Repo: ${context.repoName}`)
-  for (const warning of warningLines) log(`- WARN: ${warning}`)
-  if (hooks.skipped) {
-    log(`- HOOKS: (skipped) ${hooks.message}`)
-  } else if (!hooks.ok) {
-    log(`- HOOKS FAIL: ${hooks.message}`)
-    process.exitCode = 1
-  } else {
-    log(`- HOOKS OK: ${hooks.message}`)
-  }
-
-  if (options.json) return
-
-  const approved = await confirm('Approve and write Claude files now?')
-  if (!approved) {
-    log('Setup reviewed. No files written.')
-    log('Next step: run `haus apply --write` when ready.')
-    return
-  }
-
-  // Apply
-  const files = await writeClaudeFiles(root, false)
-  log('Applied files:')
-  files.forEach((f) => log(`- ${displayPath(root, f)}`))
-
-  // Post-apply doctor check
-  const hooksAfter = await verifyProjectSettingsHooksContract(root)
-  if (hooksAfter.skipped) {
-    log(`- HOOKS: (skipped) ${hooksAfter.message}`)
-  } else if (!hooksAfter.ok) {
-    log(`- HOOKS FAIL: ${hooksAfter.message}`)
-    process.exitCode = 1
-  } else {
-    log(`- HOOKS OK: ${hooksAfter.message}`)
-  }
+  // In --json mode preview only (apply:false). Interactive modes apply after a
+  // confirm() gate run inside the core, after the scan/recommend/doctor summary.
+  await runSetupCore(root, {
+    mode,
+    json: options.json,
+    apply: !options.json,
+    dryRun: false,
+    confirm: () => confirm('Approve and write Claude files now?'),
+  })
 }
