@@ -22,11 +22,18 @@ import YAML from 'yaml'
 import { writeWorkspaceClaudeMd } from '../../claude/write-workspace-claude-md.js'
 import { readContextOrScan } from '../../scanner/read-context.js'
 import type { ContextMap } from '../../types.js'
+import { checkLock } from '../../update/lockfile.js'
 import { readText } from '../../utils/fs.js'
 import { error, log } from '../../utils/logger.js'
 import { runSetupCore } from '../setup-core.js'
 
 import { writeWorkspaceArtifacts, type WorkspaceRepoInput } from './aggregate.js'
+import {
+  buildManifest,
+  readManifest,
+  writeWorkspaceManifest,
+  type ManifestRepoInput,
+} from './manifest.js'
 
 type RepoEntry = { name: string; path: string; role?: string }
 
@@ -209,6 +216,69 @@ export async function runWorkspaceSetup(
       dryRun: options.dryRun,
     })
     written.push(docPath)
+  }
+
+  // Workspace manifest — derived/advisory record of per-repo setup state. Written
+  // on --write (not dryRun) and records every outcome, including failures. Repos
+  // skipped this run (e.g. `--only`) carry forward their prior entry, else `pending`.
+  if (apply && !options.dryRun) {
+    const statusByName = new Map(statuses.map((s) => [s.name, s]))
+    const prior = await readManifest(workspaceRoot)
+    const priorByName = new Map((prior?.repos ?? []).map((r) => [r.name, r]))
+    const manifestRepos: ManifestRepoInput[] = []
+    for (const repo of config.repos) {
+      const status = statusByName.get(repo.name)
+      const role = repo.role ?? status?.roles?.[0] ?? 'auto'
+      if (status?.status === 'ok') {
+        const lock = await checkLock(path.resolve(workspaceRoot, repo.path))
+        manifestRepos.push({
+          name: repo.name,
+          path: repo.path,
+          role,
+          status: 'ok',
+          lockItemCount: lock.count,
+          catalogRef: lock.catalogRef,
+        })
+      } else if (status?.status === 'failed') {
+        manifestRepos.push({
+          name: repo.name,
+          path: repo.path,
+          role,
+          status: 'failed',
+          lockItemCount: 0,
+          catalogRef: null,
+          error: status.error,
+        })
+      } else {
+        // Not processed this run — preserve the prior entry verbatim, else pending.
+        const carried = priorByName.get(repo.name)
+        manifestRepos.push(
+          carried
+            ? {
+                name: carried.name,
+                path: carried.path,
+                role: carried.role,
+                status: carried.status,
+                lockItemCount: carried.lockItemCount,
+                catalogRef: carried.catalogRef,
+                lastSetupAt: carried.lastSetupAt,
+                hausVersionAtSetup: carried.hausVersionAtSetup,
+                ...(carried.error ? { error: carried.error } : {}),
+              }
+            : {
+                name: repo.name,
+                path: repo.path,
+                role,
+                status: 'pending',
+                lockItemCount: 0,
+                catalogRef: null,
+              },
+        )
+      }
+    }
+    const manifest = buildManifest({ client: config.client, repos: manifestRepos })
+    const manifestFile = await writeWorkspaceManifest(workspaceRoot, manifest)
+    written.push(manifestFile)
   }
 
   const ok = statuses.filter((s) => s.status === 'ok').length
