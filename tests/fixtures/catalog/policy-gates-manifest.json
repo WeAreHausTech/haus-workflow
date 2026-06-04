@@ -1,0 +1,120 @@
+{
+  "version": "0.1.0",
+  "_note": "Policy gates test fixture. One item per gate exercised by recommend-eligibility.test.js.",
+  "items": [
+    {
+      "id": "test.unsupported-python",
+      "source": "haus",
+      "type": "skill",
+      "path": "skills/test.unsupported-python",
+      "title": "Test: Unsupported Python",
+      "purpose": "Triggers UNSUPPORTED gate (python in tags).",
+      "tags": ["python", "backend"],
+      "repoRoles": [],
+      "default": false,
+      "tokenEstimate": 100
+    },
+    {
+      "id": "test.curated-not-approved",
+      "source": "curated",
+      "type": "skill",
+      "path": "skills/test.curated-not-approved",
+      "title": "Test: Curated Not Approved",
+      "purpose": "Triggers curated-not-approved gate (reviewStatus:candidate).",
+      "tags": ["frontend"],
+      "repoRoles": [],
+      "reviewStatus": "candidate",
+      "default": false,
+      "tokenEstimate": 100
+    },
+    {
+      "id": "test.curated-risk-blocked",
+      "source": "curated",
+      "type": "skill",
+      "path": "skills/test.curated-risk-blocked",
+      "title": "Test: Curated Risk Blocked",
+      "purpose": "Triggers curated-risk-blocked gate (reviewStatus:approved but riskLevel:blocked).",
+      "tags": ["frontend"],
+      "repoRoles": [],
+      "reviewStatus": "approved",
+      "riskLevel": "blocked",
+      "default": false,
+      "tokenEstimate": 100
+    },
+    {
+      "id": "test.env-management",
+      "source": "haus",
+      "type": "skill",
+      "path": "skills/test.env-management",
+      "title": "Test: Sensitive Secrets Item",
+      "purpose": "Triggers sensitive-policy gate (secrets in tags, matched by SENSITIVE_ITEM_KEYWORDS).",
+      "tags": ["secrets", "workflow"],
+      "repoRoles": [],
+      "default": false,
+      "tokenEstimate": 100
+    },
+    {
+      "id": "test.third-party-unapproved",
+      "source": "third-party-plugin",
+      "type": "skill",
+      "path": "skills/test.third-party-unapproved",
+      "title": "Test: Third-Party Unapproved",
+      "purpose": "Triggers source-approval gate (non-haus, non-curated, not in sources-report.json).",
+      "tags": ["typescript"],
+      "repoRoles": [],
+      "default": false,
+      "tokenEstimate": 100
+    },
+    {
+      "id": "test.requires-svelte",
+      "source": "haus",
+      "type": "skill",
+      "path": "skills/test.requires-svelte",
+      "title": "Test: Requires Svelte",
+      "purpose": "Triggers requiresAny unsatisfied gate when svelte not in context.",
+      "tags": ["svelte"],
+      "repoRoles": [],
+      "requiresAny": [{ "dependency": "svelte" }],
+      "default": false,
+      "tokenEstimate": 100
+    },
+    {
+      "id": "test.default-baseline",
+      "source": "haus",
+      "type": "skill",
+      "path": "skills/test.default-baseline",
+      "title": "Test: Default Baseline",
+      "purpose": "Passes all gates because default:true. Used to verify tokenEstimate is preserved.",
+      "tags": ["workflow"],
+      "repoRoles": [],
+      "default": true,
+      "tokenEstimate": 999
+    },
+    {
+      "id": "test.role-matched",
+      "source": "haus",
+      "type": "skill",
+      "path": "skills/test.role-matched",
+      "title": "Test: Role Matched",
+      "purpose": "Recommended when context has nextjs stack. Tests positive matching path.",
+      "tags": ["nextjs", "frontend"],
+      "repoRoles": ["next-app"],
+      "requiresAny": [{ "stack": "nextjs" }],
+      "default": false,
+      "tokenEstimate": 100
+    },
+    {
+      "id": "haus.nx21-monorepo-patterns",
+      "source": "haus",
+      "type": "skill",
+      "path": "skills/haus.nx21-monorepo-patterns",
+      "title": "Haus Nx 21 Monorepo Patterns",
+      "purpose": "Triggers required-role-missing gate when nx-monorepo role is absent. Hardcoded check in recommend().",
+      "tags": ["nx", "monorepo"],
+      "repoRoles": ["nx-monorepo"],
+      "requiresAny": [{ "stack": "nx" }],
+      "default": false,
+      "tokenEstimate": 100
+    }
+  ]
+}
