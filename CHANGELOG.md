@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.13.2](https://github.com/WeAreHausTech/haus-workflow/compare/v0.13.1...v0.13.2) (2026-06-04)
+
+### Bug Fixes
+
+- catalog-audit drift + scanner EMFILE (TDD) ([#65](https://github.com/WeAreHausTech/haus-workflow/issues/65)) ([815ad79](https://github.com/WeAreHausTech/haus-workflow/commit/815ad798b5c28b98f53a8b8fc62c4e8decf9350e))
+
 ## [0.13.1](https://github.com/WeAreHausTech/haus-workflow/compare/v0.13.0...v0.13.1) (2026-06-03)
 
 ### Bug Fixes
