@@ -56,13 +56,25 @@ function makeWorkspace() {
   return ws
 }
 
+// runSetupCore + writeClaudeFiles emit large diff/file-list output. node:test
+// forwards each test's stdout to the reporter over a V8-serialized worker pipe;
+// a large stdout burst can be split mid-message and crash the worker with
+// "Unable to deserialize cloned data" (Linux pipe buffering only — never macOS).
+// Muting console during these in-process runs keeps the IPC payload small.
 function withExitCode(fn) {
   return async () => {
     const prev = process.exitCode
     process.exitCode = 0
+    const orig = { log: console.log, warn: console.warn, error: console.error }
+    console.log = () => {}
+    console.warn = () => {}
+    console.error = () => {}
     try {
       await fn()
     } finally {
+      console.log = orig.log
+      console.warn = orig.warn
+      console.error = orig.error
       process.exitCode = prev
     }
   }
