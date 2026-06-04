@@ -1,0 +1,16 @@
+{
+  "include": ["src/**"],
+  "exclude": ["tests/**", "dist/**", "scripts/**", "**/*.d.ts", "src/cli.ts"],
+  "all": true,
+  "reporter": ["text-summary", "lcov", "json-summary"],
+  "report-dir": "coverage",
+  "check-coverage": false,
+  "lines": 54,
+  "functions": 54,
+  "branches": 54,
+  "statements": 54,
+  "ratchet": {
+    "hotPathLineFloor": 85,
+    "hotPathGlobs": ["src/recommender/", "src/catalog/", "src/scanner/", "src/update/lockfile.ts"]
+  }
+}
