@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.14.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.13.2...v0.14.0) (2026-06-04)
+
+### Features
+
+- **workspace:** add repo auto-discovery ([#70](https://github.com/WeAreHausTech/haus-workflow/issues/70)) ([4b57571](https://github.com/WeAreHausTech/haus-workflow/commit/4b57571a32ef733dda0faf474d593b7fbb297a8e))
+- **workspace:** extract shared setup core for workspace configuration ([#68](https://github.com/WeAreHausTech/haus-workflow/issues/68)) ([5e9b1ea](https://github.com/WeAreHausTech/haus-workflow/commit/5e9b1eaf72e8c7a32ec28148611f778367e4f1ef))
+- **workspace:** manifest + drift doctor + command wiring (Tasks 4–5) ([#72](https://github.com/WeAreHausTech/haus-workflow/issues/72)) ([4526005](https://github.com/WeAreHausTech/haus-workflow/commit/4526005e693cc2f254ee6c1c5991a92f356506cc))
+- **workspace:** per-repo setup loop + workspace aggregate layer ([#71](https://github.com/WeAreHausTech/haus-workflow/issues/71)) ([5c7ae9d](https://github.com/WeAreHausTech/haus-workflow/commit/5c7ae9d5691b0bd262c3449bad2fe649fd0271bf))
+
 ## [0.13.2](https://github.com/WeAreHausTech/haus-workflow/compare/v0.13.1...v0.13.2) (2026-06-04)
 
 ### Bug Fixes
