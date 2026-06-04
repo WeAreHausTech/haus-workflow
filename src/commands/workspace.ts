@@ -1,80 +1,146 @@
-/** `haus workspace` — initializes or scans a multi-repo workspace, writing cross-repo summaries and dependency maps. */
+/**
+ * `haus workspace` — multi-repo workspace dispatcher.
+ *
+ * Thin command layer: resolves the workspace root (the dir holding
+ * `haus.workspace.yaml`) and delegates to the focused modules under
+ * `src/commands/workspace/`:
+ *
+ * - `init`     — scaffold a minimal `haus.workspace.yaml`.
+ * - `discover` — auto-find member repos and write/merge the yaml.
+ * - `scan`     — aggregate cross-repo summary (no per-repo setup).
+ * - `setup`    — per-repo setup loop + workspace layer + manifest.
+ * - `doctor`   — workspace drift report.
+ */
 import path from 'node:path'
 
 import YAML from 'yaml'
 
 import { scanProject } from '../scanner/scan-project.js'
-import { readText, writeJson, writeText } from '../utils/fs.js'
+import { readText, writeText } from '../utils/fs.js'
 import { error, log } from '../utils/logger.js'
 
+import { writeWorkspaceArtifacts, type WorkspaceRepoInput } from './workspace/aggregate.js'
+import { runDiscover } from './workspace/discover.js'
+import { runWorkspaceDoctor } from './workspace/doctor.js'
+import { resolveWorkspaceRoot, runWorkspaceSetup } from './workspace/setup.js'
+
+export type WorkspaceAction = 'init' | 'discover' | 'scan' | 'setup' | 'doctor'
+
+/** Raw flags from commander (camelCased); normalized per-action before delegating. */
+export type WorkspaceOptions = {
+  write?: boolean
+  dryRun?: boolean
+  json?: boolean
+  fast?: boolean
+  guided?: boolean
+  continueOnError?: boolean
+  only?: string | string[]
+  maxDepth?: string | number
+  client?: string
+}
+
+const WORKSPACE_FILE = 'haus.workspace.yaml'
+
+/** Normalize a comma-or-space separated `--only` value into a name list. */
+function normalizeOnly(only: WorkspaceOptions['only']): string[] | undefined {
+  if (!only) return undefined
+  const list = Array.isArray(only) ? only : only.split(/[\s,]+/)
+  const cleaned = list.map((s) => s.trim()).filter(Boolean)
+  return cleaned.length > 0 ? cleaned : undefined
+}
+
+function normalizeMaxDepth(maxDepth: WorkspaceOptions['maxDepth']): number | undefined {
+  if (maxDepth === undefined) return undefined
+  const n = typeof maxDepth === 'number' ? maxDepth : Number.parseInt(maxDepth, 10)
+  return Number.isFinite(n) && n > 0 ? Math.floor(n) : undefined
+}
+
+/** Scaffold a minimal workspace yaml in the current directory. */
+async function initWorkspace(): Promise<void> {
+  await writeText(
+    WORKSPACE_FILE,
+    `client: unknown\nrepos:\n  - name: current\n    path: .\n    role: auto\nrelationships: []\n`,
+  )
+  log('Workspace initialized.')
+}
+
 /**
- * Initializes (creates haus.workspace.yaml) or scans a multi-repo workspace.
- * Scan writes workspace-summary.json, cross-repo-summary.md, and dependency-ownership-map.json.
+ * Aggregate cross-repo summary from a `fast` scan of each member repo (no per-repo
+ * setup). Shares `writeWorkspaceArtifacts` with the setup loop so artifacts match.
  */
-export async function runWorkspace(action: 'init' | 'scan'): Promise<void> {
-  if (action === 'init') {
-    await writeText(
-      'haus.workspace.yaml',
-      `client: unknown\nrepos:\n  - name: current\n    path: .\n    role: auto\nrelationships: []\n`,
-    )
-    log('Workspace initialized.')
-    return
-  }
-  const configText = await readText('haus.workspace.yaml')
+async function scanWorkspace(workspaceRoot: string, opts: { json?: boolean }): Promise<void> {
+  const configText = await readText(path.join(workspaceRoot, WORKSPACE_FILE))
   if (!configText) {
-    error('Missing haus.workspace.yaml. Run `haus workspace init` first.')
+    error(`Missing ${WORKSPACE_FILE}. Run \`haus workspace discover\` or \`init\` first.`)
     process.exitCode = 1
     return
   }
   const config = YAML.parse(configText) as {
     repos?: Array<{ name: string; path: string; role?: string }>
+    relationships?: unknown[]
   }
   const repos = config.repos ?? []
   if (repos.length === 0) {
-    error('No repos configured in haus.workspace.yaml.')
+    error(`No repos configured in ${WORKSPACE_FILE}.`)
     process.exitCode = 1
     return
   }
 
-  const summaries: Array<{
-    name: string
-    path: string
-    roles: string[]
-    packageManager: string
-    deps: string[]
-  }> = []
-  const ownership: Record<string, string[]> = {}
+  const inputs: WorkspaceRepoInput[] = []
   for (const repo of repos) {
-    const repoRoot = path.resolve(process.cwd(), repo.path)
+    const repoRoot = path.resolve(workspaceRoot, repo.path)
     const result = await scanProject(repoRoot, 'fast')
-    summaries.push({
-      name: repo.name,
-      path: repo.path,
-      roles: result.repoRoles,
-      packageManager: result.packageManager,
-      deps: result.dependencies,
-    })
-    for (const dep of result.dependencies) {
-      ownership[dep] ??= []
-      ownership[dep].push(repo.name)
-    }
+    inputs.push({ name: repo.name, path: repo.path, context: result })
+  }
+  const written = await writeWorkspaceArtifacts(workspaceRoot, inputs, config.relationships ?? [])
+  if (opts.json) {
+    log(JSON.stringify({ written }, null, 2))
+  } else {
+    log(`Workspace scan complete. Wrote ${written.length} artifact(s) under .haus-workflow/.`)
+  }
+}
+
+/**
+ * Dispatch a workspace subcommand.
+ *
+ * @param action - The workspace subcommand to run.
+ * @param options - Raw commander flags (normalized per action).
+ */
+export async function runWorkspace(
+  action: WorkspaceAction,
+  options: WorkspaceOptions = {},
+): Promise<void> {
+  if (action === 'init') {
+    await initWorkspace()
+    return
   }
 
-  await writeJson('.haus-workflow/workspace-summary.json', {
-    generatedAt: new Date().toISOString(),
-    repos: summaries,
-  })
-  await writeJson('.haus-workflow/dependency-ownership-map.json', ownership)
-  await writeText(
-    '.haus-workflow/cross-repo-summary.md',
-    `# Cross Repo Summary\n\n${summaries
-      .map(
-        (repo) =>
-          `- ${repo.name} (${repo.path}) roles: ${repo.roles.join(', ') || 'unknown'}; package manager: ${repo.packageManager}`,
-      )
-      .join('\n')}\n`,
-  )
-  log(
-    'Workspace scan complete. Wrote .haus-workflow/workspace-summary.json, cross-repo-summary.md, dependency-ownership-map.json',
-  )
+  const workspaceRoot = resolveWorkspaceRoot()
+
+  switch (action) {
+    case 'discover':
+      await runDiscover(workspaceRoot, {
+        write: options.write,
+        json: options.json,
+        maxDepth: normalizeMaxDepth(options.maxDepth),
+        client: options.client,
+      })
+      return
+    case 'scan':
+      await scanWorkspace(workspaceRoot, { json: options.json })
+      return
+    case 'setup':
+      await runWorkspaceSetup(workspaceRoot, {
+        mode: options.guided ? 'guided' : 'fast',
+        write: options.write,
+        dryRun: options.dryRun,
+        json: options.json,
+        continueOnError: options.continueOnError,
+        only: normalizeOnly(options.only),
+      })
+      return
+    case 'doctor':
+      await runWorkspaceDoctor(workspaceRoot, { json: options.json })
+      return
+  }
 }

@@ -131,7 +131,35 @@ config
 
 const workspace = program.command('workspace')
 workspace.command('init').action(() => runWorkspace('init'))
-workspace.command('scan').action(() => runWorkspace('scan'))
+workspace
+  .command('discover')
+  .description('Auto-find member repos and write/merge haus.workspace.yaml')
+  .option('--write', 'Persist haus.workspace.yaml (default previews only)')
+  .option('--json')
+  .option('--max-depth <n>', 'Max directory depth to traverse (default 3)')
+  .option('--client <name>', 'Set the workspace client name')
+  .action((opts) => runWorkspace('discover', opts))
+workspace
+  .command('scan')
+  .description('Aggregate a cross-repo summary from a fast scan of each repo')
+  .option('--json')
+  .action((opts) => runWorkspace('scan', opts))
+workspace
+  .command('setup')
+  .description('Per-repo setup loop + workspace layer + manifest')
+  .option('--write', 'Apply changes (default previews only)')
+  .option('--dry-run')
+  .option('--json')
+  .option('--fast')
+  .option('--guided')
+  .option('--continue-on-error', 'Keep going past a failed repo (default fail-fast)')
+  .option('--only <names>', 'Restrict to comma-separated repo names')
+  .action((opts) => runWorkspace('setup', opts))
+workspace
+  .command('doctor')
+  .description('Report workspace drift against the manifest')
+  .option('--json')
+  .action((opts) => runWorkspace('doctor', opts))
 
 program.parseAsync(process.argv).catch((err: unknown) => {
   const message = err instanceof Error ? err.message : String(err)
