@@ -14,7 +14,7 @@
  * - **Fail-fast by default**, `--continue-on-error` for resilient mode; every
  *   outcome is recorded in the returned statuses.
  */
-import { existsSync } from 'node:fs'
+import { existsSync, statSync } from 'node:fs'
 import path from 'node:path'
 
 import YAML from 'yaml'
@@ -146,6 +146,13 @@ export async function runWorkspaceSetup(
     const repoRoot = path.resolve(workspaceRoot, repo.path)
     log(`\n→ ${repo.name} (${repo.path})`)
     try {
+      // Guard a misconfigured path (missing dir, or a file) before the scan
+      // pipeline: handing a non-directory to fast-glob's cwd throws ENOTDIR on
+      // Linux and surfaces as an unhandled rejection. A clean pre-check keeps the
+      // failure recoverable (caught below) and consistent across platforms.
+      if (!existsSync(repoRoot) || !statSync(repoRoot).isDirectory()) {
+        throw new Error(`Repo path is not a directory: ${repo.path}`)
+      }
       const res = await runSetupCore(repoRoot, {
         mode,
         json: options.json,
