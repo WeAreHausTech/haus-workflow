@@ -41,3 +41,19 @@ describe('guardFileAccess', () => {
     assert.match(msg, /config\/app\.pem/)
   })
 })
+
+// Regression: d562199 — guard reason strings must not contain backticks so
+// the JSON permissionDecisionReason field renders safely as Markdown in the UI.
+describe('guard reason strings contain no backticks', () => {
+  it('guardBash reason has no backticks', () => {
+    const msg = guardBash('rm -rf /important')
+    assert.ok(msg, 'expected a block message')
+    assert.equal(msg.includes('`'), false, 'guard reason must not contain backticks')
+  })
+
+  it('guardFileAccess reason has no backticks', () => {
+    const msg = guardFileAccess('.env')
+    assert.ok(msg, 'expected a block message')
+    assert.equal(msg.includes('`'), false, 'guard reason must not contain backticks')
+  })
+})
