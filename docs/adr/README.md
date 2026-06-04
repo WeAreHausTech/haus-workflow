@@ -9,3 +9,4 @@ supersedes it. See `.claude/WORKFLOW.md` → "Architecture Decision Records".
 | [0002](0002-binary-eligibility-recommender.md) | Recommender uses binary eligibility (supersedes weighted scoring)  | Accepted |
 | [0003](0003-documentation-owned-by-skill.md)   | Project documentation owned by the writing-documentation skill     | Accepted |
 | [0004](0004-deep-context-feedback-loop.md)     | Deep comprehension feeds asset selection via deep-context.json     | Accepted |
+| [0005](0005-cross-repo-contract-testing.md)    | Cross-repo contract testing between the CLI and the catalog        | Accepted |

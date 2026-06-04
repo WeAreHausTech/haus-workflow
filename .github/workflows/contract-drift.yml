@@ -1,0 +1,42 @@
+name: Contract drift
+
+# Cross-repo contract drift check. The catalog repo
+# (WeAreHausTech/haus-workflow-catalog) is the source of truth for
+# validation-rules.json, manifest/catalog-item schemas, and haus-lock schema;
+# this CLI consumes SYNCED copies. scripts/contract-check.mjs fetches the LIVE
+# catalog and diffs it against the committed copies so drift surfaces in CI.
+#
+# Strictness model (derived from GITHUB_EVENT_NAME inside the script):
+#   - pull_request : drift => WARN (exit 0). Don't block feature work on an
+#                    out-of-band catalog change; the sync PR is a separate flow.
+#   - push to main : drift => FAIL.
+#   - schedule     : drift => FAIL (daily catch for silent drift).
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  schedule:
+    # Daily at 06:00 UTC.
+    - cron: '0 6 * * *'
+
+permissions:
+  contents: read
+
+jobs:
+  contract-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Setup Node
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        with:
+          node-version: '22'
+
+      # No yarn install needed: contract-check.mjs uses only Node built-ins +
+      # global fetch (Node >=18). Strictness is derived from GITHUB_EVENT_NAME.
+      - name: Contract check (live catalog vs committed)
+        run: node scripts/contract-check.mjs
