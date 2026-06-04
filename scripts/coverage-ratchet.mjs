@@ -5,13 +5,14 @@
  * Reads coverage/coverage-summary.json (produced by `c8 ... json-summary`)
  * and compares against the floors recorded in .c8rc.json.
  *
- * Behaviour:
- *  - FAIL (exit 1) if a global metric is below its floor (regression).
- *  - FAIL (exit 1) if a global metric exceeds its floor by >= 1 percentage
- *    point — prompting a human to raise the floor. The floor is never
+ * Behaviour (non-blocking phase — gates flip to hard-fail in Phase 5):
+ *  - FAIL (exit 1) only if a global metric is below its floor (a real
+ *    regression).
+ *  - HINT (non-fatal) if a global metric exceeds its floor by >= 1 percentage
+ *    point — prompts a human to raise the floor. The floor is never
  *    auto-edited; it only ever ratchets up by hand.
- *  - FAIL (exit 1) if any hot-path module that is currently at/above the
- *    per-file line floor regresses below it.
+ *  - HINT (non-fatal) for hot-path modules below the per-file line target.
+ *    Several are below target at baseline, so this is advisory until Phase 5.
  *
  * The script never edits any file; it only reports.
  */
