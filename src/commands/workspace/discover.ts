@@ -173,7 +173,18 @@ export async function runDiscover(
   opts: DiscoverOptions = {},
 ): Promise<void> {
   const yamlPath = path.join(workspaceRoot, 'haus.workspace.yaml')
-  const existing = parseWorkspaceConfig(await readText(yamlPath))
+  const existingText = await readText(yamlPath)
+  const existing = parseWorkspaceConfig(existingText)
+  // A present-but-unparseable yaml would be silently treated as "no existing config"
+  // and clobbered on --write, dropping the user's client/relationships/edits. Refuse
+  // rather than overwrite — the user must fix or remove the file first.
+  if (existingText && !existing) {
+    error(
+      'Existing haus.workspace.yaml is malformed — fix or remove it before running discover (refusing to overwrite).',
+    )
+    process.exitCode = 1
+    return
+  }
   const discovered = await discoverRepos(workspaceRoot, opts.maxDepth ?? DEFAULT_MAX_DEPTH)
   if (discovered.length === 0) {
     error('No repos discovered under the workspace root.')

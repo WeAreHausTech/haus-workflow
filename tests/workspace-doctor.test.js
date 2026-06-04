@@ -2,14 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import os from 'node:os'
 import path from 'node:path'
-import {
-  mkdtempSync,
-  mkdirSync,
-  writeFileSync,
-  readFileSync,
-  existsSync,
-  rmSync,
-} from 'node:fs'
+import { mkdtempSync, mkdirSync, writeFileSync, existsSync, rmSync } from 'node:fs'
 
 // Point the recommender/apply at the vendored fixture catalog (no network, deterministic).
 process.env.HAUS_FIXTURE_CATALOG = path.resolve('tests/fixtures/catalog/manifest.json')
@@ -311,6 +304,59 @@ test(
     )
     assert.equal(apiAfter.hausVersionAtSetup, apiBefore.hausVersionAtSetup)
     assert.equal(apiAfter.lockItemCount, apiBefore.lockItemCount)
+  }),
+)
+
+test(
+  'workspace doctor fails loudly when the workspace yaml is missing or malformed',
+  withExitCode(async () => {
+    const ws = makeWorkspace()
+    await runWorkspaceSetup(ws, { mode: 'fast', write: true })
+    // Corrupt the yaml after setup: doctor must not report a repo-less "healthy" workspace.
+    writeFileSync(path.join(ws, 'haus.workspace.yaml'), 'repos: [ broken: , : \n  -\n')
+
+    const result = await runWorkspaceDoctor(ws)
+    assert.ok(
+      result.drift.some((d) => d.kind === 'no-config'),
+      'malformed yaml flagged as no-config',
+    )
+    assert.equal(process.exitCode, 1)
+  }),
+)
+
+test(
+  'workspace doctor does not print an OK line for a repo that has drift',
+  withExitCode(async () => {
+    const ws = makeWorkspace()
+    await runWorkspaceSetup(ws, { mode: 'fast', write: true })
+    rmSync(path.join(ws, 'frontend', '.claude'), { recursive: true, force: true })
+
+    const lines = []
+    const orig = { log: console.log, warn: console.warn }
+    console.log = (...args) => lines.push(args.join(' '))
+    console.warn = (...args) => lines.push(args.join(' '))
+    try {
+      await runWorkspaceDoctor(ws)
+    } finally {
+      console.log = orig.log
+      console.warn = orig.warn
+    }
+
+    // The flagged repo must not also appear in an "OK (... lock item(s))" line.
+    assert.ok(
+      !lines.some((l) => l.includes('acme-frontend') && l.includes('OK (')),
+      'flagged repo must not be reported OK',
+    )
+    // The healthy repo still gets its OK line.
+    assert.ok(
+      lines.some((l) => l.includes('acme-api') && l.includes('OK (')),
+      'healthy repo still reported OK',
+    )
+    // Verdict + detail must not duplicate the same drift line.
+    const driftLineCount = lines.filter(
+      (l) => l.includes('acme-frontend') && l.includes('Missing .claude/'),
+    ).length
+    assert.equal(driftLineCount, 1, 'drift detail printed exactly once (no verdict duplication)')
   }),
 )
 

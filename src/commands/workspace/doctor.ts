@@ -21,6 +21,7 @@ import { readWorkspaceConfig } from './config.js'
 import { hausVersion, readManifest, type WorkspaceManifest } from './manifest.js'
 
 export type DriftKind =
+  | 'no-config'
   | 'no-manifest'
   | 'missing-from-manifest'
   | 'version-mismatch'
@@ -51,8 +52,8 @@ export async function runWorkspaceDoctor(
   workspaceRoot: string,
   opts: { json?: boolean } = {},
 ): Promise<WorkspaceDoctorResult> {
+  const config = await readWorkspaceConfig(workspaceRoot)
   const manifest = await readManifest(workspaceRoot)
-  const yamlRepos = (await readWorkspaceConfig(workspaceRoot))?.repos ?? []
   const currentVersion = hausVersion()
   const drift: WorkspaceDriftItem[] = []
 
@@ -62,6 +63,18 @@ export async function runWorkspaceDoctor(
   const flag = (item: WorkspaceDriftItem) => {
     drift.push(item)
     detail.push({ stream: 'warn', text: `- ${item.repo}: ${item.detail}` })
+  }
+
+  // No (or malformed) workspace yaml → there is nothing to validate. Fail loudly
+  // rather than reporting a repo-less workspace as "healthy".
+  if (!config) {
+    flag({
+      repo: '(workspace)',
+      kind: 'no-config',
+      detail:
+        'Missing or malformed haus.workspace.yaml — run `haus workspace discover --write` or `init`.',
+    })
+    return emit({ workspaceRoot, manifest, drift, detail, json: opts.json })
   }
 
   // No manifest → a single workspace-level flag; skip the per-repo checks, which
@@ -78,7 +91,7 @@ export async function runWorkspaceDoctor(
 
   const manifestByName = new Map(manifest.repos.map((r) => [r.name, r]))
 
-  for (const repo of yamlRepos) {
+  for (const repo of config.repos) {
     const repoRoot = path.resolve(workspaceRoot, repo.path)
     const entry = manifestByName.get(repo.name)
 
@@ -92,7 +105,11 @@ export async function runWorkspaceDoctor(
       continue
     }
 
-    if (entry?.status === 'failed') {
+    // Track drift added for this repo so a clean repo gets exactly one "OK" line and
+    // a flagged repo gets none (avoids an internally contradictory report).
+    const driftBefore = drift.length
+
+    if (entry.status === 'failed') {
       flag({
         repo: repo.name,
         kind: 'failed',
@@ -100,7 +117,7 @@ export async function runWorkspaceDoctor(
       })
     }
 
-    if (entry?.hausVersionAtSetup && entry.hausVersionAtSetup !== currentVersion) {
+    if (entry.hausVersionAtSetup && entry.hausVersionAtSetup !== currentVersion) {
       flag({
         repo: repo.name,
         kind: 'version-mismatch',
@@ -132,7 +149,9 @@ export async function runWorkspaceDoctor(
         kind: 'invalid-lock',
         detail: 'haus.lock.json present but invalid — re-run `haus workspace setup --write`.',
       })
-    } else {
+    }
+
+    if (drift.length === driftBefore) {
       ok(`- ${repo.name}: OK (${lock.count} lock item(s))`)
     }
   }
@@ -158,11 +177,12 @@ function emit(args: {
   if (args.json) {
     log(JSON.stringify({ manifest: manifest ?? null, drift }, null, 2))
   } else {
+    // Verdict first (a one-line summary), then the buffered detail — the per-item
+    // specifics live in the detail lines only, so they are not printed twice.
     if (drift.length === 0) {
       log('✅ Workspace is set up and healthy.')
     } else {
       log(`⚠️ ${drift.length} workspace drift item(s) need attention:`)
-      for (const d of drift) log(`  • ${d.repo}: ${d.detail}`)
     }
     log('Haus Workspace Doctor')
     for (const line of detail) {
