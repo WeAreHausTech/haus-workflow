@@ -149,6 +149,61 @@ test('doctor --hooks fails when settings missing', () => {
   assert.equal(out.includes('doctor --hooks') || out.includes('settings'), true)
 })
 
+// Regression: d562199 — verdict line must appear FIRST, before "Haus Doctor" and detail.
+test('doctor verdict line appears before Haus Doctor header (d562199)', () => {
+  const temp = mkdtempSync(path.join(os.tmpdir(), 'haus-doctor-order-'))
+  writeFileSync(
+    path.join(temp, 'package.json'),
+    JSON.stringify(
+      { name: 'order-temp', packageManager: 'yarn@4.5.3', dependencies: { react: '19.0.0' } },
+      null,
+      2,
+    ),
+  )
+  writeFileSync(path.join(temp, 'yarn.lock'), '# lock')
+  const cli = path.resolve('dist/cli.js')
+  execaSync('node', [cli, 'scan', '--json'], { cwd: temp })
+  execaSync('node', [cli, 'recommend', '--json'], { cwd: temp })
+  execaSync('node', [cli, 'apply', '--write'], { cwd: temp })
+  const r = execaSync('node', [cli, 'doctor'], { cwd: temp, reject: false })
+  const stdout = r.stdout ?? ''
+  const verdictIdx = stdout.search(/✅|⚠️/)
+  const headerIdx = stdout.indexOf('Haus Doctor')
+  assert.ok(verdictIdx >= 0, 'verdict line should be present')
+  assert.ok(headerIdx >= 0, 'Haus Doctor header should be present')
+  assert.ok(verdictIdx < headerIdx, 'verdict must appear before "Haus Doctor" header')
+  rmSync(temp, { recursive: true, force: true })
+})
+
+// Regression: d562199 — doctor must detect a malformed import block (BEGIN without END).
+test('doctor flags BEGIN-without-END import block as broken (d562199)', () => {
+  const temp = mkdtempSync(path.join(os.tmpdir(), 'haus-doctor-broken-block-'))
+  writeFileSync(
+    path.join(temp, 'package.json'),
+    JSON.stringify(
+      { name: 'broken-block', packageManager: 'yarn@4.5.3', dependencies: { react: '19.0.0' } },
+      null,
+      2,
+    ),
+  )
+  writeFileSync(path.join(temp, 'yarn.lock'), '# lock')
+  const cli = path.resolve('dist/cli.js')
+  execaSync('node', [cli, 'scan', '--json'], { cwd: temp })
+  execaSync('node', [cli, 'recommend', '--json'], { cwd: temp })
+  execaSync('node', [cli, 'apply', '--write'], { cwd: temp })
+  // Write a CLAUDE.md that has a BEGIN marker but no END marker.
+  const claudeMdPath = path.join(temp, 'CLAUDE.md')
+  writeFileSync(
+    claudeMdPath,
+    '# My project\n\n<!-- HAUS:BEGIN haus-imports v=1 -->\n@.haus-workflow/WORKFLOW.md\n\n(END marker intentionally removed)\n',
+  )
+  const r = execaSync('node', [cli, 'doctor'], { cwd: temp, reject: false })
+  const out = `${r.stdout ?? ''}${r.stderr ?? ''}`
+  assert.match(out, /not closed|malformed|broken/i, 'doctor should flag broken import block')
+  assert.match(r.stdout ?? '', /⚠️ \d+ thing/, 'verdict should report at least 1 thing needing attention')
+  rmSync(temp, { recursive: true, force: true })
+})
+
 test('doctor --hooks passes after apply', () => {
   const temp = mkdtempSync(path.join(os.tmpdir(), 'haus-doctor-hooks-ok-'))
   writeFileSync(

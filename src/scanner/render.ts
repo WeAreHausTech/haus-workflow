@@ -4,6 +4,7 @@ import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
 import type { ContextMap } from '../types.js'
+import { mapWithConcurrency } from '../utils/fs.js'
 
 import { describeRepo } from './role-labels.js'
 
@@ -26,24 +27,17 @@ export async function buildContentBlob(root: string, files: string[]): Promise<s
       f.endsWith('.yml') ||
       f.endsWith('.yaml'),
   )
-  // Read in bounded chunks rather than one big Promise.all — 300 concurrent opens can
-  // exhaust file descriptors (EMFILE) on some systems; chunking keeps the one-pass win.
+  // Read in bounded batches rather than one big Promise.all — 300 concurrent opens can
+  // exhaust file descriptors (EMFILE) on some systems; the bound keeps the one-pass win.
   const slice = candidates.slice(0, 300)
-  const CHUNK = 24
-  const parts: string[] = []
-  for (let i = 0; i < slice.length; i += CHUNK) {
-    const batch = await Promise.all(
-      slice.slice(i, i + CHUNK).map(async (rel) => {
-        try {
-          return await readFile(path.join(root, rel), 'utf8')
-        } catch {
-          // File may have been deleted or be unreadable — skip and continue.
-          return ''
-        }
-      }),
-    )
-    parts.push(...batch)
-  }
+  const parts = await mapWithConcurrency(slice, async (rel) => {
+    try {
+      return await readFile(path.join(root, rel), 'utf8')
+    } catch {
+      // File may have been deleted or be unreadable — skip and continue.
+      return ''
+    }
+  })
   return parts.join('\n')
 }
 

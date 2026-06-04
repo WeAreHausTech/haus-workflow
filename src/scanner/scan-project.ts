@@ -8,7 +8,14 @@ import path from 'node:path'
 
 import type { ContextMap } from '../types.js'
 import { isRecord } from '../utils/audit-checks.js'
-import { hashText, listFiles, readJson, writeJson, writeText } from '../utils/fs.js'
+import {
+  hashText,
+  listFiles,
+  mapWithConcurrency,
+  readJson,
+  writeJson,
+  writeText,
+} from '../utils/fs.js'
 import { hausPath } from '../utils/paths.js'
 import { satisfiesVersion } from '../utils/versions.js'
 
@@ -151,11 +158,13 @@ export async function scanProject(
     node: deps.filter((d) => !d.includes('/')),
     composer: isRecord(composer?.require) ? Object.keys(composer.require) : [],
   }
+  // Bounded fan-out: hashing every safe file with an unbounded Promise.all opens one
+  // descriptor per file at once and can hit EMFILE on low fd ulimits. mapWithConcurrency
+  // batches the reads (same guard render.ts uses for the content blob).
   const scanHashes = Object.fromEntries(
-    await Promise.all(
-      safeFiles.map(
-        async (f) => [f, hashText(await readFile(path.join(root, f), 'utf8'))] as const,
-      ),
+    await mapWithConcurrency(
+      safeFiles,
+      async (f) => [f, hashText(await readFile(path.join(root, f), 'utf8'))] as const,
     ),
   )
   const repoSummary = renderSummary(context)
