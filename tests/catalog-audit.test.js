@@ -27,6 +27,15 @@ test('audit does not flag a clean item', () => {
   assert.deepEqual(failures, [])
 })
 
+test('audit does not flag a tag that merely contains a forbidden word as a substring', () => {
+  // "go" is forbidden; "mongodb" and "django" contain it as a substring. Exact-match
+  // tag checking must not flag them (regression for the substring false-positive).
+  const failures = auditForbiddenTags([
+    { id: 'data.mongodb-patterns', tags: ['mongodb', 'django-rest'] },
+  ])
+  assert.deepEqual(failures, [])
+})
+
 test('audit forbidden set agrees with FORBIDDEN_TAGS exactly', () => {
   // For each forbidden tag, an isolated probe must be flagged; for a tag NOT in
   // FORBIDDEN_TAGS (and not a substring of one), it must not. This proves the audit's

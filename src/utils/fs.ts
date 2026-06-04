@@ -74,7 +74,9 @@ export async function mapWithConcurrency<T, R>(
   fn: (item: T, index: number) => Promise<R>,
   concurrency = 24,
 ): Promise<R[]> {
-  const size = Math.max(1, concurrency)
+  // Coerce to a finite positive integer so a fractional/NaN/Infinity argument
+  // can't produce fractional loop indices and corrupt results array ordering.
+  const size = Number.isFinite(concurrency) ? Math.max(1, Math.floor(concurrency)) : 24
   const results: R[] = new Array(items.length)
   for (let i = 0; i < items.length; i += size) {
     const batch = items.slice(i, i + size)

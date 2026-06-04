@@ -11,10 +11,18 @@ import { error, log } from '../utils/logger.js'
  */
 export function auditForbiddenTags(items: CatalogItem[]): string[] {
   const failures: string[] = []
+  const forbidden = new Set(FORBIDDEN_TAGS.map((w) => w.toLowerCase()))
   for (const item of items) {
-    const text = `${item.id} ${item.tags.join(' ')}`.toLowerCase()
-    for (const word of FORBIDDEN_TAGS)
-      if (text.includes(word.toLowerCase())) failures.push(`${item.id} has unsupported tag ${word}`)
+    // Exact-match each tag. Substring matching would flag "go" inside "mongodb"
+    // or "django", producing false positives.
+    for (const tag of item.tags) {
+      if (forbidden.has(tag.toLowerCase())) failures.push(`${item.id} has unsupported tag ${tag}`)
+    }
+    // Check the id separately, tokenised on non-alphanumeric boundaries (keeping
+    // "+" so "c++" survives) so a forbidden word only matches a whole id segment.
+    for (const token of item.id.toLowerCase().split(/[^a-z0-9+]+/)) {
+      if (forbidden.has(token)) failures.push(`${item.id} has unsupported tag ${token}`)
+    }
   }
   return failures
 }
