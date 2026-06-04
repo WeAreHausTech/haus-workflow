@@ -58,3 +58,30 @@ export async function listFiles(root: string, patterns: string[]): Promise<strin
 export function hashText(value: string): string {
   return `sha256-${crypto.createHash('sha256').update(value).digest('hex')}`
 }
+
+/**
+ * Map `items` through async `fn` in bounded-concurrency batches, preserving input order.
+ * An unbounded `Promise.all` over many file reads can open hundreds of descriptors at
+ * once and exhaust the per-process fd limit (EMFILE) on low-ulimit systems; chunking
+ * caps concurrent work while keeping the one-pass throughput win.
+ *
+ * @param items - Input list.
+ * @param fn - Async mapper invoked per item.
+ * @param concurrency - Max in-flight calls per batch (default 24, matching the scanner blob reader).
+ */
+export async function mapWithConcurrency<T, R>(
+  items: readonly T[],
+  fn: (item: T, index: number) => Promise<R>,
+  concurrency = 24,
+): Promise<R[]> {
+  // Coerce to a finite positive integer so a fractional/NaN/Infinity argument
+  // can't produce fractional loop indices and corrupt results array ordering.
+  const size = Number.isFinite(concurrency) ? Math.max(1, Math.floor(concurrency)) : 24
+  const results: R[] = new Array(items.length)
+  for (let i = 0; i < items.length; i += size) {
+    const batch = items.slice(i, i + size)
+    const settled = await Promise.all(batch.map((item, j) => fn(item, i + j)))
+    for (let j = 0; j < settled.length; j += 1) results[i + j] = settled[j]
+  }
+  return results
+}
