@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.16.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.15.0...v0.16.0) (2026-06-05)
+
+### Features
+
+- support catalog contexts and refresh-aware sync ([1ab1d6c](https://github.com/WeAreHausTech/haus-workflow/commit/1ab1d6c1ca91a412fc4e7269e1616050c4397101))
+
+### Bug Fixes
+
+- Add forbidden-content, sources-report, and drift ([e7cbd07](https://github.com/WeAreHausTech/haus-workflow/commit/e7cbd076f7f8d8a21555c5e0cdba058b9788ee29))
+
 ## [0.15.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.14.0...v0.15.0) (2026-06-05)
 
 ### Features
