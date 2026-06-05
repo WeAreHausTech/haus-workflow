@@ -4,7 +4,7 @@
     {
       "id": 1,
       "subject": "Task 1: Guard test for /haus-setup orchestration",
-      "status": "pending",
+      "status": "completed",
       "description": "**Goal:** A failing test that pins the command prompt's critical contract — it must reference the docs skill at the manifest-derived path and run `haus recommend` before the final `haus apply`.\n\n**Files:**\n- Create: `tests/haus-setup-command.test.js`\n- Reads: `library/global/commands/haus-setup.md`, `library/catalog/manifest.json`\n\n**Acceptance Criteria:**\n- References `.claude/skills/<basename>/SKILL.md` where basename = path.basename of the haus.writing-documentation manifest path\n- Mentions deep-context.json\n- Asserts `haus recommend` ordered after docs skill and before last `haus apply --write`\n- Fails pre-rewrite\n\n**Verify:** `node --test tests/haus-setup-command.test.js` → FAIL before Task 2, PASS after.\n\n```json:metadata\n{\"files\": [\"tests/haus-setup-command.test.js\"], \"verifyCommand\": \"node --test tests/haus-setup-command.test.js\", \"acceptanceCriteria\": [\"references manifest-derived skill path\", \"mentions deep-context.json\", \"recommend ordered after docs skill and before final apply\", \"fails pre-rewrite\"]}\n```"
     },
     {
