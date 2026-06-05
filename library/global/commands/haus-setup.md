@@ -22,9 +22,9 @@ Do this in order:
    the core guardrails and helpers — including the documentation skill haus uses
    in the next step.
 
-5. **Write the project docs (this is what makes the setup smart).** Open and
-   follow the instructions in `.claude/skills/writing-documentation/SKILL.md`,
-   which step 4 just installed. Following it, do a deep read of the project and:
+5. **Write the project docs.** Open and follow the instructions in
+   `.claude/skills/writing-documentation/SKILL.md`, which step 4 just installed.
+   Following it, do a deep read of the project and:
    - write the project documentation (the `CLAUDE.md` body and `docs/` files).
      NEVER alter the `<!-- HAUS:BEGIN haus-imports … -->` … `<!-- HAUS:END … -->`
      block in `CLAUDE.md`; write around it.
