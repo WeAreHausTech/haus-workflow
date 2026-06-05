@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.15.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.14.0...v0.15.0) (2026-06-05)
+
+### Features
+
+- add manifest drift check to contract validation ([90c5efc](https://github.com/WeAreHausTech/haus-workflow/commit/90c5efc683b9a62f48493ee8705b60b6206750dc))
+
+### Bug Fixes
+
+- Handle cache write failures and refresh global install ([e4a7d58](https://github.com/WeAreHausTech/haus-workflow/commit/e4a7d58b187cd5b1722fbbfe20994c5a2a8336f4))
+- Make apply/undo merge-safe for project settings ([977cf4f](https://github.com/WeAreHausTech/haus-workflow/commit/977cf4f39809cfc68632b7856284b089deb5b835))
+- refresh project .claude files on update ([a4b55db](https://github.com/WeAreHausTech/haus-workflow/commit/a4b55db650c748e17085ecf093b70b9689ec6081))
+
 ## [0.14.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.13.2...v0.14.0) (2026-06-04)
 
 ### Features
