@@ -200,7 +200,11 @@ test('doctor flags BEGIN-without-END import block as broken (d562199)', () => {
   const r = execaSync('node', [cli, 'doctor'], { cwd: temp, reject: false })
   const out = `${r.stdout ?? ''}${r.stderr ?? ''}`
   assert.match(out, /not closed|malformed|broken/i, 'doctor should flag broken import block')
-  assert.match(r.stdout ?? '', /⚠️ \d+ thing/, 'verdict should report at least 1 thing needing attention')
+  assert.match(
+    r.stdout ?? '',
+    /⚠️ \d+ thing/,
+    'verdict should report at least 1 thing needing attention',
+  )
   rmSync(temp, { recursive: true, force: true })
 })
 
@@ -221,5 +225,5 @@ test('doctor --hooks passes after apply', () => {
   execaSync('node', [cli, 'apply', '--write'], { cwd: temp })
   const r = execaSync('node', [cli, 'doctor', '--hooks'], { cwd: temp, reject: false })
   assert.equal(r.exitCode, 0)
-  assert.equal((r.stdout ?? '').includes('matches canonical hook contract'), true)
+  assert.equal((r.stdout ?? '').includes('carries required haus hook contract'), true)
 })

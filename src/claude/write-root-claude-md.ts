@@ -30,6 +30,17 @@ export function buildImportBlock(): string {
  * Replace the existing haus block in `existing`, or append `block` if none is present.
  * User content outside the sentinels is always preserved.
  */
+/** Removes the managed haus import block from CLAUDE.md, preserving surrounding user content. */
+export function stripHausBlock(existing: string): string {
+  const beginIdx = existing.indexOf(BLOCK_BEGIN)
+  const endIdx = existing.indexOf(BLOCK_END)
+  if (beginIdx === -1 || endIdx === -1 || endIdx <= beginIdx) return existing
+  const before = existing.slice(0, beginIdx)
+  const after = existing.slice(endIdx + BLOCK_END.length)
+  const merged = `${before}${after}`.replace(/\n{3,}/g, '\n\n').trimEnd()
+  return merged.length > 0 ? `${merged}\n` : ''
+}
+
 export function injectHausBlock(existing: string, block: string): string {
   const beginIdx = existing.indexOf(BLOCK_BEGIN)
   const endIdx = existing.indexOf(BLOCK_END)

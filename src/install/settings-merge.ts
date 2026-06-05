@@ -41,8 +41,8 @@ type ClaudePermissions = {
   ask?: string[]
 }
 
-/** Subset of ~/.claude/settings.json that haus reads and writes. */
-type ClaudeSettings = {
+/** Subset of Claude Code settings.json that haus reads and writes. */
+export type ClaudeSettings = {
   hooks?: Record<string, ClaudeHookEntry[]>
   permissions?: ClaudePermissions
   /** Haus-private namespace used to track installed hook IDs, commands, and deny/allow rules. */

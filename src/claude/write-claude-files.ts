@@ -17,8 +17,8 @@ import { log, warn } from '../utils/logger.js'
 import { claudePath, displayPath, hausPath, packageRoot } from '../utils/paths.js'
 
 import { DEFAULT_HOOKS_CONFIG } from './load-hooks-config.js'
-import { loadClaudeHooksSettings } from './load-hooks.js'
-import { assertPostApplySettingsMatchCanonical } from './verify-hooks-contract.js'
+import { applyProjectSettingsMerge, mergeProjectSettings } from './merge-project-settings.js'
+import { assertPostApplySettingsHausContract } from './verify-hooks-contract.js'
 import { writeRootClaudeMd } from './write-root-claude-md.js'
 import { writeWorkflowConfig } from './write-workflow-config.js'
 import { writeWorkflow } from './write-workflow.js'
@@ -74,9 +74,13 @@ export async function writeClaudeFiles(
         hausPath(root, 'selected-context.json'),
         hausPath(root, 'haus.lock.json'),
       ]
-  const hookSettings = await loadClaudeHooksSettings()
-  await writeManagedJson(root, claudePath(root, 'settings.json'), hookSettings, dryRun)
-  if (!dryRun) await assertPostApplySettingsMatchCanonical(root, hookSettings)
+  if (dryRun) {
+    const mergedSettings = await mergeProjectSettings(root)
+    await writeManagedJson(root, claudePath(root, 'settings.json'), mergedSettings, true)
+  } else {
+    await applyProjectSettingsMerge(root)
+    await assertPostApplySettingsHausContract(root)
+  }
   // Emit `.haus-workflow/config.json` with the P2 hook gating defaults (both off).
   // Only created when missing — existing config is left untouched so users'
   // opt-ins survive subsequent `apply --write` runs.

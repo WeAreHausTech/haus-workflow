@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-import { mkdtempSync, writeFileSync, readFileSync } from 'node:fs'
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync } from 'node:fs'
 import { execaSync } from 'execa'
 
 process.env.HAUS_FIXTURE_CATALOG = path.resolve('tests/fixtures/catalog/manifest.json')
@@ -66,6 +66,59 @@ test('apply writes claude files and rules', () => {
     assert.equal(row.version, pkg.version)
     assert.equal(row.hash.startsWith('sha256-'), true)
   }
+})
+
+test('apply merges haus hooks into existing settings without clobbering user hooks', () => {
+  const temp = mkdtempSync(path.join(os.tmpdir(), 'haus-apply-merge-settings-'))
+  mkdirSync(path.join(temp, '.claude'), { recursive: true })
+  writeFileSync(
+    path.join(temp, 'package.json'),
+    JSON.stringify(
+      { name: 'apply-merge', packageManager: 'yarn@4.5.3', dependencies: { react: '19.0.0' } },
+      null,
+      2,
+    ),
+  )
+  writeFileSync(path.join(temp, 'yarn.lock'), '# lock')
+  writeFileSync(
+    path.join(temp, '.claude/settings.json'),
+    JSON.stringify(
+      {
+        hooks: {
+          PreToolUse: [
+            {
+              matcher: 'Custom',
+              hooks: [{ type: 'command', command: 'echo user-hook' }],
+            },
+          ],
+        },
+        permissions: { ask: ['Bash(custom:*)'] },
+      },
+      null,
+      2,
+    ) + '\n',
+  )
+
+  const env = {
+    ...process.env,
+    HAUS_FIXTURE_CATALOG: path.resolve('tests/fixtures/catalog/manifest.json'),
+  }
+  execaSync('node', [path.resolve('dist/cli.js'), 'scan', '--json'], { cwd: temp, env })
+  execaSync('node', [path.resolve('dist/cli.js'), 'recommend', '--json'], { cwd: temp, env })
+  execaSync('node', [path.resolve('dist/cli.js'), 'apply', '--write'], { cwd: temp, env })
+
+  const settings = JSON.parse(readFileSync(path.join(temp, '.claude/settings.json'), 'utf8'))
+  const pre = settings.hooks.PreToolUse
+  assert.equal(
+    pre.some((e) => e.matcher === 'Custom'),
+    true,
+  )
+  assert.equal(
+    pre.some((e) => e.matcher === 'Read|Edit|Write'),
+    true,
+  )
+  assert.equal(settings.permissions.ask.includes('Bash(custom:*)'), true)
+  assert.equal(settings.permissions.deny.includes('Bash(rm -rf:*)'), true)
 })
 
 test('apply reports diff before overwriting generated files', () => {
