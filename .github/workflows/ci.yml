@@ -74,7 +74,11 @@ jobs:
             cd "$TMP_DIR"
             node "$GITHUB_WORKSPACE/dist/cli.js" scan --json
             node "$GITHUB_WORKSPACE/dist/cli.js" recommend --json
-            node "$GITHUB_WORKSPACE/dist/cli.js" apply --write
+            # No catalog cache is populated in CI (the npm package ships only the
+            # manifest, not skill bodies), so apply core files only. Installing
+            # recommended catalog skills requires `haus update` to fetch content
+            # from the live catalog, which we deliberately keep out of the smoke.
+            node "$GITHUB_WORKSPACE/dist/cli.js" apply --write --allow-empty-cache
             node "$GITHUB_WORKSPACE/dist/cli.js" doctor
             node "$GITHUB_WORKSPACE/dist/cli.js" doctor --hooks
             # update --check can return non-zero when no lock entries were selected.
