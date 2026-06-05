@@ -35,13 +35,13 @@ function writeLock(items) {
 test('checkLock: missing lock file returns ok:false, count:0, catalogRef:null', async () => {
   // do not write a lockfile
   const result = await checkLock(tmpDir)
-  assert.deepEqual(result, { ok: false, count: 0, catalogRef: null })
+  assert.deepEqual(result, { ok: false, count: 0, catalogRef: null, drift: [], driftCount: 0 })
 })
 
 test('checkLock: empty array returns ok:false, count:0, catalogRef:null', async () => {
   writeLock([])
   const result = await checkLock(tmpDir)
-  assert.deepEqual(result, { ok: false, count: 0, catalogRef: null })
+  assert.deepEqual(result, { ok: false, count: 0, catalogRef: null, drift: [], driftCount: 0 })
 })
 
 test('checkLock: valid items with no versions returns ok:true', async () => {
@@ -55,18 +55,14 @@ test('checkLock: valid items with no versions returns ok:true', async () => {
 })
 
 test('checkLock: valid semver versions returns ok:true', async () => {
-  writeLock([
-    { id: 'skill.foo', type: 'skill', version: '1.2.3' },
-  ])
+  writeLock([{ id: 'skill.foo', type: 'skill', version: '1.2.3' }])
   const result = await checkLock(tmpDir)
   assert.equal(result.ok, true)
   assert.equal(result.count, 1)
 })
 
 test('checkLock: invalid version string returns ok:false', async () => {
-  writeLock([
-    { id: 'skill.foo', type: 'skill', version: 'not-a-version' },
-  ])
+  writeLock([{ id: 'skill.foo', type: 'skill', version: 'not-a-version' }])
   const result = await checkLock(tmpDir)
   assert.equal(result.ok, false)
 })
@@ -91,7 +87,48 @@ test('checkLock: multiple items all sharing catalogRef returns first item catalo
   assert.equal(result.count, 3)
 })
 
-// ---- applyLock --------------------------------------------------------------
+test('checkLock: detects hash drift when installed files changed', async () => {
+  fs.mkdirSync(path.join(tmpDir, '.claude'), { recursive: true })
+  fs.writeFileSync(path.join(tmpDir, '.claude', 'tracked.md'), 'original', 'utf8')
+  writeLock([
+    {
+      id: 'skill.foo',
+      type: 'skill',
+      version: '1.0.0',
+      paths: ['.claude/tracked.md'],
+      hash: 'sha256-stale',
+    },
+  ])
+
+  const result = await checkLock(tmpDir)
+  assert.equal(result.ok, false)
+  assert.equal(result.driftCount, 1)
+  assert.equal(result.drift[0].id, 'skill.foo')
+  assert.equal(result.drift[0].expected, 'sha256-stale')
+  assert.ok(result.drift[0].actual.startsWith('sha256-'))
+})
+
+test('checkLock: matching hash returns ok:true with empty drift', async () => {
+  fs.mkdirSync(path.join(tmpDir, '.claude'), { recursive: true })
+  fs.writeFileSync(path.join(tmpDir, '.claude', 'tracked.md'), 'same content', 'utf8')
+  writeLock([{ id: 'skill.foo', type: 'skill', paths: ['.claude/tracked.md'] }])
+  const { after } = await applyLock(tmpDir)
+  const hash = JSON.parse(after)[0].hash
+
+  writeLock([
+    {
+      id: 'skill.foo',
+      type: 'skill',
+      version: '1.0.0',
+      paths: ['.claude/tracked.md'],
+      hash,
+    },
+  ])
+
+  const result = await checkLock(tmpDir)
+  assert.equal(result.ok, true)
+  assert.equal(result.driftCount, 0)
+})
 
 test('applyLock: empty lockfile writes empty array and returns correct before/after', async () => {
   writeLock([])
@@ -105,9 +142,7 @@ test('applyLock: item with paths that exist gets hash set in output', async () =
   fs.mkdirSync(path.join(tmpDir, '.claude'), { recursive: true })
   fs.writeFileSync(path.join(tmpDir, '.claude', 'tracked.md'), 'tracked content', 'utf8')
 
-  writeLock([
-    { id: 'skill.foo', type: 'skill', paths: ['.claude/tracked.md'] },
-  ])
+  writeLock([{ id: 'skill.foo', type: 'skill', paths: ['.claude/tracked.md'] }])
 
   const { after } = await applyLock(tmpDir)
   const parsed = JSON.parse(after)
@@ -117,9 +152,7 @@ test('applyLock: item with paths that exist gets hash set in output', async () =
 })
 
 test('applyLock: item with empty paths gets EMPTY_LOCK_PATHS_TOKEN hash', async () => {
-  writeLock([
-    { id: 'skill.bar', type: 'skill', paths: [] },
-  ])
+  writeLock([{ id: 'skill.bar', type: 'skill', paths: [] }])
 
   const { after } = await applyLock(tmpDir)
   const parsed = JSON.parse(after)

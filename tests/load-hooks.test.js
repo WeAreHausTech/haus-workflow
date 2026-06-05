@@ -8,7 +8,7 @@ import { loadClaudeHooksSettings } from '../src/claude/load-hooks.js'
 describe('loadClaudeHooksSettings', () => {
   it('keeps the canonical hooks', async () => {
     const s = await loadClaudeHooksSettings()
-    assert.equal(s.hooks.UserPromptSubmit[0].hooks[0].command, 'haus context --from-hook || true')
+    assert.equal(s.hooks.UserPromptSubmit[0].hooks[0].command, 'haus context --from-hook')
     assert.equal(s.hooks.UserPromptSubmit[0].hooks.length, 1)
     assert.equal(s.hooks.PreToolUse.length, 2)
   })
@@ -18,10 +18,7 @@ describe('loadClaudeHooksSettings', () => {
     // It must stay in sync with CANONICAL_HOOKS — a stale `haus memory inject` entry
     // would install a hook calling a removed command (hook-time errors).
     const fragment = JSON.parse(
-      fs.readFileSync(
-        path.resolve('library/global/settings-fragments/hooks.json'),
-        'utf8',
-      ),
+      fs.readFileSync(path.resolve('library/global/settings-fragments/hooks.json'), 'utf8'),
     )
     for (const hook of fragment.hooks) {
       assert.ok(!/\bmemory\b/.test(hook.command), `unexpected memory hook: ${hook.command}`)

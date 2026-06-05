@@ -51,6 +51,7 @@ export async function runUpdate(options: { check?: boolean }): Promise<void> {
       ),
     )
     if (!status.ok) process.exitCode = 1
+    if (status.driftCount > 0) process.exitCode = 1
     return
   }
 

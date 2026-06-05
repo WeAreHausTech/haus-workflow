@@ -8,6 +8,7 @@ import {
   type TaskIntent,
 } from '../recommender/task-intent.js'
 import { readContextOrScan } from '../scanner/read-context.js'
+import { redactSensitive } from '../security/redact-sensitive.js'
 import type { Recommendation } from '../types.js'
 import { readJson, readText } from '../utils/fs.js'
 import { log } from '../utils/logger.js'
@@ -73,6 +74,6 @@ export async function runContext(options: {
     }),
     summary,
   ]
-  const text = lines.join('\n')
+  const text = redactSensitive(lines.join('\n'))
   log(options.fromHook ? text.slice(0, 3000) : text)
 }

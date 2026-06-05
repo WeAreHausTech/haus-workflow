@@ -20,21 +20,21 @@ const PROJECT_HOOK_FRAGMENTS: HookFragment[] = [
     id: 'haus.context-hook',
     gate: 'keep',
     event: 'UserPromptSubmit',
-    command: 'haus context --from-hook || true',
+    command: 'haus context --from-hook',
   },
   {
     id: 'haus.guard-file',
     gate: 'keep',
     event: 'PreToolUse',
     matcher: 'Read|Edit|Write',
-    command: 'haus guard file-access --from-hook || true',
+    command: 'haus guard file-access --from-hook',
   },
   {
     id: 'haus.guard-bash',
     gate: 'keep',
     event: 'PreToolUse',
     matcher: 'Bash',
-    command: 'haus guard bash --from-hook || true',
+    command: 'haus guard bash --from-hook',
   },
 ]
 

@@ -1,25 +1,10 @@
 /** Policy filters for the recommender: unsupported stacks, requiresAny gating, warning merge. */
 
+import { FORBIDDEN_TAGS } from '../catalog/validation-rules.js'
 import type { ContextMap, RequiresAnyClause } from '../types.js'
 
-/** Stack tokens that trigger an immediate skip — haus does not support these ecosystems. */
-export const UNSUPPORTED = [
-  'python',
-  'django',
-  'go',
-  'rust',
-  'java',
-  'spring',
-  'kotlin',
-  'swift',
-  'android',
-  'flutter',
-  'dart',
-  'c++',
-  'perl',
-  'defi',
-  'trading',
-]
+/** Stack tokens that trigger an immediate skip — driven by validation-rules.json. */
+export const UNSUPPORTED: readonly string[] = FORBIDDEN_TAGS
 
 /** Check whether at least one requiresAny clause is satisfied by the project context. */
 export function matchRequiresAny(

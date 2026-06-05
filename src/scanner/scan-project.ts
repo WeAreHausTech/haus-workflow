@@ -1,7 +1,7 @@
 /**
  * Core project scanner — reads package.json, composer.json, and safe project files,
- * then writes four outputs to .haus-workflow/: context-map.json, dependency-map.json,
- * scan-hashes.json, and repo-summary.md.
+ * then writes five outputs to .haus-workflow/: context-map.json, dependency-map.json,
+ * scan-hashes.json, repo-summary.md, and sources-report.json.
  */
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
@@ -30,6 +30,7 @@ import {
 } from './detection.js'
 import { buildContentBlob, renderSummary } from './render.js'
 import type { ScanResult } from './types.js'
+import { writeSourcesReport } from './write-sources-report.js'
 
 /**
  * Allowlist of file globs that are safe to read during a scan.
@@ -173,6 +174,7 @@ export async function scanProject(
   await writeJson(hausPath(root, 'dependency-map.json'), dependencyMap)
   await writeJson(hausPath(root, 'scan-hashes.json'), scanHashes)
   await writeText(hausPath(root, 'repo-summary.md'), repoSummary)
+  await writeSourcesReport(root)
 
   return { ...context, dependencyMap, scanHashes, repoSummary }
 }

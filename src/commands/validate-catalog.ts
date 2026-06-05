@@ -2,6 +2,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 
+import { auditForbiddenTagsInText } from '../catalog/forbidden-content.js'
 import {
   ANY_NPX_PATTERN,
   ALLOWED_NPX_PATTERN,
@@ -109,6 +110,9 @@ function auditShippedFiles(manifestDir: string, items: CatalogItem[]): string[] 
       for (const section of REQUIRED_SKILL_SECTIONS) {
         if (!text.includes(section)) failures.push(`${item.id}: SKILL.md missing ${section}`)
       }
+      failures.push(
+        ...auditForbiddenTagsInText(text, `${item.id}: ${path.relative(manifestDir, skillMd)}`),
+      )
     } else if (item.type === 'agent') {
       if (!fs.existsSync(absPath)) {
         failures.push(`${item.id}: missing agent file ${item.path}`)
@@ -124,12 +128,38 @@ function auditShippedFiles(manifestDir: string, items: CatalogItem[]): string[] 
         if (lower.includes(phrase))
           failures.push(`${item.id}: agent file contains disallowed phrase "${phrase}"`)
       }
+      failures.push(
+        ...auditForbiddenTagsInText(text, `${item.id}: ${path.relative(manifestDir, absPath)}`),
+      )
     } else if (item.type === 'template') {
       if (!fs.existsSync(absPath)) {
         failures.push(`${item.id}: missing template file ${item.path}`)
+        continue
       }
+      failures.push(...auditTemplateContent(manifestDir, absPath, item.id))
     }
   }
+  return failures
+}
+
+function auditTemplateContent(manifestDir: string, absPath: string, itemId: string): string[] {
+  const rel = path.relative(manifestDir, absPath)
+  const text = fs.readFileSync(absPath, 'utf8')
+  const failures: string[] = []
+  const lines = text.split(/\r?\n/)
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i] ?? ''
+    if (PLACEHOLDER_PATTERN.test(line)) {
+      failures.push(`${rel}:${i + 1}: TODO or placeholder in shipped content`)
+    }
+    if (RISKY_INSTALL_PATTERNS.some((re) => re.test(line))) {
+      failures.push(`${rel}:${i + 1}: risky install pattern`)
+    }
+    if (ANY_NPX_PATTERN.test(line) && !ALLOWED_NPX_PATTERN.test(line)) {
+      failures.push(`${rel}:${i + 1}: disallowed npx (only npx tsx allowed)`)
+    }
+  }
+  failures.push(...auditForbiddenTagsInText(text, `${itemId}: ${rel}`))
   return failures
 }
 
@@ -139,7 +169,7 @@ function auditShippedFiles(manifestDir: string, items: CatalogItem[]): string[] 
  */
 function auditMarkdownContent(manifestDir: string): string[] {
   const failures: string[] = []
-  const dirs = ['skills', 'agents']
+  const dirs = ['skills', 'agents', 'templates']
   for (const dir of dirs) {
     const abs = path.join(manifestDir, dir)
     if (!fs.existsSync(abs)) continue
@@ -158,6 +188,9 @@ function auditMarkdownContent(manifestDir: string): string[] {
         if (ANY_NPX_PATTERN.test(line) && !ALLOWED_NPX_PATTERN.test(line)) {
           failures.push(`${rel}:${i + 1}: disallowed npx (only npx tsx allowed)`)
         }
+      }
+      if (!rel.includes('/references/')) {
+        failures.push(...auditForbiddenTagsInText(text, rel))
       }
     })
   }

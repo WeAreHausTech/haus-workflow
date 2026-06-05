@@ -1,7 +1,7 @@
 /** Compares installed hashes against the lockfile to detect stale or missing items. */
-import { checkLock } from './lockfile.js'
+import { checkLock, type LockCheckResult } from './lockfile.js'
 
-/** Returns whether the lockfile is valid and how many items it contains. */
-export async function checkUpdates(root: string): Promise<{ ok: boolean; count: number }> {
+/** Returns lock validity, item count, and installed-file hash drift. */
+export async function checkUpdates(root: string): Promise<LockCheckResult> {
   return checkLock(root)
 }

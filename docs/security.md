@@ -37,8 +37,7 @@ uninstall, leaving user-defined rules intact.
 ## Sensitive data handling
 
 - Scanner excludes sensitive paths from scan set
-- Hook-time redactor (`src/security/redact-sensitive.ts`) strips secrets from text the
-  context hook would surface
+- Hook-time redactor (`src/security/redact-sensitive.ts`) strips secrets from `haus context` output (including hook mode) before it reaches Claude Code
 - Generated security rule file (`.claude/rules/security.md`) reinforces policy
 
 ---

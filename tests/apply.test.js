@@ -43,12 +43,12 @@ test('apply writes claude files and rules', () => {
 
   const ups = settings.hooks.UserPromptSubmit[0].hooks
   assert.equal(ups.length, 1)
-  assert.equal(ups[0].command, 'haus context --from-hook || true')
+  assert.equal(ups[0].command, 'haus context --from-hook')
   const pre = settings.hooks.PreToolUse
   assert.equal(pre[0].matcher, 'Read|Edit|Write')
-  assert.equal(pre[0].hooks[0].command, 'haus guard file-access --from-hook || true')
+  assert.equal(pre[0].hooks[0].command, 'haus guard file-access --from-hook')
   assert.equal(pre[1].matcher, 'Bash')
-  assert.equal(pre[1].hooks[0].command, 'haus guard bash --from-hook || true')
+  assert.equal(pre[1].hooks[0].command, 'haus guard bash --from-hook')
   // Deterministic deny rules are written into project settings.json (WS1).
   assert.equal(Array.isArray(settings.permissions?.deny), true)
   assert.equal(settings.permissions.deny.includes('Bash(rm -rf:*)'), true)

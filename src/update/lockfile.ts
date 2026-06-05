@@ -31,17 +31,36 @@ export type LockItem = {
   reviewStatus?: string
 }
 
-/** Validates the lockfile and returns item count and the catalogRef used at install time. */
-export async function checkLock(
-  root: string,
-): Promise<{ ok: boolean; count: number; catalogRef: string | null }> {
+/** Result of validating a project lockfile. */
+export type LockCheckResult = {
+  ok: boolean
+  count: number
+  catalogRef: string | null
+  /** Lock items whose on-disk content no longer matches the stored hash. */
+  drift: Array<{ id: string; expected: string; actual: string }>
+  driftCount: number
+}
+
+/** Validates the lockfile and compares stored hashes to installed file content. */
+export async function checkLock(root: string): Promise<LockCheckResult> {
   const lock = (await readJson<LockItem[]>(hausPath(root, 'haus.lock.json'))) ?? []
   const hasValidVersions = lock.every(
     (item) => !item.version || normalizeVersion(item.version) !== null,
   )
-  // All items in a lock file share the same catalogRef (set at install time).
   const catalogRef = lock[0]?.catalogRef ?? null
-  return { ok: lock.length > 0 && hasValidVersions, count: lock.length, catalogRef }
+
+  const drift: LockCheckResult['drift'] = []
+  for (const item of lock) {
+    if (!item.hash) continue
+    const paths = Array.isArray(item.paths) ? item.paths.map(String) : []
+    const actual = await hashInstalledPaths(root, paths)
+    if (item.hash !== actual) {
+      drift.push({ id: item.id, expected: item.hash, actual })
+    }
+  }
+
+  const ok = lock.length > 0 && hasValidVersions && drift.length === 0
+  return { ok, count: lock.length, catalogRef, drift, driftCount: drift.length }
 }
 
 /**

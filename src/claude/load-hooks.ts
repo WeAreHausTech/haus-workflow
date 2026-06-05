@@ -26,17 +26,17 @@ export const CANONICAL_HOOKS: ClaudeHooksSettings = {
   hooks: {
     UserPromptSubmit: [
       {
-        hooks: [{ type: 'command', command: 'haus context --from-hook || true' }],
+        hooks: [{ type: 'command', command: 'haus context --from-hook' }],
       },
     ],
     PreToolUse: [
       {
         matcher: 'Read|Edit|Write',
-        hooks: [{ type: 'command', command: 'haus guard file-access --from-hook || true' }],
+        hooks: [{ type: 'command', command: 'haus guard file-access --from-hook' }],
       },
       {
         matcher: 'Bash',
-        hooks: [{ type: 'command', command: 'haus guard bash --from-hook || true' }],
+        hooks: [{ type: 'command', command: 'haus guard bash --from-hook' }],
       },
     ],
   },
@@ -44,9 +44,9 @@ export const CANONICAL_HOOKS: ClaudeHooksSettings = {
 
 /** Maps known hook commands to stable IDs used in recommended-hooks.json. */
 const STABLE_HOOK_IDS: Record<string, string> = {
-  'haus context --from-hook || true': 'haus.context-hook',
-  'haus guard file-access --from-hook || true': 'haus.guard-file',
-  'haus guard bash --from-hook || true': 'haus.guard-bash',
+  'haus context --from-hook': 'haus.context-hook',
+  'haus guard file-access --from-hook': 'haus.guard-file',
+  'haus guard bash --from-hook': 'haus.guard-bash',
 }
 
 /**

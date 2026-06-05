@@ -143,7 +143,7 @@ Multi-project workspace operations.
 
 ### `haus refresh`
 
-Refresh local state without a full re-scan.
+Re-scan the project (fast mode), refresh `.haus-workflow/sources-report.json`, and regenerate `recommendation.json` without running a full apply.
 
 ### `haus undo [-y | --yes]`
 

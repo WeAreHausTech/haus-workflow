@@ -12,6 +12,9 @@ import {
 } from 'node:fs'
 import { execaSync } from 'execa'
 
+import { hashText } from '../src/utils/fs.js'
+import { EMPTY_LOCK_PATHS_TOKEN } from '../src/update/hash-installed.js'
+
 test('update check and apply create backup', () => {
   const temp = mkdtempSync(path.join(os.tmpdir(), 'haus-update-'))
   mkdirSync(path.join(temp, '.haus-workflow'), { recursive: true })
@@ -28,7 +31,7 @@ test('update check and apply create backup', () => {
           type: 'skill',
           source: 'haus',
           version: '0.2.0',
-          hash: 'sha256-old',
+          hash: hashText(EMPTY_LOCK_PATHS_TOKEN),
           installMode: 'copied',
           paths: [],
         },
@@ -47,8 +50,9 @@ test('update check and apply create backup', () => {
   const checkOut = execaSync('node', [path.resolve('dist/cli.js'), 'update', '--check'], {
     cwd: temp,
     env,
+    reject: false,
   }).stdout
-  assert.equal(checkOut.includes('"ok"'), true)
+  assert.equal(checkOut.includes('"ok": true') || checkOut.includes('"ok":true'), true)
 
   const out = execaSync('node', [path.resolve('dist/cli.js'), 'update'], { cwd: temp, env }).stdout
   const backups = readdirSync(path.join(temp, '.haus-workflow/backups'))
@@ -83,7 +87,7 @@ test('update --check output includes npmVersion field', () => {
           type: 'skill',
           source: 'haus',
           version: '0.1.0',
-          hash: 'sha256-abc',
+          hash: hashText(EMPTY_LOCK_PATHS_TOKEN),
           installMode: 'copied',
           paths: [],
         },
