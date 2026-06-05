@@ -43,6 +43,21 @@ export async function fetchRemoteManifest(): Promise<CatalogItem[] | null> {
   }
 }
 
+type WriteOutcome = 'created' | 'updated' | 'unchanged'
+
+/** Writes `text` to `dest` when missing or content differs; creates parent dirs on write. */
+async function writeTextIfChanged(dest: string, text: string): Promise<WriteOutcome> {
+  if (await fs.pathExists(dest)) {
+    const local = await fs.readFile(dest, 'utf8')
+    if (local === text) return 'unchanged'
+    await fs.writeFile(dest, text, 'utf8')
+    return 'updated'
+  }
+  await fs.ensureDir(path.dirname(dest))
+  await fs.writeFile(dest, text, 'utf8')
+  return 'created'
+}
+
 /** Relative path of the workflow standard template within the catalog. */
 export const WORKFLOW_TEMPLATE_REL = 'templates/agentic-workflow-standard.md'
 
@@ -60,12 +75,15 @@ export async function readWorkflowTemplate(
   opts: { dryRun?: boolean } = {},
 ): Promise<string | null> {
   const dest = path.join(CACHE_DIR, WORKFLOW_TEMPLATE_REL)
-  if (await fs.pathExists(dest)) return fs.readFile(dest, 'utf8')
   const text = await fetchText(`${REMOTE_BASE}/${WORKFLOW_TEMPLATE_REL}`)
-  if (text === null) return null
+  if (text === null) {
+    if (await fs.pathExists(dest)) return fs.readFile(dest, 'utf8')
+    return null
+  }
   if (!opts.dryRun) {
-    await fs.ensureDir(path.dirname(dest))
-    await fs.writeFile(dest, text, 'utf8')
+    await writeTextIfChanged(dest, text)
+  } else if (await fs.pathExists(dest)) {
+    return fs.readFile(dest, 'utf8')
   }
   return text
 }
@@ -74,7 +92,9 @@ export async function readWorkflowTemplate(
 export type SyncResult = {
   /** IDs of items downloaded for the first time. */
   newItems: string[]
-  /** Count of items already present in the cache (skipped). */
+  /** IDs of items whose cached content was replaced because the remote copy changed. */
+  refreshed: string[]
+  /** Count of items already present in the cache with matching remote content. */
   unchanged: number
   /** IDs of items that could not be fetched or had invalid paths. */
   failed: string[]
@@ -112,14 +132,12 @@ async function downloadSkillReferences(item: CatalogItem, destDir: string): Prom
       warn(`Skipping reference "${ref}" for ${item.id}: path traversal detected`)
       continue
     }
-    if (await fs.pathExists(refDest)) continue
     const text = await fetchText(`${REMOTE_BASE}/${item.path}/${ref}`)
     if (text === null) {
       warn(`Failed to fetch reference "${ref}" for ${item.id}`)
       continue
     }
-    await fs.ensureDir(path.dirname(refDest))
-    await fs.writeFile(refDest, text, 'utf8')
+    await writeTextIfChanged(refDest, text)
   }
 }
 
@@ -131,7 +149,7 @@ export async function syncRemoteCatalog(): Promise<SyncResult> {
   const items = await fetchRemoteManifest()
   if (!items) {
     warn('Remote catalog fetch failed — using bundled catalog')
-    return { newItems: [], unchanged: 0, failed: [] }
+    return { newItems: [], refreshed: [], unchanged: 0, failed: [] }
   }
 
   try {
@@ -145,10 +163,11 @@ export async function syncRemoteCatalog(): Promise<SyncResult> {
     warn(
       `Catalog cache not writable (${CACHE_DIR}) — skipping cache sync: ${err instanceof Error ? err.message : String(err)}`,
     )
-    return { newItems: [], unchanged: 0, failed: [] }
+    return { newItems: [], refreshed: [], unchanged: 0, failed: [] }
   }
 
   const newItems: string[] = []
+  const refreshed: string[] = []
   let unchanged = 0
   const failed: string[] = []
 
@@ -169,13 +188,6 @@ export async function syncRemoteCatalog(): Promise<SyncResult> {
         continue
       }
       const dest = path.join(destDir, 'SKILL.md')
-      if (await fs.pathExists(dest)) {
-        // SKILL.md already cached, but earlier versions never downloaded the skill's
-        // nested reference files — backfill any that are still missing.
-        await downloadSkillReferences(item, destDir)
-        unchanged++
-        continue
-      }
       const url = `${REMOTE_BASE}/${item.path}/SKILL.md`
       const text = await fetchText(url)
       if (!text) {
@@ -184,10 +196,11 @@ export async function syncRemoteCatalog(): Promise<SyncResult> {
         continue
       }
       try {
-        await fs.ensureDir(path.dirname(dest))
-        await fs.writeFile(dest, text, 'utf8')
+        const outcome = await writeTextIfChanged(dest, text)
         await downloadSkillReferences(item, destDir)
-        newItems.push(item.id)
+        if (outcome === 'created') newItems.push(item.id)
+        else if (outcome === 'updated') refreshed.push(item.id)
+        else unchanged++
       } catch (err) {
         warn(`Failed to cache ${item.id}: ${err instanceof Error ? err.message : String(err)}`)
         failed.push(item.id)
@@ -199,10 +212,6 @@ export async function syncRemoteCatalog(): Promise<SyncResult> {
         failed.push(item.id)
         continue
       }
-      if (await fs.pathExists(dest)) {
-        unchanged++
-        continue
-      }
       const url = `${REMOTE_BASE}/${item.path}`
       const text = await fetchText(url)
       if (!text) {
@@ -211,9 +220,10 @@ export async function syncRemoteCatalog(): Promise<SyncResult> {
         continue
       }
       try {
-        await fs.ensureDir(path.dirname(dest))
-        await fs.writeFile(dest, text, 'utf8')
-        newItems.push(item.id)
+        const outcome = await writeTextIfChanged(dest, text)
+        if (outcome === 'created') newItems.push(item.id)
+        else if (outcome === 'updated') refreshed.push(item.id)
+        else unchanged++
       } catch (err) {
         warn(`Failed to cache ${item.id}: ${err instanceof Error ? err.message : String(err)}`)
         failed.push(item.id)
@@ -221,7 +231,7 @@ export async function syncRemoteCatalog(): Promise<SyncResult> {
     }
   }
 
-  return { newItems, unchanged, failed }
+  return { newItems, refreshed, unchanged, failed }
 }
 
 const CATALOG_TAGS_API_URL = 'https://api.github.com/repos/WeAreHausTech/haus-workflow-catalog/tags'

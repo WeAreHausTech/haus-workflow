@@ -6,6 +6,7 @@
  * The upcoming workspace setup loop will call it once per member repo so every
  * repo gets byte-identical output to `haus setup-project`.
  */
+import { syncRemoteCatalog } from '../catalog/remote-catalog.js'
 import { flattenRecommendedHooks, loadClaudeHooksSettings } from '../claude/load-hooks.js'
 import { verifyProjectSettingsHooksContract } from '../claude/verify-hooks-contract.js'
 import { writeClaudeFiles } from '../claude/write-claude-files.js'
@@ -116,7 +117,18 @@ export async function runSetupCore(root: string, opts: SetupCoreOptions): Promis
     }
   }
 
-  // Apply
+  // Populate catalog cache before apply so recommend/apply share the same manifest
+  // and skill bodies are available on first-time setup when online.
+  if (!dryRun && !process.env['HAUS_FIXTURE_CATALOG']) {
+    log('Syncing remote catalog...')
+    const sync = await syncRemoteCatalog()
+    if (sync.newItems.length > 0) {
+      log(`Catalog cache populated: ${sync.newItems.length} new item(s).`)
+    } else if (sync.refreshed.length > 0) {
+      log(`Catalog cache refreshed: ${sync.refreshed.length} updated item(s).`)
+    }
+  }
+
   const files = await writeClaudeFiles(root, dryRun ?? false)
   log('Applied files:')
   files.forEach((f) => log(`- ${displayPath(root, f)}`))

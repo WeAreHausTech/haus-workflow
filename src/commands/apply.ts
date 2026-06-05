@@ -76,18 +76,11 @@ export async function runApply(options: {
     const catalogItemCount =
       selectedIds !== undefined ? selectedIds.length : (rec?.recommended.length ?? 0)
     if (catalogItemCount > 0 && !(await cacheHasItems())) {
-      if (isDryRun) {
-        warn(
-          'Catalog cache is empty — `haus apply --write` will skip catalog items. Run `haus update` first.',
-        )
-      } else {
-        error(
-          'Catalog cache is empty — cannot install catalog items. Run `haus update` first, ' +
-            'or pass --allow-empty-cache to apply core files only.',
-        )
-        process.exitCode = 1
-        return
-      }
+      warn(
+        isDryRun
+          ? 'Catalog cache is empty — `haus apply --write` will skip catalog items. Run `haus update` first.'
+          : 'Catalog cache is empty — catalog items will be skipped. Run `haus update` first, or pass --allow-empty-cache to silence this warning.',
+      )
     }
   }
 

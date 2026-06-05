@@ -121,6 +121,43 @@ test('apply merges haus hooks into existing settings without clobbering user hoo
   assert.equal(settings.permissions.deny.includes('Bash(rm -rf:*)'), true)
 })
 
+test('apply --write warns and succeeds when catalog cache is empty', () => {
+  const temp = mkdtempSync(path.join(os.tmpdir(), 'haus-apply-empty-cache-'))
+  writeFileSync(
+    path.join(temp, 'package.json'),
+    JSON.stringify(
+      {
+        name: 'apply-empty-cache',
+        packageManager: 'yarn@4.5.3',
+        dependencies: { react: '19.0.0' },
+      },
+      null,
+      2,
+    ),
+  )
+  writeFileSync(path.join(temp, 'yarn.lock'), '# lock')
+  const env = {
+    ...process.env,
+    HAUS_CATALOG_CACHE_DIR_OVERRIDE: path.join(temp, 'empty-cache'),
+    HAUS_CATALOG_REMOTE_BASE: 'http://127.0.0.1:0',
+    HOME: path.join(temp, 'home'),
+    USERPROFILE: path.join(temp, 'home'),
+  }
+  // execa extends process.env by default — clear fixture override so cache-empty gate runs.
+  env.HAUS_FIXTURE_CATALOG = ''
+  execaSync('node', [path.resolve('dist/cli.js'), 'scan', '--json'], { cwd: temp, env })
+  execaSync('node', [path.resolve('dist/cli.js'), 'recommend', '--json'], { cwd: temp, env })
+  const r = execaSync('node', [path.resolve('dist/cli.js'), 'apply', '--write'], {
+    cwd: temp,
+    env,
+    reject: false,
+  })
+  assert.equal(r.exitCode, 0)
+  const combined = `${r.stdout ?? ''}${r.stderr ?? ''}`
+  assert.equal(combined.includes('Catalog cache is empty'), true)
+  assert.equal(fs.existsSync(path.join(temp, '.claude/settings.json')), true)
+})
+
 test('apply reports diff before overwriting generated files', () => {
   const temp = mkdtempSync(path.join(os.tmpdir(), 'haus-apply-overwrite-'))
   writeFileSync(

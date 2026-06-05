@@ -76,7 +76,12 @@ export async function runUpdate(options: { check?: boolean }): Promise<void> {
   if (sync.newItems.length > 0) {
     log(`Catalog updated: ${sync.newItems.length} new item(s): ${sync.newItems.join(', ')}`)
     log('Run `haus recommend && haus apply --write` to install new skills.')
-  } else if (sync.unchanged > 0) {
+  }
+  if (sync.refreshed.length > 0) {
+    log(`Catalog refreshed: ${sync.refreshed.length} updated item(s): ${sync.refreshed.join(', ')}`)
+    log('Run `haus apply --write` to install refreshed skill content.')
+  }
+  if (sync.newItems.length === 0 && sync.refreshed.length === 0 && sync.unchanged > 0) {
     log(`Catalog up to date (${sync.unchanged} item(s) unchanged).`)
   }
   if (sync.failed.length > 0) {

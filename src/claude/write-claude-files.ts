@@ -8,7 +8,7 @@ import path from 'node:path'
 import fs from 'fs-extra'
 
 import { CATALOG_REF } from '../catalog/constants.js'
-import { CACHE_DIR } from '../catalog/remote-catalog.js'
+import { catalogItemContentPath, loadCatalogContext } from '../catalog/load-catalog.js'
 import type { Recommendation } from '../types.js'
 import { hashInstalledPaths } from '../update/hash-installed.js'
 import { createUnifiedDiff, hasTextChanged, summarizeDiff } from '../utils/diff.js'
@@ -131,19 +131,8 @@ export async function writeClaudeFiles(
     useMode?: string
     license?: string
   }
-  const fixtureManifestPath = process.env['HAUS_FIXTURE_CATALOG']
-  const manifestPath =
-    fixtureManifestPath ?? path.join(pkgRoot, 'library', 'catalog', 'manifest.json')
-  const manifestDir = path.dirname(manifestPath)
-  const manifest = (await readJson<{ items?: ManifestItem[] }>(manifestPath)) ?? { items: [] }
-  const manifestById = new Map((manifest.items ?? []).map((item) => [item.id, item]))
-  // Catalog manifests use paths relative to the manifest's own directory.
-  // Cache manifest in CACHE_DIR, bundled in library/catalog, fixture in tests/fixtures/catalog —
-  // all resolve via `path.join(<dir-of-manifest>, item.path)`.
-  const cacheManifest = await readJson<{ items?: ManifestItem[] }>(
-    path.join(CACHE_DIR, 'manifest.json'),
-  )
-  const cacheManifestById = new Map((cacheManifest?.items ?? []).map((item) => [item.id, item]))
+  const { items: manifestItems, contentRoot } = await loadCatalogContext(root)
+  const manifestById = new Map((manifestItems as ManifestItem[]).map((item) => [item.id, item]))
   const installedPathsByItem = new Map<string, string[]>()
   // Track which recommended items were actually installed so that skipped
   // curated items (unapproved or blocked) are excluded from the lock and
@@ -172,12 +161,7 @@ export async function writeClaudeFiles(
         continue
       }
     }
-    const cachedItem = cacheManifestById.get(item.id)
-    const cachePath = cachedItem?.path ? path.join(CACHE_DIR, cachedItem.path) : null
-    const sourcePath =
-      cachePath && (await fs.pathExists(cachePath))
-        ? cachePath
-        : path.join(manifestDir, manifestItem.path)
+    const sourcePath = catalogItemContentPath(contentRoot, manifestItem)
     const target =
       item.type === 'agent' ? 'agents' : item.type === 'template' ? 'templates' : 'skills'
     const destination = claudePath(root, target, path.basename(sourcePath))

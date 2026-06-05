@@ -3,42 +3,74 @@
  * Test scenarios can override the source path via HAUS_FIXTURE_CATALOG env var.
  */
 
-import os from 'node:os'
 import path from 'node:path'
 
 import type { CatalogItem } from '../types.js'
 import { readJson } from '../utils/fs.js'
 import { packageRoot } from '../utils/paths.js'
 
-import { CATALOG_CACHE_SUBDIR } from './constants.js'
+import { CACHE_DIR } from './remote-catalog.js'
 
-/** Absolute path to the user-level catalog cache manifest written by `haus update`. */
-const CACHE_MANIFEST = path.join(os.homedir(), CATALOG_CACHE_SUBDIR, 'manifest.json')
+export type CatalogSource = 'fixture' | 'cache' | 'local' | 'bundled'
+
+/** Active catalog manifest plus the directory where item.path content resolves. */
+export type CatalogManifestContext = {
+  items: CatalogItem[]
+  /** Base directory: item.path is relative to this (cache dir, fixture dir, or library/catalog). */
+  contentRoot: string
+  source: CatalogSource
+}
+
+/**
+ * Returns the first non-empty catalog manifest and its content root so recommend and
+ * apply resolve the same item metadata and on-disk paths (no cache/bundled split-brain).
+ */
+export async function loadCatalogContext(root: string): Promise<CatalogManifestContext> {
+  const envPath = process.env['HAUS_FIXTURE_CATALOG']
+  if (envPath) {
+    const data = await readJson<{ items: CatalogItem[] }>(envPath)
+    return {
+      items: data?.items ?? [],
+      contentRoot: path.dirname(envPath),
+      source: 'fixture',
+    }
+  }
+
+  const cacheManifestPath = path.join(CACHE_DIR, 'manifest.json')
+  const cacheData = await readJson<{ items: CatalogItem[] }>(cacheManifestPath)
+  if (cacheData?.items?.length) {
+    return { items: cacheData.items, contentRoot: CACHE_DIR, source: 'cache' }
+  }
+
+  const localManifest = path.join(root, 'library/catalog/manifest.json')
+  const localData = await readJson<{ items: CatalogItem[] }>(localManifest)
+  if (localData?.items?.length) {
+    return {
+      items: localData.items,
+      contentRoot: path.dirname(localManifest),
+      source: 'local',
+    }
+  }
+
+  const packageManifest = path.join(packageRoot(), 'library/catalog/manifest.json')
+  const data = await readJson<{ items: CatalogItem[] }>(packageManifest)
+  return {
+    items: data?.items ?? [],
+    contentRoot: path.dirname(packageManifest),
+    source: 'bundled',
+  }
+}
 
 /**
  * Returns catalog items using the first non-empty source found:
  * HAUS_FIXTURE_CATALOG env var → user cache → project-local vendor copy → bundled package snapshot.
- * @param root - Absolute path to the project root (used for local vendor lookup).
  */
 export async function loadCatalog(root: string): Promise<CatalogItem[]> {
-  // Env override for isolated test scenarios
-  const envPath = process.env['HAUS_FIXTURE_CATALOG']
-  if (envPath) {
-    const data = await readJson<{ items: CatalogItem[] }>(envPath)
-    return data?.items ?? []
-  }
+  const ctx = await loadCatalogContext(root)
+  return ctx.items
+}
 
-  // Populated by `haus update` (P8); skip if empty or missing
-  const cacheData = await readJson<{ items: CatalogItem[] }>(CACHE_MANIFEST)
-  if (cacheData?.items?.length) return cacheData.items
-
-  // Project-local override (for projects that vendor their own catalog)
-  const localManifest = path.join(root, 'library/catalog/manifest.json')
-  const localData = await readJson<{ items: CatalogItem[] }>(localManifest)
-  if (localData?.items?.length) return localData.items
-
-  // Package-bundled catalog (shipped as decoupled snapshot, updated with each CLI release)
-  const packageManifest = path.join(packageRoot(), 'library/catalog/manifest.json')
-  const data = await readJson<{ items: CatalogItem[] }>(packageManifest)
-  return data?.items ?? []
+/** Absolute path to an item's cached/bundled content (skill dir or agent/template file). */
+export function catalogItemContentPath(contentRoot: string, item: { path: string }): string {
+  return path.join(contentRoot, item.path)
 }

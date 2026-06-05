@@ -22,11 +22,7 @@ const FIXTURE_MANIFEST = {
       repoRoles: [],
       tokenEstimate: 1000,
       requiresAny: [{ dependency: 'react' }],
-      references: [
-        'references/conventions.md',
-        'references/scope.md',
-        'https://react.dev/',
-      ],
+      references: ['references/conventions.md', 'references/scope.md', 'https://react.dev/'],
     },
     {
       id: 'haus.code-reviewer-agent',
@@ -203,11 +199,55 @@ test('haus update: no duplicate downloads for already-cached items', async () =>
     })
     assert.equal(out.exitCode, 0)
     const combined = out.stdout + out.stderr
-    // Only agent should be new; skill was already cached
-    if (combined.includes('new item')) {
+    // Skill content unchanged; only the agent should appear as a new download.
+    assert.equal(combined.includes('Catalog refreshed'), false)
+    if (combined.includes('new item(s)')) {
       assert.equal(combined.includes('code-reviewer-agent'), true, 'agent should be new')
-      assert.equal(combined.includes('react19-patterns'), false, 'skill should NOT be new')
+      assert.equal(
+        /new item\(s\):[^\n]*react19/.test(combined),
+        false,
+        'skill should not be listed as new',
+      )
     }
+  } finally {
+    await stopServer(server)
+  }
+})
+
+test('haus update: refreshes cached items when remote content changes', async () => {
+  const STALE_SKILL = '## Use when\nStale.\n## Do not use when\nNever.\n'
+  const FRESH_SKILL = '## Use when\nFresh.\n## Do not use when\nNever.\n'
+  const { server, port } = await startMockServer({
+    '/manifest.json': { body: JSON.stringify(FIXTURE_MANIFEST) },
+    '/skills/react19-patterns/SKILL.md': { body: FRESH_SKILL },
+    '/agents/code-reviewer.md': { body: FIXTURE_AGENT_MD },
+  })
+
+  const cacheDir = mkdtempSync(path.join(os.tmpdir(), 'haus-cache-refresh-'))
+  fs.mkdirSync(path.join(cacheDir, 'skills/react19-patterns'), { recursive: true })
+  fs.writeFileSync(path.join(cacheDir, 'skills/react19-patterns/SKILL.md'), STALE_SKILL)
+  fs.writeFileSync(
+    path.join(cacheDir, 'manifest.json'),
+    `${JSON.stringify(FIXTURE_MANIFEST, null, 2)}\n`,
+  )
+
+  const temp = makeProjectDir()
+
+  try {
+    const out = await runCli(['update'], {
+      cwd: temp,
+      env: {
+        ...process.env,
+        HAUS_CATALOG_REMOTE_BASE: `http://127.0.0.1:${port}`,
+        HAUS_CATALOG_CACHE_DIR_OVERRIDE: cacheDir,
+      },
+    })
+    assert.equal(out.exitCode, 0)
+    const combined = out.stdout + out.stderr
+    assert.equal(combined.includes('Catalog refreshed'), true)
+    assert.equal(combined.includes('react19-patterns'), true)
+    const cached = fs.readFileSync(path.join(cacheDir, 'skills/react19-patterns/SKILL.md'), 'utf8')
+    assert.equal(cached.includes('Fresh.'), true)
   } finally {
     await stopServer(server)
   }
