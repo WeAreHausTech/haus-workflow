@@ -4,7 +4,7 @@ import path from 'node:path'
 import checkbox from '@inquirer/checkbox'
 import fs from 'fs-extra'
 
-import { CACHE_DIR } from '../catalog/remote-catalog.js'
+import { getCacheDir } from '../catalog/remote-catalog.js'
 import { readProjectSettings } from '../claude/merge-project-settings.js'
 import { writeClaudeFiles } from '../claude/write-claude-files.js'
 import type { Recommendation } from '../types.js'
@@ -13,7 +13,7 @@ import { error, log, warn } from '../utils/logger.js'
 import { claudePath, displayPath, hausPath } from '../utils/paths.js'
 
 async function cacheHasItems(): Promise<boolean> {
-  const data = await readJson<{ items?: unknown[] }>(path.join(CACHE_DIR, 'manifest.json'))
+  const data = await readJson<{ items?: unknown[] }>(path.join(getCacheDir(), 'manifest.json'))
   return Array.isArray(data?.items) && data.items.length > 0
 }
 

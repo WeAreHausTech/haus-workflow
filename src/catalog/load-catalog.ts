@@ -9,7 +9,7 @@ import type { CatalogItem } from '../types.js'
 import { readJson } from '../utils/fs.js'
 import { packageRoot } from '../utils/paths.js'
 
-import { CACHE_DIR } from './remote-catalog.js'
+import { getCacheDir } from './remote-catalog.js'
 
 export type CatalogSource = 'fixture' | 'cache' | 'local' | 'bundled'
 
@@ -36,10 +36,11 @@ export async function loadCatalogContext(root: string): Promise<CatalogManifestC
     }
   }
 
-  const cacheManifestPath = path.join(CACHE_DIR, 'manifest.json')
+  const cacheDir = getCacheDir()
+  const cacheManifestPath = path.join(cacheDir, 'manifest.json')
   const cacheData = await readJson<{ items: CatalogItem[] }>(cacheManifestPath)
   if (cacheData?.items?.length) {
-    return { items: cacheData.items, contentRoot: CACHE_DIR, source: 'cache' }
+    return { items: cacheData.items, contentRoot: cacheDir, source: 'cache' }
   }
 
   const localManifest = path.join(root, 'library/catalog/manifest.json')

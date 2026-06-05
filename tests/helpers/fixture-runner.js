@@ -3,8 +3,14 @@ import os from 'node:os'
 import path from 'node:path'
 import { execaSync } from 'execa'
 
+const FIXTURE_CATALOG = path.resolve('tests/fixtures/catalog/manifest.json')
+
 function cliPath() {
   return path.resolve('dist/cli.js')
+}
+
+function hausEnv() {
+  return { ...process.env, HAUS_FIXTURE_CATALOG: FIXTURE_CATALOG }
 }
 
 export function cloneFixtureToTemp(fixtureName) {
@@ -21,7 +27,7 @@ export function runHaus(cwd, command) {
   while ((match = tokenRegex.exec(command)) !== null) {
     args.push(match[1] ?? match[2] ?? match[3])
   }
-  const result = execaSync('node', [cliPath(), ...args], { cwd })
+  const result = execaSync('node', [cliPath(), ...args], { cwd, env: hausEnv() })
   return result.stdout
 }
 

@@ -3,7 +3,7 @@ import path from 'node:path'
 
 import fs from 'fs-extra'
 
-import { CACHE_DIR, getCacheManifestAge } from '../catalog/remote-catalog.js'
+import { getCacheDir, getCacheManifestAge } from '../catalog/remote-catalog.js'
 import { isHookEnabled, type HookKey } from '../claude/load-hooks-config.js'
 import { normaliseLF } from '../claude/managed-template.js'
 import { verifyProjectSettingsHooksContract } from '../claude/verify-hooks-contract.js'
@@ -147,7 +147,7 @@ export async function runDoctor(options?: { hooks?: boolean }): Promise<void> {
     } else {
       // Compare installed template hash against current template — prefer catalog cache (same as writeWorkflow).
       const storedHashMatch = firstLine.match(/hash=(sha256-[a-f0-9]+)/)
-      const cachePath = path.join(CACHE_DIR, 'templates/agentic-workflow-standard.md')
+      const cachePath = path.join(getCacheDir(), 'templates/agentic-workflow-standard.md')
       const bundledPath = path.join(
         packageRoot(),
         'library',
@@ -225,7 +225,10 @@ export async function runDoctor(options?: { hooks?: boolean }): Promise<void> {
       `A newer haus (${npmStatus.latest}) is available`,
       `npm install -g ${NPM_PACKAGE_NAME}`,
     )
-    process.exitCode = 1
+    // Fixture/offline runs (tests) should not fail doctor solely on registry drift.
+    if (!process.env['HAUS_FIXTURE_CATALOG']) {
+      process.exitCode = 1
+    }
   } else if (npmStatus.latest !== null) {
     ok(`- CLI: ${currentVersion} (up to date)`)
   } else {

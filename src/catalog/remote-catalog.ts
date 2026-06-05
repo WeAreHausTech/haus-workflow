@@ -14,8 +14,12 @@ import { warn } from '../utils/logger.js'
 import { CATALOG_CACHE_SUBDIR, CATALOG_REF, CATALOG_REPO_URL } from './constants.js'
 
 // HAUS_CATALOG_CACHE_DIR_OVERRIDE redirects cache writes/reads for isolated tests.
-export const CACHE_DIR =
-  process.env['HAUS_CATALOG_CACHE_DIR_OVERRIDE'] ?? path.join(os.homedir(), CATALOG_CACHE_SUBDIR)
+/** Resolves the catalog cache directory (per call so tests can override env after import). */
+export function getCacheDir(): string {
+  return (
+    process.env['HAUS_CATALOG_CACHE_DIR_OVERRIDE'] ?? path.join(os.homedir(), CATALOG_CACHE_SUBDIR)
+  )
+}
 // HAUS_CATALOG_REMOTE_BASE allows tests to point at a local mock server.
 const REMOTE_BASE = process.env['HAUS_CATALOG_REMOTE_BASE'] ?? `${CATALOG_REPO_URL}/${CATALOG_REF}`
 const REMOTE_MANIFEST_URL = `${REMOTE_BASE}/manifest.json`
@@ -74,7 +78,7 @@ export const WORKFLOW_TEMPLATE_REL = 'templates/agentic-workflow-standard.md'
 export async function readWorkflowTemplate(
   opts: { dryRun?: boolean } = {},
 ): Promise<string | null> {
-  const dest = path.join(CACHE_DIR, WORKFLOW_TEMPLATE_REL)
+  const dest = path.join(getCacheDir(), WORKFLOW_TEMPLATE_REL)
   const text = await fetchText(`${REMOTE_BASE}/${WORKFLOW_TEMPLATE_REL}`)
   if (text === null) {
     if (await fs.pathExists(dest)) return fs.readFile(dest, 'utf8')
@@ -152,16 +156,17 @@ export async function syncRemoteCatalog(): Promise<SyncResult> {
     return { newItems: [], refreshed: [], unchanged: 0, failed: [] }
   }
 
+  const cacheDir = getCacheDir()
   try {
-    await fs.ensureDir(CACHE_DIR)
+    await fs.ensureDir(cacheDir)
     await fs.writeFile(
-      path.join(CACHE_DIR, 'manifest.json'),
+      path.join(cacheDir, 'manifest.json'),
       `${JSON.stringify({ items }, null, 2)}\n`,
       'utf8',
     )
   } catch (err) {
     warn(
-      `Catalog cache not writable (${CACHE_DIR}) — skipping cache sync: ${err instanceof Error ? err.message : String(err)}`,
+      `Catalog cache not writable (${cacheDir}) — skipping cache sync: ${err instanceof Error ? err.message : String(err)}`,
     )
     return { newItems: [], refreshed: [], unchanged: 0, failed: [] }
   }
@@ -181,7 +186,7 @@ export async function syncRemoteCatalog(): Promise<SyncResult> {
     }
 
     if (item.type === 'skill') {
-      const destDir = safeJoin(CACHE_DIR, item.path)
+      const destDir = safeJoin(getCacheDir(), item.path)
       if (!destDir) {
         warn(`Skipping ${item.id}: path traversal detected`)
         failed.push(item.id)
@@ -206,7 +211,7 @@ export async function syncRemoteCatalog(): Promise<SyncResult> {
         failed.push(item.id)
       }
     } else {
-      const dest = safeJoin(CACHE_DIR, item.path)
+      const dest = safeJoin(getCacheDir(), item.path)
       if (!dest) {
         warn(`Skipping ${item.id}: path traversal detected`)
         failed.push(item.id)
@@ -260,7 +265,7 @@ export async function fetchLatestCatalogTag(): Promise<string | null> {
 /** Returns milliseconds since the cache manifest was last written, or null if absent. */
 export async function getCacheManifestAge(): Promise<number | null> {
   try {
-    const stat = await fs.stat(path.join(CACHE_DIR, 'manifest.json'))
+    const stat = await fs.stat(path.join(getCacheDir(), 'manifest.json'))
     return Date.now() - stat.mtimeMs
   } catch {
     return null

@@ -4,9 +4,8 @@ import os from 'node:os'
 import path from 'node:path'
 import fs from 'node:fs'
 
-// IMPORTANT: CACHE_MANIFEST in load-catalog.ts is resolved at module load time via os.homedir().
-// We rely on HAUS_FIXTURE_CATALOG for deterministic tests. For the project-local fallback test
-// we set HOME before the dynamic import so the module resolves CACHE_MANIFEST to our temp dir.
+// CACHE_DIR is resolved at runtime via getCacheDir() (HAUS_CATALOG_CACHE_DIR_OVERRIDE or ~/.claude/...).
+// Tests that need an empty cache should set HAUS_CATALOG_CACHE_DIR_OVERRIDE to a fresh temp dir.
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -103,35 +102,28 @@ test('returns [] for empty HAUS_FIXTURE_CATALOG manifest', async () => {
 })
 
 test('project-local manifest used when cache empty and no env var', async () => {
-  const tmpHome = fs.mkdtempSync(path.join(os.tmpdir(), 'haus-lc-proj-home-'))
+  const emptyCache = fs.mkdtempSync(path.join(os.tmpdir(), 'haus-lc-empty-cache-'))
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'haus-lc-proj-root-'))
   const localManifest = path.join(root, 'library/catalog/manifest.json')
   writeManifest(localManifest, [makeMinimalItem('test.local')])
 
   const prevFixture = process.env.HAUS_FIXTURE_CATALOG
-  const prevHome = process.env.HOME
-  const prevUserProfile = process.env.USERPROFILE
+  const prevCacheOverride = process.env.HAUS_CATALOG_CACHE_DIR_OVERRIDE
   delete process.env.HAUS_FIXTURE_CATALOG
-  // Point HOME + USERPROFILE to an empty temp dir so the user-level cache won't exist
-  process.env.HOME = tmpHome
-  process.env.USERPROFILE = tmpHome
+  process.env.HAUS_CATALOG_CACHE_DIR_OVERRIDE = emptyCache
 
   try {
-    // Cache-bust the import so CACHE_MANIFEST is re-evaluated with the new HOME,
-    // guaranteeing the module-level constant resolves to the empty tmpHome cache dir.
-    const { loadCatalog } = await import('../src/catalog/load-catalog.js?r=' + Math.random())
+    const { loadCatalog } = await import('../src/catalog/load-catalog.js')
     const items = await loadCatalog(root)
 
-    // CACHE_MANIFEST now resolves to the empty tmpHome, so the project-local manifest wins.
     assert.equal(items.length, 1, 'project-local manifest should be used when cache is absent')
     assert.equal(items[0].id, 'test.local')
   } finally {
     if (prevFixture === undefined) delete process.env.HAUS_FIXTURE_CATALOG
     else process.env.HAUS_FIXTURE_CATALOG = prevFixture
-    process.env.HOME = prevHome
-    if (prevUserProfile === undefined) delete process.env.USERPROFILE
-    else process.env.USERPROFILE = prevUserProfile
-    fs.rmSync(tmpHome, { recursive: true, force: true })
+    if (prevCacheOverride === undefined) delete process.env.HAUS_CATALOG_CACHE_DIR_OVERRIDE
+    else process.env.HAUS_CATALOG_CACHE_DIR_OVERRIDE = prevCacheOverride
+    fs.rmSync(emptyCache, { recursive: true, force: true })
     fs.rmSync(root, { recursive: true, force: true })
   }
 })

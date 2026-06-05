@@ -1,7 +1,7 @@
 /**
  * Tests for src/claude/write-workflow.ts
  *
- * IMPORTANT: remote-catalog.ts resolves CACHE_DIR and REMOTE_BASE at module load time.
+ * IMPORTANT: remote-catalog.ts resolves REMOTE_BASE at module load time; cache dir uses getCacheDir() at runtime.
  * These env vars MUST be set before the first import of write-workflow / remote-catalog.
  * We use top-level await to start the mock server, set env vars, then dynamically import.
  * The server stays alive for all tests and is closed in the node:test after() hook.
