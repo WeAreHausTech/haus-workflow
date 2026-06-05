@@ -2,6 +2,7 @@
 import path from 'node:path'
 
 import { fetchLatestCatalogTag, syncRemoteCatalog } from '../catalog/remote-catalog.js'
+import { applyInstall } from '../install/apply.js'
 import { diffGeneratedFiles, summarizeLockDiff } from '../update/diff-generated-files.js'
 import { applyLock, checkLock, diffLock, hasLocalOverrides } from '../update/lockfile.js'
 import { fetchNpmVersionStatus } from '../update/npm-version.js'
@@ -20,10 +21,11 @@ export async function runUpdate(options: { check?: boolean }): Promise<void> {
   if (options.check) {
     const pkgJson = await readJson<{ version?: string }>(path.join(packageRoot(), 'package.json'))
     const currentVersion = pkgJson?.version ?? '0.0.0'
-    const [status, npmVersion, latestCatalogTag] = await Promise.all([
+    const [status, npmVersion, latestCatalogTag, globalInstallDrift] = await Promise.all([
       checkLock(root),
       fetchNpmVersionStatus(currentVersion),
       fetchLatestCatalogTag(),
+      detectGlobalInstallDrift(),
     ])
     const installedRef = status.catalogRef ?? 'main'
     const catalogRefBehind =
@@ -37,6 +39,7 @@ export async function runUpdate(options: { check?: boolean }): Promise<void> {
           installedCatalogRef: installedRef,
           latestCatalogTag,
           catalogRefBehind,
+          globalInstallDrift,
           localOverrides: await hasLocalOverrides(root),
           summary: diffGeneratedFiles(),
           npmVersion,
@@ -78,5 +81,42 @@ export async function runUpdate(options: { check?: boolean }): Promise<void> {
     warn(`Failed to fetch ${sync.failed.length} item(s): ${sync.failed.join(', ')}`)
   }
 
+  await refreshGlobalInstall()
+
   log('Update applied with backup in .haus-workflow/backups/. Run haus doctor.')
+}
+
+/**
+ * Refreshes the Haus-managed files in `~/.claude/` (skills, slash commands, hook/security
+ * settings) so `haus update` matches its documented scope. User-edited managed files are
+ * preserved (no --force). A non-writable home directory warns instead of failing the update.
+ */
+async function refreshGlobalInstall(): Promise<void> {
+  log('Refreshing ~/.claude/ global files...')
+  try {
+    const result = await applyInstall({})
+    const total = result.created.length + result.updated.length
+    if (total > 0) {
+      log(`~/.claude refreshed: ${result.created.length} added, ${result.updated.length} updated.`)
+    } else {
+      log('~/.claude already up to date.')
+    }
+    if (result.skipped.length > 0) {
+      log(
+        `Preserved ${result.skipped.length} locally-edited file(s) (run \`haus install --force\` to overwrite).`,
+      )
+    }
+  } catch (err) {
+    warn(`Could not refresh ~/.claude/: ${err instanceof Error ? err.message : String(err)}`)
+  }
+}
+
+/** Returns whether the global `~/.claude/` install has drifted from bundled sources; null if undetectable. */
+async function detectGlobalInstallDrift(): Promise<boolean | null> {
+  try {
+    const result = await applyInstall({ check: true })
+    return result.drift
+  } catch {
+    return null
+  }
 }

@@ -134,12 +134,19 @@ export async function syncRemoteCatalog(): Promise<SyncResult> {
     return { newItems: [], unchanged: 0, failed: [] }
   }
 
-  await fs.ensureDir(CACHE_DIR)
-  await fs.writeFile(
-    path.join(CACHE_DIR, 'manifest.json'),
-    `${JSON.stringify({ items }, null, 2)}\n`,
-    'utf8',
-  )
+  try {
+    await fs.ensureDir(CACHE_DIR)
+    await fs.writeFile(
+      path.join(CACHE_DIR, 'manifest.json'),
+      `${JSON.stringify({ items }, null, 2)}\n`,
+      'utf8',
+    )
+  } catch (err) {
+    warn(
+      `Catalog cache not writable (${CACHE_DIR}) — skipping cache sync: ${err instanceof Error ? err.message : String(err)}`,
+    )
+    return { newItems: [], unchanged: 0, failed: [] }
+  }
 
   const newItems: string[] = []
   let unchanged = 0
@@ -176,10 +183,15 @@ export async function syncRemoteCatalog(): Promise<SyncResult> {
         failed.push(item.id)
         continue
       }
-      await fs.ensureDir(path.dirname(dest))
-      await fs.writeFile(dest, text, 'utf8')
-      await downloadSkillReferences(item, destDir)
-      newItems.push(item.id)
+      try {
+        await fs.ensureDir(path.dirname(dest))
+        await fs.writeFile(dest, text, 'utf8')
+        await downloadSkillReferences(item, destDir)
+        newItems.push(item.id)
+      } catch (err) {
+        warn(`Failed to cache ${item.id}: ${err instanceof Error ? err.message : String(err)}`)
+        failed.push(item.id)
+      }
     } else {
       const dest = safeJoin(CACHE_DIR, item.path)
       if (!dest) {
@@ -198,9 +210,14 @@ export async function syncRemoteCatalog(): Promise<SyncResult> {
         failed.push(item.id)
         continue
       }
-      await fs.ensureDir(path.dirname(dest))
-      await fs.writeFile(dest, text, 'utf8')
-      newItems.push(item.id)
+      try {
+        await fs.ensureDir(path.dirname(dest))
+        await fs.writeFile(dest, text, 'utf8')
+        newItems.push(item.id)
+      } catch (err) {
+        warn(`Failed to cache ${item.id}: ${err instanceof Error ? err.message : String(err)}`)
+        failed.push(item.id)
+      }
     }
   }
 

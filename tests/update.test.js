@@ -31,12 +31,19 @@ test('update check and apply create backup', () => {
     ),
   )
 
+  const env = {
+    HAUS_CATALOG_CACHE_DIR_OVERRIDE: path.join(temp, 'cache'),
+    HAUS_CATALOG_REMOTE_BASE: 'http://127.0.0.1:0',
+    HOME: path.join(temp, 'home'),
+    USERPROFILE: path.join(temp, 'home'),
+  }
   const checkOut = execaSync('node', [path.resolve('dist/cli.js'), 'update', '--check'], {
     cwd: temp,
+    env,
   }).stdout
   assert.equal(checkOut.includes('"ok"'), true)
 
-  const out = execaSync('node', [path.resolve('dist/cli.js'), 'update'], { cwd: temp }).stdout
+  const out = execaSync('node', [path.resolve('dist/cli.js'), 'update'], { cwd: temp, env }).stdout
   const backups = readdirSync(path.join(temp, '.haus-workflow/backups'))
   const lock = JSON.parse(readFileSync(path.join(temp, '.haus-workflow/haus.lock.json'), 'utf8'))
 
@@ -82,6 +89,12 @@ test('update --check output includes npmVersion field', () => {
   const r = execaSync('node', [path.resolve('dist/cli.js'), 'update', '--check'], {
     cwd: temp,
     reject: false,
+    env: {
+      HAUS_CATALOG_CACHE_DIR_OVERRIDE: path.join(temp, 'cache'),
+      HAUS_CATALOG_REMOTE_BASE: 'http://127.0.0.1:0',
+      HOME: path.join(temp, 'home'),
+      USERPROFILE: path.join(temp, 'home'),
+    },
   })
   assert.equal(r.exitCode, 0)
   const parsed = JSON.parse(r.stdout)
@@ -119,14 +132,64 @@ test('update recomputes hash from tracked file paths', () => {
     ),
   )
 
-  execaSync('node', [path.resolve('dist/cli.js'), 'update'], { cwd: temp })
+  const env = {
+    HAUS_CATALOG_CACHE_DIR_OVERRIDE: path.join(temp, 'cache'),
+    HAUS_CATALOG_REMOTE_BASE: 'http://127.0.0.1:0',
+    HOME: path.join(temp, 'home'),
+    USERPROFILE: path.join(temp, 'home'),
+  }
+  execaSync('node', [path.resolve('dist/cli.js'), 'update'], { cwd: temp, env })
   const lock1 = JSON.parse(readFileSync(path.join(temp, '.haus-workflow/haus.lock.json'), 'utf8'))
   const h1 = lock1[0].hash
   assert.equal(h1.startsWith('sha256-'), true)
   assert.notEqual(h1, 'sha256-stale')
 
   writeFileSync(path.join(temp, '.claude/tracked.md'), 'content-v2')
-  execaSync('node', [path.resolve('dist/cli.js'), 'update'], { cwd: temp })
+  execaSync('node', [path.resolve('dist/cli.js'), 'update'], { cwd: temp, env })
   const lock2 = JSON.parse(readFileSync(path.join(temp, '.haus-workflow/haus.lock.json'), 'utf8'))
   assert.notEqual(lock2[0].hash, h1)
+})
+
+test('update refreshes ~/.claude global files', () => {
+  const temp = mkdtempSync(path.join(os.tmpdir(), 'haus-update-global-'))
+  const home = path.join(temp, 'home')
+  mkdirSync(path.join(temp, '.haus-workflow'), { recursive: true })
+  mkdirSync(home, { recursive: true })
+  writeFileSync(
+    path.join(temp, 'package.json'),
+    JSON.stringify({ name: 'update-global', packageManager: 'yarn@4.5.3' }, null, 2),
+  )
+  writeFileSync(
+    path.join(temp, '.haus-workflow/haus.lock.json'),
+    JSON.stringify(
+      [
+        {
+          id: 'x',
+          type: 'skill',
+          source: 'haus',
+          version: '0.1.0',
+          hash: 'sha256-x',
+          installMode: 'copied',
+          paths: [],
+        },
+      ],
+      null,
+      2,
+    ),
+  )
+
+  const env = {
+    HAUS_CATALOG_CACHE_DIR_OVERRIDE: path.join(temp, 'cache'),
+    HAUS_CATALOG_REMOTE_BASE: 'http://127.0.0.1:0',
+    HOME: home,
+    USERPROFILE: home,
+  }
+  const out = execaSync('node', [path.resolve('dist/cli.js'), 'update'], { cwd: temp, env }).stdout
+
+  // The global install manifest is written only when ~/.claude was actually seeded.
+  const manifest = JSON.parse(
+    readFileSync(path.join(home, '.claude/haus/install-manifest.json'), 'utf8'),
+  )
+  assert.equal(manifest.files.length > 0, true)
+  assert.equal(out.includes('Refreshing ~/.claude/ global files...'), true)
 })
