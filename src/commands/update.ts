@@ -10,6 +10,8 @@ import { readJson } from '../utils/fs.js'
 import { log, warn } from '../utils/logger.js'
 import { packageRoot } from '../utils/paths.js'
 
+import { refreshProjectApply } from './apply.js'
+
 const NPM_PACKAGE_NAME = '@haus-tech/haus-workflow'
 
 /**
@@ -63,7 +65,7 @@ export async function runUpdate(options: { check?: boolean }): Promise<void> {
   }
 
   if (await hasLocalOverrides(root)) {
-    log('Local .claude overrides detected. Preserving local files; only lockfile updated.')
+    log('Existing .claude/settings.json — haus rules will be merged, not replaced.')
   }
   const { before, after } = await applyLock(root)
   log(diffLock(before, after))
@@ -82,8 +84,27 @@ export async function runUpdate(options: { check?: boolean }): Promise<void> {
   }
 
   await refreshGlobalInstall()
+  await refreshProjectFiles(root)
 
   log('Update applied with backup in .haus-workflow/backups/. Run haus doctor.')
+}
+
+/**
+ * Re-applies haus-managed project `.claude/` files when this repo was previously set up.
+ * Skips fresh projects with no haus artifacts. Failures warn instead of aborting update.
+ */
+async function refreshProjectFiles(root: string): Promise<void> {
+  log('Refreshing project .claude/ files...')
+  try {
+    const files = await refreshProjectApply(root)
+    if (files.length === 0) {
+      log('No prior haus project setup detected — skipped project re-apply.')
+      return
+    }
+    log(`Project refreshed: ${files.length} managed path(s) updated.`)
+  } catch (err) {
+    warn(`Could not refresh project files: ${err instanceof Error ? err.message : String(err)}`)
+  }
 }
 
 /**

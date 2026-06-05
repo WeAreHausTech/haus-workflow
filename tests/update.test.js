@@ -2,7 +2,14 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import os from 'node:os'
 import path from 'node:path'
-import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, readdirSync } from 'node:fs'
+import {
+  existsSync,
+  mkdtempSync,
+  mkdirSync,
+  writeFileSync,
+  readFileSync,
+  readdirSync,
+} from 'node:fs'
 import { execaSync } from 'execa'
 
 test('update check and apply create backup', () => {
@@ -192,4 +199,77 @@ test('update refreshes ~/.claude global files', () => {
   )
   assert.equal(manifest.files.length > 0, true)
   assert.equal(out.includes('Refreshing ~/.claude/ global files...'), true)
+})
+
+test('update re-applies project files and preserves user settings merge', () => {
+  const temp = mkdtempSync(path.join(os.tmpdir(), 'haus-update-project-'))
+  const home = path.join(temp, 'home')
+  mkdirSync(home, { recursive: true })
+  writeFileSync(
+    path.join(temp, 'package.json'),
+    JSON.stringify(
+      { name: 'update-project', packageManager: 'yarn@4.5.3', dependencies: { react: '19.0.0' } },
+      null,
+      2,
+    ),
+  )
+  writeFileSync(path.join(temp, 'yarn.lock'), '# lock')
+
+  const env = {
+    HAUS_FIXTURE_CATALOG: path.resolve('tests/fixtures/catalog/manifest.json'),
+    HAUS_CATALOG_CACHE_DIR_OVERRIDE: path.join(temp, 'cache'),
+    HAUS_CATALOG_REMOTE_BASE: 'http://127.0.0.1:0',
+    HOME: home,
+    USERPROFILE: home,
+  }
+  const cli = path.resolve('dist/cli.js')
+  execaSync('node', [cli, 'scan', '--json'], { cwd: temp, env })
+  execaSync('node', [cli, 'recommend', '--json'], { cwd: temp, env })
+  execaSync('node', [cli, 'apply', '--write', '--allow-empty-cache'], { cwd: temp, env })
+
+  writeFileSync(path.join(temp, '.claude/rules/security.md'), 'stale override')
+  const settingsBefore = JSON.parse(readFileSync(path.join(temp, '.claude/settings.json'), 'utf8'))
+  settingsBefore.hooks.PreToolUse.push({
+    matcher: 'Custom',
+    hooks: [{ type: 'command', command: 'echo user-hook' }],
+  })
+  writeFileSync(
+    path.join(temp, '.claude/settings.json'),
+    `${JSON.stringify(settingsBefore, null, 2)}\n`,
+  )
+
+  const out = execaSync('node', [cli, 'update'], { cwd: temp, env }).stdout
+  const security = readFileSync(path.join(temp, '.claude/rules/security.md'), 'utf8')
+  const settingsAfter = JSON.parse(readFileSync(path.join(temp, '.claude/settings.json'), 'utf8'))
+
+  assert.equal(security.includes('Never read secrets'), true)
+  assert.equal(
+    settingsAfter.hooks.PreToolUse.some((e) => e.matcher === 'Custom'),
+    true,
+  )
+  assert.equal(
+    settingsAfter.hooks.PreToolUse.some((e) => e.matcher === 'Read|Edit|Write'),
+    true,
+  )
+  assert.equal(out.includes('Refreshing project .claude/ files...'), true)
+  assert.equal(out.includes('Project refreshed:'), true)
+})
+
+test('update skips project re-apply when no prior haus setup', () => {
+  const temp = mkdtempSync(path.join(os.tmpdir(), 'haus-update-noproj-'))
+  const home = path.join(temp, 'home')
+  mkdirSync(home, { recursive: true })
+  writeFileSync(
+    path.join(temp, 'package.json'),
+    JSON.stringify({ name: 'no-haus', packageManager: 'yarn@4.5.3' }, null, 2),
+  )
+  const env = {
+    HAUS_CATALOG_CACHE_DIR_OVERRIDE: path.join(temp, 'cache'),
+    HAUS_CATALOG_REMOTE_BASE: 'http://127.0.0.1:0',
+    HOME: home,
+    USERPROFILE: home,
+  }
+  const out = execaSync('node', [path.resolve('dist/cli.js'), 'update'], { cwd: temp, env }).stdout
+  assert.equal(out.includes('No prior haus project setup detected'), true)
+  assert.equal(existsSync(path.join(temp, '.claude')), false)
 })
