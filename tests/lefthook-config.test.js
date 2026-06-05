@@ -20,7 +20,11 @@ describe('lefthook migration: package.json', () => {
   it('depends on lefthook and installs it via prepare', () => {
     assert.ok(pkg.devDependencies.lefthook, 'lefthook devDep should be present')
     assert.match(pkg.scripts.prepare, /lefthook install/)
-    assert.match(pkg.scripts.prepare, /\|\| true$/, 'prepare must stay non-fatal for git-install consumers')
+    assert.match(
+      pkg.scripts.prepare,
+      /\|\| true$/,
+      'prepare must stay non-fatal for git-install consumers',
+    )
   })
 })
 
@@ -34,8 +38,10 @@ describe('lefthook migration: lefthook.yml', () => {
     }
   })
 
-  it('runs the test suite on pre-push', () => {
-    assert.match(config['pre-push'].commands.test.run, /yarn test/)
+  it('builds dist then runs the test suite on pre-push', () => {
+    const run = config['pre-push'].commands.test.run
+    assert.match(run, /yarn build/)
+    assert.match(run, /yarn test/)
   })
 
   it('gives every command an agent-readable fail_text', () => {

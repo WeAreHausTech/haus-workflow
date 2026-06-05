@@ -42,5 +42,5 @@ pre-commit:
 pre-push:
   commands:
     test:
-      run: yarn test
-      fail_text: 'Tests failed. Fix the failing tests (`yarn test`) before pushing.'
+      run: yarn build && yarn test
+      fail_text: 'Build or tests failed. Run `yarn build && yarn test` locally, fix failures, then push.'
