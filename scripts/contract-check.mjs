@@ -12,6 +12,9 @@
  * Checkpoints (see ADR-0005):
  *  - BP#1: LIVE validation-rules.json vs committed library/catalog copy
  *          (byte/structure diff — these MUST be identical, see ADR-0001).
+ *  - BP#2: LIVE manifest.json vs committed library/catalog/manifest.json
+ *          (canonical diff — the bundled fallback catalog MUST match live so an
+ *          offline/locked-down install ships the same items the catalog publishes).
  *  - BP#3: LIVE manifest.schema + catalog-item.schema vs the committed test
  *          fixture, on a KEY-SET basis. The fixture is an intentional curated
  *          subset, so this is NOT byte-equality — it fails only if the fixture
@@ -135,6 +138,42 @@ async function checkValidationRules() {
         (diffs.length ? ` Differing keys: ${diffs.join(', ')}` : ''),
     )
   }
+}
+
+// ---------------------------------------------------------------------------
+// BP#2 — manifest.json: bundled fallback copy must match the live catalog.
+// The CLI ships library/catalog/manifest.json as the offline fallback used when
+// the remote catalog can't be reached. If it lags the live manifest, an offline
+// or locked-down install silently recommends/applies a stale item set. BP#1
+// already catches validation-rules drift; this catches manifest drift the same
+// way (canonical equality — the sync PR keeps them identical).
+// ---------------------------------------------------------------------------
+async function checkManifest() {
+  console.log('BP#2 manifest.json (live vs committed):')
+  const committedPath = resolve(repoRoot, 'library/catalog/manifest.json')
+  if (!existsSync(committedPath)) {
+    fail(`committed manifest.json not found at ${committedPath}`)
+    return
+  }
+  const committed = readJson(committedPath)
+  const live = await fetchJson('manifest.json')
+
+  const a = JSON.stringify(canonical(committed))
+  const b = JSON.stringify(canonical(live))
+  if (a === b) {
+    ok(`committed manifest.json matches live catalog (version ${live.version ?? '?'})`)
+    return
+  }
+  const diffs = topLevelKeyDiffs(committed, live)
+  const versionNote =
+    committed.version !== live.version
+      ? ` (committed version ${committed.version ?? '?'} vs live ${live.version ?? '?'})`
+      : ''
+  fail(
+    `manifest.json DRIFT vs live catalog (ref ${CATALOG_REF})${versionNote}. ` +
+      `Run the catalog sync to refresh library/catalog/manifest.json.` +
+      (diffs.length ? ` Differing keys: ${diffs.join(', ')}` : ''),
+  )
 }
 
 function canonical(value) {
@@ -280,6 +319,7 @@ async function main() {
   console.log(`contract-check: catalog ref "${CATALOG_REF}" (${STRICT ? 'STRICT' : 'advisory'})`)
   try {
     await checkValidationRules()
+    await checkManifest()
     await checkFixtureAgainstSchema()
     await checkLockSchema()
   } catch (err) {
