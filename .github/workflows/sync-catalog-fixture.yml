@@ -50,10 +50,19 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           BRANCH="chore/sync-catalog-fixture"
-          git checkout -B "$BRANCH"
+          # Fetch refs so --force-with-lease has current remote tip (avoids "stale info").
+          git fetch origin main
+          git fetch origin "$BRANCH" || true
+          # Always rebuild the sync branch from latest CLI main + catalog fixtures.
+          git checkout -B "$BRANCH" origin/main
           git add library/catalog/manifest.json library/catalog/validation-rules.json
           git commit -m "chore(catalog): sync fixtures from haus-workflow-catalog main"
-          git push --force-with-lease origin "$BRANCH"
+          git fetch origin "$BRANCH" || true
+          if git show-ref --verify --quiet "refs/remotes/origin/$BRANCH"; then
+            git push --force-with-lease=refs/heads/"$BRANCH":refs/heads/"$BRANCH" origin HEAD:"$BRANCH"
+          else
+            git push -u origin HEAD:"$BRANCH"
+          fi
           if ! gh pr view "$BRANCH" --json number >/dev/null 2>&1; then
             gh pr create \
               --base main \
