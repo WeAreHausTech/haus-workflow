@@ -11,12 +11,12 @@ CLI that scans repos, recommends context assets, and writes controlled outputs i
 yarn build          # compiles src/ → dist/ via tsup
 yarn test           # runs tests/**/*.test.js with Node test runner
 yarn dev <cmd>      # run CLI without building (tsx)
-yarn verify         # full gate: typecheck + lint + build + test + prepack
+yarn verify         # full gate: typecheck + typecheck:scripts + lint + build + test
 ```
 
 ## scripts/ convention
 
-`scripts/` contains audit and QA scripts run via `tsx` during `prepack`. They are **not** compiled into `dist/`. Scripts may import from `src/` using relative paths (`../src/...`). They are typechecked separately via `tsconfig.scripts.json` (`yarn typecheck:scripts`).
+`scripts/` contains audit, QA, and release helpers written as native `.mjs` (node ESM) — run directly via `node` in CI (`.github/workflows/`) and locally, **not** during `prepack`. They use node built-ins only and are not compiled into `dist/`.
 
 ## Command flow
 
@@ -24,13 +24,13 @@ CLI → command module → core module (scanner/recommender/writer) → concise 
 
 Outputs written to: `.haus-workflow/context-map.json`, `.haus-workflow/recommendation.json`, `.haus-workflow/haus.lock.json`, `.claude/*`
 
-Catalog content from [`haus-workflow-catalog`](https://github.com/WeAreHausTech/haus-workflow-catalog) (v2.5.0, 71 items). `apply`/`update` prune catalog items removed upstream when lock hash matches; user edits are kept. Validation rules: synced fixture `library/catalog/validation-rules.json` (skills require frontmatter `description:`).
+Catalog content from [`haus-workflow-catalog`](https://github.com/WeAreHausTech/haus-workflow-catalog) (71 items; version in `library/catalog/manifest.json`). `apply`/`update` prune catalog items removed upstream when lock hash matches; user edits are kept. Validation rules: synced fixture `library/catalog/validation-rules.json` (skills require frontmatter `description:`).
 
 ## Workflow rules
 
 - Merge each PR to `main` before starting the next branch — no stacking
 - Run `/compact` between tasks, `/clear` when pivoting to an unrelated topic
-- `prepack` runs all audit scripts before publish — do not skip
+- `prepack` runs `yarn build` before publish; audit/QA scripts run in CI, not prepack
 
 ## Do not read unless asked
 
