@@ -21,7 +21,10 @@ test('loader reconstructs regex objects from the {source,flags} JSON form', () =
   assert.ok(RISKY_INSTALL_PATTERNS.every((r) => r instanceof RegExp))
   assert.ok(ALLOWED_NPX_PATTERN instanceof RegExp)
   // Behavior preserved from the original hand-written regexes.
-  assert.equal(RISKY_INSTALL_PATTERNS.some((r) => r.test('run npx -y create-app')), true)
+  assert.equal(
+    RISKY_INSTALL_PATTERNS.some((r) => r.test('run npx -y create-app')),
+    true,
+  )
   assert.equal(ALLOWED_NPX_PATTERN.test('npx tsx script.ts'), true)
   assert.equal(ANY_NPX_PATTERN.test('npx anything'), true)
   assert.equal(HTTP_URL_PATTERN.test('http://insecure.example'), true)

@@ -1,6 +1,5 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { mkdtempSync, mkdirSync, writeFileSync } from 'node:fs'
@@ -15,7 +14,10 @@ const cli = () => path.resolve('dist/cli.js')
 
 function makeCatalogRoot(items, files = {}) {
   const root = mkdtempSync(path.join(os.tmpdir(), 'haus-validate-catalog-'))
-  writeFileSync(path.join(root, 'manifest.json'), JSON.stringify({ version: '1.0.0', items }, null, 2))
+  writeFileSync(
+    path.join(root, 'manifest.json'),
+    JSON.stringify({ version: '1.0.0', items }, null, 2),
+  )
   for (const [rel, content] of Object.entries(files)) {
     const abs = path.join(root, rel)
     mkdirSync(path.dirname(abs), { recursive: true })
