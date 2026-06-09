@@ -191,7 +191,7 @@ function auditMarkdownContent(manifestDir: string): string[] {
     if (!fs.existsSync(abs)) continue
     walkMd(abs, (file) => {
       const text = fs.readFileSync(file, 'utf8')
-      const rel = path.relative(manifestDir, file)
+      const rel = path.relative(manifestDir, file).replace(/\\/g, '/')
       if (rel.includes('/superpowers/')) return
       const lines = text.split(/\r?\n/)
       for (let i = 0; i < lines.length; i++) {
