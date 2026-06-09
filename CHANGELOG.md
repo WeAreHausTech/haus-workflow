@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.16.3](https://github.com/WeAreHausTech/haus-workflow/compare/v0.16.2...v0.16.3) (2026-06-09)
+
+### Bug Fixes
+
+- **install:** keep skill frontmatter valid by stamping marker as a field ([#79](https://github.com/WeAreHausTech/haus-workflow/issues/79)) ([76ddbf1](https://github.com/WeAreHausTech/haus-workflow/commit/76ddbf1248b8844538363dcfd3744cd975d96f52))
+
 ## [0.16.2](https://github.com/WeAreHausTech/haus-workflow/compare/v0.16.1...v0.16.2) (2026-06-09)
 
 ## [0.16.1](https://github.com/WeAreHausTech/haus-workflow/compare/v0.16.0...v0.16.1) (2026-06-09)
