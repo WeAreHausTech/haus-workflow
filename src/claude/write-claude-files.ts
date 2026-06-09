@@ -269,8 +269,14 @@ async function cleanupStaleCatalogItems(
       if (await fs.pathExists(path.join(root, rel))) existing.push(rel)
     }
     if (existing.length === 0) continue
+    if (entry.hash === undefined) {
+      warn(
+        `Stale catalog item ${entry.id} has no lock hash — leaving in place: ${existing.join(', ')}`,
+      )
+      continue
+    }
     const currentHash = await hashInstalledPaths(root, relPaths)
-    if (entry.hash !== undefined && currentHash !== entry.hash) {
+    if (currentHash !== entry.hash) {
       warn(
         `Stale catalog item ${entry.id} was modified locally — leaving in place: ${existing.join(', ')}`,
       )

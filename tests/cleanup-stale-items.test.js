@@ -176,6 +176,29 @@ test('item deselected via --select but still in manifest is kept', () => {
   assert.deepEqual(lockIds(root), ['demo.a'])
 })
 
+test('removed-from-manifest item with missing lock hash is preserved', () => {
+  const { root, catalogDir } = makeProject('clean-no-hash')
+  const a = skillItem('demo.a')
+  const b = skillItem('demo.b')
+  writeCatalogContent(catalogDir, [a, b])
+  const both = writeManifest(catalogDir, 'manifest-both.json', [a, b])
+  const onlyA = writeManifest(catalogDir, 'manifest-onlyA.json', [a])
+
+  writeRecommendation(root, [a, b])
+  runWrite(root, both, undefined)
+
+  const lockPath = path.join(root, '.haus-workflow/haus.lock.json')
+  const lock = JSON.parse(readFileSync(lockPath, 'utf8'))
+  const bRow = lock.find((r) => r.id === 'demo.b')
+  assert.ok(bRow)
+  delete bRow.hash
+  writeFileSync(lockPath, JSON.stringify(lock, null, 2))
+
+  writeRecommendation(root, [a])
+  runWrite(root, onlyA, undefined)
+  assert.equal(existsSync(path.join(root, b.dest)), true, 'stale item without lock hash kept')
+})
+
 test('empty skill dir is pruned after the last item is removed', () => {
   const { root, catalogDir } = makeProject('clean-prune')
   const b = skillItem('demo.b')
