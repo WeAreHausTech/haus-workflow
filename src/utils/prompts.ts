@@ -4,7 +4,7 @@ import { stdin as input, stdout as output } from 'node:process'
 import readline from 'node:readline/promises'
 
 /** Prompt the user with a question and return their trimmed response. */
-export async function ask(question: string): Promise<string> {
+async function ask(question: string): Promise<string> {
   const rl = readline.createInterface({ input, output })
   try {
     const answer = await rl.question(`${question}\n> `)
