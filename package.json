@@ -18,9 +18,7 @@
     "library/catalog",
     "tests/fixtures/catalog",
     "README.md",
-    "CHANGELOG.md",
-    "LICENSE",
-    "NOTICE"
+    "CHANGELOG.md"
   ],
   "scripts": {
     "build": "tsup src/cli.ts --format esm --dts --clean --out-dir dist --external @inquirer/checkbox",
@@ -34,8 +32,6 @@
     "typecheck": "tsc --noEmit",
     "typecheck:scripts": "tsc --noEmit --project tsconfig.scripts.json",
     "pack:local": "yarn pack",
-    "publish:dry": "npm pack --dry-run",
-    "publish:public": "yarn npm publish --access public",
     "release": "GITHUB_TOKEN=$(gh auth token) release-it",
     "release:dry": "GITHUB_TOKEN=$(gh auth token) release-it --dry-run",
     "prepack": "yarn build",

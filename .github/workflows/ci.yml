@@ -85,9 +85,6 @@ jobs:
             node "$GITHUB_WORKSPACE/dist/cli.js" update --check || true
           )
 
-      - name: Pack
-        run: yarn pack
-
   # Regression-test gate: a `fix:` commit must ship a test. A bug fixed without a
   # test will silently regress; this forces the regression test into the same PR.
   fix-needs-test:
