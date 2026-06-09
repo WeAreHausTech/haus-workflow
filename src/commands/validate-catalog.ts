@@ -15,6 +15,7 @@ import {
   REQUIRED_SKILL_SECTIONS,
   RISKY_INSTALL_PATTERNS,
   SKILL_SECTION_EXEMPT_SOURCES,
+  isVerbatimSuperpowersMarkdownPath,
 } from '../catalog/validation-rules.js'
 import type { CatalogItem } from '../types.js'
 import { readJson } from '../utils/fs.js'
@@ -191,8 +192,8 @@ function auditMarkdownContent(manifestDir: string): string[] {
     if (!fs.existsSync(abs)) continue
     walkMd(abs, (file) => {
       const text = fs.readFileSync(file, 'utf8')
-      const rel = path.relative(manifestDir, file).replace(/\\/g, '/')
-      if (rel.includes('/superpowers/')) return
+      const rel = path.relative(manifestDir, file)
+      if (isVerbatimSuperpowersMarkdownPath(rel)) return
       const lines = text.split(/\r?\n/)
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i] ?? ''
