@@ -4,7 +4,7 @@ commands; they read plain language and approve.
 
 Do this in order:
 
-1. **Detect.** Run `haus setup-project --fast --json`. Read the JSON yourself —
+1. **Detect.** Run `haus setup-project --json`. Read the JSON yourself —
    do not show it. Translate what was detected into one or two plain sentences,
    e.g. "This looks like a Next.js website using Yarn. I found unit tests but no
    end-to-end tests." If the detection status is `unknown` or `partial`, say so
