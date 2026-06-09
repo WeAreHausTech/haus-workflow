@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.18.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.17.1...v0.18.0) (2026-06-09)
+
+### Features
+
+- prune stale catalog copies and simplify validators ([#83](https://github.com/WeAreHausTech/haus-workflow/issues/83)) ([f87541c](https://github.com/WeAreHausTech/haus-workflow/commit/f87541cc182e9cf2461ba6b388dc227aba88900e))
+
+### Bug Fixes
+
+- **validate:** parse folded YAML description frontmatter ([#84](https://github.com/WeAreHausTech/haus-workflow/issues/84)) ([677d7de](https://github.com/WeAreHausTech/haus-workflow/commit/677d7def4e838c4e5381f34c870a5525c4614073))
+
 ## [0.17.1](https://github.com/WeAreHausTech/haus-workflow/compare/v0.17.0...v0.17.1) (2026-06-09)
 
 ### Bug Fixes
