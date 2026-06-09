@@ -95,7 +95,7 @@ top-line HTML comment, keeping `---` on line 1.
 ---
 name: haus-workflow
 description: ...
-haus_managed: "id=skill.haus-workflow v=1 source=@haus-tech/haus-workflow@0.15.0 hash=..."
+haus_managed: "id=skill.haus-workflow v=1 source=@haus-tech/haus-workflow@0.16.2 hash=..."
 ---
 ```
 
@@ -112,6 +112,14 @@ haus_managed: "id=skill.haus-workflow v=1 source=@haus-tech/haus-workflow@0.15.0
 > the frontmatter-marker form for the `haus-workflow` skill — if tier-1 merges first,
 > Task 4/5 here update its install assertions to expect `---` on line 1 plus a real
 > `name`/`description`.
+>
+> Reevaluated against `main` @ 521a55e (v0.16.2): **tier-1 merged** (9c30ce3). Core bug
+> still fully intact — SKILL.md body was edited by 21450c8 but the malformed frontmatter
+> (`## <!--`, no opening `---`) and `header.ts` are unchanged; menu/`AskUserQuestion`
+> instruction still present (SKILL.md:16,:40). Coordination note now **resolved**:
+> `tests/install-roundtrip.test.js` exists (temp-HOME + `applyInstall`, settings/hooks
+> only — no skill-content assertions, no collision). Tasks 4 & 5 below now reuse that
+> harness. ADR-0006 slot still free.
 
 Rationale:
 
@@ -191,15 +199,17 @@ Write `docs/adr/0006-ownership-marking-on-frontmatter-files.md` capturing this.
 - **Acceptance criteria:** Re-running install on an unmodified installed skill is a
   no-op (skipped, hashes match); a user-edited skill is detected and skipped without
   `--force`; `--force` overwrites.
-- **Verification:** extend `tests/install.test.js` with a frontmatter-skill case
-  (install → re-install no-op → edit body → re-install skips → `--force` overwrites).
+- **Verification:** add a frontmatter-skill case to the tier-1 harness
+  `tests/install-roundtrip.test.js` (temp-HOME + `applyInstall`, already merged) — or a
+  sibling file reusing its `mkdtempSync` + `process.env.HOME` stub pattern: install →
+  re-install no-op → edit body → re-install skips → `--force` overwrites.
 - **Dependencies:** Tasks 2, 3.
 
 ### Task 5 — Extend the frontmatter-integrity guard to global install
 
 - **Source doc:** `tests/frontmatter-integrity.test.js`.
-- **Do:** Add a test that runs the global install path (`applyInstall`, or
-  `haus install` against a temp `HOME`/claude dir) and asserts every installed
+- **Do:** Add a test (reuse the merged `tests/install-roundtrip.test.js` temp-HOME +
+  `applyInstall` harness) that runs the global install path and asserts every installed
   `skills/*/SKILL.md`:
   1. has `---` on line 1, and
   2. exposes a real `name` and a `description` that is NOT the HAUS-MANAGED string.
