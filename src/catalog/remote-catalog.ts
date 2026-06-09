@@ -177,7 +177,13 @@ export async function syncRemoteCatalog(): Promise<SyncResult> {
   const failed: string[] = []
 
   for (const item of items) {
-    if ((item.type !== 'skill' && item.type !== 'agent' && item.type !== 'template') || !item.path)
+    if (
+      (item.type !== 'skill' &&
+        item.type !== 'agent' &&
+        item.type !== 'template' &&
+        item.type !== 'command') ||
+      !item.path
+    )
       continue
     if (!isSafeCatalogPath(item.path)) {
       warn(`Skipping ${item.id}: invalid path "${item.path}"`)

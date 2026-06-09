@@ -18,16 +18,16 @@ that has already moved on.
 A second, sharper divergence existed in the **tag allowlist**. The CLI's
 `validate-catalog` enforced an allowlist (`library/catalog/allowed-stacks.json`
 plus a hardcoded set of "always allowed" meta tags), while the catalog's own
-`scripts/validate.mjs` enforced only the *denylist* (`FORBIDDEN_TAGS`). A catalog
+`scripts/validate.mjs` enforced only the _denylist_ (`FORBIDDEN_TAGS`). A catalog
 author could add a tag that passed local `yarn validate` but failed the CLI's
 stricter CI check — exactly what happened during WS1 (`pre-commit`/`lefthook`/
 `config` tags). Worse, the CLI itself had **two** allowlist evaluators with
-*different* special-tag lists (`src/catalog/validate-catalog.ts`, which was dead
+_different_ special-tag lists (`src/catalog/validate-catalog.ts`, which was dead
 code, and `src/commands/validate-catalog.ts`).
 
 The allowlist (`allowed-stacks.json`) deliberately lived in the CLI package, "not
 in the catalog repo", so the catalog would not restrict its own authoring. WS1
-proved that reasoning backwards: the catalog *should* be restricted locally,
+proved that reasoning backwards: the catalog _should_ be restricted locally,
 because it ships the tags the CLI later rejects.
 
 ## Decision
@@ -60,10 +60,10 @@ because it ships the tags the CLI later rejects.
 
 - Editing a rule means editing **one** JSON file. No language port, no "update
   the other file" ritual.
-- A catalog author runs the *same* allowlist check locally that CI enforces; the
+- A catalog author runs the _same_ allowlist check locally that CI enforces; the
   WS1 class of drift cannot recur.
 - The CLI bundles the rules at build time (static JSON import). Validation is
-  release-coupled by design — unlike catalog *content*, which is fetched at
+  release-coupled by design — unlike catalog _content_, which is fetched at
   runtime. A rule change reaches the CLI via the fixture-sync PR, then a release.
 - The CLI no longer has a runtime `readAllowedStacks(root)` seam; the allowlist
   is part of the bundled rules.
@@ -77,3 +77,21 @@ because it ships the tags the CLI later rejects.
   of it.
 - **Leave the allowlist asymmetry alone (constants-only merge).** Rejected: the
   allowlist drift was the concrete failure (WS1), so the fix must cover it.
+
+## Cross-reference: curated verbatim skill import (catalog ADR-0001)
+
+The catalog may ship **curated** skills copied verbatim from upstream (e.g.
+pcvelz/superpowers) whose `SKILL.md` files use `description:` frontmatter instead
+of `## Use when` / `## Do not use when`. Those sections are enforced via manifest
+`whenToUse` / `whenNotToUse` instead.
+
+`validation-rules.json` carries `skillSectionExemptSources: ["curated"]`. Both
+validators skip the section loop when `item.source` is exempt **and** the manifest
+carries both when-fields. The CLI must ship this exemption in a **released** build
+before the catalog PR that adds curated section-less skills can pass
+`haus validate-catalog` CI.
+
+**Landing order:** (1) CLI PR with hand-added `skillSectionExemptSources` in the
+fixture + mirrored validator logic → merge → **npm release**; (2) catalog PR with
+items + identical `validation-rules.json` key → merge; (3) fixture-sync reconciles
+to an identical JSON value → no-op PR. See `haus-workflow-catalog/docs/adr/0001`.

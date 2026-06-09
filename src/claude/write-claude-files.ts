@@ -163,7 +163,13 @@ export async function writeClaudeFiles(
     }
     const sourcePath = catalogItemContentPath(contentRoot, manifestItem)
     const target =
-      item.type === 'agent' ? 'agents' : item.type === 'template' ? 'templates' : 'skills'
+      item.type === 'agent'
+        ? 'agents'
+        : item.type === 'template'
+          ? 'templates'
+          : item.type === 'command'
+            ? 'commands'
+            : 'skills'
     const destination = claudePath(root, target, path.basename(sourcePath))
     if (await fs.pathExists(sourcePath)) {
       if (dryRun) {
