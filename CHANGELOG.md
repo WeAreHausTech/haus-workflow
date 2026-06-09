@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.17.1](https://github.com/WeAreHausTech/haus-workflow/compare/v0.17.0...v0.17.1) (2026-06-09)
+
+### Bug Fixes
+
+- **ci:** fixture-sync push when PR branch already exists ([#82](https://github.com/WeAreHausTech/haus-workflow/issues/82)) ([db0273c](https://github.com/WeAreHausTech/haus-workflow/commit/db0273cec86712b44fad234272ad5f1de353bd25))
+
 ## [0.17.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.16.3...v0.17.0) (2026-06-09)
 
 ### Features
