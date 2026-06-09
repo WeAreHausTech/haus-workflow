@@ -1,7 +1,21 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 
-import { auditForbiddenTagsInText } from '../src/catalog/forbidden-content.js'
+import {
+  auditForbiddenTagsInText,
+  extractFrontmatterDescription,
+} from '../src/catalog/forbidden-content.js'
+
+test('extractFrontmatterDescription reads folded YAML block scalars', () => {
+  const md = `---
+name: demo
+description: >-
+  Use when doing multi-line description work.
+other: x
+---
+`
+  assert.match(extractFrontmatterDescription(md), /multi-line description/)
+})
 
 test('auditForbiddenTagsInText flags forbidden stacks in Use when only', () => {
   const text = `## Use when\n- building python django APIs\n## Do not use when\n- native android apps`
