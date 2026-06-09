@@ -17,16 +17,21 @@ All-in-one entry point for the Haus AI workflow.
 
 ## Task aliases → commands
 
-| Alias(es)                            | Command                 | What it does                                                        |
-| ------------------------------------ | ----------------------- | ------------------------------------------------------------------- |
-| `init`, `setup`                      | _Setup procedure below_ | Full first-time setup: scaffolding, skills, commands + project docs |
-| `apply`, `refresh`, `update-project` | `haus apply --write`    | Re-run setup / refresh `.claude/` context                           |
-| `update`, `upgrade`                  | `haus update`           | Update npm package + catalog + `~/.claude/`                         |
-| `catalog`                            | `haus update`           | Fetch latest catalog (same command as update)                       |
-| `doctor`, `check`                    | `haus doctor`           | Check for install drift                                             |
-| `install`, `global`                  | `haus install`          | Seed `~/.claude/` with haus-owned files                             |
-| `uninstall`                          | `haus uninstall`        | Remove all haus global files from `~/.claude/`                      |
-| `claude-md`, `regenerate`            | `haus apply --write`    | Regenerate root `CLAUDE.md` import block                            |
+Task names use an asymmetric scope convention. The **project:** namespace marks tasks that
+act on **this repo** (`./.claude`, `./.haus-workflow`) — type `project:` to see them all.
+The unprefixed verbs (`update`, `catalog`, `install`, `uninstall`) act on **this machine's
+haus install** (`~/.claude`, npm) — they manage the haus tool itself, like `npm install -g`.
+The short legacy aliases still work but the names below are canonical.
+
+| Task name (legacy aliases)                                        | Command                 | Scope   | What it does                                                                                |
+| ----------------------------------------------------------------- | ----------------------- | ------- | ------------------------------------------------------------------------------------------- |
+| `project:init` (`setup`, `init`)                                  | _Setup procedure below_ | project | First-time setup of an **existing** repo: adds AI skills, commands, workflow + project docs |
+| `project:refresh` (`apply`, `refresh`, `claude-md`, `regenerate`) | `haus apply --write`    | project | Re-run setup / refresh `.claude/` context + regenerate root `CLAUDE.md` import block        |
+| `project:doctor` (`doctor`, `check`)                              | `haus doctor`           | project | Check for install drift                                                                     |
+| `update` (`upgrade`)                                              | `haus update`           | global  | Update npm package + catalog + `~/.claude/` (also refreshes this project)                   |
+| `catalog`                                                         | `haus update`           | global  | Fetch latest catalog (same command as update)                                               |
+| `install` (`global`)                                              | `haus install`          | global  | Seed `~/.claude/` with haus-owned files                                                     |
+| `uninstall`                                                       | `haus uninstall`        | global  | Remove all haus global files from `~/.claude/`                                              |
 
 ## Step 1 — Determine the task
 
@@ -37,16 +42,14 @@ All-in-one entry point for the Haus AI workflow.
 ```
 Question: "What would you like to do?"
 Options:
-  1. Set up this project for the first time
-     (full setup — scaffolding + skills + commands, then a deep read to write the CLAUDE.md docs body + docs/)
-  2. Refresh project setup
+  1. [project] project:init — add haus to an existing project for the first time
+     (AI skills + commands + workflow into a repo you already have, then a deep read to write the CLAUDE.md docs body + docs/)
+  2. [project] project:refresh — refresh this project's setup
      (haus apply --write — re-runs setup, regenerates CLAUDE.md imports)
-  3. Update haus package + catalog + global files
+  3. [global] update — update haus package + catalog + global files
      (haus update — checks npm for new version, fetches catalog, refreshes ~/.claude/)
-  4. Fetch catalog updates only
+  4. [global] catalog — fetch catalog updates only
      (haus update — same command; pulls latest workflow templates and lockfile)
-  5. Regenerate CLAUDE.md import block
-     (haus apply --write — rewrites the @-import block at the root CLAUDE.md)
 ```
 
 Map the user's selection to the command from the alias table, then continue to Step 2.
@@ -55,13 +58,13 @@ Map the user's selection to the command from the alias table, then continue to S
 
 Run the mapped command via Bash. Quote the exact command you are running before executing it.
 
-**Exception — `setup` / `init`:** this maps to a multi-step procedure, not a single command. Do not run a bare `haus init`. Skip to **Setup (`setup` / `init`)** under Step 3 and follow it.
+**Exception — `project:init` (`setup` / `init`):** this maps to a multi-step procedure, not a single command. Do not run a bare `haus init`. Skip to **Setup (`project:init`)** under Step 3 and follow it.
 
 ## Step 3 — Post-run steps
 
 After the command completes, follow the relevant post-run steps below.
 
-### Setup (`setup` / `init`)
+### Setup (`project:init`)
 
 1. Open and follow `~/.claude/commands/haus-setup.md` — the installed `haus-setup` command (in some projects also `.claude/commands/haus-setup.md`). Run every step in order. It detects the stack, asks the guided questions, runs `haus apply --write` (scaffolding, skills, commands, rules, docs skill), writes the **project docs** (`CLAUDE.md` body + `docs/`) and `.haus-workflow/deep-context.json`, runs `haus recommend`, applies the newly-matched helpers, and confirms.
 2. Then fill `.haus-workflow/workflow-config.md` — replace every placeholder (`TODO`, `n/a`, empty): test/lint/typecheck/build commands (check `package.json`), docs paths, validation library, pre-commit tool, highest-stakes logic (ask if unclear). Leave none.

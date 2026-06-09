@@ -29,13 +29,17 @@ and configures the repo for you.
 
 Once installed, Claude Code gains a `/haus-workflow` slash command.
 
+The `project:*` tasks act on the current repo. The unprefixed verbs (`update`,
+`catalog`, `install`, `uninstall`) manage the haus tool itself on your machine
+(`~/.claude` + npm), like `npm install -g`. The short legacy names still work.
+
 ```
-/haus-workflow          # interactive menu — pick setup, update, refresh, etc.
-/haus-workflow setup    # full first-time setup — scaffolding, skills, commands + docs (runs the /haus-setup flow)
-/haus-workflow apply    # refresh .claude/ and regenerate CLAUDE.md imports
-/haus-workflow update   # update npm package + catalog + ~/.claude/
-/haus-workflow catalog  # fetch only latest catalog
-/haus-workflow doctor   # health check for drift
+/haus-workflow                 # interactive menu — pick a task
+/haus-workflow project:init    # [project] add haus to an EXISTING repo — AI skills, commands, workflow + docs
+/haus-workflow project:refresh # [project] refresh .claude/ and regenerate CLAUDE.md imports
+/haus-workflow project:doctor  # [project] health check for drift
+/haus-workflow update          # [global]  update npm package + catalog + ~/.claude/
+/haus-workflow catalog         # [global]  fetch only the latest catalog
 ```
 
 Without an argument, the skill presents a menu so you can pick the task. With an argument, it runs immediately.
