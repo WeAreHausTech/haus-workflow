@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.18.1](https://github.com/WeAreHausTech/haus-workflow/compare/v0.18.0...v0.18.1) (2026-06-09)
+
+### Bug Fixes
+
+- **ci:** improve PR creation logic in sync-catalog-fixture workflow ([d7717d6](https://github.com/WeAreHausTech/haus-workflow/commit/d7717d6024bb400b02f3254ff7f2d33b6e1fb4c6))
+
 ## [0.18.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.17.1...v0.18.0) (2026-06-09)
 
 ### Features
