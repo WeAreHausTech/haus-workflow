@@ -28,11 +28,10 @@ const ART = ['recommendation.json', 'recommended-hooks.json', 'recommended-rules
 // This asserts the core writes the full artifact set parameterized on root.
 test('setup core writes scan + recommendation + hooks + rules artifacts', () => {
   const temp = makeFixture()
-  const r = execaSync(
-    'node',
-    [path.resolve('dist/cli.js'), 'setup-project', '--fast', '--json'],
-    { cwd: temp, reject: false },
-  )
+  const r = execaSync('node', [path.resolve('dist/cli.js'), 'setup-project', '--json'], {
+    cwd: temp,
+    reject: false,
+  })
   assert.equal(r.exitCode, 0, `stderr: ${r.stderr}`)
 
   assert.ok(
@@ -40,10 +39,7 @@ test('setup core writes scan + recommendation + hooks + rules artifacts', () => 
     'context-map.json not written',
   )
   for (const f of ART) {
-    assert.ok(
-      existsSync(path.join(temp, '.haus-workflow', f)),
-      `${f} not written by setup core`,
-    )
+    assert.ok(existsSync(path.join(temp, '.haus-workflow', f)), `${f} not written by setup core`)
   }
 
   const rules = JSON.parse(
@@ -63,11 +59,10 @@ test('setup core writes scan + recommendation + hooks + rules artifacts', () => 
 // In --json mode the core runs with apply:false → no Claude files written.
 test('setup core in json/preview mode does not write .claude/ files', () => {
   const temp = makeFixture()
-  const r = execaSync(
-    'node',
-    [path.resolve('dist/cli.js'), 'setup-project', '--fast', '--json'],
-    { cwd: temp, reject: false },
-  )
+  const r = execaSync('node', [path.resolve('dist/cli.js'), 'setup-project', '--json'], {
+    cwd: temp,
+    reject: false,
+  })
   assert.equal(r.exitCode, 0, `stderr: ${r.stderr}`)
   assert.ok(
     !existsSync(path.join(temp, '.claude/CLAUDE.md')),

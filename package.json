@@ -1,6 +1,6 @@
 {
   "name": "@haus-tech/haus-workflow",
-  "version": "0.16.0",
+  "version": "0.16.2",
   "description": "Haus AI workflow CLI for Claude Code.",
   "type": "module",
   "bin": {
