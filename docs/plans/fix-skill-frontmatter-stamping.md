@@ -104,6 +104,14 @@ haus_managed: "id=skill.haus-workflow v=1 source=@haus-tech/haus-workflow@0.15.0
 > e7cbd07 lockfile-drift work (`src/update/lockfile.ts`, `driftCount`/`drift`) is
 > **project-scoped** (`haus.lock.json`), distinct from the global-install manifest
 > this plan touches — no interaction. ADR slot 0006 still free.
+>
+> Reevaluated against `main` @ 0ca98f7 (v0.16.0): no relevant code changed since
+> e7cbd07 (only catalog fixtures + release). Core bug, header logic, and ADR-0006 slot
+> all unchanged. **Coordination note:** `docs/plans/test-tier1-coverage.md` Task 3 adds
+> `tests/install-roundtrip.test.js` via `applyInstall`. Whichever lands second must use
+> the frontmatter-marker form for the `haus-workflow` skill — if tier-1 merges first,
+> Task 4/5 here update its install assertions to expect `---` on line 1 plus a real
+> `name`/`description`.
 
 Rationale:
 
