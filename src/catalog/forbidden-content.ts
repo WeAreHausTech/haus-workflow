@@ -20,13 +20,32 @@ function extractUseWhenSection(text: string): string {
   return next < 0 ? tail : tail.slice(0, next)
 }
 
+/** YAML block-scalar header: `>`, `>-`, `>2`, `|- # note`, etc. */
+function isYamlBlockScalarHeader(rest: string): boolean {
+  return /^[>|][-+]?(\d+)?(?:\s+#.*)?$/.test(rest)
+}
+
 /** Extracts the YAML frontmatter `description:` value (the superpowers when-signal). */
 export function extractFrontmatterDescription(text: string): string {
   const m = text.match(/^---\r?\n([\s\S]*?)\r?\n---/)
   if (!m) return ''
-  const dm = m[1]!.match(/^description:[ \t]*(.*)$/m)
-  if (!dm) return ''
-  return dm[1]!.replace(/^["']|["']$/g, '').trim()
+  const lines = m[1]!.split(/\r?\n/)
+  const idx = lines.findIndex((l) => /^description:[ \t]*/.test(l))
+  if (idx < 0) return ''
+  const rest = lines[idx]!.replace(/^description:[ \t]*/, '').trim()
+  if (!rest) return ''
+  if (!isYamlBlockScalarHeader(rest)) {
+    return rest.replace(/^["']|["']$/g, '').trim()
+  }
+  const body: string[] = []
+  for (let j = idx + 1; j < lines.length; j++) {
+    const line = lines[j]!
+    if (/^[a-zA-Z_][\w.-]*:[ \t]/.test(line)) break
+    if (line.trim() === '') continue
+    if (/^\s+/.test(line)) body.push(line.trimStart())
+    else break
+  }
+  return body.join(' ').replace(/\s+/g, ' ').trim()
 }
 
 /**
