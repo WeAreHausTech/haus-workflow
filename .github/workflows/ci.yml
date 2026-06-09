@@ -88,6 +88,35 @@ jobs:
       - name: Pack
         run: yarn pack
 
+  # Packed-tarball smoke: install the published artifact into a clean consumer and
+  # run the shipped bin. Catches a missing `files` entry, broken bin shebang, ESM
+  # resolution failure, or unbundled dependency that the in-repo `dist/cli.js` smoke
+  # cannot see. Packs with `npm pack` to match the `npm publish` release path.
+  pack-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Setup Node
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        with:
+          node-version: '22'
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install
+        run: yarn install --immutable --check-cache
+
+      - name: Build
+        run: yarn build
+
+      - name: Pack-and-install smoke
+        env:
+          HAUS_NO_POSTINSTALL: '1'
+        run: node scripts/pack-smoke.mjs
+
   # Regression-test gate: a `fix:` commit must ship a test. A bug fixed without a
   # test will silently regress; this forces the regression test into the same PR.
   fix-needs-test:
