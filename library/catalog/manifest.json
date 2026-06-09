@@ -1,5 +1,5 @@
 {
-  "version": "2.5.0",
+  "version": "2.6.1",
   "items": [
     {
       "id": "haus.nextjs-patterns",
@@ -1650,7 +1650,7 @@
     },
     {
       "id": "haus.superpowers-brainstorming",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "source": "curated",
       "type": "skill",
       "path": "skills/superpowers/brainstorming",
