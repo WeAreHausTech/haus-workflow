@@ -50,10 +50,24 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           BRANCH="chore/sync-catalog-fixture"
-          git checkout -B "$BRANCH"
+          CATALOG_MANIFEST_URL="https://raw.githubusercontent.com/WeAreHausTech/haus-workflow-catalog/main/manifest.json"
+          CATALOG_RULES_URL="https://raw.githubusercontent.com/WeAreHausTech/haus-workflow-catalog/main/validation-rules.json"
+          git fetch origin main
+          git fetch origin "$BRANCH" || true
+          LEASE_REF=""
+          if git show-ref --verify --quiet "refs/remotes/origin/$BRANCH"; then
+            LEASE_REF="$(git rev-parse "origin/$BRANCH")"
+          fi
+          git checkout -B "$BRANCH" origin/main
+          curl -fsSL "$CATALOG_MANIFEST_URL" -o library/catalog/manifest.json
+          curl -fsSL "$CATALOG_RULES_URL" -o library/catalog/validation-rules.json
           git add library/catalog/manifest.json library/catalog/validation-rules.json
           git commit -m "chore(catalog): sync fixtures from haus-workflow-catalog main"
-          git push --force-with-lease origin "$BRANCH"
+          if [ -n "$LEASE_REF" ]; then
+            git push --force-with-lease="$BRANCH:$LEASE_REF" origin "HEAD:$BRANCH"
+          else
+            git push -u origin "HEAD:$BRANCH"
+          fi
           if ! gh pr view "$BRANCH" --json number >/dev/null 2>&1; then
             gh pr create \
               --base main \
