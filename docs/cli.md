@@ -164,7 +164,7 @@ Validate a catalog manifest file.
 `haus install` seeds `~/.claude/commands/` so these appear in the `/` menu of every
 project — including before first setup, the main discovery path for non-developers:
 
-- `/haus-setup` — agent runs `haus setup-project --fast --json`, narrates detection in
+- `/haus-setup` — agent runs `haus setup-project --json`, narrates detection in
   plain language, asks the guided questions as chat, writes the answers, then applies.
 - `/haus-doctor` — agent runs `haus doctor` and relays the verdict in plain language.
 - `/haus-fix` — agent runs `haus doctor` then applies each suggested fix.

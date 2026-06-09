@@ -31,7 +31,7 @@ Once installed, Claude Code gains a `/haus-workflow` slash command.
 
 ```
 /haus-workflow          # interactive menu — pick setup, update, refresh, etc.
-/haus-workflow init     # first-time project setup
+/haus-workflow setup    # full first-time setup — scaffolding, skills, commands + docs (runs the /haus-setup flow)
 /haus-workflow apply    # refresh .claude/ and regenerate CLAUDE.md imports
 /haus-workflow update   # update npm package + catalog + ~/.claude/
 /haus-workflow catalog  # fetch only latest catalog
