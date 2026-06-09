@@ -21,6 +21,16 @@ export async function writeJson(file: string, value: unknown): Promise<void> {
   await fs.writeFile(file, `${JSON.stringify(value, null, 2)}\n`, 'utf8')
 }
 
+/** Removes `dir` when it is empty, to avoid leaving ghost directories after deleting files. */
+export async function pruneEmptyDir(dir: string): Promise<void> {
+  try {
+    const entries = await fs.readdir(dir)
+    if (entries.length === 0) await fs.remove(dir)
+  } catch {
+    /* ignore */
+  }
+}
+
 /** Read a text file, returning `undefined` instead of throwing on missing files. */
 export async function readText(file: string): Promise<string | undefined> {
   try {

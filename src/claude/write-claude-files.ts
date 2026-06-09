@@ -11,12 +11,12 @@ import { CATALOG_REF } from '../catalog/constants.js'
 import { catalogItemContentPath, loadCatalogContext } from '../catalog/load-catalog.js'
 import type { Recommendation } from '../types.js'
 import { hashInstalledPaths } from '../update/hash-installed.js'
-import { createUnifiedDiff, hasTextChanged, summarizeDiff } from '../utils/diff.js'
-import { readJson, writeText } from '../utils/fs.js'
+import { pruneEmptyDir, readJson } from '../utils/fs.js'
 import { log, warn } from '../utils/logger.js'
 import { claudePath, displayPath, hausPath, packageRoot } from '../utils/paths.js'
 
 import { DEFAULT_HOOKS_CONFIG } from './load-hooks-config.js'
+import { writeManagedJson, writeManagedText } from './managed-write.js'
 import { applyProjectSettingsMerge, mergeProjectSettings } from './merge-project-settings.js'
 import { assertPostApplySettingsHausContract } from './verify-hooks-contract.js'
 import { writeRootClaudeMd } from './write-root-claude-md.js'
@@ -293,52 +293,4 @@ async function cleanupStaleCatalogItems(
       log(`Removed stale ${displayPath(root, abs)} (${entry.id})`)
     }
   }
-}
-
-/** Removes `dir` when it becomes empty after deleting a stale item, avoiding ghost dirs. */
-async function pruneEmptyDir(dir: string): Promise<void> {
-  try {
-    const entries = await fs.readdir(dir)
-    if (entries.length === 0) await fs.remove(dir)
-  } catch {
-    /* ignore */
-  }
-}
-
-/** Write a text file only when content has changed; in dry-run mode, log the diff instead. */
-async function writeManagedText(
-  root: string,
-  filePath: string,
-  nextText: string,
-  dryRun: boolean,
-): Promise<void> {
-  const prev = (await fs.pathExists(filePath)) ? await fs.readFile(filePath, 'utf8') : ''
-  const printable = displayPath(root, filePath)
-  if (dryRun) {
-    if (!prev) {
-      log(createUnifiedDiff(printable, '', nextText))
-    } else if (hasTextChanged(prev, nextText)) {
-      log(createUnifiedDiff(printable, prev, nextText))
-    } else {
-      log(`${printable}: unchanged`)
-    }
-    return
-  }
-  if (hasTextChanged(prev, nextText) && prev.length > 0) {
-    const diffText = createUnifiedDiff(printable, prev, nextText)
-    const summary = summarizeDiff(diffText)
-    log(`Overwriting ${printable} (diff +${summary.additions} -${summary.deletions})`)
-  }
-  await writeText(filePath, nextText)
-}
-
-/** Serialize `value` to pretty-printed JSON then delegate to `writeManagedText`. */
-async function writeManagedJson(
-  root: string,
-  filePath: string,
-  value: unknown,
-  dryRun: boolean,
-): Promise<void> {
-  const nextText = `${JSON.stringify(value, null, 2)}\n`
-  await writeManagedText(root, filePath, nextText, dryRun)
 }

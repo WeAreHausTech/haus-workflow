@@ -9,10 +9,7 @@ import path from 'node:path'
 
 import fs from 'fs-extra'
 
-import { createUnifiedDiff, hasTextChanged, summarizeDiff } from '../utils/diff.js'
-import { writeText } from '../utils/fs.js'
-import { log } from '../utils/logger.js'
-import { displayPath } from '../utils/paths.js'
+import { writeManagedText } from './managed-write.js'
 
 /** Opening sentinel for the managed import block inside CLAUDE.md. */
 export const BLOCK_BEGIN = '<!-- HAUS:BEGIN haus-imports v=1 -->'
@@ -33,8 +30,9 @@ export function buildImportBlock(): string {
 /** Removes the managed haus import block from CLAUDE.md, preserving surrounding user content. */
 export function stripHausBlock(existing: string): string {
   const beginIdx = existing.indexOf(BLOCK_BEGIN)
-  const endIdx = existing.indexOf(BLOCK_END)
-  if (beginIdx === -1 || endIdx === -1 || endIdx <= beginIdx) return existing
+  if (beginIdx === -1) return existing
+  const endIdx = existing.indexOf(BLOCK_END, beginIdx + BLOCK_BEGIN.length)
+  if (endIdx === -1) return existing
   const before = existing.slice(0, beginIdx)
   const after = existing.slice(endIdx + BLOCK_END.length)
   const merged = `${before}${after}`.replace(/\n{3,}/g, '\n\n').trimEnd()
@@ -43,9 +41,9 @@ export function stripHausBlock(existing: string): string {
 
 export function injectHausBlock(existing: string, block: string): string {
   const beginIdx = existing.indexOf(BLOCK_BEGIN)
-  const endIdx = existing.indexOf(BLOCK_END)
+  const endIdx = beginIdx === -1 ? -1 : existing.indexOf(BLOCK_END, beginIdx + BLOCK_BEGIN.length)
 
-  if (beginIdx !== -1 && endIdx !== -1 && endIdx > beginIdx) {
+  if (beginIdx !== -1 && endIdx !== -1) {
     const before = existing.slice(0, beginIdx)
     const after = existing.slice(endIdx + BLOCK_END.length)
     return `${before}${block}${after}`
@@ -67,25 +65,7 @@ export async function writeRootClaudeMd(root: string, dryRun: boolean): Promise<
   const block = buildImportBlock()
   const prev = (await fs.pathExists(filePath)) ? await fs.readFile(filePath, 'utf8') : ''
   const next = injectHausBlock(prev, block)
-  const printable = displayPath(root, filePath)
 
-  if (dryRun) {
-    if (!prev) {
-      log(createUnifiedDiff(printable, '', next))
-    } else if (hasTextChanged(prev, next)) {
-      log(createUnifiedDiff(printable, prev, next))
-    } else {
-      log(`${printable}: unchanged`)
-    }
-    return filePath
-  }
-
-  if (hasTextChanged(prev, next) && prev.length > 0) {
-    const diffText = createUnifiedDiff(printable, prev, next)
-    const summary = summarizeDiff(diffText)
-    log(`Overwriting ${printable} (diff +${summary.additions} -${summary.deletions})`)
-  }
-
-  await writeText(filePath, next)
+  await writeManagedText(root, filePath, next, dryRun)
   return filePath
 }
