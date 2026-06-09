@@ -31,6 +31,22 @@ export function runHaus(cwd, command) {
   return result.stdout
 }
 
+/**
+ * Run the built CLI and capture stdout, stderr, and exit code without throwing on
+ * a nonzero exit. Unlike runHaus, this lets a test assert the guard deny path
+ * (exitCode 1 + JSON on stdout). `args` is an array (no shell tokenization);
+ * `input` is piped to the process stdin to emulate a Claude Code hook payload.
+ */
+export function runHausRaw(cwd, args, { input } = {}) {
+  return execaSync('node', [cliPath(), ...args], {
+    cwd,
+    input,
+    env: hausEnv(),
+    reject: false,
+  })
+  // returns { stdout, stderr, exitCode }
+}
+
 export function readHausJson(cwd, fileName) {
   const file = path.join(cwd, '.haus-workflow', fileName)
   return JSON.parse(fs.readFileSync(file, 'utf8'))
