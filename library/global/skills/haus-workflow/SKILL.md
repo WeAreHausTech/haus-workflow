@@ -1,8 +1,6 @@
-## <!-- HAUS-MANAGED id=skill.haus-workflow v=2 source=@haus-tech/haus-workflow@0.1.0 -->
-
+---
 name: haus-workflow
 description: Haus all-in-one workflow skill. Handles project setup, update, catalog refresh, and CLAUDE.md regeneration. Invoke with a task name or without to get a menu.
-
 ---
 
 # haus-workflow

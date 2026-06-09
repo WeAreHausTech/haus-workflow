@@ -23,6 +23,21 @@ required one (keep it a minimal curated subset). If the new required field is
 deliberately omitted, add it to `requiredOmitExempt` in `contract-check.mjs` — a
 conscious decoupling decision.
 
+## Installed skill shows wrong description / no menu in Claude Desktop
+
+**Symptom:** `/haus-workflow` with no task does not present its `AskUserQuestion`
+menu in Claude Desktop, and/or the skill's description shows as a literal
+`<!-- HAUS-MANAGED ... -->` comment. **Cause:** the global install stamped the
+ownership marker as an HTML comment on line 1 of `SKILL.md`, pushing the YAML
+frontmatter off line 1 so Claude Code could not register the skill correctly
+(see ADR-0006). **Fix:** the marker now lives inside the frontmatter as a
+`haus_managed:` field (`src/install/header.ts`); re-run `haus install` (or
+`haus install --force` if the file was hand-edited) to restamp. Verify the
+installed `~/.claude/skills/haus-workflow/SKILL.md` starts with `---` on line 1
+and carries a real `name`/`description`. Then confirm in Desktop that the menu
+appears; if it still does not after a valid frontmatter install, the gap is
+client-side `AskUserQuestion` rendering, not the skill file — raise separately.
+
 ## Coverage ratchet says raise the floor
 
 **Symptom:** `coverage-ratchet.mjs` prints a non-fatal hint
