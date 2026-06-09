@@ -35,22 +35,27 @@ Output: `.haus-workflow/recommendation.json`
 
 ### `haus apply [--dry-run] [--write] [--select] [--allow-empty-cache] [--refill-config]`
 
-Materialize catalog assets into `.claude/`.
+Materialize catalog assets into `.claude/` (skills, agents, commands, templates).
 
 - `--dry-run` — preview what would be written without writing
 - `--write` — write `.claude/` files, `.haus-workflow/selected-context.json`, and `.haus-workflow/haus.lock.json`
-- `--select` — interactively select catalog items before applying
+- `--select` — interactively select catalog items before applying (deselected items that remain in the catalog are **not** removed from disk)
 - `--allow-empty-cache` — apply core files only when catalog cache is empty (skip catalog items without error)
 - `--refill-config` — fill still-blank `<!-- fill in -->` fields in `workflow-config.md` from auto-detected values, without touching fields you've edited
+
+**Stale cleanup:** before rewriting the lock, apply compares the previous
+`haus.lock.json` against the current catalog manifest. Items removed upstream are
+deleted from `.claude/` when their content still matches the recorded lock hash;
+user-modified copies are left in place with a warning. Empty parent dirs are pruned.
 
 After writing `.claude/settings.json`, apply runs a self-check that it matches `CANONICAL_HOOKS` in `src/claude/load-hooks.ts`. Throws on drift.
 
 ### `haus update [--check]`
 
-Sync remote catalog and refresh lockfile.
+Sync remote catalog, refresh global install (`~/.claude/`), and re-apply project files.
 
 - `--check` — validate lock presence and version fields; exit non-zero if stale
-- (no flag) — back up lockfile to `.haus-workflow/backups/`, recompute per-item hashes from current files, print unified lock diff
+- (no flag) — back up lockfile to `.haus-workflow/backups/`, fetch latest catalog into cache, refresh global `haus install`, re-run project apply (including stale-item cleanup), recompute per-item hashes, print unified lock diff
 
 ---
 
@@ -147,7 +152,9 @@ Re-scan the project (fast mode), refresh `.haus-workflow/sources-report.json`, a
 
 ### `haus undo [-y | --yes]`
 
-Remove `.claude/` and `.haus-workflow/` from the current project. Use `-y` / `--yes` to skip confirmation.
+Remove haus-managed project files: lock-tracked catalog paths, core rules/commands,
+and haus portions of `settings.json` / root `CLAUDE.md`. User-owned `.claude/` content
+and scan artifacts under `.haus-workflow/` are preserved. Use `-y` / `--yes` to skip confirmation.
 
 ### `haus catalog-audit`
 
@@ -155,7 +162,13 @@ Audit local catalog manifest for issues.
 
 ### `haus validate-catalog [manifest]`
 
-Validate a catalog manifest file.
+Validate a catalog manifest and on-disk content. Used by catalog repo CI.
+
+Checks include: manifest structure, file existence, skill frontmatter `description:`,
+agent required sections + banned phrases, safety scans (forbidden stack tags, risky
+install patterns, `npx tsx`-only allowlist, tag allowlist), and `source: curated` +
+`reviewStatus: approved` gate. Rules load from bundled `library/catalog/validation-rules.json`
+(synced from catalog — ADR-0001).
 
 ---
 

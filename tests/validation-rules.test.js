@@ -12,7 +12,7 @@ import {
   ALLOWED_STACKS,
   ALWAYS_ALLOWED_TAGS,
   PATTERN_TAG_SUFFIXES,
-  SKILL_SECTION_EXEMPT_SOURCES,
+  REQUIRED_SKILL_FRONTMATTER,
   isTagAllowed,
   auditDisallowedTags,
 } from '../src/catalog/validation-rules.ts'
@@ -64,7 +64,7 @@ test('CLI fixture has every required key (a malformed sync would drop one)', () 
   for (const key of [
     'forbiddenTags',
     'bannedAgentPhrases',
-    'requiredSkillSections',
+    'requiredSkillFrontmatter',
     'requiredAgentSections',
     'riskyInstallPatterns',
     'allowedNpxPattern',
@@ -74,12 +74,11 @@ test('CLI fixture has every required key (a malformed sync would drop one)', () 
     'allowedStacks',
     'alwaysAllowedTags',
     'patternTagSuffixes',
-    'skillSectionExemptSources',
   ]) {
     assert.ok(key in json, `missing key in fixture: ${key}`)
   }
 })
 
-test('skillSectionExemptSources loads curated from the canonical JSON', () => {
-  assert.deepEqual([...SKILL_SECTION_EXEMPT_SOURCES], ['curated'])
+test('requiredSkillFrontmatter loads description from the canonical JSON', () => {
+  assert.deepEqual([...REQUIRED_SKILL_FRONTMATTER], ['description'])
 })

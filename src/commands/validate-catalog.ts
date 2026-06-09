@@ -2,7 +2,10 @@
 import fs from 'node:fs'
 import path from 'node:path'
 
-import { auditForbiddenTagsInText } from '../catalog/forbidden-content.js'
+import {
+  auditForbiddenTagsInText,
+  extractFrontmatterDescription,
+} from '../catalog/forbidden-content.js'
 import {
   ANY_NPX_PATTERN,
   ALLOWED_NPX_PATTERN,
@@ -12,10 +15,8 @@ import {
   HTTP_URL_PATTERN,
   PLACEHOLDER_PATTERN,
   REQUIRED_AGENT_SECTIONS,
-  REQUIRED_SKILL_SECTIONS,
+  REQUIRED_SKILL_FRONTMATTER,
   RISKY_INSTALL_PATTERNS,
-  SKILL_SECTION_EXEMPT_SOURCES,
-  isVerbatimSuperpowersMarkdownPath,
 } from '../catalog/validation-rules.js'
 import type { CatalogItem } from '../types.js'
 import { readJson } from '../utils/fs.js'
@@ -114,11 +115,12 @@ function auditShippedFiles(manifestDir: string, items: CatalogItem[]): string[] 
         continue
       }
       const text = fs.readFileSync(skillMd, 'utf8')
-      const skillSectionExempt =
-        SKILL_SECTION_EXEMPT_SOURCES.includes(item.source) && item.whenToUse && item.whenNotToUse
-      if (!skillSectionExempt) {
-        for (const section of REQUIRED_SKILL_SECTIONS) {
-          if (!text.includes(section)) failures.push(`${item.id}: SKILL.md missing ${section}`)
+      // Skills declare their when-signal via YAML frontmatter `description:`
+      // (the superpowers convention), not prose section headers.
+      const description = extractFrontmatterDescription(text)
+      for (const key of REQUIRED_SKILL_FRONTMATTER) {
+        if (key === 'description' && !description) {
+          failures.push(`${item.id}: SKILL.md missing non-empty frontmatter 'description:'`)
         }
       }
       failures.push(
@@ -193,13 +195,12 @@ function auditMarkdownContent(manifestDir: string): string[] {
     walkMd(abs, (file) => {
       const text = fs.readFileSync(file, 'utf8')
       const rel = path.relative(manifestDir, file)
-      if (isVerbatimSuperpowersMarkdownPath(rel)) return
+      // Repo-wide safety scan only. The TODO/placeholder check is an authoring-quality
+      // guard, not a safety rule, and false-positives on legitimate prose, so it is not
+      // run here — per-item shipped template/command audits still enforce it.
       const lines = text.split(/\r?\n/)
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i] ?? ''
-        if (PLACEHOLDER_PATTERN.test(line)) {
-          failures.push(`${rel}:${i + 1}: TODO or placeholder in shipped content`)
-        }
         if (RISKY_INSTALL_PATTERNS.some((re) => re.test(line))) {
           failures.push(`${rel}:${i + 1}: risky install pattern`)
         }

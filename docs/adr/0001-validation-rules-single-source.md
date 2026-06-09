@@ -80,18 +80,24 @@ because it ships the tags the CLI later rejects.
 
 ## Cross-reference: curated verbatim skill import (catalog ADR-0001)
 
-The catalog may ship **curated** skills copied verbatim from upstream (e.g.
-pcvelz/superpowers) whose `SKILL.md` files use `description:` frontmatter instead
-of `## Use when` / `## Do not use when`. Those sections are enforced via manifest
-`whenToUse` / `whenNotToUse` instead.
+The catalog ships **curated** skills copied verbatim from upstream (e.g.
+pcvelz/superpowers) whose `SKILL.md` files use `description:` frontmatter rather
+than `## Use when` / `## Do not use when` headers.
 
-`validation-rules.json` carries `skillSectionExemptSources: ["curated"]`. Both
-validators skip the section loop when `item.source` is exempt **and** the manifest
-carries both when-fields. The CLI must ship this exemption in a **released** build
-before the catalog PR that adds curated section-less skills can pass
-`haus validate-catalog` CI.
+Rather than special-casing curated content, the skill rule adopts the superpowers
+convention for **all** skills: `validation-rules.json` carries
+`requiredSkillFrontmatter: ["description"]`, and both validators require a non-empty
+frontmatter `description:` instead of section headers. Haus-owned skills already
+carry `description:`, so no migration was required. The previous
+`skillSectionExemptSources: ["curated"]` exemption — and the `/superpowers/`
+markdown-walk skip plus the CLI `isVerbatimSuperpowersMarkdownPath()` helper — were
+removed. The TODO/placeholder scan (an authoring guard, not a safety rule) runs only
+on shipped template/command items, not in the repo-wide walk, so curated prose that
+discusses TODOs no longer needs path-based exemption.
 
-**Landing order:** (1) CLI PR with hand-added `skillSectionExemptSources` in the
-fixture + mirrored validator logic → merge → **npm release**; (2) catalog PR with
-items + identical `validation-rules.json` key → merge; (3) fixture-sync reconciles
-to an identical JSON value → no-op PR. See `haus-workflow-catalog/docs/adr/0001`.
+**Landing order:** (1) CLI PR with the updated validator logic + fixture
+`validation-rules.json` (`requiredSkillFrontmatter`) → merge → **npm release**;
+(2) catalog PR with the identical canonical JSON + validator logic → merge;
+(3) fixture-sync reconciles to an identical JSON value → no-op PR;
+`contract-drift` on CLI main green once the catalog change is on `main`.
+See `haus-workflow-catalog/docs/adr/0001`.

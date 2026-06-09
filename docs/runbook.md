@@ -38,6 +38,16 @@ and carries a real `name`/`description`. Then confirm in Desktop that the menu
 appears; if it still does not after a valid frontmatter install, the gap is
 client-side `AskUserQuestion` rendering, not the skill file — raise separately.
 
+## Stale catalog item not removed after update
+
+**Symptom:** An item was removed from the catalog manifest but its copy remains under
+`.claude/skills/` (or agents/commands/templates) after `haus update`. **Cause:** apply
+only deletes stale items when on-disk content still matches the hash in
+`haus.lock.json` — if you edited the file locally, cleanup skips it with a warning.
+**Fix:** delete the path manually, or restore the original content and re-run
+`haus apply --write` / `haus update`. Items you deselected with `apply --select` but
+that still exist in the catalog are intentionally left in place.
+
 ## Coverage ratchet says raise the floor
 
 **Symptom:** `coverage-ratchet.mjs` prints a non-fatal hint

@@ -66,12 +66,13 @@ haus setup-project     # re-run setup on existing project
 haus scan              # scan repo and write context-map
 haus recommend         # recommend catalog items (binary eligibility)
 haus apply --dry-run   # preview what would be written
-haus apply --write     # write .claude/ files
+haus apply --write     # write .claude/ files (skills, agents, commands, templates)
+haus apply --select    # interactively choose which recommended items to install
 haus apply --refill-config    # fill still-blank workflow-config.md fields, keep edits
 haus context --task "<task>"  # select context rules for a task (token-budgeted)
-haus update                   # sync remote catalog + refresh lockfile
+haus update                   # sync remote catalog + re-apply project files
 haus update --check           # check for updates without applying
-haus undo                     # undo last applied changes
+haus undo                     # remove haus-managed project files (lock-tracked paths)
 haus doctor                   # health check: hooks, CLAUDE.md, imports, catalog cache
 haus config                   # manage hook configuration
 haus guard                    # test bash/file-access guards
@@ -91,9 +92,19 @@ yarn verify   # typecheck + lint + build + test
 yarn dev <cmd>  # run CLI without building (tsx)
 ```
 
+### Catalog
+
+Content lives in [`haus-workflow-catalog`](https://github.com/WeAreHausTech/haus-workflow-catalog)
+(71 items at v2.5.0). Fetched at runtime from `main` (override with `HAUS_CATALOG_REF`).
+Validation rules sync from catalog → `library/catalog/validation-rules.json` (ADR-0001).
+
+On `haus apply` / `haus update`, items **removed from the catalog** are pruned from the
+project when their on-disk copy still matches the lock hash; user-edited copies are kept.
+
 ### Internal docs
 
 - [Architecture](docs/architecture.md)
 - [CLI reference](docs/cli.md)
 - [Security](docs/security.md)
 - [Developer scripts](docs/dev.md)
+- [Runbook](docs/runbook.md)

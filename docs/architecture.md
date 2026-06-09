@@ -25,7 +25,7 @@ Core flow: **scan → recommend → apply**
 | `src/utils/`       | Shared utilities: `logger.ts`, `fs.ts`, `paths.ts`, `audit-checks.ts`, `diff.ts`, `exec.ts`, `prompts.ts`, `versions.ts` |
 | `src/types/`       | Local ambient type declarations                                                                                          |
 | `library/global/`  | Shipped skills, agents, and hook templates                                                                               |
-| `library/catalog/` | Bundled catalog manifest (fallback when remote cache is absent)                                                          |
+| `library/catalog/` | Bundled manifest + `validation-rules.json` fixture (synced from catalog; fallback when remote cache is absent)           |
 
 ---
 
@@ -88,14 +88,18 @@ scan; a second `recommend` pass picks up skills the shallow scanner missed.
 
 ## Apply / generator flow
 
-1. Read recommendation file.
+1. Read recommendation file (optionally filtered by `--select`).
 2. Write canonical `.claude/*` command, rule, and settings files.
-3. Copy selected catalog assets into `.claude/skills` or `.claude/agents`.
-4. Write:
+3. Copy selected catalog assets into `.claude/{skills,agents,commands,templates}`.
+4. **Stale cleanup:** compare previous `haus.lock.json` to the current catalog manifest.
+   Items removed upstream are deleted when on-disk content matches the lock hash;
+   user-modified copies are kept. Items merely deselected via `--select` but still in
+   the catalog are not removed.
+5. Write:
    - `.haus-workflow/selected-context.json`
    - `.haus-workflow/haus.lock.json`
-5. Print overwrite summary for changed generated files.
-6. Self-check that written `.claude/settings.json` matches canonical hook config.
+6. Print overwrite summary for changed generated files.
+7. Self-check that written `.claude/settings.json` matches canonical hook config.
 
 ---
 
@@ -103,10 +107,13 @@ scan; a second `recommend` pass picks up skills the shallow scanner missed.
 
 1. `update --check` validates lock presence and version fields.
 2. `update` backs up lockfile to `.haus-workflow/backups/`.
-3. Recomputes per-item hashes from lockfile `paths`.
-4. Prints unified lock diff and summary.
+3. Fetches latest catalog manifest into `~/.claude/haus/catalog-cache/`.
+4. Refreshes global install (`haus install` — includes orphan cleanup for `~/.claude/`).
+5. Re-applies project files via `writeClaudeFiles` (includes stale-item cleanup).
+6. Recomputes per-item hashes from lockfile `paths`.
+7. Prints unified lock diff and summary.
 
-The catalog is maintained in a separate repository and fetched by `haus update`.
+The catalog is maintained in a separate repository ([`haus-workflow-catalog`](https://github.com/WeAreHausTech/haus-workflow-catalog), currently v2.5.0 / 71 items) and fetched by `haus update`.
 
 ---
 

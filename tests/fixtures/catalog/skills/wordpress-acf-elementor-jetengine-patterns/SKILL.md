@@ -1,4 +1,9 @@
-<!-- Fixture stub — minimal valid SKILL.md for CLI tests. -->
+---
+name: fixture-stub
+description: Fixture stub — minimal valid SKILL.md for CLI tests.
+---
+
+# Fixture stub
 
 ## Use when
 

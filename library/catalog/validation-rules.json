@@ -17,7 +17,7 @@
     "trading"
   ],
   "bannedAgentPhrases": ["autonomous", "swarm", "delegate", "orchestrat", "marketplace"],
-  "requiredSkillSections": ["## Use when", "## Do not use when"],
+  "requiredSkillFrontmatter": ["description"],
   "requiredAgentSections": ["## Use when", "## Do not use when", "## Verification"],
   "riskyInstallPatterns": [
     { "source": "\\bnpx\\s+-y\\b", "flags": "i" },
@@ -142,6 +142,5 @@
     "baseline",
     "project-instructions"
   ],
-  "patternTagSuffixes": ["-patterns"],
-  "skillSectionExemptSources": ["curated"]
+  "patternTagSuffixes": ["-patterns"]
 }

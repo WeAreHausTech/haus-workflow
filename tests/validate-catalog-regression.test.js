@@ -5,11 +5,6 @@ import path from 'node:path'
 import { mkdtempSync, mkdirSync, writeFileSync } from 'node:fs'
 import { execaSync } from 'execa'
 
-import {
-  SKILL_SECTION_EXEMPT_SOURCES,
-  isVerbatimSuperpowersMarkdownPath,
-} from '../src/catalog/validation-rules.ts'
-
 const cli = () => path.resolve('dist/cli.js')
 
 function makeCatalogRoot(items, files = {}) {
@@ -33,22 +28,20 @@ function runValidateCatalog(root) {
 }
 
 const CURATED_SKILL_MD = `---
-description: Use when testing curated exemption.
+description: Use when testing the superpowers convention.
 ---
 
 Every project goes through this process. A todo list is fine here.
 `
 
-test('skillSectionExemptSources includes curated', () => {
-  assert.ok(SKILL_SECTION_EXEMPT_SOURCES.includes('curated'))
-})
+const SKILL_MD_NO_DESCRIPTION = `---
+name: no-desc
+---
 
-test('isVerbatimSuperpowersMarkdownPath normalizes Windows separators', () => {
-  assert.equal(isVerbatimSuperpowersMarkdownPath('skills\\superpowers\\x\\SKILL.md'), true)
-  assert.equal(isVerbatimSuperpowersMarkdownPath('skills/other/x.md'), false)
-})
+# Skill without a description frontmatter field.
+`
 
-test('validate-catalog accepts curated skill without SKILL.md when-sections', () => {
+test('validate-catalog accepts a skill whose when-signal is frontmatter description only', () => {
   const root = makeCatalogRoot(
     [
       {
@@ -75,7 +68,7 @@ test('validate-catalog accepts curated skill without SKILL.md when-sections', ()
   assert.equal(r.exitCode, 0, r.stderr || r.stdout)
 })
 
-test('validate-catalog rejects haus skill missing when-sections in SKILL.md', () => {
+test('validate-catalog rejects a skill missing frontmatter description', () => {
   const root = makeCatalogRoot(
     [
       {
@@ -83,7 +76,7 @@ test('validate-catalog rejects haus skill missing when-sections in SKILL.md', ()
         version: '1.0.0',
         source: 'haus',
         type: 'skill',
-        path: 'skills/superpowers/test',
+        path: 'skills/test',
         title: 'Test',
         tags: ['workflow'],
         repoRoles: [],
@@ -93,11 +86,11 @@ test('validate-catalog rejects haus skill missing when-sections in SKILL.md', ()
         riskLevel: 'low',
       },
     ],
-    { 'skills/superpowers/test/SKILL.md': CURATED_SKILL_MD },
+    { 'skills/test/SKILL.md': SKILL_MD_NO_DESCRIPTION },
   )
   const r = runValidateCatalog(root)
   assert.equal(r.exitCode, 1)
-  assert.match(r.stderr ?? '', /SKILL\.md missing ## Use when/)
+  assert.match(r.stderr ?? '', /SKILL\.md missing non-empty frontmatter 'description:'/)
 })
 
 test('validate-catalog accepts command item when file exists', () => {
