@@ -41,6 +41,16 @@ describe('header — comment form (plain docs)', () => {
     assert.equal(twice.match(/HAUS-MANAGED/g).length, 1, 'exactly one marker')
   })
 
+  it('is idempotent for a bare header with no trailing newline', async () => {
+    const { stampMarkdown } = await import('../src/install/header.js')
+    const once = stampMarkdown('# doc', H).split('\n')[0] // build a header line
+    // A file that is exactly the header line, no newline, no body.
+    const bare = stampMarkdown('# doc', H).split('\n')[0]
+    const stamped = stampMarkdown(bare, H)
+    assert.equal(stamped, once, 're-stamp of a bare header does not duplicate it')
+    assert.equal(stamped.match(/HAUS-MANAGED/g).length, 1, 'exactly one marker')
+  })
+
   it('preserves doc body after the comment', async () => {
     const { stampMarkdown } = await import('../src/install/header.js')
     const out = stampMarkdown(PLAIN_DOC, H)

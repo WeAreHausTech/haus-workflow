@@ -114,8 +114,12 @@ export function stampMarkdown(content: string, h: HausHeader): string {
   const header = buildMarkdownHeader(h)
   const firstLine = content.split('\n')[0] ?? ''
   if (firstLine.startsWith(MD_PREFIX)) {
-    const rest = content.slice(content.indexOf('\n') + 1)
-    return `${header}\n${rest}`
+    // Replace the existing header line. When the file is a bare header with no
+    // trailing newline, indexOf returns -1 — drop the body entirely rather than
+    // re-appending the whole string (which would duplicate the header).
+    const nl = content.indexOf('\n')
+    const rest = nl === -1 ? '' : content.slice(nl + 1)
+    return rest === '' ? header : `${header}\n${rest}`
   }
   return `${header}\n${content}`
 }
