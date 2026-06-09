@@ -68,10 +68,14 @@ jobs:
           else
             git push -u origin "HEAD:$BRANCH"
           fi
-          if ! gh pr view "$BRANCH" --json number >/dev/null 2>&1; then
+          # gh pr view matches merged/closed PRs too — only skip create when one is OPEN.
+          OPEN_PR="$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number // empty')"
+          if [ -z "$OPEN_PR" ]; then
             gh pr create \
               --base main \
               --head "$BRANCH" \
               --title "chore(catalog): sync fixtures from haus-workflow-catalog main" \
               --body "Automated sync of \`library/catalog/manifest.json\` and \`library/catalog/validation-rules.json\` from the latest \`main\` of [haus-workflow-catalog](https://github.com/WeAreHausTech/haus-workflow-catalog)."
+          else
+            echo "Updated open PR #${OPEN_PR} on ${BRANCH}"
           fi
