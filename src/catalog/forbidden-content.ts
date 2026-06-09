@@ -20,6 +20,11 @@ function extractUseWhenSection(text: string): string {
   return next < 0 ? tail : tail.slice(0, next)
 }
 
+/** YAML block-scalar header: `>`, `>-`, `>2`, `|- # note`, etc. */
+function isYamlBlockScalarHeader(rest: string): boolean {
+  return /^[>|][-+]?(\d+)?(?:\s+#.*)?$/.test(rest)
+}
+
 /** Extracts the YAML frontmatter `description:` value (the superpowers when-signal). */
 export function extractFrontmatterDescription(text: string): string {
   const m = text.match(/^---\r?\n([\s\S]*?)\r?\n---/)
@@ -28,8 +33,8 @@ export function extractFrontmatterDescription(text: string): string {
   const idx = lines.findIndex((l) => /^description:[ \t]*/.test(l))
   if (idx < 0) return ''
   const rest = lines[idx]!.replace(/^description:[ \t]*/, '').trim()
-  const blockIndicators = new Set(['>', '>-', '|-', '|', '>+', '|+'])
-  if (rest && !blockIndicators.has(rest)) {
+  if (!rest) return ''
+  if (!isYamlBlockScalarHeader(rest)) {
     return rest.replace(/^["']|["']$/g, '').trim()
   }
   const body: string[] = []
