@@ -8,7 +8,7 @@ import { log } from '../utils/logger.js'
 import { runSetupProject } from './setup-project.js'
 
 /** Initializes Haus AI for the first time; no-ops with a message if already initialized. */
-export async function runInit(options: { fast?: boolean; json?: boolean }): Promise<void> {
+export async function runInit(options: { json?: boolean }): Promise<void> {
   const root = process.cwd()
   const hausDir = path.join(root, '.haus-workflow')
   const alreadyInit = await fs.pathExists(hausDir)

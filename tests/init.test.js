@@ -28,7 +28,7 @@ test('haus init runs setup when .haus-workflow is missing', () => {
     ),
   )
   writeFileSync(path.join(temp, 'yarn.lock'), '# lock')
-  const result = execaSync('node', [path.resolve('dist/cli.js'), 'init', '--fast', '--json'], {
+  const result = execaSync('node', [path.resolve('dist/cli.js'), 'init', '--json'], {
     cwd: temp,
     reject: false,
   })
