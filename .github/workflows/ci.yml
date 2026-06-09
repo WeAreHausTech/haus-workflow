@@ -85,9 +85,6 @@ jobs:
             node "$GITHUB_WORKSPACE/dist/cli.js" update --check || true
           )
 
-      - name: Pack
-        run: yarn pack
-
   # Packed-tarball smoke: install the published artifact into a clean consumer and
   # run the shipped bin. Catches a missing `files` entry, broken bin shebang, ESM
   # resolution failure, or unbundled dependency that the in-repo `dist/cli.js` smoke
