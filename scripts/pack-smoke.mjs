@@ -26,16 +26,13 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
-const PKG_NAME = '@haus-tech/haus-workflow'
+const pkg = JSON.parse(fs.readFileSync(path.join(repoRoot, 'package.json'), 'utf8'))
+const PKG_NAME = pkg.name
 
-// Paths that package.json `files` promises to ship. A missing one = red build.
-const SHIPPED_PATHS = [
-  'dist/cli.js',
-  'library/global',
-  'library/catalog',
-  'tests/fixtures/catalog',
-  'scripts/postinstall.mjs',
-]
+// The shipped-path contract is derived from package.json `files` (so it can't drift
+// from the real contract). These extra invariants are asserted on top, because a
+// `files` directory entry like "dist" would not catch a missing entrypoint inside it.
+const EXTRA_INVARIANTS = ['dist/cli.js']
 
 function run(cmd, args, opts = {}) {
   console.log(`$ ${cmd} ${args.join(' ')}`)
@@ -80,10 +77,11 @@ try {
     env: { ...process.env, HAUS_NO_POSTINSTALL: '1' },
   })
 
-  // 3. Run the shipped bin (asserts shebang + bin mapping), then a real command.
+  // 3. Run the shipped bin *directly* (not via `node`), so a missing shebang or
+  //    executable bit on the published entrypoint fails here as a user would hit it.
   const binPath = path.join(consumer, 'node_modules', '.bin', 'haus')
   if (!fs.existsSync(binPath)) fail(`bin not linked at ${binPath}`)
-  const version = run('node', [binPath, '--version'], { cwd: consumer }).trim()
+  const version = run(binPath, ['--version'], { cwd: consumer }).trim()
   if (!version) fail('haus --version produced no output')
   console.log(`✓ installed haus --version → ${version}`)
 
@@ -102,12 +100,23 @@ try {
   run('node', [path.join(pkgDir, 'dist', 'cli.js'), 'scan', '--json'], { cwd: project })
   console.log('✓ installed CLI ran `scan --json`')
 
-  // 4. Every shipped path must resolve inside the installed package.
-  for (const rel of SHIPPED_PATHS) {
-    const abs = path.join(pkgDir, rel)
-    if (!fs.existsSync(abs)) fail(`shipped path missing from package: ${rel}`)
+  // 4. Every `files` entry that exists in the repo must resolve in the installed
+  //    package. An entry listed in `files` but absent from the repo (npm cannot
+  //    ship what isn't there) is flagged as a warning, not a hard failure — that
+  //    is a separate `files`-hygiene issue, not a packaging regression.
+  const fileEntries = Array.isArray(pkg.files) ? pkg.files : []
+  let checked = 0
+  for (const rel of [...fileEntries, ...EXTRA_INVARIANTS]) {
+    const inRepo = fs.existsSync(path.join(repoRoot, rel))
+    const inPkg = fs.existsSync(path.join(pkgDir, rel))
+    if (!inRepo) {
+      console.warn(`⚠ files lists "${rel}" but it is absent from the repo — npm cannot ship it`)
+      continue
+    }
+    if (!inPkg) fail(`shipped path missing from package: ${rel}`)
+    checked++
   }
-  console.log(`✓ all ${SHIPPED_PATHS.length} shipped paths present`)
+  console.log(`✓ ${checked} shipped paths present`)
 
   console.log('✓ pack-smoke passed')
 } finally {

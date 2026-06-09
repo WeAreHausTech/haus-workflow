@@ -109,9 +109,8 @@ jobs:
       - name: Install
         run: yarn install --immutable --check-cache
 
-      - name: Build
-        run: yarn build
-
+      # No explicit build step: pack-smoke runs `npm pack`, whose `prepack` hook
+      # runs `yarn build`. A separate build step would compile twice.
       - name: Pack-and-install smoke
         env:
           HAUS_NO_POSTINSTALL: '1'
