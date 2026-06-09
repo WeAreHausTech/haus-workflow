@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.17.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.16.3...v0.17.0) (2026-06-09)
+
+### Features
+
+- **catalog:** support curated superpowers skills and commands ([#80](https://github.com/WeAreHausTech/haus-workflow/issues/80)) ([2e49c80](https://github.com/WeAreHausTech/haus-workflow/commit/2e49c80d6780e8ff753536f2d4042b4ce7fa2ae8))
+
 ## [0.16.3](https://github.com/WeAreHausTech/haus-workflow/compare/v0.16.2...v0.16.3) (2026-06-09)
 
 ### Bug Fixes
