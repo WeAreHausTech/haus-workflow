@@ -142,5 +142,6 @@
     "baseline",
     "project-instructions"
   ],
-  "patternTagSuffixes": ["-patterns"]
+  "patternTagSuffixes": ["-patterns"],
+  "skillSectionExemptSources": ["curated"]
 }

@@ -5,6 +5,10 @@ on:
     types: [sync-catalog-fixture] # fired by haus-workflow-catalog when manifest.json changes on main
   workflow_dispatch:
 
+concurrency:
+  group: sync-catalog-fixture
+  cancel-in-progress: true
+
 permissions:
   contents: write
   pull-requests: write
@@ -33,20 +37,24 @@ jobs:
             echo "changed=true" >> $GITHUB_OUTPUT
           fi
 
-      - name: Commit updated fixture and open PR
+      - name: Open or update sync PR
         if: steps.diff.outputs.changed == 'true'
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DISPATCH_PAT: ${{ secrets.HAUS_WORKFLOW_DISPATCH_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
-          BRANCH="chore/sync-catalog-fixture-${{ github.run_id }}"
+          set -euo pipefail
+          printf '%s\n' "$DISPATCH_PAT" | gh auth login --with-token
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git checkout -b "$BRANCH"
+          BRANCH="chore/sync-catalog-fixture"
+          git checkout -B "$BRANCH"
           git add library/catalog/manifest.json library/catalog/validation-rules.json
           git commit -m "chore(catalog): sync fixtures from haus-workflow-catalog main"
-          git push origin "$BRANCH"
-          gh pr create \
-            --base main \
-            --head "$BRANCH" \
-            --title "chore(catalog): sync fixtures from haus-workflow-catalog main" \
-            --body "Automated sync of \`library/catalog/manifest.json\` and \`library/catalog/validation-rules.json\` from the latest \`main\` of [haus-workflow-catalog](https://github.com/WeAreHausTech/haus-workflow-catalog)."
+          git push --force-with-lease origin "$BRANCH"
+          if ! gh pr view "$BRANCH" --json number >/dev/null 2>&1; then
+            gh pr create \
+              --base main \
+              --head "$BRANCH" \
+              --title "chore(catalog): sync fixtures from haus-workflow-catalog main" \
+              --body "Automated sync of \`library/catalog/manifest.json\` and \`library/catalog/validation-rules.json\` from the latest \`main\` of [haus-workflow-catalog](https://github.com/WeAreHausTech/haus-workflow-catalog)."
+          fi

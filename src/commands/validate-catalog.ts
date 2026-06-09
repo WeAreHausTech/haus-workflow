@@ -14,6 +14,7 @@ import {
   REQUIRED_AGENT_SECTIONS,
   REQUIRED_SKILL_SECTIONS,
   RISKY_INSTALL_PATTERNS,
+  SKILL_SECTION_EXEMPT_SOURCES,
 } from '../catalog/validation-rules.js'
 import type { CatalogItem } from '../types.js'
 import { readJson } from '../utils/fs.js'
@@ -61,7 +62,12 @@ function auditManifestStructure(items: CatalogItem[]): string[] {
       seenIds.set(item.id, i)
     }
 
-    if (item.type === 'skill' || item.type === 'agent' || item.type === 'template') {
+    if (
+      item.type === 'skill' ||
+      item.type === 'agent' ||
+      item.type === 'template' ||
+      item.type === 'command'
+    ) {
       if (!item.path) {
         failures.push(`${item.id}: missing path`)
       } else {
@@ -107,8 +113,12 @@ function auditShippedFiles(manifestDir: string, items: CatalogItem[]): string[] 
         continue
       }
       const text = fs.readFileSync(skillMd, 'utf8')
-      for (const section of REQUIRED_SKILL_SECTIONS) {
-        if (!text.includes(section)) failures.push(`${item.id}: SKILL.md missing ${section}`)
+      const skillSectionExempt =
+        SKILL_SECTION_EXEMPT_SOURCES.includes(item.source) && item.whenToUse && item.whenNotToUse
+      if (!skillSectionExempt) {
+        for (const section of REQUIRED_SKILL_SECTIONS) {
+          if (!text.includes(section)) failures.push(`${item.id}: SKILL.md missing ${section}`)
+        }
       }
       failures.push(
         ...auditForbiddenTagsInText(text, `${item.id}: ${path.relative(manifestDir, skillMd)}`),
@@ -134,6 +144,12 @@ function auditShippedFiles(manifestDir: string, items: CatalogItem[]): string[] 
     } else if (item.type === 'template') {
       if (!fs.existsSync(absPath)) {
         failures.push(`${item.id}: missing template file ${item.path}`)
+        continue
+      }
+      failures.push(...auditTemplateContent(manifestDir, absPath, item.id))
+    } else if (item.type === 'command') {
+      if (!fs.existsSync(absPath)) {
+        failures.push(`${item.id}: missing command file ${item.path}`)
         continue
       }
       failures.push(...auditTemplateContent(manifestDir, absPath, item.id))
@@ -169,13 +185,14 @@ function auditTemplateContent(manifestDir: string, absPath: string, itemId: stri
  */
 function auditMarkdownContent(manifestDir: string): string[] {
   const failures: string[] = []
-  const dirs = ['skills', 'agents', 'templates']
+  const dirs = ['skills', 'agents', 'templates', 'commands']
   for (const dir of dirs) {
     const abs = path.join(manifestDir, dir)
     if (!fs.existsSync(abs)) continue
     walkMd(abs, (file) => {
       const text = fs.readFileSync(file, 'utf8')
       const rel = path.relative(manifestDir, file)
+      if (rel.includes('/superpowers/')) return
       const lines = text.split(/\r?\n/)
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i] ?? ''

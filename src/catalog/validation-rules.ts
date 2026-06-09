@@ -33,6 +33,9 @@ export const BANNED_AGENT_PHRASES: readonly string[] = rules.bannedAgentPhrases
 /** Sections required in every skill's SKILL.md. */
 export const REQUIRED_SKILL_SECTIONS: readonly string[] = rules.requiredSkillSections
 
+/** Skill sources exempt from REQUIRED_SKILL_SECTIONS when manifest carries whenToUse/whenNotToUse. */
+export const SKILL_SECTION_EXEMPT_SOURCES: readonly string[] = rules.skillSectionExemptSources
+
 /** Sections required in every agent's .md file. */
 export const REQUIRED_AGENT_SECTIONS: readonly string[] = rules.requiredAgentSections
 
