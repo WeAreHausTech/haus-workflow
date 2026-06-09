@@ -20,9 +20,23 @@ function extractUseWhenSection(text: string): string {
   return next < 0 ? tail : tail.slice(0, next)
 }
 
-/** Returns failure messages when the Use-when section recommends a forbidden stack. */
+/** Extracts the YAML frontmatter `description:` value (the superpowers when-signal). */
+export function extractFrontmatterDescription(text: string): string {
+  const m = text.match(/^---\r?\n([\s\S]*?)\r?\n---/)
+  if (!m) return ''
+  const dm = m[1]!.match(/^description:[ \t]*(.*)$/m)
+  if (!dm) return ''
+  return dm[1]!.replace(/^["']|["']$/g, '').trim()
+}
+
+/**
+ * Returns failure messages when the skill's when-signal recommends a forbidden stack.
+ * Scans both the frontmatter `description:` (superpowers convention) and any legacy
+ * `## Use when` section (haus-owned agents/skills); other prose may name platforms in
+ * negation or file paths, so it is intentionally excluded.
+ */
 export function auditForbiddenTagsInText(text: string, label: string): string[] {
-  const body = extractUseWhenSection(text)
+  const body = `${extractFrontmatterDescription(text)}\n${extractUseWhenSection(text)}`
   if (!body.trim()) return []
 
   const failures: string[] = []

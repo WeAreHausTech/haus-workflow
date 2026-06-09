@@ -192,6 +192,13 @@ export async function writeClaudeFiles(
     }
   }
 
+  // Remove items that were installed on a prior run (recorded in the lock) but have
+  // since been removed from the catalog manifest entirely. Items that merely fall out
+  // of the current selection (e.g. `apply --select`) yet still exist in the catalog are
+  // left untouched. Hash-gated: only unmodified copies are deleted, matching the
+  // global-install orphan-cleanup contract.
+  await cleanupStaleCatalogItems(root, new Set(manifestById.keys()), dryRun)
+
   if (dryRun) return [...new Set(files)]
 
   const installedItems = catalogItems.filter((r) => installedIds.has(r.id))
@@ -236,6 +243,66 @@ export async function writeClaudeFiles(
   await writeManagedJson(root, hausPath(root, 'haus.lock.json'), lock, false)
 
   return [...new Set(files)]
+}
+
+type PrevLockEntry = { id?: string; paths?: string[]; hash?: string }
+
+/**
+ * Deletes catalog items installed on a previous run (per the existing lock) that are no
+ * longer present in the catalog manifest. Only removes on-disk copies whose content still
+ * matches the recorded lock hash; user-modified files are preserved with a warning. Items
+ * still in the manifest but unselected this run are intentionally left in place.
+ */
+async function cleanupStaleCatalogItems(
+  root: string,
+  knownIds: Set<string>,
+  dryRun: boolean,
+): Promise<void> {
+  const prevLock = await readJson<PrevLockEntry[]>(hausPath(root, 'haus.lock.json'))
+  if (!prevLock?.length) return
+  for (const entry of prevLock) {
+    if (!entry.id || knownIds.has(entry.id)) continue
+    const relPaths = entry.paths ?? []
+    if (relPaths.length === 0) continue
+    const existing: string[] = []
+    for (const rel of relPaths) {
+      if (await fs.pathExists(path.join(root, rel))) existing.push(rel)
+    }
+    if (existing.length === 0) continue
+    if (entry.hash === undefined) {
+      warn(
+        `Stale catalog item ${entry.id} has no lock hash — leaving in place: ${existing.join(', ')}`,
+      )
+      continue
+    }
+    const currentHash = await hashInstalledPaths(root, relPaths)
+    if (currentHash !== entry.hash) {
+      warn(
+        `Stale catalog item ${entry.id} was modified locally — leaving in place: ${existing.join(', ')}`,
+      )
+      continue
+    }
+    for (const rel of existing) {
+      const abs = path.join(root, rel)
+      if (dryRun) {
+        log(`[dry-run] would remove stale ${displayPath(root, abs)} (${entry.id})`)
+        continue
+      }
+      await fs.remove(abs)
+      await pruneEmptyDir(path.dirname(abs))
+      log(`Removed stale ${displayPath(root, abs)} (${entry.id})`)
+    }
+  }
+}
+
+/** Removes `dir` when it becomes empty after deleting a stale item, avoiding ghost dirs. */
+async function pruneEmptyDir(dir: string): Promise<void> {
+  try {
+    const entries = await fs.readdir(dir)
+    if (entries.length === 0) await fs.remove(dir)
+  } catch {
+    /* ignore */
+  }
 }
 
 /** Write a text file only when content has changed; in dry-run mode, log the diff instead. */

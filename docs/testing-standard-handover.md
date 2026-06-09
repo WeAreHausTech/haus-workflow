@@ -12,7 +12,7 @@
 2. **Coverage can't silently drop.** c8 measures it; a ratchet gate fails CI if coverage falls below the floor.
 3. **Every `fix:` commit must ship a test.** CI's `fix-needs-test` job blocks a `fix:` PR that doesn't touch `tests/`.
 4. **Cross-repo drift is caught.** A contract check compares the CLI's committed copies against the live catalog; warns on PR, fails on `main`/cron.
-5. **The catalog repo has tests at all** (it had zero). 37 tests over validation, schema, references, forbidden content.
+5. **The catalog repo has tests at all** (it had zero). 38+ tests over validation, schema, references, forbidden content (safety scan only in repo-wide walk).
 6. **Branch protection** on both repos: PR required, linear history, no force-push/delete, required status checks.
 
 ---
@@ -75,7 +75,7 @@ Fixtures: `tests/fixtures/catalog/policy-gates-manifest.json` (one item per poli
 - `validate.test.mjs` — drives the real `scripts/validate.mjs` over temp manifests, one test per fail() branch + happy path
 - `schema.test.mjs` — real manifest/items vs JSON schemas (ajv)
 - `references.test.mjs` — every path + relative reference resolves on disk; fails fast on insecure `http://`
-- `forbidden-content.test.mjs` — placeholders/risky-install/npx/http/forbidden-tags scan, driven by `validation-rules.json`
+- `forbidden-content.test.mjs` — risky-install/npx/http/forbidden-tags safety scan (no TODO/placeholder in walk), driven by `validation-rules.json`
 - `tests/helpers/catalog-fixture.mjs` — builds throwaway catalog roots, runs the validator as a child process
 
 ---
