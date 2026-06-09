@@ -1,5 +1,7 @@
 # Changelog
 
+## [0.16.2](https://github.com/WeAreHausTech/haus-workflow/compare/v0.16.1...v0.16.2) (2026-06-09)
+
 ## [0.16.1](https://github.com/WeAreHausTech/haus-workflow/compare/v0.16.0...v0.16.1) (2026-06-09)
 
 ## [0.16.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.15.0...v0.16.0) (2026-06-05)
