@@ -4,6 +4,7 @@ import assert from 'node:assert/strict'
 import {
   auditForbiddenTagsInText,
   extractFrontmatterDescription,
+  extractFrontmatterValue,
 } from '../src/catalog/forbidden-content.js'
 
 test('extractFrontmatterDescription reads folded YAML block scalars', () => {
@@ -39,6 +40,17 @@ description: >2
 ---
 `
   assert.match(extractFrontmatterDescription(indent), /Indented block body/)
+})
+
+test('extractFrontmatterValue reads arbitrary frontmatter keys', () => {
+  const md = `---
+name: demo
+other: arbitrary scalar value
+description: ignored when reading other
+---
+`
+  assert.equal(extractFrontmatterValue(md, 'other'), 'arbitrary scalar value')
+  assert.equal(extractFrontmatterValue(md, 'missing'), '')
 })
 
 test('extractFrontmatterDescription returns empty for bare description key', () => {
