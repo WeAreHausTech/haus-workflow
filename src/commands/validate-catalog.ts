@@ -2,10 +2,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 
-import {
-  auditForbiddenTagsInText,
-  extractFrontmatterDescription,
-} from '../catalog/forbidden-content.js'
+import { auditForbiddenTagsInText, extractFrontmatterValue } from '../catalog/forbidden-content.js'
 import {
   ANY_NPX_PATTERN,
   ALLOWED_NPX_PATTERN,
@@ -98,6 +95,19 @@ function auditManifestStructure(items: CatalogItem[]): string[] {
   return failures
 }
 
+// Every required frontmatter key must be present and non-empty. Key-agnostic so a new
+// key added to validation-rules.json#requiredSkillFrontmatter is enforced, not ignored.
+// Applied to skills and commands (both ship a `description:` when-signal).
+function checkRequiredFrontmatter(text: string, label: string): string[] {
+  const failures: string[] = []
+  for (const key of REQUIRED_SKILL_FRONTMATTER) {
+    if (!extractFrontmatterValue(text, key)) {
+      failures.push(`${label}: missing non-empty frontmatter '${key}:'`)
+    }
+  }
+  return failures
+}
+
 /**
  * Checks file existence, required sections, and banned phrases for each item.
  * Only runs when `manifestDir` is provided (i.e. the catalog files are on disk).
@@ -115,14 +125,7 @@ function auditShippedFiles(manifestDir: string, items: CatalogItem[]): string[] 
         continue
       }
       const text = fs.readFileSync(skillMd, 'utf8')
-      // Skills declare their when-signal via YAML frontmatter `description:`
-      // (the superpowers convention), not prose section headers.
-      const description = extractFrontmatterDescription(text)
-      for (const key of REQUIRED_SKILL_FRONTMATTER) {
-        if (key === 'description' && !description) {
-          failures.push(`${item.id}: SKILL.md missing non-empty frontmatter 'description:'`)
-        }
-      }
+      failures.push(...checkRequiredFrontmatter(text, `${item.id}: SKILL.md`))
       failures.push(
         ...auditForbiddenTagsInText(text, `${item.id}: ${path.relative(manifestDir, skillMd)}`),
       )
@@ -155,6 +158,9 @@ function auditShippedFiles(manifestDir: string, items: CatalogItem[]): string[] 
         failures.push(`${item.id}: missing command file ${item.path}`)
         continue
       }
+      const text = fs.readFileSync(absPath, 'utf8')
+      const rel = path.relative(manifestDir, absPath)
+      failures.push(...checkRequiredFrontmatter(text, `${item.id}: ${rel}`))
       failures.push(...auditTemplateContent(manifestDir, absPath, item.id))
     }
   }

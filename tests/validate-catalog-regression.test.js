@@ -90,7 +90,32 @@ test('validate-catalog rejects a skill missing frontmatter description', () => {
   )
   const r = runValidateCatalog(root)
   assert.equal(r.exitCode, 1)
-  assert.match(r.stderr ?? '', /SKILL\.md missing non-empty frontmatter 'description:'/)
+  assert.match(r.stderr ?? '', /SKILL\.md: missing non-empty frontmatter 'description:'/)
+})
+
+test('validate-catalog rejects command missing frontmatter description', () => {
+  const root = makeCatalogRoot(
+    [
+      {
+        id: 'haus.cmd',
+        version: '1.0.0',
+        source: 'haus',
+        type: 'command',
+        path: 'commands/x.md',
+        title: 'Cmd',
+        tags: ['workflow'],
+        repoRoles: [],
+        tokenEstimate: 50,
+        installMode: 'copy-selected',
+        reviewStatus: 'approved',
+        riskLevel: 'low',
+      },
+    ],
+    { 'commands/x.md': '# Heading\n\nProse without frontmatter.\n' },
+  )
+  const r = runValidateCatalog(root)
+  assert.equal(r.exitCode, 1)
+  assert.match(r.stderr ?? '', /commands\/x\.md: missing non-empty frontmatter 'description:'/)
 })
 
 test('validate-catalog accepts command item when file exists', () => {
