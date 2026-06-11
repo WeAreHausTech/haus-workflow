@@ -21,16 +21,16 @@ The unprefixed verbs (`update`, `catalog`, `install`, `uninstall`) act on **this
 haus install** (`~/.claude`, npm) — they manage the haus tool itself, like `npm install -g`.
 The short legacy aliases still work but the names below are canonical.
 
-| Task name (legacy aliases)                                        | Command                 | Scope   | What it does                                                                                                              |
-| ----------------------------------------------------------------- | ----------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `project:init` (`setup`, `init`)                                  | _Setup procedure below_ | project | First-time setup of an **existing** repo: adds AI skills, commands, workflow + project docs                               |
-| `project:cloneandsetup` (`cloneandsetup`, `clone`)                | _Clone procedure below_ | project | Bring a **workspace** up from a bare checkout: clone (or reuse local) every member repo (per-repo setup is not wired yet) |
-| `project:refresh` (`apply`, `refresh`, `claude-md`, `regenerate`) | `haus apply --write`    | project | Re-run setup / refresh `.claude/` context + regenerate root `CLAUDE.md` import block                                      |
-| `project:doctor` (`doctor`, `check`)                              | `haus doctor`           | project | Check for install drift                                                                                                   |
-| `update` (`upgrade`)                                              | `haus update`           | global  | Update npm package + catalog + `~/.claude/` (also refreshes this project)                                                 |
-| `catalog`                                                         | `haus update`           | global  | Fetch latest catalog (same command as update)                                                                             |
-| `install` (`global`)                                              | `haus install`          | global  | Seed `~/.claude/` with haus-owned files                                                                                   |
-| `uninstall`                                                       | `haus uninstall`        | global  | Remove all haus global files from `~/.claude/`                                                                            |
+| Task name (legacy aliases)                                        | Command                 | Scope   | What it does                                                                                                                |
+| ----------------------------------------------------------------- | ----------------------- | ------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `project:init` (`setup`, `init`)                                  | _Setup procedure below_ | project | First-time setup of an **existing** repo: adds AI skills, commands, workflow + project docs                                 |
+| `project:clone [name]` (`clone`)                                  | _Clone procedure below_ | project | No name: clone a **workspace**'s repos from `repos.manifest.json`. With a `name`: find & clone one repo by name from GitHub |
+| `project:refresh` (`apply`, `refresh`, `claude-md`, `regenerate`) | `haus apply --write`    | project | Re-run setup / refresh `.claude/` context + regenerate root `CLAUDE.md` import block                                        |
+| `project:doctor` (`doctor`, `check`)                              | `haus doctor`           | project | Check for install drift                                                                                                     |
+| `update` (`upgrade`)                                              | `haus update`           | global  | Update npm package + catalog + `~/.claude/` (also refreshes this project)                                                   |
+| `catalog`                                                         | `haus update`           | global  | Fetch latest catalog (same command as update)                                                                               |
+| `install` (`global`)                                              | `haus install`          | global  | Seed `~/.claude/` with haus-owned files                                                                                     |
+| `uninstall`                                                       | `haus uninstall`        | global  | Remove all haus global files from `~/.claude/`                                                                              |
 
 ## Step 1 — Determine the task
 
@@ -49,8 +49,8 @@ Options:
      (haus update — checks npm for new version, fetches catalog, refreshes ~/.claude/)
   4. [global] catalog — fetch catalog updates only
      (haus update — same command; pulls latest workflow templates and lockfile)
-  5. [project] project:cloneandsetup — clone a workspace's repos
-     (loops repos.manifest.json, cloning each repo via `haus clone <url>`; setup comes later)
+  5. [project] project:clone [name] — clone repos
+     (no name: clone a workspace from repos.manifest.json; with a name: find & clone one repo by name from GitHub)
 ```
 
 Map the user's selection to the command from the alias table, then continue to Step 2.
@@ -61,7 +61,7 @@ Run the mapped command via Bash. Quote the exact command you are running before 
 
 **Exception — `project:init` (`setup` / `init`):** this maps to a multi-step procedure, not a single command. Do not run a bare `haus init`. Skip to **Setup (`project:init`)** under Step 3 and follow it.
 
-**Exception — `project:cloneandsetup` (`cloneandsetup` / `clone`):** this asks the user a question before running, so it is a short procedure too. Skip to **Clone & setup (`project:cloneandsetup`)** under Step 3 and follow it.
+**Exception — `project:clone` (`clone`):** this asks the user a question before running, so it is a short procedure too. Skip to **Clone (`project:clone`)** under Step 3 and follow it.
 
 ## Step 3 — Post-run steps
 
@@ -72,9 +72,9 @@ After the command completes, follow the relevant post-run steps below.
 1. Open and follow `~/.claude/commands/haus-setup.md` — the installed `haus-setup` command (in some projects also `.claude/commands/haus-setup.md`). Run every step in order. It detects the stack, asks the guided questions, runs `haus apply --write` (scaffolding, skills, commands, rules, docs skill), writes the **project docs** (`CLAUDE.md` body + `docs/`) and `.haus-workflow/deep-context.json`, runs `haus recommend`, applies the newly-matched helpers, and confirms.
 2. Then fill `.haus-workflow/workflow-config.md` — replace every placeholder (`TODO`, `n/a`, empty): test/lint/typecheck/build commands (check `package.json`), docs paths, validation library, pre-commit tool, highest-stakes logic (ask if unclear). Leave none.
 
-### Clone (`project:cloneandsetup`)
+### Clone (`project:clone`)
 
-1. Open and follow `~/.claude/commands/haus-clone.md` — the installed `haus-clone` command. It checks for `repos.manifest.json`, asks how to obtain the repos (clean clone vs reuse local), loops over the manifest, and clones each repo via `haus clone <url> <folder>`. Per-repo setup (install, Docker, env) is a separate step that isn't wired yet, so just get the repos in place for now.
+1. Open and follow `~/.claude/commands/haus-clone.md` — the installed `haus-clone` command. With a `name` argument it finds and clones one matching repo from GitHub; with no argument it clones a workspace's repos from `repos.manifest.json`. Per-repo setup (install, Docker, env) is a separate step that isn't wired yet, so just get the repos in place for now.
 
 ### After `haus apply --write`
 

@@ -3,8 +3,8 @@
  *
  * A primitive with no workspace knowledge: it clones one repo and nothing more.
  * Orchestration (looping over a workspace's `repos.manifest.json`, honoring
- * `repos.local.json` overrides) lives in the `project:cloneandsetup` skill, which
- * calls this command once per repo.
+ * `repos.local.json` overrides, or finding a repo by name on GitHub) lives in the
+ * `project:clone` skill, which calls this command once per repo.
  *
  * Behaviour:
  * - Target defaults to a folder named after the repo (URL basename, sans `.git`),
