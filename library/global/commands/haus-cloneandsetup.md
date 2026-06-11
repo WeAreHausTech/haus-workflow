@@ -26,7 +26,9 @@ For each repo directory, run its setup **in that directory**, detecting what's n
 bash -lc 'export NVM_DIR="$HOME/.nvm"; [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"; cd "<repo>" && nvm install && corepack enable && yarn install'
 ```
 
-Adjust per repo:
+**Read the repo's own setup docs first — they win.** Before applying the file-heuristics below, look for the repo's canonical setup instructions: `docs/setup.md`, `CLAUDE.md`, `README.md` (or follow `docs/SUMMARY.md` to the setup page). If present, **follow them as authoritative** — they capture nested or non-standard builds a root file-scan can't see. Use the heuristics below only to fill gaps, or when the repo ships no setup doc. Example: a WordPress/Bedrock repo has **no root `package.json`** — its JS/theme build lives under `web/app/themes/<theme>` and is only described in the docs, so a root-only scan wrongly reports "no JS". When the docs point at a nested build, scan subdirectories for the relevant `package.json` / build script and run it.
+
+Adjust per repo (gap-fill, or when no setup doc exists):
 
 1. **Node version.** If `.nvmrc` (or `engines.node` in `package.json`) is present, select it with `nvm install` (reads `.nvmrc`, installs the version if missing, then switches to it). If the user uses `fnm` instead, `fnm use --install-if-missing`. If neither is available, tell the user the required version and continue on the current node.
 2. **JS dependencies.** Enable the pinned package manager with `corepack enable`, then install based on what's present:
