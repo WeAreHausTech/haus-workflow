@@ -2,6 +2,35 @@ import tsParser from '@typescript-eslint/parser'
 import tsPlugin from '@typescript-eslint/eslint-plugin'
 import importPlugin from 'eslint-plugin-import'
 
+const commonRules = {
+  // TypeScript
+  '@typescript-eslint/no-explicit-any': 'warn',
+  '@typescript-eslint/no-unused-vars': [
+    'error',
+    { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+  ],
+  '@typescript-eslint/consistent-type-imports': ['error', { prefer: 'type-imports' }],
+  '@typescript-eslint/no-floating-promises': 'error',
+  '@typescript-eslint/no-misused-promises': 'error',
+
+  // Import
+  'import/no-duplicates': 'error',
+  'import/order': [
+    'error',
+    {
+      groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
+      'newlines-between': 'always',
+      alphabetize: { order: 'asc', caseInsensitive: true },
+    },
+  ],
+
+  // General
+  'no-console': 'warn',
+  eqeqeq: ['error', 'always', { null: 'ignore' }],
+  'no-var': 'error',
+  'prefer-const': 'error',
+}
+
 /** @type {import("eslint").Linter.Config[]} */
 export default [
   {
@@ -20,70 +49,7 @@ export default [
         sourceType: 'module',
       },
     },
-    rules: {
-      // TypeScript
-      '@typescript-eslint/no-explicit-any': 'warn',
-      '@typescript-eslint/no-unused-vars': [
-        'error',
-        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
-      ],
-      '@typescript-eslint/consistent-type-imports': ['error', { prefer: 'type-imports' }],
-      '@typescript-eslint/no-floating-promises': 'error',
-      '@typescript-eslint/no-misused-promises': 'error',
-
-      // Import
-      'import/no-duplicates': 'error',
-      'import/order': [
-        'error',
-        {
-          groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
-          'newlines-between': 'always',
-          alphabetize: { order: 'asc', caseInsensitive: true },
-        },
-      ],
-
-      // General
-      'no-console': 'warn',
-      eqeqeq: ['error', 'always', { null: 'ignore' }],
-      'no-var': 'error',
-      'prefer-const': 'error',
-    },
-  },
-  {
-    files: ['scripts/**/*.ts'],
-    plugins: {
-      '@typescript-eslint': tsPlugin,
-      import: importPlugin,
-    },
-    languageOptions: {
-      parser: tsParser,
-      parserOptions: {
-        project: './tsconfig.scripts.json',
-        sourceType: 'module',
-      },
-    },
-    rules: {
-      '@typescript-eslint/no-explicit-any': 'warn',
-      '@typescript-eslint/no-unused-vars': [
-        'error',
-        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
-      ],
-      '@typescript-eslint/consistent-type-imports': ['error', { prefer: 'type-imports' }],
-      '@typescript-eslint/no-floating-promises': 'error',
-      'import/no-duplicates': 'error',
-      'import/order': [
-        'error',
-        {
-          groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
-          'newlines-between': 'always',
-          alphabetize: { order: 'asc', caseInsensitive: true },
-        },
-      ],
-      'no-console': 'off',
-      eqeqeq: ['error', 'always', { null: 'ignore' }],
-      'no-var': 'error',
-      'prefer-const': 'error',
-    },
+    rules: commonRules,
   },
   {
     // tests: plain JS, no TS project — relax rules

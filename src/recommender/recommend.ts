@@ -180,7 +180,8 @@ export async function recommend(root: string, context: ContextMap): Promise<Reco
     )
     if (configSignal) push('config-signal-match', 'config signal match', `warning:${configSignal}`)
 
-    const changedMatch = changedFiles.find((f) => f.includes(item.id.split('.').pop() ?? ''))
+    const idSegment = item.id.split('.').pop() ?? ''
+    const changedMatch = idSegment ? changedFiles.find((f) => f.includes(idSegment)) : undefined
     if (changedMatch)
       push('changed-file-match', 'changed file match', `changedFile:${changedMatch}`)
 

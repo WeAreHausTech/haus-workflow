@@ -5,25 +5,15 @@ import fs from 'node:fs'
 
 const SKILL = fs.readFileSync('library/global/skills/haus-workflow/SKILL.md', 'utf8')
 
-test('setup delegates to the haus-setup command flow', () => {
-  assert.ok(
-    SKILL.includes('haus-setup.md'),
-    'setup must point the agent at the haus-setup command file',
-  )
+test('haus-workflow SKILL.md keeps the required setup-flow references', () => {
+  // Guards the high-stakes global skill: it must route to haus-setup, write
+  // project docs, and complete workflow-config.md.
+  for (const phrase of ['haus-setup.md', 'project docs', 'workflow-config.md']) {
+    assert.ok(SKILL.includes(phrase), `SKILL.md must reference: ${phrase}`)
+  }
 })
 
-test('setup produces project docs as part of the flow', () => {
-  assert.ok(SKILL.includes('project docs'), 'setup must state that project docs are written')
-})
-
-test('setup still completes workflow-config.md', () => {
-  assert.ok(
-    SKILL.includes('workflow-config.md'),
-    'setup must still fill workflow-config.md after the haus-setup flow',
-  )
-})
-
-test('setup/init no longer maps to a bare `haus init` command', () => {
+test('setup/init alias no longer maps to a bare `haus init` command', () => {
   const aliasRow = SKILL.split('\n').find((l) => l.includes('`init`') && l.includes('`setup`'))
   assert.ok(aliasRow, 'aliases table must keep an init/setup row')
   assert.ok(

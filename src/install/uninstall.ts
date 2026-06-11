@@ -7,7 +7,7 @@ import path from 'node:path'
 
 import fs from 'fs-extra'
 
-import { readText } from '../utils/fs.js'
+import { pruneEmptyDir, readText } from '../utils/fs.js'
 import { log, warn } from '../utils/logger.js'
 
 import { parseMarkdownHeader } from './header.js'
@@ -109,15 +109,5 @@ export function printUninstallResult(result: UninstallResult): void {
   }
   if (result.hooksStripped) {
     log('Haus hook entries removed from ~/.claude/settings.json')
-  }
-}
-
-/** Removes `dir` if it is empty after deleting a file, to avoid leaving ghost directories. */
-async function pruneEmptyDir(dir: string): Promise<void> {
-  try {
-    const entries = await fs.readdir(dir)
-    if (entries.length === 0) await fs.remove(dir)
-  } catch {
-    /* ignore */
   }
 }

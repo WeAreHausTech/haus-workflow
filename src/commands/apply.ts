@@ -99,7 +99,7 @@ export async function runApply(options: {
  * True when this directory has prior haus setup artifacts. Lock alone is not enough —
  * `haus update` may create an empty lock before re-apply runs.
  */
-export async function isHausProject(root: string): Promise<boolean> {
+async function isHausProject(root: string): Promise<boolean> {
   if (await fs.pathExists(hausPath(root, 'recommendation.json'))) return true
   if (await fs.pathExists(claudePath(root, 'settings.json'))) {
     const settings = await readProjectSettings(root)

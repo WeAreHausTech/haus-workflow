@@ -95,7 +95,7 @@ yarn dev <cmd>  # run CLI without building (tsx)
 ### Catalog
 
 Content lives in [`haus-workflow-catalog`](https://github.com/WeAreHausTech/haus-workflow-catalog)
-(71 items at v2.5.0). Fetched at runtime from `main` (override with `HAUS_CATALOG_REF`).
+(71 items; version pinned in `library/catalog/manifest.json`). Fetched at runtime from `main` (override with `HAUS_CATALOG_REF`).
 Validation rules sync from catalog → `library/catalog/validation-rules.json` (ADR-0001).
 
 On `haus apply` / `haus update`, items **removed from the catalog** are pruned from the

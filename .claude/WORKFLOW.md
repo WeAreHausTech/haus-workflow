@@ -6,15 +6,15 @@
 
 ## Source-of-truth documents
 
-| Workflow term | Default path                                                          |
-| ------------- | --------------------------------------------------------------------- |
-| Spec          | `docs/SPEC.md`                                                        |
-| Design        | `docs/DESIGN.md`                                                      |
-| UX flows      | `docs/UX.md`                                                          |
-| Mockups       | `docs/design/` (gitignore binaries, commit README.txt)                |
-| Plans         | `docs/plans/<feature-slug>.md` (one per feature, persist after merge) |
-| Decision log  | `docs/adr/`                                                           |
-| Failure modes | `docs/runbook.md`                                                     |
+| Workflow term | Default path                                                                                         |
+| ------------- | ---------------------------------------------------------------------------------------------------- |
+| Spec          | `docs/SPEC.md`                                                                                       |
+| Design        | `docs/DESIGN.md`                                                                                     |
+| UX flows      | `docs/UX.md`                                                                                         |
+| Mockups       | `docs/design/` (gitignore binaries, commit README.txt)                                               |
+| Plans         | `docs/plans/<feature-slug>.md` (one per feature, delete after merge; git history is the audit trail) |
+| Decision log  | `docs/adr/`                                                                                          |
+| Failure modes | `docs/runbook.md`                                                                                    |
 
 When the user says "spec", "design", "ux", "plan", or "mockup": resolve to the rows above.
 

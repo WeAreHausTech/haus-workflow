@@ -13,7 +13,7 @@ import { log, warn } from '../utils/logger.js'
 import { packageRoot } from '../utils/paths.js'
 
 import { buildAllowRules } from './allow-rules.js'
-import { buildMarkdownHeader, parseMarkdownHeader, stampMarkdown } from './header.js'
+import { parseMarkdownHeader, stampMarkdown } from './header.js'
 import {
   buildManifest,
   globalClaudeDir,
@@ -279,13 +279,4 @@ export function printApplyResult(result: ApplyResult, dryRun: boolean): void {
   if (result.drift) {
     warn('Install drift detected — run `haus install` to sync.')
   }
-}
-
-/** Thin re-export of `buildMarkdownHeader` with flat parameters for external callers. */
-export function buildMarkdownHeaderExport(
-  stableId: string,
-  schemaVersion: string,
-  source: string,
-): string {
-  return buildMarkdownHeader({ stableId, schemaVersion, source })
 }

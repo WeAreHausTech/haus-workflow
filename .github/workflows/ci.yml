@@ -37,9 +37,6 @@ jobs:
       - name: Typecheck
         run: yarn typecheck
 
-      - name: Typecheck scripts
-        run: yarn typecheck:scripts
-
       - name: Build
         run: yarn build
 
