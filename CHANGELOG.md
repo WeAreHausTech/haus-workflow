@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.20.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.19.0...v0.20.0) (2026-06-11)
+
+### Features
+
+- **clone:** enhance user confirmation prompts before cloning repositories ([#93](https://github.com/WeAreHausTech/haus-workflow/issues/93)) ([1f3e6b4](https://github.com/WeAreHausTech/haus-workflow/commit/1f3e6b4c4e97b2ab7b979ab4fbcab8ce6cda3f32))
+
 ## [0.19.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.18.2...v0.19.0) (2026-06-11)
 
 ### Features
