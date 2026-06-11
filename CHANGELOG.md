@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.21.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.20.0...v0.21.0) (2026-06-11)
+
+### Features
+
+- **clone:** add project:cloneandsetup command for cloning and setting up repos ([#94](https://github.com/WeAreHausTech/haus-workflow/issues/94)) ([3e7d279](https://github.com/WeAreHausTech/haus-workflow/commit/3e7d2799433106615a1bf25e94be3402f4eb69d2))
+
+### Bug Fixes
+
+- **audit:** correctness hardening ([#90](https://github.com/WeAreHausTech/haus-workflow/issues/90)) ([823b98d](https://github.com/WeAreHausTech/haus-workflow/commit/823b98dc9e4deb2d28ecc5b57b721e80af555a05))
+
 ## [0.20.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.19.0...v0.20.0) (2026-06-11)
 
 ### Features
