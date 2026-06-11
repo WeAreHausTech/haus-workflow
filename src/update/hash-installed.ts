@@ -7,6 +7,7 @@ import path from 'node:path'
 import fg from 'fast-glob'
 import fs from 'fs-extra'
 
+import { normaliseLF } from '../claude/managed-template.js'
 import { hashText } from '../utils/fs.js'
 
 /** Deterministic hash when a lock item has no installed paths yet. */
@@ -29,7 +30,7 @@ export async function hashInstalledPaths(root: string, relPaths: string[]): Prom
     const stat = await fs.stat(abs)
     if (stat.isFile()) {
       const body = await fs.readFile(abs, 'utf8')
-      fileDigests.push({ rel, digest: hashText(body) })
+      fileDigests.push({ rel, digest: hashText(normaliseLF(body)) })
       continue
     }
     if (!stat.isDirectory()) continue
@@ -38,7 +39,7 @@ export async function hashInstalledPaths(root: string, relPaths: string[]): Prom
       const relFile = path.join(rel, sub).replace(/\\/g, '/')
       const absFile = path.join(abs, sub)
       const body = await fs.readFile(absFile, 'utf8')
-      fileDigests.push({ rel: relFile, digest: hashText(body) })
+      fileDigests.push({ rel: relFile, digest: hashText(normaliseLF(body)) })
     }
   }
 

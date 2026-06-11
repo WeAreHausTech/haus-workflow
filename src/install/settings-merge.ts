@@ -71,6 +71,16 @@ export async function writeSettings(settings: ClaudeSettings): Promise<void> {
   await writeJson(settingsJsonPath(), settings)
 }
 
+function collectEventHookCommands(entries: ClaudeHookEntry[]): Set<string> {
+  const cmds = new Set<string>()
+  for (const entry of entries) {
+    for (const h of entry.hooks ?? []) {
+      if (h.command) cmds.add(h.command)
+    }
+  }
+  return cmds
+}
+
 /**
  * Adds hook fragments with gate="keep" to the settings object, skipping any
  * already registered by a previous install. Returns the updated settings and the
@@ -82,7 +92,6 @@ export function mergeHooks(
 ): { settings: ClaudeSettings; addedIds: string[] } {
   const existing = settings._haus?.hooks ?? []
   const existingCommands = settings._haus?.hookCommands ?? []
-  const existingSet = new Set(existing)
 
   const updated = { ...settings }
   updated.hooks = { ...(settings.hooks ?? {}) }
@@ -92,9 +101,12 @@ export function mergeHooks(
 
   for (const fragment of fragments) {
     if (fragment.gate !== 'keep') continue
-    if (existingSet.has(fragment.id)) continue
 
     const event = fragment.event
+    const eventEntries = updated.hooks[event] ?? []
+    const presentCommands = collectEventHookCommands(eventEntries)
+    if (presentCommands.has(fragment.command)) continue
+
     if (!updated.hooks[event]) updated.hooks[event] = []
 
     const entry: ClaudeHookEntry = {
@@ -103,8 +115,8 @@ export function mergeHooks(
     if (fragment.matcher) entry.matcher = fragment.matcher
 
     updated.hooks[event] = [...(updated.hooks[event] ?? []), entry]
-    addedIds.push(fragment.id)
-    addedCommands.push(fragment.command)
+    if (!existing.includes(fragment.id)) addedIds.push(fragment.id)
+    if (!existingCommands.includes(fragment.command)) addedCommands.push(fragment.command)
   }
 
   updated._haus = {

@@ -140,36 +140,46 @@ export async function runDoctor(options?: { hooks?: boolean }): Promise<void> {
       'haus apply --write',
     )
   } else {
-    const workflowContent = await readText(workflowPath)
-    const firstLine = workflowContent?.split('\n')[0] ?? ''
+    const workflowContent = (await readText(workflowPath)) ?? ''
+    const firstLine = workflowContent.split('\n')[0] ?? ''
     if (!firstLine.includes('HAUS-MANAGED')) {
       ok('- .haus-workflow/WORKFLOW.md: OK (user-owned)')
     } else {
       // Compare installed template hash against current template — prefer catalog cache (same as writeWorkflow).
       const storedHashMatch = firstLine.match(/hash=(sha256-[a-f0-9]+)/)
-      const cachePath = path.join(getCacheDir(), 'templates/agentic-workflow-standard.md')
-      const bundledPath = path.join(
-        packageRoot(),
-        'library',
-        'global',
-        'templates',
-        'agentic-workflow-standard.md',
-      )
-      const templatePath = (await fs.pathExists(cachePath)) ? cachePath : bundledPath
-      const templateContent = await readText(templatePath)
-      if (storedHashMatch && templateContent) {
-        const currentHash = hashText(normaliseLF(templateContent))
-        if (storedHashMatch[1] !== currentHash) {
-          flag(
-            '- .haus-workflow/WORKFLOW.md: stale (template updated — run `haus apply --write`)',
-            'The workflow standard is out of date',
-            'haus apply --write',
-          )
+      const bodyContent = workflowContent.slice(firstLine.length + 1)
+      const onDiskBodyHash = hashText(normaliseLF(bodyContent))
+      if (storedHashMatch && onDiskBodyHash !== storedHashMatch[1]) {
+        flag(
+          '- .haus-workflow/WORKFLOW.md: modified locally (run `haus apply --write --force` to restore)',
+          'The workflow standard file was edited after haus wrote it',
+          'haus apply --write --force',
+        )
+      } else {
+        const cachePath = path.join(getCacheDir(), 'templates/agentic-workflow-standard.md')
+        const bundledPath = path.join(
+          packageRoot(),
+          'library',
+          'global',
+          'templates',
+          'agentic-workflow-standard.md',
+        )
+        const templatePath = (await fs.pathExists(cachePath)) ? cachePath : bundledPath
+        const templateContent = await readText(templatePath)
+        if (storedHashMatch && templateContent) {
+          const currentHash = hashText(normaliseLF(templateContent))
+          if (storedHashMatch[1] !== currentHash) {
+            flag(
+              '- .haus-workflow/WORKFLOW.md: stale (template updated — run `haus apply --write`)',
+              'The workflow standard is out of date',
+              'haus apply --write',
+            )
+          } else {
+            ok('- .haus-workflow/WORKFLOW.md: OK')
+          }
         } else {
           ok('- .haus-workflow/WORKFLOW.md: OK')
         }
-      } else {
-        ok('- .haus-workflow/WORKFLOW.md: OK')
       }
     }
   }

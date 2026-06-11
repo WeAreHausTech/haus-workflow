@@ -114,10 +114,28 @@ describe('settings-merge: mergeHooks', () => {
     assert.equal((settings.hooks?.['UserPromptSubmit'] ?? []).length, 0)
   })
 
-  it('does not duplicate already-installed hooks', () => {
+  it('re-adds hooks tracked in _haus when the real hook entry was deleted', () => {
     const existing = { _haus: { hooks: ['hook.guard.bash'] } }
+    const { addedIds, settings } = mergeHooks(existing, [KEEP_FRAGMENT])
+    assert.deepEqual(addedIds, [])
+    assert.equal(settings.hooks?.['PreToolUse']?.length, 1)
+  })
+
+  it('does not duplicate a hook already present in hooks[event]', () => {
+    const existing = {
+      _haus: { hooks: [] },
+      hooks: {
+        PreToolUse: [
+          {
+            matcher: 'Bash',
+            hooks: [{ type: 'command', command: 'haus guard bash --from-hook' }],
+          },
+        ],
+      },
+    }
     const { addedIds } = mergeHooks(existing, [KEEP_FRAGMENT])
     assert.deepEqual(addedIds, [])
+    assert.equal(existing.hooks['PreToolUse'].length, 1)
   })
 
   it('preserves user-added hooks in other events', () => {

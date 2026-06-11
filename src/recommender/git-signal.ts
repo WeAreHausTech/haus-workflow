@@ -6,7 +6,7 @@ import { runGit } from '../utils/exec.js'
 export async function readChangedFiles(root: string): Promise<string[]> {
   if (process.env.HAUS_DISABLE_GIT_SIGNALS === '1') return []
   try {
-    const result = await runGit(['diff', '--name-only'], { cwd: root })
+    const result = await runGit(['diff', '--name-only'], { cwd: root, timeout: 3000 })
     if (result.exitCode !== 0) {
       return []
     }
