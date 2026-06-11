@@ -94,9 +94,7 @@ jobs:
           fetch-depth: 0
 
       - name: Run gitleaks
-        uses: gitleaks/gitleaks-action@v3
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: gitleaks/gitleaks-action@b232ad3d105a9dec37ca0d4c721b34a5d8f50be5 # v2.3.9
 
   pack-smoke:
     runs-on: ubuntu-latest

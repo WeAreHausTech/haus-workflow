@@ -229,14 +229,38 @@ test('deep-context schema drift: stacks as string coerced to [] not thrown (regr
 test('does not produce package-manager-match for npm4/npm89 pseudo-tags', async () => {
   setup()
   try {
+    const manifestPath = path.join(tmpDir, 'npm4-fixture.json')
+    writeFileSync(
+      manifestPath,
+      JSON.stringify({
+        items: [
+          {
+            id: 'test.npm4-tagged',
+            type: 'skill',
+            source: 'haus',
+            version: '1.0.0',
+            path: 'skills/npm4',
+            title: 'Npm4 tagged default',
+            tags: ['npm4'],
+            repoRoles: [],
+            tokenEstimate: 100,
+            default: true,
+          },
+        ],
+      }),
+    )
+    process.env.HAUS_FIXTURE_CATALOG = manifestPath
     const result = await recommend(
       tmpDir,
       makeContext(tmpDir, { packageManager: 'npm' }),
     )
-    const matched = result.recommended.find((r) =>
-      r.reasons?.some((reason) => reason.code === 'package-manager-match'),
+    const item = findRecommended(result, 'test.npm4-tagged')
+    assert.ok(item, 'default item with npm4 tag should still be recommended')
+    assert.equal(
+      item.reasons?.some((reason) => reason.code === 'package-manager-match'),
+      false,
+      'npm4 tag must not produce package-manager-match when packageManager is npm',
     )
-    assert.equal(matched, undefined)
   } finally {
     teardown()
   }
