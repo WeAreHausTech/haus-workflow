@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.19.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.18.2...v0.19.0) (2026-06-11)
+
+### Features
+
+- **clone:** implement single repository cloning command and related … ([#89](https://github.com/WeAreHausTech/haus-workflow/issues/89)) ([3ac9883](https://github.com/WeAreHausTech/haus-workflow/commit/3ac98838db79bf69a602f5c3c17cfd6a1a7f924a))
+
 ## [0.18.2](https://github.com/WeAreHausTech/haus-workflow/compare/v0.18.1...v0.18.2) (2026-06-11)
 
 ### Bug Fixes
