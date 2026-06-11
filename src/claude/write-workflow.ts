@@ -11,11 +11,10 @@ import { hashText, writeText } from '../utils/fs.js'
 import { log, warn } from '../utils/logger.js'
 import { displayPath, hausPath } from '../utils/paths.js'
 
-import { normaliseLF, parseHausManagedHeader } from './managed-template.js'
+import { normaliseLF, parseHausManagedHeader, SCHEMA_VERSION } from './managed-template.js'
 
 /** Stable id embedded in the HAUS-MANAGED header — identifies this file on re-apply. */
 const STABLE_ID = 'template.workflow'
-const SCHEMA_VERSION = '1'
 
 /** Build the HAUS-MANAGED header line, embedding the content hash for tamper detection. */
 export function makeWorkflowHeader(pkgVersion: string, contentHash: string): string {
@@ -30,6 +29,7 @@ export async function writeWorkflow(
   root: string,
   pkgVersion: string,
   dryRun: boolean,
+  force = false,
 ): Promise<string | null> {
   // Resolve the workflow template from the catalog on demand (cached after first fetch),
   // so a fresh `haus init` can write WORKFLOW.md without a prior `haus update`. In dry-run
@@ -64,8 +64,15 @@ export async function writeWorkflow(
       return null
     }
 
+    if (parsed.v !== undefined && parsed.v > SCHEMA_VERSION) {
+      warn(
+        `${printable}: written by a newer haus (template v${parsed.v}) — upgrade the CLI to manage it`,
+      )
+      return null
+    }
+
     const existingContent = existing.slice(firstLine.length + 1)
-    if (parsed.hash && hashText(normaliseLF(existingContent)) !== parsed.hash) {
+    if (parsed.hash && hashText(normaliseLF(existingContent)) !== parsed.hash && !force) {
       warn(`${printable}: content modified by user — skipping. Use --force to overwrite.`)
       return null
     }

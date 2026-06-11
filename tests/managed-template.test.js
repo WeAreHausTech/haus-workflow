@@ -32,6 +32,8 @@ test('parseHausManagedHeader: valid header with hash returns id and hash', () =>
     '<!-- HAUS-MANAGED id=template.workflow v=1 source=@haus-tech/haus-workflow@0.13.0 hash=sha256-abc123def456 -->'
   assert.deepEqual(parseHausManagedHeader(line), {
     id: 'template.workflow',
+    v: 1,
+    source: '@haus-tech/haus-workflow@0.13.0',
     hash: 'sha256-abc123def456',
   })
 })
@@ -40,6 +42,8 @@ test('parseHausManagedHeader: valid header without hash field returns id with ha
   const line = '<!-- HAUS-MANAGED id=skill.haus-workflow v=1 source=haus@0.1.0 -->'
   assert.deepEqual(parseHausManagedHeader(line), {
     id: 'skill.haus-workflow',
+    v: 1,
+    source: 'haus@0.1.0',
     hash: undefined,
   })
 })

@@ -77,6 +77,7 @@ program
     '--refill-config',
     'Fill still-blank fields in an existing workflow-config.md without touching edited ones',
   )
+  .option('--force', 'Overwrite user-modified managed workflow files')
   .action(runApply)
 program.command('undo').option('-y, --yes', 'Skip confirmation').action(runUndo)
 program.command('explain-recommendation').option('--json').action(runExplainRecommendation)
