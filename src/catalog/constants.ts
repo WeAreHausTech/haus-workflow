@@ -8,12 +8,11 @@ export const CATALOG_REPO_URL =
   'https://raw.githubusercontent.com/wearehaustech/haus-workflow-catalog'
 
 /**
- * Git ref (tag or branch) to fetch the catalog from.
- * Override via HAUS_CATALOG_REF env var to pin to a specific release tag.
- * Example: HAUS_CATALOG_REF=v1.0.0 haus install
- * Defaults to "main" (latest).
+ * Git ref override for catalog fetch. When unset, the CLI resolves the latest
+ * catalog release tag at runtime (see `resolveCatalogRef` in remote-catalog.ts).
+ * Example: HAUS_CATALOG_REF=main haus update
  */
-export const CATALOG_REF = process.env.HAUS_CATALOG_REF ?? 'main'
+export const CATALOG_REF = process.env.HAUS_CATALOG_REF
 
 /** Subdirectory path appended to os.homedir() for the user-level catalog cache. */
 export const CATALOG_CACHE_SUBDIR = '.claude/haus/catalog-cache'

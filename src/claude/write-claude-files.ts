@@ -7,8 +7,8 @@ import path from 'node:path'
 
 import fs from 'fs-extra'
 
-import { CATALOG_REF } from '../catalog/constants.js'
 import { catalogItemContentPath, loadCatalogContext } from '../catalog/load-catalog.js'
+import { getResolvedCatalogRef, isCatalogRefResolved } from '../catalog/remote-catalog.js'
 import type { Recommendation } from '../types.js'
 import { hashInstalledPaths } from '../update/hash-installed.js'
 import { pruneEmptyDir, readJson } from '../utils/fs.js'
@@ -145,15 +145,19 @@ export async function writeClaudeFiles(
       ? rec.recommended.filter((r) => selectedIds.includes(r.id))
       : rec.recommended
 
+  let curatedReviewStatusSkips = 0
   for (const item of catalogItems) {
     const manifestItem = manifestById.get(item.id)
     if (!manifestItem?.path) continue
     // Curated items must be approved and not blocked before they are written to disk.
     if (manifestItem.source === 'curated') {
       if (manifestItem.reviewStatus !== 'approved') {
-        warn(
-          `Skipping curated item ${item.id}: reviewStatus is not approved (${manifestItem.reviewStatus ?? 'unset'})`,
-        )
+        curatedReviewStatusSkips++
+        if (curatedReviewStatusSkips === 1) {
+          warn(
+            `Skipping curated item ${item.id}: reviewStatus is not approved (${manifestItem.reviewStatus ?? 'unset'})`,
+          )
+        }
         continue
       }
       if (manifestItem.riskLevel === 'blocked') {
@@ -192,6 +196,12 @@ export async function writeClaudeFiles(
     }
   }
 
+  if (curatedReviewStatusSkips > 1) {
+    warn(
+      `${curatedReviewStatusSkips} curated items skipped: reviewStatus is not approved — possible catalog field rename upstream`,
+    )
+  }
+
   // Remove items that were installed on a prior run (recorded in the lock) but have
   // since been removed from the catalog manifest entirely. Items that merely fall out
   // of the current selection (e.g. `apply --select`) yet still exist in the catalog are
@@ -202,6 +212,14 @@ export async function writeClaudeFiles(
   if (dryRun) return [...new Set(files)]
 
   const installedItems = catalogItems.filter((r) => installedIds.has(r.id))
+  const prevLock = await readJson<PrevLockEntry[]>(hausPath(root, 'haus.lock.json'))
+  const prevRefById = new Map(
+    (prevLock ?? []).filter((e) => e.id && e.catalogRef).map((e) => [e.id!, e.catalogRef!]),
+  )
+  const lockCatalogRef = (itemId: string): string =>
+    isCatalogRefResolved()
+      ? getResolvedCatalogRef()
+      : (prevRefById.get(itemId) ?? getResolvedCatalogRef())
   await writeManagedJson(
     root,
     hausPath(root, 'selected-context.json'),
@@ -223,7 +241,7 @@ export async function writeClaudeFiles(
         type: r.type,
         source: isCurated ? 'curated' : 'haus',
         version: hausVersion,
-        catalogRef: CATALOG_REF,
+        catalogRef: lockCatalogRef(r.id),
         hash: await hashInstalledPaths(root, relPaths),
         installMode: 'copied',
         paths: relPaths,
@@ -245,7 +263,7 @@ export async function writeClaudeFiles(
   return [...new Set(files)]
 }
 
-type PrevLockEntry = { id?: string; paths?: string[]; hash?: string }
+type PrevLockEntry = { id?: string; paths?: string[]; hash?: string; catalogRef?: string }
 
 /**
  * Deletes catalog items installed on a previous run (per the existing lock) that are no

@@ -9,9 +9,12 @@ import path from 'node:path'
 import fs from 'fs-extra'
 
 import type { CatalogItem } from '../types.js'
+import { mapWithConcurrency } from '../utils/fs.js'
 import { warn } from '../utils/logger.js'
 
-import { CATALOG_CACHE_SUBDIR, CATALOG_REF, CATALOG_REPO_URL } from './constants.js'
+import { CATALOG_CACHE_SUBDIR, CATALOG_REPO_URL } from './constants.js'
+import { validateCatalogItem } from './ingest-catalog.js'
+import { parseManifest } from './manifest-schema.js'
 
 // HAUS_CATALOG_CACHE_DIR_OVERRIDE redirects cache writes/reads for isolated tests.
 /** Resolves the catalog cache directory (per call so tests can override env after import). */
@@ -20,9 +23,43 @@ export function getCacheDir(): string {
     process.env['HAUS_CATALOG_CACHE_DIR_OVERRIDE'] ?? path.join(os.homedir(), CATALOG_CACHE_SUBDIR)
   )
 }
-// HAUS_CATALOG_REMOTE_BASE allows tests to point at a local mock server.
-const REMOTE_BASE = process.env['HAUS_CATALOG_REMOTE_BASE'] ?? `${CATALOG_REPO_URL}/${CATALOG_REF}`
-const REMOTE_MANIFEST_URL = `${REMOTE_BASE}/manifest.json`
+
+let cachedCatalogRef: string | undefined
+
+/** Latest resolved catalog ref for this process (informational / lock metadata). */
+export function getResolvedCatalogRef(): string {
+  return cachedCatalogRef ?? process.env['HAUS_CATALOG_REF'] ?? 'main'
+}
+
+/** True after sync or when HAUS_CATALOG_REF is set (not the unsynced `main` fallback). */
+export function isCatalogRefResolved(): boolean {
+  return cachedCatalogRef !== undefined || process.env['HAUS_CATALOG_REF'] !== undefined
+}
+
+/**
+ * Resolve which git ref to fetch the catalog from.
+ * Honors HAUS_CATALOG_REF; else latest release tag; else `main`.
+ */
+export async function resolveCatalogRef(opts?: {
+  env?: NodeJS.ProcessEnv
+  fetchLatestTag?: () => Promise<string | null>
+}): Promise<string> {
+  const env = opts?.env ?? process.env
+  if (env['HAUS_CATALOG_REF']) return env['HAUS_CATALOG_REF']
+  const fetchLatest = opts?.fetchLatestTag ?? fetchLatestCatalogTag
+  const tag = await fetchLatest()
+  return tag ?? 'main'
+}
+
+async function remoteBase(): Promise<string> {
+  if (process.env['HAUS_CATALOG_REMOTE_BASE']) {
+    return process.env['HAUS_CATALOG_REMOTE_BASE']
+  }
+  if (cachedCatalogRef === undefined) {
+    cachedCatalogRef = await resolveCatalogRef()
+  }
+  return `${CATALOG_REPO_URL}/${cachedCatalogRef}`
+}
 
 /** Fetches raw text from a URL; returns null on any network or HTTP error. Timeout: 10 s. */
 async function fetchText(url: string): Promise<string | null> {
@@ -35,16 +72,21 @@ async function fetchText(url: string): Promise<string | null> {
   }
 }
 
-/** Downloads and parses the remote manifest; returns null if fetch or parse fails. */
-export async function fetchRemoteManifest(): Promise<CatalogItem[] | null> {
-  const text = await fetchText(REMOTE_MANIFEST_URL)
+/** Downloads and schema-validates the remote manifest; returns null if fetch or validation fails. */
+export async function fetchRemoteManifest(): Promise<{
+  version: string
+  items: CatalogItem[]
+} | null> {
+  const base = await remoteBase()
+  const text = await fetchText(`${base}/manifest.json`)
   if (!text) return null
-  try {
-    const data = JSON.parse(text) as { items?: CatalogItem[] }
-    return data?.items?.length ? data.items : null
-  } catch {
+  const parsed = parseManifest(text)
+  if (!parsed.ok) {
+    warn(`Remote manifest failed schema validation: ${parsed.error}`)
     return null
   }
+  if (!parsed.manifest.items.length) return null
+  return parsed.manifest
 }
 
 type WriteOutcome = 'created' | 'updated' | 'unchanged'
@@ -79,7 +121,8 @@ export async function readWorkflowTemplate(
   opts: { dryRun?: boolean } = {},
 ): Promise<string | null> {
   const dest = path.join(getCacheDir(), WORKFLOW_TEMPLATE_REL)
-  const text = await fetchText(`${REMOTE_BASE}/${WORKFLOW_TEMPLATE_REL}`)
+  const base = await remoteBase()
+  const text = await fetchText(`${base}/${WORKFLOW_TEMPLATE_REL}`)
   if (text === null) {
     if (await fs.pathExists(dest)) return fs.readFile(dest, 'utf8')
     return null
@@ -118,6 +161,8 @@ function safeJoin(base: string, itemPath: string): string | null {
   return resolved.startsWith(base + path.sep) || resolved === base ? resolved : null
 }
 
+const KNOWN_ITEM_TYPES = new Set(['skill', 'agent', 'template', 'command'])
+
 /** True for a reference entry that points at an external resource rather than a bundled file. */
 function isExternalReference(ref: string): boolean {
   return /^[a-z][a-z0-9+.-]*:\/\//i.test(ref)
@@ -128,7 +173,11 @@ function isExternalReference(ref: string): boolean {
  * cache alongside its SKILL.md. External URL references are skipped. Idempotent: only
  * fetches files that are not already cached, so it safely backfills older partial caches.
  */
-async function downloadSkillReferences(item: CatalogItem, destDir: string): Promise<void> {
+async function downloadSkillReferences(
+  item: CatalogItem,
+  destDir: string,
+  base: string,
+): Promise<void> {
   for (const ref of item.references ?? []) {
     if (isExternalReference(ref)) continue
     const refDest = safeJoin(destDir, ref)
@@ -136,7 +185,7 @@ async function downloadSkillReferences(item: CatalogItem, destDir: string): Prom
       warn(`Skipping reference "${ref}" for ${item.id}: path traversal detected`)
       continue
     }
-    const text = await fetchText(`${REMOTE_BASE}/${item.path}/${ref}`)
+    const text = await fetchText(`${base}/${item.path}/${ref}`)
     if (text === null) {
       warn(`Failed to fetch reference "${ref}" for ${item.id}`)
       continue
@@ -145,23 +194,90 @@ async function downloadSkillReferences(item: CatalogItem, destDir: string): Prom
   }
 }
 
+async function syncOneItem(
+  item: CatalogItem,
+  base: string,
+): Promise<'created' | 'updated' | 'unchanged' | 'failed'> {
+  if (!KNOWN_ITEM_TYPES.has(item.type)) {
+    warn(
+      `Skipping ${item.id}: type "${item.type}" is unknown to this haus version — upgrade to use it`,
+    )
+    return 'failed'
+  }
+  if (!item.path) return 'failed'
+  if (!isSafeCatalogPath(item.path)) {
+    warn(`Skipping ${item.id}: invalid path "${item.path}"`)
+    return 'failed'
+  }
+
+  if (item.type === 'skill') {
+    const destDir = safeJoin(getCacheDir(), item.path)
+    if (!destDir) {
+      warn(`Skipping ${item.id}: path traversal detected`)
+      return 'failed'
+    }
+    const dest = path.join(destDir, 'SKILL.md')
+    const text = await fetchText(`${base}/${item.path}/SKILL.md`)
+    if (!text) {
+      warn(`Failed to fetch content for ${item.id}`)
+      return 'failed'
+    }
+    const verdict = validateCatalogItem(item, text)
+    if (!verdict.ok) {
+      warn(`Rejected ${item.id} at ingest: ${verdict.reason}`)
+      return 'failed'
+    }
+    try {
+      const outcome = await writeTextIfChanged(dest, text)
+      await downloadSkillReferences(item, destDir, base)
+      return outcome
+    } catch (err) {
+      warn(`Failed to cache ${item.id}: ${err instanceof Error ? err.message : String(err)}`)
+      return 'failed'
+    }
+  }
+
+  const dest = safeJoin(getCacheDir(), item.path)
+  if (!dest) {
+    warn(`Skipping ${item.id}: path traversal detected`)
+    return 'failed'
+  }
+  const text = await fetchText(`${base}/${item.path}`)
+  if (!text) {
+    warn(`Failed to fetch content for ${item.id}`)
+    return 'failed'
+  }
+  const verdict = validateCatalogItem(item, text)
+  if (!verdict.ok) {
+    warn(`Rejected ${item.id} at ingest: ${verdict.reason}`)
+    return 'failed'
+  }
+  try {
+    return await writeTextIfChanged(dest, text)
+  } catch (err) {
+    warn(`Failed to cache ${item.id}: ${err instanceof Error ? err.message : String(err)}`)
+    return 'failed'
+  }
+}
+
 /**
  * Fetches the remote manifest and downloads any new skill/agent files into the local cache.
  * Skips items that already exist; logs a warning and falls back to the bundled catalog on failure.
  */
 export async function syncRemoteCatalog(): Promise<SyncResult> {
-  const items = await fetchRemoteManifest()
-  if (!items) {
+  const manifest = await fetchRemoteManifest()
+  if (!manifest) {
     warn('Remote catalog fetch failed — using bundled catalog')
     return { newItems: [], refreshed: [], unchanged: 0, failed: [] }
   }
+  const { version, items } = manifest
 
   const cacheDir = getCacheDir()
   try {
     await fs.ensureDir(cacheDir)
     await fs.writeFile(
       path.join(cacheDir, 'manifest.json'),
-      `${JSON.stringify({ items }, null, 2)}\n`,
+      `${JSON.stringify({ version, items }, null, 2)}\n`,
       'utf8',
     )
   } catch (err) {
@@ -175,71 +291,16 @@ export async function syncRemoteCatalog(): Promise<SyncResult> {
   const refreshed: string[] = []
   let unchanged = 0
   const failed: string[] = []
+  const base = await remoteBase()
 
-  for (const item of items) {
-    if (
-      (item.type !== 'skill' &&
-        item.type !== 'agent' &&
-        item.type !== 'template' &&
-        item.type !== 'command') ||
-      !item.path
-    )
-      continue
-    if (!isSafeCatalogPath(item.path)) {
-      warn(`Skipping ${item.id}: invalid path "${item.path}"`)
-      failed.push(item.id)
-      continue
-    }
-
-    if (item.type === 'skill') {
-      const destDir = safeJoin(getCacheDir(), item.path)
-      if (!destDir) {
-        warn(`Skipping ${item.id}: path traversal detected`)
-        failed.push(item.id)
-        continue
-      }
-      const dest = path.join(destDir, 'SKILL.md')
-      const url = `${REMOTE_BASE}/${item.path}/SKILL.md`
-      const text = await fetchText(url)
-      if (!text) {
-        warn(`Failed to fetch content for ${item.id}`)
-        failed.push(item.id)
-        continue
-      }
-      try {
-        const outcome = await writeTextIfChanged(dest, text)
-        await downloadSkillReferences(item, destDir)
-        if (outcome === 'created') newItems.push(item.id)
-        else if (outcome === 'updated') refreshed.push(item.id)
-        else unchanged++
-      } catch (err) {
-        warn(`Failed to cache ${item.id}: ${err instanceof Error ? err.message : String(err)}`)
-        failed.push(item.id)
-      }
-    } else {
-      const dest = safeJoin(getCacheDir(), item.path)
-      if (!dest) {
-        warn(`Skipping ${item.id}: path traversal detected`)
-        failed.push(item.id)
-        continue
-      }
-      const url = `${REMOTE_BASE}/${item.path}`
-      const text = await fetchText(url)
-      if (!text) {
-        warn(`Failed to fetch content for ${item.id}`)
-        failed.push(item.id)
-        continue
-      }
-      try {
-        const outcome = await writeTextIfChanged(dest, text)
-        if (outcome === 'created') newItems.push(item.id)
-        else if (outcome === 'updated') refreshed.push(item.id)
-        else unchanged++
-      } catch (err) {
-        warn(`Failed to cache ${item.id}: ${err instanceof Error ? err.message : String(err)}`)
-        failed.push(item.id)
-      }
-    }
+  const outcomes = await mapWithConcurrency(items, (item) => syncOneItem(item, base), 8)
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i]!
+    const outcome = outcomes[i]
+    if (outcome === 'created') newItems.push(item.id)
+    else if (outcome === 'updated') refreshed.push(item.id)
+    else if (outcome === 'unchanged') unchanged++
+    else if (outcome === 'failed') failed.push(item.id)
   }
 
   return { newItems, refreshed, unchanged, failed }
