@@ -44,6 +44,8 @@ export function parseManifest(json: string): ParseManifestResult {
   }
 
   const items: CatalogItem[] = []
+  const seenIds = new Set<string>()
+  const seenPaths = new Set<string>()
   for (let i = 0; i < root.items.length; i++) {
     const raw = root.items[i]
     if (!raw || typeof raw !== 'object') {
@@ -59,6 +61,15 @@ export function parseManifest(json: string): ParseManifestResult {
     if (!isNonEmptyString(item.path)) {
       return { ok: false, error: `${item.id}: missing path` }
     }
+    if (seenIds.has(item.id)) {
+      return { ok: false, error: `${item.id}: duplicate id` }
+    }
+    seenIds.add(item.id)
+    const normPath = item.path.replace(/\\/g, '/')
+    if (seenPaths.has(normPath)) {
+      return { ok: false, error: `${item.id}: duplicate path "${normPath}"` }
+    }
+    seenPaths.add(normPath)
     if (item.source === 'curated') {
       if (!isNonEmptyString(item.reviewStatus)) {
         return { ok: false, error: `${item.id}: curated item missing reviewStatus` }

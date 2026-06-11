@@ -8,7 +8,7 @@ import path from 'node:path'
 import fs from 'fs-extra'
 
 import { catalogItemContentPath, loadCatalogContext } from '../catalog/load-catalog.js'
-import { getResolvedCatalogRef } from '../catalog/remote-catalog.js'
+import { getResolvedCatalogRef, isCatalogRefResolved } from '../catalog/remote-catalog.js'
 import type { Recommendation } from '../types.js'
 import { hashInstalledPaths } from '../update/hash-installed.js'
 import { pruneEmptyDir, readJson } from '../utils/fs.js'
@@ -212,6 +212,14 @@ export async function writeClaudeFiles(
   if (dryRun) return [...new Set(files)]
 
   const installedItems = catalogItems.filter((r) => installedIds.has(r.id))
+  const prevLock = await readJson<PrevLockEntry[]>(hausPath(root, 'haus.lock.json'))
+  const prevRefById = new Map(
+    (prevLock ?? []).filter((e) => e.id && e.catalogRef).map((e) => [e.id!, e.catalogRef!]),
+  )
+  const lockCatalogRef = (itemId: string): string =>
+    isCatalogRefResolved()
+      ? getResolvedCatalogRef()
+      : (prevRefById.get(itemId) ?? getResolvedCatalogRef())
   await writeManagedJson(
     root,
     hausPath(root, 'selected-context.json'),
@@ -233,7 +241,7 @@ export async function writeClaudeFiles(
         type: r.type,
         source: isCurated ? 'curated' : 'haus',
         version: hausVersion,
-        catalogRef: getResolvedCatalogRef(),
+        catalogRef: lockCatalogRef(r.id),
         hash: await hashInstalledPaths(root, relPaths),
         installMode: 'copied',
         paths: relPaths,
@@ -255,7 +263,7 @@ export async function writeClaudeFiles(
   return [...new Set(files)]
 }
 
-type PrevLockEntry = { id?: string; paths?: string[]; hash?: string }
+type PrevLockEntry = { id?: string; paths?: string[]; hash?: string; catalogRef?: string }
 
 /**
  * Deletes catalog items installed on a previous run (per the existing lock) that are no

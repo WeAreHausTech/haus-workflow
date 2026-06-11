@@ -31,6 +31,11 @@ export function getResolvedCatalogRef(): string {
   return cachedCatalogRef ?? process.env['HAUS_CATALOG_REF'] ?? 'main'
 }
 
+/** True after sync or when HAUS_CATALOG_REF is set (not the unsynced `main` fallback). */
+export function isCatalogRefResolved(): boolean {
+  return cachedCatalogRef !== undefined || process.env['HAUS_CATALOG_REF'] !== undefined
+}
+
 /**
  * Resolve which git ref to fetch the catalog from.
  * Honors HAUS_CATALOG_REF; else latest release tag; else `main`.

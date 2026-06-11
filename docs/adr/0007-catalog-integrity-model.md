@@ -24,8 +24,10 @@ Layer integrity controls at the catalog ingest chokepoint:
    as `haus validate-catalog` (risky install patterns, banned agent phrases,
    forbidden tags) before cache write.
 
-Manifest `version` is informational only (display/doctor) — never a gate.
-Breaking shape changes fail schema validation; additive optional fields pass.
+Manifest top-level `version` is **required by ingest schema** (missing/empty fails
+`parseManifest()`), but once accepted it is informational only (display/doctor) —
+never a CLI compatibility gate. Breaking shape changes fail schema validation;
+additive optional fields pass.
 
 Cryptographic signing of manifests is **deferred**. Tags plus consumption-time
 validation are the mitigation for now.
