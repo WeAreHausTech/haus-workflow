@@ -11,6 +11,7 @@ import { execa } from 'execa'
 const DIST_CLI = path.resolve('dist/cli.js')
 
 const FIXTURE_MANIFEST = {
+  version: '1.0.0',
   items: [
     {
       id: 'haus.react19-patterns',

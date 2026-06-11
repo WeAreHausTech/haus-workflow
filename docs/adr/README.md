@@ -11,3 +11,4 @@ supersedes it. See `.claude/WORKFLOW.md` → "Architecture Decision Records".
 | [0004](0004-deep-context-feedback-loop.md)             | Deep comprehension feeds asset selection via deep-context.json     | Accepted |
 | [0005](0005-cross-repo-contract-testing.md)            | Cross-repo contract testing between the CLI and the catalog        | Accepted |
 | [0006](0006-ownership-marking-on-frontmatter-files.md) | Ownership marker moves inside frontmatter for skill files          | Accepted |
+| [0007](0007-catalog-integrity-model.md)                | Catalog integrity — release tags, schema + content validation      | Accepted |
