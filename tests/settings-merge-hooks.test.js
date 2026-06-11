@@ -42,3 +42,15 @@ test('does not duplicate a hook already present when _haus tracking was cleared'
   const { settings: merged } = mergeHooks(settings, [CONTEXT_FRAGMENT])
   assert.equal(merged.hooks.UserPromptSubmit.length, 1)
 })
+
+test('records hookCommands when hook entry already exists but tracking was empty', () => {
+  const entry = {
+    hooks: [{ type: 'command', command: 'haus context --from-hook' }],
+  }
+  const settings = {
+    _haus: { hooks: ['hook.context'], hookCommands: [] },
+    hooks: { UserPromptSubmit: [entry] },
+  }
+  const { settings: merged } = mergeHooks(settings, [CONTEXT_FRAGMENT])
+  assert.deepEqual(merged._haus?.hookCommands, ['haus context --from-hook'])
+})

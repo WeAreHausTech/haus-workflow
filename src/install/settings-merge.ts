@@ -105,7 +105,10 @@ export function mergeHooks(
     const event = fragment.event
     const eventEntries = updated.hooks[event] ?? []
     const presentCommands = collectEventHookCommands(eventEntries)
-    if (presentCommands.has(fragment.command)) continue
+    if (presentCommands.has(fragment.command)) {
+      if (!existingCommands.includes(fragment.command)) addedCommands.push(fragment.command)
+      continue
+    }
 
     if (!updated.hooks[event]) updated.hooks[event] = []
 
