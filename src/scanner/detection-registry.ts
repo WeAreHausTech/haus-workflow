@@ -24,10 +24,26 @@ export type DetectionSignal =
 export const dep = (value: string): DetectionSignal => ({ kind: 'dep', value })
 export const depPrefix = (value: string): DetectionSignal => ({ kind: 'depPrefix', value })
 export const depAbsent = (value: string): DetectionSignal => ({ kind: 'depAbsent', value })
-export const fileEndsWith = (value: string): DetectionSignal => ({ kind: 'file', value, mode: 'endsWith' })
-export const fileIncludes = (value: string): DetectionSignal => ({ kind: 'file', value, mode: 'includes' })
-export const fileEquals = (value: string): DetectionSignal => ({ kind: 'file', value, mode: 'equals' })
-export const fileStartsWith = (value: string): DetectionSignal => ({ kind: 'file', value, mode: 'startsWith' })
+export const fileEndsWith = (value: string): DetectionSignal => ({
+  kind: 'file',
+  value,
+  mode: 'endsWith',
+})
+export const fileIncludes = (value: string): DetectionSignal => ({
+  kind: 'file',
+  value,
+  mode: 'includes',
+})
+export const fileEquals = (value: string): DetectionSignal => ({
+  kind: 'file',
+  value,
+  mode: 'equals',
+})
+export const fileStartsWith = (value: string): DetectionSignal => ({
+  kind: 'file',
+  value,
+  mode: 'startsWith',
+})
 export const content = (value: string): DetectionSignal => ({ kind: 'content', value })
 
 /** A detection rule: matches when its `all`/`any` signals hold, then contributes role/stack. */
@@ -135,7 +151,10 @@ export const STACK_RULES: DetectionRule[] = [
   { stack: ['frontend', 'vue'], any: [dep('vue')] },
   { stack: ['frontend', 'vite8'], any: [dep('vite')] },
   { stack: ['frontend', 'react-router-v7'], all: [dep('react-router'), dep('@react-router/node')] },
-  { stack: ['frontend', 'tailwindcss'], any: [dep('tailwindcss'), fileIncludes('tailwind.config.')] },
+  {
+    stack: ['frontend', 'tailwindcss'],
+    any: [dep('tailwindcss'), fileIncludes('tailwind.config.')],
+  },
   {
     stack: ['frontend', 'shadcn'],
     all: [fileEndsWith('components.json'), dep('class-variance-authority')],
@@ -148,10 +167,12 @@ export const STACK_RULES: DetectionRule[] = [
   { stack: ['frontend', 'react-native'], any: [dep('react-native')] },
   { stack: ['tooling', 'i18next'], any: [dep('i18next'), dep('react-i18next')] },
   { stack: ['tooling', 'bullmq'], any: [dep('bullmq')] },
-  { stack: ['tooling', 'docker'], any: [fileEquals('Dockerfile'), fileStartsWith('docker-compose')] },
+  {
+    stack: ['tooling', 'docker'],
+    any: [fileEquals('Dockerfile'), fileStartsWith('docker-compose')],
+  },
   { stack: ['tooling', 'pm2'], any: [dep('pm2'), fileIncludes('ecosystem.config')] },
   { stack: ['tooling', 'sentry'], any: [depPrefix('@sentry/')] },
-  { stack: ['tooling', 'deployer-php'], any: [dep('deployer/deployer')] },
   { stack: ['tooling', 'missing-prettier'], any: [depAbsent('prettier')] },
   { stack: ['tooling', 'missing-eslint'], any: [depAbsent('eslint')] },
   {
@@ -168,7 +189,10 @@ export const STACK_RULES: DetectionRule[] = [
   { stack: ['backend', 'nestjs'], any: [content('NestFactory')] },
   { stack: ['backend', 'vendure3'], any: [content('@VendurePlugin')] },
   { stack: ['backend', 'graphql'], any: [dep('graphql'), dep('@nestjs/graphql')] },
-  { stack: ['backend', 'graphql'], any: [fileEndsWith('.graphql'), fileEndsWith('schema.graphql')] },
+  {
+    stack: ['backend', 'graphql'],
+    any: [fileEndsWith('.graphql'), fileEndsWith('schema.graphql')],
+  },
   { stack: ['backend', 'laravel'], any: [dep('laravel/framework')] },
   { stack: ['backend', 'laravel'], any: [fileIncludes('app/Providers/'), fileIncludes('routes/')] },
   { stack: ['backend', 'wordpress'], any: [fileEndsWith('wp-config.php'), dep('roots/wordpress')] },
