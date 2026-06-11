@@ -6,6 +6,7 @@ import { Command } from 'commander'
 
 import { runApply } from './commands/apply.js'
 import { runCatalogAudit } from './commands/catalog-audit.js'
+import { runClone } from './commands/clone.js'
 import { runConfig } from './commands/config.js'
 import { runContext } from './commands/context.js'
 import { runDoctor } from './commands/doctor.js'
@@ -87,6 +88,15 @@ program
   .option('--verbose')
   .action(runContext)
 program.command('init').option('--json').action(runInit)
+program
+  .command('clone')
+  .description('Clone a single git repository by URL')
+  .argument('<url>', 'Git URL to clone')
+  .argument('[dir]', 'Target directory (default: repo name derived from the URL)')
+  .option('--dry-run', 'Print what would happen without cloning')
+  .action((url: string, dir: string | undefined, opts: { dryRun?: boolean }) =>
+    runClone(url, { dir, dryRun: opts.dryRun }),
+  )
 program.command('refresh').action(runRefresh)
 program.command('catalog-audit').action(runCatalogAudit)
 program.command('validate-catalog').argument('[manifest]').action(runValidateCatalog)
