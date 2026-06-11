@@ -23,6 +23,15 @@ import { writeRootClaudeMd } from './write-root-claude-md.js'
 import { writeWorkflowConfig } from './write-workflow-config.js'
 import { writeWorkflow } from './write-workflow.js'
 
+/** Map catalog item type to `.claude/` subdir; null = unknown type (skip). */
+export function targetDirForType(type: string): string | null {
+  if (type === 'agent') return 'agents'
+  if (type === 'template') return 'templates'
+  if (type === 'command') return 'commands'
+  if (type === 'skill') return 'skills'
+  return null
+}
+
 /**
  * Write all managed .claude/ files for the project at `root`.
  * In dry-run mode, logs diffs but does not write anything to disk.
@@ -166,14 +175,13 @@ export async function writeClaudeFiles(
       }
     }
     const sourcePath = catalogItemContentPath(contentRoot, manifestItem)
-    const target =
-      item.type === 'agent'
-        ? 'agents'
-        : item.type === 'template'
-          ? 'templates'
-          : item.type === 'command'
-            ? 'commands'
-            : 'skills'
+    const target = targetDirForType(item.type)
+    if (!target) {
+      warn(
+        `Skipping ${item.id}: type "${item.type}" is unknown to this haus version — upgrade the CLI to use it`,
+      )
+      continue
+    }
     const destination = claudePath(root, target, path.basename(sourcePath))
     if (await fs.pathExists(sourcePath)) {
       if (dryRun) {

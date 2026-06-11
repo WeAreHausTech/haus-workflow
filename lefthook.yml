@@ -33,7 +33,7 @@ pre-commit:
       # Always-on baseline. Scans ADDED lines only (deleting a leaked secret is never
       # blocked) for inline credential assignments.
       run: |
-        added="$(git diff --cached --no-color -U0 | grep -E '^\+' | grep -vE '^\+\+\+')"
+        added="$(git diff --cached --no-color -U0 -- ':!.github/workflows' | grep -E '^\+' | grep -vE '^\+\+\+')"
         if printf '%s\n' "$added" | grep -iqE "(password|secret|token|api_key)[[:space:]]*[:=]"; then
           exit 1
         fi

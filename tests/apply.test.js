@@ -121,7 +121,7 @@ test('apply merges haus hooks into existing settings without clobbering user hoo
   assert.equal(settings.permissions.deny.includes('Bash(rm -rf:*)'), true)
 })
 
-test('apply --write warns and succeeds when catalog cache is empty', () => {
+test('apply --write fails hard when catalog cache is empty', () => {
   const temp = mkdtempSync(path.join(os.tmpdir(), 'haus-apply-empty-cache-'))
   writeFileSync(
     path.join(temp, 'package.json'),
@@ -152,10 +152,9 @@ test('apply --write warns and succeeds when catalog cache is empty', () => {
     env,
     reject: false,
   })
-  assert.equal(r.exitCode, 0)
+  assert.equal(r.exitCode, 1)
   const combined = `${r.stdout ?? ''}${r.stderr ?? ''}`
-  assert.equal(combined.includes('Catalog cache is empty'), true)
-  assert.equal(fs.existsSync(path.join(temp, '.claude/settings.json')), true)
+  assert.match(combined, /run `haus update`/i)
 })
 
 test('apply reports diff before overwriting generated files', () => {

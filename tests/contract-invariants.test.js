@@ -23,43 +23,11 @@ function readJson(rel) {
   return JSON.parse(readFileSync(resolve(repoRoot, rel), 'utf8'))
 }
 
+import { CATALOG_ITEM_KNOWN_KEYS } from '../src/types.js'
+
 const fixture = readJson('tests/fixtures/catalog/manifest.json')
 
-// Property set the catalog-item contract declares (mirrors src/types.ts
-// CatalogItem and schema/catalog-item.schema.json). The live-vs-this drift is
-// caught by scripts/contract-check.mjs; here we enforce the fixture against the
-// bundled contract knowledge so the offline suite stays self-sufficient.
-const KNOWN_ITEM_KEYS = new Set([
-  'id',
-  'type',
-  'source',
-  'version',
-  'path',
-  'title',
-  'purpose',
-  'whenToUse',
-  'whenNotToUse',
-  'tags',
-  'repoRoles',
-  'installMode',
-  'references',
-  'safetyNotes',
-  'tokenBudget',
-  'tokenEstimate',
-  'default',
-  'requiresAny',
-  'ecosystem',
-  'reviewStatus',
-  'riskLevel',
-  'useMode',
-  'licenseConfidence',
-  'license',
-  'originSourceId',
-  'originUrl',
-  'pinnedRef',
-  'intents',
-  'sourceInfluences',
-])
+const KNOWN_ITEM_KEYS = new Set(CATALOG_ITEM_KNOWN_KEYS)
 
 // Fields the CLI loader/recommender require on every item (a strict subset of
 // the schema's required list; `version` is release-coupled and omitted from the
