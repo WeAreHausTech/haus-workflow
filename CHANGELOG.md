@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.22.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.21.0...v0.22.0) (2026-06-11)
+
+### Features
+
+- **audit:** offline, perf cleanup, CI ([#92](https://github.com/WeAreHausTech/haus-workflow/issues/92)) ([a133f06](https://github.com/WeAreHausTech/haus-workflow/commit/a133f06d52b9a9e2a15f949c443c7042ed125735))
+- **catalog:** ingest chokepoint ([#91](https://github.com/WeAreHausTech/haus-workflow/issues/91)) ([712d72b](https://github.com/WeAreHausTech/haus-workflow/commit/712d72b252ae3181bcdb9ce02614ede098c5bab5))
+
+### Bug Fixes
+
+- **cloneandsetup:** read repo setup docs before file-heuristics ([#95](https://github.com/WeAreHausTech/haus-workflow/issues/95)) ([8219b92](https://github.com/WeAreHausTech/haus-workflow/commit/8219b92d1c40b71ecb78661929ca57e1fe858603))
+
 ## [0.21.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.20.0...v0.21.0) (2026-06-11)
 
 ### Features
