@@ -24,6 +24,7 @@ import {
   matchRequiresAny,
   mergeRecommendationWarnings,
 } from './policies.js'
+import { estimateContextTokens, tokenReductionPct } from './token-estimate.js'
 
 /** A positive eligibility signal: why an item matched the project context. */
 type ReasonHit = { code: string; message: string; signal?: string }
@@ -163,11 +164,12 @@ export async function recommend(root: string, context: ContextMap): Promise<Reco
     )
     if (goalMatch) push('goal-match', 'guided goal match', `goal:${goalMatch}`)
 
-    if (
-      item.tags.includes(context.packageManager) ||
-      item.tags.includes(`${context.packageManager}4`) ||
-      item.tags.includes(`${context.packageManager}89`)
-    ) {
+    const pm = context.packageManager
+    const pmVersionedMatch =
+      pm === 'yarn' || pm === 'pnpm'
+        ? item.tags.includes(pm) || item.tags.includes(`${pm}4`) || item.tags.includes(`${pm}89`)
+        : item.tags.includes(pm)
+    if (pmVersionedMatch) {
       push(
         'package-manager-match',
         'package manager match',
@@ -225,13 +227,10 @@ export async function recommend(root: string, context: ContextMap): Promise<Reco
 
   recommended.sort((a, b) => a.id.localeCompare(b.id))
   skipped.sort((a, b) => a.id.localeCompare(b.id))
-  const estimatedContextTokens = recommended.length * 320
   const selectedRules = recommended.length
   const skippedRules = skipped.length
-  const estimatedTokenReductionPct = Math.max(
-    0,
-    Math.round((skippedRules / Math.max(selectedRules + skippedRules, 1)) * 100),
-  )
+  const estimatedContextTokens = estimateContextTokens(selectedRules)
+  const estimatedTokenReductionPct = tokenReductionPct(selectedRules, skippedRules)
   return {
     mode: context.mode,
     recommended,

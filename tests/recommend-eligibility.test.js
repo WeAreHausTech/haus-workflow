@@ -226,6 +226,22 @@ test('deep-context schema drift: stacks as string coerced to [] not thrown (regr
   }
 })
 
+test('does not produce package-manager-match for npm4/npm89 pseudo-tags', async () => {
+  setup()
+  try {
+    const result = await recommend(
+      tmpDir,
+      makeContext(tmpDir, { packageManager: 'npm' }),
+    )
+    const matched = result.recommended.find((r) =>
+      r.reasons?.some((reason) => reason.code === 'package-manager-match'),
+    )
+    assert.equal(matched, undefined)
+  } finally {
+    teardown()
+  }
+})
+
 test('requiresAny satisfied: role-matched item recommended when nextjs in stacks', async () => {
   setup()
   try {

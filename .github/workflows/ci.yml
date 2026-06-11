@@ -29,7 +29,6 @@ jobs:
         run: yarn install --immutable --check-cache
 
       - name: Audit dependencies
-        continue-on-error: true
         run: yarn npm audit -A -R --severity high --environment production
       - name: Lint
         run: yarn lint
@@ -86,6 +85,17 @@ jobs:
   # run the shipped bin. Catches a missing `files` entry, broken bin shebang, ESM
   # resolution failure, or unbundled dependency that the in-repo `dist/cli.js` smoke
   # cannot see. Packs with `npm pack` to match the `npm publish` release path.
+  gitleaks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          fetch-depth: 0
+
+      - name: Run gitleaks
+        uses: gitleaks/gitleaks-action@b232ad3d105a9dec37ca0d4c721b34a5d8f50be5 # v2.3.9
+
   pack-smoke:
     runs-on: ubuntu-latest
     steps:

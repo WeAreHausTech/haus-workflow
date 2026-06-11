@@ -104,6 +104,39 @@ export type CatalogItem = {
   pinnedRef?: string
 }
 
+/** Known catalog item field names — keep in sync with catalog-item.schema.json. */
+export const CATALOG_ITEM_KNOWN_KEYS = [
+  'id',
+  'type',
+  'source',
+  'version',
+  'path',
+  'title',
+  'purpose',
+  'whenToUse',
+  'whenNotToUse',
+  'tags',
+  'repoRoles',
+  'installMode',
+  'references',
+  'safetyNotes',
+  'sourceInfluences',
+  'intents',
+  'tokenBudget',
+  'tokenEstimate',
+  'default',
+  'requiresAny',
+  'ecosystem',
+  'originSourceId',
+  'originUrl',
+  'license',
+  'licenseConfidence',
+  'useMode',
+  'riskLevel',
+  'reviewStatus',
+  'pinnedRef',
+] as const
+
 /**
  * Deep-comprehension signals emitted by the writing-documentation skill to
  * .haus-workflow/deep-context.json. LLM-authored — read defensively. Feeds the

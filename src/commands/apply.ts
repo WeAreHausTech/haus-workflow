@@ -77,11 +77,14 @@ export async function runApply(options: {
     const catalogItemCount =
       selectedIds !== undefined ? selectedIds.length : (rec?.recommended.length ?? 0)
     if (catalogItemCount > 0 && !(await cacheHasItems())) {
-      warn(
-        isDryRun
-          ? 'Catalog cache is empty — `haus apply --write` will skip catalog items. Run `haus update` first.'
-          : 'Catalog cache is empty — catalog items will be skipped. Run `haus update` first, or pass --allow-empty-cache to silence this warning.',
-      )
+      const message = 'No catalog content found. Run `haus update` first.'
+      if (isDryRun) {
+        warn(`Catalog cache is empty — dry-run will skip catalog items. ${message}`)
+      } else {
+        error(message)
+        process.exitCode = 1
+        return
+      }
     }
   }
 

@@ -13,8 +13,7 @@
  *  - BP#1: LIVE validation-rules.json vs committed library/catalog copy
  *          (byte/structure diff — these MUST be identical, see ADR-0001).
  *  - BP#2: LIVE manifest.json vs committed library/catalog/manifest.json
- *          (canonical diff — the bundled fallback catalog MUST match live so an
- *          offline/locked-down install ships the same items the catalog publishes).
+ *          (canonical diff — the bundled fallback catalog MUST match live).
  *  - BP#3: LIVE manifest.schema + catalog-item.schema vs the committed test
  *          fixture, on a KEY-SET basis. The fixture is an intentional curated
  *          subset, so this is NOT byte-equality — it fails only if the fixture

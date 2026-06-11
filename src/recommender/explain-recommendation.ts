@@ -5,6 +5,8 @@
 
 import type { Recommendation } from '../types.js'
 
+import { estimateContextTokens, tokenReductionPct } from './token-estimate.js'
+
 /** Loose input shape that covers both current and legacy recommendation.json formats. */
 type RecommendationLike = Partial<Recommendation> & {
   recommended?: Array<{
@@ -83,15 +85,12 @@ export function normalizeRecommendation(input: RecommendationLike): Recommendati
     recommended,
     skipped,
     warnings: input.warnings ?? [],
-    estimatedContextTokens: input.estimatedContextTokens ?? recommended.length * 320,
+    estimatedContextTokens:
+      input.estimatedContextTokens ?? estimateContextTokens(recommended.length),
     selectedRules: input.selectedRules ?? recommended.length,
     skippedRules: input.skippedRules ?? skipped.length,
     estimatedTokenReductionPct:
-      input.estimatedTokenReductionPct ??
-      Math.max(
-        0,
-        Math.round((skipped.length / Math.max(recommended.length + skipped.length, 1)) * 100),
-      ),
+      input.estimatedTokenReductionPct ?? tokenReductionPct(recommended.length, skipped.length),
   }
 }
 
