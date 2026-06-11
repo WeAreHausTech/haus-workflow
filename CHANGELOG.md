@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.18.2](https://github.com/WeAreHausTech/haus-workflow/compare/v0.18.1...v0.18.2) (2026-06-11)
+
+### Bug Fixes
+
+- **validate-catalog:** mirror catalog command frontmatter checks ([#87](https://github.com/WeAreHausTech/haus-workflow/issues/87)) ([765983b](https://github.com/WeAreHausTech/haus-workflow/commit/765983bf1b810b8fd4647b1d7158f0ccee51cefe)), closes [#14](https://github.com/WeAreHausTech/haus-workflow/issues/14)
+
 ## [0.18.1](https://github.com/WeAreHausTech/haus-workflow/compare/v0.18.0...v0.18.1) (2026-06-09)
 
 ### Bug Fixes
