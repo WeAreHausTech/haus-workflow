@@ -34,12 +34,14 @@ The `project:*` tasks act on the current repo. The unprefixed verbs (`update`,
 (`~/.claude` + npm), like `npm install -g`. The short legacy names still work.
 
 ```
-/haus-workflow                 # interactive menu — pick a task
-/haus-workflow project:init    # [project] add haus to an EXISTING repo — AI skills, commands, workflow + docs
-/haus-workflow project:refresh # [project] refresh .claude/ and regenerate CLAUDE.md imports
-/haus-workflow project:doctor  # [project] health check for drift
-/haus-workflow update          # [global]  update npm package + catalog + ~/.claude/
-/haus-workflow catalog         # [global]  fetch only the latest catalog
+/haus-workflow                              # interactive menu — pick a task
+/haus-workflow project:init                 # [project] add haus to an EXISTING repo — AI skills, commands, workflow + docs
+/haus-workflow project:clone [name]         # [project] clone a workspace's repos (repos.manifest.json), or find & clone one repo by name from GitHub
+/haus-workflow project:cloneandsetup [name] # [project] like project:clone, then set up each repo locally (node version, deps, .env)
+/haus-workflow project:refresh              # [project] refresh .claude/ and regenerate CLAUDE.md imports
+/haus-workflow project:doctor               # [project] health check for drift
+/haus-workflow update                       # [global]  update npm package + catalog + ~/.claude/
+/haus-workflow catalog                      # [global]  fetch only the latest catalog
 ```
 
 Without an argument, the skill presents a menu so you can pick the task. With an argument, it runs immediately.
@@ -63,6 +65,7 @@ Scans the repo, recommends context assets, and writes `.claude/` and `.haus-work
 ```bash
 haus init              # first-run setup (scan → recommend → apply)
 haus setup-project     # re-run setup on existing project
+haus clone <url> [dir] # clone a single git repo by URL (the primitive project:clone / project:cloneandsetup loop over)
 haus scan              # scan repo and write context-map
 haus recommend         # recommend catalog items (binary eligibility)
 haus apply --dry-run   # preview what would be written
