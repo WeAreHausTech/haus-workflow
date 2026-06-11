@@ -63,9 +63,7 @@ test('CLI fixture has every required key (a malformed sync would drop one)', () 
   // Required keys present — a malformed sync would drop one.
   for (const key of [
     'forbiddenTags',
-    'bannedAgentPhrases',
     'requiredSkillFrontmatter',
-    'requiredAgentSections',
     'riskyInstallPatterns',
     'allowedNpxPattern',
     'anyNpxPattern',

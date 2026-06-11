@@ -16,9 +16,7 @@
     "defi",
     "trading"
   ],
-  "bannedAgentPhrases": ["autonomous", "swarm", "delegate", "orchestrat", "marketplace"],
   "requiredSkillFrontmatter": ["description"],
-  "requiredAgentSections": ["## Use when", "## Do not use when", "## Verification"],
   "riskyInstallPatterns": [
     { "source": "\\bnpx\\s+-y\\b", "flags": "i" },
     { "source": "\\bnpx\\s+--yes\\b", "flags": "i" },

@@ -15,11 +15,12 @@ test('rejects content with a risky install command', () => {
   assert.match(verdict.reason, /risky|install|npx/i)
 })
 
-test('rejects a banned autonomous-agent phrase', () => {
-  const item = { id: 'bad2', type: 'skill', path: 'skills/bad2' }
-  const content = '# Skill\n\nThis agent runs autonomous workflows.\n'
+test('accepts third-party prose that previously tripped banned-phrase substring checks', () => {
+  const item = { id: 'curated', type: 'skill', path: 'skills/curated' }
+  const content =
+    '# Skill\n\nDelegate investigation to subagents. Monorepo orchestration and marketplace refs are fine.\n'
   const verdict = validateCatalogItem(item, content)
-  assert.equal(verdict.ok, false)
+  assert.equal(verdict.ok, true)
 })
 
 test('accepts clean content', () => {

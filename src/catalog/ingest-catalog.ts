@@ -3,12 +3,7 @@
 import type { CatalogItem } from '../types.js'
 
 import { auditForbiddenTagsInText } from './forbidden-content.js'
-import {
-  ALLOWED_NPX_PATTERN,
-  ANY_NPX_PATTERN,
-  BANNED_AGENT_PHRASES,
-  RISKY_INSTALL_PATTERNS,
-} from './validation-rules.js'
+import { ALLOWED_NPX_PATTERN, ANY_NPX_PATTERN, RISKY_INSTALL_PATTERNS } from './validation-rules.js'
 
 export type ValidateCatalogItemResult = { ok: true } | { ok: false; reason: string }
 
@@ -26,13 +21,6 @@ export function validateCatalogItem(
     }
     if (ANY_NPX_PATTERN.test(line) && !ALLOWED_NPX_PATTERN.test(line)) {
       return { ok: false, reason: `${label}: disallowed npx at line ${i + 1}` }
-    }
-  }
-
-  const lower = content.toLowerCase()
-  for (const phrase of BANNED_AGENT_PHRASES) {
-    if (lower.includes(phrase)) {
-      return { ok: false, reason: `${label}: banned phrase "${phrase}"` }
     }
   }
 

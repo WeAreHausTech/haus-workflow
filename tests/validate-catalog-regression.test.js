@@ -68,6 +68,70 @@ test('validate-catalog accepts a skill whose when-signal is frontmatter descript
   assert.equal(r.exitCode, 0, r.stderr || r.stdout)
 })
 
+test('validate-catalog accepts an agent whose when-signal is frontmatter description only', () => {
+  const root = makeCatalogRoot(
+    [
+      {
+        id: 'haus.test-agent',
+        version: '1.0.0',
+        source: 'haus',
+        type: 'agent',
+        path: 'agents/test-agent.md',
+        title: 'Test agent',
+        purpose: 'Test',
+        whenToUse: 'Use when testing.',
+        whenNotToUse: 'Do not use otherwise.',
+        tags: ['workflow'],
+        repoRoles: [],
+        tokenEstimate: 100,
+        installMode: 'copy-selected',
+        reviewStatus: 'approved',
+        riskLevel: 'low',
+      },
+    ],
+    {
+      'agents/test-agent.md': `---
+description: Use when testing third-party agent imports without prose section headers.
+---
+
+# Test agent
+
+Body without ## Use when sections.
+`,
+    },
+  )
+  const r = runValidateCatalog(root)
+  assert.equal(r.exitCode, 0, r.stderr || r.stdout)
+})
+
+test('validate-catalog rejects an agent missing frontmatter description', () => {
+  const root = makeCatalogRoot(
+    [
+      {
+        id: 'haus.bad-agent',
+        version: '1.0.0',
+        source: 'haus',
+        type: 'agent',
+        path: 'agents/bad-agent.md',
+        title: 'Bad agent',
+        tags: ['workflow'],
+        repoRoles: [],
+        tokenEstimate: 100,
+        installMode: 'copy-selected',
+        reviewStatus: 'approved',
+        riskLevel: 'low',
+      },
+    ],
+    { 'agents/bad-agent.md': '# Agent\n\n## Use when\nAlways.\n' },
+  )
+  const r = runValidateCatalog(root)
+  assert.equal(r.exitCode, 1)
+  assert.match(
+    r.stderr ?? '',
+    /agents\/bad-agent\.md: missing non-empty frontmatter 'description:'/,
+  )
+})
+
 test('validate-catalog rejects a skill missing frontmatter description', () => {
   const root = makeCatalogRoot(
     [

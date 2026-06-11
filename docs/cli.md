@@ -164,8 +164,8 @@ Audit local catalog manifest for issues.
 
 Validate a catalog manifest and on-disk content. Used by catalog repo CI.
 
-Checks include: manifest structure, file existence, skill frontmatter `description:`,
-agent required sections + banned phrases, safety scans (forbidden stack tags, risky
+Checks include: manifest structure, file existence, skill/agent/command frontmatter
+`description:`, safety scans (forbidden stack tags, risky
 install patterns, `npx tsx`-only allowlist, tag allowlist), and `source: curated` +
 `reviewStatus: approved` gate. Rules load from bundled `library/catalog/validation-rules.json`
 (synced from catalog — ADR-0001).

@@ -7,11 +7,9 @@ import {
   ANY_NPX_PATTERN,
   ALLOWED_NPX_PATTERN,
   auditDisallowedTags,
-  BANNED_AGENT_PHRASES,
   FORBIDDEN_TAGS,
   HTTP_URL_PATTERN,
   PLACEHOLDER_PATTERN,
-  REQUIRED_AGENT_SECTIONS,
   REQUIRED_SKILL_FRONTMATTER,
   RISKY_INSTALL_PATTERNS,
 } from '../catalog/validation-rules.js'
@@ -97,7 +95,7 @@ function auditManifestStructure(items: CatalogItem[]): string[] {
 
 // Every required frontmatter key must be present and non-empty. Key-agnostic so a new
 // key added to validation-rules.json#requiredSkillFrontmatter is enforced, not ignored.
-// Applied to skills and commands (both ship a `description:` when-signal).
+// Applied to skills, agents, and commands (all ship a `description:` when-signal).
 function checkRequiredFrontmatter(text: string, label: string): string[] {
   const failures: string[] = []
   for (const key of REQUIRED_SKILL_FRONTMATTER) {
@@ -109,7 +107,7 @@ function checkRequiredFrontmatter(text: string, label: string): string[] {
 }
 
 /**
- * Checks file existence, required sections, and banned phrases for each item.
+ * Checks file existence and required frontmatter for each item.
  * Only runs when `manifestDir` is provided (i.e. the catalog files are on disk).
  */
 function auditShippedFiles(manifestDir: string, items: CatalogItem[]): string[] {
@@ -135,18 +133,9 @@ function auditShippedFiles(manifestDir: string, items: CatalogItem[]): string[] 
         continue
       }
       const text = fs.readFileSync(absPath, 'utf8')
-      if (!text.startsWith('---')) failures.push(`${item.id}: agent file missing YAML frontmatter`)
-      for (const section of REQUIRED_AGENT_SECTIONS) {
-        if (!text.includes(section)) failures.push(`${item.id}: agent file missing ${section}`)
-      }
-      const lower = text.toLowerCase()
-      for (const phrase of BANNED_AGENT_PHRASES) {
-        if (lower.includes(phrase))
-          failures.push(`${item.id}: agent file contains disallowed phrase "${phrase}"`)
-      }
-      failures.push(
-        ...auditForbiddenTagsInText(text, `${item.id}: ${path.relative(manifestDir, absPath)}`),
-      )
+      const rel = path.relative(manifestDir, absPath)
+      failures.push(...checkRequiredFrontmatter(text, `${item.id}: ${rel}`))
+      failures.push(...auditForbiddenTagsInText(text, `${item.id}: ${rel}`))
     } else if (item.type === 'template') {
       if (!fs.existsSync(absPath)) {
         failures.push(`${item.id}: missing template file ${item.path}`)
@@ -237,7 +226,7 @@ function walkMd(dir: string, fn: (file: string) => void): void {
  *   haus validate-catalog ./manifest.json
  *
  * When run from the catalog repo root, also validates file existence,
- * required sections, banned phrases, and risky install patterns.
+ * required frontmatter, and risky install patterns.
  */
 export async function runValidateCatalog(manifestPath: string | undefined): Promise<void> {
   if (!manifestPath) {
