@@ -64,7 +64,7 @@ preserved when editing the command/path lists.
 ## Sensitive data handling
 
 - Scanner excludes sensitive paths from scan set
-- Security policy lines in `.claude/rules/haus.md` reinforce policy (standalone `security.md` is legacy)
+- Security policy lines in `.claude/rules/haus.md` reinforce policy; the generated `.claude/rules/security.md` file is no longer written (legacy projects may still have one)
 
 ---
 
