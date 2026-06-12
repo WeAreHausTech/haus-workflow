@@ -315,12 +315,27 @@ test('apply preserves a user-modified security.md', () => {
   assert.equal(readFileSync(securityPath, 'utf8'), custom, 'customised content should be untouched')
 })
 
-test('apply removes a legacy selected-context.json', () => {
+test('apply removes all legacy readerless .haus-workflow artifacts', () => {
   const { temp, env } = scaffoldApplyProject()
-  const selectedPath = path.join(temp, '.haus-workflow/selected-context.json')
-
-  // Simulate a legacy install that still carries the readerless artifact.
-  writeFileSync(selectedPath, JSON.stringify([{ id: 'x', type: 'skill' }]))
+  // Every readerless, machine-generated artifact that haus no longer writes. On upgrade,
+  // `apply` must prune them so the output set actually shrinks (PR "11 files -> 5" goal).
+  const legacy = [
+    'selected-context.json',
+    'dependency-map.json',
+    'scan-hashes.json',
+    'recommended-hooks.json',
+    'recommended-rules.json',
+    'repo-summary.md',
+  ]
+  for (const rel of legacy) {
+    writeFileSync(path.join(temp, '.haus-workflow', rel), 'stale')
+  }
   execaSync('node', [path.resolve('dist/cli.js'), 'apply', '--write'], { cwd: temp, env })
-  assert.equal(fs.existsSync(selectedPath), false, 'legacy selected-context.json should be removed')
+  for (const rel of legacy) {
+    assert.equal(
+      fs.existsSync(path.join(temp, '.haus-workflow', rel)),
+      false,
+      `legacy ${rel} should be removed on apply`,
+    )
+  }
 })

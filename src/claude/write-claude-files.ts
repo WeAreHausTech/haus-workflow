@@ -159,15 +159,26 @@ export async function writeClaudeFiles(
       }
     }
   }
-  // Legacy: selected-context.json was a readerless, fully machine-generated artifact
-  // (a subset of haus.lock.json) that is no longer written. It was never user-authored,
-  // so remove it unconditionally from projects that installed it earlier.
-  const legacySelectedContextPath = hausPath(root, 'selected-context.json')
-  if (await fs.pathExists(legacySelectedContextPath)) {
-    if (dryRun) {
-      log(`[dry-run] would remove stale ${displayPath(root, legacySelectedContextPath)}`)
-    } else {
-      await fs.remove(legacySelectedContextPath)
+  // Legacy: these `.haus-workflow/` artifacts were readerless, fully machine-generated
+  // outputs that are no longer written. They were never user-authored, so remove them
+  // unconditionally from projects that installed them earlier — otherwise an upgrade via
+  // `haus apply` would leave them lingering and the output set would not actually shrink.
+  const LEGACY_PRUNED_ARTIFACTS = [
+    'selected-context.json',
+    'dependency-map.json',
+    'scan-hashes.json',
+    'recommended-hooks.json',
+    'recommended-rules.json',
+    'repo-summary.md',
+  ]
+  for (const rel of LEGACY_PRUNED_ARTIFACTS) {
+    const legacyPath = hausPath(root, rel)
+    if (await fs.pathExists(legacyPath)) {
+      if (dryRun) {
+        log(`[dry-run] would remove stale ${displayPath(root, legacyPath)}`)
+      } else {
+        await fs.remove(legacyPath)
+      }
     }
   }
 

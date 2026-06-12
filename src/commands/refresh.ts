@@ -5,7 +5,7 @@ import { writeJson } from '../utils/fs.js'
 import { log } from '../utils/logger.js'
 import { hausPath } from '../utils/paths.js'
 
-/** Re-scans in fast mode, writes context + sources-report, and regenerates recommendation.json. */
+/** Re-scans the project, writes context + sources-report, and regenerates recommendation.json. */
 export async function runRefresh(): Promise<void> {
   const root = process.cwd()
   const context = await scanProject(root)
