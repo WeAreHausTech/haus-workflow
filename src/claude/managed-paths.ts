@@ -9,7 +9,6 @@ export const PROJECT_MANAGED_CLAUDE_REL = [
   'rules/haus.md',
   'rules/security.md',
   'commands/haus-doctor.md',
-  'commands/haus-review.md',
 ] as const
 
 /** Haus-managed artifacts under `.haus-workflow/` written during apply. */
