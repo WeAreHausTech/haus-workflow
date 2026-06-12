@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.24.1](https://github.com/WeAreHausTech/haus-workflow/compare/v0.24.0...v0.24.1) (2026-06-12)
+
+### Bug Fixes
+
+- **settings:** reconcile haus permission rules on update/apply ([#104](https://github.com/WeAreHausTech/haus-workflow/issues/104)) ([8ab070c](https://github.com/WeAreHausTech/haus-workflow/commit/8ab070c006943f600b6dccb7582b8330d452d3c1))
+
 ## [0.24.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.23.1...v0.24.0) (2026-06-12)
 
 ### Features
