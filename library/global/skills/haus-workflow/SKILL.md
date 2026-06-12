@@ -17,7 +17,7 @@ All-in-one entry point for the Haus AI workflow.
 
 Task names use an asymmetric scope convention. The **project:** namespace marks tasks that
 act on **this repo** (`./.claude`, `./.haus-workflow`) — type `project:` to see them all.
-The unprefixed verbs (`update`, `catalog`, `install`, `uninstall`) act on **this machine's
+The unprefixed verbs (`update`, `install`, `uninstall`) act on **this machine's
 haus install** (`~/.claude`, npm) — they manage the haus tool itself, like `npm install -g`.
 The short legacy aliases still work but the names below are canonical.
 
@@ -29,7 +29,6 @@ The short legacy aliases still work but the names below are canonical.
 | `project:refresh` (`apply`, `refresh`, `claude-md`, `regenerate`) | `haus apply --write`            | project | Re-run setup / refresh `.claude/` context + regenerate root `CLAUDE.md` import block                                                                                                      |
 | `project:doctor` (`doctor`, `check`)                              | `haus doctor`                   | project | Check for install drift                                                                                                                                                                   |
 | `update` (`upgrade`)                                              | `haus update`                   | global  | Update npm package + catalog + `~/.claude/` (also refreshes this project)                                                                                                                 |
-| `catalog`                                                         | `haus update`                   | global  | Fetch latest catalog (same command as update)                                                                                                                                             |
 | `install` (`global`)                                              | `haus install`                  | global  | Seed `~/.claude/` with haus-owned files                                                                                                                                                   |
 | `uninstall`                                                       | `haus uninstall`                | global  | Remove all haus global files from `~/.claude/`                                                                                                                                            |
 
@@ -48,11 +47,9 @@ Options:
      (haus apply --write — re-runs setup, regenerates CLAUDE.md imports)
   3. [global] update — update haus package + catalog + global files
      (haus update — checks npm for new version, fetches catalog, refreshes ~/.claude/)
-  4. [global] catalog — fetch catalog updates only
-     (haus update — same command; pulls latest workflow templates and lockfile)
-  5. [project] project:clone [name] — clone repos
+  4. [project] project:clone [name] — clone repos
      (no name: clone a workspace from repos.manifest.json; with a name: find & clone one repo by name from GitHub)
-  6. [project] project:cloneandsetup [name] — clone repos, then set them up for local dev
+  5. [project] project:cloneandsetup [name] — clone repos, then set them up for local dev
      (project:clone, then per-repo deps + databases + cross-repo links + env from localdev.yml)
 ```
 
