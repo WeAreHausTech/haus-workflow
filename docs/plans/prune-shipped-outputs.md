@@ -1,7 +1,8 @@
 # Plan: Prune shipped warnings, guided questions, `.haus-workflow/` outputs, and rules
 
-> Status: **EXECUTED on branch `refactor/prune-shipped-outputs`.** All 4 steps done;
-> `yarn verify` green (490 tests, +3 new migration tests). Awaiting code review + merge decision.
+> Status: **SHIPPED to PR [#103](https://github.com/WeAreHausTech/haus-workflow/pull/103).**
+> All 4 steps done; adversarial review run + findings fixed; `yarn verify` green (491 tests,
+> +4 migration/cleanup tests). Awaiting merge.
 > Source request: prune evaluation across 6 targets (warnings, guided questions,
 > `.haus-workflow/` overload, shipped security rule, shipped haus rule).
 > Reference docs: `.claude/WORKFLOW.md`, `.claude/workflow-config.md`.
