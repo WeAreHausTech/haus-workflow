@@ -207,3 +207,67 @@ test('apply --dry-run shows diffs and does not write files', () => {
   assert.equal(fs.existsSync(path.join(temp, 'CLAUDE.md')), false)
   assert.equal(fs.existsSync(path.join(temp, '.claude', 'CLAUDE.md')), false)
 })
+
+const LEGACY_REVIEW_STUB = 'Run `haus context --task "code review"` then review diff.'
+
+function scaffoldApplyProject() {
+  const temp = mkdtempSync(path.join(os.tmpdir(), 'haus-legacy-review-'))
+  writeFileSync(
+    path.join(temp, 'package.json'),
+    JSON.stringify(
+      { name: 'legacy-temp', packageManager: 'yarn@4.5.3', dependencies: { react: '19.0.0' } },
+      null,
+      2,
+    ),
+  )
+  writeFileSync(path.join(temp, 'yarn.lock'), '# lock')
+  const env = {
+    ...process.env,
+    HAUS_FIXTURE_CATALOG: path.resolve('tests/fixtures/catalog/manifest.json'),
+  }
+  execaSync('node', [path.resolve('dist/cli.js'), 'scan', '--json'], { cwd: temp, env })
+  execaSync('node', [path.resolve('dist/cli.js'), 'recommend', '--json'], { cwd: temp, env })
+  execaSync('node', [path.resolve('dist/cli.js'), 'apply', '--write'], { cwd: temp, env })
+  return { temp, env }
+}
+
+test('apply does not write haus-review command (removed)', () => {
+  const { temp } = scaffoldApplyProject()
+  assert.equal(fs.existsSync(path.join(temp, '.claude/commands/haus-review.md')), false)
+  // haus-doctor is retained
+  assert.equal(fs.existsSync(path.join(temp, '.claude/commands/haus-doctor.md')), true)
+})
+
+test('apply removes a legacy haus-review stub that matches the historical content', () => {
+  const { temp, env } = scaffoldApplyProject()
+  const reviewPath = path.join(temp, '.claude/commands/haus-review.md')
+
+  // Exact stub (no trailing newline) — must be removed.
+  writeFileSync(reviewPath, LEGACY_REVIEW_STUB)
+  execaSync('node', [path.resolve('dist/cli.js'), 'apply', '--write'], { cwd: temp, env })
+  assert.equal(fs.existsSync(reviewPath), false, 'exact legacy stub should be removed')
+
+  // Stub with a single trailing newline — must also be removed.
+  writeFileSync(reviewPath, `${LEGACY_REVIEW_STUB}\n`)
+  execaSync('node', [path.resolve('dist/cli.js'), 'apply', '--write'], { cwd: temp, env })
+  assert.equal(fs.existsSync(reviewPath), false, 'stub + trailing newline should be removed')
+})
+
+test('apply preserves a user-modified haus-review.md', () => {
+  const { temp, env } = scaffoldApplyProject()
+  const reviewPath = path.join(temp, '.claude/commands/haus-review.md')
+
+  // Genuinely customised content — must be preserved.
+  const custom = 'Run our in-house review checklist, then `haus context`.'
+  writeFileSync(reviewPath, custom)
+  execaSync('node', [path.resolve('dist/cli.js'), 'apply', '--write'], { cwd: temp, env })
+  assert.equal(fs.existsSync(reviewPath), true, 'customised file should be preserved')
+  assert.equal(readFileSync(reviewPath, 'utf8'), custom, 'customised content should be untouched')
+
+  // Whitespace-only edit (extra blank lines) is still a user change — must be preserved.
+  const whitespaceEdited = `${LEGACY_REVIEW_STUB}\n\n`
+  writeFileSync(reviewPath, whitespaceEdited)
+  execaSync('node', [path.resolve('dist/cli.js'), 'apply', '--write'], { cwd: temp, env })
+  assert.equal(fs.existsSync(reviewPath), true, 'whitespace-edited file should be preserved')
+  assert.equal(readFileSync(reviewPath, 'utf8'), whitespaceEdited)
+})

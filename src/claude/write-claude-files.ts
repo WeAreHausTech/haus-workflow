@@ -109,11 +109,14 @@ export async function writeClaudeFiles(
   )
   // Legacy: haus-review was a managed core command, removed in favour of the review
   // skills. Delete the stale stub from projects that installed it earlier, but only
-  // when its content is unchanged so a user-customised file is never destroyed.
+  // when its content byte-for-byte matches the historical stub so a user-customised
+  // file is never destroyed. Match exactly (allowing one optional trailing newline,
+  // LF or CRLF) — any other whitespace edit counts as a user change and is preserved.
   const legacyReviewPath = claudePath(root, 'commands', 'haus-review.md')
   if (await fs.pathExists(legacyReviewPath)) {
-    const content = (await fs.readFile(legacyReviewPath, 'utf8')).trim()
-    if (content === 'Run `haus context --task "code review"` then review diff.') {
+    const content = await fs.readFile(legacyReviewPath, 'utf8')
+    const stub = 'Run `haus context --task "code review"` then review diff.'
+    if (content === stub || content === `${stub}\n` || content === `${stub}\r\n`) {
       if (dryRun) {
         log(`[dry-run] would remove stale ${displayPath(root, legacyReviewPath)}`)
       } else {
