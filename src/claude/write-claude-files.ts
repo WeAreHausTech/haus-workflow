@@ -68,7 +68,6 @@ export async function writeClaudeFiles(
     claudePath(root, 'rules', 'haus.md'),
     claudePath(root, 'rules', 'security.md'),
     claudePath(root, 'commands', 'haus-doctor.md'),
-    claudePath(root, 'commands', 'haus-review.md'),
   ]
   const rootClaudeMdPath = await writeRootClaudeMd(root, dryRun)
   const workflowPath = await writeWorkflow(root, hausVersion, dryRun, opts.force)
@@ -108,12 +107,20 @@ export async function writeClaudeFiles(
     'Run `haus doctor`.',
     dryRun,
   )
-  await writeManagedText(
-    root,
-    claudePath(root, 'commands', 'haus-review.md'),
-    'Run `haus context --task "code review"` then review diff.',
-    dryRun,
-  )
+  // Legacy: haus-review was a managed core command, removed in favour of the review
+  // skills. Delete the stale stub from projects that installed it earlier, but only
+  // when its content is unchanged so a user-customised file is never destroyed.
+  const legacyReviewPath = claudePath(root, 'commands', 'haus-review.md')
+  if (await fs.pathExists(legacyReviewPath)) {
+    const content = (await fs.readFile(legacyReviewPath, 'utf8')).trim()
+    if (content === 'Run `haus context --task "code review"` then review diff.') {
+      if (dryRun) {
+        log(`[dry-run] would remove stale ${displayPath(root, legacyReviewPath)}`)
+      } else {
+        await fs.remove(legacyReviewPath)
+      }
+    }
+  }
   await writeManagedText(
     root,
     claudePath(root, 'rules', 'haus.md'),
