@@ -1,6 +1,6 @@
 # Local-dev orchestration for `project:cloneandsetup`
 
-- **Status:** Draft (pending user review) | **Date:** 2026-06-12
+- **Status:** Approved | **Date:** 2026-06-12
 - **Feature branch:** `feat/localdev-orchestration`
 - **Spans:** `haus-workflow` (format + command change) and any workspace that adopts it (first: `bad-varme-workspace`)
 
@@ -129,7 +129,8 @@ and the final report:
 4. **Links.** Perform the workspace `links` (symlink / composer-path / yarn-link),
    idempotently, after the repos they reference are set up.
 5. **Env.** For each workspace `env` entry, ensure the source is satisfiable and write the
-   value into each sink repo's `.env` under its `key`. (See open question on `.env` policy.)
+   value into each sink repo's `.env` under its `key` (upsert). If the write is blocked or
+   fails, print the `KEY=value` lines for the user to paste instead (decision **D5**).
 6. **Report + next-steps.** Summarize per repo, then print the ordered **start** commands
    from each repo's `serve.start` and any manual follow-ups (e.g. `wp sync-products sync`).
 
@@ -147,19 +148,24 @@ and the final report:
   `haus setup-localdev` subcommand that reuses the same files is a clean follow-up.
 - **D4 — Links owned by the workspace, performed generically** by the orchestrator;
   `setup-dev-mode.sh` / `revert-dev-mode.sh` are deprecated.
+- **D5 — `.env` is written** (option a). The command writes local, non-secret values into
+  each repo's `.env` (scaffold from `.env.example` + the shared `env` map). The workflow's
+  `deny: Write(.env)` is relaxed for `cloneandsetup`. **Fallback:** if a write is blocked
+  or fails, print the exact `KEY=value` lines for the user to paste rather than silently
+  skipping. Real secrets (DB passwords, tokens) are still the user's to fill.
 
 ## Application to `bad-varme-workspace`
 
 Author seven files (six repo, one workspace). Summary of contents:
 
-| Repo                         | `localdev.yml` essentials                                                                                                                                                                                             |
-| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `bad-varme.se`               | env: WP*HOME/SITEURL/DB*\*; steps: composer install → theme `npm install && npm run build` (node 10) → `dep db:pull staging-oderland` (remote) → `./dev_db.sh` (optional); serve: valet @ `https://bad-varme.se.test` |
-| `bov-ecom`                   | env: APP*ENV/DB*\*; steps: `docker compose up -d` (datastores) → fetch DB from server (remote) → `yarn install`; serve: command `yarn dev` @ `http://localhost:3000`                                                  |
-| `ecom-components`            | env: VITE_API_URL/VITE_VENDURE_TOKEN; steps: `yarn install` → `yarn build`                                                                                                                                            |
-| `ecom-elementor-widgets`     | env: NODE_AUTH_TOKEN; steps: `yarn install` → `yarn build`                                                                                                                                                            |
-| `bov-ecom-elementor-widgets` | env: NODE_AUTH_TOKEN (+ composer `auth.json`); steps: `yarn install` → `composer install` → `yarn build` (linking moved to workspace)                                                                                 |
-| `wp-products-sync`           | steps: `composer install` → `yarn install` → `yarn build`; next-step: `wp sync-products sync`                                                                                                                         |
+| Repo                         | `localdev.yml` essentials                                                                                                                                                                                                                                                               |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `bad-varme.se`               | env: WP*HOME/SITEURL/DB*\*; steps: composer install → theme `npm install && npm run build` (node 10) → `dep db:pull staging-oderland` (remote) → `./dev_db.sh` (optional); serve: valet @ `https://bad-varme.se.test`                                                                   |
+| `bov-ecom`                   | env: APP*ENV/DB*\*; steps: `docker compose up -d` (datastores) → `yarn install`; DB starts empty (`DB_SYNCHRONIZE=true`). **DB-from-server pull deferred** (site migrates to a new server 2026-06-15); add the pull step afterward. serve: command `yarn dev` @ `http://localhost:3000` |
+| `ecom-components`            | env: VITE_API_URL/VITE_VENDURE_TOKEN; steps: `yarn install` → `yarn build`                                                                                                                                                                                                              |
+| `ecom-elementor-widgets`     | env: NODE_AUTH_TOKEN; steps: `yarn install` → `yarn build`                                                                                                                                                                                                                              |
+| `bov-ecom-elementor-widgets` | env: NODE_AUTH_TOKEN (+ composer `auth.json`); steps: `yarn install` → `composer install` → `yarn build` (linking moved to workspace)                                                                                                                                                   |
+| `wp-products-sync`           | steps: `composer install` → `yarn install` → `yarn build`; next-step: `wp sync-products sync`                                                                                                                                                                                           |
 
 Workspace file: the `order`, `links`, and `env` shown in the format section above
 (symlink widget plugin into WP; composer-path + yarn-link the widget/component repos;
@@ -174,18 +180,12 @@ share the Vendure shop-api URL).
 - A real (non-symlink) directory at a symlink target is never clobbered without confirm.
 - Per-repo failure is isolated; the run continues and the report lists what failed.
 
-## Open questions (for spec review)
+## Resolved (spec review)
 
-- **`.env` writing vs policy.** Step 5 writes shared values into sink `.env` files, and the
-  per-repo pass scaffolds `.env` from `.env.example`. The shipped workflow `settings.json`
-  **denies `Write(.env)`**. Options: (a) relax the deny for `cloneandsetup` and write
-  non-secret local values; (b) never write `.env` — only _report_ the values to set; (c)
-  write a separate `.env.local`/print-and-confirm. Needs a decision before implementation.
-- **`bov-ecom` DB fetch mechanism is unknown.** WP has `dep db:pull`; bov-ecom has a
-  docker-compose + devcontainer but no discovered "pull DB from server" task. Before
-  authoring its `localdev.yml` we must determine how its DB is obtained (a script? a
-  documented dump+restore? does dev just start empty with `DB_SYNCHRONIZE=true` + seed?).
-  Resolve while authoring the workspace files.
+- **`.env` writing** → decision **D5**: write it, with a print-the-values fallback.
+- **`bov-ecom` DB fetch** → deferred. The site migrates to a new server on 2026-06-15, so
+  v1 omits a DB-from-server pull for bov-ecom; its DB starts empty (`DB_SYNCHRONIZE=true`).
+  The pull step is added once the migration settles.
 
 ## Out of scope (v1)
 
