@@ -4,71 +4,68 @@
     {
       "id": 1,
       "subject": "Task 1: localdev.yml format + orchestration phase in command",
-      "status": "pending",
-      "description": "**Goal:** Rewrite library/global/commands/haus-cloneandsetup.md to document the per-repo + workspace localdev.yml schemas and run discover → order → steps → links → env → report.\n\n**Files:** Modify library/global/commands/haus-cloneandsetup.md\n\n**Verify:** grep -c 'localdev.yml' library/global/commands/haus-cloneandsetup.md → ≥ 4\n\n```json:metadata\n{\"files\": [\"library/global/commands/haus-cloneandsetup.md\"], \"verifyCommand\": \"grep -c 'localdev.yml' library/global/commands/haus-cloneandsetup.md\", \"acceptanceCriteria\": [\"both schemas documented\", \"orchestration phase described\", \"fallback to heuristics\", \"links generic + setup-dev-mode deprecated\", \"env write w/ print fallback, ready-not-running\"]}\n```"
+      "status": "completed",
+      "commit": "e4ad6c0"
     },
     {
       "id": 2,
       "subject": "Task 2: Update haus-workflow SKILL.md descriptions",
-      "status": "pending",
-      "description": "**Goal:** Make the entry-point skill describe DB + links + env for cloneandsetup.\n\n**Files:** Modify library/global/skills/haus-workflow/SKILL.md\n\n**Verify:** grep -n 'localdev' library/global/skills/haus-workflow/SKILL.md\n\n```json:metadata\n{\"files\": [\"library/global/skills/haus-workflow/SKILL.md\"], \"verifyCommand\": \"grep -n 'localdev' library/global/skills/haus-workflow/SKILL.md\", \"acceptanceCriteria\": [\"row+menu mention db/links/env via localdev.yml\", \"no stale deps+.env-only claim\"]}\n```"
+      "status": "completed",
+      "commit": "0c78d01"
     },
     {
       "id": 3,
       "subject": "Task 3: Author workspace localdev.yml (order + links + env)",
-      "status": "pending",
-      "description": "**Goal:** Add bad-varme-workspace/.haus-workflow/localdev.yml (order, 3 links, shared shop-api env).\n\n**Files:** Create /Users/johanna/Desktop/bad-varme-workspace/.haus-workflow/localdev.yml\n\n**Verify:** npx --yes js-yaml /Users/johanna/Desktop/bad-varme-workspace/.haus-workflow/localdev.yml\n\n```json:metadata\n{\"files\": [\"/Users/johanna/Desktop/bad-varme-workspace/.haus-workflow/localdev.yml\"], \"verifyCommand\": \"npx --yes js-yaml /Users/johanna/Desktop/bad-varme-workspace/.haus-workflow/localdev.yml\", \"acceptanceCriteria\": [\"order lists 6 repos\", \"3 link kinds declared\", \"env maps shop-api to 2 sinks\", \"valid yaml\"]}\n```"
+      "status": "completed",
+      "commit": "d62cb71"
     },
     {
       "id": 4,
       "subject": "Task 4: Author bad-varme.se localdev.yml",
-      "status": "pending",
-      "blockedBy": [],
-      "description": "**Goal:** WP repo setup: composer, theme build (node 10), DB pull (remote), valet serve.\n\n**Files:** Create /Users/johanna/Desktop/bad-varme-workspace/bad-varme.se/.haus-workflow/localdev.yml\n\n**Verify:** cd repo && npx --yes js-yaml .haus-workflow/localdev.yml && test -f dev_db.sh && grep -q db:pull deploy.php\n\n```json:metadata\n{\"files\": [\"/Users/johanna/Desktop/bad-varme-workspace/bad-varme.se/.haus-workflow/localdev.yml\"], \"verifyCommand\": \"cd /Users/johanna/Desktop/bad-varme-workspace/bad-varme.se && npx --yes js-yaml .haus-workflow/localdev.yml && test -f dev_db.sh && grep -q db:pull deploy.php\", \"acceptanceCriteria\": [\"4 steps node10/remote/optional\", \"5 WP/DB env keys\", \"valet serve\", \"valid yaml; dev_db.sh + db:pull exist\"]}\n```"
+      "status": "completed",
+      "commit": "6fde1a5"
     },
     {
       "id": 5,
       "subject": "Task 5: Author bov-ecom localdev.yml",
-      "status": "pending",
-      "description": "**Goal:** Vendure setup: docker datastores + yarn install (node 20); DB pull deferred (2026-06-15 migration); yarn dev serve.\n\n**Files:** Create /Users/johanna/Desktop/bad-varme-workspace/bov-ecom/.haus-workflow/localdev.yml\n\n**Verify:** cd repo && npx --yes js-yaml .haus-workflow/localdev.yml && test -f docker-compose.yml && node -e require dev script\n\n```json:metadata\n{\"files\": [\"/Users/johanna/Desktop/bad-varme-workspace/bov-ecom/.haus-workflow/localdev.yml\"], \"verifyCommand\": \"cd /Users/johanna/Desktop/bad-varme-workspace/bov-ecom && npx --yes js-yaml .haus-workflow/localdev.yml && test -f docker-compose.yml\", \"acceptanceCriteria\": [\"docker compose + yarn install steps\", \"deferred DB pull comment\", \"yarn dev serve\", \"6 DB env keys\", \"valid yaml + compose + dev script\"]}\n```"
+      "status": "completed",
+      "commit": "d965f27"
     },
     {
       "id": 6,
       "subject": "Task 6: Author bov-ecom-elementor-widgets localdev.yml",
-      "status": "pending",
-      "description": "**Goal:** BoV widgets setup (deps + build, node 20); no links (workspace-owned).\n\n**Files:** Create /Users/johanna/Desktop/bad-varme-workspace/bov-ecom-elementor-widgets/.haus-workflow/localdev.yml\n\n**Verify:** cd repo && npx --yes js-yaml .haus-workflow/localdev.yml && build script present\n\n```json:metadata\n{\"files\": [\"/Users/johanna/Desktop/bad-varme-workspace/bov-ecom-elementor-widgets/.haus-workflow/localdev.yml\"], \"verifyCommand\": \"cd /Users/johanna/Desktop/bad-varme-workspace/bov-ecom-elementor-widgets && npx --yes js-yaml .haus-workflow/localdev.yml\", \"acceptanceCriteria\": [\"yarn/composer/build node20\", \"NODE_AUTH_TOKEN + auth.json note\", \"no links\", \"valid yaml + build script\"]}\n```"
+      "status": "completed",
+      "commit": "fbb49c2"
     },
     {
       "id": 7,
       "subject": "Task 7: Author ecom-elementor-widgets localdev.yml",
-      "status": "pending",
-      "description": "**Goal:** Shared widgets setup (deps + build, node 20).\n\n**Files:** Create /Users/johanna/Desktop/bad-varme-workspace/ecom-elementor-widgets/.haus-workflow/localdev.yml\n\n**Verify:** cd repo && npx --yes js-yaml .haus-workflow/localdev.yml && build script present\n\n```json:metadata\n{\"files\": [\"/Users/johanna/Desktop/bad-varme-workspace/ecom-elementor-widgets/.haus-workflow/localdev.yml\"], \"verifyCommand\": \"cd /Users/johanna/Desktop/bad-varme-workspace/ecom-elementor-widgets && npx --yes js-yaml .haus-workflow/localdev.yml\", \"acceptanceCriteria\": [\"yarn install + build node20\", \"NODE_AUTH_TOKEN needsEnv\", \"valid yaml + build script\"]}\n```"
+      "status": "completed",
+      "commit": "98efca5"
     },
     {
       "id": 8,
       "subject": "Task 8: Author ecom-components localdev.yml",
-      "status": "pending",
-      "description": "**Goal:** Shared React lib setup (deps + build, node 20) + Vendure codegen env keys.\n\n**Files:** Create /Users/johanna/Desktop/bad-varme-workspace/ecom-components/.haus-workflow/localdev.yml\n\n**Verify:** cd repo && npx --yes js-yaml .haus-workflow/localdev.yml && build script present\n\n```json:metadata\n{\"files\": [\"/Users/johanna/Desktop/bad-varme-workspace/ecom-components/.haus-workflow/localdev.yml\"], \"verifyCommand\": \"cd /Users/johanna/Desktop/bad-varme-workspace/ecom-components && npx --yes js-yaml .haus-workflow/localdev.yml\", \"acceptanceCriteria\": [\"yarn install + build node20\", \"VITE_API_URL + VITE_VENDURE_TOKEN needsEnv\", \"valid yaml + build script\"]}\n```"
+      "status": "completed",
+      "commit": "bbe8b1e"
     },
     {
       "id": 9,
       "subject": "Task 9: Author wp-products-sync localdev.yml",
-      "status": "pending",
-      "description": "**Goal:** Sync plugin setup (composer + admin build, node 22); wp sync-products as printed next-step.\n\n**Files:** Create /Users/johanna/Desktop/bad-varme-workspace/wp-products-sync/.haus-workflow/localdev.yml\n\n**Verify:** cd repo && npx --yes js-yaml .haus-workflow/localdev.yml && build script present\n\n```json:metadata\n{\"files\": [\"/Users/johanna/Desktop/bad-varme-workspace/wp-products-sync/.haus-workflow/localdev.yml\"], \"verifyCommand\": \"cd /Users/johanna/Desktop/bad-varme-workspace/wp-products-sync && npx --yes js-yaml .haus-workflow/localdev.yml\", \"acceptanceCriteria\": [\"composer/yarn/build node22\", \"wp sync-products next-step\", \"valid yaml + build script\"]}\n```"
+      "status": "completed",
+      "commit": "e131daa"
     },
     {
       "id": 10,
       "subject": "Task 10: Dry-run verification of orchestration against the workspace",
-      "status": "pending",
-      "blockedBy": [1, 3, 4, 5, 6, 7, 8, 9],
-      "description": "**Goal:** Prove the command + seven files produce the correct ordered plan without running destructive/remote steps.\n\n**Files:** none (reads the 7 files + command)\n\n**Verify:** js-yaml loop over 7 files (7 ok lines); ecom-components package name = @haus-tech/ecom-components; bad-varme.se/web/app/plugins exists\n\n```json:metadata\n{\"files\": [], \"verifyCommand\": \"js-yaml loop + package name + plugins dir (plan Task 10)\", \"acceptanceCriteria\": [\"7 yaml parse\", \"order matches expected\", \"3 links resolve\", \"env source+sinks exist\", \"dry-run prints starts, nothing destructive\"]}\n```"
+      "status": "completed",
+      "blockedBy": [1, 3, 4, 5, 6, 7, 8, 9]
     },
     {
       "id": 11,
       "subject": "Task 11: Push + PRs (user-approved follow-up)",
       "status": "pending",
-      "blockedBy": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-      "description": "**Goal:** Get the eight branches reviewed/merged; never push without explicit per-repo OK.\n\n**Files:** none\n\n**Verify:** git status / gh pr view per approved repo\n\n```json:metadata\n{\"files\": [], \"verifyCommand\": \"git status / gh pr view per approved repo\", \"acceptanceCriteria\": [\"explicit per-repo push approval\", \"PRs opened for approved repos\", \"haus-workflow release noted as separate\"]}\n```"
+      "blockedBy": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
     }
   ],
   "lastUpdated": "2026-06-12"
