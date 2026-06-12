@@ -1,5 +1,5 @@
 {
-  "version": "2.6.3",
+  "version": "2.6.5",
   "items": [
     {
       "id": "haus.nextjs-patterns",
@@ -11,12 +11,7 @@
       "purpose": "Guide Next.js route, server/client boundary, and middleware-safe changes.",
       "whenToUse": "Use for App Router pages, layouts, route handlers, and middleware behavior updates.",
       "whenNotToUse": "Do not use for backend-only or non-Next framework tasks.",
-      "references": [
-        "references/conventions.md",
-        "references/scope.md",
-        "references/workflow.md",
-        "https://nextjs.org/llms.txt"
-      ],
+      "references": ["https://nextjs.org/llms.txt"],
       "tokenBudget": 1200,
       "tags": ["frontend", "nextjs", "react", "typescript"],
       "repoRoles": ["next-app"],
@@ -44,12 +39,7 @@
       "purpose": "Guide React component, hook, and state-boundary changes.",
       "whenToUse": "Use for React component behavior, hooks, and UI state flow updates.",
       "whenNotToUse": "Do not use for backend-only changes or framework routing config tasks.",
-      "references": [
-        "references/conventions.md",
-        "references/scope.md",
-        "references/workflow.md",
-        "https://react.dev/"
-      ],
+      "references": ["https://react.dev/"],
       "tokenBudget": 1200,
       "tags": ["frontend", "react", "typescript"],
       "repoRoles": ["react-app", "next-app", "design-system"],
@@ -77,12 +67,7 @@
       "purpose": "Guide TypeScript contract and migration-safe typing changes.",
       "whenToUse": "Use for shared types, DTOs, interface boundaries, and type-safe refactors.",
       "whenNotToUse": "Do not use for runtime-only changes without type-contract impact.",
-      "references": [
-        "references/conventions.md",
-        "references/scope.md",
-        "references/workflow.md",
-        "https://www.typescriptlang.org/docs/handbook/"
-      ],
+      "references": ["https://www.typescriptlang.org/docs/handbook/"],
       "tokenBudget": 1200,
       "tags": ["typescript", "frontend", "backend"],
       "repoRoles": [
@@ -120,13 +105,7 @@
       "purpose": "Guide Vite config, plugin wiring, and deterministic build pipeline changes.",
       "whenToUse": "Use for vite config, alias/plugin, and build mode behavior updates.",
       "whenNotToUse": "Do not use for framework feature logic without build pipeline impact.",
-      "references": [
-        "references/conventions.md",
-        "references/scope.md",
-        "references/workflow.md",
-        "https://vite.dev/guide",
-        "https://vitest.dev/guide"
-      ],
+      "references": ["https://vite.dev/guide", "https://vitest.dev/guide"],
       "tokenBudget": 1200,
       "tags": ["vite8", "frontend", "typescript"],
       "repoRoles": ["vite-app", "react-app", "vue-app"],
@@ -154,12 +133,7 @@
       "purpose": "Guide React Router v7 SSR route, loader, and action boundary changes.",
       "whenToUse": "Use for routes, loaders, actions, and SSR config in React Router v7 apps.",
       "whenNotToUse": "Do not use for Next.js App Router or Remix v1 codebases.",
-      "references": [
-        "references/conventions.md",
-        "references/scope.md",
-        "references/workflow.md",
-        "https://reactrouter.com/start/framework/installation"
-      ],
+      "references": ["https://reactrouter.com/start/framework/installation"],
       "tokenBudget": 1200,
       "tags": ["frontend", "react", "typescript"],
       "repoRoles": ["react-router-app", "react-app"],
@@ -190,12 +164,7 @@
       "purpose": "Guide Expo Router, React Native component, native module, and EAS build changes.",
       "whenToUse": "Use for Expo Router routes, RN components, native modules, expo config plugins, and EAS build/submit.",
       "whenNotToUse": "Do not use for web-only React apps or unrelated mobile native projects (Swift/Kotlin without Expo).",
-      "references": [
-        "references/conventions.md",
-        "references/scope.md",
-        "references/workflow.md",
-        "https://docs.expo.dev/"
-      ],
+      "references": ["https://docs.expo.dev/"],
       "tokenBudget": 1200,
       "tags": ["expo", "react-native", "mobile", "react"],
       "repoRoles": ["expo-app"],
@@ -232,12 +201,7 @@
       "purpose": "Guide i18next setup, namespace structure, translation key conventions, and SSR-safe usage.",
       "whenToUse": "Use for adding/changing translations, configuring i18next, or wiring react-i18next / next-i18next.",
       "whenNotToUse": "Do not use for non-i18next translation systems or static-only content with no locale.",
-      "references": [
-        "references/conventions.md",
-        "references/scope.md",
-        "references/workflow.md",
-        "https://www.i18next.com/"
-      ],
+      "references": ["https://www.i18next.com/"],
       "tokenBudget": 1200,
       "tags": ["i18next", "i18n", "frontend"],
       "repoRoles": ["next-app", "react-app", "vue-app", "vite-app"],
@@ -268,12 +232,7 @@
       "purpose": "Guide BullMQ queue, worker, scheduler, and Redis-connection lifecycle changes.",
       "whenToUse": "Use for BullMQ queue definitions, processors, schedulers, and graceful shutdown.",
       "whenNotToUse": "Do not use for non-BullMQ job systems or in-process scheduling without Redis.",
-      "references": [
-        "references/conventions.md",
-        "references/scope.md",
-        "references/workflow.md",
-        "https://docs.bullmq.io/"
-      ],
+      "references": ["https://docs.bullmq.io/"],
       "tokenBudget": 1200,
       "tags": ["bullmq", "queue", "backend"],
       "repoRoles": ["vendure-app", "nestjs-api"],
@@ -301,12 +260,7 @@
       "purpose": "Guide Sentry SDK setup, error capture, performance tracing, and PII scrubbing.",
       "whenToUse": "Use for `@sentry/*` SDK init, scope/breadcrumb config, source map upload, and PII redaction.",
       "whenNotToUse": "Do not use for non-Sentry monitoring (Datadog, New Relic, etc.).",
-      "references": [
-        "references/conventions.md",
-        "references/scope.md",
-        "references/workflow.md",
-        "https://docs.sentry.io/"
-      ],
+      "references": ["https://docs.sentry.io/"],
       "tokenBudget": 1200,
       "tags": ["sentry", "observability", "tooling"],
       "repoRoles": ["next-app", "nestjs-api", "vendure-app"],
@@ -340,7 +294,6 @@
       "purpose": "Install `@haus-tech/tech-config` and wire `.prettierrc` to the shared prettier config via the `/prettier` subpath export.",
       "whenToUse": "Use when Prettier is missing from a haus repo, when migrating an ad-hoc config, or when migrating from the deprecated `@haus-tech/prettier-config`.",
       "whenNotToUse": "Do not use when Prettier is already configured against `@haus-tech/tech-config/prettier`.",
-      "references": ["references/conventions.md", "references/scope.md", "references/workflow.md"],
       "tokenBudget": 800,
       "tags": ["prettier", "tooling", "quality"],
       "repoRoles": [],
@@ -365,7 +318,6 @@
       "purpose": "Install `@haus-tech/tech-config` and wire ESLint flat config to the shared rules.",
       "whenToUse": "Use when ESLint is missing from a haus repo or migrating from a legacy `.eslintrc` to flat config.",
       "whenNotToUse": "Do not use when ESLint is already configured against `@haus-tech/tech-config`.",
-      "references": ["references/conventions.md", "references/scope.md", "references/workflow.md"],
       "tokenBudget": 800,
       "tags": ["eslint", "tooling", "quality"],
       "repoRoles": [],
@@ -390,12 +342,7 @@
       "purpose": "Guide Stripe Elements, Checkout, webhook handling, and PCI-safe integration changes.",
       "whenToUse": "Use for `@stripe/stripe-js` / `@stripe/react-stripe-js` integrations, payment intents, webhooks, and Checkout.",
       "whenNotToUse": "Do not use for non-Stripe payment providers (Qliro, Klarna, etc.).",
-      "references": [
-        "references/conventions.md",
-        "references/scope.md",
-        "references/workflow.md",
-        "https://docs.stripe.com/"
-      ],
+      "references": ["https://docs.stripe.com/"],
       "tokenBudget": 1200,
       "tags": ["stripe", "payments", "tooling"],
       "repoRoles": ["next-app", "react-app", "vendure-plugin"],
@@ -426,7 +373,6 @@
       "purpose": "Guide Qliro Checkout integration via @haus-tech/qliro-plugin in Vendure storefronts.",
       "whenToUse": "Use for Qliro Checkout flow, order callbacks, refund handling, and merchant API config.",
       "whenNotToUse": "Do not use for non-Nordic payment providers or Stripe-only flows.",
-      "references": ["references/conventions.md", "references/scope.md", "references/workflow.md"],
       "tokenBudget": 1200,
       "tags": ["qliro", "payments", "tooling"],
       "repoRoles": ["vendure-app", "vendure-plugin", "next-app"],
@@ -454,12 +400,7 @@
       "purpose": "Guide Supabase client wiring, Row-Level Security, edge functions, and auth integration.",
       "whenToUse": "Use for `@supabase/supabase-js` queries, RLS policies, edge functions, and Supabase Auth flows.",
       "whenNotToUse": "Do not use for non-Supabase BaaS (Firebase, AWS Amplify) or self-hosted Postgres without Supabase.",
-      "references": [
-        "references/conventions.md",
-        "references/scope.md",
-        "references/workflow.md",
-        "https://supabase.com/docs"
-      ],
+      "references": ["https://supabase.com/docs"],
       "tokenBudget": 1200,
       "tags": ["supabase", "database", "backend"],
       "repoRoles": ["next-app", "react-app"],
@@ -490,12 +431,7 @@
       "purpose": "Guide Sanity v3/v5 schema, Studio config, GROQ query, and Next.js integration changes.",
       "whenToUse": "Use for Sanity schema, Studio plugin, GROQ query, or next-sanity integration updates.",
       "whenNotToUse": "Do not use for Strapi, WordPress, or other CMS work.",
-      "references": [
-        "references/conventions.md",
-        "references/scope.md",
-        "references/workflow.md",
-        "https://www.sanity.io/docs"
-      ],
+      "references": ["https://www.sanity.io/docs"],
       "tokenBudget": 1200,
       "tags": ["sanity", "backend", "cms"],
       "repoRoles": ["sanity-studio", "next-app"],
@@ -529,12 +465,7 @@
       "purpose": "Guide Strapi v5 content type, controller, service, and policy changes.",
       "whenToUse": "Use for Strapi content type schemas, controllers, services, and policies in v5.",
       "whenNotToUse": "Do not use for Sanity, WordPress, or other CMS work.",
-      "references": [
-        "references/conventions.md",
-        "references/scope.md",
-        "references/workflow.md",
-        "https://docs.strapi.io/dev-docs/intro"
-      ],
+      "references": ["https://docs.strapi.io/dev-docs/intro"],
       "tokenBudget": 1200,
       "tags": ["strapi", "backend", "cms"],
       "repoRoles": ["strapi-app"],
@@ -565,12 +496,7 @@
       "purpose": "Guide Prisma schema, migration, and query-safe ORM changes.",
       "whenToUse": "Use for prisma/schema.prisma updates, migrations, and PrismaClient query changes.",
       "whenNotToUse": "Do not use for non-Prisma ORM tasks or pure DB schema work without Prisma.",
-      "references": [
-        "references/conventions.md",
-        "references/scope.md",
-        "references/workflow.md",
-        "https://www.prisma.io/docs"
-      ],
+      "references": ["https://www.prisma.io/docs"],
       "tokenBudget": 1200,
       "tags": ["prisma", "backend", "database"],
       "repoRoles": ["next-app", "nestjs-api"],
@@ -601,12 +527,7 @@
       "purpose": "Guide Vendure plugin boundary, schema, and migration-safe development.",
       "whenToUse": "Use for Vendure plugin resolvers, services, entities, and plugin migrations.",
       "whenNotToUse": "Do not use for storefront-only UI changes or non-Vendure APIs.",
-      "references": [
-        "references/conventions.md",
-        "references/scope.md",
-        "references/workflow.md",
-        "https://docs.vendure.io/llms.txt"
-      ],
+      "references": ["https://docs.vendure.io/llms.txt"],
       "tokenBudget": 1200,
       "tags": ["backend", "vendure", "nestjs", "graphql", "typescript"],
       "repoRoles": ["vendure-plugin", "vendure-app"],
@@ -637,12 +558,7 @@
       "purpose": "Guide Laravel domain, routing, policy, and persistence changes.",
       "whenToUse": "Use for Laravel controllers/services/models/jobs/policies and route changes.",
       "whenNotToUse": "Do not use for Nova-only admin resource customization tasks.",
-      "references": [
-        "references/conventions.md",
-        "references/scope.md",
-        "references/workflow.md",
-        "https://laravel.com/docs"
-      ],
+      "references": ["https://laravel.com/docs"],
       "tokenBudget": 1200,
       "tags": ["backend", "laravel", "php"],
       "repoRoles": ["laravel-app", "laravel-nova-app"],
@@ -670,12 +586,7 @@
       "purpose": "Guide WordPress hook/template/plugin/theme runtime changes.",
       "whenToUse": "Use for WordPress hook/filter/template/plugin/theme behavior updates.",
       "whenNotToUse": "Do not use for Bedrock-only config bootstrap or non-WP backend tasks.",
-      "references": [
-        "references/conventions.md",
-        "references/scope.md",
-        "references/workflow.md",
-        "https://developer.wordpress.org/"
-      ],
+      "references": ["https://developer.wordpress.org/"],
       "tokenBudget": 1200,
       "tags": ["backend", "wordpress", "php"],
       "repoRoles": ["wordpress-site", "wordpress-bedrock-site"],
@@ -703,7 +614,6 @@
       "purpose": "Guide .NET API/service/domain/persistence layer changes.",
       "whenToUse": "Use for .NET service and endpoint behavior changes with domain impact.",
       "whenNotToUse": "Do not use for frontend-only or non-.NET runtime tasks.",
-      "references": ["references/conventions.md", "references/scope.md", "references/workflow.md"],
       "tokenBudget": 1200,
       "tags": ["backend", "dotnet", "csharp"],
       "repoRoles": ["dotnet-service"],
@@ -728,12 +638,7 @@
       "purpose": "Guide deterministic E2E browser test flow changes.",
       "whenToUse": "Use for Playwright specs, fixtures, and browser test stability work.",
       "whenNotToUse": "Do not use for unit-only test tasks without browser automation.",
-      "references": [
-        "references/conventions.md",
-        "references/scope.md",
-        "references/workflow.md",
-        "https://playwright.dev/docs/intro"
-      ],
+      "references": ["https://playwright.dev/docs/intro"],
       "tokenBudget": 1200,
       "tags": ["testing", "playwright"],
       "repoRoles": ["next-app", "react-app", "vue-app", "test-suite"],
@@ -752,36 +657,6 @@
       "riskLevel": "low"
     },
     {
-      "id": "haus.security-reviewer-agent",
-      "version": "1.0.0",
-      "source": "haus",
-      "type": "agent",
-      "path": "agents/haus-owned/security-reviewer.md",
-      "title": "Haus security reviewer agent",
-      "tags": ["review", "security"],
-      "repoRoles": [],
-      "requiresAny": [],
-      "tokenEstimate": 1400,
-      "installMode": "copy-selected",
-      "reviewStatus": "approved",
-      "riskLevel": "low"
-    },
-    {
-      "id": "haus.docs-researcher-agent",
-      "version": "1.0.0",
-      "source": "haus",
-      "type": "agent",
-      "path": "agents/haus-owned/docs-researcher.md",
-      "title": "Haus docs researcher agent",
-      "tags": ["review", "quality", "workflow"],
-      "repoRoles": [],
-      "requiresAny": [],
-      "tokenEstimate": 1200,
-      "installMode": "copy-selected",
-      "reviewStatus": "approved",
-      "riskLevel": "low"
-    },
-    {
       "id": "haus.vendure-app-patterns",
       "version": "1.0.0",
       "source": "haus",
@@ -791,12 +666,7 @@
       "purpose": "Guide Vendure app-level config, worker, bootstrap, and plugin wiring changes.",
       "whenToUse": "Use for Vendure app config, worker, bootstrap, and system wiring updates.",
       "whenNotToUse": "Do not use for isolated shared plugin package tasks.",
-      "references": [
-        "references/conventions.md",
-        "references/scope.md",
-        "references/workflow.md",
-        "https://docs.vendure.io/llms.txt"
-      ],
+      "references": ["https://docs.vendure.io/llms.txt"],
       "tokenBudget": 1200,
       "tags": ["vendure3", "nestjs", "graphql"],
       "repoRoles": ["vendure-app"],
@@ -824,12 +694,7 @@
       "purpose": "Guide resolver/module/guard/DTO-safe GraphQL implementation in NestJS.",
       "whenToUse": "Use for NestJS GraphQL resolver, module, DTO/input, and guard changes.",
       "whenNotToUse": "Do not use for REST-only controller tasks.",
-      "references": [
-        "references/conventions.md",
-        "references/scope.md",
-        "references/workflow.md",
-        "https://docs.nestjs.com/"
-      ],
+      "references": ["https://docs.nestjs.com/"],
       "tokenBudget": 1200,
       "tags": ["nestjs", "graphql", "typescript5"],
       "repoRoles": ["nestjs-api"],
@@ -860,12 +725,7 @@
       "purpose": "Guide Nx project graph, target pipeline, and workspace boundaries.",
       "whenToUse": "Use for Nx workspace graph, target, and generator configuration updates.",
       "whenNotToUse": "Do not use for app-only feature edits without workspace impact.",
-      "references": [
-        "references/conventions.md",
-        "references/scope.md",
-        "references/workflow.md",
-        "https://nx.dev/docs"
-      ],
+      "references": ["https://nx.dev/docs"],
       "tokenBudget": 1200,
       "tags": ["nx21", "yarn4"],
       "repoRoles": ["nx-monorepo"],
@@ -896,12 +756,7 @@
       "purpose": "Guide Turbo pipeline and cache-safe monorepo orchestration changes.",
       "whenToUse": "Use for turbo pipeline graph and package task orchestration updates.",
       "whenNotToUse": "Do not use for package-local feature edits without pipeline impact.",
-      "references": [
-        "references/conventions.md",
-        "references/scope.md",
-        "references/workflow.md",
-        "https://turbo.build/repo/docs"
-      ],
+      "references": ["https://turbo.build/repo/docs"],
       "tokenBudget": 1200,
       "tags": ["turbo", "yarn4"],
       "repoRoles": ["turbo-monorepo"],
@@ -930,9 +785,6 @@
       "whenToUse": "Use for TanStack query cache behavior and TanStack router flow updates.",
       "whenNotToUse": "Do not use for styling-only component changes.",
       "references": [
-        "references/conventions.md",
-        "references/scope.md",
-        "references/workflow.md",
         "https://tanstack.com/query/latest/docs",
         "https://tanstack.com/router/latest/docs"
       ],
@@ -969,13 +821,7 @@
       "purpose": "Guide accessible UI primitive and wrapper behavior changes.",
       "whenToUse": "Use for Radix primitive usage and shadcn wrapper updates.",
       "whenNotToUse": "Do not use for backend/domain logic changes.",
-      "references": [
-        "references/conventions.md",
-        "references/scope.md",
-        "references/workflow.md",
-        "https://ui.shadcn.com/docs",
-        "https://www.radix-ui.com/primitives/docs"
-      ],
+      "references": ["https://ui.shadcn.com/docs", "https://www.radix-ui.com/primitives/docs"],
       "tokenBudget": 1200,
       "tags": ["radix", "shadcn", "react19"],
       "repoRoles": ["next-app", "react-app"],
@@ -1015,12 +861,7 @@
       "purpose": "Guide style-system-safe Tailwind and SCSS module changes.",
       "whenToUse": "Use for Tailwind token/utility and SCSS module behavior updates.",
       "whenNotToUse": "Do not use for non-style backend/service changes.",
-      "references": [
-        "references/conventions.md",
-        "references/scope.md",
-        "references/workflow.md",
-        "https://tailwindcss.com/docs"
-      ],
+      "references": ["https://tailwindcss.com/docs"],
       "tokenBudget": 1200,
       "tags": ["tailwind", "scss", "react19"],
       "repoRoles": ["next-app", "react-app", "vite-app"],
@@ -1051,12 +892,7 @@
       "purpose": "Guide Vue component/composable/state behavior changes.",
       "whenToUse": "Use for Vue component, composable, route, and state-boundary updates.",
       "whenNotToUse": "Do not use for React/Next-only component work.",
-      "references": [
-        "references/conventions.md",
-        "references/scope.md",
-        "references/workflow.md",
-        "https://vuejs.org/guide"
-      ],
+      "references": ["https://vuejs.org/guide"],
       "tokenBudget": 1200,
       "tags": ["vue"],
       "repoRoles": ["vue-app"],
@@ -1084,12 +920,7 @@
       "purpose": "Guide Nova admin resources, actions, and policy-safe field behavior.",
       "whenToUse": "Use for Laravel Nova resources, actions, filters, and admin UI behavior.",
       "whenNotToUse": "Do not use for customer-facing API/domain-only changes.",
-      "references": [
-        "references/conventions.md",
-        "references/scope.md",
-        "references/workflow.md",
-        "https://laravel.com/docs"
-      ],
+      "references": ["https://laravel.com/docs"],
       "tokenBudget": 1200,
       "tags": ["laravel-nova", "laravel"],
       "repoRoles": ["laravel-nova-app"],
@@ -1114,12 +945,7 @@
       "purpose": "Guide Bedrock config/bootstrap and environment-aware WP deployment layout.",
       "whenToUse": "Use for Bedrock config, env loading, and boot path behavior updates.",
       "whenNotToUse": "Do not use for hook/template-only WordPress runtime changes.",
-      "references": [
-        "references/conventions.md",
-        "references/scope.md",
-        "references/workflow.md",
-        "https://developer.wordpress.org/"
-      ],
+      "references": ["https://developer.wordpress.org/"],
       "tokenBudget": 1200,
       "tags": ["wordpress", "bedrock"],
       "repoRoles": ["wordpress-bedrock-site"],
@@ -1147,12 +973,7 @@
       "purpose": "Guide builder-field/meta-template wiring for ACF, Elementor Pro, and JetEngine.",
       "whenToUse": "Use for ACF field groups and Elementor/JetEngine-driven dynamic template behavior.",
       "whenNotToUse": "Do not use for generic WordPress hooks with no builder/meta impact.",
-      "references": [
-        "references/conventions.md",
-        "references/scope.md",
-        "references/workflow.md",
-        "https://developer.wordpress.org/"
-      ],
+      "references": ["https://developer.wordpress.org/"],
       "tokenBudget": 1200,
       "tags": ["wordpress"],
       "repoRoles": ["wordpress-bedrock-site", "wordpress-vanilla-site"],
@@ -1192,7 +1013,6 @@
       "purpose": "Guide .NET service-layer contract and orchestration changes.",
       "whenToUse": "Use for .NET service boundary, orchestration, and handler behavior updates.",
       "whenNotToUse": "Do not use for route formatting-only tasks with no service impact.",
-      "references": ["references/conventions.md", "references/scope.md", "references/workflow.md"],
       "tokenBudget": 1200,
       "tags": ["dotnet"],
       "repoRoles": ["dotnet-service"],
@@ -1220,7 +1040,6 @@
       "purpose": "Guide identity-provider auth flow and claim/session lifecycle changes across OIDC, Azure AD, BankID, and SAML2.",
       "whenToUse": "Use for OIDC/Azure AD/BankID/SAML2 login, callback, token, claim mapping, and SP/IDP metadata updates.",
       "whenNotToUse": "Do not use for profile CRUD without auth protocol change.",
-      "references": ["references/conventions.md", "references/scope.md", "references/workflow.md"],
       "tokenBudget": 1200,
       "tags": ["oidc", "azure-ad", "bankid", "saml2"],
       "repoRoles": [],
@@ -1254,12 +1073,7 @@
       "purpose": "Guide NextAuth.js / Auth.js provider, session, callback, and middleware changes in Next.js apps.",
       "whenToUse": "Use for `next-auth` / `@auth/core` provider setup, session strategy, callbacks, JWT, and route protection in Next.js.",
       "whenNotToUse": "Do not use for Laravel/PHP auth, OIDC outside Next.js, or session-less API tokens.",
-      "references": [
-        "references/conventions.md",
-        "references/scope.md",
-        "references/workflow.md",
-        "https://authjs.dev/"
-      ],
+      "references": ["https://authjs.dev/"],
       "tokenBudget": 1200,
       "tags": ["next-auth", "auth", "nextjs"],
       "repoRoles": ["next-app"],
@@ -1290,7 +1104,6 @@
       "purpose": "Guide schema/query/index/search changes across supported data engines.",
       "whenToUse": "Use for migrations, query behavior, indexing, and Elasticsearch mapping updates.",
       "whenNotToUse": "Do not use for UI-only changes without persistence/search impact.",
-      "references": ["references/conventions.md", "references/scope.md", "references/workflow.md"],
       "tokenBudget": 1200,
       "tags": ["postgresql", "mariadb", "mysql", "mssql", "elasticsearch", "redis"],
       "repoRoles": [],
@@ -1330,7 +1143,6 @@
       "purpose": "Guide deterministic dependency/workspace changes for Yarn4 and pnpm89.",
       "whenToUse": "Use for lockfile, workspace, and package manager configuration changes.",
       "whenNotToUse": "Do not use for feature-only code edits with no dependency/workspace impact.",
-      "references": ["references/conventions.md", "references/scope.md", "references/workflow.md"],
       "tokenBudget": 1200,
       "tags": ["yarn4", "pnpm89"],
       "repoRoles": [],
@@ -1358,12 +1170,7 @@
       "purpose": "Guide user-visible behavior testing with Testing Library.",
       "whenToUse": "Use for component interaction tests with @testing-library tooling.",
       "whenNotToUse": "Do not use for full browser journey tests better served by Playwright.",
-      "references": [
-        "references/conventions.md",
-        "references/scope.md",
-        "references/workflow.md",
-        "https://vitest.dev/guide"
-      ],
+      "references": ["https://vitest.dev/guide"],
       "tokenBudget": 1200,
       "tags": ["testing-library"],
       "repoRoles": [],
@@ -1397,12 +1204,7 @@
       "purpose": "Guide Vitest unit/integration test structure, mocking, and coverage config.",
       "whenToUse": "Use when writing or modifying Vitest tests in TypeScript/JS frontends and Node services.",
       "whenNotToUse": "Do not use for Jest, Playwright, or PHPUnit test tasks.",
-      "references": [
-        "references/conventions.md",
-        "references/scope.md",
-        "references/workflow.md",
-        "https://vitest.dev/guide/"
-      ],
+      "references": ["https://vitest.dev/guide/"],
       "tokenBudget": 1200,
       "tags": ["testing", "vitest", "typescript"],
       "repoRoles": [
@@ -1437,12 +1239,7 @@
       "purpose": "Guide Jest unit/integration test structure, mocking, and Nx-style setup.",
       "whenToUse": "Use when writing or modifying Jest tests, including Nx workspace projects.",
       "whenNotToUse": "Do not use for Vitest, Playwright, or PHPUnit test tasks.",
-      "references": [
-        "references/conventions.md",
-        "references/scope.md",
-        "references/workflow.md",
-        "https://jestjs.io/docs/getting-started"
-      ],
+      "references": ["https://jestjs.io/docs/getting-started"],
       "tokenBudget": 1200,
       "tags": ["testing", "jest", "typescript"],
       "repoRoles": ["next-app", "react-app", "nx-monorepo"],
@@ -1473,12 +1270,7 @@
       "purpose": "Guide PHPUnit feature/unit test changes for PHP/Laravel behavior.",
       "whenToUse": "Use for PHPUnit tests tied to backend behavior updates.",
       "whenNotToUse": "Do not use for frontend/browser-only test tasks.",
-      "references": [
-        "references/conventions.md",
-        "references/scope.md",
-        "references/workflow.md",
-        "https://laravel.com/docs"
-      ],
+      "references": ["https://laravel.com/docs"],
       "tokenBudget": 1200,
       "tags": ["phpunit"],
       "repoRoles": ["laravel-app", "laravel-nova-app"],
@@ -1506,12 +1298,7 @@
       "purpose": "Guide story coverage and component API documentation updates.",
       "whenToUse": "Use for component stories, args/controls, and Storybook config changes.",
       "whenNotToUse": "Do not use for backend/service-only development tasks.",
-      "references": [
-        "references/conventions.md",
-        "references/scope.md",
-        "references/workflow.md",
-        "https://storybook.js.org/docs"
-      ],
+      "references": ["https://storybook.js.org/docs"],
       "tokenBudget": 1200,
       "tags": ["storybook"],
       "repoRoles": ["react-app", "next-app", "vite-app"],
@@ -1536,33 +1323,6 @@
       "riskLevel": "low"
     },
     {
-      "id": "haus.security-review",
-      "version": "1.0.0",
-      "source": "haus",
-      "type": "skill",
-      "path": "skills/haus-owned/general/security-review",
-      "title": "Haus security review",
-      "purpose": "Route bounded security review with structured findings and explicit verification.",
-      "whenToUse": "Use when the user requests security review, threat check, or hardening on a named scope.",
-      "whenNotToUse": "Do not use for unscoped repo sweeps, exploit development, or non-security tasks.",
-      "references": [
-        "references/conventions.md",
-        "references/output-shape.md",
-        "references/scope-signals.md",
-        "references/verification.md"
-      ],
-      "tokenBudget": 800,
-      "tags": ["security", "review"],
-      "repoRoles": [],
-      "requiresAny": [],
-      "tokenEstimate": 1200,
-      "installMode": "copy-selected",
-      "ecosystem": "security",
-      "default": true,
-      "reviewStatus": "approved",
-      "riskLevel": "low"
-    },
-    {
       "id": "haus.writing-documentation",
       "version": "1.0.0",
       "source": "haus",
@@ -1572,14 +1332,6 @@
       "purpose": "Create or refresh agent-operable project docs (CLAUDE.md, docs/SUMMARY.md, topic files) from code.",
       "whenToUse": "Use when the user runs the docs sync or asks to init/refresh project documentation for agent context, or after setup/commands/env/deploy/integration changes.",
       "whenNotToUse": "Do not use for code changes with no documentation impact, or where facts would have to be invented.",
-      "references": [
-        "references/claude-template.md",
-        "references/claude-template-workspace.md",
-        "references/summary-template.md",
-        "references/topic-file-formats.md",
-        "references/completeness-criteria.md",
-        "references/validation-checklist.md"
-      ],
       "tokenBudget": 1200,
       "tags": ["workflow", "core-skill", "project-instructions"],
       "repoRoles": [],
@@ -1607,25 +1359,6 @@
       "tokenEstimate": 2200,
       "tokenBudget": 2400,
       "default": true,
-      "reviewStatus": "approved",
-      "riskLevel": "low"
-    },
-    {
-      "id": "haus.memory-conventions",
-      "version": "1.0.0",
-      "source": "haus",
-      "type": "template",
-      "path": "templates/memory-conventions.md",
-      "title": "Memory conventions",
-      "purpose": "How to keep durable cross-session learnings using Claude Code native memory; haus ships no memory store.",
-      "whenToUse": "Install when a project wants a documented memory practice (native MEMORY.md + periodic consolidation).",
-      "whenNotToUse": "Skip if the project does not use cross-session memory.",
-      "tags": ["workflow", "project-instructions"],
-      "repoRoles": [],
-      "installMode": "copy-selected",
-      "default": false,
-      "tokenEstimate": 700,
-      "tokenBudget": 900,
       "reviewStatus": "approved",
       "riskLevel": "low"
     },
