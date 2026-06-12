@@ -15,6 +15,8 @@ Run the full `project:clone` flow by following `~/.claude/commands/haus-clone.md
 
 For each repo, in its own directory, detect and install from the repo's own files (read its `docs/setup.md` / `CLAUDE.md` / `README.md` first — they win). Select node from `.nvmrc`/`engines.node` (`nvm install`), enable the pinned package manager (`corepack enable`), install JS deps (`yarn`/`pnpm`/`npm` by lockfile), composer deps if `composer.json` + `composer` present. Run each repo's steps in one login shell so the node version stays active. Per-repo failure is reported and skipped, not fatal.
 
+**Scaffold `.env`** so the env-wiring in Step 4 has a file to write to: if `.env.example` exists and `.env` does not, copy it; otherwise create an empty `.env`. Per decision D5, write `.env`; if the write is blocked, print the values for the user to add. Tell the user real secrets still need filling.
+
 ## Step 4 — Local-dev orchestration
 
 This is the phase that takes the workspace from "installed" to "ready to run." It is driven by `localdev.yml` files; a repo with none is set up by Step 3 only.
@@ -80,7 +82,7 @@ env:
    - `symlink` → `ln -s <from> <to>`; replace an existing symlink, but never clobber a real directory without confirmation.
    - `composer-path` → in `in`'s `composer.json`, set the `dep`'s require to `{ "type": "path", "url": "../<dep-folder>", "options": { "symlink": true } }`, then `composer update <vendor/dep>`.
    - `yarn-link` → `yarn link` in the `dep` repo, then `yarn link <pkg-name>` in each `in` repo (read `<pkg-name>` from the dep's `package.json`).
-5. **Env:** for each workspace `env` entry, confirm the `source` is satisfiable, then upsert the value into each sink repo's `.env` under its `key`. **If the write is blocked or fails, print the exact `KEY=value` lines for the user to paste** (decision D5). Real secrets (DB passwords, tokens) remain the user's to fill.
+5. **Env:** for each workspace `env` entry, confirm the `source` is satisfiable, then upsert the value into each sink repo's `.env` under its `key` — **creating `.env` if it does not exist** (Step 3 scaffolds it, but don't assume). **If the write is blocked or fails, print the exact `KEY=value` lines for the user to paste** (decision D5). Real secrets (DB passwords, tokens) remain the user's to fill.
 6. **Report + next-steps.** Per-repo summary, then the ordered **start** commands from each repo's `serve.start` plus any manual follow-ups (e.g. `wp sync-products sync`).
 
 **Stops at "ready to run," not "running" (D2):** bring up datastores (`docker compose up -d`), pull DBs, link, build, wire env — but do NOT start foreground dev servers or run the initial product sync. Print those.
