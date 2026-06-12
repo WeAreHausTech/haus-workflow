@@ -155,8 +155,15 @@ function reconcileManagedRules(
   newRules: string[],
 ): { rules: string[]; tracked: string[]; added: string[]; removed: string[] } {
   const prevTrackedSet = new Set(prevTracked)
-  const userRules = existing.filter((rule) => !prevTrackedSet.has(rule))
-  const userSet = new Set(userRules)
+  // User rules = existing entries haus never tracked, deduped (first occurrence wins)
+  // so accidental duplicates in the source array don't survive reconcile.
+  const userRules: string[] = []
+  const userSet = new Set<string>()
+  for (const rule of existing) {
+    if (prevTrackedSet.has(rule) || userSet.has(rule)) continue
+    userSet.add(rule)
+    userRules.push(rule)
+  }
 
   // Dedupe newRules while excluding any that the user already owns.
   const tracked: string[] = []

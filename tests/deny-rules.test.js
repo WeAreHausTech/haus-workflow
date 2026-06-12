@@ -106,6 +106,17 @@ describe('settings-merge: mergeDenyRules', () => {
     assert.ok(!settings.permissions.deny.includes('Bash(rm -rf:*)'), 'stale haus rule pruned')
   })
 
+  it('dedupes pre-existing duplicate user rules (first occurrence wins)', () => {
+    const existing = { permissions: { deny: ['Bash(dup:*)', 'Bash(dup:*)'] } }
+    const { settings } = mergeDenyRules(existing, ['Bash(sudo:*)'])
+    assert.equal(
+      settings.permissions.deny.filter((r) => r === 'Bash(dup:*)').length,
+      1,
+      'duplicate user rule collapsed to one',
+    )
+    assert.deepEqual(settings.permissions.deny, ['Bash(dup:*)', 'Bash(sudo:*)'])
+  })
+
   it('is idempotent across re-merges with the same build list', () => {
     const once = mergeDenyRules({ permissions: { deny: ['Bash(user:*)'] } }, buildDenyRules())
       .settings
