@@ -314,3 +314,13 @@ test('apply preserves a user-modified security.md', () => {
   assert.equal(fs.existsSync(securityPath), true, 'customised security.md should be preserved')
   assert.equal(readFileSync(securityPath, 'utf8'), custom, 'customised content should be untouched')
 })
+
+test('apply removes a legacy selected-context.json', () => {
+  const { temp, env } = scaffoldApplyProject()
+  const selectedPath = path.join(temp, '.haus-workflow/selected-context.json')
+
+  // Simulate a legacy install that still carries the readerless artifact.
+  writeFileSync(selectedPath, JSON.stringify([{ id: 'x', type: 'skill' }]))
+  execaSync('node', [path.resolve('dist/cli.js'), 'apply', '--write'], { cwd: temp, env })
+  assert.equal(fs.existsSync(selectedPath), false, 'legacy selected-context.json should be removed')
+})

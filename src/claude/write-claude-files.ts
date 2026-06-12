@@ -49,7 +49,6 @@ export async function writeClaudeFiles(
   opts: { refillConfig?: boolean; force?: boolean } = {},
 ): Promise<string[]> {
   const rec = (await readJson<Recommendation>(hausPath(root, 'recommendation.json'))) ?? {
-    mode: 'fast',
     recommended: [],
     skipped: [],
     warnings: [],
@@ -62,7 +61,7 @@ export async function writeClaudeFiles(
   const hausVersion =
     (await readJson<{ version?: string }>(path.join(pkgRoot, 'package.json')))?.version ?? '0.0.0'
 
-  // Lock and selected-context are only written during actual apply, not dry-run.
+  // The lock is only written during actual apply, not dry-run.
   const coreFiles = [
     claudePath(root, 'settings.json'),
     claudePath(root, 'rules', 'haus.md'),
@@ -160,6 +159,17 @@ export async function writeClaudeFiles(
       }
     }
   }
+  // Legacy: selected-context.json was a readerless, fully machine-generated artifact
+  // (a subset of haus.lock.json) that is no longer written. It was never user-authored,
+  // so remove it unconditionally from projects that installed it earlier.
+  const legacySelectedContextPath = hausPath(root, 'selected-context.json')
+  if (await fs.pathExists(legacySelectedContextPath)) {
+    if (dryRun) {
+      log(`[dry-run] would remove stale ${displayPath(root, legacySelectedContextPath)}`)
+    } else {
+      await fs.remove(legacySelectedContextPath)
+    }
+  }
 
   type ManifestItem = {
     id: string
@@ -176,9 +186,9 @@ export async function writeClaudeFiles(
   const manifestById = new Map((manifestItems as ManifestItem[]).map((item) => [item.id, item]))
   const installedPathsByItem = new Map<string, string[]>()
   // Track which recommended items were actually installed so that skipped
-  // curated items (unapproved or blocked) are excluded from the lock and
-  // selected-context output — a stale recommendation.json must not cause
-  // unapproved artifacts to appear in the written state.
+  // curated items (unapproved or blocked) are excluded from the lock — a stale
+  // recommendation.json must not cause unapproved artifacts to appear in the
+  // written state.
   const installedIds = new Set<string>()
 
   const catalogItems =
