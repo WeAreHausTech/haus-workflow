@@ -33,4 +33,7 @@ Clone a whole **workspace** from its manifest. Workspace-only (a `repos.manifest
    - **Cancel** — do nothing.
 5. Show the concrete plan before touching anything: list which repos will be cloned (and into which `folder`) and which will be reused/skipped. Get a final go-ahead.
 6. For each repo to clone, run (quoting it first): `haus clone <repo-url> <folder>` from the workspace root. Offer `--dry-run` first if the user wants a preview. If one repo fails, report it and continue to the next.
+
+   **Transport fallback.** Manifest URLs may be SSH (`git@github.com:org/repo.git` or `ssh://…`). Probe SSH connectivity once up front (`ssh -T git@github.com`); if it fails, **auto-fall back to the HTTPS URL** (`https://github.com/org/repo.git`) using your `gh auth` credentials, clone over HTTPS, and **report that you switched transport** so the user knows their SSH is down. Don't halt the run for an SSH outage when HTTPS works.
+
 7. After the loop, report which repos were cloned, reused (local), skipped (already present), and failed. Remind the user that installing dependencies and configuring each repo (`.env`, services) is still a manual step for now.
