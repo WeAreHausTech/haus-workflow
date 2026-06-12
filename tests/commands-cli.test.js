@@ -79,7 +79,10 @@ test('context CLI redacts secrets in hook-style output', () => {
         mode: 'fast',
         generatedAt: new Date().toISOString(),
         root: temp,
-        repoName: 'cli-temp',
+        // Secret embedded in a rendered field: `haus context` renders the repo summary
+        // on demand from context-map.json (repo-summary.md is no longer written), so the
+        // redaction pass must scrub it from that output.
+        repoName: cred('api_key', 'supersecretvalue'),
         packageManager: 'yarn',
         repoRoles: [],
         detectedStacks: {},
@@ -93,11 +96,6 @@ test('context CLI redacts secrets in hook-style output', () => {
       null,
       2,
     ),
-  )
-  writeFileSync(
-    path.join(temp, '.haus-workflow/repo-summary.md'),
-    `${cred('api_key', 'supersecretvalue')}\n`,
-    'utf8',
   )
   const r = execaSync('node', [cli(), 'context'], { cwd: temp, reject: false })
   assert.equal(r.exitCode, 0)

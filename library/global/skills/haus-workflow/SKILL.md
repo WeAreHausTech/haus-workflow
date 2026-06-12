@@ -74,7 +74,7 @@ After the command completes, follow the relevant post-run steps below.
 
 ### Setup (`project:init`)
 
-1. Open and follow `~/.claude/commands/haus-setup.md` — the installed `haus-setup` command (in some projects also `.claude/commands/haus-setup.md`). Run every step in order. It detects the stack, asks the guided questions, runs `haus apply --write` (scaffolding, skills, commands, rules, docs skill), writes the **project docs** (`CLAUDE.md` body + `docs/`) and `.haus-workflow/deep-context.json`, runs `haus recommend`, applies the newly-matched helpers, and confirms.
+1. Open and follow `~/.claude/commands/haus-setup.md` — the installed `haus-setup` command (in some projects also `.claude/commands/haus-setup.md`). Run every step in order. It detects the stack, runs `haus apply --write` (scaffolding, skills, commands, rules, docs skill), writes the **project docs** (`CLAUDE.md` body + `docs/`) and `.haus-workflow/deep-context.json`, runs `haus recommend`, applies the newly-matched helpers, and confirms.
 2. Then fill `.haus-workflow/workflow-config.md` — replace every placeholder (`TODO`, `n/a`, empty): test/lint/typecheck/build commands (check `package.json`), docs paths, validation library, pre-commit tool, highest-stakes logic (ask if unclear). Leave none.
 
 ### Clone (`project:clone`)

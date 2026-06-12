@@ -39,7 +39,6 @@ test('apply writes claude files and rules', () => {
 
   const settings = JSON.parse(readFileSync(path.join(temp, '.claude/settings.json'), 'utf8'))
   const rulesHaus = readFileSync(path.join(temp, '.claude/rules/haus.md'), 'utf8')
-  const rulesSecurity = readFileSync(path.join(temp, '.claude/rules/security.md'), 'utf8')
 
   const ups = settings.hooks.UserPromptSubmit[0].hooks
   assert.equal(ups.length, 1)
@@ -56,7 +55,9 @@ test('apply writes claude files and rules', () => {
   // WS6: managed rule carries the natural-language "Driving haus" trigger.
   assert.equal(rulesHaus.includes('Driving haus'), true)
   assert.equal(rulesHaus.includes('haus setup-project'), true)
-  assert.equal(rulesSecurity.includes('Never read secrets'), true)
+  // Security lines folded into haus.md; no standalone security.md is written.
+  assert.equal(rulesHaus.includes('Never read secrets'), true)
+  assert.equal(fs.existsSync(path.join(temp, '.claude/rules/security.md')), false)
 
   const pkg = JSON.parse(readFileSync(path.resolve('package.json'), 'utf8'))
   const lock = JSON.parse(readFileSync(path.join(temp, '.haus-workflow/haus.lock.json'), 'utf8'))
@@ -171,14 +172,14 @@ test('apply reports diff before overwriting generated files', () => {
   execaSync('node', [path.resolve('dist/cli.js'), 'scan', '--json'], { cwd: temp })
   execaSync('node', [path.resolve('dist/cli.js'), 'recommend', '--json'], { cwd: temp })
   execaSync('node', [path.resolve('dist/cli.js'), 'apply', '--write'], { cwd: temp })
-  const manualPath = path.join(temp, '.claude/rules/security.md')
+  const manualPath = path.join(temp, '.claude/rules/haus.md')
   writeFileSync(manualPath, 'manual override')
   const second = execaSync('node', [path.resolve('dist/cli.js'), 'apply', '--write'], {
     cwd: temp,
     reject: false,
   })
   assert.equal(second.exitCode, 0)
-  assert.equal(second.stdout.includes('Overwriting ./.claude/rules/security.md'), true)
+  assert.equal(second.stdout.includes('Overwriting ./.claude/rules/haus.md'), true)
 })
 
 test('apply --dry-run shows diffs and does not write files', () => {
@@ -209,6 +210,10 @@ test('apply --dry-run shows diffs and does not write files', () => {
 })
 
 const LEGACY_REVIEW_STUB = 'Run `haus context --task "code review"` then review diff.'
+
+// Security lines were folded into haus.md; the standalone security.md is removed on apply
+// when it still matches this historical stub, and preserved when a user has edited it.
+const LEGACY_SECURITY_STUB = '- Never read secrets.\n- Block dangerous shell commands.'
 
 function scaffoldApplyProject() {
   const temp = mkdtempSync(path.join(os.tmpdir(), 'haus-legacy-review-'))
@@ -270,4 +275,42 @@ test('apply preserves a user-modified haus-review.md', () => {
   execaSync('node', [path.resolve('dist/cli.js'), 'apply', '--write'], { cwd: temp, env })
   assert.equal(fs.existsSync(reviewPath), true, 'whitespace-edited file should be preserved')
   assert.equal(readFileSync(reviewPath, 'utf8'), whitespaceEdited)
+})
+
+test('apply folds security lines into haus.md and writes no standalone security.md', () => {
+  const { temp } = scaffoldApplyProject()
+  const rulesHaus = readFileSync(path.join(temp, '.claude/rules/haus.md'), 'utf8')
+  assert.equal(rulesHaus.includes('Never read secrets'), true)
+  assert.equal(rulesHaus.includes('Block dangerous shell commands'), true)
+  assert.equal(
+    fs.existsSync(path.join(temp, '.claude/rules/security.md')),
+    false,
+    'standalone security.md should not be written',
+  )
+})
+
+test('apply removes a legacy security.md stub that matches the historical content', () => {
+  const { temp, env } = scaffoldApplyProject()
+  const securityPath = path.join(temp, '.claude/rules/security.md')
+
+  // Exact stub (no trailing newline) — must be removed.
+  writeFileSync(securityPath, LEGACY_SECURITY_STUB)
+  execaSync('node', [path.resolve('dist/cli.js'), 'apply', '--write'], { cwd: temp, env })
+  assert.equal(fs.existsSync(securityPath), false, 'exact legacy stub should be removed')
+
+  // Stub with a single trailing newline (as historically written) — must also be removed.
+  writeFileSync(securityPath, `${LEGACY_SECURITY_STUB}\n`)
+  execaSync('node', [path.resolve('dist/cli.js'), 'apply', '--write'], { cwd: temp, env })
+  assert.equal(fs.existsSync(securityPath), false, 'stub + trailing newline should be removed')
+})
+
+test('apply preserves a user-modified security.md', () => {
+  const { temp, env } = scaffoldApplyProject()
+  const securityPath = path.join(temp, '.claude/rules/security.md')
+
+  const custom = '- Never read secrets.\n- Also: rotate keys quarterly per our policy.'
+  writeFileSync(securityPath, custom)
+  execaSync('node', [path.resolve('dist/cli.js'), 'apply', '--write'], { cwd: temp, env })
+  assert.equal(fs.existsSync(securityPath), true, 'customised security.md should be preserved')
+  assert.equal(readFileSync(securityPath, 'utf8'), custom, 'customised content should be untouched')
 })

@@ -13,7 +13,6 @@ export type DetectionStatus = 'supported' | 'partial' | 'unknown'
 
 /** Scanned repository context written to .haus-workflow/context-map.json. */
 export type ContextMap = {
-  mode: 'guided' | 'fast'
   generatedAt: string
   root: string
   repoName: string
@@ -152,7 +151,6 @@ export type DeepContext = {
 
 /** Eligibility recommendation result written to .haus-workflow/recommendation.json. */
 export type Recommendation = {
-  mode: 'guided' | 'fast'
   recommended: Array<{
     id: string
     type: string

@@ -156,8 +156,6 @@ workspace
   .option('--write', 'Apply changes (default previews only)')
   .option('--dry-run', 'Preview changes without writing')
   .option('--json', 'Emit machine-readable per-repo output')
-  .option('--fast', 'Skip interactive prompts (default)')
-  .option('--guided', 'Enable guided Q&A per repo')
   .option('--continue-on-error', 'Keep going past a failed repo (default fail-fast)')
   .option('--only <names>', 'Restrict to comma-separated repo names')
   .action((opts) => runWorkspace('setup', opts))

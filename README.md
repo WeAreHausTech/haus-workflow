@@ -20,8 +20,8 @@ re-run or repair any time with `haus install`. Undo with `haus uninstall`.
 
 **Driving it from Claude Code (no terminal):** once installed, every project's `/`
 menu has `/haus-setup`, `/haus-doctor`, and `/haus-fix`. Run `/haus-setup` (or just
-ask "set up my project") and the agent scans, asks a few plain-language questions,
-and configures the repo for you.
+ask "set up my project") and the agent scans, explains what it found in plain
+language, and configures the repo for you.
 
 ---
 

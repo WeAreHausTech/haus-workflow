@@ -12,7 +12,6 @@ function formatReasonWithSignal(reason: { message: string; signal?: string }): s
 export function formatRecommendationHuman(rec: Recommendation): string {
   const lines: string[] = []
   lines.push('Recommendation explanation')
-  lines.push(`  mode: ${rec.mode}`)
   lines.push(
     `  selected: ${rec.selectedRules} | skipped: ${rec.skippedRules} | estimated token reduction: ${rec.estimatedTokenReductionPct}%`,
   )

@@ -36,8 +36,6 @@ type ReasonHit = { code: string; message: string; signal?: string }
  */
 export async function recommend(root: string, context: ContextMap): Promise<Recommendation> {
   const items = await loadCatalog(root)
-  const setupAnswers =
-    (await readJson<Record<string, string>>(hausPath(root, 'setup-answers.json'))) ?? {}
   const sources =
     (await readJson<{ items?: Array<{ id: string; status?: string }> }>(
       hausPath(root, 'sources-report.json'),
@@ -72,7 +70,6 @@ export async function recommend(root: string, context: ContextMap): Promise<Reco
 
   const recommended: Recommendation['recommended'] = []
   const skipped: Recommendation['skipped'] = []
-  const goals = Object.values(setupAnswers).join(' ').toLowerCase()
   const sourceTrust = new Map((sources.items ?? []).map((x) => [x.id, x.status ?? 'candidate']))
   const changedFiles = await readChangedFiles(root)
 
@@ -159,11 +156,6 @@ export async function recommend(root: string, context: ContextMap): Promise<Reco
     const tagMatch = item.tags.find((t) => stackSet.has(t.toLowerCase()))
     if (tagMatch) push('stack-match', 'stack/dependency match', stackSignal(tagMatch))
 
-    const goalMatch = item.tags.find(
-      (t) => goals.includes(t) || goals.includes(t.replace(/-/g, ' ')),
-    )
-    if (goalMatch) push('goal-match', 'guided goal match', `goal:${goalMatch}`)
-
     const pm = context.packageManager
     const pmVersionedMatch =
       pm === 'yarn' || pm === 'pnpm'
@@ -232,7 +224,6 @@ export async function recommend(root: string, context: ContextMap): Promise<Reco
   const estimatedContextTokens = estimateContextTokens(selectedRules)
   const estimatedTokenReductionPct = tokenReductionPct(selectedRules, skippedRules)
   return {
-    mode: context.mode,
     recommended,
     skipped,
     warnings: mergeRecommendationWarnings(context),

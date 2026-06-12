@@ -18,6 +18,6 @@ export async function readContextOrScan(root: string): Promise<ContextMap> {
   // Use the cached copy when available to avoid rescanning on every command.
   const context = await readJson<ContextMap>(hausPath(root, 'context-map.json'))
   if (context) return context
-  const scan = await scanProject(root, 'fast')
+  const scan = await scanProject(root)
   return scan
 }

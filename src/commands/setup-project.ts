@@ -13,7 +13,6 @@ export async function runSetupProject(options: { json?: boolean }): Promise<void
   // In --json mode preview only (apply:false). Interactive mode applies after a
   // confirm() gate run inside the core, after the scan/recommend/doctor summary.
   await runSetupCore(root, {
-    mode: 'fast',
     json: options.json,
     apply: !options.json,
     dryRun: false,
