@@ -8,8 +8,16 @@
 
 Requires Node 22+.
 
+**Terminal:**
+
 ```bash
 npm install -g @haus-tech/haus-workflow
+```
+
+**Or paste this into Claude Code:**
+
+```
+Install the haus-workflow CLI globally by running `npm install -g @haus-tech/haus-workflow`.
 ```
 
 A **global** install auto-runs `haus install` via a postinstall hook — it seeds
@@ -18,11 +26,6 @@ security rules into `~/.claude/settings.json`, and prints a notice of what chang
 It is non-fatal, idempotent, and global-only. Skip it with `HAUS_NO_POSTINSTALL=1`;
 re-run or repair any time with `haus install`. Undo with `haus uninstall`.
 
-**Driving it from Claude Code (no terminal):** once installed, every project's `/`
-menu has `/haus-setup`, `/haus-doctor`, and `/haus-fix`. Run `/haus-setup` (or just
-ask "set up my project") and the agent scans, asks a few plain-language questions,
-and configures the repo for you.
-
 ---
 
 ## haus-workflow skill
@@ -30,7 +33,7 @@ and configures the repo for you.
 Once installed, Claude Code gains a `/haus-workflow` slash command.
 
 The `project:*` tasks act on the current repo. The unprefixed verbs (`update`,
-`catalog`, `install`, `uninstall`) manage the haus tool itself on your machine
+`install`, `uninstall`) manage the haus tool itself on your machine
 (`~/.claude` + npm), like `npm install -g`. The short legacy names still work.
 
 ```
@@ -41,22 +44,9 @@ The `project:*` tasks act on the current repo. The unprefixed verbs (`update`,
 /haus-workflow project:refresh              # [project] refresh .claude/ and regenerate CLAUDE.md imports
 /haus-workflow project:doctor               # [project] health check for drift
 /haus-workflow update                       # [global]  update npm package + catalog + ~/.claude/
-/haus-workflow catalog                      # [global]  fetch only the latest catalog
 ```
 
 Without an argument, the skill presents a menu so you can pick the task. With an argument, it runs immediately.
-
----
-
-## Per-project setup
-
-Run once inside each project:
-
-```bash
-haus init
-```
-
-Scans the repo, recommends context assets, and writes `.claude/` and `.haus-workflow/`.
 
 ---
 
@@ -73,12 +63,13 @@ haus apply --write     # write .claude/ files (skills, agents, commands, templat
 haus apply --select    # interactively choose which recommended items to install
 haus apply --refill-config    # fill still-blank workflow-config.md fields, keep edits
 haus context --task "<task>"  # select context rules for a task (token-budgeted)
-haus update                   # sync remote catalog + re-apply project files
+haus update                   # check npm for new CLI + sync catalog + refresh ~/.claude/ and this project
 haus update --check           # check for updates without applying
 haus undo                     # remove haus-managed project files (lock-tracked paths)
 haus doctor                   # health check: hooks, CLAUDE.md, imports, catalog cache
 haus config                   # manage hook configuration
-haus guard                    # test bash/file-access guards
+haus guard                    # security guard hook (bash + file-access); invoked by PreToolUse
+haus workspace                # multi-repo ops: discover, scan, setup, doctor across a workspace
 haus uninstall                # remove Haus-managed files from ~/.claude/
 ```
 
@@ -87,24 +78,16 @@ haus uninstall                # remove Haus-managed files from ~/.claude/
 
 ---
 
-## Development
-
-```bash
-yarn install
-yarn verify   # typecheck + lint + build + test
-yarn dev <cmd>  # run CLI without building (tsx)
-```
-
-### Catalog
+## Catalog
 
 Content lives in [`haus-workflow-catalog`](https://github.com/WeAreHausTech/haus-workflow-catalog)
-(71 items; version pinned in `library/catalog/manifest.json`). Fetched at runtime from `main` (override with `HAUS_CATALOG_REF`).
+(version pinned in `library/catalog/manifest.json`). Fetched at runtime from `main` (override with `HAUS_CATALOG_REF`).
 Validation rules sync from catalog → `library/catalog/validation-rules.json` (ADR-0001).
 
 On `haus apply` / `haus update`, items **removed from the catalog** are pruned from the
 project when their on-disk copy still matches the lock hash; user-edited copies are kept.
 
-### Internal docs
+## Internal docs
 
 - [Architecture](docs/architecture.md)
 - [CLI reference](docs/cli.md)

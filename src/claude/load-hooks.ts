@@ -43,13 +43,6 @@ export const CANONICAL_HOOKS: ClaudeHooksSettings = {
   },
 }
 
-/** Maps known hook commands to stable IDs used in recommended-hooks.json. */
-const STABLE_HOOK_IDS: Record<string, string> = {
-  'haus context --from-hook': 'haus.context-hook',
-  'haus guard file-access --from-hook': 'haus.guard-file',
-  'haus guard bash --from-hook': 'haus.guard-bash',
-}
-
 /**
  * Returns the canonical project settings: inlined hooks plus the deterministic
  * `permissions.deny` rules (WORKFLOW.md "enforce in both"). One source so the
@@ -57,25 +50,4 @@ const STABLE_HOOK_IDS: Record<string, string> = {
  */
 export async function loadClaudeHooksSettings(): Promise<ClaudeHooksSettings> {
   return { ...CANONICAL_HOOKS, permissions: { deny: buildDenyRules(), ask: buildAskRules() } }
-}
-
-/** Flat list for `.haus-workflow/recommended-hooks.json` (ids stable for known commands). */
-export function flattenRecommendedHooks(
-  settings: ClaudeHooksSettings,
-): Array<{ id: string; command: string }> {
-  const out: Array<{ id: string; command: string }> = []
-  let generic = 0
-  for (const block of settings.hooks.UserPromptSubmit) {
-    for (const h of block.hooks) {
-      const id = STABLE_HOOK_IDS[h.command] ?? `haus.hook.user-${generic++}`
-      out.push({ id, command: h.command })
-    }
-  }
-  for (const block of settings.hooks.PreToolUse) {
-    for (const h of block.hooks) {
-      const id = STABLE_HOOK_IDS[h.command] ?? `haus.hook.pre-${generic++}`
-      out.push({ id, command: h.command })
-    }
-  }
-  return out
 }

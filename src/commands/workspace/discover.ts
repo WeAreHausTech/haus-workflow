@@ -106,7 +106,7 @@ export async function discoverRepos(
         : path.basename(relDir === '.' ? workspaceRoot : absDir)
     let role = 'auto'
     try {
-      const scan = await scanProject(absDir, 'fast')
+      const scan = await scanProject(absDir)
       if (scan.repoRoles[0]) role = scan.repoRoles[0]
     } catch {
       // Best-effort: an unscannable repo still counts as a member, role stays 'auto'.

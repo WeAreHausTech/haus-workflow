@@ -31,8 +31,6 @@ export type WorkspaceOptions = {
   write?: boolean
   dryRun?: boolean
   json?: boolean
-  fast?: boolean
-  guided?: boolean
   continueOnError?: boolean
   only?: string | string[]
   maxDepth?: string | number
@@ -95,7 +93,7 @@ async function scanWorkspace(workspaceRoot: string, opts: { json?: boolean }): P
     if (!existsSync(repoRoot) || !statSync(repoRoot).isDirectory()) {
       throw new Error(`Repo path is not a directory: ${repo.path}`)
     }
-    const result = await scanProject(repoRoot, 'fast')
+    const result = await scanProject(repoRoot)
     inputs.push({ name: repo.name, path: repo.path, context: result })
   }
   const written = await writeWorkspaceArtifacts(workspaceRoot, inputs, config.relationships)
@@ -137,7 +135,6 @@ export async function runWorkspace(
       return
     case 'setup':
       await runWorkspaceSetup(workspaceRoot, {
-        mode: options.guided ? 'guided' : 'fast',
         write: options.write,
         dryRun: options.dryRun,
         json: options.json,

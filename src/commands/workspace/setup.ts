@@ -36,7 +36,6 @@ import {
 } from './manifest.js'
 
 export type WorkspaceSetupOptions = {
-  mode?: 'guided' | 'fast'
   write?: boolean
   dryRun?: boolean
   json?: boolean
@@ -91,7 +90,6 @@ export async function runWorkspaceSetup(
   workspaceRoot: string,
   options: WorkspaceSetupOptions = {},
 ): Promise<WorkspaceSetupResult> {
-  const mode = options.mode ?? 'fast'
   const apply = options.write ?? false
   const configText = await readText(path.join(workspaceRoot, WORKSPACE_FILE))
   if (!configText) {
@@ -124,7 +122,6 @@ export async function runWorkspaceSetup(
         throw new Error(`Repo path is not a directory: ${repo.path}`)
       }
       const res = await runSetupCore(repoRoot, {
-        mode,
         json: options.json,
         apply,
         dryRun: options.dryRun,

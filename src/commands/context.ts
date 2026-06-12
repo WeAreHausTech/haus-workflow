@@ -8,9 +8,10 @@ import {
   type TaskIntent,
 } from '../recommender/task-intent.js'
 import { readContextOrScan } from '../scanner/read-context.js'
+import { renderSummary } from '../scanner/render.js'
 import { redactSensitive } from '../security/redact-sensitive.js'
 import type { Recommendation } from '../types.js'
-import { readJson, readText } from '../utils/fs.js'
+import { readJson } from '../utils/fs.js'
 import { log } from '../utils/logger.js'
 import { hausPath } from '../utils/paths.js'
 
@@ -31,7 +32,8 @@ export async function runContext(options: {
     return
   }
   const context = await readContextOrScan(root)
-  const summary = (await readText(hausPath(root, 'repo-summary.md'))) ?? ''
+  // repo-summary.md is no longer persisted; render the same one-pager on demand.
+  const summary = renderSummary(context)
   const recommendationRaw = await readJson<Recommendation>(hausPath(root, 'recommendation.json'))
   const recommendation = recommendationRaw ? normalizeRecommendation(recommendationRaw) : undefined
   const taskIntents = options.task ? classifyTaskIntents(options.task) : new Set<TaskIntent>()

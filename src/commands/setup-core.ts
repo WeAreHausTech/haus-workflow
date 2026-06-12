@@ -2,12 +2,11 @@
  * Shared setup pipeline parameterized on an explicit `root`.
  *
  * This is the single source of truth for the scan → recommend → apply flow.
- * `setup-project` wraps it with interactive mode choice + a confirm() gate.
+ * `setup-project` wraps it with a confirm() gate.
  * The upcoming workspace setup loop will call it once per member repo so every
  * repo gets byte-identical output to `haus setup-project`.
  */
 import { syncRemoteCatalog } from '../catalog/remote-catalog.js'
-import { flattenRecommendedHooks, loadClaudeHooksSettings } from '../claude/load-hooks.js'
 import { verifyProjectSettingsHooksContract } from '../claude/verify-hooks-contract.js'
 import { writeClaudeFiles } from '../claude/write-claude-files.js'
 import { recommend } from '../recommender/recommend.js'
@@ -28,7 +27,6 @@ export type SetupCoreResult = {
 }
 
 export type SetupCoreOptions = {
-  mode: 'guided' | 'fast'
   json?: boolean
   apply: boolean
   dryRun?: boolean
@@ -49,10 +47,10 @@ export type SetupCoreOptions = {
  * prior behaviour.
  */
 export async function runSetupCore(root: string, opts: SetupCoreOptions): Promise<SetupCoreResult> {
-  const { mode, json, apply, dryRun, confirm } = opts
+  const { json, apply, dryRun, confirm } = opts
 
   // Scan
-  const scanResult = await scanProject(root, mode)
+  const scanResult = await scanProject(root)
   if (json) {
     log(JSON.stringify(scanResult, null, 2))
   } else {
@@ -65,12 +63,6 @@ export async function runSetupCore(root: string, opts: SetupCoreOptions): Promis
   const context = await readContextOrScan(root)
   const recommendation = await recommend(root, context)
   await writeJson(hausPath(root, 'recommendation.json'), recommendation)
-  const hookSettings = await loadClaudeHooksSettings()
-  await writeJson(hausPath(root, 'recommended-hooks.json'), flattenRecommendedHooks(hookSettings))
-  await writeJson(hausPath(root, 'recommended-rules.json'), [
-    { id: 'haus.rule.context-minimal', enabled: true },
-    { id: 'haus.rule.security', enabled: true },
-  ])
   if (json) {
     log(JSON.stringify(recommendation, null, 2))
   } else {

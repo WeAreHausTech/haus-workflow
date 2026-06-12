@@ -231,7 +231,7 @@ test('update re-applies project files and preserves user settings merge', () => 
   execaSync('node', [cli, 'recommend', '--json'], { cwd: temp, env })
   execaSync('node', [cli, 'apply', '--write', '--allow-empty-cache'], { cwd: temp, env })
 
-  writeFileSync(path.join(temp, '.claude/rules/security.md'), 'stale override')
+  writeFileSync(path.join(temp, '.claude/rules/haus.md'), 'stale override')
   const settingsBefore = JSON.parse(readFileSync(path.join(temp, '.claude/settings.json'), 'utf8'))
   settingsBefore.hooks.PreToolUse.push({
     matcher: 'Custom',
@@ -243,10 +243,11 @@ test('update re-applies project files and preserves user settings merge', () => 
   )
 
   const out = execaSync('node', [cli, 'update'], { cwd: temp, env }).stdout
-  const security = readFileSync(path.join(temp, '.claude/rules/security.md'), 'utf8')
+  // Security lines are folded into the managed haus.md rule; update restores it after tamper.
+  const rulesHaus = readFileSync(path.join(temp, '.claude/rules/haus.md'), 'utf8')
   const settingsAfter = JSON.parse(readFileSync(path.join(temp, '.claude/settings.json'), 'utf8'))
 
-  assert.equal(security.includes('Never read secrets'), true)
+  assert.equal(rulesHaus.includes('Never read secrets'), true)
   assert.equal(
     settingsAfter.hooks.PreToolUse.some((e) => e.matcher === 'Custom'),
     true,

@@ -6,20 +6,17 @@
 
 ## Core workflow
 
-### `haus init [--fast] [--json]`
+### `haus init [--json]`
 
 First-run setup: scan → recommend → apply in one step. Use inside a project repo.
 
-- `--fast` — skip interactive prompts
 - `--json` — emit JSON output
 
-### `haus setup-project [--guided] [--fast] [--json]`
+### `haus setup-project [--json]`
 
-Re-run setup on an existing project.
+Re-run setup on an existing project. Prompts to confirm before writing (unless `--json`).
 
-- `--guided` — step-by-step interactive mode
-- `--fast` — non-interactive mode
-- `--json` — emit JSON output
+- `--json` — preview only; emit JSON output and write nothing
 
 ### `haus scan [--json]`
 
@@ -178,6 +175,6 @@ install patterns, `npx tsx`-only allowlist, tag allowlist), and `source: curated
 project — including before first setup, the main discovery path for non-developers:
 
 - `/haus-setup` — agent runs `haus setup-project --json`, narrates detection in
-  plain language, asks the guided questions as chat, writes the answers, then applies.
+  plain language, then applies the basics and writes the project docs.
 - `/haus-doctor` — agent runs `haus doctor` and relays the verdict in plain language.
 - `/haus-fix` — agent runs `haus doctor` then applies each suggested fix.

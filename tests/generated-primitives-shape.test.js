@@ -25,7 +25,8 @@ test('generated claude primitives stay compact routers', () => {
     false,
     '.claude/CLAUDE.md should not exist',
   )
-  // Carries the brief "Driving haus" NL-trigger block (WS6) but must stay a compact router, not an essay.
-  assert.equal(ruleHaus.length < 600, true, 'haus rule should stay compact')
+  // Carries the "Driving haus" NL-trigger block (WS6), the folded security lines, and the
+  // hand-edit guard — but must stay a compact router, not an essay.
+  assert.equal(ruleHaus.length < 1000, true, 'haus rule should stay compact')
   assert.equal(cmdDoctor.length < 200, true, 'command router should stay compact')
 })

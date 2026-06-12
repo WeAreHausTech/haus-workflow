@@ -22,11 +22,11 @@ function makeFixture() {
   return temp
 }
 
-const ART = ['recommendation.json', 'recommended-hooks.json', 'recommended-rules.json']
+const ART = ['context-map.json', 'recommendation.json']
 
 // The shared setup core (runSetupCore) is exercised through `setup-project`.
-// This asserts the core writes the full artifact set parameterized on root.
-test('setup core writes scan + recommendation + hooks + rules artifacts', () => {
+// This asserts the core writes the load-bearing artifact set parameterized on root.
+test('setup core writes scan + recommendation artifacts', () => {
   const temp = makeFixture()
   const r = execaSync('node', [path.resolve('dist/cli.js'), 'setup-project', '--json'], {
     cwd: temp,
@@ -34,26 +34,17 @@ test('setup core writes scan + recommendation + hooks + rules artifacts', () => 
   })
   assert.equal(r.exitCode, 0, `stderr: ${r.stderr}`)
 
-  assert.ok(
-    existsSync(path.join(temp, '.haus-workflow/context-map.json')),
-    'context-map.json not written',
-  )
   for (const f of ART) {
     assert.ok(existsSync(path.join(temp, '.haus-workflow', f)), `${f} not written by setup core`)
   }
 
-  const rules = JSON.parse(
-    readFileSync(path.join(temp, '.haus-workflow/recommended-rules.json'), 'utf8'),
-  )
-  assert.deepEqual(rules, [
-    { id: 'haus.rule.context-minimal', enabled: true },
-    { id: 'haus.rule.security', enabled: true },
-  ])
-
-  const hooks = JSON.parse(
-    readFileSync(path.join(temp, '.haus-workflow/recommended-hooks.json'), 'utf8'),
-  )
-  assert.ok(Array.isArray(hooks), 'recommended-hooks.json must be a flat array')
+  // Readerless artifacts pruned: setup core no longer emits these.
+  for (const f of ['recommended-hooks.json', 'recommended-rules.json', 'dependency-map.json']) {
+    assert.ok(
+      !existsSync(path.join(temp, '.haus-workflow', f)),
+      `${f} should no longer be written`,
+    )
+  }
 })
 
 // In --json mode the core runs with apply:false → no Claude files written.

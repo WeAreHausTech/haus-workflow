@@ -49,7 +49,6 @@ export async function writeClaudeFiles(
   opts: { refillConfig?: boolean; force?: boolean } = {},
 ): Promise<string[]> {
   const rec = (await readJson<Recommendation>(hausPath(root, 'recommendation.json'))) ?? {
-    mode: 'fast',
     recommended: [],
     skipped: [],
     warnings: [],
@@ -62,11 +61,10 @@ export async function writeClaudeFiles(
   const hausVersion =
     (await readJson<{ version?: string }>(path.join(pkgRoot, 'package.json')))?.version ?? '0.0.0'
 
-  // Lock and selected-context are only written during actual apply, not dry-run.
+  // The lock is only written during actual apply, not dry-run.
   const coreFiles = [
     claudePath(root, 'settings.json'),
     claudePath(root, 'rules', 'haus.md'),
-    claudePath(root, 'rules', 'security.md'),
     claudePath(root, 'commands', 'haus-doctor.md'),
   ]
   const rootClaudeMdPath = await writeRootClaudeMd(root, dryRun)
@@ -81,12 +79,7 @@ export async function writeClaudeFiles(
   ]
   const files = dryRun
     ? [...coreFiles, ...p6Files]
-    : [
-        ...coreFiles,
-        ...p6Files,
-        hausPath(root, 'selected-context.json'),
-        hausPath(root, 'haus.lock.json'),
-      ]
+    : [...coreFiles, ...p6Files, hausPath(root, 'haus.lock.json')]
   if (dryRun) {
     const mergedSettings = await mergeProjectSettings(root)
     await writeManagedJson(root, claudePath(root, 'settings.json'), mergedSettings, true)
@@ -124,25 +117,70 @@ export async function writeClaudeFiles(
       }
     }
   }
+  // The haus rule now also carries the two security lines that previously lived in a
+  // separate security.md (the advisory mirror of settings.json deny/ask), plus a guard
+  // against hand-editing haus-managed files. settings.json + the guard hooks remain the
+  // deterministic enforcement layer; this rule is the advisory half WORKFLOW.md requires.
   await writeManagedText(
     root,
     claudePath(root, 'rules', 'haus.md'),
-    '- Keep context minimal.\n' +
-      '- Follow project conventions.\n' +
-      '\n' +
-      '## Driving haus\n' +
-      'When the user asks to set up, configure, check, or fix the project, run ' +
-      '`haus setup-project` or `haus doctor` and narrate results in plain language — ' +
-      'never make them use a terminal or read JSON. The `/haus-setup`, `/haus-doctor`, ' +
-      'and `/haus-fix` commands do the same.\n',
+    [
+      '- Keep context minimal.',
+      '- Follow project conventions.',
+      '- Never read secrets.',
+      '- Block dangerous shell commands.',
+      '- NEVER hand-edit haus-managed blocks (`<!-- HAUS:BEGIN … -->` … `<!-- HAUS:END … -->`)',
+      '  or haus-owned files under `.claude/` / `.haus-workflow/` — regenerate via `haus apply`.',
+      '  Hand-edits are silently overwritten or flagged as drift.',
+      '',
+      '## Driving haus',
+      'haus owns `.claude/` and `.haus-workflow/`. When the user asks to set up, configure,',
+      'check, fix, refresh, or update the project, run the matching `haus` command and narrate',
+      'results in plain language — never make them use a terminal or read JSON.',
+      '- Set up / configure / fix / check → `haus setup-project`, `haus apply --write`, `haus doctor`',
+      '- Update package + catalog → `haus update`',
+      '- The `/haus-workflow`, `/haus-setup`, `/haus-doctor`, and `/haus-fix` commands do the same.',
+      '',
+    ].join('\n'),
     dryRun,
   )
-  await writeManagedText(
-    root,
-    claudePath(root, 'rules', 'security.md'),
-    '- Never read secrets.\n- Block dangerous shell commands.\n',
-    dryRun,
-  )
+  // Legacy: the two security lines moved into haus.md (above). Remove the standalone
+  // security.md from projects that installed it earlier, but only when its content
+  // byte-for-byte matches the historical stub so a user-customised file is preserved.
+  const legacySecurityPath = claudePath(root, 'rules', 'security.md')
+  if (await fs.pathExists(legacySecurityPath)) {
+    const content = await fs.readFile(legacySecurityPath, 'utf8')
+    const stub = '- Never read secrets.\n- Block dangerous shell commands.'
+    if (content === stub || content === `${stub}\n` || content === `${stub}\r\n`) {
+      if (dryRun) {
+        log(`[dry-run] would remove stale ${displayPath(root, legacySecurityPath)}`)
+      } else {
+        await fs.remove(legacySecurityPath)
+      }
+    }
+  }
+  // Legacy: these `.haus-workflow/` artifacts were readerless, fully machine-generated
+  // outputs that are no longer written. They were never user-authored, so remove them
+  // unconditionally from projects that installed them earlier — otherwise an upgrade via
+  // `haus apply` would leave them lingering and the output set would not actually shrink.
+  const LEGACY_PRUNED_ARTIFACTS = [
+    'selected-context.json',
+    'dependency-map.json',
+    'scan-hashes.json',
+    'recommended-hooks.json',
+    'recommended-rules.json',
+    'repo-summary.md',
+  ]
+  for (const rel of LEGACY_PRUNED_ARTIFACTS) {
+    const legacyPath = hausPath(root, rel)
+    if (await fs.pathExists(legacyPath)) {
+      if (dryRun) {
+        log(`[dry-run] would remove stale ${displayPath(root, legacyPath)}`)
+      } else {
+        await fs.remove(legacyPath)
+      }
+    }
+  }
 
   type ManifestItem = {
     id: string
@@ -159,9 +197,9 @@ export async function writeClaudeFiles(
   const manifestById = new Map((manifestItems as ManifestItem[]).map((item) => [item.id, item]))
   const installedPathsByItem = new Map<string, string[]>()
   // Track which recommended items were actually installed so that skipped
-  // curated items (unapproved or blocked) are excluded from the lock and
-  // selected-context output — a stale recommendation.json must not cause
-  // unapproved artifacts to appear in the written state.
+  // curated items (unapproved or blocked) are excluded from the lock — a stale
+  // recommendation.json must not cause unapproved artifacts to appear in the
+  // written state.
   const installedIds = new Set<string>()
 
   const catalogItems =
@@ -262,17 +300,6 @@ export async function writeClaudeFiles(
     isCatalogRefResolved()
       ? getResolvedCatalogRef()
       : (prevRefById.get(itemId) ?? getResolvedCatalogRef())
-  await writeManagedJson(
-    root,
-    hausPath(root, 'selected-context.json'),
-    installedItems.map((r) => ({
-      id: r.id,
-      type: r.type,
-      reason: r.reason,
-      selectionMode: r.selectionMode,
-    })),
-    false,
-  )
   const lock = await Promise.all(
     installedItems.map(async (r) => {
       const relPaths = installedPathsByItem.get(r.id) ?? []

@@ -81,7 +81,6 @@ export function normalizeRecommendation(input: RecommendationLike): Recommendati
   }))
 
   return {
-    mode: input.mode === 'guided' ? 'guided' : 'fast',
     recommended,
     skipped,
     warnings: input.warnings ?? [],

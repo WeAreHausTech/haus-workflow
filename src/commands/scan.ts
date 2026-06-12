@@ -3,12 +3,8 @@ import { scanProject } from '../scanner/scan-project.js'
 import { log } from '../utils/logger.js'
 
 /** Scans the current project and outputs detected roles and package manager; use --json for machine-readable output. */
-export async function runScan(options: {
-  json?: boolean
-  mode?: 'guided' | 'fast'
-}): Promise<void> {
-  const mode = options.mode ?? 'fast'
-  const result = await scanProject(process.cwd(), mode)
+export async function runScan(options: { json?: boolean }): Promise<void> {
+  const result = await scanProject(process.cwd())
   if (options.json) {
     log(JSON.stringify(result, null, 2))
     return
