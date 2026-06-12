@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.23.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.22.1...v0.23.0) (2026-06-12)
+
+### Features
+
+- **catalog:** full skill cache and superpowers shared install ([#100](https://github.com/WeAreHausTech/haus-workflow/issues/100)) ([d366ccc](https://github.com/WeAreHausTech/haus-workflow/commit/d366ccc99a6f42791a7ae3dfe34456662bb41bdf))
+- **security:** add ask tier to Claude Code permissions ([#99](https://github.com/WeAreHausTech/haus-workflow/issues/99)) ([937487c](https://github.com/WeAreHausTech/haus-workflow/commit/937487c2a2c5bd2ccc64f501b759e7f4dfb110f5))
+
 ## [0.22.1](https://github.com/WeAreHausTech/haus-workflow/compare/v0.22.0...v0.22.1) (2026-06-11)
 
 ## [0.22.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.21.0...v0.22.0) (2026-06-11)
