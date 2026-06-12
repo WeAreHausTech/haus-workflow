@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.24.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.23.1...v0.24.0) (2026-06-12)
+
+### Features
+
+- **cloneandsetup:** local-dev orchestration via localdev.yml ([#97](https://github.com/WeAreHausTech/haus-workflow/issues/97)) ([8a2b5d3](https://github.com/WeAreHausTech/haus-workflow/commit/8a2b5d3e9a767bfe92152189b37921d58878818b))
+
 ## [0.23.1](https://github.com/WeAreHausTech/haus-workflow/compare/v0.23.0...v0.23.1) (2026-06-12)
 
 ## [0.23.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.22.1...v0.23.0) (2026-06-12)
