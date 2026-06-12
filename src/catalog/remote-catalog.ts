@@ -171,6 +171,34 @@ function isSafeCatalogPath(itemPath: string): boolean {
   return !normalized.startsWith('..') && !normalized.includes('/..')
 }
 
+/** Guards relative file paths from tree listings (untrusted) before joining under a dest dir. */
+function isSafeRelativeFilePath(rel: string): boolean {
+  if (!rel || rel.startsWith('/') || rel.includes('\\') || rel.includes('//')) return false
+  if (path.isAbsolute(rel)) return false
+  const normalized = path.posix.normalize(rel.replace(/\\/g, '/'))
+  return normalized !== '..' && !normalized.startsWith('../') && !normalized.includes('/../')
+}
+
+function githubApiHeaders(): Record<string, string> {
+  const headers: Record<string, string> = { Accept: 'application/vnd.github+json' }
+  const auth = process.env['HAUS_GITHUB_TOKEN'] ?? process.env['GITHUB_TOKEN']
+  if (auth) headers['Authorization'] = `Bearer ${auth}`
+  return headers
+}
+
+/** Drop unsafe entries; returns null when any path in the listing is rejected. */
+function sanitizeRelativeFilePaths(files: string[], label: string): string[] | null {
+  const safe: string[] = []
+  for (const rel of files) {
+    if (!isSafeRelativeFilePath(rel)) {
+      warn(`Rejected unsafe path in ${label}: ${rel}`)
+      return null
+    }
+    safe.push(rel)
+  }
+  return safe
+}
+
 /** Resolves itemPath under base; returns null if the result escapes the base directory. */
 function safeJoin(base: string, itemPath: string): string | null {
   if (!isSafeCatalogPath(itemPath)) return null
@@ -213,19 +241,27 @@ async function listMockPrefixFiles(base: string, prefix: string): Promise<string
 
 async function fetchGitHubRecursiveBlobPaths(ref: string): Promise<string[] | null> {
   try {
+    const headers = githubApiHeaders()
     const commitRes = await fetch(`${CATALOG_GITHUB_API_URL}/commits/${encodeURIComponent(ref)}`, {
       signal: AbortSignal.timeout(15_000),
-      headers: { Accept: 'application/vnd.github+json' },
+      headers,
     })
     if (!commitRes.ok) return null
     const commit = (await commitRes.json()) as { commit: { tree: { sha: string } } }
     const treeSha = commit.commit.tree.sha
     const treeRes = await fetch(`${CATALOG_GITHUB_API_URL}/git/trees/${treeSha}?recursive=1`, {
       signal: AbortSignal.timeout(30_000),
-      headers: { Accept: 'application/vnd.github+json' },
+      headers,
     })
     if (!treeRes.ok) return null
-    const tree = (await treeRes.json()) as { tree: Array<{ path: string; type: string }> }
+    const tree = (await treeRes.json()) as {
+      tree: Array<{ path: string; type: string }>
+      truncated?: boolean
+    }
+    if (tree.truncated) {
+      warn('Catalog GitHub tree listing was truncated — refusing partial cache sync')
+      return null
+    }
     return tree.tree.filter((e) => e.type === 'blob').map((e) => e.path)
   } catch {
     return null
@@ -250,16 +286,19 @@ export async function listFilesUnderCatalogPrefix(
   const normalized = prefix.replace(/\\/g, '/').replace(/\/+$/, '')
   const prefixSlash = `${normalized}/`
 
+  let relFiles: string[] | null
   if (process.env['HAUS_CATALOG_REMOTE_BASE']) {
-    return listMockPrefixFiles(base, normalized)
+    relFiles = await listMockPrefixFiles(base, normalized)
+  } else {
+    const blobs = await fetchCatalogBlobPaths(base)
+    if (!blobs) return null
+    relFiles = blobs
+      .filter((p) => p.startsWith(prefixSlash))
+      .map((p) => p.slice(prefixSlash.length))
+      .sort()
   }
-
-  const blobs = await fetchCatalogBlobPaths(base)
-  if (!blobs) return null
-  return blobs
-    .filter((p) => p.startsWith(prefixSlash))
-    .map((p) => p.slice(prefixSlash.length))
-    .sort()
+  if (!relFiles) return null
+  return sanitizeRelativeFilePaths(relFiles, normalized)
 }
 
 type FetchedFile =
@@ -541,7 +580,7 @@ export async function fetchLatestCatalogTag(): Promise<string | null> {
   try {
     const res = await fetch(CATALOG_TAGS_API_URL, {
       signal: AbortSignal.timeout(5_000),
-      headers: { Accept: 'application/vnd.github+json' },
+      headers: githubApiHeaders(),
     })
     if (!res.ok) return null
     const tags = (await res.json()) as Array<{ name: string }>

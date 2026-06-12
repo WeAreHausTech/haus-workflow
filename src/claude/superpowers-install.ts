@@ -49,6 +49,9 @@ export async function installCatalogSkill(
 ): Promise<void> {
   if (opts.dryRun) return
   await fs.ensureDir(path.dirname(destination))
+  if (await fs.pathExists(destination)) {
+    await fs.remove(destination)
+  }
   await fs.copy(sourcePath, destination, { overwrite: true, errorOnExist: false })
   if (opts.originSourceId === SUPERPOWERS_ORIGIN_SOURCE_ID) {
     await rewriteMarkdownTree(destination)
@@ -69,6 +72,9 @@ export async function installSuperpowersShared(
   const destination = claudePath(projectRoot, 'skills', 'shared')
   if (dryRun) return path.relative(projectRoot, destination)
   await fs.ensureDir(path.dirname(destination))
+  if (await fs.pathExists(destination)) {
+    await fs.remove(destination)
+  }
   await fs.copy(source, destination, { overwrite: true, errorOnExist: false })
   await rewriteMarkdownTree(destination)
   return path.relative(projectRoot, destination)
