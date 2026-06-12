@@ -72,6 +72,58 @@ describe('settings-merge: mergeDenyRules', () => {
     const { settings } = mergeDenyRules(existing, ['Bash(rm -rf:*)'])
     assert.deepEqual(settings.permissions.allow, ['Bash(haus doctor:*)'])
   })
+
+  // Regression: additive-only merge left stale haus rules in existing projects on
+  // update (e.g. Read(.env)/Read(*.sql) stayed denied after the ask-tier release).
+  // Reconcile must prune tracked rules no longer in the new build list.
+  it('removes stale haus deny rules dropped from the new build list (reconcile)', () => {
+    // Simulate an old install: haus tracked Read(.env)/Read(*.sql)/Edit(*.sql) + rm -rf.
+    const old = mergeDenyRules({}, [
+      'Bash(rm -rf:*)',
+      'Read(.env)',
+      'Read(*.sql)',
+      'Edit(*.sql)',
+    ]).settings
+    // New release ships a different deny set (no .env/.sql).
+    const { settings } = mergeDenyRules(old, ['Bash(sudo:*)', 'Read(*.pem)'])
+    assert.ok(!settings.permissions.deny.includes('Read(.env)'), 'stale Read(.env) pruned')
+    assert.ok(!settings.permissions.deny.includes('Read(*.sql)'), 'stale Read(*.sql) pruned')
+    assert.ok(!settings.permissions.deny.includes('Edit(*.sql)'), 'stale Edit(*.sql) pruned')
+    assert.ok(!settings.permissions.deny.includes('Bash(rm -rf:*)'), 'stale Bash(rm -rf:*) pruned')
+    assert.deepEqual(settings.permissions.deny, ['Bash(sudo:*)', 'Read(*.pem)'])
+    assert.deepEqual(settings._haus.denyRules, ['Bash(sudo:*)', 'Read(*.pem)'])
+  })
+
+  it('prunes stale haus rules but keeps user-authored rules on re-merge', () => {
+    const old = mergeDenyRules({ permissions: { deny: ['Bash(my-own:*)'] } }, [
+      'Read(.env)',
+      'Bash(rm -rf:*)',
+    ]).settings
+    const { settings } = mergeDenyRules(old, ['Bash(sudo:*)'])
+    assert.ok(settings.permissions.deny.includes('Bash(my-own:*)'), 'user rule kept')
+    assert.ok(settings.permissions.deny.includes('Bash(sudo:*)'), 'new haus rule added')
+    assert.ok(!settings.permissions.deny.includes('Read(.env)'), 'stale haus rule pruned')
+    assert.ok(!settings.permissions.deny.includes('Bash(rm -rf:*)'), 'stale haus rule pruned')
+  })
+
+  it('dedupes pre-existing duplicate user rules (first occurrence wins)', () => {
+    const existing = { permissions: { deny: ['Bash(dup:*)', 'Bash(dup:*)'] } }
+    const { settings } = mergeDenyRules(existing, ['Bash(sudo:*)'])
+    assert.equal(
+      settings.permissions.deny.filter((r) => r === 'Bash(dup:*)').length,
+      1,
+      'duplicate user rule collapsed to one',
+    )
+    assert.deepEqual(settings.permissions.deny, ['Bash(dup:*)', 'Bash(sudo:*)'])
+  })
+
+  it('is idempotent across re-merges with the same build list', () => {
+    const once = mergeDenyRules({ permissions: { deny: ['Bash(user:*)'] } }, buildDenyRules())
+      .settings
+    const twice = mergeDenyRules(once, buildDenyRules()).settings
+    assert.deepEqual(twice.permissions.deny, once.permissions.deny)
+    assert.deepEqual(twice._haus.denyRules, once._haus.denyRules)
+  })
 })
 
 describe('settings-merge: stripHausDeny', () => {

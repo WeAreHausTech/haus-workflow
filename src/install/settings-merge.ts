@@ -136,77 +136,110 @@ export function mergeHooks(
 }
 
 /**
- * Adds `permissions.deny` rule strings to the settings object, skipping any
- * already present (whether user-defined or haus-installed). Tracks only the
- * newly-added rules under `_haus.denyRules` so they can be cleanly stripped on
- * uninstall without touching the user's own deny rules. Idempotent.
+ * Reconciles the haus-managed slice of a permission array to exactly `newRules`,
+ * leaving user-authored rules untouched. Callers always pass the COMPLETE current
+ * haus set for the tier (e.g. `buildDenyRules()`), so this both ADDS new haus rules
+ * and REMOVES haus rules dropped from / moved out of the build list on update —
+ * fixing the additive-only bug where stale rules lingered forever.
+ *
+ * - `userRules = existing \ prevTracked` — never touched (preserves user rules).
+ * - `tracked = newRules \ userRules` — haus claims only rules the user didn't already have,
+ *   so uninstall never strips a user's own identical rule.
+ * - final array = userRules ++ tracked (user order preserved, then build order).
+ *
+ * Idempotent: same `newRules` twice yields the same array and tracking.
+ */
+function reconcileManagedRules(
+  existing: string[],
+  prevTracked: string[],
+  newRules: string[],
+): { rules: string[]; tracked: string[]; added: string[]; removed: string[] } {
+  const prevTrackedSet = new Set(prevTracked)
+  // User rules = existing entries haus never tracked, deduped (first occurrence wins)
+  // so accidental duplicates in the source array don't survive reconcile.
+  const userRules: string[] = []
+  const userSet = new Set<string>()
+  for (const rule of existing) {
+    if (prevTrackedSet.has(rule) || userSet.has(rule)) continue
+    userSet.add(rule)
+    userRules.push(rule)
+  }
+
+  // Dedupe newRules while excluding any that the user already owns.
+  const tracked: string[] = []
+  const trackedSet = new Set<string>()
+  for (const rule of newRules) {
+    if (userSet.has(rule) || trackedSet.has(rule)) continue
+    trackedSet.add(rule)
+    tracked.push(rule)
+  }
+
+  const existingSet = new Set(existing)
+  const added = tracked.filter((rule) => !existingSet.has(rule))
+  const newSet = new Set([...userSet, ...trackedSet])
+  const removed = existing.filter((rule) => !newSet.has(rule))
+
+  return { rules: [...userRules, ...tracked], tracked, added, removed }
+}
+
+/**
+ * Reconciles haus-managed `permissions.deny` rules to exactly `rules` (the full
+ * current haus deny set), preserving user-defined deny rules. Adds new haus rules,
+ * removes haus rules no longer shipped, and tracks the result under `_haus.denyRules`
+ * for clean uninstall. Idempotent.
  */
 export function mergeDenyRules(
   settings: ClaudeSettings,
   rules: string[],
 ): { settings: ClaudeSettings; addedRules: string[] } {
   const existingDeny = settings.permissions?.deny ?? []
-  const seen = new Set(existingDeny)
   const trackedDeny = settings._haus?.denyRules ?? []
-
-  const addedRules: string[] = []
-  for (const rule of rules) {
-    if (seen.has(rule)) continue
-    seen.add(rule)
-    addedRules.push(rule)
-  }
+  const { rules: deny, tracked, added } = reconcileManagedRules(existingDeny, trackedDeny, rules)
 
   const updated: ClaudeSettings = { ...settings }
   updated.permissions = {
     ...(settings.permissions ?? {}),
-    deny: [...existingDeny, ...addedRules],
+    deny,
   }
   updated._haus = {
     hooks: settings._haus?.hooks ?? [],
     ...(settings._haus?.hookCommands ? { hookCommands: settings._haus.hookCommands } : {}),
-    denyRules: [...trackedDeny, ...addedRules],
+    denyRules: tracked,
     ...(settings._haus?.allowRules ? { allowRules: settings._haus.allowRules } : {}),
     ...(settings._haus?.askRules ? { askRules: settings._haus.askRules } : {}),
   }
 
-  return { settings: updated, addedRules }
+  return { settings: updated, addedRules: added }
 }
 
 /**
- * Adds `permissions.allow` rule strings to the settings object, skipping any
- * already present (whether user-defined or haus-installed). Tracks only the
- * newly-added rules under `_haus.allowRules` so they can be cleanly stripped on
- * uninstall without touching the user's own allow rules. Idempotent.
+ * Reconciles haus-managed `permissions.allow` rules to exactly `rules` (the full
+ * current haus allow set), preserving user-defined allow rules. Adds new haus rules,
+ * removes haus rules no longer shipped, and tracks the result under `_haus.allowRules`
+ * for clean uninstall. Idempotent.
  */
 export function mergeAllowRules(
   settings: ClaudeSettings,
   rules: string[],
 ): { settings: ClaudeSettings; addedRules: string[] } {
   const existingAllow = settings.permissions?.allow ?? []
-  const seen = new Set(existingAllow)
   const trackedAllow = settings._haus?.allowRules ?? []
-
-  const addedRules: string[] = []
-  for (const rule of rules) {
-    if (seen.has(rule)) continue
-    seen.add(rule)
-    addedRules.push(rule)
-  }
+  const { rules: allow, tracked, added } = reconcileManagedRules(existingAllow, trackedAllow, rules)
 
   const updated: ClaudeSettings = { ...settings }
   updated.permissions = {
     ...(settings.permissions ?? {}),
-    allow: [...existingAllow, ...addedRules],
+    allow,
   }
   updated._haus = {
     hooks: settings._haus?.hooks ?? [],
     ...(settings._haus?.hookCommands ? { hookCommands: settings._haus.hookCommands } : {}),
     ...(settings._haus?.denyRules ? { denyRules: settings._haus.denyRules } : {}),
-    allowRules: [...trackedAllow, ...addedRules],
+    allowRules: tracked,
     ...(settings._haus?.askRules ? { askRules: settings._haus.askRules } : {}),
   }
 
-  return { settings: updated, addedRules }
+  return { settings: updated, addedRules: added }
 }
 
 /**
@@ -305,40 +338,33 @@ export function stripHausHooks(settings: ClaudeSettings): ClaudeSettings {
 }
 
 /**
- * Adds `permissions.ask` rule strings to the settings object, skipping any
- * already present. Tracks only the newly-added rules under `_haus.askRules` so
- * they can be cleanly stripped on uninstall without touching user-defined ask rules.
- * Idempotent.
+ * Reconciles haus-managed `permissions.ask` rules to exactly `rules` (the full
+ * current haus ask set), preserving user-defined ask rules. Adds new haus rules,
+ * removes haus rules no longer shipped, and tracks the result under `_haus.askRules`
+ * for clean uninstall. Idempotent.
  */
 export function mergeAskRules(
   settings: ClaudeSettings,
   rules: string[],
 ): { settings: ClaudeSettings; addedRules: string[] } {
   const existingAsk = settings.permissions?.ask ?? []
-  const seen = new Set(existingAsk)
   const trackedAsk = settings._haus?.askRules ?? []
-
-  const addedRules: string[] = []
-  for (const rule of rules) {
-    if (seen.has(rule)) continue
-    seen.add(rule)
-    addedRules.push(rule)
-  }
+  const { rules: ask, tracked, added } = reconcileManagedRules(existingAsk, trackedAsk, rules)
 
   const updated: ClaudeSettings = { ...settings }
   updated.permissions = {
     ...(settings.permissions ?? {}),
-    ask: [...existingAsk, ...addedRules],
+    ask,
   }
   updated._haus = {
     hooks: settings._haus?.hooks ?? [],
     ...(settings._haus?.hookCommands ? { hookCommands: settings._haus.hookCommands } : {}),
     ...(settings._haus?.denyRules ? { denyRules: settings._haus.denyRules } : {}),
     ...(settings._haus?.allowRules ? { allowRules: settings._haus.allowRules } : {}),
-    askRules: [...trackedAsk, ...addedRules],
+    askRules: tracked,
   }
 
-  return { settings: updated, addedRules }
+  return { settings: updated, addedRules: added }
 }
 
 /**

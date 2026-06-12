@@ -88,6 +88,24 @@ describe('settings-merge: mergeAskRules', () => {
     assert.deepEqual(settings.permissions.deny, ['Bash(sudo:*)'])
     assert.deepEqual(settings.permissions.allow, ['Bash(haus doctor:*)'])
   })
+
+  // Regression: reconcile must prune haus ask rules dropped from the new build list,
+  // while keeping user-authored ask rules.
+  it('removes stale haus ask rules on re-merge, keeps user ask rules', () => {
+    const old = mergeAskRules({ permissions: { ask: ['Bash(user-ask:*)'] } }, [
+      'Bash(rm -rf:*)',
+      'Edit(old-pattern/**)',
+    ]).settings
+    const { settings } = mergeAskRules(old, ['Bash(rm -rf:*)', 'Edit(.env)'])
+    assert.ok(settings.permissions.ask.includes('Bash(user-ask:*)'), 'user ask rule kept')
+    assert.ok(settings.permissions.ask.includes('Edit(.env)'), 'new haus ask rule added')
+    assert.ok(settings.permissions.ask.includes('Bash(rm -rf:*)'), 'still-shipped haus rule kept')
+    assert.ok(
+      !settings.permissions.ask.includes('Edit(old-pattern/**)'),
+      'stale haus ask rule pruned',
+    )
+    assert.ok(!settings._haus.askRules.includes('Edit(old-pattern/**)'))
+  })
 })
 
 describe('settings-merge: stripHausAsk', () => {
