@@ -158,11 +158,11 @@ export type Recommendation = {
     reasons: Array<{ code: string; message: string; signal?: string }>
     selectionMode: 'baseline' | 'matched'
     install: boolean
-    /** Catalog tags echoed for downstream task-intent routing. Additive optional field. */
+    /** Catalog tags echoed from the manifest entry. Additive optional field. */
     tags?: string[]
-    /** Catalog ecosystem family echoed for downstream task-intent routing. Additive optional field. */
+    /** Catalog ecosystem family echoed from the manifest entry. Additive optional field. */
     ecosystem?: string
-    /** Catalog token estimate echoed for token-budget enforcement in the router. Additive optional field. */
+    /** Catalog token estimate echoed from the manifest entry. Additive optional field. */
     tokenEstimate?: number
   }>
   skipped: Array<{

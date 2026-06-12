@@ -4,32 +4,8 @@ Known deferred implementation decisions — kept here so they are not forgotten.
 
 ---
 
-## Ecosystem-based testing fallback in `computeRuleIntents`
+## Ecosystem-based testing fallback in task-intent routing
 
-**File:** `src/recommender/task-intent.ts` — `computeRuleIntents`
+**Status:** Closed — moot after removal of `haus context` and the task-intent router (PR #106).
 
-**Status:** Deferred — low impact, no current behaviour change needed.
-
-### Context
-
-Skills with testing-related tags (`storybook`, `testing-library`, `playwright`, `phpunit`, `testing`) are caught by the `isTestingRule` tag check before the ecosystem→intent map is evaluated. This means `ecosystem: "testing"` on `testing-library-patterns` (and `ecosystem: "storybook"` on `storybook-patterns`) is cosmetic — it is never reached in `computeRuleIntents`.
-
-Verified 2026-06-01: the `eco === 'testing'` path still does not exist in the ecosystem map.
-
-### When to implement
-
-If a new testing skill is added that does **not** have a recognised testing tag (e.g. a custom test runner with an unfamiliar tag name). At that point the ecosystem field is the only signal left.
-
-### Change required
-
-In `src/recommender/task-intent.ts`, inside `computeRuleIntents`, add after the `isTestingRule` early-return block (currently around line 299):
-
-```ts
-// Ecosystem-based fallback for testing rules not covered by known tags.
-if (eco === 'testing' || eco === 'playwright' || eco === 'storybook') {
-  intents.add('testing')
-  return intents
-}
-```
-
-Also update the `isTestingRule` tag list to include the new tag so future skills don't rely solely on the ecosystem field.
+The `computeRuleIntents` / ecosystem→intent map lived in the deleted `task-intent` cluster. If task-scoped context selection returns via a catalog skill or agent, revisit there — not in the CLI hook path.

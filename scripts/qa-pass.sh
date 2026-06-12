@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
-# Helper: run scan + recommend + explain-context + context --task across a fixture.
-# Usage: scripts/qa-pass.sh <fixture-name> "<task>"
+# Helper: run scan + recommend across a fixture.
+# Usage: scripts/qa-pass.sh <fixture-name>
 set -euo pipefail
 
 FIXTURE="${1:?fixture name required}"
-TASK="${2:-}"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 CLI="$ROOT/dist/cli.js"
 FIXTURE_DIR="$ROOT/tests/fixtures/repos/$FIXTURE"
@@ -26,11 +25,6 @@ node -e "const c=JSON.parse(require('fs').readFileSync('.haus-workflow/context-m
 
 echo "=== $FIXTURE: recommend ==="
 node -e "const r=JSON.parse(require('fs').readFileSync('.haus-workflow/recommendation.json','utf8'));console.log(JSON.stringify({selected:r.recommended.map(x=>({id:x.id,mode:x.selectionMode,reasons:x.reasons.map(y=>y.code)})),skipped:r.skipped.map(x=>x.id)},null,2))"
-
-if [[ -n "$TASK" ]]; then
-  echo "=== $FIXTURE: context --task \"$TASK\" ==="
-  node "$CLI" context --task "$TASK" --json
-fi
 
 popd >/dev/null
 rm -rf "$TMP"

@@ -59,3 +59,43 @@ test('records hookCommands when hook entry already exists but tracking was empty
   const { settings: merged } = mergeHooks(settings, [GUARD_FRAGMENT])
   assert.deepEqual(merged._haus?.hookCommands, ['haus guard file-access --from-hook'])
 })
+
+const PROJECT_GUARD_FRAGMENTS = [
+  GUARD_FRAGMENT,
+  {
+    id: 'haus.guard-bash',
+    gate: 'keep',
+    event: 'PreToolUse',
+    matcher: 'Bash',
+    command: 'haus guard bash --from-hook',
+  },
+]
+
+test('prunes retired haus context hook entries and tracking on merge', () => {
+  const settings = {
+    _haus: {
+      hooks: ['haus.context-hook', 'haus.guard-file'],
+      hookCommands: ['haus context --from-hook', 'haus guard file-access --from-hook'],
+    },
+    hooks: {
+      UserPromptSubmit: [
+        { hooks: [{ type: 'command', command: 'haus context --from-hook' }] },
+      ],
+      PreToolUse: [
+        {
+          matcher: 'Read|Edit|Write',
+          hooks: [{ type: 'command', command: 'haus guard file-access --from-hook' }],
+        },
+      ],
+    },
+  }
+  const { settings: merged } = mergeHooks(settings, PROJECT_GUARD_FRAGMENTS)
+  assert.equal(merged.hooks.UserPromptSubmit, undefined)
+  assert.equal(
+    merged._haus?.hookCommands?.includes('haus context --from-hook'),
+    false,
+  )
+  assert.equal(merged._haus?.hooks?.includes('haus.context-hook'), false)
+  assert.ok(merged.hooks.PreToolUse.some((e) => e.matcher === 'Read|Edit|Write'))
+  assert.ok(merged.hooks.PreToolUse.some((e) => e.matcher === 'Bash'))
+})

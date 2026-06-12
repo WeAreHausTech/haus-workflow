@@ -102,6 +102,51 @@ test('apply writes guards-only hook contract and doctor --hooks passes', () => {
   assert.match(doctor.stdout, /hook contract/i)
 })
 
+test('apply upgrades legacy settings by pruning the retired context UserPromptSubmit hook', () => {
+  const temp = mkdtempSync(path.join(os.tmpdir(), 'haus-apply-upgrade-context-hook-'))
+  mkdirSync(path.join(temp, '.claude'), { recursive: true })
+  writeFileSync(
+    path.join(temp, 'package.json'),
+    JSON.stringify(
+      { name: 'apply-upgrade', packageManager: 'yarn@4.5.3', dependencies: { react: '19.0.0' } },
+      null,
+      2,
+    ),
+  )
+  writeFileSync(path.join(temp, 'yarn.lock'), '# lock')
+  writeFileSync(
+    path.join(temp, '.claude/settings.json'),
+    JSON.stringify(
+      {
+        _haus: {
+          hooks: ['haus.context-hook'],
+          hookCommands: ['haus context --from-hook'],
+        },
+        hooks: {
+          UserPromptSubmit: [
+            { hooks: [{ type: 'command', command: 'haus context --from-hook' }] },
+          ],
+        },
+      },
+      null,
+      2,
+    ) + '\n',
+  )
+
+  const env = {
+    ...process.env,
+    HAUS_FIXTURE_CATALOG: path.resolve('tests/fixtures/catalog/manifest.json'),
+  }
+  execaSync('node', [path.resolve('dist/cli.js'), 'scan', '--json'], { cwd: temp, env })
+  execaSync('node', [path.resolve('dist/cli.js'), 'recommend', '--json'], { cwd: temp, env })
+  execaSync('node', [path.resolve('dist/cli.js'), 'apply', '--write'], { cwd: temp, env })
+
+  const settings = JSON.parse(readFileSync(path.join(temp, '.claude/settings.json'), 'utf8'))
+  assert.equal(settings.hooks.UserPromptSubmit, undefined)
+  assert.equal(settings.hooks.PreToolUse.length, 2)
+  assert.equal(settings._haus?.hookCommands?.includes('haus context --from-hook'), false)
+})
+
 test('apply merges haus hooks into existing settings without clobbering user hooks', () => {
   const temp = mkdtempSync(path.join(os.tmpdir(), 'haus-apply-merge-settings-'))
   mkdirSync(path.join(temp, '.claude'), { recursive: true })
