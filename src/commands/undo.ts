@@ -55,7 +55,11 @@ async function stripProjectSettings(root: string): Promise<boolean> {
   if (!(await fs.pathExists(settingsPath))) return false
 
   let settings = await readProjectSettings(root)
-  settings = stripHausAsk(stripHausAllow(stripHausDeny(stripHausHooks(settings))))
+  // Strip deny + allow + ask rules first (each keeps _haus while other tracking remains),
+  // then hooks last (deletes the _haus namespace). stripHausHooks must run last: it removes
+  // _haus wholesale, so any rule-strip after it would see no ledger and silently no-op,
+  // orphaning haus rules in the user's settings.json. Mirrors uninstall.ts.
+  settings = stripHausHooks(stripHausAsk(stripHausAllow(stripHausDeny(settings))))
   const hasContent = Object.keys(settings).length > 0
   if (hasContent) {
     await writeProjectSettings(root, settings)
