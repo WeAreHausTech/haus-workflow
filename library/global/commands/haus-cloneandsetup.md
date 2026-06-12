@@ -25,7 +25,7 @@ This is the phase that takes the workspace from "installed" to "ready to run." I
 
 Specify the least. Infer the rest from the repo's stack + these conventions, and work out the concrete commands at run time:
 
-- **PHP / WordPress sites are served by the developer's own PHP environment — prefer [Laravel Herd](https://herd.laravel.com)** (docroot → the repo's `web/`, `herd secure` for HTTPS). **Do not install or script the PHP env**; just satisfy its env contract and report the URL. DDEV / Valet are fine if the dev already uses them.
+- **PHP / WordPress sites are served by the developer's own PHP environment.** If they already have one — detect `valet`, `herd`, `ddev`, or `php` on PATH — **use it**: just satisfy the env contract (docroot → the repo's `web/`, HTTPS) and report the URL; never override what they already run. **Only when no local PHP environment exists** (a completely fresh machine) suggest installing **[Laravel Herd](https://herd.laravel.com)** as the default and point its docroot at `web/` + `herd secure`.
 - **Databases and other services (a repo's `needs:`) run in Docker.** Provision them the simplest way (a one-off `docker run`, or the repo's own compose if it ships one), then wire the matching env vars to point at them. Confirm before creating/overwriting data.
 - **Dependencies** install from the lockfile (Step 3).
 - A repo's `localdev.yml` carries **only what can't be inferred** — its `needs`, repo-specific `build`/`seed` commands, env keys, and URL. Detect the stack (e.g. Bedrock = `composer.json` + `web/` docroot + `wp-cli.yml`; Vendure/Node = `docker-compose.yml` + `@vendure/*`) and apply the matching convention.
