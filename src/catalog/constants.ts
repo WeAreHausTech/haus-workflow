@@ -7,6 +7,13 @@
 export const CATALOG_REPO_URL =
   'https://raw.githubusercontent.com/wearehaustech/haus-workflow-catalog'
 
+/** GitHub REST API root for the catalog repository (recursive tree listing). */
+export const CATALOG_GITHUB_API_URL =
+  'https://api.github.com/repos/WeAreHausTech/haus-workflow-catalog'
+
+/** Relative catalog path cached for superpowers cross-skill support files. */
+export const SUPERPOWERS_SHARED_CATALOG_REL = 'skills/superpowers/shared'
+
 /**
  * Git ref override for catalog fetch. When unset, the CLI resolves the latest
  * catalog release tag at runtime (see `resolveCatalogRef` in remote-catalog.ts).
