@@ -14,12 +14,6 @@
       "event": "PreToolUse",
       "matcher": "Bash",
       "command": "haus guard bash --from-hook"
-    },
-    {
-      "id": "hook.context",
-      "gate": "gate-default-off",
-      "event": "UserPromptSubmit",
-      "command": "haus context --from-hook"
     }
   ]
 }

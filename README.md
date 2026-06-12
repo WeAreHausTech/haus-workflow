@@ -62,12 +62,10 @@ haus apply --dry-run   # preview what would be written
 haus apply --write     # write .claude/ files (skills, agents, commands, templates)
 haus apply --select    # interactively choose which recommended items to install
 haus apply --refill-config    # fill still-blank workflow-config.md fields, keep edits
-haus context --task "<task>"  # select context rules for a task (token-budgeted)
 haus update                   # check npm for new CLI + sync catalog + refresh ~/.claude/ and this project
 haus update --check           # check for updates without applying
 haus undo                     # remove haus-managed project files (lock-tracked paths)
 haus doctor                   # health check: hooks, CLAUDE.md, imports, catalog cache
-haus config                   # manage hook configuration
 haus guard                    # security guard hook (bash + file-access); invoked by PreToolUse
 haus workspace                # multi-repo ops: discover, scan, setup, doctor across a workspace
 haus uninstall                # remove Haus-managed files from ~/.claude/

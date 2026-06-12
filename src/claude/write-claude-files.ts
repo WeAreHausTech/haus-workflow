@@ -15,7 +15,6 @@ import { pruneEmptyDir, readJson } from '../utils/fs.js'
 import { log, warn } from '../utils/logger.js'
 import { claudePath, displayPath, hausPath, packageRoot } from '../utils/paths.js'
 
-import { DEFAULT_HOOKS_CONFIG } from './load-hooks-config.js'
 import { writeManagedJson, writeManagedText } from './managed-write.js'
 import { applyProjectSettingsMerge, mergeProjectSettings } from './merge-project-settings.js'
 import {
@@ -87,13 +86,6 @@ export async function writeClaudeFiles(
     await applyProjectSettingsMerge(root)
     await assertPostApplySettingsHausContract(root)
   }
-  // Emit `.haus-workflow/config.json` with the P2 hook gating defaults (both off).
-  // Only created when missing — existing config is left untouched so users'
-  // opt-ins survive subsequent `apply --write` runs.
-  const configPath = hausPath(root, 'config.json')
-  if (!(await fs.pathExists(configPath))) {
-    await writeManagedJson(root, configPath, DEFAULT_HOOKS_CONFIG, dryRun)
-  }
   await writeManagedText(
     root,
     claudePath(root, 'commands', 'haus-doctor.md'),
@@ -164,6 +156,7 @@ export async function writeClaudeFiles(
   // unconditionally from projects that installed them earlier — otherwise an upgrade via
   // `haus apply` would leave them lingering and the output set would not actually shrink.
   const LEGACY_PRUNED_ARTIFACTS = [
+    'config.json',
     'selected-context.json',
     'dependency-map.json',
     'scan-hashes.json',

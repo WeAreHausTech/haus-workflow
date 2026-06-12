@@ -19,12 +19,6 @@ import { claudePath } from '../utils/paths.js'
 /** Hook fragments derived from the inlined canonical project hook set. */
 const PROJECT_HOOK_FRAGMENTS: HookFragment[] = [
   {
-    id: 'haus.context-hook',
-    gate: 'keep',
-    event: 'UserPromptSubmit',
-    command: 'haus context --from-hook',
-  },
-  {
     id: 'haus.guard-file',
     gate: 'keep',
     event: 'PreToolUse',

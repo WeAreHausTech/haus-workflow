@@ -7,7 +7,6 @@ import { mkdtempSync, mkdirSync, writeFileSync } from 'node:fs'
 import { execaSync } from 'execa'
 
 const cli = () => path.resolve('dist/cli.js')
-const cred = (key, val, sep = '=') => `${key}${sep}${val}`
 const fixtureEnv = (extra = {}) => ({
   ...process.env,
   HAUS_FIXTURE_CATALOG: path.resolve('tests/fixtures/catalog/manifest.json'),
@@ -36,71 +35,6 @@ test('validate-catalog CLI validates bundled fixture manifest', () => {
 test('validate-catalog CLI fails on missing manifest', () => {
   const r = execaSync('node', [cli(), 'validate-catalog'], { reject: false })
   assert.equal(r.exitCode, 1)
-})
-
-test('context CLI emits JSON after scan and recommend', () => {
-  const temp = mkdtempSync(path.join(os.tmpdir(), 'haus-context-cli-'))
-  seedProject(temp)
-  const env = fixtureEnv()
-  execaSync('node', [cli(), 'scan', '--json'], { cwd: temp, env })
-  execaSync('node', [cli(), 'recommend', '--json'], { cwd: temp, env })
-  const r = execaSync('node', [cli(), 'context', '--json', '--task', 'fix lint errors'], {
-    cwd: temp,
-    env,
-    reject: false,
-  })
-  assert.equal(r.exitCode, 0)
-  const parsed = JSON.parse(r.stdout)
-  assert.ok(Array.isArray(parsed.selectedRules))
-})
-
-test('context CLI redacts secrets in hook-style output', () => {
-  const temp = mkdtempSync(path.join(os.tmpdir(), 'haus-context-redact-'))
-  seedProject(temp)
-  mkdirSync(path.join(temp, '.haus-workflow'), { recursive: true })
-  writeFileSync(
-    path.join(temp, '.haus-workflow/recommendation.json'),
-    JSON.stringify(
-      {
-        mode: 'fast',
-        recommended: [],
-        skipped: [],
-        warnings: [],
-        estimatedContextTokens: 0,
-      },
-      null,
-      2,
-    ),
-  )
-  writeFileSync(
-    path.join(temp, '.haus-workflow/context-map.json'),
-    JSON.stringify(
-      {
-        mode: 'fast',
-        generatedAt: new Date().toISOString(),
-        root: temp,
-        // Secret embedded in a rendered field: `haus context` renders the repo summary
-        // on demand from context-map.json (repo-summary.md is no longer written), so the
-        // redaction pass must scrub it from that output.
-        repoName: cred('api_key', 'supersecretvalue'),
-        packageManager: 'yarn',
-        repoRoles: [],
-        detectedStacks: {},
-        dependencies: [],
-        securityRisks: [],
-        crossRepoHints: [],
-        warnings: [],
-        detectionStatus: 'supported',
-        unsupportedSignals: [],
-      },
-      null,
-      2,
-    ),
-  )
-  const r = execaSync('node', [cli(), 'context'], { cwd: temp, reject: false })
-  assert.equal(r.exitCode, 0)
-  assert.equal((r.stdout ?? '').includes('supersecretvalue'), false)
-  assert.match(r.stdout ?? '', /\[REDACTED\]/)
 })
 
 test('guard bash CLI denies dangerous command from stdin payload', () => {

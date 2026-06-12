@@ -7,8 +7,6 @@ import { Command } from 'commander'
 import { runApply } from './commands/apply.js'
 import { runCatalogAudit } from './commands/catalog-audit.js'
 import { runClone } from './commands/clone.js'
-import { runConfig } from './commands/config.js'
-import { runContext } from './commands/context.js'
 import { runDoctor } from './commands/doctor.js'
 import { runExplainRecommendation } from './commands/explain-recommendation.js'
 import { runGuard } from './commands/guard.js'
@@ -81,13 +79,6 @@ program
   .action(runApply)
 program.command('undo').option('-y, --yes', 'Skip confirmation').action(runUndo)
 program.command('explain-recommendation').option('--json').action(runExplainRecommendation)
-program
-  .command('context')
-  .option('--task <task>')
-  .option('--from-hook')
-  .option('--json')
-  .option('--verbose')
-  .action(runContext)
 program.command('init').option('--json').action(runInit)
 program
   .command('clone')
@@ -120,20 +111,6 @@ guard
   .command('bash')
   .option('--from-hook')
   .action((opts) => runGuard('bash', opts))
-
-const config = program.command('config')
-config
-  .command('enable <key>')
-  .description('Enable a hook (hook.context)')
-  .action((key: string) => runConfig(key, 'enable'))
-config
-  .command('disable <key>')
-  .description('Disable a hook (hook.context)')
-  .action((key: string) => runConfig(key, 'disable'))
-config
-  .command('status <key>')
-  .description('Show current state of a hook (hook.context)')
-  .action((key: string) => runConfig(key, 'status'))
 
 const workspace = program.command('workspace')
 workspace.command('init').action(() => runWorkspace('init'))

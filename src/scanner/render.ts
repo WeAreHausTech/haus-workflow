@@ -3,10 +3,7 @@
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
-import type { ContextMap } from '../types.js'
 import { mapWithConcurrency } from '../utils/fs.js'
-
-import { describeRepo } from './role-labels.js'
 
 /**
  * Builds a single content blob from the first 300 candidate files (code/config
@@ -39,17 +36,4 @@ export async function buildContentBlob(root: string, files: string[]): Promise<s
     }
   })
   return parts.join('\n')
-}
-
-/** Renders a concise markdown summary of the context map for repo-summary.md. */
-export function renderSummary(context: ContextMap): string {
-  return `# Repo summary
-
-${describeRepo(context)}
-
-- Repo: ${context.repoName}
-- Package manager: ${context.packageManager}
-- Roles: ${context.repoRoles.join(', ') || 'unknown'}
-- Generated: ${context.generatedAt}
-`
 }

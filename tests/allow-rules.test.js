@@ -16,7 +16,6 @@ describe('allow-rules: buildAllowRules', () => {
     assert.ok(rules.includes('Bash(haus apply:*)'))
     assert.ok(rules.includes('Bash(haus doctor:*)'))
     assert.ok(rules.includes('Bash(haus scan:*)'))
-    assert.ok(rules.includes('Bash(haus context:*)'))
     assert.ok(rules.includes('Bash(haus recommend:*)'))
     assert.ok(!rules.includes('Bash(haus:*)'), 'must not be a blanket allow')
   })

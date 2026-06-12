@@ -93,25 +93,13 @@ const KEEP_FRAGMENT = {
   command: 'haus guard bash --from-hook',
 }
 
-const GATED_FRAGMENT = {
-  id: 'hook.context',
-  gate: 'gate-default-off',
-  event: 'UserPromptSubmit',
-  command: 'haus context --from-hook',
-}
-
 describe('settings-merge: mergeHooks', () => {
   it('adds keep hooks to empty settings', () => {
-    const { settings, addedIds } = mergeHooks({}, [KEEP_FRAGMENT, GATED_FRAGMENT])
+    const { settings, addedIds } = mergeHooks({}, [KEEP_FRAGMENT])
     assert.deepEqual(addedIds, ['hook.guard.bash'])
     assert.ok(Array.isArray(settings.hooks?.['PreToolUse']))
     assert.equal(settings.hooks?.['PreToolUse']?.length, 1)
     assert.equal(settings._haus?.hooks?.[0], 'hook.guard.bash')
-  })
-
-  it('skips gate-default-off hooks', () => {
-    const { settings } = mergeHooks({}, [GATED_FRAGMENT])
-    assert.equal((settings.hooks?.['UserPromptSubmit'] ?? []).length, 0)
   })
 
   it('re-adds hooks tracked in _haus when the real hook entry was deleted', () => {

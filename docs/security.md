@@ -64,8 +64,7 @@ preserved when editing the command/path lists.
 ## Sensitive data handling
 
 - Scanner excludes sensitive paths from scan set
-- Hook-time redactor (`src/security/redact-sensitive.ts`) strips secrets from `haus context` output (including hook mode) before it reaches Claude Code
-- Generated security rule file (`.claude/rules/security.md`) reinforces policy
+- Security policy lines in `.claude/rules/haus.md` reinforce policy (standalone `security.md` is legacy)
 
 ---
 
