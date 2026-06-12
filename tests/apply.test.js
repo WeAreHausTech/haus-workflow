@@ -51,7 +51,7 @@ test('apply writes claude files and rules', () => {
   assert.equal(pre[1].hooks[0].command, 'haus guard bash --from-hook')
   // Deterministic deny rules are written into project settings.json (WS1).
   assert.equal(Array.isArray(settings.permissions?.deny), true)
-  assert.equal(settings.permissions.deny.includes('Bash(rm -rf:*)'), true)
+  assert.equal(settings.permissions.deny.includes('Bash(sudo:*)'), true)
   assert.equal(rulesHaus.includes('Keep context minimal'), true)
   // WS6: managed rule carries the natural-language "Driving haus" trigger.
   assert.equal(rulesHaus.includes('Driving haus'), true)
@@ -118,7 +118,7 @@ test('apply merges haus hooks into existing settings without clobbering user hoo
     true,
   )
   assert.equal(settings.permissions.ask.includes('Bash(custom:*)'), true)
-  assert.equal(settings.permissions.deny.includes('Bash(rm -rf:*)'), true)
+  assert.equal(settings.permissions.deny.includes('Bash(sudo:*)'), true)
 })
 
 test('apply --write fails hard when catalog cache is empty', () => {

@@ -114,6 +114,7 @@ describe('install/uninstall round-trip (stubbed HOME)', () => {
     assert.deepEqual(second._haus.hooks, first._haus.hooks, 'tracked hook ids not duplicated')
     assert.deepEqual(second.permissions.deny, first.permissions.deny, 'deny rules unchanged')
     assert.deepEqual(second.permissions.allow, first.permissions.allow, 'allow rules unchanged')
+    assert.deepEqual(second.permissions.ask, first.permissions.ask, 'ask rules unchanged')
   })
 
   it('restores settings.json exactly after install → uninstall', async () => {

@@ -18,7 +18,7 @@ function guard(kind, payload) {
 
 describe('guard hook contract: bash', () => {
   it('denies a dangerous command with deny JSON + exit 1', () => {
-    const { stdout, exitCode } = guard('bash', { tool_input: { command: 'rm -rf /' } })
+    const { stdout, exitCode } = guard('bash', { tool_input: { command: 'sudo rm /' } })
     assert.equal(exitCode, 1)
     const decision = JSON.parse(stdout)
     assert.equal(decision.permissionDecision, 'deny')
@@ -39,8 +39,8 @@ describe('guard hook contract: bash', () => {
 })
 
 describe('guard hook contract: file-access', () => {
-  it('denies reading a .env file (file_path key) with deny + exit 1', () => {
-    const { stdout, exitCode } = guard('file-access', { tool_input: { file_path: '.env' } })
+  it('denies a deny-tier path (file_path key) with deny + exit 1', () => {
+    const { stdout, exitCode } = guard('file-access', { tool_input: { file_path: 'secrets/token.txt' } })
     assert.equal(exitCode, 1)
     assert.equal(JSON.parse(stdout).permissionDecision, 'deny')
   })

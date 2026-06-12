@@ -106,7 +106,7 @@ test('context CLI redacts secrets in hook-style output', () => {
 })
 
 test('guard bash CLI denies dangerous command from stdin payload', () => {
-  const payload = JSON.stringify({ tool_input: { command: 'rm -rf /tmp/x' } })
+  const payload = JSON.stringify({ tool_input: { command: 'sudo rm /tmp/x' } })
   const r = execaSync('node', [cli(), 'guard', 'bash', '--from-hook'], {
     input: payload,
     reject: false,

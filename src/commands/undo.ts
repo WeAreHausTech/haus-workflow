@@ -6,7 +6,12 @@ import fs from 'fs-extra'
 import { coreManagedAbsolutePaths } from '../claude/managed-paths.js'
 import { readProjectSettings, writeProjectSettings } from '../claude/merge-project-settings.js'
 import { BLOCK_BEGIN, stripHausBlock } from '../claude/write-root-claude-md.js'
-import { stripHausAllow, stripHausDeny, stripHausHooks } from '../install/settings-merge.js'
+import {
+  stripHausAllow,
+  stripHausAsk,
+  stripHausDeny,
+  stripHausHooks,
+} from '../install/settings-merge.js'
 import { readJson } from '../utils/fs.js'
 import { log } from '../utils/logger.js'
 import { claudePath, hausPath } from '../utils/paths.js'
@@ -50,7 +55,7 @@ async function stripProjectSettings(root: string): Promise<boolean> {
   if (!(await fs.pathExists(settingsPath))) return false
 
   let settings = await readProjectSettings(root)
-  settings = stripHausAllow(stripHausDeny(stripHausHooks(settings)))
+  settings = stripHausAsk(stripHausAllow(stripHausDeny(stripHausHooks(settings))))
   const hasContent = Object.keys(settings).length > 0
   if (hasContent) {
     await writeProjectSettings(root, settings)

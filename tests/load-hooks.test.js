@@ -25,14 +25,27 @@ describe('loadClaudeHooksSettings', () => {
     }
   })
 
-  it('includes permissions.deny with the NEVER rules (project-level deterministic layer)', async () => {
+  it('includes permissions.deny with hard-deny rules only', async () => {
     const s = await loadClaudeHooksSettings()
     assert.ok(Array.isArray(s.permissions?.deny), 'permissions.deny should be present')
-    assert.ok(s.permissions.deny.includes('Bash(rm -rf:*)'))
     assert.ok(s.permissions.deny.includes('Bash(git push --force:*)'))
+    assert.ok(s.permissions.deny.includes('Bash(sudo:*)'))
+    // ask-tier commands must NOT be in deny
+    assert.ok(!s.permissions.deny.includes('Bash(rm -rf:*)'), 'rm -rf must not be in deny')
+    // .env is ask-tier, not deny-tier
     assert.ok(
-      s.permissions.deny.some((r) => r.startsWith('Write(') && r.includes('.env')),
-      'expected a Write deny for .env',
+      !s.permissions.deny.some((r) => r.includes('.env')),
+      '.env rules must not be in deny',
+    )
+  })
+
+  it('includes permissions.ask with ask-tier rules', async () => {
+    const s = await loadClaudeHooksSettings()
+    assert.ok(Array.isArray(s.permissions?.ask), 'permissions.ask should be present')
+    assert.ok(s.permissions.ask.includes('Bash(rm -rf:*)'), 'rm -rf should be in ask')
+    assert.ok(
+      s.permissions.ask.some((r) => r.startsWith('Write(') && r.includes('.env')),
+      'expected a Write ask for .env',
     )
   })
 })

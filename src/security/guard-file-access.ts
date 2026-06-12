@@ -1,17 +1,19 @@
-/** Guard that blocks file-path access matching known sensitive path patterns. */
+/** Guard that hard-blocks file-path access matching deny-tier path patterns. */
 
-import { SENSITIVE_PATHS } from './sensitive-paths.js'
+import { DENY_PATHS } from './sensitive-paths.js'
 
 /**
- * Returns a block message if `candidate` matches a sensitive path pattern, otherwise `undefined`.
+ * Returns a block message if `candidate` matches a deny-tier path pattern, otherwise `undefined`.
+ * ASK_PATHS are not blocked here — they go through `permissions.ask` instead.
  * @param candidate - File path string to evaluate.
  */
 export function guardFileAccess(candidate: string): string | undefined {
   // Strip glob wildcards before substring matching — patterns like "*.pem" become ".pem"
-  const matched = SENSITIVE_PATHS.find((token) => candidate.includes(token.replace('*', '')))
+  const matched = DENY_PATHS.find((token) => candidate.includes(token.replace(/\*/g, '')))
   // Plain-language reason (non-devs hit these) that still names the blocked path.
   // No backticks: emitted as a JSON permissionDecisionReason the UI may render as
   // Markdown, so backticks in the path itself could break formatting.
-  if (matched) return `I didn't open ${candidate} — it looks like it holds secrets or sensitive data`
+  if (matched)
+    return `I didn't open ${candidate} — it looks like it holds secrets or sensitive data`
   return undefined
 }

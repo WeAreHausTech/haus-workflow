@@ -251,7 +251,7 @@ describe('applyInstall dry-run (real invocation, stubbed HOME)', () => {
       fs.readFileSync(path.join(tmpDir, '.claude', 'settings.json'), 'utf8'),
     )
     assert.ok(Array.isArray(settings.permissions?.deny), 'permissions.deny should be written')
-    assert.ok(settings.permissions.deny.includes('Bash(rm -rf:*)'))
+    assert.ok(settings.permissions.deny.includes('Bash(sudo:*)'))
     assert.ok(settings.permissions.deny.includes('Bash(git push --force:*)'))
     assert.ok(
       settings.permissions.deny.some((r) => r.startsWith('Read(') && r.includes('.pem')),

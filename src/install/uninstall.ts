@@ -15,6 +15,7 @@ import { globalClaudeDir, hausManifestPath, readManifest } from './manifest.js'
 import {
   readSettings,
   stripHausAllow,
+  stripHausAsk,
   stripHausDeny,
   stripHausHooks,
   writeSettings,
@@ -78,9 +79,9 @@ export async function runUninstall(options: UninstallOptions = {}): Promise<Unin
   }
 
   const settings = await readSettings()
-  // Strip allow + deny rules first (each keeps _haus if other tracking remains),
+  // Strip allow + deny + ask rules first (each keeps _haus if other tracking remains),
   // then hooks last (deletes the _haus namespace).
-  const stripped = stripHausHooks(stripHausAllow(stripHausDeny(settings)))
+  const stripped = stripHausHooks(stripHausAsk(stripHausAllow(stripHausDeny(settings))))
   await writeSettings(stripped)
   result.hooksStripped = true
 
