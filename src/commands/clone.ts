@@ -24,6 +24,30 @@ export type CloneOptions = {
   dryRun?: boolean
 }
 
+/**
+ * Env vars that pin git to an existing repo's location. They are exported by git
+ * when running hooks (e.g. pre-push) and are present when `haus clone` runs inside
+ * a repo — inherited, they redirect `git clone` into the wrong .git/worktree and
+ * corrupt the result. Scrubbed for the clone subprocess; auth/transport vars
+ * (GIT_SSH_COMMAND, GIT_ASKPASS, …) are deliberately kept so cloning still works.
+ */
+const GIT_LOCATION_VARS = [
+  'GIT_DIR',
+  'GIT_WORK_TREE',
+  'GIT_INDEX_FILE',
+  'GIT_COMMON_DIR',
+  'GIT_OBJECT_DIRECTORY',
+  'GIT_NAMESPACE',
+  'GIT_PREFIX',
+]
+
+/** A copy of process.env with repo-location GIT_* vars removed (see GIT_LOCATION_VARS). */
+function cloneEnv(): NodeJS.ProcessEnv {
+  const env = { ...process.env }
+  for (const key of GIT_LOCATION_VARS) delete env[key]
+  return env
+}
+
 /** Derive a target folder name from a git URL — its last path segment without `.git`. */
 export function repoNameFromUrl(url: string): string {
   const trimmed = url
@@ -59,7 +83,7 @@ export async function runClone(url: string, opts: CloneOptions = {}): Promise<vo
     return
   }
 
-  const res = await runGit(['clone', url, target])
+  const res = await runGit(['clone', url, target], { env: cloneEnv(), extendEnv: false })
   if (res.exitCode !== 0) {
     error(`clone failed for ${url}: ${(res.stderr || res.stdout).trim()}`)
     process.exitCode = 1

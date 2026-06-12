@@ -66,6 +66,32 @@ test('runClone derives the target folder from the URL when no dir is given', asy
   }
 })
 
+// Regression: git exports GIT_DIR/GIT_WORK_TREE when running hooks (e.g. pre-push),
+// and they are present when `haus clone` runs inside a repo. Inherited, they redirect
+// `git clone` into the wrong location. runClone must scrub them for the subprocess.
+test('runClone ignores ambient GIT_DIR / GIT_WORK_TREE and still clones correctly', async () => {
+  const remote = makeRemote({ 'package.json': '{"name":"app"}' })
+  const dest = path.join(mkdtempSync(path.join(os.tmpdir(), 'haus-clone-gitenv-')), 'app')
+  const saved = {
+    GIT_DIR: process.env.GIT_DIR,
+    GIT_WORK_TREE: process.env.GIT_WORK_TREE,
+    GIT_INDEX_FILE: process.env.GIT_INDEX_FILE,
+  }
+  process.env.GIT_DIR = path.join(remote, '.git')
+  process.env.GIT_WORK_TREE = remote
+  process.env.GIT_INDEX_FILE = path.join(remote, '.git', 'index')
+  try {
+    await quiet('log', () => runClone(remote, { dir: dest }))
+    assert.ok(existsSync(path.join(dest, 'package.json')), 'cloned despite ambient GIT_* vars')
+    assert.ok(existsSync(path.join(dest, '.git')), 'fresh .git created in the target dir')
+  } finally {
+    for (const [k, v] of Object.entries(saved)) {
+      if (v === undefined) delete process.env[k]
+      else process.env[k] = v
+    }
+  }
+})
+
 test('runClone --dry-run clones nothing', async () => {
   const remote = makeRemote()
   const dest = path.join(mkdtempSync(path.join(os.tmpdir(), 'haus-clone-dry-')), 'app')
