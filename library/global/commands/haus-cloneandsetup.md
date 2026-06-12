@@ -84,10 +84,17 @@ env:
    - `composer-path` → in `in`'s `composer.json`, set the `dep`'s require to `{ "type": "path", "url": "../<dep-folder>", "options": { "symlink": true } }`, then `composer update <vendor/dep>`.
    - `yarn-link` → `yarn link` in the `dep` repo, then `yarn link <pkg-name>` in each `in` repo (read `<pkg-name>` from the dep's `package.json`).
 5. **Env:** for each workspace `env` entry, confirm the `source` is satisfiable, then upsert the value into each sink repo's `.env` under its `key` — **creating `.env` if it does not exist** (Step 3 scaffolds it, but don't assume). **If the write is blocked or fails, print the exact `KEY=value` lines for the user to paste** (decision D5). Real secrets (DB passwords, tokens) remain the user's to fill.
-6. **Report + next-steps.** Per-repo summary, then the ordered **start** commands from each repo's `serve.start` plus any manual follow-ups (e.g. `wp sync-products sync`).
+6. **Report, then offer to start.** Give the per-repo summary, then **ask the user whether to start everything now.**
+   - **Yes** → start each repo in the workspace `order` (its `serve.start`, e.g. `yarn dev`; bring up any remaining foreground services), run any follow-ups (e.g. `wp sync-products sync`), then **print the live URLs** (each repo's `serve.url`).
+   - **No** → just print the ordered start commands + follow-ups as next steps; start nothing.
 
-**Stops at "ready to run," not "running" (D2):** bring up datastores (`docker compose up -d`), pull DBs, link, build, wire env — but do NOT start foreground dev servers or run the initial product sync. Print those.
+**Default is "ready to run" (D2):** the preparation — datastores up (`docker compose up -d`), DBs pulled, links, builds, env wired — always happens. Starting the **foreground** dev servers and the initial product sync happens **only if the user says yes** to the start prompt above; otherwise they're printed, not run.
 
 ## Step 5 — Report
 
-Summarise per repo (node, deps, localdev steps, links, env). Then print, in order, the start commands and manual follow-ups. **Do not** run `yarn dev` / `docker compose up` (foreground) / `wp sync-products` — this command prepares, it does not run the app.
+Summarise per repo (node, deps, localdev steps, links, env). Then **ask whether to start everything now**:
+
+- **Yes** → start the dev servers in workspace `order`, run any follow-ups, and **print the live URLs** so the user can open the running app.
+- **No** → print the ordered start commands + follow-ups instead, and start nothing.
+
+Never start the app without that explicit yes.
