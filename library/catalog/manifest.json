@@ -1842,7 +1842,7 @@
     },
     {
       "id": "haus.superpowers-subagent-driven-development",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "source": "curated",
       "type": "skill",
       "path": "skills/superpowers/subagent-driven-development",
@@ -1852,7 +1852,7 @@
       "whenNotToUse": "Do not use for tightly coupled sequential work or when subagents are unavailable.",
       "tags": ["workflow", "workflow-skill"],
       "repoRoles": [],
-      "tokenEstimate": 3491,
+      "tokenEstimate": 3948,
       "installMode": "copy-selected",
       "default": true,
       "reviewStatus": "approved",
@@ -1861,8 +1861,9 @@
       "license": "MIT",
       "licenseConfidence": "high",
       "originSourceId": "superpowers-pcvelz",
-      "originUrl": "https://github.com/pcvelz/superpowers/tree/bd000c6ec1df53449a74397f55305b22802b9a2b/skills/subagent-driven-development",
-      "ecosystem": "superpowers"
+      "originUrl": "https://github.com/pcvelz/superpowers/tree/48f5123e18a1a92dfba962da8dc2509391c821ee/skills/subagent-driven-development",
+      "ecosystem": "superpowers",
+      "pinnedRef": "48f5123e18a1a92dfba962da8dc2509391c821ee"
     },
     {
       "id": "haus.superpowers-systematic-debugging",
@@ -1986,7 +1987,7 @@
     },
     {
       "id": "haus.superpowers-writing-plans",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "source": "curated",
       "type": "skill",
       "path": "skills/superpowers/writing-plans",
@@ -1996,7 +1997,7 @@
       "whenNotToUse": "Do not use for single-step tasks that need no multi-step plan.",
       "tags": ["workflow", "core-skill"],
       "repoRoles": [],
-      "tokenEstimate": 5277,
+      "tokenEstimate": 5493,
       "installMode": "copy-selected",
       "default": true,
       "reviewStatus": "approved",
@@ -2005,8 +2006,9 @@
       "license": "MIT",
       "licenseConfidence": "high",
       "originSourceId": "superpowers-pcvelz",
-      "originUrl": "https://github.com/pcvelz/superpowers/tree/bd000c6ec1df53449a74397f55305b22802b9a2b/skills/writing-plans",
-      "ecosystem": "superpowers"
+      "originUrl": "https://github.com/pcvelz/superpowers/tree/48f5123e18a1a92dfba962da8dc2509391c821ee/skills/writing-plans",
+      "ecosystem": "superpowers",
+      "pinnedRef": "48f5123e18a1a92dfba962da8dc2509391c821ee"
     },
     {
       "id": "haus.superpowers-writing-skills",
@@ -2150,6 +2152,31 @@
       "licenseConfidence": "high",
       "originSourceId": "superpowers-pcvelz",
       "originUrl": "https://github.com/pcvelz/superpowers/blob/bd000c6ec1df53449a74397f55305b22802b9a2b/commands/write-plan.md",
+      "ecosystem": "superpowers"
+    },
+    {
+      "id": "haus.superpowers-onboard",
+      "version": "1.0.0",
+      "source": "curated",
+      "type": "command",
+      "path": "commands/superpowers/onboard.md",
+      "title": "Superpowers Onboard",
+      "purpose": "Guided setup for superpowers' optional features. Asks short multiple-choice questions and writes the chosen configuration files in place. Everything it configures can also be set up manually — see README.md.",
+      "whenToUse": "Guided setup for superpowers' optional features. Asks short multiple-choice questions and writes the chosen configuration files in place. Everything it configures can also be set up manually — see README.md.",
+      "whenNotToUse": "Do not use when a more specific skill or command applies.",
+      "tags": ["workflow"],
+      "repoRoles": [],
+      "tokenEstimate": 2871,
+      "installMode": "copy-selected",
+      "default": true,
+      "reviewStatus": "approved",
+      "riskLevel": "low",
+      "useMode": "copy",
+      "license": "MIT",
+      "licenseConfidence": "high",
+      "originSourceId": "superpowers-pcvelz",
+      "originUrl": "https://github.com/pcvelz/superpowers/blob/48f5123e18a1a92dfba962da8dc2509391c821ee/commands/onboard.md",
+      "pinnedRef": "48f5123e18a1a92dfba962da8dc2509391c821ee",
       "ecosystem": "superpowers"
     }
   ]
