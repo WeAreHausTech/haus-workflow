@@ -4,7 +4,6 @@ import path from 'node:path'
 import fs from 'fs-extra'
 
 import { getCacheDir, getCacheManifestAge } from '../catalog/remote-catalog.js'
-import { isHookEnabled, type HookKey } from '../claude/load-hooks-config.js'
 import { normaliseLF } from '../claude/managed-template.js'
 import { verifyProjectSettingsHooksContract } from '../claude/verify-hooks-contract.js'
 import { BLOCK_BEGIN, BLOCK_END } from '../claude/write-root-claude-md.js'
@@ -75,14 +74,6 @@ export async function runDoctor(options?: { hooks?: boolean }): Promise<void> {
     process.exitCode = 1
   } else {
     ok(`- HOOKS OK: ${hooks.message}`)
-  }
-
-  // Per-hook gate state (P2 outcome). Guards are always on; only the
-  // gated UserPromptSubmit hooks have an opt-in flag.
-  const gatedHooks: HookKey[] = ['context']
-  for (const key of gatedHooks) {
-    const enabled = await isHookEnabled(root, key)
-    ok(`- HOOK ${key}: ${enabled ? 'enabled' : 'disabled (default)'}`)
   }
 
   // P6 / WS9: validate root CLAUDE.md import block AND that each @-imported

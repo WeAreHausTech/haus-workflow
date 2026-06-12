@@ -6,11 +6,12 @@ import { describe, it } from 'node:test'
 import { loadClaudeHooksSettings } from '../src/claude/load-hooks.js'
 
 describe('loadClaudeHooksSettings', () => {
-  it('keeps the canonical hooks', async () => {
+  it('keeps the canonical PreToolUse guard hooks only', async () => {
     const s = await loadClaudeHooksSettings()
-    assert.equal(s.hooks.UserPromptSubmit[0].hooks[0].command, 'haus context --from-hook')
-    assert.equal(s.hooks.UserPromptSubmit[0].hooks.length, 1)
+    assert.equal(s.hooks.UserPromptSubmit, undefined)
     assert.equal(s.hooks.PreToolUse.length, 2)
+    assert.equal(s.hooks.PreToolUse[0].hooks[0].command, 'haus guard file-access --from-hook')
+    assert.equal(s.hooks.PreToolUse[1].hooks[0].command, 'haus guard bash --from-hook')
   })
 
   it('bundled install fragment installs no removed CLI commands', () => {
@@ -33,10 +34,7 @@ describe('loadClaudeHooksSettings', () => {
     // ask-tier commands must NOT be in deny
     assert.ok(!s.permissions.deny.includes('Bash(rm -rf:*)'), 'rm -rf must not be in deny')
     // .env is ask-tier, not deny-tier
-    assert.ok(
-      !s.permissions.deny.some((r) => r.includes('.env')),
-      '.env rules must not be in deny',
-    )
+    assert.ok(!s.permissions.deny.some((r) => r.includes('.env')), '.env rules must not be in deny')
   })
 
   it('includes permissions.ask with ask-tier rules', async () => {

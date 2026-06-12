@@ -9,7 +9,6 @@ import { buildDenyRules } from '../security/deny-rules.js'
 /** Shape written to `.claude/settings.json` under `hooks` (+ deterministic deny/ask rules). */
 export type ClaudeHooksSettings = {
   hooks: {
-    UserPromptSubmit: Array<{ hooks: Array<{ type: 'command'; command: string }> }>
     PreToolUse: Array<{ matcher: string; hooks: Array<{ type: 'command'; command: string }> }>
   }
   permissions?: { deny: string[]; ask?: string[] }
@@ -25,11 +24,6 @@ export type ClaudeHooksSettings = {
  */
 export const CANONICAL_HOOKS: ClaudeHooksSettings = {
   hooks: {
-    UserPromptSubmit: [
-      {
-        hooks: [{ type: 'command', command: 'haus context --from-hook' }],
-      },
-    ],
     PreToolUse: [
       {
         matcher: 'Read|Edit|Write',

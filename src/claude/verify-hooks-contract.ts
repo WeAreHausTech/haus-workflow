@@ -30,11 +30,6 @@ export function hausHookContractSatisfied(
   canonical: ClaudeHooksSettings,
 ): boolean {
   const present = new Set(collectHookCommands(project))
-  for (const block of canonical.hooks.UserPromptSubmit) {
-    for (const h of block.hooks) {
-      if (!present.has(h.command)) return false
-    }
-  }
   for (const block of canonical.hooks.PreToolUse) {
     for (const h of block.hooks) {
       if (!present.has(h.command)) return false

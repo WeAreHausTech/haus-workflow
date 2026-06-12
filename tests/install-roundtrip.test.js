@@ -64,7 +64,7 @@ describe('install/uninstall round-trip (stubbed HOME)', () => {
     return JSON.parse(fs.readFileSync(settingsPath, 'utf8'))
   }
 
-  it('merges the two keep guard hooks and skips the gated context hook', async () => {
+  it('merges the two PreToolUse guard hooks', async () => {
     const { applyInstall } = await import('../src/install/apply.js')
     await applyInstall({})
     const settings = readSettings()
@@ -72,14 +72,7 @@ describe('install/uninstall round-trip (stubbed HOME)', () => {
     const cmds = preToolUseCommands(settings)
     assert.ok(cmds.includes(HAUS_GUARD_FILE), 'file-access guard hook should be merged')
     assert.ok(cmds.includes(HAUS_GUARD_BASH), 'bash guard hook should be merged')
-    // hook.context is gate-default-off → must not be installed.
-    const contextCmds = (settings.hooks?.UserPromptSubmit ?? []).flatMap((e) =>
-      (e.hooks ?? []).map((h) => h.command),
-    )
-    assert.ok(
-      !contextCmds.some((c) => c.includes('haus context')),
-      'gated context hook must not be installed',
-    )
+    assert.equal(settings.hooks?.UserPromptSubmit, undefined, 'no UserPromptSubmit hooks')
     assert.ok((settings._haus?.hooks?.length ?? 0) > 0, 'installed hook ids tracked in _haus')
     assert.ok((settings._haus?.hookCommands?.length ?? 0) > 0, 'hook commands tracked in _haus')
   })
@@ -129,6 +122,9 @@ describe('install/uninstall round-trip (stubbed HOME)', () => {
     assert.deepEqual(restored, original, 'settings.json must match the pre-install snapshot')
     assert.equal(restored._haus, undefined, 'no _haus block left behind')
     const cmds = preToolUseCommands(restored)
-    assert.ok(!cmds.includes(HAUS_GUARD_FILE) && !cmds.includes(HAUS_GUARD_BASH), 'no haus hooks left')
+    assert.ok(
+      !cmds.includes(HAUS_GUARD_FILE) && !cmds.includes(HAUS_GUARD_BASH),
+      'no haus hooks left',
+    )
   })
 })

@@ -14,7 +14,8 @@ test('generated settings uses haus command', () => {
     fs.readFileSync('src/claude/load-hooks.ts', 'utf8'),
   ].join('\n')
   assert.equal(/haus-ai\s+(doctor|context|guard|apply)/.test(combined), false)
-  assert.equal(combined.includes('haus context --from-hook'), true)
+  assert.equal(combined.includes('haus guard file-access --from-hook'), true)
+  assert.equal(combined.includes('haus context --from-hook'), false)
 })
 
 test('apply writes claude files and rules', () => {
@@ -40,9 +41,7 @@ test('apply writes claude files and rules', () => {
   const settings = JSON.parse(readFileSync(path.join(temp, '.claude/settings.json'), 'utf8'))
   const rulesHaus = readFileSync(path.join(temp, '.claude/rules/haus.md'), 'utf8')
 
-  const ups = settings.hooks.UserPromptSubmit[0].hooks
-  assert.equal(ups.length, 1)
-  assert.equal(ups[0].command, 'haus context --from-hook')
+  assert.equal(settings.hooks.UserPromptSubmit, undefined)
   const pre = settings.hooks.PreToolUse
   assert.equal(pre[0].matcher, 'Read|Edit|Write')
   assert.equal(pre[0].hooks[0].command, 'haus guard file-access --from-hook')
@@ -67,6 +66,85 @@ test('apply writes claude files and rules', () => {
     assert.equal(row.version, pkg.version)
     assert.equal(row.hash.startsWith('sha256-'), true)
   }
+  assert.equal(fs.existsSync(path.join(temp, '.haus-workflow/config.json')), false)
+})
+
+test('apply writes guards-only hook contract and doctor --hooks passes', () => {
+  const temp = mkdtempSync(path.join(os.tmpdir(), 'haus-apply-hooks-contract-'))
+  writeFileSync(
+    path.join(temp, 'package.json'),
+    JSON.stringify(
+      { name: 'hooks-contract', packageManager: 'yarn@4.5.3', dependencies: { react: '19.0.0' } },
+      null,
+      2,
+    ),
+  )
+  writeFileSync(path.join(temp, 'yarn.lock'), '# lock')
+
+  const env = {
+    ...process.env,
+    HAUS_FIXTURE_CATALOG: path.resolve('tests/fixtures/catalog/manifest.json'),
+  }
+  execaSync('node', [path.resolve('dist/cli.js'), 'scan', '--json'], { cwd: temp, env })
+  execaSync('node', [path.resolve('dist/cli.js'), 'recommend', '--json'], { cwd: temp, env })
+  execaSync('node', [path.resolve('dist/cli.js'), 'apply', '--write'], { cwd: temp, env })
+
+  const settings = JSON.parse(readFileSync(path.join(temp, '.claude/settings.json'), 'utf8'))
+  assert.equal(settings.hooks.UserPromptSubmit, undefined)
+  assert.equal(settings.hooks.PreToolUse.length, 2)
+
+  const doctor = execaSync('node', [path.resolve('dist/cli.js'), 'doctor', '--hooks'], {
+    cwd: temp,
+    env,
+    reject: false,
+  })
+  assert.equal(doctor.exitCode, 0, doctor.stderr)
+  assert.match(doctor.stdout, /hook contract/i)
+})
+
+test('apply upgrades legacy settings by pruning the retired context UserPromptSubmit hook', () => {
+  const temp = mkdtempSync(path.join(os.tmpdir(), 'haus-apply-upgrade-context-hook-'))
+  mkdirSync(path.join(temp, '.claude'), { recursive: true })
+  writeFileSync(
+    path.join(temp, 'package.json'),
+    JSON.stringify(
+      { name: 'apply-upgrade', packageManager: 'yarn@4.5.3', dependencies: { react: '19.0.0' } },
+      null,
+      2,
+    ),
+  )
+  writeFileSync(path.join(temp, 'yarn.lock'), '# lock')
+  writeFileSync(
+    path.join(temp, '.claude/settings.json'),
+    JSON.stringify(
+      {
+        _haus: {
+          hooks: ['haus.context-hook'],
+          hookCommands: ['haus context --from-hook'],
+        },
+        hooks: {
+          UserPromptSubmit: [
+            { hooks: [{ type: 'command', command: 'haus context --from-hook' }] },
+          ],
+        },
+      },
+      null,
+      2,
+    ) + '\n',
+  )
+
+  const env = {
+    ...process.env,
+    HAUS_FIXTURE_CATALOG: path.resolve('tests/fixtures/catalog/manifest.json'),
+  }
+  execaSync('node', [path.resolve('dist/cli.js'), 'scan', '--json'], { cwd: temp, env })
+  execaSync('node', [path.resolve('dist/cli.js'), 'recommend', '--json'], { cwd: temp, env })
+  execaSync('node', [path.resolve('dist/cli.js'), 'apply', '--write'], { cwd: temp, env })
+
+  const settings = JSON.parse(readFileSync(path.join(temp, '.claude/settings.json'), 'utf8'))
+  assert.equal(settings.hooks.UserPromptSubmit, undefined)
+  assert.equal(settings.hooks.PreToolUse.length, 2)
+  assert.equal(settings._haus?.hookCommands?.includes('haus context --from-hook'), false)
 })
 
 test('apply merges haus hooks into existing settings without clobbering user hooks', () => {
@@ -320,6 +398,7 @@ test('apply removes all legacy readerless .haus-workflow artifacts', () => {
   // Every readerless, machine-generated artifact that haus no longer writes. On upgrade,
   // `apply` must prune them so the output set actually shrinks (PR "11 files -> 5" goal).
   const legacy = [
+    'config.json',
     'selected-context.json',
     'dependency-map.json',
     'scan-hashes.json',

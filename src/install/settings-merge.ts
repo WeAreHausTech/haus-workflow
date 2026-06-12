@@ -82,6 +82,62 @@ function collectEventHookCommands(entries: ClaudeHookEntry[]): Set<string> {
   return cmds
 }
 
+/** Hook commands haus no longer ships — pruned on merge so upgrades do not leave broken hooks. */
+export const RETIRED_HAUS_HOOK_COMMANDS = ['haus context --from-hook'] as const
+
+/** Retired hook fragment ids (global + project naming). */
+export const RETIRED_HAUS_HOOK_IDS = ['hook.context', 'haus.context-hook'] as const
+
+/**
+ * Drops hook entries and `_haus` tracking for commands/ids haus no longer ships.
+ * Mirrors deny-rule reconcile: tracked haus hooks must match the current fragment set.
+ */
+function reconcileRetiredHausHooks(
+  updated: ClaudeSettings,
+  fragments: HookFragment[],
+  priorHaus: ClaudeSettings['_haus'],
+  addedIds: string[],
+  addedCommands: string[],
+): void {
+  const canonicalCommands = new Set(
+    fragments.filter((f) => f.gate === 'keep').map((f) => f.command),
+  )
+  const canonicalIds = new Set(fragments.filter((f) => f.gate === 'keep').map((f) => f.id))
+  const retiredCommands = new Set<string>(RETIRED_HAUS_HOOK_COMMANDS)
+  for (const cmd of [...(priorHaus?.hookCommands ?? []), ...addedCommands]) {
+    if (!canonicalCommands.has(cmd)) retiredCommands.add(cmd)
+  }
+
+  const prunedHooks: Record<string, ClaudeHookEntry[]> = {}
+  for (const [event, entries] of Object.entries(updated.hooks ?? {})) {
+    const kept = (entries as ClaudeHookEntry[]).filter((entry) => {
+      const cmds = (entry.hooks ?? []).map((h) => h.command).filter(Boolean)
+      return cmds.length === 0 || !cmds.some((cmd) => retiredCommands.has(cmd))
+    })
+    if (kept.length > 0) prunedHooks[event] = kept
+  }
+  updated.hooks = prunedHooks
+
+  const retiredIdSet = new Set<string>(RETIRED_HAUS_HOOK_IDS)
+  for (const id of priorHaus?.hooks ?? []) {
+    if (!canonicalIds.has(id)) retiredIdSet.add(id)
+  }
+  const survivingIds = [...new Set([...(priorHaus?.hooks ?? []), ...addedIds])].filter(
+    (id) => canonicalIds.has(id) && !retiredIdSet.has(id),
+  )
+  const survivingCommands = [
+    ...new Set([...(priorHaus?.hookCommands ?? []), ...addedCommands]),
+  ].filter((cmd) => canonicalCommands.has(cmd))
+
+  updated._haus = {
+    hooks: survivingIds,
+    ...(survivingCommands.length > 0 ? { hookCommands: survivingCommands } : {}),
+    ...(priorHaus?.denyRules ? { denyRules: priorHaus.denyRules } : {}),
+    ...(priorHaus?.allowRules ? { allowRules: priorHaus.allowRules } : {}),
+    ...(priorHaus?.askRules ? { askRules: priorHaus.askRules } : {}),
+  }
+}
+
 /**
  * Adds hook fragments with gate="keep" to the settings object, skipping any
  * already registered by a previous install. Returns the updated settings and the
@@ -123,14 +179,7 @@ export function mergeHooks(
     if (!existingCommands.includes(fragment.command)) addedCommands.push(fragment.command)
   }
 
-  updated._haus = {
-    hooks: [...existing, ...addedIds],
-    hookCommands: [...existingCommands, ...addedCommands],
-    // Preserve deny/allow/ask tracking so hook, deny, allow, and ask merges are order-independent.
-    ...(settings._haus?.denyRules ? { denyRules: settings._haus.denyRules } : {}),
-    ...(settings._haus?.allowRules ? { allowRules: settings._haus.allowRules } : {}),
-    ...(settings._haus?.askRules ? { askRules: settings._haus.askRules } : {}),
-  }
+  reconcileRetiredHausHooks(updated, fragments, settings._haus, addedIds, addedCommands)
 
   return { settings: updated, addedIds }
 }

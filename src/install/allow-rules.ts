@@ -10,14 +10,7 @@
  */
 
 /** The haus subcommands an agent runs on the user's behalf during setup/health-check. */
-const ALLOWED_SUBCOMMANDS = [
-  'setup-project',
-  'apply',
-  'doctor',
-  'scan',
-  'context',
-  'recommend',
-] as const
+const ALLOWED_SUBCOMMANDS = ['setup-project', 'apply', 'doctor', 'scan', 'recommend'] as const
 
 /** Returns the deduped, scoped list of `permissions.allow` rule strings haus manages. */
 export function buildAllowRules(): string[] {

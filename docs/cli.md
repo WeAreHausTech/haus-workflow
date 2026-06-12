@@ -72,13 +72,6 @@ with developer detail beneath.
 
 Render explainability data directly from `.haus-workflow/recommendation.json` (no extra scoring pass).
 
-### `haus context --task "<task>" [--json] [--verbose] [--from-hook]`
-
-Return task-scoped selected rules plus context minimization stats. Selection narrows
-the recommended set by classified task intents, then trims to a token budget
-(`DEFAULT_CONTEXT_TOKEN_BUDGET`, 12k) — lowest-scoring non-baseline rules drop first;
-baselines are never dropped.
-
 ---
 
 ## Global install
@@ -101,18 +94,6 @@ with `HAUS_NO_POSTINSTALL=1`.
 ### `haus uninstall [--force]`
 
 Remove HAUS-MANAGED files from `~/.claude/` and strip haus-added hooks + deny/allow rules.
-
----
-
-## Configuration
-
-### `haus config enable <key>`
-
-### `haus config disable <key>`
-
-### `haus config status <key>`
-
-Manage hook configuration. Keys: `hook.context`.
 
 > Cross-session memory uses Claude Code's native `MEMORY.md` — haus ships no memory
 > command or store (see the `haus.memory-conventions` catalog doc).

@@ -126,8 +126,6 @@ The catalog is maintained in a separate repository ([`haus-workflow-catalog`](ht
 
 haus ships no memory store. Cross-session learnings use Claude Code's native
 `MEMORY.md`; the `haus.memory-conventions` catalog template documents the practice.
-The hook-time redactor (`src/security/redact-sensitive.ts`) is retained — a separate
-concern from any store.
 
 ---
 
