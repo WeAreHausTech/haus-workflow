@@ -94,8 +94,10 @@ Add to `.claude/settings.json`:
       "Bash(git push --force:*)",
       "Bash(git push -f:*)",
       "Read(*.pem)",
+      "Edit(*.pem)",
       "Write(*.pem)",
       "Read(*.key)",
+      "Edit(*.key)",
       "Write(*.key)"
     ],
     "ask": ["Edit(.env)", "Write(.env)"]

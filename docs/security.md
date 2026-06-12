@@ -44,7 +44,9 @@ preserved when editing the command/path lists.
 ### Deny-tier path patterns (hard block, all tools)
 
 `src/security/sensitive-paths.ts` `DENY_PATHS`: `*.pem`, `*.key`, `*.p12`, `*.pfx`,
-`id_rsa`, `id_ed25519`, `customer-data/**`, `secrets/**`, `certs/**`.
+`id_rsa`, `id_ed25519`, `customer-data`, `secrets`, `certs`. The directory tokens
+(`customer-data`, `secrets`, `certs` — listed in `DENY_DIRS`) are expanded to
+`<dir>/**` when `buildDenyRules()` builds the rule strings.
 
 ### Ask-tier path patterns (user prompt, per-tool)
 
