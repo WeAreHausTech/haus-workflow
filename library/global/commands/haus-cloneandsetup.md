@@ -19,22 +19,37 @@ For each repo, in its own directory, detect and install from the repo's own file
 
 This is the phase that takes the workspace from "installed" to "ready to run." It is driven by `localdev.yml` files; a repo with none is set up by Step 3 only.
 
+### House conventions (the "how", so repos specify only the "what")
+
+Specify the least. Infer the rest from the repo's stack + these conventions, and work out the concrete commands at run time:
+
+- **PHP / WordPress sites are served by the developer's own PHP environment — prefer [Laravel Herd](https://herd.laravel.com)** (docroot → the repo's `web/`, `herd secure` for HTTPS). **Do not install or script the PHP env**; just satisfy its env contract and report the URL. DDEV / Valet are fine if the dev already uses them.
+- **Databases and other services (a repo's `needs:`) run in Docker.** Provision them the simplest way (a one-off `docker run`, or the repo's own compose if it ships one), then wire the matching env vars to point at them. Confirm before creating/overwriting data.
+- **Dependencies** install from the lockfile (Step 3).
+- A repo's `localdev.yml` carries **only what can't be inferred** — its `needs`, repo-specific `build`/`seed` commands, env keys, and URL. Detect the stack (e.g. Bedrock = `composer.json` + `web/` docroot + `wp-cli.yml`; Vendure/Node = `docker-compose.yml` + `@vendure/*`) and apply the matching convention.
+
 ### The `localdev.yml` format
 
 **Per-repo — `<repo>/.haus-workflow/localdev.yml`** (how to set up THAT repo alone; sibling-agnostic):
 
+All fields optional. **Prefer intent (`needs`/`build`/`seed`/`serve`) over explicit `steps`** —
+the conventions above turn intent into commands.
+
 ```yaml
+needs: [mysql] # services this repo requires; provisioned in Docker, env wired to them
 needsEnv: [WP_HOME, DB_NAME] # env keys that must be present to run/serve
-steps: # ordered; each runs in the repo dir, in a login shell
-  - run: 'composer install' # the shell command (required)
-    node: 10 # optional: nvm version for THIS step
-    remote: true # optional: hits a server (SSH) → confirm first
-    destructive: true # optional: drops/overwrites data → confirm first
-    optional: true # optional: failure is non-fatal, continue
-serve: # optional: printed as a next-step, never auto-run
-  via: valet # valet | docker | command
+build: 'yarn build' # optional: the build command (run after deps)
+seed: 'dep db:pull staging-oderland' # optional: how to load data; remote/destructive → confirm first
+serve: # optional: how it runs (printed as a next-step, never auto-started)
+  via: herd # herd | valet | docker | command — for PHP envs, bring-your-own (don't install)
   url: 'https://example.test'
   start: 'yarn dev'
+steps: # optional escape hatch: explicit ordered shell steps when intent isn't enough
+  - run: 'composer install'
+    node: 10 # nvm version for THIS step
+    remote: true # SSH → confirm first
+    destructive: true # overwrites data → confirm first
+    optional: true # failure is non-fatal, continue
 ```
 
 **Workspace — `<workspace>/.haus-workflow/localdev.yml`** (the glue BETWEEN repos):
@@ -55,7 +70,12 @@ env:
 
 1. **Discover** `.haus-workflow/localdev.yml` in the workspace root and each repo.
 2. **Resolve order** from the workspace `order` (repos not listed run last, in manifest order). No workspace file → manifest order.
-3. **Per repo, in order:** run `steps` (select `node:` per step; `optional:` failures continue). **Confirm before any step marked `remote:` or `destructive:`**, every run, even on re-run.
+3. **Per repo, in order**, apply intent via the conventions:
+   - **`needs`** → provision each service in Docker if not already running, and wire its env vars. Confirm before creating/overwriting data.
+   - **`build`** → run it (honor any node version the repo's docs note).
+   - **`serve`** → for `via: herd` / PHP envs, install nothing — verify the dev's environment serves `web/`, and report the URL.
+   - **`seed`** → run it; **confirm first** if it's remote (SSH) or destructive (overwrites data).
+   - **`steps`** (escape hatch) → run in order, selecting `node:` per step, `optional:` failures continue, **confirming before any `remote:`/`destructive:` step** — every run, even on re-run.
 4. **Links** (workspace-owned, performed generically — do NOT call a repo's own `setup-dev-mode.sh`, which is deprecated):
    - `symlink` → `ln -s <from> <to>`; replace an existing symlink, but never clobber a real directory without confirmation.
    - `composer-path` → in `in`'s `composer.json`, set the `dep`'s require to `{ "type": "path", "url": "../<dep-folder>", "options": { "symlink": true } }`, then `composer update <vendor/dep>`.
