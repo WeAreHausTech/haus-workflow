@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.25.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.24.1...v0.25.0) (2026-06-12)
+
+### Features
+
+- **cloneandsetup:** deterministic env phase, prereq gate, standalone needs, clone fallback ([#105](https://github.com/WeAreHausTech/haus-workflow/issues/105)) ([c6f5858](https://github.com/WeAreHausTech/haus-workflow/commit/c6f585850591eba48d08f7f6e2d8b1a2aa50c355))
+
 ## [0.24.1](https://github.com/WeAreHausTech/haus-workflow/compare/v0.24.0...v0.24.1) (2026-06-12)
 
 ### Bug Fixes
