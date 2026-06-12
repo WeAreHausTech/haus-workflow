@@ -107,9 +107,14 @@ scan; a second `recommend` pass picks up skills the shallow scanner missed.
 
 1. `update --check` validates lock presence and version fields.
 2. `update` backs up lockfile to `.haus-workflow/backups/`.
-3. Fetches latest catalog manifest into `~/.claude/haus/catalog-cache/`.
+3. Fetches latest catalog manifest into `~/.claude/haus/catalog-cache/`, caching **full skill
+   directories** (not only `SKILL.md`) via a single recursive GitHub tree listing per sync.
+   Superpowers support files under `skills/superpowers/shared/` are cached alongside items.
 4. Refreshes global install (`haus install` — includes orphan cleanup for `~/.claude/`).
-5. Re-applies project files via `writeClaudeFiles` (includes stale-item cleanup).
+5. Re-applies project files via `writeClaudeFiles` (includes stale-item cleanup). Curated
+   superpowers skills install the full cached skill tree, copy `skills/superpowers/shared/`
+   to `.claude/skills/shared/`, and rewrite `skills/shared/` prose paths in installed
+   markdown only.
 6. Recomputes per-item hashes from lockfile `paths`.
 7. Prints unified lock diff and summary.
 

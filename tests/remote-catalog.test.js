@@ -41,14 +41,27 @@ const FIXTURE_MANIFEST = {
 const FIXTURE_SKILL_MD = '## Use when\nAlways.\n## Do not use when\nNever.\n'
 const FIXTURE_AGENT_MD = '---\ndescription: Review.\n---\n## Use when\nAlways.\n'
 
+const REACT19_TREE = ['SKILL.md', 'references/conventions.md', 'references/scope.md']
+
+function treeHandler(files) {
+  return {
+    [`/__haus_tree__/${encodeURIComponent('skills/react19-patterns')}`]: {
+      body: JSON.stringify(files),
+    },
+  }
+}
+
 function startMockServer(handlers) {
   return new Promise((resolve) => {
     const server = http.createServer((req, res) => {
       const url = req.url ?? '/'
       const handler = handlers[url]
       if (handler) {
-        const { status = 200, body } = handler
-        res.writeHead(status, { 'Content-Type': 'application/json' })
+        const { status = 200, body, contentType } = handler
+        const type =
+          contentType ??
+          (url.startsWith('/__haus_tree__/') ? 'application/json' : 'text/plain; charset=utf-8')
+        res.writeHead(status, { 'Content-Type': type })
         res.end(body)
       } else {
         res.writeHead(404)
@@ -95,7 +108,8 @@ async function runCli(args, options = {}) {
 
 test('haus update: catalog sync writes manifest to cache on success', async () => {
   const { server, port } = await startMockServer({
-    '/manifest.json': { body: JSON.stringify(FIXTURE_MANIFEST) },
+    '/manifest.json': { body: JSON.stringify(FIXTURE_MANIFEST), contentType: 'application/json' },
+    ...treeHandler(REACT19_TREE),
     '/skills/react19-patterns/SKILL.md': { body: FIXTURE_SKILL_MD },
     '/skills/react19-patterns/references/conventions.md': { body: '# conventions' },
     '/skills/react19-patterns/references/scope.md': { body: '# scope' },
@@ -173,10 +187,47 @@ test('haus update: offline fallback does not crash when server unreachable', asy
   )
 })
 
+test('haus update: caches extra skill files from full tree listing', async () => {
+  const { server, port } = await startMockServer({
+    '/manifest.json': { body: JSON.stringify(FIXTURE_MANIFEST), contentType: 'application/json' },
+    ...treeHandler([...REACT19_TREE, 'scripts/helper.js']),
+    '/skills/react19-patterns/SKILL.md': { body: FIXTURE_SKILL_MD },
+    '/skills/react19-patterns/references/conventions.md': { body: '# conventions' },
+    '/skills/react19-patterns/references/scope.md': { body: '# scope' },
+    '/skills/react19-patterns/scripts/helper.js': { body: 'export const ok = true;\n' },
+    '/agents/code-reviewer.md': { body: FIXTURE_AGENT_MD },
+  })
+
+  const cacheDir = mkdtempSync(path.join(os.tmpdir(), 'haus-cache-tree-'))
+  const temp = makeProjectDir()
+
+  try {
+    const out = await runCli(['update'], {
+      cwd: temp,
+      env: {
+        ...process.env,
+        HAUS_CATALOG_REMOTE_BASE: `http://127.0.0.1:${port}`,
+        HAUS_CATALOG_CACHE_DIR_OVERRIDE: cacheDir,
+      },
+    })
+    assert.equal(out.exitCode, 0, `update failed:\n${out.stdout}\n${out.stderr}`)
+    assert.equal(
+      fs.existsSync(path.join(cacheDir, 'skills/react19-patterns/scripts/helper.js')),
+      true,
+      'extra skill file from tree not cached',
+    )
+  } finally {
+    await stopServer(server)
+  }
+})
+
 test('haus update: no duplicate downloads for already-cached items', async () => {
   const { server, port } = await startMockServer({
-    '/manifest.json': { body: JSON.stringify(FIXTURE_MANIFEST) },
+    '/manifest.json': { body: JSON.stringify(FIXTURE_MANIFEST), contentType: 'application/json' },
+    ...treeHandler(REACT19_TREE),
     '/skills/react19-patterns/SKILL.md': { body: FIXTURE_SKILL_MD },
+    '/skills/react19-patterns/references/conventions.md': { body: '# conventions' },
+    '/skills/react19-patterns/references/scope.md': { body: '# scope' },
     '/agents/code-reviewer.md': { body: FIXTURE_AGENT_MD },
   })
 
@@ -186,8 +237,11 @@ test('haus update: no duplicate downloads for already-cached items', async () =>
   // Pre-populate the skill so it appears already cached
   fs.mkdirSync(path.join(cacheDir, 'skills/react19-patterns/references'), { recursive: true })
   fs.writeFileSync(path.join(cacheDir, 'skills/react19-patterns/SKILL.md'), FIXTURE_SKILL_MD)
-  fs.writeFileSync(path.join(cacheDir, 'skills/react19-patterns/references/conventions.md'), 'x')
-  fs.writeFileSync(path.join(cacheDir, 'skills/react19-patterns/references/scope.md'), 'x')
+  fs.writeFileSync(
+    path.join(cacheDir, 'skills/react19-patterns/references/conventions.md'),
+    '# conventions',
+  )
+  fs.writeFileSync(path.join(cacheDir, 'skills/react19-patterns/references/scope.md'), '# scope')
 
   try {
     const out = await runCli(['update'], {
@@ -219,7 +273,8 @@ test('haus update: refreshes cached items when remote content changes', async ()
   const STALE_SKILL = '## Use when\nStale.\n## Do not use when\nNever.\n'
   const FRESH_SKILL = '## Use when\nFresh.\n## Do not use when\nNever.\n'
   const { server, port } = await startMockServer({
-    '/manifest.json': { body: JSON.stringify(FIXTURE_MANIFEST) },
+    '/manifest.json': { body: JSON.stringify(FIXTURE_MANIFEST), contentType: 'application/json' },
+    ...treeHandler(['SKILL.md']),
     '/skills/react19-patterns/SKILL.md': { body: FRESH_SKILL },
     '/agents/code-reviewer.md': { body: FIXTURE_AGENT_MD },
   })

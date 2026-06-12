@@ -55,9 +55,19 @@ const { server, port } = await new Promise((resolve) => {
       res.end(JSON.stringify(BAD_MANIFEST))
       return
     }
+    if (url === `/__haus_tree__/${encodeURIComponent('skills/bad-skill')}`) {
+      res.writeHead(200, { 'Content-Type': 'application/json' })
+      res.end(JSON.stringify(['SKILL.md', 'notes.md']))
+      return
+    }
     if (url === '/skills/bad-skill/SKILL.md') {
       res.writeHead(200, { 'Content-Type': 'text/plain' })
       res.end(BAD_SKILL)
+      return
+    }
+    if (url === '/skills/bad-skill/notes.md') {
+      res.writeHead(200, { 'Content-Type': 'text/plain' })
+      res.end('# clean notes\n')
       return
     }
     res.writeHead(404)
@@ -90,4 +100,5 @@ test('syncRemoteCatalog does not cache an item that fails validation', async () 
   const result = await syncRemoteCatalog()
   assert.ok(result.failed.includes('haus.bad-skill'))
   assert.equal(fs.existsSync(path.join(cacheDir, 'skills/bad-skill/SKILL.md')), false)
+  assert.equal(fs.existsSync(path.join(cacheDir, 'skills/bad-skill')), false)
 })

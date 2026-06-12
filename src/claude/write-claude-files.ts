@@ -18,6 +18,11 @@ import { claudePath, displayPath, hausPath, packageRoot } from '../utils/paths.j
 import { DEFAULT_HOOKS_CONFIG } from './load-hooks-config.js'
 import { writeManagedJson, writeManagedText } from './managed-write.js'
 import { applyProjectSettingsMerge, mergeProjectSettings } from './merge-project-settings.js'
+import {
+  SUPERPOWERS_ORIGIN_SOURCE_ID,
+  installCatalogSkill,
+  installSuperpowersShared,
+} from './superpowers-install.js'
 import { assertPostApplySettingsHausContract } from './verify-hooks-contract.js'
 import { writeRootClaudeMd } from './write-root-claude-md.js'
 import { writeWorkflowConfig } from './write-workflow-config.js'
@@ -155,6 +160,7 @@ export async function writeClaudeFiles(
       : rec.recommended
 
   let curatedReviewStatusSkips = 0
+  let superpowersSharedInstalled = false
   for (const item of catalogItems) {
     const manifestItem = manifestById.get(item.id)
     if (!manifestItem?.path) continue
@@ -189,13 +195,31 @@ export async function writeClaudeFiles(
         log(
           `${displayPath(root, destination)}: ${exists ? 'would overwrite' : 'would create'} (${item.id})`,
         )
+      } else if (item.type === 'skill') {
+        await installCatalogSkill(sourcePath, destination, {
+          originSourceId: manifestItem.originSourceId,
+          dryRun: false,
+        })
       } else {
         await fs.ensureDir(path.dirname(destination))
         await fs.copy(sourcePath, destination, { overwrite: true, errorOnExist: false })
       }
       files.push(destination)
+      const relPaths = [path.relative(root, destination)]
+      if (
+        !superpowersSharedInstalled &&
+        manifestItem.originSourceId === SUPERPOWERS_ORIGIN_SOURCE_ID &&
+        item.type === 'skill'
+      ) {
+        const sharedRel = await installSuperpowersShared(contentRoot, root, dryRun)
+        if (sharedRel) {
+          superpowersSharedInstalled = true
+          relPaths.push(sharedRel)
+          files.push(path.join(root, sharedRel))
+        }
+      }
       const current = installedPathsByItem.get(item.id) ?? []
-      installedPathsByItem.set(item.id, [...current, path.relative(root, destination)])
+      installedPathsByItem.set(item.id, [...current, ...relPaths])
       installedIds.add(item.id)
     } else {
       warn(

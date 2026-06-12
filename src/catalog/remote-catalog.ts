@@ -12,7 +12,12 @@ import type { CatalogItem } from '../types.js'
 import { mapWithConcurrency } from '../utils/fs.js'
 import { warn } from '../utils/logger.js'
 
-import { CATALOG_CACHE_SUBDIR, CATALOG_REPO_URL } from './constants.js'
+import {
+  CATALOG_CACHE_SUBDIR,
+  CATALOG_GITHUB_API_URL,
+  CATALOG_REPO_URL,
+  SUPERPOWERS_SHARED_CATALOG_REL,
+} from './constants.js'
 import { validateCatalogItem } from './ingest-catalog.js'
 import { parseManifest } from './manifest-schema.js'
 
@@ -25,6 +30,7 @@ export function getCacheDir(): string {
 }
 
 let cachedCatalogRef: string | undefined
+let cachedBlobPaths: string[] | undefined
 
 /** Latest resolved catalog ref for this process (informational / lock metadata). */
 export function getResolvedCatalogRef(): string {
@@ -67,6 +73,17 @@ async function fetchText(url: string): Promise<string | null> {
     const res = await fetch(url, { signal: AbortSignal.timeout(10_000) })
     if (!res.ok) return null
     return await res.text()
+  } catch {
+    return null
+  }
+}
+
+/** Fetches raw bytes from a URL; returns null on any network or HTTP error. Timeout: 10 s. */
+async function fetchBytes(url: string): Promise<Buffer | null> {
+  try {
+    const res = await fetch(url, { signal: AbortSignal.timeout(10_000) })
+    if (!res.ok) return null
+    return Buffer.from(await res.arrayBuffer())
   } catch {
     return null
   }
@@ -163,34 +180,255 @@ function safeJoin(base: string, itemPath: string): string | null {
 
 const KNOWN_ITEM_TYPES = new Set(['skill', 'agent', 'template', 'command'])
 
-/** True for a reference entry that points at an external resource rather than a bundled file. */
-function isExternalReference(ref: string): boolean {
-  return /^[a-z][a-z0-9+.-]*:\/\//i.test(ref)
+function isMarkdownPath(rel: string): boolean {
+  return rel.toLowerCase().endsWith('.md')
 }
 
-/**
- * Downloads a skill's nested reference files (e.g. `references/conventions.md`) into the
- * cache alongside its SKILL.md. External URL references are skipped. Idempotent: only
- * fetches files that are not already cached, so it safely backfills older partial caches.
- */
-async function downloadSkillReferences(
-  item: CatalogItem,
+async function listFilesRecursive(dir: string, base = dir): Promise<string[]> {
+  const out: string[] = []
+  if (!(await fs.pathExists(dir))) return out
+  for (const entry of await fs.readdir(dir, { withFileTypes: true })) {
+    const full = path.join(dir, entry.name)
+    if (entry.isDirectory()) {
+      out.push(...(await listFilesRecursive(full, base)))
+    } else if (entry.isFile()) {
+      out.push(path.relative(base, full).replace(/\\/g, '/'))
+    }
+  }
+  return out.sort()
+}
+
+/** Mock test hook: GET {base}/__haus_tree__/{prefix} → JSON string[] of paths relative to prefix. */
+async function listMockPrefixFiles(base: string, prefix: string): Promise<string[] | null> {
+  const text = await fetchText(`${base}/__haus_tree__/${encodeURIComponent(prefix)}`)
+  if (text === null) return null
+  try {
+    const parsed = JSON.parse(text) as unknown
+    if (!Array.isArray(parsed) || !parsed.every((e) => typeof e === 'string')) return null
+    return parsed as string[]
+  } catch {
+    return null
+  }
+}
+
+async function fetchGitHubRecursiveBlobPaths(ref: string): Promise<string[] | null> {
+  try {
+    const commitRes = await fetch(`${CATALOG_GITHUB_API_URL}/commits/${encodeURIComponent(ref)}`, {
+      signal: AbortSignal.timeout(15_000),
+      headers: { Accept: 'application/vnd.github+json' },
+    })
+    if (!commitRes.ok) return null
+    const commit = (await commitRes.json()) as { commit: { tree: { sha: string } } }
+    const treeSha = commit.commit.tree.sha
+    const treeRes = await fetch(`${CATALOG_GITHUB_API_URL}/git/trees/${treeSha}?recursive=1`, {
+      signal: AbortSignal.timeout(30_000),
+      headers: { Accept: 'application/vnd.github+json' },
+    })
+    if (!treeRes.ok) return null
+    const tree = (await treeRes.json()) as { tree: Array<{ path: string; type: string }> }
+    return tree.tree.filter((e) => e.type === 'blob').map((e) => e.path)
+  } catch {
+    return null
+  }
+}
+
+/** All blob paths in the catalog repo at the resolved ref (cached per sync). */
+export async function fetchCatalogBlobPaths(_base: string): Promise<string[] | null> {
+  if (cachedBlobPaths) return cachedBlobPaths
+  if (process.env['HAUS_CATALOG_REMOTE_BASE']) return null
+  const ref = getResolvedCatalogRef()
+  const paths = await fetchGitHubRecursiveBlobPaths(ref)
+  if (paths) cachedBlobPaths = paths
+  return paths
+}
+
+/** File paths relative to `prefix` (e.g. SKILL.md, references/foo.md). */
+export async function listFilesUnderCatalogPrefix(
+  prefix: string,
+  base: string,
+): Promise<string[] | null> {
+  const normalized = prefix.replace(/\\/g, '/').replace(/\/+$/, '')
+  const prefixSlash = `${normalized}/`
+
+  if (process.env['HAUS_CATALOG_REMOTE_BASE']) {
+    return listMockPrefixFiles(base, normalized)
+  }
+
+  const blobs = await fetchCatalogBlobPaths(base)
+  if (!blobs) return null
+  return blobs
+    .filter((p) => p.startsWith(prefixSlash))
+    .map((p) => p.slice(prefixSlash.length))
+    .sort()
+}
+
+type FetchedFile =
+  | { rel: string; kind: 'text'; body: string }
+  | { rel: string; kind: 'binary'; body: Buffer }
+
+async function fetchPrefixFiles(
+  catalogPrefix: string,
+  relFiles: string[],
+  base: string,
+  label: string,
+): Promise<FetchedFile[] | null> {
+  const fetched: FetchedFile[] = []
+  for (const rel of relFiles) {
+    const url = `${base}/${catalogPrefix}/${rel}`
+    if (isMarkdownPath(rel)) {
+      const text = await fetchText(url)
+      if (text === null) {
+        warn(`Failed to fetch ${rel} for ${label}`)
+        return null
+      }
+      fetched.push({ rel, kind: 'text', body: text })
+    } else {
+      const bytes = await fetchBytes(url)
+      if (bytes === null) {
+        warn(`Failed to fetch ${rel} for ${label}`)
+        return null
+      }
+      fetched.push({ rel, kind: 'binary', body: bytes })
+    }
+  }
+  return fetched
+}
+
+function validateMarkdownFiles(item: CatalogItem, fetched: FetchedFile[]): boolean {
+  for (const file of fetched) {
+    if (file.kind !== 'text' || !isMarkdownPath(file.rel)) continue
+    const verdict = validateCatalogItem(item, file.body)
+    if (!verdict.ok) {
+      warn(`Rejected ${item.id} at ingest: ${verdict.reason}`)
+      return false
+    }
+  }
+  return true
+}
+
+async function directoryMatchesFetched(destDir: string, fetched: FetchedFile[]): Promise<boolean> {
+  if (!(await fs.pathExists(destDir))) return false
+  const existing = await listFilesRecursive(destDir)
+  const relSet = new Set(fetched.map((f) => f.rel))
+  if (existing.length !== fetched.length) return false
+  for (const rel of existing) {
+    if (!relSet.has(rel)) return false
+  }
+  for (const file of fetched) {
+    const dest = path.join(destDir, file.rel)
+    if (!(await fs.pathExists(dest))) return false
+    if (file.kind === 'text') {
+      const local = await fs.readFile(dest, 'utf8')
+      if (local !== file.body) return false
+    } else {
+      const local = await fs.readFile(dest)
+      if (!local.equals(file.body)) return false
+    }
+  }
+  return true
+}
+
+async function writeFetchedDirectory(destDir: string, fetched: FetchedFile[]): Promise<void> {
+  if (await fs.pathExists(destDir)) {
+    await fs.remove(destDir)
+  }
+  await fs.ensureDir(destDir)
+  for (const file of fetched) {
+    const dest = path.join(destDir, file.rel)
+    await fs.ensureDir(path.dirname(dest))
+    if (file.kind === 'text') {
+      await fs.writeFile(dest, file.body, 'utf8')
+    } else {
+      await fs.writeFile(dest, file.body)
+    }
+  }
+}
+
+async function syncDirectoryFromPrefix(
+  item: CatalogItem | { id: string; path: string },
+  catalogPrefix: string,
   destDir: string,
   base: string,
-): Promise<void> {
-  for (const ref of item.references ?? []) {
-    if (isExternalReference(ref)) continue
-    const refDest = safeJoin(destDir, ref)
-    if (!refDest) {
-      warn(`Skipping reference "${ref}" for ${item.id}: path traversal detected`)
-      continue
+  opts: { validateMarkdown: boolean },
+): Promise<'created' | 'updated' | 'unchanged' | 'failed'> {
+  const relFiles = await listFilesUnderCatalogPrefix(catalogPrefix, base)
+  if (!relFiles) {
+    warn(`Failed to list files for ${item.id}`)
+    return 'failed'
+  }
+  if (!relFiles.includes('SKILL.md') && catalogPrefix !== SUPERPOWERS_SHARED_CATALOG_REL) {
+    warn(`Failed to fetch content for ${item.id}: missing SKILL.md`)
+    return 'failed'
+  }
+  if (relFiles.length === 0) {
+    return 'unchanged'
+  }
+
+  const fetched = await fetchPrefixFiles(catalogPrefix, relFiles, base, item.id)
+  if (!fetched) return 'failed'
+
+  if (opts.validateMarkdown && 'type' in item) {
+    if (!validateMarkdownFiles(item as CatalogItem, fetched)) return 'failed'
+  } else if (opts.validateMarkdown) {
+    for (const file of fetched) {
+      if (file.kind !== 'text' || !isMarkdownPath(file.rel)) continue
+      const verdict = validateCatalogItem(
+        { id: item.id, type: 'skill', path: catalogPrefix },
+        file.body,
+      )
+      if (!verdict.ok) {
+        warn(`Rejected ${item.id} at ingest: ${verdict.reason}`)
+        return 'failed'
+      }
     }
-    const text = await fetchText(`${base}/${item.path}/${ref}`)
-    if (text === null) {
-      warn(`Failed to fetch reference "${ref}" for ${item.id}`)
-      continue
-    }
-    await writeTextIfChanged(refDest, text)
+  }
+
+  const existed = await fs.pathExists(destDir)
+  if (await directoryMatchesFetched(destDir, fetched)) {
+    return 'unchanged'
+  }
+
+  await writeFetchedDirectory(destDir, fetched)
+  return existed ? 'updated' : 'created'
+}
+
+async function syncSkillDirectory(
+  item: CatalogItem,
+  base: string,
+): Promise<'created' | 'updated' | 'unchanged' | 'failed'> {
+  const destDir = safeJoin(getCacheDir(), item.path)
+  if (!destDir) {
+    warn(`Skipping ${item.id}: path traversal detected`)
+    return 'failed'
+  }
+  try {
+    return await syncDirectoryFromPrefix(item, item.path, destDir, base, {
+      validateMarkdown: true,
+    })
+  } catch (err) {
+    warn(`Failed to cache ${item.id}: ${err instanceof Error ? err.message : String(err)}`)
+    return 'failed'
+  }
+}
+
+async function syncSuperpowersShared(
+  base: string,
+): Promise<'created' | 'updated' | 'unchanged' | 'failed' | 'skipped'> {
+  const relFiles = await listFilesUnderCatalogPrefix(SUPERPOWERS_SHARED_CATALOG_REL, base)
+  if (!relFiles || relFiles.length === 0) return 'skipped'
+  const destDir = safeJoin(getCacheDir(), SUPERPOWERS_SHARED_CATALOG_REL)
+  if (!destDir) return 'failed'
+  try {
+    return await syncDirectoryFromPrefix(
+      { id: 'haus.superpowers-shared', path: SUPERPOWERS_SHARED_CATALOG_REL },
+      SUPERPOWERS_SHARED_CATALOG_REL,
+      destDir,
+      base,
+      { validateMarkdown: true },
+    )
+  } catch (err) {
+    warn(`Failed to cache superpowers shared: ${err instanceof Error ? err.message : String(err)}`)
+    return 'failed'
   }
 }
 
@@ -211,30 +449,7 @@ async function syncOneItem(
   }
 
   if (item.type === 'skill') {
-    const destDir = safeJoin(getCacheDir(), item.path)
-    if (!destDir) {
-      warn(`Skipping ${item.id}: path traversal detected`)
-      return 'failed'
-    }
-    const dest = path.join(destDir, 'SKILL.md')
-    const text = await fetchText(`${base}/${item.path}/SKILL.md`)
-    if (!text) {
-      warn(`Failed to fetch content for ${item.id}`)
-      return 'failed'
-    }
-    const verdict = validateCatalogItem(item, text)
-    if (!verdict.ok) {
-      warn(`Rejected ${item.id} at ingest: ${verdict.reason}`)
-      return 'failed'
-    }
-    try {
-      const outcome = await writeTextIfChanged(dest, text)
-      await downloadSkillReferences(item, destDir, base)
-      return outcome
-    } catch (err) {
-      warn(`Failed to cache ${item.id}: ${err instanceof Error ? err.message : String(err)}`)
-      return 'failed'
-    }
+    return syncSkillDirectory(item, base)
   }
 
   const dest = safeJoin(getCacheDir(), item.path)
@@ -265,6 +480,8 @@ async function syncOneItem(
  * Skips items that already exist; logs a warning and falls back to the bundled catalog on failure.
  */
 export async function syncRemoteCatalog(): Promise<SyncResult> {
+  cachedBlobPaths = undefined
+
   const manifest = await fetchRemoteManifest()
   if (!manifest) {
     warn('Remote catalog fetch failed — using bundled catalog')
@@ -294,9 +511,14 @@ export async function syncRemoteCatalog(): Promise<SyncResult> {
   const base = await remoteBase()
 
   const outcomes = await mapWithConcurrency(items, (item) => syncOneItem(item, base), 8)
+  const sharedOutcome = await syncSuperpowersShared(base)
+  if (sharedOutcome === 'failed') {
+    warn('Failed to cache superpowers shared support files')
+  }
+
   for (let i = 0; i < items.length; i++) {
     const item = items[i]!
-    const outcome = outcomes[i]
+    const outcome = outcomes[i]!
     if (outcome === 'created') newItems.push(item.id)
     else if (outcome === 'updated') refreshed.push(item.id)
     else if (outcome === 'unchanged') unchanged++
