@@ -6,16 +6,23 @@ Clone a project's repos **and** set each one up for local development — node v
 
 Run the full `project:clone` flow by following `~/.claude/commands/haus-clone.md` end to end (name → one repo; no name → workspace repos from `repos.manifest.json`). Carry the resulting repo list into Step 2.
 
-## Step 2 — Confirm the setup pass
+## Step 2 — Prerequisite gate (one consolidated check)
 
-1. List the repos and what each will run (node, deps, localdev steps). Get a go-ahead. For **reused** local clones, ask whether to re-run setup.
-2. Check `NODE_AUTH_TOKEN` is exported if any repo needs private `@`-scoped packages; if missing, tell the user — those installs fail without it.
+Before any setup work, probe **everything** the workspace will need and surface **all** gaps in a single prompt — never discover them piecemeal mid-flow. For the repos being set up, check:
+
+- **Auth tokens** — `NODE_AUTH_TOKEN` exported (private `@`-scoped npm packages fail without it); `~/.composer/auth.json` (or a repo-local `auth.json`) present if any repo has private composer deps.
+- **Docker daemon** — running (`docker info`); required for any repo's `needs:` services.
+- **PHP environment** — `valet`, `herd`, `ddev`, or `php` on PATH, if any repo is a PHP/WordPress site.
+- **WP-CLI** — `wp --version`, if any repo's `seed:` pulls a WordPress DB.
+- **Node versions** — the versions named in each repo's `.nvmrc` / `engines.node` are installable via `nvm`.
+
+Then list the repos and what each will run (node, deps, localdev steps), **report every gap at once**, and get a single go-ahead. For **reused** local clones, ask whether to re-run setup. For each gap, name what it blocks; the user decides whether to fix it now (**ask before any global/system install**) or proceed and skip the affected steps. Don't begin per-repo work until this gate is acknowledged.
 
 ## Step 3 — Per-repo dependency pass
 
 For each repo, in its own directory, detect and install from the repo's own files (read its `docs/setup.md` / `CLAUDE.md` / `README.md` first — they win). Select node from `.nvmrc`/`engines.node` (`nvm install`), enable the pinned package manager (`corepack enable`), install JS deps (`yarn`/`pnpm`/`npm` by lockfile), composer deps if `composer.json` + `composer` present. Run each repo's steps in one login shell so the node version stays active. Per-repo failure is reported and skipped, not fatal.
 
-**Scaffold `.env`** so the env-wiring in Step 4 has a file to write to: if `.env.example` exists and `.env` does not, copy it; otherwise create an empty `.env`. Per decision D5, write `.env`; if the write is blocked, print the values for the user to add. Tell the user real secrets still need filling.
+**Do not touch `.env` here.** Env is produced deterministically in the env phase (Step 4 → "Env"), which stages a complete file to a guard-safe path and hands the user one promote command. The dependency pass installs only — it neither creates nor writes any `.env`.
 
 ## Step 4 — Local-dev orchestration
 
@@ -27,7 +34,7 @@ Specify the least. Infer the rest from the repo's stack + these conventions, and
 
 - **IMPORTANT — never install anything without asking first; global/system tools especially** (Homebrew, Docker, Laravel Herd, global `npm`/`composer` packages). Detect what's already present; if something required is missing, name it, say why it's needed, and get an explicit **yes** before installing. Prefer the least-invasive option, and don't switch or override tools the dev already has.
 - **PHP / WordPress sites are served by the developer's own PHP environment.** If they already have one — detect `valet`, `herd`, `ddev`, or `php` on PATH — **use it**: just satisfy the env contract (docroot → the repo's `web/`, HTTPS) and report the URL; never override what they already run. **Only when no local PHP environment exists** (a completely fresh machine) suggest installing **[Laravel Herd](https://herd.laravel.com)** as the default (asking first) and point its docroot at `web/` + `herd secure`.
-- **Databases and other services (a repo's `needs:`) run in Docker.** **If Docker isn't installed**, it's a prerequisite for these — tell the user and **ask before installing it** (it's a global install). Once Docker is available, provision services the simplest way (a one-off `docker run`, or the repo's own compose if it ships one), then wire the matching env vars to point at them. Confirm before creating/overwriting data.
+- **Databases and other services (a repo's `needs:`) run in Docker as standalone containers.** Bring each up with a **clean `docker run`** — image, host port, and env from the house convention for that service (e.g. `mysql` → `mysql:8` on `127.0.0.1:3306`, root password from generated secrets; `postgres` → `postgres:16` on `5432`). **Do not provision a `needs:` service from the repo's own `docker-compose.yml` when that compose bind-mounts repo-relative init files** (e.g. `./seed.sql`, `./docker-entrypoint-initdb.d/`): those mounts need files the guard won't let us create, and they conflate bring-up with seeding (which is the separate `seed:` step). **If Docker isn't installed** it's a prerequisite (surfaced in the Step 2 gate) — **ask before installing it** (global install). **Port-conflict caveat:** if the conventional host port is already taken, pick the next free port, use it, and **record the chosen port in the workspace `localdev.yml` `env` map** so sink repos point at the right place. A `needs:` service comes up **empty** — populating it is always the separate `seed:` step.
 - **Dependencies** install from the lockfile (Step 3).
 - A repo's `localdev.yml` carries **only what can't be inferred** — its `needs`, repo-specific `build`/`seed` commands, env keys, and URL. Detect the stack (e.g. Bedrock = `composer.json` + `web/` docroot + `wp-cli.yml`; Vendure/Node = `docker-compose.yml` + `@vendure/*`) and apply the matching convention.
 
@@ -57,6 +64,8 @@ steps: # optional escape hatch: explicit ordered shell steps when intent isn't e
 
 **Workspace — `<workspace>/.haus-workflow/localdev.yml`** (the glue BETWEEN repos):
 
+The workspace `env` map is the **single source of truth for cross-repo values** — DB names, ports, host URLs are chosen once and recorded here as literals. The env phase reads values **from here**, never from a repo's `.env`. (badvarme's failure was that these values lived only in `.env`; `db:pull` couldn't find them.)
+
 ```yaml
 order: [repo-a, repo-b] # setup/startup order, by manifest id
 links:
@@ -64,9 +73,10 @@ links:
   - { type: composer-path, in: <repo>, dep: <sibling-repo> }
   - { type: yarn-link, in: [<repo>, ...], dep: <sibling-package-repo> }
 env:
-  - source: { repo: <repo>, provides: '<value>' }
+  - value: 'badvarme_local' # a chosen literal — the recorded source of truth, OR …
+    # source: { repo: <repo>, provides: '<value>' }   # … a value produced by another repo
     sinks:
-      - { repo: <repo>, key: ENV_KEY }
+      - { repo: <repo>, key: DB_NAME } # written under `key` into each sink's staged env
 ```
 
 ### Run order
@@ -74,27 +84,57 @@ env:
 1. **Discover** `.haus-workflow/localdev.yml` in the workspace root and each repo.
 2. **Resolve order** from the workspace `order` (repos not listed run last, in manifest order). No workspace file → manifest order.
 3. **Per repo, in order**, apply intent via the conventions:
-   - **`needs`** → provision each service in Docker if not already running, and wire its env vars. Confirm before creating/overwriting data.
+   - **`needs`** → bring up each service as a **standalone `docker run`** (image/port/env from conventions; **not** the repo's compose when it bind-mounts repo-relative init files) if not already running. The service comes up **empty**; record its values in the workspace `localdev.yml` `env` map. No data is created here, so no overwrite prompt at this step — data lands in `seed:`.
    - **`build`** → run it (honor any node version the repo's docs note).
    - **`serve`** → for `via: herd` / PHP envs, install nothing — verify the dev's environment serves `web/`, and report the URL.
-   - **`seed`** → run it; **confirm first** if it's remote (SSH) or destructive (overwrites data).
+   - **`seed`** → populate the empty datastore. **Always a distinct, confirm-gated step, separate from `needs:` bring-up** (don't conflate "DB up" with "DB has data"). Before running, **check its prerequisites and report any gap instead of running blind** — e.g. WP-CLI present (for `wp` / `db:pull` seeds), the target repo's **`.env` promoted** (the seed reads connection values from it), the **SSH alias resolves** (for remote pulls like `dep db:pull staging-oderland`). **Confirm first** for every remote (SSH) or destructive (overwrites data) seed — every run, even on re-run. Missing prerequisite → skip with a clear message, don't guess.
    - **`steps`** (escape hatch) → run in order, selecting `node:` per step, `optional:` failures continue, **confirming before any `remote:`/`destructive:` step** — every run, even on re-run.
 4. **Links** (workspace-owned, performed generically — do NOT call a repo's own `setup-dev-mode.sh`, which is deprecated):
    - `symlink` → `ln -s <from> <to>`; replace an existing symlink, but never clobber a real directory without confirmation.
    - `composer-path` → in `in`'s `composer.json`, set the `dep`'s require to `{ "type": "path", "url": "../<dep-folder>", "options": { "symlink": true } }`, then `composer update <vendor/dep>`.
    - `yarn-link` → `yarn link` in the `dep` repo, then `yarn link <pkg-name>` in each `in` repo (read `<pkg-name>` from the dep's `package.json`).
-5. **Env:** for each workspace `env` entry, confirm the `source` is satisfiable, then upsert the value into each sink repo's `.env` under its `key` — **creating `.env` if it does not exist** (Step 3 scaffolds it, but don't assume). **If the write is blocked or fails, print the exact `KEY=value` lines for the user to paste** (decision D5). Real secrets (DB passwords, tokens) remain the user's to fill.
-6. **Report, then offer to start.** Give the per-repo summary, then **ask the user whether to start everything now.**
-   - **Yes** → start each repo in the workspace `order` (its `serve.start`, e.g. `yarn dev`; bring up any remaining foreground services), run any follow-ups (e.g. `wp sync-products sync`), then **print the live URLs** (each repo's `serve.url`).
-   - **No** → just print the ordered start commands + follow-ups as next steps; start nothing.
+5. **Env (deterministic):** produce a complete, guard-safe env file per repo — no improvising, no "maybe a temp file, maybe a `cp`."
+   1. **Compute** each repo's values, in this precedence: the workspace `localdev.yml` `env` map (chosen literals + cross-repo `source` values — the single source of truth) → generated secrets (DB passwords/tokens minted this run) → the **dev-defaults table** below for anything still unset.
+   2. **Write** the result to a fixed, guard-safe staging path: **`<repo>/.haus-workflow/env.local.generated`**. **Never write a `.env`-named file here** — `.env*` names trip the secret guard; the staging name does not. Overwrite the staging file freely (it's generated, not the live config).
+   3. **Hand off** with one promote command and the URLs that follow. Do **not** run the promote yourself (writing `.env` is the user's gate) — print it:
 
-**Default is "ready to run" (D2):** the preparation — datastores up (`docker compose up -d`), DBs pulled, links, builds, env wired — always happens. Starting the **foreground** dev servers and the initial product sync happens **only if the user says yes** to the start prompt above; otherwise they're printed, not run.
+      ```bash
+      # promote staged env into each repo (run from the workspace root)
+      for r in <repo-a> <repo-b>; do cp "$r/.haus-workflow/env.local.generated" "$r/.env"; done
+      ```
 
-## Step 5 — Report
+      Then tell the user the live URLs they get once promoted and started (each repo's `serve.url`). **Real secrets the generator can't mint** (third-party API keys, prod credentials) are left as clearly-marked `KEY=` blanks in the staged file for the user to fill before promoting.
 
-Summarise per repo (node, deps, localdev steps, links, env). Then **ask whether to start everything now**:
+   **Dev-defaults table** — used only when neither `localdev.yml` nor a generated secret supplies the value:
 
-- **Yes** → start the dev servers in workspace `order`, run any follow-ups, and **print the live URLs** so the user can open the running app.
-- **No** → print the ordered start commands + follow-ups instead, and start nothing.
+   | Key                              | Default                                                             |
+   | -------------------------------- | ------------------------------------------------------------------- |
+   | `DB_HOST`                        | `127.0.0.1`                                                         |
+   | `DB_PORT`                        | `3306` (mysql) / `5432` (postgres) — or the port chosen on conflict |
+   | `DB_USER` / `DB_PASSWORD`        | `root` / a generated secret                                         |
+   | `WP_HOME`, `WP_SITEURL`, `*_URL` | the repo's `serve.url`                                              |
+   | `WP_ENV` / `APP_ENV`             | `development`                                                       |
+
+6. **Report, then offer to start.** Give the per-repo summary (including each repo's env-staging path), then **ask the user whether to start everything now.**
+   - **Yes** → if the staged env hasn't been promoted to `.env` yet, **print the promote command and ask the user to run it first** (the agent doesn't write `.env`); once promoted, start each repo in the workspace `order` (its `serve.start`, e.g. `yarn dev`; bring up any remaining foreground services), run any follow-ups (e.g. `wp sync-products sync`), then **print the live URLs** (each repo's `serve.url`).
+   - **No** → just print the promote command + ordered start commands + follow-ups as next steps; start nothing.
+
+**Default is "ready to run" (D2):** the preparation — datastores up (standalone `docker run`), seeds applied (confirm-gated), links, builds, env **staged** to `.haus-workflow/env.local.generated` with its promote command — always happens. Promoting the env, starting the **foreground** dev servers, and the initial product sync happen **only if the user says yes** to the start prompt above; otherwise they're printed, not run.
+
+## Step 5 — Report and define "done"
+
+**"Done" is an explicit terminal state**, not "looks set up". The preparation reaches:
+
+- datastores up (standalone containers),
+- dependencies installed and builds green,
+- links wired,
+- env **staged** to each repo's `.haus-workflow/env.local.generated`, with a single promote command printed.
+
+From there, **live URLs are reachable only if** every required secret is satisfiable **and** the user promotes the staged env and starts the servers. If a secret can't be minted, "done" is the **promote-command handoff** — not live links. Never imply links the secret gate will quietly break: say exactly which secrets are still blank and what the user must fill before the URLs come up.
+
+Summarise per repo (node, deps, localdev steps, links, env-staging path + promote command). Then **ask whether to start everything now**:
+
+- **Yes** → if `.env` isn't promoted yet, print the promote command and ask the user to run it first; then start the dev servers in workspace `order`, run any follow-ups, and **print the live URLs** so the user can open the running app.
+- **No** → print the promote command + ordered start commands + follow-ups instead, and start nothing.
 
 Never start the app without that explicit yes.
