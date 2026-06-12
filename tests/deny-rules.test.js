@@ -5,16 +5,37 @@ import { buildDenyRules } from '../src/security/deny-rules.js'
 import { mergeDenyRules, stripHausDeny } from '../src/install/settings-merge.js'
 
 describe('deny-rules: buildDenyRules', () => {
-  it('derives a Bash prefix-deny rule for each dangerous command', () => {
+  it('derives a Bash prefix-deny rule for each deny-tier command', () => {
     const rules = buildDenyRules()
     assert.ok(rules.includes('Bash(git push --force:*)'))
-    assert.ok(rules.includes('Bash(rm -rf:*)'))
+    assert.ok(rules.includes('Bash(sudo:*)'))
+    assert.ok(rules.includes('Bash(npm publish:*)'))
   })
 
-  it('derives file-tool deny rules for sensitive paths', () => {
+  it('does NOT include ask-tier bash commands', () => {
     const rules = buildDenyRules()
-    assert.ok(rules.some((r) => r.startsWith('Write(') && r.includes('.env')))
+    assert.ok(!rules.includes('Bash(rm -rf:*)'))
+    assert.ok(!rules.includes('Bash(chown -R:*)'))
+    assert.ok(!rules.includes('Bash(git reset --hard:*)'))
+  })
+
+  it('derives file-tool deny rules for deny-tier paths (pem, key, certs, etc.)', () => {
+    const rules = buildDenyRules()
     assert.ok(rules.some((r) => r.startsWith('Read(') && r.includes('.pem')))
+    assert.ok(rules.includes('Read(customer-data/**)'))
+    assert.ok(rules.includes('Write(secrets/**)'))
+  })
+
+  it('does NOT deny .env, storage/logs, exports (they are ask-tier or dropped)', () => {
+    const rules = buildDenyRules()
+    assert.ok(!rules.some((r) => r.includes('.env')))
+    assert.ok(!rules.some((r) => r.includes('storage/logs')))
+    assert.ok(!rules.some((r) => r.includes('exports')))
+  })
+
+  it('does NOT include *.sql (dropped entirely)', () => {
+    const rules = buildDenyRules()
+    assert.ok(!rules.some((r) => r.includes('.sql')))
   })
 
   it('returns no duplicate rules', () => {

@@ -6,15 +6,15 @@
 
 ## Source-of-truth documents
 
-| Workflow term | Default path                                                                                         |
-| ------------- | ---------------------------------------------------------------------------------------------------- |
-| Spec          | `docs/SPEC.md`                                                                                       |
-| Design        | `docs/DESIGN.md`                                                                                     |
-| UX flows      | `docs/UX.md`                                                                                         |
-| Mockups       | `docs/design/` (gitignore binaries, commit README.txt)                                               |
-| Plans         | `docs/plans/<feature-slug>.md` (one per feature, delete after merge; git history is the audit trail) |
-| Decision log  | `docs/adr/`                                                                                          |
-| Failure modes | `docs/runbook.md`                                                                                    |
+| Workflow term | Default path                                                          |
+| ------------- | --------------------------------------------------------------------- |
+| Spec          | `docs/SPEC.md`                                                        |
+| Design        | `docs/DESIGN.md`                                                      |
+| UX flows      | `docs/UX.md`                                                          |
+| Mockups       | `docs/design/` (gitignore binaries, commit README.txt)                |
+| Plans         | `docs/plans/<feature-slug>.md` (one per feature, persist after merge) |
+| Decision log  | `docs/adr/`                                                           |
+| Failure modes | `docs/runbook.md`                                                     |
 
 When the user says "spec", "design", "ux", "plan", or "mockup": resolve to the rows above.
 
@@ -93,13 +93,14 @@ Add to `.claude/settings.json`:
       "Bash(git commit --no-verify:*)",
       "Bash(git push --force:*)",
       "Bash(git push -f:*)",
-      "Read(.env)",
-      "Write(.env)",
       "Read(*.pem)",
+      "Edit(*.pem)",
       "Write(*.pem)",
       "Read(*.key)",
+      "Edit(*.key)",
       "Write(*.key)"
-    ]
+    ],
+    "ask": ["Edit(.env)", "Write(.env)"]
   }
 }
 ```
@@ -141,7 +142,7 @@ Gate every commit on (parallel):
 1. Type check
 2. Lint
 3. Format
-4. Secret scan: `git diff --cached | grep -iE "(password|secret|token|api_key)\\s*[:=]\\s*['\"]"`
+4. Secret scan: `! git diff --cached | grep -iE "(password|secret|token|api_key)\\s*[:=]\\s*['\"]"`
 
 Gate unit tests on pre-push (slow). Never gate E2E in hooks.
 

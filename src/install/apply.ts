@@ -7,6 +7,7 @@ import path from 'node:path'
 
 import fs from 'fs-extra'
 
+import { buildAskRules } from '../security/ask-rules.js'
 import { buildDenyRules } from '../security/deny-rules.js'
 import { readText, writeText } from '../utils/fs.js'
 import { log, warn } from '../utils/logger.js'
@@ -24,6 +25,7 @@ import {
 import {
   loadHooksFragment,
   mergeAllowRules,
+  mergeAskRules,
   mergeDenyRules,
   mergeHooks,
   readSettings,
@@ -219,7 +221,9 @@ export async function applyInstall(options: ApplyOptions = {}): Promise<ApplyRes
   // Write the deterministic NEVER rules into permissions.deny (WORKFLOW.md "enforce in both").
   const { settings: deniedSettings } = mergeDenyRules(hookSettings, buildDenyRules())
   // Pre-allow haus's own scoped subcommands so non-devs aren't prompted on every step (WS6).
-  const { settings: mergedSettings } = mergeAllowRules(deniedSettings, buildAllowRules())
+  const { settings: allowedSettings } = mergeAllowRules(deniedSettings, buildAllowRules())
+  // Write ask-tier rules into permissions.ask so Claude prompts before executing them.
+  const { settings: mergedSettings } = mergeAskRules(allowedSettings, buildAskRules())
   result.hookIds = addedIds
 
   // Delete files that were in the old manifest but are no longer in the current package.

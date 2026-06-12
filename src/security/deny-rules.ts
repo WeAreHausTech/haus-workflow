@@ -10,37 +10,26 @@
  *   - Bash uses prefix matching: `Bash(rm -rf:*)` (the `:*` ≡ trailing ` *`).
  *   - File tools use gitignore globs: `Read(*.pem)`, `Write(.env)`, `Read(secrets/**)`.
  */
-import { DANGEROUS_COMMANDS } from './dangerous-commands.js'
-import { SENSITIVE_PATHS } from './sensitive-paths.js'
+import { DENY_COMMANDS } from './dangerous-commands.js'
+import { DENY_DIRS, DENY_PATHS } from './sensitive-paths.js'
 
-/** Sensitive entries that name a directory — denied recursively via `<dir>/**`. */
-const SENSITIVE_DIRS = new Set([
-  'storage/logs',
-  'wp-content/uploads',
-  'uploads',
-  'customer-data',
-  'exports',
-  'secrets',
-  'certs',
-])
-
-/** File tools whose access to sensitive paths must be denied. */
+/** File tools whose access to deny-tier paths must be hard-blocked. */
 const FILE_TOOLS = ['Read', 'Edit', 'Write'] as const
 
 /**
  * Returns the deduped list of `permissions.deny` rule strings haus manages:
- * one Bash prefix-deny per dangerous command, plus Read/Edit/Write denies for
- * every sensitive path (directories denied recursively).
+ * one Bash prefix-deny per deny-tier command, plus Read/Edit/Write denies for
+ * every deny-tier path (directories denied recursively via `<dir>/**`).
  */
 export function buildDenyRules(): string[] {
   const rules: string[] = []
 
-  for (const command of DANGEROUS_COMMANDS) {
+  for (const command of DENY_COMMANDS) {
     rules.push(`Bash(${command}:*)`)
   }
 
-  for (const path of SENSITIVE_PATHS) {
-    const pattern = SENSITIVE_DIRS.has(path) ? `${path}/**` : path
+  for (const path of DENY_PATHS) {
+    const pattern = DENY_DIRS.has(path) ? `${path}/**` : path
     for (const tool of FILE_TOOLS) {
       rules.push(`${tool}(${pattern})`)
     }

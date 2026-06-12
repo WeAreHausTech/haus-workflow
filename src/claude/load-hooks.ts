@@ -3,15 +3,16 @@
  * The hook set is inlined here (no external file) so it is always in sync with the package.
  */
 
+import { buildAskRules } from '../security/ask-rules.js'
 import { buildDenyRules } from '../security/deny-rules.js'
 
-/** Shape written to `.claude/settings.json` under `hooks` (+ deterministic deny rules). */
+/** Shape written to `.claude/settings.json` under `hooks` (+ deterministic deny/ask rules). */
 export type ClaudeHooksSettings = {
   hooks: {
     UserPromptSubmit: Array<{ hooks: Array<{ type: 'command'; command: string }> }>
     PreToolUse: Array<{ matcher: string; hooks: Array<{ type: 'command'; command: string }> }>
   }
-  permissions?: { deny: string[] }
+  permissions?: { deny: string[]; ask?: string[] }
 }
 
 /**
@@ -55,7 +56,7 @@ const STABLE_HOOK_IDS: Record<string, string> = {
  * writer and both contract verifiers stay consistent.
  */
 export async function loadClaudeHooksSettings(): Promise<ClaudeHooksSettings> {
-  return { ...CANONICAL_HOOKS, permissions: { deny: buildDenyRules() } }
+  return { ...CANONICAL_HOOKS, permissions: { deny: buildDenyRules(), ask: buildAskRules() } }
 }
 
 /** Flat list for `.haus-workflow/recommended-hooks.json` (ids stable for known commands). */

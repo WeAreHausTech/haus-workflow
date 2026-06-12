@@ -45,12 +45,13 @@ type ClaudePermissions = {
 export type ClaudeSettings = {
   hooks?: Record<string, ClaudeHookEntry[]>
   permissions?: ClaudePermissions
-  /** Haus-private namespace used to track installed hook IDs, commands, and deny/allow rules. */
+  /** Haus-private namespace used to track installed hook IDs, commands, and deny/allow/ask rules. */
   _haus?: {
     hooks: string[]
     hookCommands?: string[]
     denyRules?: string[]
     allowRules?: string[]
+    askRules?: string[]
   }
   [key: string]: unknown
 }
@@ -125,9 +126,10 @@ export function mergeHooks(
   updated._haus = {
     hooks: [...existing, ...addedIds],
     hookCommands: [...existingCommands, ...addedCommands],
-    // Preserve deny/allow tracking so hook, deny, and allow merges are order-independent.
+    // Preserve deny/allow/ask tracking so hook, deny, allow, and ask merges are order-independent.
     ...(settings._haus?.denyRules ? { denyRules: settings._haus.denyRules } : {}),
     ...(settings._haus?.allowRules ? { allowRules: settings._haus.allowRules } : {}),
+    ...(settings._haus?.askRules ? { askRules: settings._haus.askRules } : {}),
   }
 
   return { settings: updated, addedIds }
@@ -164,6 +166,7 @@ export function mergeDenyRules(
     ...(settings._haus?.hookCommands ? { hookCommands: settings._haus.hookCommands } : {}),
     denyRules: [...trackedDeny, ...addedRules],
     ...(settings._haus?.allowRules ? { allowRules: settings._haus.allowRules } : {}),
+    ...(settings._haus?.askRules ? { askRules: settings._haus.askRules } : {}),
   }
 
   return { settings: updated, addedRules }
@@ -200,6 +203,7 @@ export function mergeAllowRules(
     ...(settings._haus?.hookCommands ? { hookCommands: settings._haus.hookCommands } : {}),
     ...(settings._haus?.denyRules ? { denyRules: settings._haus.denyRules } : {}),
     allowRules: [...trackedAllow, ...addedRules],
+    ...(settings._haus?.askRules ? { askRules: settings._haus.askRules } : {}),
   }
 
   return { settings: updated, addedRules }
@@ -230,7 +234,8 @@ export function stripHausAllow(settings: ClaudeSettings): ClaudeSettings {
   const stillTracking =
     (haus.hooks?.length ?? 0) > 0 ||
     (haus.hookCommands?.length ?? 0) > 0 ||
-    (haus.denyRules?.length ?? 0) > 0
+    (haus.denyRules?.length ?? 0) > 0 ||
+    (haus.askRules?.length ?? 0) > 0
   if (stillTracking) updated._haus = haus
   else delete updated._haus
 
@@ -262,7 +267,8 @@ export function stripHausDeny(settings: ClaudeSettings): ClaudeSettings {
   const stillTracking =
     (haus.hooks?.length ?? 0) > 0 ||
     (haus.hookCommands?.length ?? 0) > 0 ||
-    (haus.allowRules?.length ?? 0) > 0
+    (haus.allowRules?.length ?? 0) > 0 ||
+    (haus.askRules?.length ?? 0) > 0
   if (stillTracking) updated._haus = haus
   else delete updated._haus
 
@@ -296,6 +302,76 @@ export function stripHausHooks(settings: ClaudeSettings): ClaudeSettings {
   const { _haus: _, ...rest } = updated
   void _
   return rest
+}
+
+/**
+ * Adds `permissions.ask` rule strings to the settings object, skipping any
+ * already present. Tracks only the newly-added rules under `_haus.askRules` so
+ * they can be cleanly stripped on uninstall without touching user-defined ask rules.
+ * Idempotent.
+ */
+export function mergeAskRules(
+  settings: ClaudeSettings,
+  rules: string[],
+): { settings: ClaudeSettings; addedRules: string[] } {
+  const existingAsk = settings.permissions?.ask ?? []
+  const seen = new Set(existingAsk)
+  const trackedAsk = settings._haus?.askRules ?? []
+
+  const addedRules: string[] = []
+  for (const rule of rules) {
+    if (seen.has(rule)) continue
+    seen.add(rule)
+    addedRules.push(rule)
+  }
+
+  const updated: ClaudeSettings = { ...settings }
+  updated.permissions = {
+    ...(settings.permissions ?? {}),
+    ask: [...existingAsk, ...addedRules],
+  }
+  updated._haus = {
+    hooks: settings._haus?.hooks ?? [],
+    ...(settings._haus?.hookCommands ? { hookCommands: settings._haus.hookCommands } : {}),
+    ...(settings._haus?.denyRules ? { denyRules: settings._haus.denyRules } : {}),
+    ...(settings._haus?.allowRules ? { allowRules: settings._haus.allowRules } : {}),
+    askRules: [...trackedAsk, ...addedRules],
+  }
+
+  return { settings: updated, addedRules }
+}
+
+/**
+ * Returns a copy of settings with haus-installed ask rules removed (identified
+ * by `_haus.askRules`), leaving user-defined ask rules intact. Cleans up empty
+ * `permissions`/`ask` containers and drops the `_haus` namespace if nothing else
+ * is tracked there.
+ */
+export function stripHausAsk(settings: ClaudeSettings): ClaudeSettings {
+  const prevHaus = settings._haus
+  if (!prevHaus?.askRules || prevHaus.askRules.length === 0) return settings
+
+  const ownedSet = new Set(prevHaus.askRules)
+  const updated: ClaudeSettings = { ...settings }
+
+  const remainingAsk = (settings.permissions?.ask ?? []).filter((rule) => !ownedSet.has(rule))
+  const permissions: ClaudePermissions = { ...(settings.permissions ?? {}) }
+  if (remainingAsk.length > 0) permissions.ask = remainingAsk
+  else delete permissions.ask
+  if (Object.keys(permissions).length > 0) updated.permissions = permissions
+  else delete updated.permissions
+
+  const haus = { ...prevHaus }
+  delete haus.askRules
+  const stillTracking =
+    (haus.hooks?.length ?? 0) > 0 ||
+    (haus.hookCommands?.length ?? 0) > 0 ||
+    (haus.denyRules?.length ?? 0) > 0 ||
+    (haus.allowRules?.length ?? 0) > 0
+  if (stillTracking) updated._haus = haus
+  else delete updated._haus
+
+  return updated
 }
 
 /** Reads and parses the bundled hooks.json fragment file; returns [] if missing or invalid. */

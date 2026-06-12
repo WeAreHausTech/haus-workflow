@@ -1,18 +1,26 @@
-/** String tokens that the bash guard treats as dangerous and will block. */
+/**
+ * String tokens the bash guard and permissions layers treat as dangerous.
+ * DENY_COMMANDS → hard block (guard + permissions.deny).
+ * ASK_COMMANDS  → prompt user before running (permissions.ask only; guard does not block).
+ */
 
-/** Substrings matched (case-sensitive) against a full bash command string. */
-export const DANGEROUS_COMMANDS = [
-  'rm -rf',
+/** Hard-deny: substrings that the bash guard hard-blocks. */
+export const DENY_COMMANDS = [
   'sudo',
   'chmod -R 777',
-  'chown -R',
   'git push --force',
-  'git reset --hard',
-  'docker system prune',
   'drop database',
   'truncate table',
-  'php artisan migrate --force',
   'npm publish',
   'yarn npm publish',
   'pnpm publish',
+]
+
+/** Ask-tier: substrings that Claude must ask the user about before running. */
+export const ASK_COMMANDS = [
+  'rm -rf',
+  'chown -R',
+  'git reset --hard',
+  'docker system prune',
+  'php artisan migrate --force',
 ]

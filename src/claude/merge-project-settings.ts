@@ -5,11 +5,13 @@
 import { buildAllowRules } from '../install/allow-rules.js'
 import {
   mergeAllowRules,
+  mergeAskRules,
   mergeDenyRules,
   mergeHooks,
   type ClaudeSettings,
   type HookFragment,
 } from '../install/settings-merge.js'
+import { buildAskRules } from '../security/ask-rules.js'
 import { buildDenyRules } from '../security/deny-rules.js'
 import { readJson, writeJson } from '../utils/fs.js'
 import { claudePath } from '../utils/paths.js'
@@ -54,7 +56,8 @@ export async function mergeProjectSettings(root: string): Promise<ClaudeSettings
   const base = await readProjectSettings(root)
   const { settings: withHooks } = mergeHooks(base, PROJECT_HOOK_FRAGMENTS)
   const { settings: withDeny } = mergeDenyRules(withHooks, buildDenyRules())
-  const { settings: merged } = mergeAllowRules(withDeny, buildAllowRules())
+  const { settings: withAllow } = mergeAllowRules(withDeny, buildAllowRules())
+  const { settings: merged } = mergeAskRules(withAllow, buildAskRules())
   return merged
 }
 
