@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.27.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.26.1...v0.27.0) (2026-06-15)
+
+### Features
+
+- **install:** suggest Caveman and RTK after global install ([#111](https://github.com/WeAreHausTech/haus-workflow/issues/111)) ([ab39845](https://github.com/WeAreHausTech/haus-workflow/commit/ab3984550f931f10083aa8e9e5b736c9a7765e94))
+
 ## [0.26.1](https://github.com/WeAreHausTech/haus-workflow/compare/v0.26.0...v0.26.1) (2026-06-15)
 
 ## [0.26.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.25.1...v0.26.0) (2026-06-15)
