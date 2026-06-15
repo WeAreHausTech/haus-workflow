@@ -1,5 +1,5 @@
 {
-  "version": "2.7.0",
+  "version": "2.7.1",
   "items": [
     {
       "id": "haus.nextjs-patterns",
@@ -1648,7 +1648,7 @@
     },
     {
       "id": "haus.superpowers-using-git-worktrees",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "source": "curated",
       "type": "skill",
       "path": "skills/superpowers/using-git-worktrees",
@@ -1658,7 +1658,7 @@
       "whenNotToUse": "Do not use when current workspace isolation is already sufficient.",
       "tags": ["workflow", "workflow-skill"],
       "repoRoles": [],
-      "tokenEstimate": 1996,
+      "tokenEstimate": 2140,
       "installMode": "copy-selected",
       "default": true,
       "reviewStatus": "approved",
@@ -1667,8 +1667,9 @@
       "license": "MIT",
       "licenseConfidence": "high",
       "originSourceId": "superpowers-pcvelz",
-      "originUrl": "https://github.com/pcvelz/superpowers/tree/bd000c6ec1df53449a74397f55305b22802b9a2b/skills/using-git-worktrees",
-      "ecosystem": "superpowers"
+      "originUrl": "https://github.com/pcvelz/superpowers/tree/20c0b1ed71cb073c847432fe01379f48c5278a5f/skills/using-git-worktrees",
+      "ecosystem": "superpowers",
+      "pinnedRef": "20c0b1ed71cb073c847432fe01379f48c5278a5f"
     },
     {
       "id": "haus.superpowers-using-superpowers",
@@ -1889,7 +1890,7 @@
     },
     {
       "id": "haus.superpowers-onboard",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "source": "curated",
       "type": "command",
       "path": "commands/superpowers/onboard.md",
@@ -1899,7 +1900,7 @@
       "whenNotToUse": "Do not use when a more specific skill or command applies.",
       "tags": ["workflow"],
       "repoRoles": [],
-      "tokenEstimate": 2871,
+      "tokenEstimate": 3567,
       "installMode": "copy-selected",
       "default": true,
       "reviewStatus": "approved",
@@ -1908,8 +1909,8 @@
       "license": "MIT",
       "licenseConfidence": "high",
       "originSourceId": "superpowers-pcvelz",
-      "originUrl": "https://github.com/pcvelz/superpowers/blob/48f5123e18a1a92dfba962da8dc2509391c821ee/commands/onboard.md",
-      "pinnedRef": "48f5123e18a1a92dfba962da8dc2509391c821ee",
+      "originUrl": "https://github.com/pcvelz/superpowers/blob/20c0b1ed71cb073c847432fe01379f48c5278a5f/commands/onboard.md",
+      "pinnedRef": "20c0b1ed71cb073c847432fe01379f48c5278a5f",
       "ecosystem": "superpowers"
     },
     {
