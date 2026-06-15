@@ -22,7 +22,8 @@
   "scripts": {
     "build": "tsup src/cli.ts --format esm --dts --clean --out-dir dist --external @inquirer/checkbox",
     "dev": "tsx src/cli.ts",
-    "test": "node --import tsx --test tests/**/*.test.js",
+    "test": "node scripts/run-tests.mjs tests/**/*.test.js",
+    "test:fast": "node scripts/test-fast.mjs",
     "test:coverage": "c8 yarn test",
     "coverage:check": "c8 --check-coverage yarn test",
     "lint": "eslint src",

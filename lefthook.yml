@@ -44,9 +44,9 @@ pre-push:
     test:
       # git exports GIT_DIR/GIT_WORK_TREE/etc into pre-push hooks. Tests that shell
       # out to git in temp dirs (clone, git-signal) inherit them and misbehave, so we
-      # clear the repo-location vars before running. CI runs `yarn test` directly with
-      # no such leak; this keeps the dogfooded hook consistent with it.
+      # clear the repo-location vars before running. CI runs the full suite with
+      # coverage; pre-push gates on the fast unit subset only (see scripts/test-fast.mjs).
       run: |
         unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE GIT_COMMON_DIR GIT_OBJECT_DIRECTORY GIT_NAMESPACE GIT_PREFIX
-        yarn build && yarn test
-      fail_text: 'Build or tests failed. Run `yarn build && yarn test` locally, fix failures, then push.'
+        yarn build && yarn test:fast
+      fail_text: 'Build or fast tests failed. Run `yarn build && yarn test:fast` locally, fix failures, then push. CI runs the full suite.'

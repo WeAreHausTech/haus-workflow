@@ -42,12 +42,7 @@ jobs:
       - name: Catalog audit
         run: node dist/cli.js catalog-audit
 
-      - name: Test
-        run: yarn test
-
-      # Coverage gate (Phase 5: now BLOCKING — ratchet passes at the baseline
-      # floor of 54, so a regression below floor fails the build).
-      - name: Coverage
+      - name: Test with coverage
         run: yarn test:coverage
 
       - name: Coverage ratchet

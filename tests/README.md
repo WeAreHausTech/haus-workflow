@@ -3,16 +3,24 @@
 Node built-in test runner (`node --test`). No framework. All test files are `.js` (compiled output not required — tests import from `dist/` via `fixture-runner.js`).
 
 ```bash
-yarn test
+yarn test          # full suite
+yarn test:fast     # unit tests only (pre-push hook)
 ```
+
+`yarn test` uses `scripts/run-tests.mjs`: compact `.` / `X` progress during the run, then a
+summary line and a `FAILURES` block at the end when anything fails (no scrolling through
+hundreds of passing tests to find the error).
+
+Pre-push runs `test:fast`; CI runs `test:coverage` (full suite). Integration tests are
+listed in `scripts/test-fast.mjs` — add new CLI/git/fixture tests there.
 
 ## Structure
 
-| Path              | Contents                            |
-| ----------------- | ----------------------------------- |
-| `tests/*.test.js` | Unit and integration tests          |
-| `tests/helpers/`  | Shared test utilities               |
-| `tests/fixtures/` | Static fixture repos used by tests  |
+| Path              | Contents                           |
+| ----------------- | ---------------------------------- |
+| `tests/*.test.js` | Unit and integration tests         |
+| `tests/helpers/`  | Shared test utilities              |
+| `tests/fixtures/` | Static fixture repos used by tests |
 
 ## helpers/fixture-runner.js
 
@@ -51,4 +59,3 @@ Full fixture repos scanned by integration tests and golden tests. Each subdirect
 - `fixtures/unsupported-python/` — unsupported stack (Python)
 - `fixtures/vendure-plugin/` — minimal Vendure plugin package
 - `fixtures/laravel-app/`, `fixtures/next-react-app/`, `fixtures/wordpress-bedrock/` — legacy shallow fixtures; prefer `fixtures/repos/` equivalents for new tests
-

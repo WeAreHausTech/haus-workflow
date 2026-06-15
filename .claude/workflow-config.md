@@ -13,6 +13,7 @@
 ## Test commands (TDD / verification gate)
 
 - Test (unit + integration): `yarn test`
+- Test (pre-push subset): `yarn test:fast`
 - Test (E2E): n/a — no E2E suite
 
 ## Highest-stakes logic
@@ -25,5 +26,6 @@ a wrong gate silently drops or leaks a context asset.
 ## Pre-commit tool
 
 Lefthook (`lefthook.yml`; installed via the `prepare` script). pre-commit gates
-lint + format + typecheck + secret scan (gitleaks + grep); pre-push runs tests.
+lint + format + typecheck + secret scan (gitleaks + grep); pre-push runs `test:fast`
+(unit only). CI runs full `test:coverage`.
 This dogfoods the standard haus ships (`haus.lefthook-security`).
