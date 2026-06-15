@@ -177,9 +177,7 @@ test(
 
     const result = await runWorkspaceDoctor(ws)
     assert.ok(
-      result.drift.some(
-        (d) => d.repo === manifest.repos[0].name && d.kind === 'version-mismatch',
-      ),
+      result.drift.some((d) => d.repo === manifest.repos[0].name && d.kind === 'version-mismatch'),
       'stale version flagged',
     )
     assert.equal(process.exitCode, 1, 'drift sets non-zero exit')

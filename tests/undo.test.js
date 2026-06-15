@@ -58,11 +58,27 @@ test('undo --yes strips haus deny/allow/ask rules and preserves user rules', () 
   const after = JSON.parse(fs.readFileSync(path.join(temp, '.claude/settings.json'), 'utf8'))
   // Haus rules gone from all three arrays (allow/ask arrays held only haus rules,
   // so they are deleted entirely — normalize with ?? [] before checking).
-  assert.equal((after.permissions?.deny ?? []).includes('Bash(sudo:*)'), false, 'haus deny rule removed')
-  assert.equal((after.permissions?.allow ?? []).includes('Bash(haus doctor:*)'), false, 'haus allow rule removed')
-  assert.equal((after.permissions?.ask ?? []).includes('Bash(rm -rf:*)'), false, 'haus ask rule removed')
+  assert.equal(
+    (after.permissions?.deny ?? []).includes('Bash(sudo:*)'),
+    false,
+    'haus deny rule removed',
+  )
+  assert.equal(
+    (after.permissions?.allow ?? []).includes('Bash(haus doctor:*)'),
+    false,
+    'haus allow rule removed',
+  )
+  assert.equal(
+    (after.permissions?.ask ?? []).includes('Bash(rm -rf:*)'),
+    false,
+    'haus ask rule removed',
+  )
   // User's own deny rule preserved.
-  assert.equal((after.permissions?.deny ?? []).includes('Bash(my-own:*)'), true, 'user deny rule preserved')
+  assert.equal(
+    (after.permissions?.deny ?? []).includes('Bash(my-own:*)'),
+    true,
+    'user deny rule preserved',
+  )
   // Ledger and hooks gone.
   assert.equal(after._haus, undefined, '_haus namespace removed')
 })

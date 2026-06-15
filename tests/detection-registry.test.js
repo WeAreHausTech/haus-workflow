@@ -17,7 +17,10 @@ test('dependency signal produces the mapped role and stack', () => {
 })
 
 test('AND rule requires every signal (react-router-v7 needs both deps)', () => {
-  assert.equal(runDetection(ctx({ deps: ['react-router'] })).stacks.frontend.includes('react-router-v7'), false)
+  assert.equal(
+    runDetection(ctx({ deps: ['react-router'] })).stacks.frontend.includes('react-router-v7'),
+    false,
+  )
   assert.equal(
     runDetection(ctx({ deps: ['react-router', '@react-router/node'] })).stacks.frontend.includes(
       'react-router-v7',

@@ -2,7 +2,15 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import os from 'node:os'
 import path from 'node:path'
-import { mkdtempSync, mkdirSync, copyFileSync, writeFileSync, readFileSync, existsSync, rmSync } from 'node:fs'
+import {
+  mkdtempSync,
+  mkdirSync,
+  copyFileSync,
+  writeFileSync,
+  readFileSync,
+  existsSync,
+  rmSync,
+} from 'node:fs'
 import { execaSync } from 'execa'
 
 process.env.HAUS_FIXTURE_CATALOG = path.resolve('tests/fixtures/catalog/manifest.json')

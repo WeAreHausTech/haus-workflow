@@ -40,7 +40,9 @@ describe('guard hook contract: bash', () => {
 
 describe('guard hook contract: file-access', () => {
   it('denies a deny-tier path (file_path key) with deny + exit 1', () => {
-    const { stdout, exitCode } = guard('file-access', { tool_input: { file_path: 'secrets/token.txt' } })
+    const { stdout, exitCode } = guard('file-access', {
+      tool_input: { file_path: 'secrets/token.txt' },
+    })
     assert.equal(exitCode, 1)
     assert.equal(JSON.parse(stdout).permissionDecision, 'deny')
   })

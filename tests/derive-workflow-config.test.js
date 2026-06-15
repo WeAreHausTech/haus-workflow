@@ -42,10 +42,7 @@ test('reconstructs the E2E command from deps when no script exists (npm → npx)
   const root = tmpRepo({
     'package.json': JSON.stringify({ scripts: {} }),
   })
-  const v = await deriveWorkflowConfig(
-    root,
-    ctx({ dependencies: ['@playwright/test'] }),
-  )
+  const v = await deriveWorkflowConfig(root, ctx({ dependencies: ['@playwright/test'] }))
   assert.equal(v.testE2E, 'npx --no-install playwright test')
   fs.rmSync(root, { recursive: true, force: true })
 })
@@ -75,7 +72,9 @@ test('detects pre-commit tool and doc paths', async () => {
 
 test('first write produces real test commands, not placeholders', async () => {
   const root = tmpRepo({
-    'package.json': JSON.stringify({ scripts: { test: 'vitest run', 'test:e2e': 'playwright test' } }),
+    'package.json': JSON.stringify({
+      scripts: { test: 'vitest run', 'test:e2e': 'playwright test' },
+    }),
   })
   const dest = await writeWorkflowConfig(root, false)
   const out = fs.readFileSync(dest, 'utf8')

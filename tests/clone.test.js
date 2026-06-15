@@ -21,7 +21,20 @@ function makeRemote(files = { 'README.md': '# hi\n' }) {
     writeFileSync(full, content)
   }
   git(['add', '-A'], dir)
-  git(['-c', 'user.name=t', '-c', 'user.email=t@t', '-c', 'commit.gpgsign=false', 'commit', '-m', 'init'], dir)
+  git(
+    [
+      '-c',
+      'user.name=t',
+      '-c',
+      'user.email=t@t',
+      '-c',
+      'commit.gpgsign=false',
+      'commit',
+      '-m',
+      'init',
+    ],
+    dir,
+  )
   return dir
 }
 
@@ -60,7 +73,10 @@ test('runClone derives the target folder from the URL when no dir is given', asy
   process.chdir(cwd)
   try {
     await quiet('log', () => runClone(remote))
-    assert.ok(existsSync(path.join(cwd, path.basename(remote))), 'cloned into derived folder under cwd')
+    assert.ok(
+      existsSync(path.join(cwd, path.basename(remote))),
+      'cloned into derived folder under cwd',
+    )
   } finally {
     process.chdir(prev)
   }

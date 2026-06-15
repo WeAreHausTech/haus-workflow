@@ -123,9 +123,7 @@ test('apply upgrades legacy settings by pruning the retired context UserPromptSu
           hookCommands: ['haus context --from-hook'],
         },
         hooks: {
-          UserPromptSubmit: [
-            { hooks: [{ type: 'command', command: 'haus context --from-hook' }] },
-          ],
+          UserPromptSubmit: [{ hooks: [{ type: 'command', command: 'haus context --from-hook' }] }],
         },
       },
       null,
