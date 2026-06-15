@@ -1,203 +1,105 @@
 {
   "laravel-app": {
-    "repoRoles": [
-      "laravel-app"
-    ],
+    "repoRoles": ["laravel-app"],
     "detectedStacks": {
-      "backend": [
-        "laravel"
-      ],
+      "backend": ["php", "laravel"],
       "frontend": [],
       "databases": [],
-      "testing": [
-        "phpunit"
-      ],
+      "testing": ["phpunit"],
       "auth": [],
-      "tooling": [
-        "missing-prettier",
-        "missing-eslint"
-      ],
+      "tooling": ["missing-prettier", "missing-eslint"],
       "packageManagers": []
     },
     "confidence": 0.56
   },
   "laravel-with-react-frontend": {
-    "repoRoles": [
-      "laravel-app",
-      "react-app",
-      "vite-app"
-    ],
+    "repoRoles": ["laravel-app", "react-app", "vite-app"],
     "detectedStacks": {
-      "backend": [
-        "laravel"
-      ],
-      "frontend": [
-        "react19",
-        "vite8",
-        "tailwindcss"
-      ],
+      "backend": ["php", "laravel"],
+      "frontend": ["react19", "vite8", "tailwindcss"],
       "databases": [],
-      "testing": [
-        "phpunit"
-      ],
+      "testing": ["phpunit"],
       "auth": [],
-      "tooling": [
-        "missing-prettier",
-        "missing-eslint"
-      ],
-      "packageManagers": [
-        "pnpm89"
-      ]
+      "tooling": ["missing-prettier", "missing-eslint"],
+      "packageManagers": ["pnpm89"]
     },
     "confidence": 0.8
   },
   "nest-graphql-api": {
-    "repoRoles": [
-      "graphql-api",
-      "nestjs-api"
-    ],
+    "repoRoles": ["graphql-api", "nestjs-api"],
     "detectedStacks": {
-      "backend": [
-        "nestjs",
-        "graphql"
-      ],
+      "backend": ["nestjs", "graphql"],
       "frontend": [],
       "databases": [],
       "testing": [],
       "auth": [],
-      "tooling": [
-        "typescript5",
-        "missing-prettier",
-        "missing-eslint"
-      ],
-      "packageManagers": [
-        "yarn4"
-      ]
+      "tooling": ["typescript5", "missing-prettier", "missing-eslint"],
+      "packageManagers": ["yarn4"]
     },
     "confidence": 0.68
   },
   "nextjs-app": {
-    "repoRoles": [
-      "next-app",
-      "react-app"
-    ],
+    "repoRoles": ["next-app", "react-app"],
     "detectedStacks": {
       "backend": [],
-      "frontend": [
-        "nextjs",
-        "react19"
-      ],
+      "frontend": ["nextjs", "react19"],
       "databases": [],
-      "testing": [
-        "playwright"
-      ],
+      "testing": ["playwright"],
       "auth": [],
-      "tooling": [
-        "typescript5",
-        "missing-prettier",
-        "missing-eslint"
-      ],
-      "packageManagers": [
-        "pnpm89"
-      ]
+      "tooling": ["typescript5", "missing-prettier", "missing-eslint"],
+      "packageManagers": ["pnpm89"]
     },
     "confidence": 0.7
   },
   "nx-workspace": {
-    "repoRoles": [
-      "nx-monorepo",
-      "react-app"
-    ],
+    "repoRoles": ["nx-monorepo", "react-app"],
     "detectedStacks": {
       "backend": [],
-      "frontend": [
-        "react19"
-      ],
+      "frontend": ["react19"],
       "databases": [],
       "testing": [],
       "auth": [],
-      "tooling": [
-        "typescript5",
-        "missing-prettier",
-        "missing-eslint"
-      ],
-      "packageManagers": [
-        "yarn4"
-      ]
+      "tooling": ["typescript5", "missing-prettier", "missing-eslint"],
+      "packageManagers": ["yarn4"]
     },
     "confidence": 0.66
   },
   "orphan-graphql-config": {
-    "repoRoles": [
-      "graphql-api"
-    ],
+    "repoRoles": ["graphql-api"],
     "detectedStacks": {
-      "backend": [
-        "graphql"
-      ],
+      "backend": ["graphql"],
       "frontend": [],
       "databases": [],
       "testing": [],
       "auth": [],
-      "tooling": [
-        "missing-prettier",
-        "missing-eslint"
-      ],
-      "packageManagers": [
-        "pnpm89"
-      ]
+      "tooling": ["missing-prettier", "missing-eslint"],
+      "packageManagers": ["pnpm89"]
     },
     "confidence": 0.56
   },
   "turbo-monorepo": {
-    "repoRoles": [
-      "react-app",
-      "turbo-monorepo"
-    ],
+    "repoRoles": ["react-app", "turbo-monorepo"],
     "detectedStacks": {
       "backend": [],
-      "frontend": [
-        "react19"
-      ],
+      "frontend": ["react19"],
       "databases": [],
       "testing": [],
       "auth": [],
-      "tooling": [
-        "typescript5",
-        "missing-prettier",
-        "missing-eslint"
-      ],
-      "packageManagers": [
-        "yarn4"
-      ]
+      "tooling": ["typescript5", "missing-prettier", "missing-eslint"],
+      "packageManagers": ["yarn4"]
     },
     "confidence": 0.66
   },
   "vendure-monorepo": {
-    "repoRoles": [
-      "graphql-api",
-      "nestjs-api",
-      "vendure-app",
-      "vendure-plugin"
-    ],
+    "repoRoles": ["graphql-api", "nestjs-api", "vendure-app", "vendure-plugin"],
     "detectedStacks": {
-      "backend": [
-        "vendure3",
-        "nestjs",
-        "graphql"
-      ],
+      "backend": ["vendure3", "nestjs", "graphql"],
       "frontend": [],
       "databases": [],
       "testing": [],
       "auth": [],
-      "tooling": [
-        "typescript5",
-        "missing-prettier",
-        "missing-eslint"
-      ],
-      "packageManagers": [
-        "yarn4"
-      ]
+      "tooling": ["typescript5", "missing-prettier", "missing-eslint"],
+      "packageManagers": ["yarn4"]
     },
     "confidence": 0.86
   },
@@ -211,67 +113,39 @@
       "vendure-plugin"
     ],
     "detectedStacks": {
-      "backend": [
-        "vendure3",
-        "nestjs",
-        "graphql"
-      ],
-      "frontend": [
-        "nextjs",
-        "react19"
-      ],
+      "backend": ["vendure3", "nestjs", "graphql"],
+      "frontend": ["nextjs", "react19"],
       "databases": [],
       "testing": [],
       "auth": [],
-      "tooling": [
-        "typescript5",
-        "missing-prettier",
-        "missing-eslint"
-      ],
-      "packageManagers": [
-        "yarn4"
-      ]
+      "tooling": ["typescript5", "missing-prettier", "missing-eslint"],
+      "packageManagers": ["yarn4"]
     },
     "confidence": 0.99
   },
   "wordpress-bedrock-site": {
-    "repoRoles": [
-      "wordpress-bedrock-site",
-      "wordpress-site"
-    ],
+    "repoRoles": ["wordpress-bedrock-site", "wordpress-site"],
     "detectedStacks": {
-      "backend": [
-        "wordpress"
-      ],
+      "backend": ["php", "wordpress"],
       "frontend": [],
       "databases": [],
       "testing": [],
       "auth": [],
-      "tooling": [
-        "missing-prettier",
-        "missing-eslint"
-      ],
+      "tooling": ["missing-prettier", "missing-eslint"],
       "packageManagers": []
     },
     "confidence": 0.62
   },
   "wordpress-with-node-tooling": {
-    "repoRoles": [
-      "wordpress-bedrock-site",
-      "wordpress-site"
-    ],
+    "repoRoles": ["wordpress-bedrock-site", "wordpress-site"],
     "detectedStacks": {
-      "backend": [
-        "wordpress"
-      ],
+      "backend": ["php", "wordpress"],
       "frontend": [],
       "databases": [],
       "testing": [],
       "auth": [],
       "tooling": [],
-      "packageManagers": [
-        "pnpm89"
-      ]
+      "packageManagers": ["pnpm89"]
     },
     "confidence": 0.6
   }

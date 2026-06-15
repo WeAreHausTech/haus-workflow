@@ -193,6 +193,11 @@ export const STACK_RULES: DetectionRule[] = [
     stack: ['backend', 'graphql'],
     any: [fileEndsWith('.graphql'), fileEndsWith('schema.graphql')],
   },
+  // PHP (Composer-managed) — broad language signal so php-tooling catalog items
+  // (e.g. the php-reviewer agent gated on { stack: 'php' }) are recommendable on any
+  // Composer project. Placed before laravel/wordpress so 'php' precedes the
+  // framework-specific stacks in the backend bucket.
+  { stack: ['backend', 'php'], any: [fileEndsWith('composer.json')] },
   { stack: ['backend', 'laravel'], any: [dep('laravel/framework')] },
   { stack: ['backend', 'laravel'], any: [fileIncludes('app/Providers/'), fileIncludes('routes/')] },
   { stack: ['backend', 'wordpress'], any: [fileEndsWith('wp-config.php'), dep('roots/wordpress')] },
