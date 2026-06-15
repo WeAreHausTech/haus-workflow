@@ -1,5 +1,5 @@
 {
-  "version": "2.6.5",
+  "version": "2.7.0",
   "items": [
     {
       "id": "haus.nextjs-patterns",
@@ -1911,6 +1911,323 @@
       "originUrl": "https://github.com/pcvelz/superpowers/blob/48f5123e18a1a92dfba962da8dc2509391c821ee/commands/onboard.md",
       "pinnedRef": "48f5123e18a1a92dfba962da8dc2509391c821ee",
       "ecosystem": "superpowers"
+    },
+    {
+      "id": "haus.ecc-react-reviewer",
+      "version": "1.0.0",
+      "source": "curated",
+      "type": "agent",
+      "path": "agents/ecc/react-reviewer.md",
+      "title": "React Reviewer",
+      "purpose": "Expert React/JSX code reviewer specializing in hook correctness, render performance, server/client component boundaries, accessibility, and React-specific security. Use for any change touching .tsx/.jsx files or React component logic. MUST BE USED for React projects.",
+      "whenToUse": "Expert React/JSX code reviewer specializing in hook correctness, render performance, server/client component boundaries, accessibility, and React-specific security. Use for any change touching .tsx/.jsx files or React component logic. MUST BE USED for React projects.",
+      "whenNotToUse": "Do not use when a more specific skill or command applies.",
+      "tags": ["agent", "review", "react"],
+      "repoRoles": [],
+      "tokenEstimate": 2856,
+      "installMode": "copy-selected",
+      "reviewStatus": "approved",
+      "riskLevel": "low",
+      "useMode": "copy",
+      "license": "MIT",
+      "licenseConfidence": "high",
+      "originSourceId": "ecc-affaanm",
+      "originUrl": "https://github.com/affaan-m/ECC/blob/5b173d2e6c11b976a0f13b2f59125e08956c1d47/agents/react-reviewer.md",
+      "pinnedRef": "5b173d2e6c11b976a0f13b2f59125e08956c1d47",
+      "ecosystem": "react",
+      "requiresAny": [
+        {
+          "stack": "react"
+        },
+        {
+          "dependency": "react"
+        }
+      ]
+    },
+    {
+      "id": "haus.ecc-react-build-resolver",
+      "version": "1.0.0",
+      "source": "curated",
+      "type": "agent",
+      "path": "agents/ecc/react-build-resolver.md",
+      "title": "React Build Resolver",
+      "purpose": "Diagnose and fix React build failures across Vite, webpack, Next.js, CRA, Parcel, esbuild, and Bun. Handles JSX/TSX compile errors, hydration mismatches, server/client component boundary failures, missing types, and bundler-specific configuration issues with minimal, surgical changes. MUST BE USED when a React build fails.",
+      "whenToUse": "Diagnose and fix React build failures across Vite, webpack, Next.js, CRA, Parcel, esbuild, and Bun. Handles JSX/TSX compile errors, hydration mismatches, server/client component boundary failures, missing types, and bundler-specific configuration issues with minimal, surgical changes. MUST BE USED when a React build fails.",
+      "whenNotToUse": "Do not use when a more specific skill or command applies.",
+      "tags": ["agent", "react"],
+      "repoRoles": [],
+      "tokenEstimate": 2801,
+      "installMode": "copy-selected",
+      "reviewStatus": "approved",
+      "riskLevel": "low",
+      "useMode": "copy",
+      "license": "MIT",
+      "licenseConfidence": "high",
+      "originSourceId": "ecc-affaanm",
+      "originUrl": "https://github.com/affaan-m/ECC/blob/5b173d2e6c11b976a0f13b2f59125e08956c1d47/agents/react-build-resolver.md",
+      "pinnedRef": "5b173d2e6c11b976a0f13b2f59125e08956c1d47",
+      "ecosystem": "react",
+      "requiresAny": [
+        {
+          "stack": "react"
+        },
+        {
+          "dependency": "react"
+        }
+      ]
+    },
+    {
+      "id": "haus.ecc-php-reviewer",
+      "version": "1.0.0",
+      "source": "curated",
+      "type": "agent",
+      "path": "agents/ecc/php-reviewer.md",
+      "title": "PHP Reviewer",
+      "purpose": "Expert PHP code reviewer specializing in PSR-12 compliance, PHP type system, Eloquent ORM patterns, security, and performance. Use for all PHP code changes. MUST BE USED for PHP projects.",
+      "whenToUse": "Expert PHP code reviewer specializing in PSR-12 compliance, PHP type system, Eloquent ORM patterns, security, and performance. Use for all PHP code changes. MUST BE USED for PHP projects.",
+      "whenNotToUse": "Do not use when a more specific skill or command applies.",
+      "tags": ["agent", "review", "php"],
+      "repoRoles": [],
+      "tokenEstimate": 1431,
+      "installMode": "copy-selected",
+      "reviewStatus": "approved",
+      "riskLevel": "low",
+      "useMode": "copy",
+      "license": "MIT",
+      "licenseConfidence": "high",
+      "originSourceId": "ecc-affaanm",
+      "originUrl": "https://github.com/affaan-m/ECC/blob/5b173d2e6c11b976a0f13b2f59125e08956c1d47/agents/php-reviewer.md",
+      "pinnedRef": "5b173d2e6c11b976a0f13b2f59125e08956c1d47",
+      "ecosystem": "php",
+      "requiresAny": [
+        {
+          "stack": "php"
+        }
+      ]
+    },
+    {
+      "id": "haus.ecc-csharp-reviewer",
+      "version": "1.0.0",
+      "source": "curated",
+      "type": "agent",
+      "path": "agents/ecc/csharp-reviewer.md",
+      "title": "C# Reviewer",
+      "purpose": "Expert C# code reviewer specializing in .NET conventions, async patterns, security, nullable reference types, and performance. Use for all C# code changes. MUST BE USED for C# projects.",
+      "whenToUse": "Expert C# code reviewer specializing in .NET conventions, async patterns, security, nullable reference types, and performance. Use for all C# code changes. MUST BE USED for C# projects.",
+      "whenNotToUse": "Do not use when a more specific skill or command applies.",
+      "tags": ["agent", "review", "csharp", "dotnet"],
+      "repoRoles": [],
+      "tokenEstimate": 1426,
+      "installMode": "copy-selected",
+      "reviewStatus": "approved",
+      "riskLevel": "low",
+      "useMode": "copy",
+      "license": "MIT",
+      "licenseConfidence": "high",
+      "originSourceId": "ecc-affaanm",
+      "originUrl": "https://github.com/affaan-m/ECC/blob/5b173d2e6c11b976a0f13b2f59125e08956c1d47/agents/csharp-reviewer.md",
+      "pinnedRef": "5b173d2e6c11b976a0f13b2f59125e08956c1d47",
+      "ecosystem": "dotnet",
+      "requiresAny": [
+        {
+          "stack": "dotnet"
+        }
+      ]
+    },
+    {
+      "id": "haus.ecc-database-reviewer",
+      "version": "1.0.0",
+      "source": "curated",
+      "type": "agent",
+      "path": "agents/ecc/database-reviewer.md",
+      "title": "Database Reviewer",
+      "purpose": "PostgreSQL database specialist for query optimization, schema design, security, and performance. Use PROACTIVELY when writing SQL, creating migrations, designing schemas, or troubleshooting database performance. Incorporates Supabase best practices.",
+      "whenToUse": "PostgreSQL database specialist for query optimization, schema design, security, and performance. Use PROACTIVELY when writing SQL, creating migrations, designing schemas, or troubleshooting database performance. Incorporates Supabase best practices.",
+      "whenNotToUse": "Do not use when a more specific skill or command applies.",
+      "tags": ["agent", "review", "database"],
+      "repoRoles": [],
+      "tokenEstimate": 1336,
+      "installMode": "copy-selected",
+      "reviewStatus": "approved",
+      "riskLevel": "low",
+      "useMode": "copy",
+      "license": "MIT",
+      "licenseConfidence": "high",
+      "originSourceId": "ecc-affaanm",
+      "originUrl": "https://github.com/affaan-m/ECC/blob/5b173d2e6c11b976a0f13b2f59125e08956c1d47/agents/database-reviewer.md",
+      "pinnedRef": "5b173d2e6c11b976a0f13b2f59125e08956c1d47",
+      "ecosystem": "database",
+      "requiresAny": [
+        {
+          "stack": "postgresql"
+        },
+        {
+          "stack": "mysql"
+        },
+        {
+          "stack": "mariadb"
+        },
+        {
+          "stack": "mssql"
+        }
+      ]
+    },
+    {
+      "id": "haus.ecc-e2e-runner",
+      "version": "1.0.0",
+      "source": "curated",
+      "type": "agent",
+      "path": "agents/ecc/e2e-runner.md",
+      "title": "E2E Runner",
+      "purpose": "End-to-end testing specialist using Vercel Agent Browser (preferred) with Playwright fallback. Use PROACTIVELY for generating, maintaining, and running E2E tests. Manages test journeys, quarantines flaky tests, uploads artifacts (screenshots, videos, traces), and ensures critical user flows work.",
+      "whenToUse": "End-to-end testing specialist using Vercel Agent Browser (preferred) with Playwright fallback. Use PROACTIVELY for generating, maintaining, and running E2E tests. Manages test journeys, quarantines flaky tests, uploads artifacts (screenshots, videos, traces), and ensures critical user flows work.",
+      "whenNotToUse": "Do not use when a more specific skill or command applies.",
+      "tags": ["agent", "testing"],
+      "repoRoles": [],
+      "tokenEstimate": 1274,
+      "installMode": "copy-selected",
+      "reviewStatus": "approved",
+      "riskLevel": "low",
+      "useMode": "copy",
+      "license": "MIT",
+      "licenseConfidence": "high",
+      "originSourceId": "ecc-affaanm",
+      "originUrl": "https://github.com/affaan-m/ECC/blob/5b173d2e6c11b976a0f13b2f59125e08956c1d47/agents/e2e-runner.md",
+      "pinnedRef": "5b173d2e6c11b976a0f13b2f59125e08956c1d47",
+      "ecosystem": "testing",
+      "requiresAny": [
+        {
+          "stack": "playwright"
+        },
+        {
+          "dependency": "@playwright/test"
+        }
+      ]
+    },
+    {
+      "id": "haus.ecc-performance-optimizer",
+      "version": "1.0.0",
+      "source": "curated",
+      "type": "agent",
+      "path": "agents/ecc/performance-optimizer.md",
+      "title": "Performance Optimizer",
+      "purpose": "Performance analysis and optimization specialist. Use PROACTIVELY for identifying bottlenecks, optimizing slow code, reducing bundle sizes, and improving runtime performance. Profiling, memory leaks, render optimization, and algorithmic improvements.",
+      "whenToUse": "Performance analysis and optimization specialist. Use PROACTIVELY for identifying bottlenecks, optimizing slow code, reducing bundle sizes, and improving runtime performance. Profiling, memory leaks, render optimization, and algorithmic improvements.",
+      "whenNotToUse": "Do not use when a more specific skill or command applies.",
+      "tags": ["agent", "quality"],
+      "repoRoles": [],
+      "tokenEstimate": 3367,
+      "installMode": "copy-selected",
+      "reviewStatus": "approved",
+      "riskLevel": "low",
+      "useMode": "copy",
+      "license": "MIT",
+      "licenseConfidence": "high",
+      "originSourceId": "ecc-affaanm",
+      "originUrl": "https://github.com/affaan-m/ECC/blob/5b173d2e6c11b976a0f13b2f59125e08956c1d47/agents/performance-optimizer.md",
+      "pinnedRef": "5b173d2e6c11b976a0f13b2f59125e08956c1d47",
+      "ecosystem": "ecc",
+      "default": true
+    },
+    {
+      "id": "haus.ecc-refactor-cleaner",
+      "version": "1.0.0",
+      "source": "curated",
+      "type": "agent",
+      "path": "agents/ecc/refactor-cleaner.md",
+      "title": "Refactor Cleaner",
+      "purpose": "Dead code cleanup and consolidation specialist. Use PROACTIVELY for removing unused code, duplicates, and refactoring. Runs analysis tools (knip, depcheck, ts-prune) to identify dead code and safely removes it.",
+      "whenToUse": "Dead code cleanup and consolidation specialist. Use PROACTIVELY for removing unused code, duplicates, and refactoring. Runs analysis tools (knip, depcheck, ts-prune) to identify dead code and safely removes it.",
+      "whenNotToUse": "Do not use when a more specific skill or command applies.",
+      "tags": ["agent", "quality"],
+      "repoRoles": [],
+      "tokenEstimate": 670,
+      "installMode": "copy-selected",
+      "reviewStatus": "approved",
+      "riskLevel": "low",
+      "useMode": "copy",
+      "license": "MIT",
+      "licenseConfidence": "high",
+      "originSourceId": "ecc-affaanm",
+      "originUrl": "https://github.com/affaan-m/ECC/blob/5b173d2e6c11b976a0f13b2f59125e08956c1d47/.kiro/agents/refactor-cleaner.md",
+      "pinnedRef": "5b173d2e6c11b976a0f13b2f59125e08956c1d47",
+      "ecosystem": "ecc",
+      "default": true
+    },
+    {
+      "id": "haus.oh-my-claudecode-test-engineer",
+      "version": "1.0.0",
+      "source": "curated",
+      "type": "agent",
+      "path": "agents/oh-my-claudecode/test-engineer.md",
+      "title": "Test Engineer",
+      "purpose": "Test strategy, integration/e2e coverage, flaky test hardening, TDD workflows",
+      "whenToUse": "Test strategy, integration/e2e coverage, flaky test hardening, TDD workflows",
+      "whenNotToUse": "Do not use when a more specific skill or command applies.",
+      "tags": ["agent", "testing"],
+      "repoRoles": [],
+      "tokenEstimate": 1656,
+      "installMode": "copy-selected",
+      "reviewStatus": "approved",
+      "riskLevel": "low",
+      "useMode": "copy",
+      "license": "MIT",
+      "licenseConfidence": "high",
+      "originSourceId": "omcc-yeachanheo",
+      "originUrl": "https://github.com/yeachan-heo/oh-my-claudecode/blob/50f6ff05eb5d9ebed66f05d8c4580c0b119f37af/agents/test-engineer.md",
+      "pinnedRef": "50f6ff05eb5d9ebed66f05d8c4580c0b119f37af",
+      "ecosystem": "oh-my-claudecode",
+      "default": true
+    },
+    {
+      "id": "haus.oh-my-claudecode-designer",
+      "version": "1.0.0",
+      "source": "curated",
+      "type": "agent",
+      "path": "agents/oh-my-claudecode/designer.md",
+      "title": "Designer",
+      "purpose": "UI/UX Designer-Developer for stunning interfaces (Sonnet)",
+      "whenToUse": "UI/UX Designer-Developer for stunning interfaces (Sonnet)",
+      "whenNotToUse": "Do not use when a more specific skill or command applies.",
+      "tags": ["agent", "frontend"],
+      "repoRoles": [],
+      "tokenEstimate": 2407,
+      "installMode": "copy-selected",
+      "reviewStatus": "approved",
+      "riskLevel": "low",
+      "useMode": "copy",
+      "license": "MIT",
+      "licenseConfidence": "high",
+      "originSourceId": "omcc-yeachanheo",
+      "originUrl": "https://github.com/yeachan-heo/oh-my-claudecode/blob/50f6ff05eb5d9ebed66f05d8c4580c0b119f37af/agents/designer.md",
+      "pinnedRef": "50f6ff05eb5d9ebed66f05d8c4580c0b119f37af",
+      "ecosystem": "oh-my-claudecode",
+      "default": true
+    },
+    {
+      "id": "haus.oh-my-claudecode-tracer",
+      "version": "1.0.0",
+      "source": "curated",
+      "type": "agent",
+      "path": "agents/oh-my-claudecode/tracer.md",
+      "title": "Tracer",
+      "purpose": "Evidence-driven causal tracing with competing hypotheses, evidence for/against, uncertainty tracking, and next-probe recommendations",
+      "whenToUse": "Evidence-driven causal tracing with competing hypotheses, evidence for/against, uncertainty tracking, and next-probe recommendations",
+      "whenNotToUse": "Do not use when a more specific skill or command applies.",
+      "tags": ["agent", "quality"],
+      "repoRoles": [],
+      "tokenEstimate": 3004,
+      "installMode": "copy-selected",
+      "reviewStatus": "approved",
+      "riskLevel": "low",
+      "useMode": "copy",
+      "license": "MIT",
+      "licenseConfidence": "high",
+      "originSourceId": "omcc-yeachanheo",
+      "originUrl": "https://github.com/yeachan-heo/oh-my-claudecode/blob/50f6ff05eb5d9ebed66f05d8c4580c0b119f37af/agents/tracer.md",
+      "pinnedRef": "50f6ff05eb5d9ebed66f05d8c4580c0b119f37af",
+      "ecosystem": "oh-my-claudecode",
+      "default": true
     }
   ]
 }
