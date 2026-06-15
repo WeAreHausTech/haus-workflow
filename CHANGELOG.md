@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.26.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.25.1...v0.26.0) (2026-06-15)
+
+### Features
+
+- **catalog:** exempt agent content from the only-npx-tsx rule ([#107](https://github.com/WeAreHausTech/haus-workflow/issues/107)) ([e335ecc](https://github.com/WeAreHausTech/haus-workflow/commit/e335eccd9e33e70781f3172cc96952fc070c28a9))
+
+### Bug Fixes
+
+- **scanner:** detect php stack so php-gated catalog items are recommendable ([#109](https://github.com/WeAreHausTech/haus-workflow/issues/109)) ([4daa09e](https://github.com/WeAreHausTech/haus-workflow/commit/4daa09e2ef2e5133f43437b5a6e73277b8c6ab69))
+
 ## [0.25.1](https://github.com/WeAreHausTech/haus-workflow/compare/v0.25.0...v0.25.1) (2026-06-15)
 
 ## [0.25.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.24.1...v0.25.0) (2026-06-12)
