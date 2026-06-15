@@ -16,33 +16,33 @@
 | Decision log  | `docs/adr/`                                                           |
 | Failure modes | `docs/runbook.md`                                                     |
 
-When the user says "spec", "design", "ux", "plan", or "mockup": resolve to the rows above.
+User says "spec", "design", "ux", "plan", "mockup": resolve to rows above.
 
 ---
 
 ## How to write rules that stick
 
 - **Specific beats general.** "Run `npm test` before commit" over "test your changes". "Handlers live in `src/api/`" over "keep files organised".
-- **Emphasis raises adherence.** Reserve `NEVER` / `YOU MUST` / `IMPORTANT` for the few rules that matter most. Overuse dilutes them.
-- **State the reason.** A rule with its WHY survives edge cases; a bare rule gets rationalised away.
+- **Emphasis raises adherence.** Reserve `NEVER` / `YOU MUST` / `IMPORTANT` for rules that matter most. Overuse dilutes.
+- **State the reason.** Rule with WHY survives edge cases; bare rule gets rationalised away.
 
 ---
 
 ## Feature workflow
 
-The canonical loop is **explore -> plan -> code -> commit**. Steps below expand it. Steps are ordered — do not skip.
+Canonical loop: **explore -> plan -> code -> commit**. Steps below expand it. Ordered — do not skip.
 
-**Escape hatch:** if you can describe the whole diff in one sentence (typo, copy tweak, one-line fix), skip to step 5. Planning is for changes that touch multiple files, are architecturally uncertain, or live in unfamiliar code. Do not ceremony-tax trivial work.
+**Escape hatch:** whole diff in one sentence (typo, copy tweak, one-line fix) → skip to step 5. Planning for multi-file changes, architecturally uncertain, or unfamiliar code. No ceremony-taxing trivial work.
 
 **1. Explore. Read inputs.**
-Read spec, design, UX, mockups, and the code you will touch. No edits, no plan, no questions before this.
+Read spec, design, UX, mockups, code to touch. No edits, no plan, no questions before this.
 
 **2. Align intent.**
-State all assumptions. Flag every gap and conflict between inputs. List what is ambiguous.
-**Stop. Wait for explicit user OK before writing a plan.**
+State assumptions. Flag gaps/conflicts between inputs. List ambiguous.
+**Stop. Wait for explicit user OK before writing plan.**
 
 **3. Write a plan.**
-Break into discrete tasks. Each task requires: acceptance criteria (testable, not aspirational), verification steps (exact commands or manual checks), dependencies on other tasks, reference to source doc.
+Break into discrete tasks. Each task needs: acceptance criteria (testable, not aspirational), verification steps (exact commands or manual checks), dependencies, source doc reference.
 Save to `docs/plans/<slug>.md`.
 **Stop. Wait for explicit user OK before executing.**
 
@@ -55,19 +55,19 @@ git worktree add .claude/worktrees/<slug> -b feat/<slug>
 ```
 
 **5. Code.**
-Work tasks sequentially unless independent (no shared state, no ordering dependency) — then dispatch parallel subagents, each in its own worktree.
-All new code ships with tests. **Give every task a verifiable signal** (test, build, lint, screenshot vs mockup) and loop in one pass: implement -> run the check -> read the result -> fix -> repeat until it passes. Without a pass/fail signal, "looks done" is the only signal and you are the verification loop.
-**When a bug surfaces: stop, diagnose root cause methodically before writing any fix.** Do not patch symptoms.
+Work tasks sequentially unless independent (no shared state, no ordering dependency) — dispatch parallel subagents, each in own worktree.
+All new code ships with tests. **Give every task verifiable signal** (test, build, lint, screenshot vs mockup): implement -> run check -> read result -> fix -> repeat until pass. Without pass/fail signal, "looks done" is only signal and you are verification loop.
+**Bug surfaces: stop, diagnose root cause before any fix.** No symptom patches.
 
 **6. Commit.**
-Before merging: conduct a code review (adversarial, fresh context). Present merge / PR / cleanup options to the user.
-After merging a major milestone: capture lessons learned and feed them to the standards backlog.
+Before merging: code review (adversarial, fresh context). Present merge/PR/cleanup options to user.
+After major milestone: capture lessons learned, feed to standards backlog.
 
 ---
 
 ## NEVER rules
 
-Apply even in unattended mode. Reasons are included — rules without context get overridden.
+Apply in unattended mode. Reasons included — rules without context get overridden.
 
 - **NEVER commit or push without explicit user OK**, unless inside an approved plan (plan approval = blanket exec authority for that plan's scope only).
 - **NEVER use `git push --force`** on a published branch. Destroys history others may have pulled.
@@ -82,7 +82,7 @@ Apply even in unattended mode. Reasons are included — rules without context ge
 
 ## Settings: deterministic enforcement
 
-CLAUDE.md/AGENTS.md rules are advisory. `settings.json` permissions are deterministic. Critical NEVER rules must be enforced in both.
+`CLAUDE.md`/`AGENTS.md` rules advisory. `settings.json` permissions deterministic. Critical NEVER rules enforced in both.
 
 Add to `.claude/settings.json`:
 
@@ -116,7 +116,7 @@ Add to `.claude/settings.json`:
 
 ## Testing rules (non-negotiable)
 
-No task is done until tests pass locally. All new code ships with tests.
+No task done until tests pass locally. All new code ships with tests.
 
 | Layer                         | Minimum bar                                                                              |
 | ----------------------------- | ---------------------------------------------------------------------------------------- |
@@ -125,9 +125,9 @@ No task is done until tests pass locally. All new code ships with tests.
 | Backend / data layer          | One integration test per repository function. Hits local emulator/test DB, never prod.   |
 | Critical user flows           | One happy-path E2E per critical journey.                                                 |
 
-**Verification gate:** run the test suite for all touched layers and record passing output in the task's verification block. Untested = unfinished.
+**Verification gate:** run test suite for all touched layers, record passing output in task's verification block. Untested = unfinished.
 
-**Highest-stakes logic** (e.g. financial, auth, medical, pedagogical) is TDD-only: write the test from the spec before any implementation. No exceptions.
+**Highest-stakes logic** (e.g. financial, auth, medical, pedagogical): TDD-only. Write test from spec before implementation. No exceptions.
 
 See `workflow-config.md` for this project's test commands.
 
@@ -135,7 +135,7 @@ See `workflow-config.md` for this project's test commands.
 
 ## Pre-commit hooks
 
-Use [Lefthook](https://github.com/evilmartians/lefthook) (Go binary, no Node dependency, faster than Husky). Write `fail_text` with agent-readable instructions — the agent reads hook output to decide what to fix.
+Use [Lefthook](https://github.com/evilmartians/lefthook) (Go binary, no Node dependency, faster than Husky). Write `fail_text` with agent-readable instructions — agent reads hook output to decide what to fix.
 
 Gate every commit on (parallel):
 
@@ -160,7 +160,7 @@ pre-commit:
       fail_text: 'Type errors found. Fix all type errors before committing.'
 ```
 
-**CI trigger.** Start with local hooks only. Add CI when: a second developer joins, a broken commit reaches main, or before first public release.
+**CI trigger.** Local hooks only. Add CI when: second developer joins, broken commit reaches main, or before first public release.
 
 ---
 
@@ -168,18 +168,18 @@ pre-commit:
 
 - **Default deny.** Access-control layers (DB rules, RLS, middleware) start denied, opened explicitly.
 - **Security rules are implementation.** Write them in the same task as the feature they protect.
-- **Validate at boundaries.** Parse and validate user input, API responses, env vars with a schema library. Trust internal types downstream.
+- **Validate at boundaries.** Parse/validate user input, API responses, env vars with schema library. Trust internal types downstream.
 - **OWASP Top 10 check** before any new public route: injection, broken auth, IDOR, SSRF, misconfiguration.
-- **Dependency audit** on a regular cadence. Block critical findings before release.
+- **Dependency audit** regularly. Block critical findings before release.
 
 ---
 
 ## Architecture Decision Records (ADR)
 
-Write an ADR when: choosing a library or framework, defining a data or security model, picking a merge or deploy strategy, setting an API contract, or resolving a spec conflict. If you would otherwise make an assumption: write an ADR instead.
+Write ADR when: choosing library/framework, defining data/security model, picking merge/deploy strategy, setting API contract, resolving spec conflict. Would make assumption → write ADR instead.
 
 - Location: `docs/adr/`, filename: `NNNN-kebab-case-title.md`
-- Write-once. To change: new ADR that "Supersedes ADR-NNNN". Statuses: `Proposed`, `Accepted`, `Deprecated`, `Superseded by ADR-XXXX`.
+- Write-once. To change: new ADR "Supersedes ADR-NNNN". Statuses: `Proposed`, `Accepted`, `Deprecated`, `Superseded by ADR-XXXX`.
 - Maintain index table in `docs/adr/README.md`.
 
 ```markdown
@@ -212,7 +212,7 @@ Maintain `docs/runbook.md`. One entry per non-obvious failure resolved.
 
 ## Where facts live
 
-Each fact has exactly one home. Never duplicate across layers.
+Each fact has one home. Never duplicate across layers.
 
 | Layer                       | What goes here                                                         | Load behaviour                                                     |
 | --------------------------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------ |
@@ -235,28 +235,28 @@ Rule of thumb: ADR for WHY, runbook for HOW TO FIX, memory for what was LEARNED,
 | State-dependent pipeline            | Sequential                                |
 | Debugging a specific failure        | Single agent with full context            |
 
-Each spawned agent needs a self-contained prompt: file paths, relevant decisions, expected output format. No implicit context from the parent session.
+Each spawned agent needs self-contained prompt: file paths, relevant decisions, expected output format. No implicit context from parent session.
 
 ---
 
 ## Context management
 
-Context is the primary constraint. Performance degrades as the window fills.
+Context is primary constraint. Performance degrades as window fills.
 
-- **Clear between unrelated tasks.** Reset context (`/clear`) when switching to something unrelated. A long session carrying stale context underperforms a fresh one.
-- **Delegate investigation to subagents.** Reading 50 files to answer one question pollutes the main window. Send it to a subagent; keep only the conclusion.
-- **Correct early.** If the agent drifts, stop and redirect immediately. If you correct the same thing twice, clear and restart with a sharper prompt instead of piling on corrections.
-- **Checkpoint before risky changes.** Use rewind/checkpoints so a bad path is one undo away, not a manual revert.
+- **Clear between unrelated tasks.** Reset context (`/clear`) when switching to unrelated task. Long session with stale context underperforms fresh one.
+- **Delegate investigation to subagents.** Reading 50 files pollutes main window. Send to subagent; keep only conclusion.
+- **Correct early.** Agent drifts → stop and redirect. Same correction twice → clear and restart with sharper prompt.
+- **Checkpoint before risky changes.** Use rewind/checkpoints — bad path is one undo away, not manual revert.
 
 ---
 
 ## Stop conditions (unattended mode)
 
-Stop and ask the user when:
+Stop and ask when:
 
 - Verification fails 3+ times on the same task.
-- A spec/design/UX conflict requires a product decision.
-- A security hole cannot be closed without new requirements.
+- Spec/design/UX conflict requires product decision.
+- Security hole can't close without new requirements.
 - Build or tests are red after rebase.
 
 ---
@@ -267,7 +267,7 @@ Stop and ask the user when:
 - Touch targets: 44x44 px minimum on touch interfaces.
 - Contrast: WCAG AA against background.
 - Reduced-motion fallbacks for all state-conveying animations.
-- All interactive elements are keyboard-navigable and have accessible labels.
+- All interactive elements keyboard-navigable with accessible labels.
 
 ---
 
