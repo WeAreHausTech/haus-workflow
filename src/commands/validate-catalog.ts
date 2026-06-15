@@ -9,6 +9,7 @@ import {
   auditDisallowedTags,
   FORBIDDEN_TAGS,
   HTTP_URL_PATTERN,
+  NPX_TSX_ONLY_EXEMPT_TYPES,
   PLACEHOLDER_PATTERN,
   REQUIRED_SKILL_FRONTMATTER,
   RISKY_INSTALL_PATTERNS,
@@ -181,12 +182,25 @@ function auditTemplateContent(manifestDir: string, absPath: string, itemId: stri
  * Walks skills/ and agents/ dirs looking for placeholder markers and risky install patterns.
  * Only runs when the catalog directory is available on disk.
  */
+// Maps a shipped-content directory to the catalog item type it holds, so the per-type
+// npx exemption (NPX_TSX_ONLY_EXEMPT_TYPES) can be applied during the walk.
+const DIR_ITEM_TYPE: Record<string, string> = {
+  skills: 'skill',
+  agents: 'agent',
+  templates: 'template',
+  commands: 'command',
+}
+
 function auditMarkdownContent(manifestDir: string): string[] {
   const failures: string[] = []
   const dirs = ['skills', 'agents', 'templates', 'commands']
   for (const dir of dirs) {
     const abs = path.join(manifestDir, dir)
     if (!fs.existsSync(abs)) continue
+    // Agent files are AI-instruction prose where `npx <tool>` is legitimate guidance, not a
+    // catalog-executed installer — waive the "only npx tsx" rule for exempt types. The
+    // risky-install scan (npx -y / dlx) is never waived (see ADR-0003).
+    const checkNonTsxNpx = !NPX_TSX_ONLY_EXEMPT_TYPES.includes(DIR_ITEM_TYPE[dir] ?? '')
     walkMd(abs, (file) => {
       const text = fs.readFileSync(file, 'utf8')
       const rel = path.relative(manifestDir, file)
@@ -199,7 +213,7 @@ function auditMarkdownContent(manifestDir: string): string[] {
         if (RISKY_INSTALL_PATTERNS.some((re) => re.test(line))) {
           failures.push(`${rel}:${i + 1}: risky install pattern`)
         }
-        if (ANY_NPX_PATTERN.test(line) && !ALLOWED_NPX_PATTERN.test(line)) {
+        if (checkNonTsxNpx && ANY_NPX_PATTERN.test(line) && !ALLOWED_NPX_PATTERN.test(line)) {
           failures.push(`${rel}:${i + 1}: disallowed npx (only npx tsx allowed)`)
         }
       }

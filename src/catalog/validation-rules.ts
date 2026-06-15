@@ -39,6 +39,14 @@ export const ALLOWED_NPX_PATTERN: RegExp = toRegExp(rules.allowedNpxPattern)
 /** Regex to detect any npx call (used to catch disallowed ones after allowing tsx). */
 export const ANY_NPX_PATTERN: RegExp = toRegExp(rules.anyNpxPattern)
 
+/**
+ * Item types exempt from the "only npx tsx" rule. Agent definitions are AI-instruction
+ * prose that legitimately references tools to run (e.g. `npx playwright`, `npx eslint`),
+ * not catalog-executed installers — so the non-tsx npx ban does not apply to them.
+ * The risky-install patterns (`npx -y` / `dlx`) stay enforced for ALL types (see ADR-0003).
+ */
+export const NPX_TSX_ONLY_EXEMPT_TYPES: readonly string[] = rules.npxTsxOnlyExemptTypes ?? []
+
 /** Insecure URL pattern. All references must use https://. */
 export const HTTP_URL_PATTERN: RegExp = toRegExp(rules.httpUrlPattern)
 
