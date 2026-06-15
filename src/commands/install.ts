@@ -1,5 +1,6 @@
 /** `haus install` — seeds `~/.claude/` with Haus-managed skills, agents, and hook settings. */
 import { applyInstall, printApplyResult } from '../install/apply.js'
+import { printCompanionToolSuggestions } from '../install/companion-tools.js'
 import { error, log } from '../utils/logger.js'
 
 /**
@@ -28,6 +29,7 @@ export async function runInstall(options: {
     if (options.check && result.drift) {
       process.exitCode = 1
     } else if (!options.check && !options.dryRun) {
+      printCompanionToolSuggestions()
       const total = result.created.length + result.updated.length
       if (options.postinstall) {
         // npm just installed haus globally and ran this automatically. The user did
