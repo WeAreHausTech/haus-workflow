@@ -26,12 +26,26 @@ Outputs written to: `.haus-workflow/context-map.json`, `.haus-workflow/recommend
 
 Catalog content from [`haus-workflow-catalog`](https://github.com/WeAreHausTech/haus-workflow-catalog) (71 items; version in `library/catalog/manifest.json`). `apply`/`update` prune catalog items removed upstream when lock hash matches; user edits are kept. Validation rules: synced fixture `library/catalog/validation-rules.json` (skills require frontmatter `description:`).
 
-## Workflow rules
+## Key conventions
 
 - Merge each PR to `main` before starting the next branch — no stacking
 - Run `/compact` between tasks, `/clear` when pivoting to an unrelated topic
 - `prepack` runs `yarn build` before publish; audit/QA scripts run in CI, not prepack
+- `src/commands/` — thin handlers only; never import across command files
+- Highest-stakes: tamper detection in `src/claude/write-workflow.ts` / `src/claude/managed-template.ts`; recommender policy gates in `src/recommender/policies.ts` — bugs here silently break downstream users
+- `scripts/` — node ESM helpers, CI-only or on-demand; never called by `prepack`
+- **Docs are an index:** use path references in `docs/`; read source for implementation detail
+- **Keep docs in sync:** after setup, commands, env, deploy, or integration changes, run the **writing-documentation** skill in this repo and commit doc updates with the code change
 
-## Do not read unless asked
+## Before opening a PR
 
-`docs/` contains `architecture.md`, `cli.md`, `security.md`. Do not read them proactively — use them only when a specific doc is relevant to the task at hand.
+- [ ] `yarn verify` (typecheck + lint + build + test)
+- [ ] Run the **writing-documentation** skill when setup, commands, env, deploy, or integration changed (or N/A)
+- [ ] Docs reflect this change or explicitly N/A
+- [ ] `fix:` commits must include a regression test (see CI `fix-needs-test` gate)
+
+## Docs
+
+[docs/SUMMARY.md](docs/SUMMARY.md)
+
+> `docs/` contains topic files for architecture, codebase, CLI, dev workflow, security, and runbook. Do not read proactively — route via `docs/SUMMARY.md` or load only the file relevant to the task at hand.

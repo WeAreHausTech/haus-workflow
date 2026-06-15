@@ -58,3 +58,14 @@ LEFTHOOK=0 git push     # skip pre-push
 ```
 
 CI still runs the full gate. Use sparingly — not a substitute for fixing failures.
+
+## Release
+
+Releases are driven locally via `release-it`. The workflow:
+
+1. `yarn release` (or `yarn release:dry` to preview) — bumps version in `package.json`, generates `CHANGELOG.md`, creates a GitHub release, and pushes a `v*.*.*` tag.
+2. The `.github/workflows/release.yml` workflow triggers on the tag push, runs `yarn verify`, then publishes to npm via OIDC Trusted Publishing (no `NPM_TOKEN` secret required).
+
+The tag must match `package.json` version; the release workflow validates this before publishing.
+
+`prepack` runs `yarn build` automatically — do not build manually before `yarn release`.
