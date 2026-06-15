@@ -9,34 +9,49 @@ import { inspect } from 'node:util'
 /** @type {Failure[]} */
 const failures = []
 
-/** @type {unknown} */
+/** @type {{ counts?: { tests: number, passed: number, failed: number, skipped: number } } | null} */
 let latestSummary = null
+
+/**
+ * @param {unknown} value
+ * @returns {value is Record<string, unknown>}
+ */
+function isRecord(value) {
+  return value !== null && typeof value === 'object' && !Array.isArray(value)
+}
 
 /**
  * @param {unknown} error
  * @returns {string}
  */
 function formatError(error) {
-  if (!error) return '(no error message)'
+  if (error == null) return '(no error message)'
   if (typeof error === 'string') return error
+  if (typeof error !== 'object') return inspect(error, { depth: 4, colors: true })
 
   const lines = []
   const err =
     /** @type {{ message?: string, stack?: string, cause?: unknown, operator?: string, expected?: unknown, actual?: unknown }} */ (
       error
     )
-  const cause =
-    err.cause && typeof err.cause === 'object'
-      ? /** @type {{ message?: string, stack?: string, operator?: string, expected?: unknown, actual?: unknown }} */ (
-          err.cause
-        )
-      : err
+  const cause = isRecord(err.cause)
+    ? /** @type {{ message?: string, stack?: string, operator?: string, expected?: unknown, actual?: unknown }} */ (
+        err.cause
+      )
+    : err
 
   if (cause.message) lines.push(cause.message)
   if (err.operator ?? cause.operator) lines.push(`operator: ${err.operator ?? cause.operator}`)
-  const expected =
-    'expected' in err ? err.expected : 'expected' in cause ? cause.expected : undefined
-  const actual = 'actual' in err ? err.actual : 'actual' in cause ? cause.actual : undefined
+  const expected = Object.hasOwn(err, 'expected')
+    ? err.expected
+    : Object.hasOwn(cause, 'expected')
+      ? cause.expected
+      : undefined
+  const actual = Object.hasOwn(err, 'actual')
+    ? err.actual
+    : Object.hasOwn(cause, 'actual')
+      ? cause.actual
+      : undefined
   if (expected !== undefined)
     lines.push(`expected: ${inspect(expected, { depth: 4, colors: true })}`)
   if (actual !== undefined) lines.push(`actual: ${inspect(actual, { depth: 4, colors: true })}`)
@@ -97,11 +112,14 @@ const reporter = new Transform({
   flush(callback) {
     const chunks = []
 
-    if (latestSummary && typeof latestSummary === 'object' && latestSummary !== null) {
-      const counts =
-        /** @type {{ counts: { tests: number, passed: number, failed: number, skipped: number } }} */ (
-          latestSummary
-        ).counts
+    const counts = isRecord(latestSummary) ? latestSummary.counts : undefined
+    if (
+      counts != null &&
+      typeof counts.tests === 'number' &&
+      typeof counts.passed === 'number' &&
+      typeof counts.failed === 'number' &&
+      typeof counts.skipped === 'number'
+    ) {
       chunks.push(
         '',
         `tests ${counts.tests} | pass ${counts.passed} | fail ${counts.failed} | skipped ${counts.skipped}`,
