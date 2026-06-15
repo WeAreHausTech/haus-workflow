@@ -34,7 +34,7 @@ Specify the least. Infer the rest from the repo's stack + these conventions, and
 
 - **IMPORTANT — never install anything without asking first; global/system tools especially** (Homebrew, Docker, Laravel Herd, global `npm`/`composer` packages). Detect what's already present; if something required is missing, name it, say why it's needed, and get an explicit **yes** before installing. Prefer the least-invasive option, and don't switch or override tools the dev already has.
 - **PHP / WordPress sites are served by the developer's own PHP environment.** If they already have one — detect `valet`, `herd`, `ddev`, or `php` on PATH — **use it**: just satisfy the env contract (docroot → the repo's `web/`, HTTPS) and report the URL; never override what they already run. **Only when no local PHP environment exists** (a completely fresh machine) suggest installing **[Laravel Herd](https://herd.laravel.com)** as the default (asking first) and point its docroot at `web/` + `herd secure`.
-- **Databases and other services (a repo's `needs:`) run in Docker as standalone containers.** Bring each up with a **clean `docker run`** — image, host port, and env from the house convention for that service (e.g. `mysql` → `mysql:8` on `127.0.0.1:3306`, root password from generated secrets; `postgres` → `postgres:16` on `5432`). **Do not provision a `needs:` service from the repo's own `docker-compose.yml` when that compose bind-mounts repo-relative init files** (e.g. `./seed.sql`, `./docker-entrypoint-initdb.d/`): those mounts need files the guard won't let us create, and they conflate bring-up with seeding (which is the separate `seed:` step). **If Docker isn't installed** it's a prerequisite (surfaced in the Step 2 gate) — **ask before installing it** (global install). **Port-conflict caveat:** if the conventional host port is already taken, pick the next free port, use it, and **record the chosen port in the workspace `localdev.yml` `env` map** so sink repos point at the right place. A `needs:` service comes up **empty** — populating it is always the separate `seed:` step.
+- **Databases and other services (a repo's `needs:`) run in Docker as a shared, workspace-owned `docker-compose` project** — grouped and self-contained (`up`/`down` together, named volumes), namespaced per workspace instance via `COMPOSE_PROJECT_NAME` + its own host ports so the workspace can run multiple times side by side. Image/port/env per the house convention (`mysql:8`, `postgres:16`, …). Don't reuse a repo's own compose that bind-mounts repo-relative init files (`seed.sql`) — author the service in the workspace compose. Services come up **empty** (seeding is the separate `seed:` step); record chosen host ports in the workspace `localdev.yml` `env` map.
 - **Dependencies** install from the lockfile (Step 3).
 - A repo's `localdev.yml` carries **only what can't be inferred** — its `needs`, repo-specific `build`/`seed` commands, env keys, and URL. Detect the stack (e.g. Bedrock = `composer.json` + `web/` docroot + `wp-cli.yml`; Vendure/Node = `docker-compose.yml` + `@vendure/*`) and apply the matching convention.
 
@@ -84,7 +84,7 @@ env:
 1. **Discover** `.haus-workflow/localdev.yml` in the workspace root and each repo.
 2. **Resolve order** from the workspace `order` (repos not listed run last, in manifest order). No workspace file → manifest order.
 3. **Per repo, in order**, apply intent via the conventions:
-   - **`needs`** → bring up each service as a **standalone `docker run`** (image/port/env from conventions; **not** the repo's compose when it bind-mounts repo-relative init files) if not already running. The service comes up **empty**; record its values in the workspace `localdev.yml` `env` map. No data is created here, so no overwrite prompt at this step — data lands in `seed:`.
+   - **`needs`** → add the service to the **workspace compose project** and `docker compose up -d` if not already running (namespaced by `COMPOSE_PROJECT_NAME`, free host ports per instance; not the repo's own bind-mounting compose). Comes up **empty**; record host ports in the workspace `localdev.yml` `env` map — data lands in `seed:`.
    - **`build`** → run it (honor any node version the repo's docs note).
    - **`serve`** → for `via: herd` / PHP envs, install nothing — verify the dev's environment serves `web/`, and report the URL.
    - **`seed`** → populate the empty datastore. **Always a distinct, confirm-gated step, separate from `needs:` bring-up** (don't conflate "DB up" with "DB has data"). Before running, **check its prerequisites and report any gap instead of running blind** — e.g. WP-CLI present (for `wp` / `db:pull` seeds), the target repo's **`.env` written** (the seed reads connection values from it — done in the Env step above), the **SSH alias resolves** (for remote pulls like `dep db:pull staging-oderland`). **Confirm first** for every remote (SSH) or destructive (overwrites data) seed — every run, even on re-run. Missing prerequisite → skip with a clear message, don't guess.
@@ -112,13 +112,13 @@ env:
    - **Yes** → start each repo in the workspace `order` (its `serve.start`, e.g. `yarn dev`; bring up any remaining foreground services), run any follow-ups (e.g. `wp sync-products sync`), then **print the live URLs** (each repo's `serve.url`).
    - **No** → just print the ordered start commands + follow-ups as next steps; start nothing.
 
-**Default is "ready to run" (D2):** the preparation — datastores up (standalone `docker run`), seeds applied (confirm-gated), links, builds, each repo's `.env` written — always happens. Starting the **foreground** dev servers and the initial product sync happen **only if the user says yes** to the start prompt above; otherwise they're printed, not run.
+**Default is "ready to run" (D2):** the preparation — datastores up (workspace `docker compose` project), seeds applied (confirm-gated), links, builds, each repo's `.env` written — always happens. Starting the **foreground** dev servers and the initial product sync happen **only if the user says yes** to the start prompt above; otherwise they're printed, not run.
 
 ## Step 5 — Report and define "done"
 
 **"Done" is an explicit terminal state**, not "looks set up". The preparation reaches:
 
-- datastores up (standalone containers),
+- datastores up (workspace `docker compose` project),
 - dependencies installed and builds green,
 - links wired,
 - each repo's `.env` written from known values.
