@@ -85,10 +85,10 @@ export function buildCompanionSuggestions(
  * (Homebrew / nvm bins may be absent), so this can false-negative. That is harmless
  * for suggestion-only output — worst case is one redundant suggestion line.
  */
-export function commandExists(bin: string): boolean {
+function commandExists(bin: string): boolean {
   try {
-    // `command -v` is a shell builtin → run through a shell.
-    const r = execaSync('sh', ['-c', `command -v ${bin}`], { reject: false })
+    // `command -v` is a shell builtin → run through a shell; pass bin as $1 to avoid injection.
+    const r = execaSync('sh', ['-c', 'command -v -- "$1"', 'probe', bin], { reject: false })
     return r.exitCode === 0
   } catch {
     return false
