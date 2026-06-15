@@ -87,8 +87,11 @@ project when their on-disk copy still matches the lock hash; user-edited copies 
 
 ## Internal docs
 
+[docs/SUMMARY.md](docs/SUMMARY.md) — full documentation index
+
 - [Architecture](docs/architecture.md)
+- [Codebase](docs/codebase.md)
 - [CLI reference](docs/cli.md)
+- [Developer scripts & release](docs/dev.md)
 - [Security](docs/security.md)
-- [Developer scripts](docs/dev.md)
 - [Runbook](docs/runbook.md)
