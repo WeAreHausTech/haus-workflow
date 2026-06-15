@@ -4,6 +4,7 @@
 dist
 tmp
 out-tsc
+.tsbuildinfo
 
 # RTK (personal token-proxy tooling) — not a project dependency
 .rtk/

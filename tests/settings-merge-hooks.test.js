@@ -78,9 +78,7 @@ test('prunes retired haus context hook entries and tracking on merge', () => {
       hookCommands: ['haus context --from-hook', 'haus guard file-access --from-hook'],
     },
     hooks: {
-      UserPromptSubmit: [
-        { hooks: [{ type: 'command', command: 'haus context --from-hook' }] },
-      ],
+      UserPromptSubmit: [{ hooks: [{ type: 'command', command: 'haus context --from-hook' }] }],
       PreToolUse: [
         {
           matcher: 'Read|Edit|Write',
@@ -91,10 +89,7 @@ test('prunes retired haus context hook entries and tracking on merge', () => {
   }
   const { settings: merged } = mergeHooks(settings, PROJECT_GUARD_FRAGMENTS)
   assert.equal(merged.hooks.UserPromptSubmit, undefined)
-  assert.equal(
-    merged._haus?.hookCommands?.includes('haus context --from-hook'),
-    false,
-  )
+  assert.equal(merged._haus?.hookCommands?.includes('haus context --from-hook'), false)
   assert.equal(merged._haus?.hooks?.includes('haus.context-hook'), false)
   assert.ok(merged.hooks.PreToolUse.some((e) => e.matcher === 'Read|Edit|Write'))
   assert.ok(merged.hooks.PreToolUse.some((e) => e.matcher === 'Bash'))

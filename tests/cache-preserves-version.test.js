@@ -31,7 +31,9 @@ const { server, port } = await new Promise((resolve) => {
     }
     if (url === '/agents/tiny.md') {
       res.writeHead(200, { 'Content-Type': 'text/plain' })
-      res.end('---\ndescription: Tiny\n---\n## Use when\nx\n## Do not use when\ny\n## Verification\nz\n')
+      res.end(
+        '---\ndescription: Tiny\n---\n## Use when\nx\n## Do not use when\ny\n## Verification\nz\n',
+      )
       return
     }
     res.writeHead(404)

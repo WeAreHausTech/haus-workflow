@@ -74,7 +74,8 @@ test('fixture item enum fields hold schema-valid values', () => {
     }
     if (!Array.isArray(item.tags)) violations.push(`${item.id}: tags not an array`)
     if (!Array.isArray(item.repoRoles)) violations.push(`${item.id}: repoRoles not an array`)
-    if (typeof item.tokenEstimate !== 'number') violations.push(`${item.id}: tokenEstimate not a number`)
+    if (typeof item.tokenEstimate !== 'number')
+      violations.push(`${item.id}: tokenEstimate not a number`)
   }
   assert.deepEqual(violations, [], 'fixture items have invalid enum/type values')
 })

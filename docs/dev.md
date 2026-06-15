@@ -36,5 +36,25 @@ is fail-open (always exits 0). Not a manual QA script — documented here as the
 ## Git hooks (Lefthook)
 
 `lefthook.yml` defines pre-commit (lint, format, typecheck, gitleaks + secret-grep) and
-pre-push (test). Installed by the `prepare` script (`lefthook install`). Replaces the
-former Husky setup; dogfoods the standard haus ships.
+pre-push (`yarn build && yarn test:fast`). Installed by the `prepare` script (`lefthook install`).
+Replaces the former Husky setup; dogfoods the standard haus ships.
+
+### Test tiers
+
+| Command              | When                  | What                                                     |
+| -------------------- | --------------------- | -------------------------------------------------------- |
+| `yarn test:fast`     | pre-push hook         | Unit tests only (~30 files); see `scripts/test-fast.mjs` |
+| `yarn test`          | local / `yarn verify` | Full suite (unit + integration)                          |
+| `yarn test:coverage` | CI                    | Full suite with coverage                                 |
+
+Add new CLI/integration/git tests to `SLOW_INTEGRATION` in `scripts/test-fast.mjs` so they
+stay out of the pre-push gate.
+
+### Skipping hooks (WIP only)
+
+```bash
+LEFTHOOK=0 git commit   # skip pre-commit
+LEFTHOOK=0 git push     # skip pre-push
+```
+
+CI still runs the full gate. Use sparingly — not a substitute for fixing failures.

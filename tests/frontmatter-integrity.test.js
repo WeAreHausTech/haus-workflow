@@ -32,7 +32,11 @@ test('apply copies skills/agents with YAML frontmatter intact on line 1', () => 
   writeFileSync(
     path.join(temp, 'package.json'),
     JSON.stringify(
-      { name: 'fm-temp', packageManager: 'yarn@4.5.3', dependencies: { next: '15.0.0', react: '19.0.0' } },
+      {
+        name: 'fm-temp',
+        packageManager: 'yarn@4.5.3',
+        dependencies: { next: '15.0.0', react: '19.0.0' },
+      },
       null,
       2,
     ),

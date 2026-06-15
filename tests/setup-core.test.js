@@ -40,10 +40,7 @@ test('setup core writes scan + recommendation artifacts', () => {
 
   // Readerless artifacts pruned: setup core no longer emits these.
   for (const f of ['recommended-hooks.json', 'recommended-rules.json', 'dependency-map.json']) {
-    assert.ok(
-      !existsSync(path.join(temp, '.haus-workflow', f)),
-      `${f} should no longer be written`,
-    )
+    assert.ok(!existsSync(path.join(temp, '.haus-workflow', f)), `${f} should no longer be written`)
   }
 })
 

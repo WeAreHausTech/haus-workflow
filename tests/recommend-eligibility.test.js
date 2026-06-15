@@ -85,7 +85,10 @@ test('UNSUPPORTED gate: python item skipped', async () => {
   setup()
   try {
     const result = await recommend(tmpDir, makeContext(tmpDir))
-    assert.ok(ids(result.skipped).has('test.unsupported-python'), 'python item should be in skipped')
+    assert.ok(
+      ids(result.skipped).has('test.unsupported-python'),
+      'python item should be in skipped',
+    )
     const entry = findSkipped(result, 'test.unsupported-python')
     assert.equal(entry.skipReasons[0].code, 'unsupported-policy')
   } finally {
@@ -173,7 +176,10 @@ test('requiresAny unsatisfied: svelte skill skipped when no svelte in context', 
   setup()
   try {
     // Empty deps and stacks — svelte dependency clause is unsatisfied.
-    const result = await recommend(tmpDir, makeContext(tmpDir, { dependencies: [], detectedStacks: {} }))
+    const result = await recommend(
+      tmpDir,
+      makeContext(tmpDir, { dependencies: [], detectedStacks: {} }),
+    )
     assert.ok(
       ids(result.skipped).has('test.requires-svelte'),
       'svelte item should be skipped when svelte not in context',
@@ -217,10 +223,18 @@ test('deep-context schema drift: stacks as string coerced to [] not thrown (regr
     // Write a malformed deep-context.json — LLM wrote wrong shapes for all fields.
     writeFileSync(
       path.join(tmpDir, '.haus-workflow', 'deep-context.json'),
-      JSON.stringify({ source: 'writing-documentation', roles: 'nx-monorepo', stacks: 'oops', patterns: 5 }),
+      JSON.stringify({
+        source: 'writing-documentation',
+        roles: 'nx-monorepo',
+        stacks: 'oops',
+        patterns: 5,
+      }),
     )
     const result = await recommend(tmpDir, makeContext(tmpDir))
-    assert.ok(Array.isArray(result.recommended), 'recommend() should return normally despite malformed deep-context')
+    assert.ok(
+      Array.isArray(result.recommended),
+      'recommend() should return normally despite malformed deep-context',
+    )
   } finally {
     teardown()
   }
@@ -250,10 +264,7 @@ test('does not produce package-manager-match for npm4/npm89 pseudo-tags', async 
       }),
     )
     process.env.HAUS_FIXTURE_CATALOG = manifestPath
-    const result = await recommend(
-      tmpDir,
-      makeContext(tmpDir, { packageManager: 'npm' }),
-    )
+    const result = await recommend(tmpDir, makeContext(tmpDir, { packageManager: 'npm' }))
     const item = findRecommended(result, 'test.npm4-tagged')
     assert.ok(item, 'default item with npm4 tag should still be recommended')
     assert.equal(

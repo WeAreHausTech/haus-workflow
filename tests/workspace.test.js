@@ -139,9 +139,14 @@ test('runWorkspace scan throws a clean error when a repo path is not a directory
   writeFileSync(path.join(ws, 'not-a-dir'), 'regular file')
   writeFileSync(
     path.join(ws, 'haus.workspace.yaml'),
-    ['client: acme', 'repos:', '  - name: bad', '    path: not-a-dir', 'relationships: []', ''].join(
-      '\n',
-    ),
+    [
+      'client: acme',
+      'repos:',
+      '  - name: bad',
+      '    path: not-a-dir',
+      'relationships: []',
+      '',
+    ].join('\n'),
   )
   await inWorkspace(ws, async () => {
     await assert.rejects(

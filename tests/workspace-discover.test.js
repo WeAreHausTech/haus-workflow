@@ -2,7 +2,14 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import os from 'node:os'
 import path from 'node:path'
-import { mkdtempSync, mkdirSync, writeFileSync, symlinkSync, existsSync, readFileSync } from 'node:fs'
+import {
+  mkdtempSync,
+  mkdirSync,
+  writeFileSync,
+  symlinkSync,
+  existsSync,
+  readFileSync,
+} from 'node:fs'
 
 import {
   discoverRepos,
@@ -102,13 +109,19 @@ test('discoverRepos respects maxDepth (default excludes deep repo; override incl
     'repo beyond default depth (3) must be excluded',
   )
   const deep = await discoverRepos(ws, 6)
-  assert.ok(deep.some((r) => r.name === 'deeprepo'), 'override depth surfaces the deep repo')
+  assert.ok(
+    deep.some((r) => r.name === 'deeprepo'),
+    'override depth surfaces the deep repo',
+  )
 })
 
 test('discoverRepos does not follow symlink cycles', async () => {
   const ws = makeWorkspace()
   const repos = await discoverRepos(ws)
-  assert.ok(!repos.some((r) => r.path.split(path.sep).includes('cycle')), 'symlink cycle not followed')
+  assert.ok(
+    !repos.some((r) => r.path.split(path.sep).includes('cycle')),
+    'symlink cycle not followed',
+  )
 })
 
 test('mergeWorkspaceConfig preserves user edits, appends new, never deletes', () => {

@@ -68,7 +68,12 @@ test('malformed deep-context.json is ignored, not thrown on', () => {
   // LLM wrote the wrong shape: roles a string, stacks a string, patterns a number.
   writeFileSync(
     path.join(temp, '.haus-workflow', 'deep-context.json'),
-    JSON.stringify({ source: 'writing-documentation', roles: 'nx-monorepo', stacks: 'oops', patterns: 5 }),
+    JSON.stringify({
+      source: 'writing-documentation',
+      roles: 'nx-monorepo',
+      stacks: 'oops',
+      patterns: 5,
+    }),
   )
   // Must not throw; enrichment is simply ignored (headless path stays alive).
   const out = recommend(temp)

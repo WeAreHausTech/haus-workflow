@@ -15,10 +15,7 @@ function docsSkillBasename() {
 
 test('haus-setup references the installed docs skill at the manifest-derived path', () => {
   const expectedPath = `.claude/skills/${docsSkillBasename()}/SKILL.md`
-  assert.ok(
-    CMD.includes(expectedPath),
-    `command should tell the agent to read ${expectedPath}`,
-  )
+  assert.ok(CMD.includes(expectedPath), `command should tell the agent to read ${expectedPath}`)
 })
 
 test('haus-setup instructs writing deep-context.json', () => {

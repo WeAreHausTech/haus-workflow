@@ -22,6 +22,10 @@ test('mapWithConcurrency preserves order and caps in-flight work', async () => {
     },
     10,
   )
-  assert.deepEqual(out, items.map((n) => n * 2), 'order preserved')
+  assert.deepEqual(
+    out,
+    items.map((n) => n * 2),
+    'order preserved',
+  )
   assert.ok(peak <= 10, `peak concurrency ${peak} must not exceed bound 10`)
 })

@@ -118,8 +118,10 @@ describe('settings-merge: mergeDenyRules', () => {
   })
 
   it('is idempotent across re-merges with the same build list', () => {
-    const once = mergeDenyRules({ permissions: { deny: ['Bash(user:*)'] } }, buildDenyRules())
-      .settings
+    const once = mergeDenyRules(
+      { permissions: { deny: ['Bash(user:*)'] } },
+      buildDenyRules(),
+    ).settings
     const twice = mergeDenyRules(once, buildDenyRules()).settings
     assert.deepEqual(twice.permissions.deny, once.permissions.deny)
     assert.deepEqual(twice._haus.denyRules, once._haus.denyRules)

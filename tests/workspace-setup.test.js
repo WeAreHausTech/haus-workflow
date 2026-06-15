@@ -7,10 +7,7 @@ import { mkdtempSync, mkdirSync, writeFileSync, existsSync, readFileSync } from 
 // Point the recommender/apply at the vendored fixture catalog (no network, deterministic).
 process.env.HAUS_FIXTURE_CATALOG = path.resolve('tests/fixtures/catalog/manifest.json')
 
-import {
-  runWorkspaceSetup,
-  resolveWorkspaceRoot,
-} from '../src/commands/workspace/setup.ts'
+import { runWorkspaceSetup, resolveWorkspaceRoot } from '../src/commands/workspace/setup.ts'
 import { writeWorkspaceArtifacts } from '../src/commands/workspace/aggregate.ts'
 
 function writeRepo(dir, pkg) {

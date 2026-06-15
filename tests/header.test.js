@@ -8,7 +8,11 @@ import { describe, it } from 'node:test'
 // stampMarkdown routes by content shape, keeps `---` on line 1 for skills, and is
 // idempotent. A bug here silently de-registers a skill or clobbers a user file.
 
-const H = { stableId: 'skill.haus-workflow', schemaVersion: '1', source: '@haus-tech/haus-workflow@0.16.2' }
+const H = {
+  stableId: 'skill.haus-workflow',
+  schemaVersion: '1',
+  source: '@haus-tech/haus-workflow@0.16.2',
+}
 
 const FRONTMATTER_DOC = `---
 name: haus-workflow
@@ -65,7 +69,10 @@ describe('header — frontmatter form (skills)', () => {
     const lines = out.split('\n')
     assert.equal(lines[0], '---', 'line 1 stays the frontmatter fence')
     assert.ok(!lines[0].includes('HAUS-MANAGED'), 'no comment pushed onto line 1')
-    assert.ok(/^haus_managed:\s*"/.test(lines.find((l) => l.startsWith('haus_managed:'))), 'field present')
+    assert.ok(
+      /^haus_managed:\s*"/.test(lines.find((l) => l.startsWith('haus_managed:'))),
+      'field present',
+    )
   })
 
   it('parses the marker back out of the frontmatter block', async () => {

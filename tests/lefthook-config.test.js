@@ -38,10 +38,10 @@ describe('lefthook migration: lefthook.yml', () => {
     }
   })
 
-  it('builds dist then runs the test suite on pre-push', () => {
+  it('builds dist then runs the fast test subset on pre-push', () => {
     const run = config['pre-push'].commands.test.run
     assert.match(run, /yarn build/)
-    assert.match(run, /yarn test/)
+    assert.match(run, /yarn test:fast/)
   })
 
   it('gives every command an agent-readable fail_text', () => {
