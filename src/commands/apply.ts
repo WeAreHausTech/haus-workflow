@@ -2,15 +2,13 @@
 import path from 'node:path'
 
 import checkbox from '@inquirer/checkbox'
-import fs from 'fs-extra'
 
 import { getCacheDir } from '../catalog/remote-catalog.js'
 import { writeClaudeFiles } from '../claude/write-claude-files.js'
-import type { ClaudeSettings } from '../install/settings-merge.js'
 import type { Recommendation } from '../types.js'
-import { readJson, readJsonDetailed } from '../utils/fs.js'
+import { readJson } from '../utils/fs.js'
 import { error, log, warn } from '../utils/logger.js'
-import { claudePath, displayPath, hausPath } from '../utils/paths.js'
+import { displayPath, hausPath } from '../utils/paths.js'
 
 async function cacheHasItems(): Promise<boolean> {
   const data = await readJson<{ items?: unknown[] }>(path.join(getCacheDir(), 'manifest.json'))
@@ -98,25 +96,4 @@ export async function runApply(options: {
     log('Applied files:')
     files.forEach((f) => log(`- ${displayPath(root, f)}`))
   }
-}
-
-/**
- * True when this directory has prior haus setup artifacts. Lock alone is not enough —
- * `haus update` may create an empty lock before re-apply runs.
- */
-async function isHausProject(root: string): Promise<boolean> {
-  if (await fs.pathExists(hausPath(root, 'recommendation.json'))) return true
-  const result = await readJsonDetailed<ClaudeSettings>(claudePath(root, 'settings.json'))
-  if (result.status === 'ok') return result.value._haus != null
-  return false
-}
-
-/**
- * Re-applies haus-managed project files (core `.claude/` outputs + lock-tracked catalog
- * items from `recommendation.json`). Safe to call from `haus update`: settings are merged,
- * not replaced. Returns written paths, or `[]` when the project was never set up by haus.
- */
-export async function refreshProjectApply(root: string): Promise<string[]> {
-  if (!(await isHausProject(root))) return []
-  return writeClaudeFiles(root, false, undefined, { refillConfig: false })
 }
