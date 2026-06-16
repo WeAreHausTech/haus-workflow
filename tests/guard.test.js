@@ -49,6 +49,15 @@ describe('guardFileAccess', () => {
   it('allows an ordinary path', () => {
     assert.equal(guardFileAccess('src/index.ts'), undefined)
     assert.equal(guardFileAccess('README.md'), undefined)
+    assert.equal(guardFileAccess('src/secretstore/index.ts'), undefined)
+    assert.equal(guardFileAccess('src/certs-utils.ts'), undefined)
+  })
+
+  it('matches deny-tier names on path segments, not loose substrings', () => {
+    assert.ok(guardFileAccess('src/secrets/token.txt'))
+    assert.ok(guardFileAccess('config/certs/ca.pem'))
+    assert.ok(guardFileAccess('data/customer-data/export.json'))
+    assert.equal(guardFileAccess('src/my-secrets-file.ts'), undefined)
   })
 
   it('explains the block in plain language while still naming the path (WS6)', () => {

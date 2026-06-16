@@ -29,6 +29,24 @@ export const DENY_PATHS = [
 /** Subset of DENY_PATHS that are directories — expanded to `<dir>/**` in rule strings. */
 export const DENY_DIRS = new Set(['customer-data', 'secrets', 'certs'])
 
+/** Anchored deny-tier path regexes used by runtime file-access guard. */
+export const DENY_PATH_REGEXES = [
+  /(^|\/)[^/]+\.pem$/i,
+  /(^|\/)[^/]+\.key$/i,
+  /(^|\/)[^/]+\.p12$/i,
+  /(^|\/)[^/]+\.pfx$/i,
+  /(^|\/)id_rsa$/i,
+  /(^|\/)id_ed25519$/i,
+  /(^|\/)customer-data(\/|$)/i,
+  /(^|\/)secrets(\/|$)/i,
+  /(^|\/)certs(\/|$)/i,
+]
+
+/** Normalize candidate paths for anchored regex checks. */
+export function normalizePathForMatch(candidate: string): string {
+  return candidate.replace(/\\/g, '/').replace(/\/+/g, '/').trim()
+}
+
 /**
  * Paths in the ask tier: Claude must prompt the user before accessing these.
  * Each entry specifies which file tools require a prompt (Read may be omitted

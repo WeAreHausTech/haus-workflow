@@ -1,6 +1,6 @@
 /** Guard that hard-blocks file-path access matching deny-tier path patterns. */
 
-import { DENY_PATHS } from './sensitive-paths.js'
+import { DENY_PATH_REGEXES, normalizePathForMatch } from './sensitive-paths.js'
 
 /**
  * Returns a block message if `candidate` matches a deny-tier path pattern, otherwise `undefined`.
@@ -8,8 +8,8 @@ import { DENY_PATHS } from './sensitive-paths.js'
  * @param candidate - File path string to evaluate.
  */
 export function guardFileAccess(candidate: string): string | undefined {
-  // Strip glob wildcards before substring matching — patterns like "*.pem" become ".pem"
-  const matched = DENY_PATHS.find((token) => candidate.includes(token.replace(/\*/g, '')))
+  const normalized = normalizePathForMatch(candidate)
+  const matched = DENY_PATH_REGEXES.find((re) => re.test(normalized))
   // Plain-language reason (non-devs hit these) that still names the blocked path.
   // No backticks: emitted as a JSON permissionDecisionReason the UI may render as
   // Markdown, so backticks in the path itself could break formatting.
