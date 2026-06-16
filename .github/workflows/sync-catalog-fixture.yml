@@ -69,6 +69,7 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git"
           BRANCH="chore/sync-catalog-fixture"
           CATALOG_REF="${{ steps.ref.outputs.catalog_ref }}"
           CATALOG_MANIFEST_URL="https://raw.githubusercontent.com/WeAreHausTech/haus-workflow-catalog/${CATALOG_REF}/manifest.json"
@@ -83,7 +84,7 @@ jobs:
           curl -fsSL "$CATALOG_MANIFEST_URL" -o library/catalog/manifest.json
           curl -fsSL "$CATALOG_RULES_URL" -o library/catalog/validation-rules.json
           git add library/catalog/manifest.json library/catalog/validation-rules.json
-          git commit -m "chore(catalog): sync fixtures from haus-workflow-catalog ${CATALOG_REF}"
+          git commit -m "chore(catalog): sync fixtures from haus-workflow-catalog ${CATALOG_REF}" || echo "No commit needed"
           if [ -n "$LEASE_REF" ]; then
             git push --force-with-lease="$BRANCH:$LEASE_REF" origin "HEAD:$BRANCH"
           else
