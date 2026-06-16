@@ -67,8 +67,6 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          printf '%s\n' "$GH_TOKEN" | gh auth login --with-token
-          gh auth setup-git
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           BRANCH="chore/sync-catalog-fixture"
