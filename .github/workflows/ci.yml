@@ -78,10 +78,6 @@ jobs:
             node "$GITHUB_WORKSPACE/dist/cli.js" update --check || true
           )
 
-  # Packed-tarball smoke: install the published artifact into a clean consumer and
-  # run the shipped bin. Catches a missing `files` entry, broken bin shebang, ESM
-  # resolution failure, or unbundled dependency that the in-repo `dist/cli.js` smoke
-  # cannot see. Packs with `npm pack` to match the `npm publish` release path.
   gitleaks:
     runs-on: ubuntu-latest
     steps:
@@ -102,6 +98,10 @@ jobs:
         run: gitleaks detect --source . --verbose --redact
 
   pack-smoke:
+    # Packed-tarball smoke: install the published artifact into a clean consumer and
+    # run the shipped bin. Catches a missing `files` entry, broken bin shebang, ESM
+    # resolution failure, or unbundled dependency that the in-repo `dist/cli.js` smoke
+    # cannot see. Packs with `npm pack` to match the `npm publish` release path.
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
