@@ -56,8 +56,7 @@ export async function readJson<T>(file: string): Promise<T | undefined> {
 
 /** Write `value` as pretty-printed JSON, creating parent directories as needed. */
 export async function writeJson(file: string, value: unknown): Promise<void> {
-  await fs.ensureDir(path.dirname(file))
-  await fs.writeFile(file, `${JSON.stringify(value, null, 2)}\n`, 'utf8')
+  await atomicWriteText(file, `${JSON.stringify(value, null, 2)}\n`)
 }
 
 /** Removes `dir` when it is empty, to avoid leaving ghost directories after deleting files. */
@@ -81,8 +80,18 @@ export async function readText(file: string): Promise<string | undefined> {
 
 /** Write a text file, creating parent directories as needed. */
 export async function writeText(file: string, value: string): Promise<void> {
-  await fs.ensureDir(path.dirname(file))
-  await fs.writeFile(file, value, 'utf8')
+  await atomicWriteText(file, value)
+}
+
+async function atomicWriteText(file: string, value: string): Promise<void> {
+  const dir = path.dirname(file)
+  await fs.ensureDir(dir)
+  const tempPath = path.join(
+    dir,
+    `.tmp-haus-write-${process.pid}-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+  )
+  await fs.writeFile(tempPath, value, 'utf8')
+  await fs.move(tempPath, file, { overwrite: true })
 }
 
 export async function exists(file: string): Promise<boolean> {

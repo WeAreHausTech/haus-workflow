@@ -22,6 +22,12 @@ test('undo --yes removes haus-managed files and preserves user-owned .claude con
   assert.equal(fs.existsSync(path.join(temp, '.claude/rules/haus.md')), false)
   assert.equal(fs.existsSync(path.join(temp, '.haus-workflow/haus.lock.json')), false)
   assert.equal(fs.existsSync(path.join(temp, '.haus-workflow/context-map.json')), true)
+  const backupDir = path.join(temp, '.haus-workflow/backups')
+  assert.equal(fs.existsSync(backupDir), true)
+  const undoBackups = fs.readdirSync(backupDir).filter((name) => name.startsWith('undo-'))
+  assert.ok(undoBackups.length > 0, 'undo backup directory should be created')
+  const backedRule = path.join(backupDir, undoBackups[0], '.claude/rules/haus.md')
+  assert.equal(fs.existsSync(backedRule), true)
 })
 
 // Regression: stripHausHooks deletes the whole _haus namespace, so it MUST run last
