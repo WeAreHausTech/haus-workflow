@@ -39,7 +39,7 @@ function findLineMarker(
   while (idx !== -1) {
     const lineStart = idx === 0 || content[idx - 1] === '\n'
     const after = idx + marker.length
-    const lineEnd = after === content.length || content[after] === '\n'
+    const lineEnd = after === content.length || content[after] === '\n' || content[after] === '\r'
     if (lineStart && lineEnd) return { start: idx, end: after }
     idx = content.indexOf(marker, idx + marker.length)
   }

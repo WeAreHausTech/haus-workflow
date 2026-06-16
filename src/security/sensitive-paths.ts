@@ -11,7 +11,8 @@ export type FileTool = 'Read' | 'Edit' | 'Write'
 
 /**
  * Glob-like patterns for paths that are hard-denied across all three file tools.
- * Wildcards (`*`) are stripped before the substring check in the guard.
+ * Runtime guard uses anchored deny regexes (`DENY_PATH_REGEXES`) after path normalization.
+ * These globs remain the source for generated `permissions.deny` strings.
  * Directories are expanded to `<dir>/**` when building permission rule strings.
  */
 export const DENY_PATHS = [

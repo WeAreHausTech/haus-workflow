@@ -106,7 +106,7 @@ async function backupManagedFilesBeforeUndo(
     const rel = path.relative(root, abs)
     const backupPath = path.join(backupRoot, rel)
     await fs.ensureDir(path.dirname(backupPath))
-    await fs.copyFile(abs, backupPath)
+    await fs.copy(abs, backupPath)
   }
   log(`Backed up ${managedAbsPaths.length} managed file(s) to ${path.relative(root, backupRoot)}.`)
 }

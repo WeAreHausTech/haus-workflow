@@ -96,3 +96,29 @@ test('undo noop when dirs missing', () => {
   assert.equal(r.exitCode, 0)
   assert.equal((r.stdout ?? '').includes('no haus-managed files'), true)
 })
+
+test('undo backs up managed directories from lock paths', () => {
+  const temp = mkdtempSync(path.join(os.tmpdir(), 'haus-undo-dir-backup-'))
+  mkdirSync(path.join(temp, '.claude/skills/haus.sample-skill'), { recursive: true })
+  mkdirSync(path.join(temp, '.haus-workflow'), { recursive: true })
+  writeFileSync(path.join(temp, '.claude/skills/haus.sample-skill/SKILL.md'), '# managed skill')
+  writeFileSync(
+    path.join(temp, '.haus-workflow/haus.lock.json'),
+    JSON.stringify([{ paths: ['.claude/skills/haus.sample-skill'] }], null, 2),
+  )
+
+  const cli = path.resolve('dist/cli.js')
+  const r = execaSync('node', [cli, 'undo', '--yes'], { cwd: temp, reject: false })
+  assert.equal(r.exitCode, 0)
+  assert.equal(fs.existsSync(path.join(temp, '.claude/skills/haus.sample-skill')), false)
+
+  const backupDir = path.join(temp, '.haus-workflow/backups')
+  const undoBackups = fs.readdirSync(backupDir).filter((name) => name.startsWith('undo-'))
+  assert.ok(undoBackups.length > 0, 'undo backup directory should be created')
+  const backedSkill = path.join(
+    backupDir,
+    undoBackups[0],
+    '.claude/skills/haus.sample-skill/SKILL.md',
+  )
+  assert.equal(fs.existsSync(backedSkill), true)
+})
