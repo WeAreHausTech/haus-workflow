@@ -79,3 +79,25 @@ test('writeWorkflow overwrites a user-modified file with force', async () => {
     fs.rmSync(root, { recursive: true, force: true })
   }
 })
+
+test('writeWorkflow skips managed file missing hash unless forced', async () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'haus-force-'))
+  try {
+    fs.mkdirSync(path.join(root, '.haus-workflow'), { recursive: true })
+    const missingHashHeader =
+      '<!-- HAUS-MANAGED id=template.workflow v=1 source=@haus-tech/haus-workflow@0.18.2 -->\nUSER BODY\n'
+    const workflowPath = path.join(root, '.haus-workflow', 'WORKFLOW.md')
+    fs.writeFileSync(workflowPath, missingHashHeader, 'utf8')
+
+    const skipped = await writeWorkflow(root, '0.18.2', false, false)
+    assert.equal(skipped, null)
+    const unchanged = fs.readFileSync(workflowPath, 'utf8')
+    assert.match(unchanged, /USER BODY/)
+
+    await writeWorkflow(root, '0.18.2', false, true)
+    const overwritten = fs.readFileSync(workflowPath, 'utf8')
+    assert.doesNotMatch(overwritten, /USER BODY/)
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true })
+  }
+})

@@ -214,3 +214,51 @@ test('.claude/CLAUDE.md is not written (root CLAUDE.md is canonical)', () => {
   assert.equal(existsSync(path.join(temp, '.claude', 'CLAUDE.md')), false)
   assert.equal(existsSync(path.join(temp, 'CLAUDE.md')), true)
 })
+
+test('apply repairs malformed lone BEGIN import block in root CLAUDE.md', () => {
+  const temp = mkdtempSync(path.join(os.tmpdir(), 'haus-p6-lone-begin-'))
+  writeFileSync(
+    path.join(temp, 'package.json'),
+    JSON.stringify({ name: 'p6-lone-begin', packageManager: 'yarn@4.5.3' }, null, 2),
+  )
+  writeFileSync(
+    path.join(temp, 'CLAUDE.md'),
+    `# Project\n\n${BLOCK_BEGIN}\n@.haus-workflow/WORKFLOW.md\nBROKEN WITHOUT END\n`,
+  )
+
+  execaSync('node', [path.resolve('dist/cli.js'), 'scan', '--json'], { cwd: temp })
+  execaSync('node', [path.resolve('dist/cli.js'), 'recommend', '--json'], { cwd: temp })
+  execaSync('node', [path.resolve('dist/cli.js'), 'apply', '--write'], { cwd: temp })
+
+  const repaired = readFileSync(path.join(temp, 'CLAUDE.md'), 'utf8')
+  assert.equal(repaired.includes(BLOCK_BEGIN), true)
+  assert.equal(repaired.includes(BLOCK_END), true)
+  assert.equal((repaired.match(new RegExp(BLOCK_BEGIN, 'g')) ?? []).length, 1)
+  assert.equal(repaired.includes('BROKEN WITHOUT END'), false)
+})
+
+test('apply updates CRLF-delimited haus import block without duplicating it', () => {
+  const temp = mkdtempSync(path.join(os.tmpdir(), 'haus-p6-crlf-block-'))
+  writeFileSync(
+    path.join(temp, 'package.json'),
+    JSON.stringify({ name: 'p6-crlf-block', packageManager: 'yarn@4.5.3' }, null, 2),
+  )
+  const crlfBlock = [
+    '# Project',
+    '',
+    BLOCK_BEGIN,
+    '@.haus-workflow/WORKFLOW.md',
+    '@.haus-workflow/workflow-config.md',
+    BLOCK_END,
+    '',
+  ].join('\r\n')
+  writeFileSync(path.join(temp, 'CLAUDE.md'), crlfBlock, 'utf8')
+
+  execaSync('node', [path.resolve('dist/cli.js'), 'scan', '--json'], { cwd: temp })
+  execaSync('node', [path.resolve('dist/cli.js'), 'recommend', '--json'], { cwd: temp })
+  execaSync('node', [path.resolve('dist/cli.js'), 'apply', '--write'], { cwd: temp })
+
+  const next = readFileSync(path.join(temp, 'CLAUDE.md'), 'utf8')
+  assert.equal((next.match(new RegExp(BLOCK_BEGIN, 'g')) ?? []).length, 1)
+  assert.equal((next.match(new RegExp(BLOCK_END, 'g')) ?? []).length, 1)
+})

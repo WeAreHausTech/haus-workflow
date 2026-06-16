@@ -66,20 +66,20 @@ haus update                   # check npm for new CLI + sync catalog + refresh ~
 haus update --check           # check for updates without applying
 haus undo                     # remove haus-managed project files (lock-tracked paths)
 haus doctor                   # health check: hooks, CLAUDE.md, imports, catalog cache
-haus guard                    # security guard hook (bash + file-access); invoked by PreToolUse
+haus guard bash|file-access   # security guard hook; invoked by PreToolUse
 haus workspace                # multi-repo ops: discover, scan, setup, doctor across a workspace
 haus uninstall                # remove Haus-managed files from ~/.claude/
 ```
 
 > Cross-session learnings use Claude Code's **native memory** (`MEMORY.md`); haus
-> ships no memory store — see the `haus.memory-conventions` catalog doc.
+> ships no memory store.
 
 ---
 
 ## Catalog
 
 Content lives in [`haus-workflow-catalog`](https://github.com/WeAreHausTech/haus-workflow-catalog)
-(version pinned in `library/catalog/manifest.json`). Fetched at runtime from `main` (override with `HAUS_CATALOG_REF`).
+(version pinned in `library/catalog/manifest.json`). Fetched at runtime from the latest release tag (override with `HAUS_CATALOG_REF`; fallback `main` when no release tag resolves).
 Validation rules sync from catalog → `library/catalog/validation-rules.json` (ADR-0001).
 
 On `haus apply` / `haus update`, items **removed from the catalog** are pruned from the

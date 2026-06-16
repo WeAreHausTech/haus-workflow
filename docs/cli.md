@@ -30,7 +30,7 @@ Recommend catalog items for the detected stack via binary eligibility (policy ga
 
 Output: `.haus-workflow/recommendation.json`
 
-### `haus apply [--dry-run] [--write] [--select] [--allow-empty-cache] [--refill-config]`
+### `haus apply [--dry-run] [--write] [--select] [--allow-empty-cache] [--refill-config] [--force]`
 
 Materialize catalog assets into `.claude/` (skills, agents, commands, templates).
 
@@ -39,6 +39,7 @@ Materialize catalog assets into `.claude/` (skills, agents, commands, templates)
 - `--select` — interactively select catalog items before applying (deselected items that remain in the catalog are **not** removed from disk)
 - `--allow-empty-cache` — apply core files only when catalog cache is empty (skip catalog items without error)
 - `--refill-config` — fill still-blank `<!-- fill in -->` fields in `workflow-config.md` from auto-detected values, without touching fields you've edited
+- `--force` — overwrite managed workflow template even when local tamper detection sees edits
 
 **Stale cleanup:** before rewriting the lock, apply compares the previous
 `haus.lock.json` against the current catalog manifest. Items removed upstream are
@@ -96,7 +97,7 @@ with `HAUS_NO_POSTINSTALL=1`.
 Remove HAUS-MANAGED files from `~/.claude/` and strip haus-added hooks + deny/allow rules.
 
 > Cross-session memory uses Claude Code's native `MEMORY.md` — haus ships no memory
-> command or store (see the `haus.memory-conventions` catalog doc).
+> command or store.
 
 ---
 
@@ -116,9 +117,23 @@ Block dangerous bash command tokens. Returns an explicit deny reason payload.
 
 ### `haus workspace init`
 
+Initialize `haus.workspace.yaml` in the current directory.
+
+### `haus workspace discover`
+
+Auto-discover workspace member repos and write `.haus-workflow/workspace-manifest.json`.
+
 ### `haus workspace scan`
 
-Multi-project workspace operations.
+Run scans across discovered/configured workspace repos.
+
+### `haus workspace setup`
+
+Run setup flow across workspace repos.
+
+### `haus workspace doctor`
+
+Run health checks across workspace repos.
 
 ---
 

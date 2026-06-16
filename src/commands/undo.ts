@@ -94,6 +94,23 @@ async function pruneDirIfEmpty(dir: string): Promise<void> {
   if (entries.length === 0) await fs.remove(dir)
 }
 
+async function backupManagedFilesBeforeUndo(
+  root: string,
+  managedAbsPaths: string[],
+): Promise<void> {
+  if (managedAbsPaths.length === 0) return
+  const stamp = new Date().toISOString().replace(/[:.]/g, '-')
+  const backupRoot = hausPath(root, 'backups', `undo-${stamp}`)
+  for (const abs of managedAbsPaths) {
+    if (!(await fs.pathExists(abs))) continue
+    const rel = path.relative(root, abs)
+    const backupPath = path.join(backupRoot, rel)
+    await fs.ensureDir(path.dirname(backupPath))
+    await fs.copy(abs, backupPath)
+  }
+  log(`Backed up ${managedAbsPaths.length} managed file(s) to ${path.relative(root, backupRoot)}.`)
+}
+
 /**
  * Removes haus-managed files from the project: lock-tracked catalog paths, core
  * managed rules/commands, haus workflow artifacts, and haus portions of settings.json.
@@ -124,6 +141,8 @@ export async function runUndo(options: { yes?: boolean }): Promise<void> {
       return
     }
   }
+
+  await backupManagedFilesBeforeUndo(root, managed)
 
   for (const abs of managed) {
     if (!(await fs.pathExists(abs))) continue

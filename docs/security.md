@@ -88,4 +88,6 @@ runs this stage in its own `lefthook.yml` (dogfooding).
 
 ## Unsupported stack safety
 
-Recommender blocks known unsupported categories (for example Python, Go, Rust, Java/Spring, mobile app stacks, DeFi/trading patterns) via policy filters in the scoring flow.
+Recommender blocks known unsupported categories (for example Python, Go, Rust, Java/Spring, mobile app stacks, DeFi/trading patterns) via binary eligibility policy filters (no scoring pipeline).
+
+`haus apply --write` always re-enforces canonical haus hooks and managed deny/ask/allow settings in `.claude/settings.json`; opting out requires uninstalling haus-managed settings, not partial apply.

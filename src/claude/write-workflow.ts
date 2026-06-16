@@ -72,6 +72,12 @@ export async function writeWorkflow(
     }
 
     const existingContent = existing.slice(firstLine.length + 1)
+    if (!parsed.hash && !force) {
+      warn(
+        `${printable}: managed header missing hash — cannot verify tamper status, skipping. Use --force to overwrite.`,
+      )
+      return null
+    }
     if (parsed.hash && hashText(normaliseLF(existingContent)) !== parsed.hash && !force) {
       warn(`${printable}: content modified by user — skipping. Use --force to overwrite.`)
       return null

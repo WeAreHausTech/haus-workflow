@@ -4,9 +4,10 @@
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { execaSync } from 'execa'
 
-const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..')
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const cli = path.join(root, 'dist/cli.js')
 const out = path.join(root, 'tmp/qa-out')
 fs.mkdirSync(out, { recursive: true })

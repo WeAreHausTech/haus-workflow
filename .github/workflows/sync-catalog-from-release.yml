@@ -1,17 +1,20 @@
-name: Sync catalog fixture
+name: Sync catalog from release
+
+# Pull-based fixture sync — no catalog-repo PAT required.
+# Resolves latest vX.Y.Z tag from haus-workflow-catalog and opens/updates a sync PR.
 
 on:
-  repository_dispatch:
-    types: [sync-catalog-fixture] # fired by haus-workflow-catalog on catalog release tag
+  schedule:
+    - cron: '0 6 * * 1' # Mondays 06:00 UTC
   workflow_dispatch:
     inputs:
       catalog_ref:
-        description: 'Catalog git ref to sync (e.g. v2.7.3)'
+        description: 'Catalog git ref to sync (default: latest vX.Y.Z tag)'
         required: false
         default: ''
 
 concurrency:
-  group: sync-catalog-fixture
+  group: sync-catalog-from-release
   cancel-in-progress: true
 
 permissions:
@@ -28,15 +31,47 @@ jobs:
 
       - name: Resolve catalog ref
         id: ref
+        env:
+          INPUT_REF: ${{ github.event.inputs.catalog_ref || '' }}
         run: |
           set -euo pipefail
-          REF="${{ github.event.client_payload.ref || '' }}"
-          INPUT_REF="${{ github.event.inputs.catalog_ref || '' }}"
-          if [ -n "$INPUT_REF" ]; then
-            REF="$INPUT_REF"
-          fi
+          REF="$INPUT_REF"
           if [ -z "$REF" ]; then
-            REF="main"
+            REF="$(node <<'NODE'
+          const semverRe = /^v?(\d+)\.(\d+)\.(\d+)$/;
+          async function main() {
+            const res = await fetch(
+              'https://api.github.com/repos/WeAreHausTech/haus-workflow-catalog/tags',
+              { headers: { 'user-agent': 'haus-sync-catalog-from-release' } },
+            );
+            if (!res.ok) {
+              console.error('tag fetch failed:', res.status);
+              process.exit(1);
+            }
+            const tags = await res.json();
+            const valid = (Array.isArray(tags) ? tags : [])
+              .map((t) => (typeof t?.name === 'string' ? t.name : ''))
+              .filter((name) => semverRe.test(name))
+              .sort((a, b) => {
+                const pa = semverRe.exec(a).slice(1).map(Number);
+                const pb = semverRe.exec(b).slice(1).map(Number);
+                for (let i = 0; i < 3; i++) {
+                  if (pa[i] !== pb[i]) return pb[i] - pa[i];
+                }
+                return 0;
+              });
+            if (valid.length === 0) {
+              console.error('no vX.Y.Z tags found');
+              process.exit(1);
+            }
+            process.stdout.write(valid[0]);
+          }
+          main().catch((err) => {
+            console.error(err);
+            process.exit(1);
+          });
+          NODE
+          )"
           fi
           echo "catalog_ref=${REF}" >> "$GITHUB_OUTPUT"
           echo "Using catalog ref: ${REF}"
@@ -91,14 +126,15 @@ jobs:
           else
             git push -u origin "HEAD:$BRANCH"
           fi
-          # gh pr view matches merged/closed PRs too — only skip create when one is OPEN.
           OPEN_PR="$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number // empty')"
           if [ -z "$OPEN_PR" ]; then
             gh pr create \
               --base main \
               --head "$BRANCH" \
               --title "chore(catalog): sync fixtures from haus-workflow-catalog ${CATALOG_REF}" \
-              --body "Automated sync of \`library/catalog/manifest.json\` and \`library/catalog/validation-rules.json\` from ref \`${CATALOG_REF}\` of [haus-workflow-catalog](https://github.com/WeAreHausTech/haus-workflow-catalog)."
+              --body "Pull-based sync of \`library/catalog/manifest.json\` and \`library/catalog/validation-rules.json\` from ref \`${CATALOG_REF}\` of [haus-workflow-catalog](https://github.com/WeAreHausTech/haus-workflow-catalog).
+
+          Triggered by \`sync-catalog-from-release\` workflow (cron or manual)."
           else
             echo "Updated open PR #${OPEN_PR} on ${BRANCH}"
           fi

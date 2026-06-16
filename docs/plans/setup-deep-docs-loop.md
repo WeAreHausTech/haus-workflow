@@ -20,7 +20,7 @@ runner (`tests/*.test.js`), the existing `haus` CLI (`scan`/`recommend`/`apply`)
 ## Locked decisions (from brainstorming, 2026-06-05)
 
 - **Layered, add-only.** Deterministic recommender stays the floor; the deep scan can only make
-  *more* skills eligible, never drop a gated asset. Already built — `recommend.ts` two-pass.
+  _more_ skills eligible, never drop a gated asset. Already built — `recommend.ts` two-pass.
 - **Skill stays in the catalog, read inline.** `writing-documentation` is NOT promoted to a
   global skill. After the first apply installs it, the `/haus-setup` orchestrator reads the
   installed `SKILL.md` and follows it inline. Scoped footprint, no session-reload risk.
@@ -41,19 +41,20 @@ runner (`tests/*.test.js`), the existing `haus` CLI (`scan`/`recommend`/`apply`)
 
 ## Target flow (the new `/haus-setup`)
 
-| # | Step | Command / action | Notes |
-|---|------|------------------|-------|
-| 1 | Detect | `haus setup-project --fast --json` | scan + shallow recommend; writes `context-map.json` |
-| 2 | Guided Q&A | ask in chat → write `setup-answers.json` | unchanged |
-| 3 | First apply | `haus apply --write` | installs base assets **+ the docs skill** |
-| 4 | Deep scan (new) | read `.claude/skills/writing-documentation/SKILL.md`, follow inline | writes docs (around the `HAUS:BEGIN/END` block) + `deep-context.json` |
-| 5 | Re-recommend (new) | `haus recommend` | two-pass picks up `deep-context.json` |
-| 6 | Second apply | `haus apply --write` | diff-first — only the newly-eligible skills |
-| 7 | Confirm | plain-language summary | docs written + skills, incl. deep-discovered |
+| #   | Step               | Command / action                                                    | Notes                                                                 |
+| --- | ------------------ | ------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| 1   | Detect             | `haus setup-project --fast --json`                                  | scan + shallow recommend; writes `context-map.json`                   |
+| 2   | Guided Q&A         | ask in chat → write `setup-answers.json`                            | unchanged                                                             |
+| 3   | First apply        | `haus apply --write`                                                | installs base assets **+ the docs skill**                             |
+| 4   | Deep scan (new)    | read `.claude/skills/writing-documentation/SKILL.md`, follow inline | writes docs (around the `HAUS:BEGIN/END` block) + `deep-context.json` |
+| 5   | Re-recommend (new) | `haus recommend`                                                    | two-pass picks up `deep-context.json`                                 |
+| 6   | Second apply       | `haus apply --write`                                                | diff-first — only the newly-eligible skills                           |
+| 7   | Confirm            | plain-language summary                                              | docs written + skills, incl. deep-discovered                          |
 
 Two facts that make this safe and cheap:
+
 - **`haus apply` does not re-recommend** — it reads `recommendation.json`
-  ([src/commands/apply.ts:44](../../src/commands/apply.ts)). That is *why* step 5 (`haus recommend`)
+  ([src/commands/apply.ts:44](../../src/commands/apply.ts)). That is _why_ step 5 (`haus recommend`)
   is required between the docs skill and the second apply.
 - **Apply is diff-first** ([src/claude/write-claude-files.ts](../../src/claude/write-claude-files.ts)) —
   the second apply only writes what changed, so running apply twice is near-free.
@@ -63,19 +64,21 @@ Two facts that make this safe and cheap:
 ## Task 1: Guard test for the new orchestration
 
 **Goal:** A failing test that pins the command prompt's critical contract — it must reference the
-docs skill at the manifest-derived path and run `haus recommend` *before* the final `haus apply`.
+docs skill at the manifest-derived path and run `haus recommend` _before_ the final `haus apply`.
 
 **Files:**
+
 - Create: `tests/haus-setup-command.test.js`
 - Reads (no modify): `library/global/commands/haus-setup.md`, `library/catalog/manifest.json`
 
 **Acceptance Criteria:**
+
 - [ ] Test asserts the command file references `.claude/skills/<basename>/SKILL.md`, where
-  `<basename>` is `path.basename` of the `haus.writing-documentation` manifest `path` (so a
-  manifest path change breaks the test, not silently the feature).
+      `<basename>` is `path.basename` of the `haus.writing-documentation` manifest `path` (so a
+      manifest path change breaks the test, not silently the feature).
 - [ ] Test asserts the file mentions `deep-context.json`.
 - [ ] Test asserts ordering: the index of `haus recommend` is greater than the first
-  `writing-documentation` reference and less than the **last** `haus apply --write`.
+      `writing-documentation` reference and less than the **last** `haus apply --write`.
 - [ ] Test fails against the current (pre-rewrite) file.
 
 **Verify:** `node --test tests/haus-setup-command.test.js` → FAIL before Task 2, PASS after.
@@ -102,10 +105,7 @@ function docsSkillBasename() {
 
 test('haus-setup references the installed docs skill at the manifest-derived path', () => {
   const expectedPath = `.claude/skills/${docsSkillBasename()}/SKILL.md`
-  assert.ok(
-    CMD.includes(expectedPath),
-    `command should tell the agent to read ${expectedPath}`,
-  )
+  assert.ok(CMD.includes(expectedPath), `command should tell the agent to read ${expectedPath}`)
 })
 
 test('haus-setup instructs writing deep-context.json', () => {
@@ -143,16 +143,18 @@ git commit -m "test(setup): guard /haus-setup deep-docs ordering and skill path"
 **Goal:** Replace `haus-setup.md` with the 7-step flow so the deep-docs loop runs automatically.
 
 **Files:**
+
 - Modify (full rewrite): `library/global/commands/haus-setup.md`
 
 **Acceptance Criteria:**
+
 - [ ] File describes all 7 steps in order (detect → Q&A → record → first apply → deep scan →
-  recommend → second apply → confirm).
+      recommend → second apply → confirm).
 - [ ] Step 5 instructs reading `.claude/skills/writing-documentation/SKILL.md` and following it
-  inline to write docs + `deep-context.json`, and to never alter the `HAUS:BEGIN/END` block.
+      inline to write docs + `deep-context.json`, and to never alter the `HAUS:BEGIN/END` block.
 - [ ] Step 6 runs `haus recommend`; step 7 runs `haus apply --write` again.
 - [ ] Includes graceful degradation: if the deep scan can't complete, say so and finish with the
-  step-4 basics (never leave the project half-applied).
+      step-4 basics (never leave the project half-applied).
 - [ ] File stays frontmatter-free (line-1 HAUS-MANAGED stamp stays harmless).
 - [ ] Task 1's test now passes.
 
@@ -197,8 +199,8 @@ Do this in order:
      block in `CLAUDE.md`; write around it.
    - write `.haus-workflow/deep-context.json` describing what the deep read found
      (roles, stacks, patterns the quick scan in step 1 could not see).
-   If this step can't be completed for any reason, say so plainly and skip to
-   step 8 — setup still finishes correctly with the basics from step 4.
+     If this step can't be completed for any reason, say so plainly and skip to
+     step 8 — setup still finishes correctly with the basics from step 4.
 
 6. **Re-check recommendations with the new understanding.** Run `haus recommend`.
    It re-reads `deep-context.json` and may surface extra helpers matching what the
@@ -247,21 +249,24 @@ declaring it "verified inline", or by substituting a cheaper check. Close only a
 in the acceptance criteria has been re-validated independently, with output captured.
 
 **Files:**
+
 - No source changes. Uses a throwaway fixture repo + the built CLI.
 
 **Acceptance Criteria:**
+
 - [ ] On a fresh fixture repo, walking the new `/haus-setup` steps manually (or via the agent)
-  produces `.haus-workflow/deep-context.json`.
+      produces `.haus-workflow/deep-context.json`.
 - [ ] The project `CLAUDE.md` has docs content AND an intact `<!-- HAUS:BEGIN haus-imports … -->`
-  … `<!-- HAUS:END … -->` block.
+      … `<!-- HAUS:END … -->` block.
 - [ ] A skill that the shallow scan did NOT recommend is present in `.claude/skills/` after the
-  second apply (i.e. enrichment added at least one), OR — if the fixture genuinely has nothing
-  extra to discover — `haus recommend` output is identical before/after, confirming graceful
-  no-op (capture which case occurred).
+      second apply (i.e. enrichment added at least one), OR — if the fixture genuinely has nothing
+      extra to discover — `haus recommend` output is identical before/after, confirming graceful
+      no-op (capture which case occurred).
 - [ ] Running the loop a second time on the now-configured repo makes no destructive changes
-  (`git status` / diff shows only intended doc refreshes; import block untouched).
+      (`git status` / diff shows only intended doc refreshes; import block untouched).
 
 **Verify:** Manual walkthrough, capturing terminal output for each criterion:
+
 ```bash
 # in a throwaway repo with a package.json the scanner under-detects
 node <repo>/dist/cli.js setup-project --fast --json
@@ -276,9 +281,9 @@ ls .claude/skills && cat .haus-workflow/deep-context.json
 
 - [ ] **Step 1:** Build the CLI: `yarn build`.
 - [ ] **Step 2:** Create a throwaway repo whose stack the shallow scanner under-detects (so the
-  deep scan has something to add), run steps 1–7 of the new flow, capturing output.
+      deep scan has something to add), run steps 1–7 of the new flow, capturing output.
 - [ ] **Step 3:** Assert each acceptance criterion against captured output; record which
-  enrichment case occurred (added-skill vs. graceful no-op).
+      enrichment case occurred (added-skill vs. graceful no-op).
 - [ ] **Step 4:** Re-run the loop; confirm non-destructive (`git status`, import block intact).
 
 ---

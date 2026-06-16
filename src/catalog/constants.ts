@@ -5,7 +5,7 @@
 
 /** Base raw-content URL for the haus-workflow-catalog GitHub repository. */
 export const CATALOG_REPO_URL =
-  'https://raw.githubusercontent.com/wearehaustech/haus-workflow-catalog'
+  'https://raw.githubusercontent.com/WeAreHausTech/haus-workflow-catalog'
 
 /** GitHub REST API root for the catalog repository (recursive tree listing). */
 export const CATALOG_GITHUB_API_URL =

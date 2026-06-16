@@ -2,6 +2,7 @@
 import path from 'node:path'
 
 import { fetchLatestCatalogTag, syncRemoteCatalog } from '../catalog/remote-catalog.js'
+import { refreshProjectApply } from '../claude/refresh-project.js'
 import { applyInstall } from '../install/apply.js'
 import { diffGeneratedFiles, summarizeLockDiff } from '../update/diff-generated-files.js'
 import { applyLock, checkLock, diffLock, hasLocalOverrides } from '../update/lockfile.js'
@@ -9,8 +10,6 @@ import { fetchNpmVersionStatus } from '../update/npm-version.js'
 import { readJson } from '../utils/fs.js'
 import { log, warn } from '../utils/logger.js'
 import { packageRoot } from '../utils/paths.js'
-
-import { refreshProjectApply } from './apply.js'
 
 const NPM_PACKAGE_NAME = '@haus-tech/haus-workflow'
 

@@ -17,6 +17,25 @@ function isNonEmptyString(value: unknown): value is string {
   return typeof value === 'string' && value.length > 0
 }
 
+function isStringArray(value: unknown): value is string[] {
+  return Array.isArray(value) && value.every((entry) => typeof entry === 'string')
+}
+
+const REQUIRES_ANY_KEYS = ['stack', 'dependency', 'packageNamePattern', 'role'] as const
+
+function isRequiresAnyClause(value: unknown): boolean {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false
+  const keys = Object.keys(value as Record<string, unknown>)
+  if (keys.length !== 1) return false
+  const key = keys[0]
+  if (!REQUIRES_ANY_KEYS.includes(key as (typeof REQUIRES_ANY_KEYS)[number])) return false
+  return typeof (value as Record<string, unknown>)[key!] === 'string'
+}
+
+function isRequiresAnyArray(value: unknown): value is unknown[] {
+  return Array.isArray(value) && value.every(isRequiresAnyClause)
+}
+
 function safeParse(json: string): unknown {
   return JSON.parse(json, (key, value) => {
     if (POLLUTION_KEYS.has(key)) return undefined
@@ -77,6 +96,18 @@ export function parseManifest(json: string): ParseManifestResult {
       if (!isNonEmptyString(item.riskLevel)) {
         return { ok: false, error: `${item.id}: curated item missing riskLevel` }
       }
+    }
+    if (!isStringArray(item.tags)) {
+      return { ok: false, error: `${item.id}: tags must be a string array` }
+    }
+    if (!isStringArray(item.repoRoles)) {
+      return { ok: false, error: `${item.id}: repoRoles must be a string array` }
+    }
+    if (item.requiresAny !== undefined && !isRequiresAnyArray(item.requiresAny)) {
+      return { ok: false, error: `${item.id}: requiresAny must be an array of clause objects` }
+    }
+    if (typeof item.tokenEstimate !== 'number' || !Number.isFinite(item.tokenEstimate)) {
+      return { ok: false, error: `${item.id}: tokenEstimate must be a finite number` }
     }
     items.push(raw as CatalogItem)
   }

@@ -28,6 +28,11 @@
  *  - Network failure: WARN + exit 0 (don't break CI on a transient blip),
  *    UNLESS CONTRACT_STRICT=1 (then a fetch failure is itself a hard failure).
  *
+ * Catalog ref resolution:
+ *  - HAUS_CATALOG_REF wins when set.
+ *  - Else resolve latest release tag (`vX.Y.Z`) from GitHub tags.
+ *  - Fallback to `main` only when no valid tag can be resolved.
+ *
  * Uses Node global fetch (Node >=18). No new dependencies.
  */
 import { readFileSync, existsSync } from 'node:fs'
@@ -37,7 +42,7 @@ import { dirname, resolve } from 'node:path'
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const repoRoot = resolve(__dirname, '..')
 
-const CATALOG_REF = process.env.HAUS_CATALOG_REF ?? 'main'
+let catalogRef = process.env.HAUS_CATALOG_REF
 const REMOTE_BASE =
   process.env.HAUS_CATALOG_REMOTE_BASE ??
   'https://raw.githubusercontent.com/WeAreHausTech/haus-workflow-catalog'
@@ -47,7 +52,9 @@ const REMOTE_BASE =
 const EVENT = process.env.GITHUB_EVENT_NAME ?? ''
 const STRICT = process.env.CONTRACT_STRICT === '1' || EVENT === 'schedule' || EVENT === 'push'
 
-const rawUrl = (path) => `${REMOTE_BASE}/${CATALOG_REF}/${path}`
+const CATALOG_TAGS_API_URL = 'https://api.github.com/repos/WeAreHausTech/haus-workflow-catalog/tags'
+
+const rawUrl = (path) => `${REMOTE_BASE}/${catalogRef ?? 'main'}/${path}`
 
 let failed = false
 const failures = []
@@ -77,6 +84,53 @@ function readJson(absPath) {
  * everything else is a real failure that must surface.
  */
 class NetworkError extends Error {}
+
+function parseTagSemver(tag) {
+  const match = /^v?(\d+)\.(\d+)\.(\d+)$/.exec(tag)
+  if (!match) return null
+  return [Number(match[1]), Number(match[2]), Number(match[3])]
+}
+
+function compareSemver(a, b) {
+  for (let i = 0; i < 3; i++) {
+    if (a[i] !== b[i]) return a[i] - b[i]
+  }
+  return 0
+}
+
+async function fetchLatestCatalogTag() {
+  if (process.env.HAUS_CATALOG_REMOTE_BASE) return null
+  try {
+    const res = await fetch(CATALOG_TAGS_API_URL, {
+      headers: { 'user-agent': 'haus-contract-check' },
+    })
+    if (!res.ok) throw new NetworkError(`fetch ${CATALOG_TAGS_API_URL} -> HTTP ${res.status}`)
+    const tags = await res.json()
+    if (!Array.isArray(tags)) return null
+    const valid = tags
+      .map((entry) => {
+        const name = typeof entry?.name === 'string' ? entry.name : ''
+        const version = parseTagSemver(name)
+        return version ? { name, version } : null
+      })
+      .filter(Boolean)
+    if (valid.length === 0) return null
+    valid.sort((a, b) => compareSemver(b.version, a.version))
+    return valid[0].name
+  } catch (err) {
+    if (err instanceof NetworkError) throw err
+    throw new NetworkError(
+      `fetch/parse ${CATALOG_TAGS_API_URL} failed: ${err instanceof Error ? err.message : err}`,
+    )
+  }
+}
+
+async function resolveCatalogRef() {
+  if (catalogRef) return catalogRef
+  const latestTag = await fetchLatestCatalogTag()
+  catalogRef = latestTag ?? 'main'
+  return catalogRef
+}
 
 async function fetchJson(path) {
   const url = rawUrl(path)
@@ -132,7 +186,7 @@ async function checkValidationRules() {
     // Report top-level keys that differ to make the sync PR obvious.
     const diffs = topLevelKeyDiffs(committed, live)
     fail(
-      `validation-rules.json DRIFT vs live catalog (ref ${CATALOG_REF}). ` +
+      `validation-rules.json DRIFT vs live catalog (ref ${catalogRef ?? 'main'}). ` +
         `Run the catalog sync to refresh library/catalog/validation-rules.json.` +
         (diffs.length ? ` Differing keys: ${diffs.join(', ')}` : ''),
     )
@@ -169,7 +223,7 @@ async function checkManifest() {
       ? ` (committed version ${committed.version ?? '?'} vs live ${live.version ?? '?'})`
       : ''
   fail(
-    `manifest.json DRIFT vs live catalog (ref ${CATALOG_REF})${versionNote}. ` +
+    `manifest.json DRIFT vs live catalog (ref ${catalogRef ?? 'main'})${versionNote}. ` +
       `Run the catalog sync to refresh library/catalog/manifest.json.` +
       (diffs.length ? ` Differing keys: ${diffs.join(', ')}` : ''),
   )
@@ -315,8 +369,9 @@ async function checkLockSchema() {
 
 // ---------------------------------------------------------------------------
 async function main() {
-  console.log(`contract-check: catalog ref "${CATALOG_REF}" (${STRICT ? 'STRICT' : 'advisory'})`)
   try {
+    const resolvedRef = await resolveCatalogRef()
+    console.log(`contract-check: catalog ref "${resolvedRef}" (${STRICT ? 'STRICT' : 'advisory'})`)
     await checkValidationRules()
     await checkManifest()
     await checkFixtureAgainstSchema()

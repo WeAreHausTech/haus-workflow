@@ -7,8 +7,18 @@ import { guardFileAccess } from '../src/security/guard-file-access.js'
 describe('guardBash', () => {
   it('hard-blocks deny-tier commands', () => {
     assert.ok(guardBash('git push --force origin main'))
+    assert.ok(guardBash('git push -f origin main'))
+    assert.ok(guardBash('git push --force-with-lease origin main'))
     assert.ok(guardBash('sudo rm something'))
+    assert.ok(guardBash('SUDO rm something'))
     assert.ok(guardBash('npm publish'))
+    assert.ok(guardBash('npm  publish'))
+  })
+
+  it('anchors sudo to command start or shell separator', () => {
+    assert.equal(guardBash('echo sudo is fine'), undefined)
+    assert.equal(guardBash('PATH=/usr/bin/sudo-wrapper yarn test'), undefined)
+    assert.ok(guardBash('cd /tmp && sudo rm -rf x'))
   })
 
   it('does NOT block ask-tier commands (they go through permissions.ask)', () => {
@@ -49,6 +59,15 @@ describe('guardFileAccess', () => {
   it('allows an ordinary path', () => {
     assert.equal(guardFileAccess('src/index.ts'), undefined)
     assert.equal(guardFileAccess('README.md'), undefined)
+    assert.equal(guardFileAccess('src/secretstore/index.ts'), undefined)
+    assert.equal(guardFileAccess('src/certs-utils.ts'), undefined)
+  })
+
+  it('matches deny-tier names on path segments, not loose substrings', () => {
+    assert.ok(guardFileAccess('src/secrets/token.txt'))
+    assert.ok(guardFileAccess('config/certs/ca.pem'))
+    assert.ok(guardFileAccess('data/customer-data/export.json'))
+    assert.equal(guardFileAccess('src/my-secrets-file.ts'), undefined)
   })
 
   it('explains the block in plain language while still naming the path (WS6)', () => {

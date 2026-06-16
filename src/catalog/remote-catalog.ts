@@ -569,6 +569,19 @@ export async function syncRemoteCatalog(): Promise<SyncResult> {
 
 const CATALOG_TAGS_API_URL = 'https://api.github.com/repos/WeAreHausTech/haus-workflow-catalog/tags'
 
+function parseSemverTag(tag: string): [number, number, number] | null {
+  const match = /^v?(\d+)\.(\d+)\.(\d+)$/.exec(tag)
+  if (!match) return null
+  return [Number(match[1]), Number(match[2]), Number(match[3])]
+}
+
+function compareSemver(a: [number, number, number], b: [number, number, number]): number {
+  for (let i = 0; i < 3; i += 1) {
+    if (a[i] !== b[i]) return a[i] - b[i]
+  }
+  return 0
+}
+
 /**
  * Fetches the latest release tag from the catalog GitHub repo.
  * Returns null if the request fails or no tags exist.
@@ -583,8 +596,19 @@ export async function fetchLatestCatalogTag(): Promise<string | null> {
       headers: githubApiHeaders(),
     })
     if (!res.ok) return null
-    const tags = (await res.json()) as Array<{ name: string }>
-    return tags[0]?.name ?? null
+    const tags = (await res.json()) as Array<{ name?: string }>
+    const valid = tags
+      .map((tag) => {
+        const name = typeof tag.name === 'string' ? tag.name : ''
+        const semver = parseSemverTag(name)
+        return semver ? { name, semver } : null
+      })
+      .filter(
+        (entry): entry is { name: string; semver: [number, number, number] } => entry !== null,
+      )
+    if (valid.length === 0) return null
+    valid.sort((a, b) => compareSemver(b.semver, a.semver))
+    return valid[0]!.name
   } catch {
     return null
   }

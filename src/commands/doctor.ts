@@ -226,10 +226,6 @@ export async function runDoctor(options?: { hooks?: boolean }): Promise<void> {
       `A newer haus (${npmStatus.latest}) is available`,
       `npm install -g ${NPM_PACKAGE_NAME}`,
     )
-    // Fixture/offline runs (tests) should not fail doctor solely on registry drift.
-    if (!process.env['HAUS_FIXTURE_CATALOG']) {
-      process.exitCode = 1
-    }
   } else if (npmStatus.latest !== null) {
     ok(`- CLI: ${currentVersion} (up to date)`)
   } else {

@@ -13,7 +13,12 @@ import {
 } from '../install/settings-merge.js'
 import { buildAskRules } from '../security/ask-rules.js'
 import { buildDenyRules } from '../security/deny-rules.js'
-import { readJson, writeJson } from '../utils/fs.js'
+import {
+  backupMalformedJsonFile,
+  MalformedJsonFileError,
+  readJsonDetailed,
+  writeJson,
+} from '../utils/fs.js'
 import { claudePath } from '../utils/paths.js'
 
 /** Hook fragments derived from the inlined canonical project hook set. */
@@ -36,9 +41,15 @@ const PROJECT_HOOK_FRAGMENTS: HookFragment[] = [
 
 /** Reads project `.claude/settings.json`, returning `{}` when missing. */
 export async function readProjectSettings(root: string): Promise<ClaudeSettings> {
-  const parsed = await readJson<ClaudeSettings>(claudePath(root, 'settings.json'))
-  return parsed ?? {}
+  const filePath = claudePath(root, 'settings.json')
+  const result = await readJsonDetailed<ClaudeSettings>(filePath)
+  if (result.status === 'ok') return result.value
+  if (result.status === 'missing') return {}
+  const backupPath = await backupMalformedJsonFile(filePath)
+  throw new MalformedJsonFileError(filePath, backupPath)
 }
+
+export { MalformedJsonFileError } from '../utils/fs.js'
 
 /** Writes the given settings object to project `.claude/settings.json`. */
 export async function writeProjectSettings(root: string, settings: ClaudeSettings): Promise<void> {

@@ -23,30 +23,65 @@ export function buildImportBlock(): string {
   return `${BLOCK_BEGIN}\n${IMPORT_CONTENT}\n${BLOCK_END}`
 }
 
+type BlockRange = {
+  beginStart: number
+  beginEnd: number
+  endStart: number
+  endEnd: number
+}
+
+function findLineMarker(
+  content: string,
+  marker: string,
+  from = 0,
+): { start: number; end: number } | null {
+  let idx = content.indexOf(marker, from)
+  while (idx !== -1) {
+    const lineStart = idx === 0 || content[idx - 1] === '\n'
+    const after = idx + marker.length
+    const lineEnd = after === content.length || content[after] === '\n' || content[after] === '\r'
+    if (lineStart && lineEnd) return { start: idx, end: after }
+    idx = content.indexOf(marker, idx + marker.length)
+  }
+  return null
+}
+
+function findImportBlockRange(content: string): BlockRange | null {
+  const begin = findLineMarker(content, BLOCK_BEGIN)
+  if (!begin) return null
+  const end = findLineMarker(content, BLOCK_END, begin.end)
+  if (!end) return null
+  return { beginStart: begin.start, beginEnd: begin.end, endStart: end.start, endEnd: end.end }
+}
+
 /**
  * Replace the existing haus block in `existing`, or append `block` if none is present.
  * User content outside the sentinels is always preserved.
  */
 /** Removes the managed haus import block from CLAUDE.md, preserving surrounding user content. */
 export function stripHausBlock(existing: string): string {
-  const beginIdx = existing.indexOf(BLOCK_BEGIN)
-  if (beginIdx === -1) return existing
-  const endIdx = existing.indexOf(BLOCK_END, beginIdx + BLOCK_BEGIN.length)
-  if (endIdx === -1) return existing
-  const before = existing.slice(0, beginIdx)
-  const after = existing.slice(endIdx + BLOCK_END.length)
+  const range = findImportBlockRange(existing)
+  if (!range) return existing
+  const before = existing.slice(0, range.beginStart)
+  const after = existing.slice(range.endEnd)
   const merged = `${before}${after}`.replace(/\n{3,}/g, '\n\n').trimEnd()
   return merged.length > 0 ? `${merged}\n` : ''
 }
 
 export function injectHausBlock(existing: string, block: string): string {
-  const beginIdx = existing.indexOf(BLOCK_BEGIN)
-  const endIdx = beginIdx === -1 ? -1 : existing.indexOf(BLOCK_END, beginIdx + BLOCK_BEGIN.length)
-
-  if (beginIdx !== -1 && endIdx !== -1) {
-    const before = existing.slice(0, beginIdx)
-    const after = existing.slice(endIdx + BLOCK_END.length)
+  const range = findImportBlockRange(existing)
+  if (range) {
+    const before = existing.slice(0, range.beginStart)
+    const after = existing.slice(range.endEnd)
     return `${before}${block}${after}`
+  }
+
+  // Malformed prior file (BEGIN present but END missing): replace trailing broken block.
+  const loneBegin = findLineMarker(existing, BLOCK_BEGIN)
+  if (loneBegin) {
+    const before = existing.slice(0, loneBegin.start).trimEnd()
+    if (before.length === 0) return `${block}\n`
+    return `${before}\n\n${block}\n`
   }
 
   const trimmed = existing.trimEnd()

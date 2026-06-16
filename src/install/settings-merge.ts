@@ -6,7 +6,12 @@ import path from 'node:path'
 
 import fs from 'fs-extra'
 
-import { readJson, writeJson } from '../utils/fs.js'
+import {
+  backupMalformedJsonFile,
+  MalformedJsonFileError,
+  readJsonDetailed,
+  writeJson,
+} from '../utils/fs.js'
 
 import { globalClaudeDir } from './manifest.js'
 
@@ -63,9 +68,15 @@ export function settingsJsonPath(): string {
 
 /** Reads ~/.claude/settings.json, returning an empty object if missing. */
 export async function readSettings(): Promise<ClaudeSettings> {
-  const parsed = await readJson<ClaudeSettings>(settingsJsonPath())
-  return parsed ?? {}
+  const filePath = settingsJsonPath()
+  const result = await readJsonDetailed<ClaudeSettings>(filePath)
+  if (result.status === 'ok') return result.value
+  if (result.status === 'missing') return {}
+  const backupPath = await backupMalformedJsonFile(filePath)
+  throw new MalformedJsonFileError(filePath, backupPath)
 }
+
+export { MalformedJsonFileError } from '../utils/fs.js'
 
 /** Writes the given settings object to ~/.claude/settings.json. */
 export async function writeSettings(settings: ClaudeSettings): Promise<void> {
@@ -80,6 +91,18 @@ function collectEventHookCommands(entries: ClaudeHookEntry[]): Set<string> {
     }
   }
   return cmds
+}
+
+function pruneEntryCommands(
+  entry: ClaudeHookEntry,
+  shouldDrop: (command: string) => boolean,
+): ClaudeHookEntry | null {
+  const keptHooks = (entry.hooks ?? []).filter((hook) => {
+    const cmd = hook.command ?? ''
+    return !cmd || !shouldDrop(cmd)
+  })
+  if (keptHooks.length === 0) return null
+  return { ...entry, hooks: keptHooks }
 }
 
 /** Hook commands haus no longer ships — pruned on merge so upgrades do not leave broken hooks. */
@@ -110,10 +133,9 @@ function reconcileRetiredHausHooks(
 
   const prunedHooks: Record<string, ClaudeHookEntry[]> = {}
   for (const [event, entries] of Object.entries(updated.hooks ?? {})) {
-    const kept = (entries as ClaudeHookEntry[]).filter((entry) => {
-      const cmds = (entry.hooks ?? []).map((h) => h.command).filter(Boolean)
-      return cmds.length === 0 || !cmds.some((cmd) => retiredCommands.has(cmd))
-    })
+    const kept = (entries as ClaudeHookEntry[])
+      .map((entry) => pruneEntryCommands(entry, (cmd) => retiredCommands.has(cmd)))
+      .filter((entry): entry is ClaudeHookEntry => entry !== null)
     if (kept.length > 0) prunedHooks[event] = kept
   }
   updated.hooks = prunedHooks
@@ -374,10 +396,13 @@ export function stripHausHooks(settings: ClaudeSettings): ClaudeSettings {
   updated.hooks = {}
 
   for (const [event, entries] of Object.entries(settings.hooks ?? {})) {
-    const kept = (entries as ClaudeHookEntry[]).filter((entry) => {
-      const cmd = entry.hooks[0]?.command ?? ''
-      return usePrefix ? !cmd.startsWith('haus ') : !ownedCommands.has(cmd)
-    })
+    const kept = (entries as ClaudeHookEntry[])
+      .map((entry) =>
+        pruneEntryCommands(entry, (cmd) =>
+          usePrefix ? cmd.startsWith('haus ') : ownedCommands.has(cmd),
+        ),
+      )
+      .filter((entry): entry is ClaudeHookEntry => entry !== null)
     if (kept.length > 0) updated.hooks[event] = kept
   }
 

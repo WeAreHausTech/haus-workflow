@@ -249,8 +249,7 @@ export async function applyInstall(options: ApplyOptions = {}): Promise<ApplyRes
   if (!dryRun && !check) {
     await writeSettings(mergedSettings)
     const manifest = buildManifest(source, manifestFiles, [
-      ...(existingManifest?.hooks ?? []),
-      ...addedIds,
+      ...new Set([...(existingManifest?.hooks ?? []), ...addedIds]),
     ])
     await writeManifest(manifest)
   }
