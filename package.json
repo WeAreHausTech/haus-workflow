@@ -20,7 +20,7 @@
     "CHANGELOG.md"
   ],
   "scripts": {
-    "build": "tsup src/cli.ts --format esm --dts --clean --out-dir dist --external @inquirer/checkbox",
+    "build": "rm -rf dist && esbuild src/cli.ts --bundle --packages=external --platform=node --format=esm --outdir=dist --external:@inquirer/checkbox",
     "dev": "tsx src/cli.ts",
     "test": "node scripts/run-tests.mjs tests/**/*.test.js",
     "test:fast": "node scripts/test-fast.mjs",
@@ -58,13 +58,13 @@
     "@typescript-eslint/eslint-plugin": "8.59.3",
     "@typescript-eslint/parser": "8.59.3",
     "c8": "11.0.0",
+    "esbuild": "0.28.1",
     "eslint": "9.39.4",
     "eslint-plugin-import": "2.32.0",
     "lefthook": "1.13.6",
     "prettier": "3.8.3",
     "release-it": "20.0.1",
-    "tsup": "8.5.1",
-    "tsx": "4.21.0",
+    "tsx": "4.22.4",
     "typescript": "5.9.3"
   },
   "engines": {

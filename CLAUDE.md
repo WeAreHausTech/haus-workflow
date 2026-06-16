@@ -8,7 +8,7 @@ CLI that scans repos, recommends context assets, and writes controlled outputs i
 ## Build & test
 
 ```bash
-yarn build          # compiles src/ → dist/ via tsup
+yarn build          # compiles src/ → dist/ via esbuild
 yarn test           # runs tests/**/*.test.js with Node test runner
 yarn dev <cmd>      # run CLI without building (tsx)
 yarn verify         # full gate: typecheck + lint + build + test

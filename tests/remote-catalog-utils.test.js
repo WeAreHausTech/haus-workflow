@@ -17,8 +17,7 @@ test('readWorkflowTemplate writes cache on non-dry run', async () => {
   const prevFetch = globalThis.fetch
   process.env.HAUS_CATALOG_CACHE_DIR_OVERRIDE = cacheDir
   process.env.HAUS_CATALOG_REMOTE_BASE = 'https://example.test'
-  globalThis.fetch = async () =>
-    ({ ok: true, text: async () => '# workflow\n' })
+  globalThis.fetch = async () => ({ ok: true, text: async () => '# workflow\n' })
   try {
     const text = await readWorkflowTemplate()
     assert.equal(text, '# workflow\n')
