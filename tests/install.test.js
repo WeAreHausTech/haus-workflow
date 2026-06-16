@@ -183,6 +183,32 @@ describe('settings-merge: stripHausHooks', () => {
     assert.equal(stripped.hooks?.['PreToolUse']?.[0].hooks[0].command, 'my-own-tool check')
   })
 
+  it('strips only haus commands from mixed multi-command entries', () => {
+    const settings = {
+      hooks: {
+        PreToolUse: [
+          {
+            matcher: 'Bash',
+            hooks: [
+              { type: 'command', command: 'haus guard bash --from-hook' },
+              { type: 'command', command: 'my-own-tool check' },
+            ],
+          },
+        ],
+      },
+      _haus: {
+        hooks: ['hook.guard.bash'],
+        hookCommands: ['haus guard bash --from-hook'],
+      },
+    }
+    const stripped = stripHausHooks(settings)
+    assert.equal(stripped._haus, undefined)
+    assert.equal(stripped.hooks?.['PreToolUse']?.length, 1)
+    assert.deepEqual(stripped.hooks?.['PreToolUse']?.[0].hooks, [
+      { type: 'command', command: 'my-own-tool check' },
+    ])
+  })
+
   it('removes _haus key even when hooks array is empty', () => {
     const settings = {
       hooks: {

@@ -93,6 +93,18 @@ function collectEventHookCommands(entries: ClaudeHookEntry[]): Set<string> {
   return cmds
 }
 
+function pruneEntryCommands(
+  entry: ClaudeHookEntry,
+  shouldDrop: (command: string) => boolean,
+): ClaudeHookEntry | null {
+  const keptHooks = (entry.hooks ?? []).filter((hook) => {
+    const cmd = hook.command ?? ''
+    return !cmd || !shouldDrop(cmd)
+  })
+  if (keptHooks.length === 0) return null
+  return { ...entry, hooks: keptHooks }
+}
+
 /** Hook commands haus no longer ships — pruned on merge so upgrades do not leave broken hooks. */
 export const RETIRED_HAUS_HOOK_COMMANDS = ['haus context --from-hook'] as const
 
@@ -121,10 +133,9 @@ function reconcileRetiredHausHooks(
 
   const prunedHooks: Record<string, ClaudeHookEntry[]> = {}
   for (const [event, entries] of Object.entries(updated.hooks ?? {})) {
-    const kept = (entries as ClaudeHookEntry[]).filter((entry) => {
-      const cmds = (entry.hooks ?? []).map((h) => h.command).filter(Boolean)
-      return cmds.length === 0 || !cmds.some((cmd) => retiredCommands.has(cmd))
-    })
+    const kept = (entries as ClaudeHookEntry[])
+      .map((entry) => pruneEntryCommands(entry, (cmd) => retiredCommands.has(cmd)))
+      .filter((entry): entry is ClaudeHookEntry => entry !== null)
     if (kept.length > 0) prunedHooks[event] = kept
   }
   updated.hooks = prunedHooks
@@ -385,10 +396,13 @@ export function stripHausHooks(settings: ClaudeSettings): ClaudeSettings {
   updated.hooks = {}
 
   for (const [event, entries] of Object.entries(settings.hooks ?? {})) {
-    const kept = (entries as ClaudeHookEntry[]).filter((entry) => {
-      const cmd = entry.hooks[0]?.command ?? ''
-      return usePrefix ? !cmd.startsWith('haus ') : !ownedCommands.has(cmd)
-    })
+    const kept = (entries as ClaudeHookEntry[])
+      .map((entry) =>
+        pruneEntryCommands(entry, (cmd) =>
+          usePrefix ? cmd.startsWith('haus ') : ownedCommands.has(cmd),
+        ),
+      )
+      .filter((entry): entry is ClaudeHookEntry => entry !== null)
     if (kept.length > 0) updated.hooks[event] = kept
   }
 

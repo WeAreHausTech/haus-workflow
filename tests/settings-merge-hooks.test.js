@@ -94,3 +94,29 @@ test('prunes retired haus context hook entries and tracking on merge', () => {
   assert.ok(merged.hooks.PreToolUse.some((e) => e.matcher === 'Read|Edit|Write'))
   assert.ok(merged.hooks.PreToolUse.some((e) => e.matcher === 'Bash'))
 })
+
+test('keeps non-retired commands when a hook entry mixes retired + active commands', () => {
+  const settings = {
+    _haus: {
+      hooks: ['haus.context-hook', 'haus.guard-file'],
+      hookCommands: ['haus context --from-hook', 'haus guard file-access --from-hook'],
+    },
+    hooks: {
+      UserPromptSubmit: [
+        {
+          hooks: [
+            { type: 'command', command: 'haus context --from-hook' },
+            { type: 'command', command: 'my-custom-hook' },
+          ],
+        },
+      ],
+    },
+  }
+  const { settings: merged } = mergeHooks(settings, PROJECT_GUARD_FRAGMENTS)
+  const entry = merged.hooks.UserPromptSubmit?.[0]
+  assert.ok(entry)
+  assert.deepEqual(
+    entry.hooks.map((h) => h.command),
+    ['my-custom-hook'],
+  )
+})
