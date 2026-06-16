@@ -9,6 +9,8 @@ export const DENY_COMMANDS = [
   'sudo',
   'chmod -R 777',
   'git push --force',
+  'git push --force-with-lease',
+  'git push -f',
   'drop database',
   'truncate table',
   'npm publish',
