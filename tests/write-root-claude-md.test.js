@@ -214,3 +214,25 @@ test('.claude/CLAUDE.md is not written (root CLAUDE.md is canonical)', () => {
   assert.equal(existsSync(path.join(temp, '.claude', 'CLAUDE.md')), false)
   assert.equal(existsSync(path.join(temp, 'CLAUDE.md')), true)
 })
+
+test('apply repairs malformed lone BEGIN import block in root CLAUDE.md', () => {
+  const temp = mkdtempSync(path.join(os.tmpdir(), 'haus-p6-lone-begin-'))
+  writeFileSync(
+    path.join(temp, 'package.json'),
+    JSON.stringify({ name: 'p6-lone-begin', packageManager: 'yarn@4.5.3' }, null, 2),
+  )
+  writeFileSync(
+    path.join(temp, 'CLAUDE.md'),
+    `# Project\n\n${BLOCK_BEGIN}\n@.haus-workflow/WORKFLOW.md\nBROKEN WITHOUT END\n`,
+  )
+
+  execaSync('node', [path.resolve('dist/cli.js'), 'scan', '--json'], { cwd: temp })
+  execaSync('node', [path.resolve('dist/cli.js'), 'recommend', '--json'], { cwd: temp })
+  execaSync('node', [path.resolve('dist/cli.js'), 'apply', '--write'], { cwd: temp })
+
+  const repaired = readFileSync(path.join(temp, 'CLAUDE.md'), 'utf8')
+  assert.equal(repaired.includes(BLOCK_BEGIN), true)
+  assert.equal(repaired.includes(BLOCK_END), true)
+  assert.equal((repaired.match(new RegExp(BLOCK_BEGIN, 'g')) ?? []).length, 1)
+  assert.equal(repaired.includes('BROKEN WITHOUT END'), false)
+})

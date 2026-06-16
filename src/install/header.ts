@@ -3,6 +3,8 @@
  * every haus-managed Markdown file, used to detect ownership and track versions.
  */
 
+import { parseHausManagedAttrs } from '../claude/haus-managed-header.js'
+
 /** Parsed fields extracted from a haus-managed file header comment. */
 export interface HausHeader {
   stableId: string
@@ -19,11 +21,10 @@ const FM_KEY = 'haus_managed'
 
 /** Parses the key=value attributes from the raw content of a HAUS-MANAGED marker. */
 function parseAttrs(raw: string): HausHeader | undefined {
-  const idMatch = /\bid=(\S+)/.exec(raw)
-  const vMatch = /\bv=(\S+)/.exec(raw)
-  const srcMatch = /\bsource=(\S+)/.exec(raw)
-  if (!idMatch || !vMatch || !srcMatch) return undefined
-  return { stableId: idMatch[1], schemaVersion: vMatch[1], source: srcMatch[1] }
+  const attrs =
+    parseHausManagedAttrs(raw) ?? parseHausManagedAttrs(`<!-- HAUS-MANAGED ${raw.trim()} -->`)
+  if (!attrs?.id || !attrs.v || !attrs.source) return undefined
+  return { stableId: attrs.id, schemaVersion: attrs.v, source: attrs.source }
 }
 
 /** True when `line` is a frontmatter fence, tolerating a trailing CR (CRLF files). */
