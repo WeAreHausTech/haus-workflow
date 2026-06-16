@@ -4,9 +4,10 @@ import { DENY_COMMANDS } from './dangerous-commands.js'
 
 function matchesDenyToken(command: string, denyPhrase: string): boolean {
   if (denyPhrase === 'sudo') {
-    return /(?:^|[|;&]\s*)sudo\b/.test(command)
+    return /(?:^|[|;&]\s*)sudo\b/i.test(command)
   }
-  return command.includes(denyPhrase)
+  const normalizedCommand = command.toLowerCase().replace(/\s+/g, ' ').trim()
+  return normalizedCommand.includes(denyPhrase.toLowerCase())
 }
 
 /**

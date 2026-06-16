@@ -10,7 +10,9 @@ describe('guardBash', () => {
     assert.ok(guardBash('git push -f origin main'))
     assert.ok(guardBash('git push --force-with-lease origin main'))
     assert.ok(guardBash('sudo rm something'))
+    assert.ok(guardBash('SUDO rm something'))
     assert.ok(guardBash('npm publish'))
+    assert.ok(guardBash('npm  publish'))
   })
 
   it('anchors sudo to command start or shell separator', () => {
