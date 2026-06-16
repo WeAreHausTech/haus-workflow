@@ -5,10 +5,10 @@ import checkbox from '@inquirer/checkbox'
 import fs from 'fs-extra'
 
 import { getCacheDir } from '../catalog/remote-catalog.js'
-import { readProjectSettings } from '../claude/merge-project-settings.js'
 import { writeClaudeFiles } from '../claude/write-claude-files.js'
+import type { ClaudeSettings } from '../install/settings-merge.js'
 import type { Recommendation } from '../types.js'
-import { readJson } from '../utils/fs.js'
+import { readJson, readJsonDetailed } from '../utils/fs.js'
 import { error, log, warn } from '../utils/logger.js'
 import { claudePath, displayPath, hausPath } from '../utils/paths.js'
 
@@ -106,10 +106,8 @@ export async function runApply(options: {
  */
 async function isHausProject(root: string): Promise<boolean> {
   if (await fs.pathExists(hausPath(root, 'recommendation.json'))) return true
-  if (await fs.pathExists(claudePath(root, 'settings.json'))) {
-    const settings = await readProjectSettings(root)
-    if (settings._haus != null) return true
-  }
+  const result = await readJsonDetailed<ClaudeSettings>(claudePath(root, 'settings.json'))
+  if (result.status === 'ok') return result.value._haus != null
   return false
 }
 

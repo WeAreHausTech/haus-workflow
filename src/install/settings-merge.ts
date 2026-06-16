@@ -6,7 +6,12 @@ import path from 'node:path'
 
 import fs from 'fs-extra'
 
-import { readJson, writeJson } from '../utils/fs.js'
+import {
+  backupMalformedJsonFile,
+  MalformedJsonFileError,
+  readJsonDetailed,
+  writeJson,
+} from '../utils/fs.js'
 
 import { globalClaudeDir } from './manifest.js'
 
@@ -63,9 +68,15 @@ export function settingsJsonPath(): string {
 
 /** Reads ~/.claude/settings.json, returning an empty object if missing. */
 export async function readSettings(): Promise<ClaudeSettings> {
-  const parsed = await readJson<ClaudeSettings>(settingsJsonPath())
-  return parsed ?? {}
+  const filePath = settingsJsonPath()
+  const result = await readJsonDetailed<ClaudeSettings>(filePath)
+  if (result.status === 'ok') return result.value
+  if (result.status === 'missing') return {}
+  const backupPath = await backupMalformedJsonFile(filePath)
+  throw new MalformedJsonFileError(filePath, backupPath)
 }
+
+export { MalformedJsonFileError } from '../utils/fs.js'
 
 /** Writes the given settings object to ~/.claude/settings.json. */
 export async function writeSettings(settings: ClaudeSettings): Promise<void> {
