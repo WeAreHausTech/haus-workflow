@@ -320,7 +320,6 @@ __metadata:
     execa: "npm:9.6.1"
     fast-glob: "npm:3.3.3"
     fs-extra: "npm:11.3.5"
-    ignore: "npm:6.0.2"
     lefthook: "npm:1.13.6"
     prettier: "npm:3.8.3"
     release-it: "npm:20.0.1"
@@ -3198,13 +3197,6 @@ __metadata:
   dependencies:
     safer-buffer: "npm:>= 2.1.2 < 3.0.0"
   checksum: 10c0/3c228920f3bd307f56bf8363706a776f4a060eb042f131cd23855ceca962951b264d0997ab38a1ad340e1c5df8499ed26e1f4f0db6b2a2ad9befaff22f14b722
-  languageName: node
-  linkType: hard
-
-"ignore@npm:6.0.2":
-  version: 6.0.2
-  resolution: "ignore@npm:6.0.2"
-  checksum: 10c0/9a38feac1861906a78ba0f03e8ef3cd6b0526dce2a1a84e1009324b557763afeb9c3ebcc04666b21f7bbf71adda45e76781bb9e2eaa0903d45dcaded634454f5
   languageName: node
   linkType: hard
 
