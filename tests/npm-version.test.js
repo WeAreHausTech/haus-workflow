@@ -5,11 +5,10 @@ import { fetchNpmVersionStatus } from '../src/update/npm-version.js'
 
 test('fetchNpmVersionStatus reports update available when latest is newer', async () => {
   const prevFetch = globalThis.fetch
-  globalThis.fetch = async () =>
-    ({
-      ok: true,
-      json: async () => ({ version: '0.99.0' }),
-    })
+  globalThis.fetch = async () => ({
+    ok: true,
+    json: async () => ({ version: '0.99.0' }),
+  })
   try {
     const status = await fetchNpmVersionStatus('0.27.0')
     assert.equal(status.latest, '0.99.0')
@@ -21,11 +20,10 @@ test('fetchNpmVersionStatus reports update available when latest is newer', asyn
 
 test('fetchNpmVersionStatus reports no update when versions are equal', async () => {
   const prevFetch = globalThis.fetch
-  globalThis.fetch = async () =>
-    ({
-      ok: true,
-      json: async () => ({ version: '0.27.0' }),
-    })
+  globalThis.fetch = async () => ({
+    ok: true,
+    json: async () => ({ version: '0.27.0' }),
+  })
   try {
     const status = await fetchNpmVersionStatus('0.27.0')
     assert.equal(status.latest, '0.27.0')

@@ -50,8 +50,22 @@ test('rejects duplicate item ids and paths', () => {
     JSON.stringify({
       version: '1.0.0',
       items: [
-        { id: 'a', type: 'skill', path: 'skills/shared', tags: [], repoRoles: [], tokenEstimate: 1 },
-        { id: 'b', type: 'skill', path: 'skills/shared', tags: [], repoRoles: [], tokenEstimate: 1 },
+        {
+          id: 'a',
+          type: 'skill',
+          path: 'skills/shared',
+          tags: [],
+          repoRoles: [],
+          tokenEstimate: 1,
+        },
+        {
+          id: 'b',
+          type: 'skill',
+          path: 'skills/shared',
+          tags: [],
+          repoRoles: [],
+          tokenEstimate: 1,
+        },
       ],
     }),
   )

@@ -4,7 +4,7 @@
 
 | Path               | Purpose                                                                                           |
 | ------------------ | ------------------------------------------------------------------------------------------------- |
-| `src/`             | TypeScript source; compiled to `dist/` via tsup                                                   |
+| `src/`             | TypeScript source; compiled to `dist/` via esbuild                                                |
 | `dist/`            | Compiled output (generated — do not hand-edit)                                                    |
 | `tests/`           | Unit and integration tests (Node test runner)                                                     |
 | `tests/fixtures/`  | Synthetic repo fixtures for scanner/recommender tests                                             |

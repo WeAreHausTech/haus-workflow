@@ -9,7 +9,11 @@ import { isHausProject } from '../src/claude/refresh-project.js'
 test('isHausProject detects recommendation.json', async () => {
   const root = mkdtempSync(path.join(os.tmpdir(), 'haus-refresh-project-'))
   mkdirSync(path.join(root, '.haus-workflow'), { recursive: true })
-  writeFileSync(path.join(root, '.haus-workflow', 'recommendation.json'), '{"recommended":[]}', 'utf8')
+  writeFileSync(
+    path.join(root, '.haus-workflow', 'recommendation.json'),
+    '{"recommended":[]}',
+    'utf8',
+  )
   assert.equal(await isHausProject(root), true)
 })
 

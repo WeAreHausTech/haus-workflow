@@ -11,7 +11,7 @@
  * Do NOT hand-edit rule values here — they come from the synced JSON.
  */
 
-// Static JSON import: esbuild/tsup inlines this into the bundle at build time, so the
+// Static JSON import: esbuild inlines this into the bundle at build time, so the
 // rules travel with the CLI version that enforces them (validation is release-coupled,
 // not runtime-fetched like the catalog content itself).
 import rules from '../../library/catalog/validation-rules.json' with { type: 'json' }
