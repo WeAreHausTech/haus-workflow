@@ -1,5 +1,5 @@
 {
-  "version": "2.7.2",
+  "version": "2.7.3",
   "items": [
     {
       "id": "haus.nextjs-patterns",
@@ -1374,6 +1374,7 @@
       "whenNotToUse": "Repos that already run a secret-scanning pre-commit hook, or that cannot install gitleaks.",
       "tags": ["security", "workflow"],
       "repoRoles": [],
+      "ecosystem": "security",
       "installMode": "copy-selected",
       "tokenEstimate": 220,
       "tokenBudget": 320,
