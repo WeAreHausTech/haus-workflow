@@ -345,3 +345,56 @@ test('validate-catalog rejects command item when file missing', () => {
   assert.equal(r.exitCode, 1)
   assert.match(r.stderr ?? '', /missing command file/)
 })
+
+test('validate-catalog rejects path traversal in item.path', () => {
+  const root = makeCatalogRoot([
+    {
+      id: 'haus.bad-path',
+      version: '1.0.0',
+      source: 'haus',
+      type: 'skill',
+      path: '../escape',
+      title: 'Bad path',
+      tags: ['workflow'],
+      repoRoles: [],
+      tokenEstimate: 10,
+      installMode: 'copy-selected',
+      reviewStatus: 'approved',
+      riskLevel: 'low',
+    },
+  ])
+  const r = runValidateCatalog(root)
+  assert.equal(r.exitCode, 1)
+  assert.match(r.stderr ?? '', /path "\.\.\/escape" is not a safe relative path/)
+})
+
+test('validate-catalog rejects non-semver item version', () => {
+  const root = makeCatalogRoot(
+    [
+      {
+        id: 'haus.bad-version',
+        version: '1.0',
+        source: 'haus',
+        type: 'skill',
+        path: 'skills/bad-version',
+        title: 'Bad version',
+        tags: ['workflow'],
+        repoRoles: [],
+        tokenEstimate: 10,
+        installMode: 'copy-selected',
+        reviewStatus: 'approved',
+        riskLevel: 'low',
+      },
+    ],
+    {
+      'skills/bad-version/SKILL.md': `---
+description: Use when validating semver checks.
+---
+Body.
+`,
+    },
+  )
+  const r = runValidateCatalog(root)
+  assert.equal(r.exitCode, 1)
+  assert.match(r.stderr ?? '', /version "1\.0" is not valid semver/)
+})

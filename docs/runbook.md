@@ -12,6 +12,14 @@ stale. **Fix:** run the catalog sync to refresh the committed copy and merge the
 resulting sync PR (the same mechanism that syncs `manifest.json`; see ADR-0001).
 Re-run `node scripts/contract-check.mjs` to confirm BP#1 passes.
 
+## Catalog fixture sync (manifest + validation-rules)
+
+**Primary:** `sync-catalog-from-release` workflow in `.github/workflows/` — runs weekly (Monday 06:00 UTC) and on `workflow_dispatch`. Resolves latest `vX.Y.Z` tag from [haus-workflow-catalog](https://github.com/WeAreHausTech/haus-workflow-catalog), diffs `library/catalog/*`, opens/updates PR on branch `chore/sync-catalog-fixture`. No catalog-repo PAT required.
+
+**Backup:** catalog `dispatch-fixture-sync` on release tag push still fires `repository_dispatch` → `sync-catalog-fixture` (same PR branch). Retire `HAUS_WORKFLOW_DISPATCH_TOKEN` after pull-based sync is stable in production.
+
+**Manual:** Actions → _Sync catalog from release_ → optional `catalog_ref` (e.g. `v2.7.3`); or _Sync catalog fixture_ with `catalog_ref` input.
+
 ## Fixture vs schema drift (contract-check BP#3 FAIL)
 
 **Symptom:** BP#3 reports a fixture item `uses field "X" the live schema does

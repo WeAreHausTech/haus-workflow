@@ -268,7 +268,7 @@ test(
     // Corrupt one repo's lock: a present item with an unparseable version → checkLock !ok, count > 0.
     writeFileSync(
       path.join(ws, 'api', '.haus-workflow', 'haus.lock.json'),
-      JSON.stringify([{ id: 'x', type: 'rule', version: 'not-a-version' }], null, 2),
+      JSON.stringify([{ id: 'x', type: 'skill', version: 'not-a-version' }], null, 2),
     )
 
     const result = await runWorkspaceDoctor(ws)

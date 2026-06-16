@@ -34,7 +34,7 @@ const KNOWN_ITEM_KEYS = new Set(CATALOG_ITEM_KNOWN_KEYS)
 // fixture by design — see contract-check.mjs requiredOmitExempt).
 const REQUIRED_FIXTURE_KEYS = ['id', 'type', 'source', 'path', 'tags', 'repoRoles', 'tokenEstimate']
 
-const TYPE_ENUM = new Set(['skill', 'agent', 'template', 'rule', 'command'])
+const TYPE_ENUM = new Set(['skill', 'agent', 'template', 'command'])
 const SOURCE_ENUM = new Set(['haus', 'curated'])
 const INSTALL_MODE_ENUM = new Set(['copy-selected', 'plugin-only'])
 

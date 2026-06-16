@@ -21,7 +21,6 @@ Core flow: **scan → recommend → apply**
 | `src/install/`     | Global `~/.claude/` install/uninstall: file copy + manifest, settings merge (hooks, deny/allow), postinstall gate        |
 | `src/security/`    | Guardrails for sensitive paths and dangerous bash; derives `permissions.deny` from the same lists                        |
 | `src/catalog/`     | Catalog manifest loader and validation (rules from the synced `validation-rules.json` fixture)                           |
-| `src/library/`     | Catalog/library audit logic                                                                                              |
 | `src/utils/`       | Shared utilities: `logger.ts`, `fs.ts`, `paths.ts`, `audit-checks.ts`, `diff.ts`, `exec.ts`, `prompts.ts`, `versions.ts` |
 | `src/types/`       | Local ambient type declarations                                                                                          |
 | `library/global/`  | Shipped skills, agents, and hook templates                                                                               |
@@ -118,14 +117,14 @@ scan; a second `recommend` pass picks up skills the shallow scanner missed.
 6. Recomputes per-item hashes from lockfile `paths`.
 7. Prints unified lock diff and summary.
 
-The catalog is maintained in a separate repository ([`haus-workflow-catalog`](https://github.com/WeAreHausTech/haus-workflow-catalog), currently v2.5.0 / 71 items) and fetched by `haus update`.
+The catalog is maintained in a separate repository ([`haus-workflow-catalog`](https://github.com/WeAreHausTech/haus-workflow-catalog)). `haus update` resolves the latest release tag by default (override with `HAUS_CATALOG_REF`; fallback `main` when no tag can be resolved).
 
 ---
 
 ## Memory
 
 haus ships no memory store. Cross-session learnings use Claude Code's native
-`MEMORY.md`; the `haus.memory-conventions` catalog template documents the practice.
+`MEMORY.md`.
 
 ---
 
