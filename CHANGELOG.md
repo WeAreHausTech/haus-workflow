@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.27.1](https://github.com/WeAreHausTech/haus-workflow/compare/v0.27.0...v0.27.1) (2026-06-16)
+
+### Bug Fixes
+
+- deep audit execution ([#115](https://github.com/WeAreHausTech/haus-workflow/issues/115)) ([eada2d0](https://github.com/WeAreHausTech/haus-workflow/commit/eada2d06f8f6c27f62c0bd82b893290d916c62ff))
+
 ## [0.27.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.26.1...v0.27.0) (2026-06-15)
 
 ### Features
