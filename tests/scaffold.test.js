@@ -102,6 +102,54 @@ describe('scaffoldConfigItems', () => {
     }
   })
 
+  it('allows a file whose name begins with ".." (not a traversal segment)', async () => {
+    fs.writeFileSync(path.join(catalogRoot, 'configs', 'eslint', '..eslintrc'), 'legacy\n')
+    const projectRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'haus-project-'))
+    try {
+      const result = await scaffoldConfigItems(projectRoot, catalogRoot, [
+        {
+          id: 'haus.legacy',
+          type: 'config',
+          path: 'configs/eslint/..eslintrc',
+          source: 'haus',
+          tags: [],
+          repoRoles: [],
+          tokenEstimate: 0,
+        },
+      ])
+      assert.equal(result.scaffolded.length, 1)
+      assert.ok(fs.existsSync(path.join(projectRoot, '..eslintrc')))
+    } finally {
+      fs.rmSync(projectRoot, { recursive: true, force: true })
+    }
+  })
+
+  it('refuses to scaffold a symlinked source', async () => {
+    const outside = path.join(tmpDir, 'secret.txt')
+    fs.writeFileSync(outside, 'TOP SECRET\n')
+    const linkPath = path.join(catalogRoot, 'configs', 'evil-link')
+    fs.symlinkSync(outside, linkPath)
+    const projectRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'haus-project-'))
+    try {
+      const result = await scaffoldConfigItems(projectRoot, catalogRoot, [
+        {
+          id: 'haus.evil',
+          type: 'config',
+          path: 'configs/evil-link',
+          source: 'haus',
+          tags: [],
+          repoRoles: [],
+          tokenEstimate: 0,
+        },
+      ])
+      assert.equal(result.scaffolded.length, 0)
+      assert.ok(!fs.existsSync(path.join(projectRoot, 'evil-link')))
+    } finally {
+      fs.rmSync(projectRoot, { recursive: true, force: true })
+      fs.rmSync(linkPath, { force: true })
+    }
+  })
+
   it('skips an item whose path escapes the catalog root', async () => {
     const projectRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'haus-project-'))
     try {

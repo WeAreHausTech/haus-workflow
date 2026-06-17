@@ -35,16 +35,24 @@ export async function scaffoldConfigItems(
 
     const sourcePath = path.resolve(catalogRoot, item.path)
     // Containment guard: a malformed/malicious item.path (e.g. '../../etc/passwd')
-    // must not let scaffold read files outside the catalog content root.
+    // must not let scaffold read files outside the catalog content root. Check for
+    // '..' as a path *segment* — a leading-".." filename (e.g. '..eslintrc') is fine.
     const rel = path.relative(catalogRoot, sourcePath)
-    if (rel === '' || rel.startsWith('..') || path.isAbsolute(rel)) {
+    const escapes =
+      rel === '' || path.isAbsolute(rel) || rel.split(/[/\\]/).some((seg) => seg === '..')
+    if (escapes) {
       warn(`Skipping ${item.id}: path '${item.path}' escapes the catalog root`)
       continue
     }
 
-    const stat = await fs.stat(sourcePath).catch(() => null)
+    // lstat (not stat): a symlinked source must be refused, never followed.
+    const stat = await fs.lstat(sourcePath).catch(() => null)
     if (!stat) {
       warn(`Skipping ${item.id}: source not found at ${sourcePath}`)
+      continue
+    }
+    if (stat.isSymbolicLink()) {
+      warn(`Skipping ${item.id}: source path is a symlink`)
       continue
     }
 
@@ -75,6 +83,18 @@ async function scaffoldFile(
   itemId: string,
   opts: { force?: boolean; dryRun?: boolean },
 ): Promise<'scaffolded' | 'skipped'> {
+  // Refuse symlinked catalog content: a malicious link could point outside the
+  // catalog root, which the string-based containment check above cannot detect.
+  const srcStat = await fs.lstat(src).catch(() => null)
+  if (!srcStat) {
+    warn(`Skipping ${path.basename(src)}: source not found`)
+    return 'skipped'
+  }
+  if (srcStat.isSymbolicLink()) {
+    warn(`Skipping ${path.basename(src)}: source is a symlink`)
+    return 'skipped'
+  }
+
   const exists = await fs.pathExists(dest)
 
   if (exists && !opts.force) {
@@ -88,7 +108,13 @@ async function scaffoldFile(
   }
 
   await fs.ensureDir(path.dirname(dest))
-  await fs.copy(src, dest, { overwrite: true })
+  // dereference:false + filter: never replicate a symlink (e.g. nested inside a
+  // directory item) into the project root.
+  await fs.copy(src, dest, {
+    overwrite: true,
+    dereference: false,
+    filter: (s) => !fs.lstatSync(s).isSymbolicLink(),
+  })
   log(`${exists ? 'Overwrote' : 'Created'} ${path.basename(dest)} (${itemId})`)
   return 'scaffolded'
 }
