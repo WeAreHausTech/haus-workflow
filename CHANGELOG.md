@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.28.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.27.1...v0.28.0) (2026-06-17)
+
+### Features
+
+- catalog compatibility for curated provenance and deprecations ([#121](https://github.com/WeAreHausTech/haus-workflow/issues/121)) ([1a8a790](https://github.com/WeAreHausTech/haus-workflow/commit/1a8a7902bf7c27462e905d01dfa4d0baac319b57))
+- **cloneandsetup:** add up-front data-access preflight + seed access/empty-ok ([#120](https://github.com/WeAreHausTech/haus-workflow/issues/120)) ([70e32ad](https://github.com/WeAreHausTech/haus-workflow/commit/70e32adba2f5ed25ade170a09d1f0cfb2bd198d7))
+
 ## [0.27.1](https://github.com/WeAreHausTech/haus-workflow/compare/v0.27.0...v0.27.1) (2026-06-16)
 
 ### Bug Fixes
