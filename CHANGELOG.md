@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.29.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.28.1...v0.29.0) (2026-06-17)
+
+### Features
+
+- add haus scaffold command for config file distribution ([#124](https://github.com/WeAreHausTech/haus-workflow/issues/124)) ([092a343](https://github.com/WeAreHausTech/haus-workflow/commit/092a3433f9bcab69877dab902b5506d8b01dd5a8))
+
 ## [0.28.1](https://github.com/WeAreHausTech/haus-workflow/compare/v0.28.0...v0.28.1) (2026-06-17)
 
 ## [0.28.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.27.1...v0.28.0) (2026-06-17)
