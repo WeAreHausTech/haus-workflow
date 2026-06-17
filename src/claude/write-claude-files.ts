@@ -27,7 +27,10 @@ import { writeRootClaudeMd } from './write-root-claude-md.js'
 import { writeWorkflowConfig } from './write-workflow-config.js'
 import { writeWorkflow } from './write-workflow.js'
 
-/** Map catalog item type to `.claude/` subdir; null = unknown type (skip). */
+/**
+ * Map catalog item type to `.claude/` subdir. Returns null for types not written
+ * to `.claude/` — either unknown types or `config` (distributed via `haus scaffold`).
+ */
 export function targetDirForType(type: string): string | null {
   if (type === 'agent') return 'agents'
   if (type === 'template') return 'templates'

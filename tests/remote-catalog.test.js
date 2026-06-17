@@ -414,6 +414,16 @@ test('haus update: caches config items (single-file + directory)', async () => {
         repoRoles: [],
         tokenEstimate: 0,
       },
+      {
+        id: 'haus.empty-config',
+        type: 'config',
+        source: 'haus',
+        path: 'configs/empty/marker',
+        title: 'Empty config',
+        tags: [],
+        repoRoles: [],
+        tokenEstimate: 0,
+      },
     ],
   }
 
@@ -421,6 +431,8 @@ test('haus update: caches config items (single-file + directory)', async () => {
     '/manifest.json': { body: JSON.stringify(manifest), contentType: 'application/json' },
     // Single-file item: no tree listing → falls back to a direct fetch.
     '/configs/eslint/eslint.config.mjs': { body: "export default []\n" },
+    // Empty file is valid content, not a fetch failure.
+    '/configs/empty/marker': { body: '' },
     // Directory item: tree lists its files, then each is fetched.
     [`/__haus_tree__/${encodeURIComponent('configs/prettier')}`]: {
       body: JSON.stringify(['prettier.config.cjs', '.prettierignore']),
@@ -463,7 +475,14 @@ test('haus update: caches config items (single-file + directory)', async () => {
       true,
       'directory config dotfile not cached',
     )
+    assert.equal(
+      fs.existsSync(path.join(cacheDir, 'configs/empty/marker')),
+      true,
+      'empty single-file config not cached (empty body treated as failure)',
+    )
   } finally {
     await stopServer(server)
+    fs.rmSync(cacheDir, { recursive: true, force: true })
+    fs.rmSync(temp, { recursive: true, force: true })
   }
 })

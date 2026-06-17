@@ -388,9 +388,10 @@ async function syncDirectoryFromPrefix(
   catalogPrefix: string,
   destDir: string,
   base: string,
-  opts: { validateMarkdown: boolean; requireSkillMd?: boolean },
+  opts: { validateMarkdown: boolean; requireSkillMd?: boolean; relFiles?: string[] },
 ): Promise<'created' | 'updated' | 'unchanged' | 'failed'> {
-  const relFiles = await listFilesUnderCatalogPrefix(catalogPrefix, base)
+  // Callers that already listed the prefix can pass relFiles to avoid a second lookup.
+  const relFiles = opts.relFiles ?? (await listFilesUnderCatalogPrefix(catalogPrefix, base))
   if (!relFiles) {
     warn(`Failed to list files for ${item.id}`)
     return 'failed'
@@ -478,6 +479,7 @@ async function syncConfigItem(
       return await syncDirectoryFromPrefix(item, item.path, dest, base, {
         validateMarkdown: false,
         requireSkillMd: false,
+        relFiles,
       })
     } catch (err) {
       warn(`Failed to cache ${item.id}: ${err instanceof Error ? err.message : String(err)}`)
@@ -485,9 +487,10 @@ async function syncConfigItem(
     }
   }
 
-  // Single-file config item.
+  // Single-file config item. An empty file is valid content (e.g. an empty
+  // .prettierignore), so distinguish a fetch error (null) from empty ('').
   const text = await fetchText(`${base}/${item.path}`)
-  if (!text) {
+  if (text === null) {
     warn(`Failed to fetch content for ${item.id}`)
     return 'failed'
   }
