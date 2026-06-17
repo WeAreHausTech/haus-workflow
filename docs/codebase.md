@@ -31,17 +31,17 @@
 
 All `src/` modules:
 
-| Module        | Path               | Purpose                                                                                                                         |
-| ------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
-| Scanner       | `src/scanner/`     | Detect stacks, roles, package manager, dependencies via `detection-registry.ts`; write context-map and scan artefacts           |
-| Recommender   | `src/recommender/` | Binary eligibility (policy gates + match signals); produce `recommendation.json`; merge `deep-context.json` signals             |
-| Claude writer | `src/claude/`      | Write `.claude/` files; manage templates; verify hooks contract; derive `workflow-config.md` fields; handle superpowers install |
-| Update        | `src/update/`      | Lockfile checks, hash refresh, backup, diff summary                                                                             |
-| Install       | `src/install/`     | Global `~/.claude/` seed/teardown; settings merge (hooks, deny/allow); orphan cleanup; companion tools                          |
-| Security      | `src/security/`    | Guard dangerous bash tokens and sensitive file paths; derive `permissions.deny` list                                            |
-| Catalog       | `src/catalog/`     | Load and validate catalog manifest; apply validation rules from `validation-rules.json`                                         |
-| Utils         | `src/utils/`       | Shared pure utilities: `logger`, `fs`, `paths`, `audit-checks`, `diff`, `exec`, `prompts`, `versions`                           |
-| Types         | `src/types/`       | Ambient type declarations                                                                                                       |
+| Module        | Path               | Purpose                                                                                                                                                                |
+| ------------- | ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Scanner       | `src/scanner/`     | Detect stacks, roles, package manager, dependencies via `detection-registry.ts`; write context-map and scan artefacts                                                  |
+| Recommender   | `src/recommender/` | Binary eligibility (policy gates + match signals); produce `recommendation.json`; merge `deep-context.json` signals                                                    |
+| Claude writer | `src/claude/`      | Write `.claude/` files; manage templates; verify hooks contract; derive `workflow-config.md` fields; handle superpowers install                                        |
+| Update        | `src/update/`      | Lockfile checks, hash refresh, backup, diff summary                                                                                                                    |
+| Install       | `src/install/`     | Global `~/.claude/` seed/teardown; settings merge (hooks, deny/allow); orphan cleanup; companion tools; `scaffold.ts` copies `config`-type items into the project root |
+| Security      | `src/security/`    | Guard dangerous bash tokens and sensitive file paths; derive `permissions.deny` list                                                                                   |
+| Catalog       | `src/catalog/`     | Load and validate catalog manifest; apply validation rules from `validation-rules.json`                                                                                |
+| Utils         | `src/utils/`       | Shared pure utilities: `logger`, `fs`, `paths`, `audit-checks`, `diff`, `exec`, `prompts`, `versions`                                                                  |
+| Types         | `src/types/`       | Ambient type declarations                                                                                                                                              |
 
 Key files inside modules:
 
@@ -58,18 +58,19 @@ Key files inside modules:
 
 ## Where to change what
 
-| Task                                         | Primary path                                                                   |
-| -------------------------------------------- | ------------------------------------------------------------------------------ |
-| Add/change a CLI command                     | `src/commands/<cmd>.ts` + register in `src/cli.ts`                             |
-| Change stack/role detection                  | `src/scanner/detection-registry.ts`                                            |
-| Change recommendation policy                 | `src/recommender/policies.ts`                                                  |
-| Change which files haus writes to `.claude/` | `src/claude/write-claude-files.ts`                                             |
-| Change hook configuration                    | `src/claude/load-hooks.ts` (`CANONICAL_HOOKS`)                                 |
-| Change global install behaviour              | `src/install/apply.ts`, `src/install/settings-merge.ts`                        |
-| Add/change a security guard rule             | `src/security/`                                                                |
-| Add/change catalog validation rules          | Sync from `haus-workflow-catalog`; see `library/catalog/validation-rules.json` |
-| Add a QA or release script                   | `scripts/*.mjs`                                                                |
-| Update bundled global skills/agents          | `library/global/`                                                              |
+| Task                                            | Primary path                                                                   |
+| ----------------------------------------------- | ------------------------------------------------------------------------------ |
+| Add/change a CLI command                        | `src/commands/<cmd>.ts` + register in `src/cli.ts`                             |
+| Change stack/role detection                     | `src/scanner/detection-registry.ts`                                            |
+| Change recommendation policy                    | `src/recommender/policies.ts`                                                  |
+| Change which files haus writes to `.claude/`    | `src/claude/write-claude-files.ts`                                             |
+| Change `haus scaffold` config-file distribution | `src/install/scaffold.ts`, `src/commands/scaffold.ts`                          |
+| Change hook configuration                       | `src/claude/load-hooks.ts` (`CANONICAL_HOOKS`)                                 |
+| Change global install behaviour                 | `src/install/apply.ts`, `src/install/settings-merge.ts`                        |
+| Add/change a security guard rule                | `src/security/`                                                                |
+| Add/change catalog validation rules             | Sync from `haus-workflow-catalog`; see `library/catalog/validation-rules.json` |
+| Add a QA or release script                      | `scripts/*.mjs`                                                                |
+| Update bundled global skills/agents             | `library/global/`                                                              |
 
 ## Tests
 

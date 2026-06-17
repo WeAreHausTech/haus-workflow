@@ -48,6 +48,24 @@ user-modified copies are left in place with a warning. Empty parent dirs are pru
 
 After writing `.claude/settings.json`, apply runs a self-check that it matches `CANONICAL_HOOKS` in `src/claude/load-hooks.ts`. Throws on drift.
 
+> `config`-type catalog items (ESLint, Prettier) are **not** written by apply — they
+> live in the project root and are user-owned. Distribute them with `haus scaffold`.
+
+### `haus scaffold [ids...] [--force] [--dry-run] [--root <path>]`
+
+Copy `config`-type catalog items (ESLint, Prettier) into the project root. Explicit,
+one-time bootstrapping — never auto-run by apply, so customised configs are not
+clobbered on update. Existing files are skipped (preserved) unless `--force`.
+
+- pass item IDs (e.g. `haus.eslint-config haus.prettier-config`) to scaffold specific items; omit to scaffold all approved config items
+- `--force` — overwrite existing files
+- `--dry-run` — preview without writing
+- `--root <path>` — project root (defaults to cwd)
+
+Single-file items copy the file to the root (`configs/eslint/eslint.config.js` →
+`<root>/eslint.config.js`); directory items copy each entry (`configs/prettier/` →
+`<root>/`). Logic: `src/install/scaffold.ts`; command: `src/commands/scaffold.ts`.
+
 ### `haus update [--check]`
 
 Sync remote catalog, refresh global install (`~/.claude/`), and re-apply project files.
