@@ -72,6 +72,7 @@ describe('scaffoldConfigItems', () => {
       assert.equal(content, '// custom config\n', 'existing file must not be overwritten')
       assert.equal(result.scaffolded.length, 0)
       assert.equal(result.skipped.length, 1)
+      assert.deepEqual(result.skippedExisting, ['eslint.config.js'], 'existing skip is --force-able')
     } finally {
       fs.rmSync(projectRoot, { recursive: true, force: true })
     }
@@ -151,6 +152,7 @@ describe('scaffoldConfigItems', () => {
         },
       ])
       assert.equal(result.scaffolded.length, 0)
+      assert.equal(result.skippedExisting.length, 0, 'refused symlink is not a --force-able skip')
       assert.ok(!fs.existsSync(path.join(projectRoot, 'evil-link')))
     } finally {
       fs.rmSync(projectRoot, { recursive: true, force: true })

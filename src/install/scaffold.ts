@@ -14,6 +14,9 @@ import { log, warn } from '../utils/logger.js'
 export type ScaffoldResult = {
   scaffolded: string[]
   skipped: string[]
+  /** Subset of `skipped` that was skipped only because the file already exists
+   * (resolvable with `--force`), as opposed to refused as unsafe/missing. */
+  skippedExisting: string[]
 }
 
 /**
@@ -32,6 +35,16 @@ export async function scaffoldConfigItems(
 ): Promise<ScaffoldResult> {
   const scaffolded: string[] = []
   const skipped: string[] = []
+  const skippedExisting: string[] = []
+
+  const record = (name: string, outcome: ScaffoldFileOutcome): void => {
+    if (outcome === 'scaffolded') {
+      scaffolded.push(name)
+      return
+    }
+    skipped.push(name)
+    if (outcome === 'skipped-exists') skippedExisting.push(name)
+  }
 
   // Resolve symlinks in the catalog root once so per-item containment compares
   // fully-resolved real paths (see realSource check below).
@@ -80,47 +93,45 @@ export async function scaffoldConfigItems(
     if (stat.isFile()) {
       const filename = path.basename(sourcePath)
       const dest = path.join(projectRoot, filename)
-      const result = await scaffoldFile(sourcePath, dest, item.id, opts)
-      if (result === 'scaffolded') scaffolded.push(filename)
-      else skipped.push(filename)
+      record(filename, await scaffoldFile(sourcePath, dest, item.id, opts))
     } else if (stat.isDirectory()) {
       const entries = await fs.readdir(sourcePath)
       for (const entry of entries) {
         const src = path.join(sourcePath, entry)
         const dest = path.join(projectRoot, entry)
-        const result = await scaffoldFile(src, dest, item.id, opts)
-        if (result === 'scaffolded') scaffolded.push(entry)
-        else skipped.push(entry)
+        record(entry, await scaffoldFile(src, dest, item.id, opts))
       }
     }
   }
 
-  return { scaffolded, skipped }
+  return { scaffolded, skipped, skippedExisting }
 }
+
+type ScaffoldFileOutcome = 'scaffolded' | 'skipped-exists' | 'skipped-refused'
 
 async function scaffoldFile(
   src: string,
   dest: string,
   itemId: string,
   opts: { force?: boolean; dryRun?: boolean },
-): Promise<'scaffolded' | 'skipped'> {
+): Promise<ScaffoldFileOutcome> {
   // Refuse symlinked catalog content: a malicious link could point outside the
   // catalog root, which the string-based containment check above cannot detect.
   const srcStat = await fs.lstat(src).catch(() => null)
   if (!srcStat) {
     warn(`Skipping ${path.basename(src)}: source not found`)
-    return 'skipped'
+    return 'skipped-refused'
   }
   if (srcStat.isSymbolicLink()) {
     warn(`Skipping ${path.basename(src)}: source is a symlink`)
-    return 'skipped'
+    return 'skipped-refused'
   }
 
   const exists = await fs.pathExists(dest)
 
   if (exists && !opts.force) {
     warn(`Skipping ${path.basename(dest)}: already exists (use --force to overwrite)`)
-    return 'skipped'
+    return 'skipped-exists'
   }
 
   if (opts.dryRun) {
@@ -141,7 +152,14 @@ async function scaffoldFile(
   await fs.copy(src, dest, {
     overwrite: true,
     dereference: false,
-    filter: (s) => !fs.lstatSync(s).isSymbolicLink(),
+    // A vanished/unreadable entry mid-walk must skip that path, not crash the copy.
+    filter: (s) => {
+      try {
+        return !fs.lstatSync(s).isSymbolicLink()
+      } catch {
+        return false
+      }
+    },
   })
   log(`${exists ? 'Overwrote' : 'Created'} ${path.basename(dest)} (${itemId})`)
   return 'scaffolded'

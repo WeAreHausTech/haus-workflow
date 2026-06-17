@@ -48,7 +48,12 @@ export async function runScaffold(
     }
   }
   if (result.skipped.length > 0) {
-    log(`Skipped (already exist): ${result.skipped.join(', ')}`)
-    log('Run with --force to overwrite.')
+    log(`Skipped: ${result.skipped.join(', ')}`)
+    // Only existing files are resolvable with --force; unsafe/missing sources are not.
+    if (result.skippedExisting.length > 0) {
+      log(
+        `Already present (re-run with --force to overwrite): ${result.skippedExisting.join(', ')}`,
+      )
+    }
   }
 }
