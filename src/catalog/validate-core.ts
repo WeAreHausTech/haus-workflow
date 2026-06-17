@@ -103,9 +103,13 @@ function auditManifestStructure(manifestVersion: unknown, items: CatalogItem[]):
       }
 
       const isHaus = item.source === 'haus'
-      const isCuratedApproved = item.source === 'curated' && item.reviewStatus === 'approved'
-      if (!isHaus && !isCuratedApproved) {
-        failures.push(`${item.id}: source must be "haus" or curated with reviewStatus "approved"`)
+      const isCuratedUsableState =
+        item.source === 'curated' &&
+        (item.reviewStatus === 'approved' || item.reviewStatus === 'deprecated')
+      if (!isHaus && !isCuratedUsableState) {
+        failures.push(
+          `${item.id}: source must be "haus" or curated with reviewStatus "approved"/"deprecated"`,
+        )
       }
     }
   }

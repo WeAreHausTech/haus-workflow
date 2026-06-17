@@ -1,7 +1,5 @@
 /** Shared manifest item field validation for parseManifest and validate-core. */
 
-import { HTTP_URL_PATTERN } from './validation-rules.js'
-
 export const USE_MODES = new Set(['copy', 'adapted', 'wrapped', 'rewritten', 'reference-only'])
 export const LICENSE_CONFIDENCES = new Set(['high', 'medium', 'low', 'unknown'])
 export const REVIEW_STATUSES = new Set([
@@ -26,11 +24,8 @@ export function validateReferences(itemId: string, references: unknown): string 
   if (!isStringArray(references)) return `${itemId}: references must be a string array`
   for (const ref of references) {
     if (/^https?:\/\//i.test(ref)) {
-      if (!ref.startsWith('https://')) {
+      if (!/^https:\/\//i.test(ref)) {
         return `${itemId}: reference must be https:// URL: ${ref}`
-      }
-      if (HTTP_URL_PATTERN.test(ref)) {
-        return `${itemId}: reference uses insecure http:// URL: ${ref}`
       }
     }
   }
