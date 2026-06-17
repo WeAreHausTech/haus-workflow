@@ -15,8 +15,25 @@ Before any setup work, probe **everything** the workspace will need and surface 
 - **PHP environment** — `valet`, `herd`, `ddev`, or `php` on PATH, if any repo is a PHP/WordPress site.
 - **WP-CLI** — `wp --version`, if any repo's `seed:` pulls a WordPress DB.
 - **Node versions** — the versions named in each repo's `.nvmrc` / `engines.node` are installable via `nvm`.
+- **Data-access preflight** — for every data load the workspace will run (each repo's `seed` **and** the workspace `seeds`), check up front that the user can actually reach the source, so nobody ends up with a half-set-up environment that only fails at the seed step. See below.
 
-Then list the repos and what each will run (node, deps, localdev steps), **report every gap at once**, and get a single go-ahead. For **reused** local clones, ask whether to re-run setup. For each gap, name what it blocks; the user decides whether to fix it now (**ask before any global/system install**) or proceed and skip the affected steps. Don't begin per-repo work until this gate is acknowledged.
+### Data-access preflight
+
+The single most common way cloneAndSetup leaves a **half-completed environment** is discovering at the `seed:` step — after cloning, installing, and bringing up services — that the user lacks the AWS/SSH/etc. access to pull the data. Catch it **here**, before any heavy work, and make the data outcome a deliberate choice.
+
+1. **Collect every seed:** each repo's `seed` plus the workspace `seeds`. For each, determine its required access:
+   - If `seed` is an **object with `access`**, run each entry's `check` (a read-only probe; exit 0 = reachable).
+   - If `seed` is a **bare string**, infer the channel and probe generically: `aws …`/SSM → `aws sts get-caller-identity`; `dep db:pull …` / `ssh`/`scp`/`rsync <user@host>` → `ssh -o BatchMode=yes -o ConnectTimeout=5 <host> true`; `northflank …` → `northflank whoami`. A purely local seed (no remote) needs nothing.
+2. **Report one table** alongside the rest of the gate — per data source: its `label`, the access it needs, and ✓ reachable / ✗ + the `login` remedy (verbatim).
+3. **Resolve every ✗ with one consolidated choice**, then remember it for the run:
+   - **Set up access now** → print the `login` text, let the user do it, **re-check**, then seed normally.
+   - **Create that DB EMPTY for now** (only when `empty-ok` is true — the default) → the datastore comes up empty (schema via migrations/`needs:`), the app still boots, and the user can run that one seed later. Name the exact command to fill it.
+   - **Abort.**
+4. **Only a gap on a seed with `empty-ok: false` is a HARD STOP** (the repo is genuinely broken without data — log in or abort). Every other gap offers the empty path; one source's missing access never blocks another's.
+
+This is the one prompt the "no half-completed environment" goal justifies. The two valid end-states are **seeded** or **deliberately empty** — never a third "did the expensive work then died at seed."
+
+Then list the repos and what each will run (node, deps, localdev steps, **data sources + the chosen seed/empty plan**), **report every gap at once**, and get a single go-ahead. For **reused** local clones, ask whether to re-run setup. For each gap, name what it blocks; the user decides whether to fix it now (**ask before any global/system install**) or proceed and skip the affected steps. Don't begin per-repo work until this gate is acknowledged.
 
 ## Step 3 — Per-repo dependency pass
 
@@ -50,6 +67,16 @@ needs: [mysql] # services this repo requires; provisioned in Docker, env wired t
 needsEnv: [WP_HOME, DB_NAME] # env keys that must be present to run/serve
 build: 'yarn build' # optional: the build command (run after deps)
 seed: 'dep db:pull staging-oderland' # optional: how to load data; remote/destructive → confirm first
+# `seed` may also be an OBJECT when the load needs external access (AWS, SSH, …) so the
+# Step-2 data-access preflight can check it up front and offer an empty-DB fallback:
+seed:
+  run: './scripts/pull-aws-db.sh --yes' # the seed command
+  empty-ok: true # default true: skipping yields a coherent EMPTY DB (schema via migrations).
+  #              # false = the repo is broken without data → a missing-access gap HARD-STOPS.
+  access: # what the user must have to run `run`; each entry probed in the Step-2 preflight
+    - label: 'AWS CLI credentials — eu-north-1 / 842675986884'
+      check: 'aws sts get-caller-identity --region eu-north-1' # read-only probe; exit 0 = OK
+      login: 'Set up the AWS CLI (brew install awscli; aws configure …) — or pick empty DB.'
 serve: # optional: how it runs (printed as a next-step, never auto-started)
   via: herd # herd | valet | docker | command — for PHP envs, bring-your-own (don't install)
   url: 'https://example.test'
@@ -77,6 +104,16 @@ env:
     # source: { repo: <repo>, provides: '<value>' }   # … a value produced by another repo
     sinks:
       - { repo: <repo>, key: DB_NAME } # written under `key` into each sink's .env
+seeds: # optional: data sources NOT owned by a manifest repo (e.g. a shared WordPress host
+  #    pulled by a workspace script). Same shape as a per-repo `seed` object; included in
+  #    the Step-2 data-access preflight.
+  - label: 'WordPress host (example.se)'
+    run: './scripts/pull-wp-example.sh'
+    empty-ok: true
+    access:
+      - label: 'SSH user@host'
+        check: 'ssh -o BatchMode=yes -o ConnectTimeout=5 user@host true'
+        login: 'Add your SSH key to the host (ssh-add …) / request access — or skip the pull.'
 ```
 
 ### Run order
@@ -87,7 +124,7 @@ env:
    - **`needs`** → add the service to the **workspace compose project** and `docker compose up -d` if not already running (namespaced by `COMPOSE_PROJECT_NAME`, free host ports per instance; not the repo's own bind-mounting compose). Comes up **empty**; record host ports in the workspace `localdev.yml` `env` map — data lands in `seed:`.
    - **`build`** → run it (honor any node version the repo's docs note).
    - **`serve`** → for `via: herd` / PHP envs, install nothing — verify the dev's environment serves `web/`, and report the URL.
-   - **`seed`** → populate the empty datastore. **Always a distinct, confirm-gated step, separate from `needs:` bring-up** (don't conflate "DB up" with "DB has data"). Before running, **check its prerequisites and report any gap instead of running blind** — e.g. WP-CLI present (for `wp` / `db:pull` seeds), the target repo's **`.env` written** (the seed reads connection values from it — done in the Env step above), the **SSH alias resolves** (for remote pulls like `dep db:pull staging-oderland`). **Confirm first** for every remote (SSH) or destructive (overwrites data) seed — every run, even on re-run. Missing prerequisite → skip with a clear message, don't guess.
+   - **`seed`** → populate the empty datastore (`seed.run`, or the bare-string form). **Always a distinct, confirm-gated step, separate from `needs:` bring-up** (don't conflate "DB up" with "DB has data"). **Honor the data plan chosen in the Step-2 data-access preflight** — don't re-discover access here: if the user chose _empty_ for this source, skip it (the DB stays empty, schema via migrations) and print the command to fill it later; if they chose _seed_, run it. Still verify the run-time prerequisites the preflight couldn't (the target repo's **`.env` written** — done in the Env step above; WP-CLI present for `wp`/`db:pull` seeds) and **confirm first** for every remote (SSH/AWS) or destructive (overwrites data) seed — every run, even on re-run. Missing prerequisite → skip with a clear message, don't guess.
    - **`steps`** (escape hatch) → run in order, selecting `node:` per step, `optional:` failures continue, **confirming before any `remote:`/`destructive:` step** — every run, even on re-run.
 4. **Links** (workspace-owned, performed generically — do NOT call a repo's own `setup-dev-mode.sh`, which is deprecated):
    - `symlink` → `ln -s <from> <to>`; replace an existing symlink, but never clobber a real directory without confirmation.
