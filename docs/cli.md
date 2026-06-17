@@ -62,8 +62,8 @@ clobbered on update. Existing files are skipped (preserved) unless `--force`.
 - `--dry-run` — preview without writing
 - `--root <path>` — project root (defaults to cwd)
 
-Single-file items copy the file to the root (`configs/eslint/eslint.config.js` →
-`<root>/eslint.config.js`); directory items copy each entry (`configs/prettier/` →
+Single-file items copy the file to the root (`configs/eslint/eslint.config.mjs` →
+`<root>/eslint.config.mjs`); directory items copy each entry (`configs/prettier/` →
 `<root>/`). Logic: `src/install/scaffold.ts`; command: `src/commands/scaffold.ts`.
 
 ### `haus update [--check]`
