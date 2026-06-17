@@ -18,8 +18,11 @@ export type ScaffoldResult = {
 
 /**
  * Copy catalog config items to the project root.
- * - Single-file items: copy the file directly (e.g. `configs/eslint/eslint.config.js` → `<root>/eslint.config.js`).
- * - Directory items: copy all files in the directory to the project root (e.g. `configs/prettier/` → `<root>/`).
+ * - Single-file items: copy the file directly (e.g. `configs/eslint/eslint.config.mjs` → `<root>/eslint.config.mjs`).
+ * - Directory items: copy each immediate entry of the directory into the project root
+ *   (e.g. `configs/prettier/` → `<root>/`). A subdirectory entry is copied whole (its
+ *   subtree preserved); symlinks are never replicated. Existing files are preserved
+ *   unless `force` is set.
  */
 export async function scaffoldConfigItems(
   projectRoot: string,

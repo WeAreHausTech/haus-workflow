@@ -150,6 +150,42 @@ describe('scaffoldConfigItems', () => {
     }
   })
 
+  it('copies a subdirectory entry whole but never replicates a nested symlink', async () => {
+    const dirItem = path.join(catalogRoot, 'configs', 'withsub')
+    fs.mkdirSync(path.join(dirItem, 'nested'), { recursive: true })
+    fs.writeFileSync(path.join(dirItem, 'top.cjs'), 'top\n')
+    fs.writeFileSync(path.join(dirItem, 'nested', 'inner.cjs'), 'inner\n')
+    const outside = path.join(tmpDir, 'outside-secret.txt')
+    fs.writeFileSync(outside, 'SECRET\n')
+    fs.symlinkSync(outside, path.join(dirItem, 'nested', 'link.cjs'))
+    const projectRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'haus-project-'))
+    try {
+      await scaffoldConfigItems(projectRoot, catalogRoot, [
+        {
+          id: 'haus.withsub',
+          type: 'config',
+          path: 'configs/withsub',
+          source: 'haus',
+          tags: [],
+          repoRoles: [],
+          tokenEstimate: 0,
+        },
+      ])
+      assert.ok(fs.existsSync(path.join(projectRoot, 'top.cjs')), 'top-level file copied')
+      assert.ok(
+        fs.existsSync(path.join(projectRoot, 'nested', 'inner.cjs')),
+        'nested subdir file copied whole',
+      )
+      assert.ok(
+        !fs.existsSync(path.join(projectRoot, 'nested', 'link.cjs')),
+        'nested symlink must not be replicated',
+      )
+    } finally {
+      fs.rmSync(projectRoot, { recursive: true, force: true })
+      fs.rmSync(dirItem, { recursive: true, force: true })
+    }
+  })
+
   it('skips an item whose path escapes the catalog root', async () => {
     const projectRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'haus-project-'))
     try {
