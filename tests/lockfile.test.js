@@ -202,3 +202,35 @@ test('hasLocalOverrides: returns false when .claude/settings.json is missing', a
   const result = await hasLocalOverrides(tmpDir)
   assert.equal(result, false)
 })
+
+test('applyLock: preserves curated provenance fields through re-hash', async () => {
+  fs.mkdirSync(path.join(tmpDir, '.claude', 'skills', 'curated'), { recursive: true })
+  fs.writeFileSync(path.join(tmpDir, '.claude', 'skills', 'curated', 'SKILL.md'), '# skill', 'utf8')
+  writeLock([
+    {
+      id: 'haus.curated-skill',
+      type: 'skill',
+      source: 'curated',
+      version: '1.0.0',
+      catalogRef: 'v9.9.9',
+      paths: ['.claude/skills/curated/SKILL.md'],
+      hash: 'sha256-stale',
+      installMode: 'copied',
+      originSourceId: 'ecc-affaanm',
+      useMode: 'copy',
+      license: 'MIT',
+      riskLevel: 'low',
+      reviewStatus: 'approved',
+    },
+  ])
+
+  const { after } = await applyLock(tmpDir)
+  const parsed = JSON.parse(after)[0]
+  assert.equal(parsed.originSourceId, 'ecc-affaanm')
+  assert.equal(parsed.useMode, 'copy')
+  assert.equal(parsed.license, 'MIT')
+  assert.equal(parsed.riskLevel, 'low')
+  assert.equal(parsed.reviewStatus, 'approved')
+  assert.equal(parsed.catalogRef, 'v9.9.9')
+  assert.ok(parsed.hash.startsWith('sha256-'))
+})
