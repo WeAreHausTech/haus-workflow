@@ -33,18 +33,36 @@ export async function scaffoldConfigItems(
   const scaffolded: string[] = []
   const skipped: string[] = []
 
+  // Resolve symlinks in the catalog root once so per-item containment compares
+  // fully-resolved real paths (see realSource check below).
+  const realRoot = await fs.realpath(catalogRoot).catch(() => null)
+
   for (const item of items) {
     if (item.type !== 'config') continue
 
     const sourcePath = path.resolve(catalogRoot, item.path)
-    // Containment guard: a malformed/malicious item.path (e.g. '../../etc/passwd')
-    // must not let scaffold read files outside the catalog content root. Check for
-    // '..' as a path *segment* — a leading-".." filename (e.g. '..eslintrc') is fine.
+    // Containment guard 1 (string): a malformed/malicious item.path (e.g.
+    // '../../etc/passwd') must not point outside the catalog content root. Check
+    // for '..' as a path *segment* — a leading-".." filename ('..eslintrc') is fine.
     const rel = path.relative(catalogRoot, sourcePath)
     const escapes =
       rel === '' || path.isAbsolute(rel) || rel.split(/[/\\]/).some((seg) => seg === '..')
     if (escapes) {
       warn(`Skipping ${item.id}: path '${item.path}' escapes the catalog root`)
+      continue
+    }
+
+    // Containment guard 2 (realpath): a symlinked *parent directory* inside the
+    // catalog (e.g. configs/evil -> /etc, item.path configs/evil/hosts) passes the
+    // string check but resolves outside the root on disk. Compare real paths.
+    const realSource = await fs.realpath(sourcePath).catch(() => null)
+    if (!realRoot || !realSource) {
+      warn(`Skipping ${item.id}: source not found at ${sourcePath}`)
+      continue
+    }
+    const realRel = path.relative(realRoot, realSource)
+    if (realRel !== '' && (path.isAbsolute(realRel) || realRel.split(/[/\\]/)[0] === '..')) {
+      warn(`Skipping ${item.id}: path '${item.path}' resolves outside the catalog root`)
       continue
     }
 
@@ -108,6 +126,13 @@ async function scaffoldFile(
   if (opts.dryRun) {
     log(`[dry-run] would ${exists ? 'overwrite' : 'create'} ${path.basename(dest)} (${itemId})`)
     return 'scaffolded'
+  }
+
+  // On overwrite, remove the existing dest first so the result matches the source
+  // exactly — fs.copy does not prune upstream-deleted files and can otherwise merge
+  // into a dest of the wrong type (e.g. a dir where the source is now a file).
+  if (exists && opts.force) {
+    await fs.remove(dest)
   }
 
   await fs.ensureDir(path.dirname(dest))

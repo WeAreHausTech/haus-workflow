@@ -124,11 +124,19 @@ describe('scaffoldConfigItems', () => {
     }
   })
 
-  it('refuses to scaffold a symlinked source', async () => {
+  it('refuses to scaffold a symlinked source', async (t) => {
     const outside = path.join(tmpDir, 'secret.txt')
     fs.writeFileSync(outside, 'TOP SECRET\n')
     const linkPath = path.join(catalogRoot, 'configs', 'evil-link')
-    fs.symlinkSync(outside, linkPath)
+    try {
+      fs.symlinkSync(outside, linkPath)
+    } catch (err) {
+      if (err.code === 'EPERM' || err.code === 'ENOSYS') {
+        t.skip('symlinks not supported in this environment')
+        return
+      }
+      throw err
+    }
     const projectRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'haus-project-'))
     try {
       const result = await scaffoldConfigItems(projectRoot, catalogRoot, [
@@ -150,14 +158,23 @@ describe('scaffoldConfigItems', () => {
     }
   })
 
-  it('copies a subdirectory entry whole but never replicates a nested symlink', async () => {
+  it('copies a subdirectory entry whole but never replicates a nested symlink', async (t) => {
     const dirItem = path.join(catalogRoot, 'configs', 'withsub')
     fs.mkdirSync(path.join(dirItem, 'nested'), { recursive: true })
     fs.writeFileSync(path.join(dirItem, 'top.cjs'), 'top\n')
     fs.writeFileSync(path.join(dirItem, 'nested', 'inner.cjs'), 'inner\n')
     const outside = path.join(tmpDir, 'outside-secret.txt')
     fs.writeFileSync(outside, 'SECRET\n')
-    fs.symlinkSync(outside, path.join(dirItem, 'nested', 'link.cjs'))
+    try {
+      fs.symlinkSync(outside, path.join(dirItem, 'nested', 'link.cjs'))
+    } catch (err) {
+      if (err.code === 'EPERM' || err.code === 'ENOSYS') {
+        fs.rmSync(dirItem, { recursive: true, force: true })
+        t.skip('symlinks not supported in this environment')
+        return
+      }
+      throw err
+    }
     const projectRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'haus-project-'))
     try {
       await scaffoldConfigItems(projectRoot, catalogRoot, [
@@ -183,6 +200,72 @@ describe('scaffoldConfigItems', () => {
     } finally {
       fs.rmSync(projectRoot, { recursive: true, force: true })
       fs.rmSync(dirItem, { recursive: true, force: true })
+    }
+  })
+
+  it('skips an item whose parent directory is a symlink escaping the root', async (t) => {
+    const target = path.join(tmpDir, 'outside-dir')
+    fs.mkdirSync(target, { recursive: true })
+    fs.writeFileSync(path.join(target, 'hosts'), 'ROOT:x:0:0\n')
+    const linkParent = path.join(catalogRoot, 'configs', 'evil-parent')
+    try {
+      fs.symlinkSync(target, linkParent)
+    } catch (err) {
+      if (err.code === 'EPERM' || err.code === 'ENOSYS') {
+        t.skip('symlinks not supported in this environment')
+        return
+      }
+      throw err
+    }
+    const projectRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'haus-project-'))
+    try {
+      const result = await scaffoldConfigItems(projectRoot, catalogRoot, [
+        {
+          id: 'haus.evil-parent',
+          type: 'config',
+          path: 'configs/evil-parent/hosts',
+          source: 'haus',
+          tags: [],
+          repoRoles: [],
+          tokenEstimate: 0,
+        },
+      ])
+      assert.equal(result.scaffolded.length, 0)
+      assert.ok(!fs.existsSync(path.join(projectRoot, 'hosts')), 'must not read through parent symlink')
+    } finally {
+      fs.rmSync(projectRoot, { recursive: true, force: true })
+      fs.rmSync(linkParent, { force: true })
+    }
+  })
+
+  it('force replaces a destination of the wrong type', async () => {
+    const projectRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'haus-project-'))
+    // Pre-existing dest is a directory where the source is a file.
+    fs.mkdirSync(path.join(projectRoot, 'eslint.config.js'), { recursive: true })
+    fs.writeFileSync(path.join(projectRoot, 'eslint.config.js', 'stale.txt'), 'stale\n')
+    try {
+      const result = await scaffoldConfigItems(
+        projectRoot,
+        catalogRoot,
+        [
+          {
+            id: 'haus.eslint-config',
+            type: 'config',
+            path: 'configs/eslint/eslint.config.js',
+            source: 'haus',
+            tags: [],
+            repoRoles: [],
+            tokenEstimate: 0,
+          },
+        ],
+        { force: true },
+      )
+      assert.equal(result.scaffolded.length, 1)
+      const dest = path.join(projectRoot, 'eslint.config.js')
+      assert.ok(fs.statSync(dest).isFile(), 'dir dest must be replaced by a file')
+      assert.equal(fs.readFileSync(dest, 'utf8'), '// eslint config\n')
+    } finally {
+      fs.rmSync(projectRoot, { recursive: true, force: true })
     }
   })
 
