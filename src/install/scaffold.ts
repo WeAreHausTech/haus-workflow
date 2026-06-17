@@ -33,7 +33,15 @@ export async function scaffoldConfigItems(
   for (const item of items) {
     if (item.type !== 'config') continue
 
-    const sourcePath = path.join(catalogRoot, item.path)
+    const sourcePath = path.resolve(catalogRoot, item.path)
+    // Containment guard: a malformed/malicious item.path (e.g. '../../etc/passwd')
+    // must not let scaffold read files outside the catalog content root.
+    const rel = path.relative(catalogRoot, sourcePath)
+    if (rel === '' || rel.startsWith('..') || path.isAbsolute(rel)) {
+      warn(`Skipping ${item.id}: path '${item.path}' escapes the catalog root`)
+      continue
+    }
+
     const stat = await fs.stat(sourcePath).catch(() => null)
     if (!stat) {
       warn(`Skipping ${item.id}: source not found at ${sourcePath}`)

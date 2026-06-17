@@ -18,6 +18,12 @@ describe('scaffoldConfigItems', () => {
       path.join(catalogRoot, 'configs', 'eslint', 'eslint.config.js'),
       '// eslint config\n',
     )
+    fs.mkdirSync(path.join(catalogRoot, 'configs', 'prettier'), { recursive: true })
+    fs.writeFileSync(
+      path.join(catalogRoot, 'configs', 'prettier', 'prettier.config.cjs'),
+      '// prettier config\n',
+    )
+    fs.writeFileSync(path.join(catalogRoot, 'configs', 'prettier', '.prettierignore'), 'dist\n')
   })
 
   after(() => {
@@ -66,6 +72,53 @@ describe('scaffoldConfigItems', () => {
       assert.equal(content, '// custom config\n', 'existing file must not be overwritten')
       assert.equal(result.scaffolded.length, 0)
       assert.equal(result.skipped.length, 1)
+    } finally {
+      fs.rmSync(projectRoot, { recursive: true, force: true })
+    }
+  })
+
+  it('copies all files of a directory-type item, including dotfiles', async () => {
+    const projectRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'haus-project-'))
+    try {
+      const result = await scaffoldConfigItems(projectRoot, catalogRoot, [
+        {
+          id: 'haus.prettier-config',
+          type: 'config',
+          path: 'configs/prettier',
+          source: 'haus',
+          tags: [],
+          repoRoles: [],
+          tokenEstimate: 0,
+        },
+      ])
+      assert.ok(fs.existsSync(path.join(projectRoot, 'prettier.config.cjs')))
+      assert.ok(
+        fs.existsSync(path.join(projectRoot, '.prettierignore')),
+        'dotfile must be copied',
+      )
+      assert.equal(result.scaffolded.length, 2)
+    } finally {
+      fs.rmSync(projectRoot, { recursive: true, force: true })
+    }
+  })
+
+  it('skips an item whose path escapes the catalog root', async () => {
+    const projectRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'haus-project-'))
+    try {
+      const result = await scaffoldConfigItems(projectRoot, catalogRoot, [
+        {
+          id: 'haus.evil',
+          type: 'config',
+          path: '../../../../etc/hosts',
+          source: 'haus',
+          tags: [],
+          repoRoles: [],
+          tokenEstimate: 0,
+        },
+      ])
+      assert.equal(result.scaffolded.length, 0)
+      assert.equal(result.skipped.length, 0)
+      assert.ok(!fs.existsSync(path.join(projectRoot, 'hosts')))
     } finally {
       fs.rmSync(projectRoot, { recursive: true, force: true })
     }
