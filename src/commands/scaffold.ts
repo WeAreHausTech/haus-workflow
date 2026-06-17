@@ -41,7 +41,11 @@ export async function runScaffold(
   })
 
   if (result.scaffolded.length > 0) {
-    log(`✓ Scaffolded: ${result.scaffolded.join(', ')}`)
+    if (options.dryRun) {
+      log(`[dry-run] would scaffold: ${result.scaffolded.join(', ')} (no files written)`)
+    } else {
+      log(`✓ Scaffolded: ${result.scaffolded.join(', ')}`)
+    }
   }
   if (result.skipped.length > 0) {
     log(`Skipped (already exist): ${result.skipped.join(', ')}`)

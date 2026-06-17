@@ -89,7 +89,8 @@ function auditManifestStructure(manifestVersion: unknown, items: CatalogItem[]):
       item.type === 'skill' ||
       item.type === 'agent' ||
       item.type === 'template' ||
-      item.type === 'command'
+      item.type === 'command' ||
+      item.type === 'config'
     ) {
       if (!item.path) {
         failures.push(`${item.id}: missing path`)

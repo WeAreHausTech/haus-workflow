@@ -206,7 +206,7 @@ function safeJoin(base: string, itemPath: string): string | null {
   return resolved.startsWith(base + path.sep) || resolved === base ? resolved : null
 }
 
-const KNOWN_ITEM_TYPES = new Set(['skill', 'agent', 'template', 'command'])
+const KNOWN_ITEM_TYPES = new Set(['skill', 'agent', 'template', 'command', 'config'])
 
 function isMarkdownPath(rel: string): boolean {
   return rel.toLowerCase().endsWith('.md')
@@ -388,14 +388,19 @@ async function syncDirectoryFromPrefix(
   catalogPrefix: string,
   destDir: string,
   base: string,
-  opts: { validateMarkdown: boolean },
+  opts: { validateMarkdown: boolean; requireSkillMd?: boolean },
 ): Promise<'created' | 'updated' | 'unchanged' | 'failed'> {
   const relFiles = await listFilesUnderCatalogPrefix(catalogPrefix, base)
   if (!relFiles) {
     warn(`Failed to list files for ${item.id}`)
     return 'failed'
   }
-  if (!relFiles.includes('SKILL.md') && catalogPrefix !== SUPERPOWERS_SHARED_CATALOG_REL) {
+  const requireSkillMd = opts.requireSkillMd ?? true
+  if (
+    requireSkillMd &&
+    !relFiles.includes('SKILL.md') &&
+    catalogPrefix !== SUPERPOWERS_SHARED_CATALOG_REL
+  ) {
     warn(`Failed to fetch content for ${item.id}: missing SKILL.md`)
     return 'failed'
   }
@@ -450,6 +455,55 @@ async function syncSkillDirectory(
   }
 }
 
+/**
+ * Caches a `config` catalog item. The item.path may point at a single file
+ * (e.g. `configs/eslint/eslint.config.mjs`) or a directory of files
+ * (e.g. `configs/prettier/`). Directory items are synced whole; single files
+ * are fetched and run through the ingest trust boundary before caching.
+ */
+async function syncConfigItem(
+  item: CatalogItem,
+  base: string,
+): Promise<'created' | 'updated' | 'unchanged' | 'failed'> {
+  const dest = safeJoin(getCacheDir(), item.path)
+  if (!dest) {
+    warn(`Skipping ${item.id}: path traversal detected`)
+    return 'failed'
+  }
+
+  // Directory config item: listing the prefix returns its files.
+  const relFiles = await listFilesUnderCatalogPrefix(item.path, base)
+  if (relFiles && relFiles.length > 0) {
+    try {
+      return await syncDirectoryFromPrefix(item, item.path, dest, base, {
+        validateMarkdown: false,
+        requireSkillMd: false,
+      })
+    } catch (err) {
+      warn(`Failed to cache ${item.id}: ${err instanceof Error ? err.message : String(err)}`)
+      return 'failed'
+    }
+  }
+
+  // Single-file config item.
+  const text = await fetchText(`${base}/${item.path}`)
+  if (!text) {
+    warn(`Failed to fetch content for ${item.id}`)
+    return 'failed'
+  }
+  const verdict = validateCatalogItem(item, text)
+  if (!verdict.ok) {
+    warn(`Rejected ${item.id} at ingest: ${verdict.reason}`)
+    return 'failed'
+  }
+  try {
+    return await writeTextIfChanged(dest, text)
+  } catch (err) {
+    warn(`Failed to cache ${item.id}: ${err instanceof Error ? err.message : String(err)}`)
+    return 'failed'
+  }
+}
+
 async function syncSuperpowersShared(
   base: string,
 ): Promise<'created' | 'updated' | 'unchanged' | 'failed' | 'skipped'> {
@@ -489,6 +543,10 @@ async function syncOneItem(
 
   if (item.type === 'skill') {
     return syncSkillDirectory(item, base)
+  }
+
+  if (item.type === 'config') {
+    return syncConfigItem(item, base)
   }
 
   const dest = safeJoin(getCacheDir(), item.path)

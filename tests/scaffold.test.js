@@ -124,6 +124,35 @@ describe('scaffoldConfigItems', () => {
     }
   })
 
+  it('dry-run reports would-be files without writing them', async () => {
+    const projectRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'haus-project-'))
+    try {
+      const result = await scaffoldConfigItems(
+        projectRoot,
+        catalogRoot,
+        [
+          {
+            id: 'haus.eslint-config',
+            type: 'config',
+            path: 'configs/eslint/eslint.config.js',
+            source: 'haus',
+            tags: [],
+            repoRoles: [],
+            tokenEstimate: 0,
+          },
+        ],
+        { dryRun: true },
+      )
+      assert.equal(result.scaffolded.length, 1)
+      assert.ok(
+        !fs.existsSync(path.join(projectRoot, 'eslint.config.js')),
+        'dry-run must not write any file',
+      )
+    } finally {
+      fs.rmSync(projectRoot, { recursive: true, force: true })
+    }
+  })
+
   it('overwrites when force: true', async () => {
     const projectRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'haus-project-'))
     fs.writeFileSync(path.join(projectRoot, 'eslint.config.js'), '// custom config\n')

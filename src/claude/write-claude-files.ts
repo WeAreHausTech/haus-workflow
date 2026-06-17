@@ -226,6 +226,10 @@ export async function writeClaudeFiles(
         continue
       }
     }
+    // 'config' items are supported but intentionally not written to `.claude/` —
+    // they are project-root tooling files distributed explicitly via `haus scaffold`.
+    if (item.type === 'config') continue
+
     const sourcePath = catalogItemContentPath(contentRoot, manifestItem)
     const target = targetDirForType(item.type)
     if (!target) {
