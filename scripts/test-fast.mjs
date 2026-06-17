@@ -40,6 +40,7 @@ const SLOW_INTEGRATION = new Set([
   'load-catalog.test.js',
   'postinstall.test.js',
   'recommend-eligibility.test.js',
+  'recommend-archetypes.test.js',
   'remote-catalog-tree.test.js',
   'remote-catalog.test.js',
   'setup-core.test.js',

@@ -1,0 +1,55 @@
+{
+  "_note": "Subset assertions for recommend() on repo archetypes. Full lists drift with defaults; only pin stack-specific must-include IDs.",
+  "deprecatedMustNotRecommend": [
+    "haus.stripe-patterns",
+    "haus.supabase-patterns",
+    "haus.sanity-patterns",
+    "haus.sentry-patterns",
+    "haus.laravel-patterns",
+    "haus.nestjs-graphql-patterns",
+    "haus.tailwind-scss-patterns",
+    "haus.database-patterns"
+  ],
+  "profiles": {
+    "nextjs-app": {
+      "mustInclude": [
+        "haus.nextjs-patterns",
+        "haus.react19-patterns",
+        "haus.ecc-typescript-reviewer",
+        "haus.ecc-react-reviewer"
+      ]
+    },
+    "nest-graphql-api": {
+      "mustInclude": [
+        "haus.ecc-nestjs-patterns",
+        "haus.ecc-security-reviewer",
+        "haus.apollo-apollo-server",
+        "haus.apollo-graphql-schema"
+      ]
+    },
+    "laravel-app": {
+      "mustInclude": [
+        "haus.ecc-laravel-patterns",
+        "haus.ecc-php-reviewer",
+        "haus.sentry-sentry-php-sdk"
+      ]
+    },
+    "vendure-monorepo": {
+      "mustInclude": [
+        "haus.vendure-app-patterns",
+        "haus.vendure-plugin-patterns",
+        "haus.ecc-nestjs-patterns"
+      ]
+    },
+    "wordpress-bedrock-site": {
+      "mustInclude": [
+        "haus.wordpress-bedrock-patterns",
+        "haus.wordpress-patterns",
+        "haus.ecc-php-reviewer"
+      ]
+    },
+    "stripe-supabase-app": {
+      "mustInclude": ["haus.stripe-stripe-best-practices", "haus.supabase-supabase"]
+    }
+  }
+}
