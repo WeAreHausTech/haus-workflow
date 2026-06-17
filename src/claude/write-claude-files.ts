@@ -27,12 +27,16 @@ import { writeRootClaudeMd } from './write-root-claude-md.js'
 import { writeWorkflowConfig } from './write-workflow-config.js'
 import { writeWorkflow } from './write-workflow.js'
 
-/** Map catalog item type to `.claude/` subdir; null = unknown type (skip). */
+/**
+ * Map catalog item type to `.claude/` subdir. Returns null for types not written
+ * to `.claude/` — either unknown types or `config` (distributed via `haus scaffold`).
+ */
 export function targetDirForType(type: string): string | null {
   if (type === 'agent') return 'agents'
   if (type === 'template') return 'templates'
   if (type === 'command') return 'commands'
   if (type === 'skill') return 'skills'
+  // 'config' items are distributed via `haus scaffold`, not `haus apply`
   return null
 }
 
@@ -225,6 +229,10 @@ export async function writeClaudeFiles(
         continue
       }
     }
+    // 'config' items are supported but intentionally not written to `.claude/` —
+    // they are project-root tooling files distributed explicitly via `haus scaffold`.
+    if (item.type === 'config') continue
+
     const sourcePath = catalogItemContentPath(contentRoot, manifestItem)
     const target = targetDirForType(item.type)
     if (!target) {

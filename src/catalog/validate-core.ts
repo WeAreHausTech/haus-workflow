@@ -89,7 +89,8 @@ function auditManifestStructure(manifestVersion: unknown, items: CatalogItem[]):
       item.type === 'skill' ||
       item.type === 'agent' ||
       item.type === 'template' ||
-      item.type === 'command'
+      item.type === 'command' ||
+      item.type === 'config'
     ) {
       if (!item.path) {
         failures.push(`${item.id}: missing path`)
@@ -184,6 +185,12 @@ function auditShippedFiles(manifestDir: string, items: CatalogItem[]): string[] 
       const rel = path.relative(manifestDir, absPath)
       failures.push(...checkRequiredFrontmatter(text, `${item.id}: ${rel}`))
       failures.push(...auditTemplateContent(manifestDir, absPath, item.id))
+    } else if (item.type === 'config') {
+      // Config items ship a file or a directory; verify the path exists. No
+      // frontmatter/content audit — they are tooling files, not agent context.
+      if (!fs.existsSync(absPath)) {
+        failures.push(`${item.id}: missing config path ${item.path}`)
+      }
     }
   }
   return failures

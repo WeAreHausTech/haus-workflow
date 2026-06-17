@@ -96,6 +96,25 @@ test('UNSUPPORTED gate: python item skipped', async () => {
   }
 })
 
+test('config-scaffold-only gate: config item skipped, never recommended', async () => {
+  setup()
+  try {
+    // Match the config item's role so it would be recommended if not gated out.
+    const result = await recommend(tmpDir, makeContext(tmpDir, { repoRoles: ['next-app'] }))
+    assert.ok(ids(result.skipped).has('test.config-item'), 'config item should be in skipped')
+    const entry = findSkipped(result, 'test.config-item')
+    assert.equal(entry.skipReasons[0].code, 'config-scaffold-only')
+    assert.equal(entry.skipReasons[0].signal, 'type:config')
+    assert.equal(
+      ids(result.recommended).has('test.config-item'),
+      false,
+      'config item must never be recommended/installed by apply',
+    )
+  } finally {
+    teardown()
+  }
+})
+
 test('curated-not-approved gate: unapproved curated item skipped', async () => {
   setup()
   try {

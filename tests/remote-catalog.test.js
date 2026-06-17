@@ -389,3 +389,100 @@ test('haus doctor: reports catalog cache absent when override cache dir is empty
     `expected 'CATALOG CACHE: absent' in:\n${combined}`,
   )
 })
+
+test('haus update: caches config items (single-file + directory)', async () => {
+  const manifest = {
+    version: '1.0.0',
+    items: [
+      {
+        id: 'haus.eslint-config',
+        type: 'config',
+        source: 'haus',
+        path: 'configs/eslint/eslint.config.mjs',
+        title: 'Haus ESLint config',
+        tags: [],
+        repoRoles: [],
+        tokenEstimate: 0,
+      },
+      {
+        id: 'haus.prettier-config',
+        type: 'config',
+        source: 'haus',
+        path: 'configs/prettier',
+        title: 'Haus Prettier config',
+        tags: [],
+        repoRoles: [],
+        tokenEstimate: 0,
+      },
+      {
+        id: 'haus.empty-config',
+        type: 'config',
+        source: 'haus',
+        path: 'configs/empty/marker',
+        title: 'Empty config',
+        tags: [],
+        repoRoles: [],
+        tokenEstimate: 0,
+      },
+    ],
+  }
+
+  const { server, port } = await startMockServer({
+    '/manifest.json': { body: JSON.stringify(manifest), contentType: 'application/json' },
+    // Single-file item: no tree listing → falls back to a direct fetch.
+    '/configs/eslint/eslint.config.mjs': { body: "export default []\n" },
+    // Empty file is valid content, not a fetch failure.
+    '/configs/empty/marker': { body: '' },
+    // Directory item: tree lists its files, then each is fetched.
+    [`/__haus_tree__/${encodeURIComponent('configs/prettier')}`]: {
+      body: JSON.stringify(['prettier.config.cjs', '.prettierignore']),
+    },
+    '/configs/prettier/prettier.config.cjs': { body: 'module.exports = {}\n' },
+    '/configs/prettier/.prettierignore': { body: 'dist\n' },
+  })
+
+  const cacheDir = mkdtempSync(path.join(os.tmpdir(), 'haus-cache-config-'))
+  const temp = makeProjectDir()
+
+  try {
+    const out = await runCli(['update'], {
+      cwd: temp,
+      env: {
+        ...process.env,
+        HAUS_CATALOG_REMOTE_BASE: `http://127.0.0.1:${port}`,
+        HAUS_CATALOG_CACHE_DIR_OVERRIDE: cacheDir,
+      },
+    })
+    assert.equal(out.exitCode, 0, `update failed:\n${out.stdout}\n${out.stderr}`)
+    // Config items must no longer be reported as an unknown type.
+    assert.equal(
+      (out.stdout + out.stderr).includes('is unknown to this haus version'),
+      false,
+      'config type should be recognized by sync',
+    )
+    assert.equal(
+      fs.existsSync(path.join(cacheDir, 'configs/eslint/eslint.config.mjs')),
+      true,
+      'single-file config not cached',
+    )
+    assert.equal(
+      fs.existsSync(path.join(cacheDir, 'configs/prettier/prettier.config.cjs')),
+      true,
+      'directory config file not cached',
+    )
+    assert.equal(
+      fs.existsSync(path.join(cacheDir, 'configs/prettier/.prettierignore')),
+      true,
+      'directory config dotfile not cached',
+    )
+    assert.equal(
+      fs.existsSync(path.join(cacheDir, 'configs/empty/marker')),
+      true,
+      'empty single-file config not cached (empty body treated as failure)',
+    )
+  } finally {
+    await stopServer(server)
+    fs.rmSync(cacheDir, { recursive: true, force: true })
+    fs.rmSync(temp, { recursive: true, force: true })
+  }
+})

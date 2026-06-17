@@ -89,6 +89,18 @@ export async function recommend(root: string, context: ContextMap): Promise<Reco
       skip(item.id, 'unsupported-policy', 'Unsupported stack policy')
       continue
     }
+    // Config items (ESLint, Prettier) are project-root files distributed via
+    // `haus scaffold`, never written to `.claude/` by apply. Keep them out of the
+    // recommended/installed set (and out of token stats) but surface the hint.
+    if (item.type === 'config') {
+      skip(
+        item.id,
+        'config-scaffold-only',
+        'Config item — install with `haus scaffold`',
+        'type:config',
+      )
+      continue
+    }
     if (item.reviewStatus === 'deprecated') {
       skip(item.id, 'deprecated', 'Catalog item is deprecated', 'reviewStatus:deprecated')
       continue

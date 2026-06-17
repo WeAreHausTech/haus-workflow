@@ -3,6 +3,18 @@
   "_note": "Policy gates test fixture. One item per gate exercised by recommend-eligibility.test.js.",
   "items": [
     {
+      "id": "test.config-item",
+      "source": "haus",
+      "type": "config",
+      "path": "configs/eslint/eslint.config.mjs",
+      "title": "Test: Config item",
+      "purpose": "Triggers config-scaffold-only gate.",
+      "tags": ["typescript", "quality"],
+      "repoRoles": ["next-app"],
+      "default": false,
+      "tokenEstimate": 0
+    },
+    {
       "id": "test.unsupported-python",
       "source": "haus",
       "type": "skill",
