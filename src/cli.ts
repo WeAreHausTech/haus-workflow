@@ -14,6 +14,7 @@ import { runInit } from './commands/init.js'
 import { runInstall } from './commands/install.js'
 import { runRecommend } from './commands/recommend.js'
 import { runRefresh } from './commands/refresh.js'
+import { runScaffold } from './commands/scaffold.js'
 import { runScan } from './commands/scan.js'
 import { runSetupProject } from './commands/setup-project.js'
 import { runUndo } from './commands/undo.js'
@@ -100,6 +101,16 @@ program
   .option('--check', 'Exit non-zero if any HAUS-MANAGED file is out of date')
   .option('--postinstall', 'Run by the npm postinstall hook; prints a plain-language change notice')
   .action(runInstall)
+program
+  .command('scaffold [ids...]')
+  .description(
+    'Copy catalog config items (ESLint, Prettier) into the project root. ' +
+      'Pass item IDs to scaffold specific items, or omit to scaffold all available config items.',
+  )
+  .option('--force', 'Overwrite existing files')
+  .option('--dry-run', 'Preview what would be written without changing anything')
+  .option('--root <path>', 'Project root (defaults to cwd)', process.cwd())
+  .action(runScaffold)
 program.command('uninstall').option('--force').action(runUninstallCommand)
 
 const guard = program.command('guard')

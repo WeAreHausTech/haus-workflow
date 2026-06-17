@@ -61,7 +61,7 @@ export type CatalogItemLicenseConfidence = 'high' | 'medium' | 'low' | 'unknown'
 /** A single entry in the catalog manifest describing a skill, agent, template, or command. */
 export type CatalogItem = {
   id: string
-  type: 'skill' | 'agent' | 'template' | 'command'
+  type: 'skill' | 'agent' | 'template' | 'command' | 'config'
   source: string
   version?: string
   path: string

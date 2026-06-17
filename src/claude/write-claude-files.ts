@@ -33,6 +33,7 @@ export function targetDirForType(type: string): string | null {
   if (type === 'template') return 'templates'
   if (type === 'command') return 'commands'
   if (type === 'skill') return 'skills'
+  // 'config' items are distributed via `haus scaffold`, not `haus apply`
   return null
 }
 
