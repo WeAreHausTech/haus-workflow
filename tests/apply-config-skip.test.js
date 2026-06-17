@@ -2,7 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import os from 'node:os'
 import path from 'node:path'
-import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, existsSync } from 'node:fs'
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, existsSync, rmSync } from 'node:fs'
 import { execaSync } from 'execa'
 
 const cli = path.resolve('dist/cli.js')
@@ -10,8 +10,9 @@ const cli = path.resolve('dist/cli.js')
 // Regression: a `config` catalog item must never be written into `.claude/` or
 // recorded in the lock by apply — config files are distributed via `haus scaffold`.
 // Even if a config id is explicitly selected, writeClaudeFiles must skip it.
-test('writeClaudeFiles skips config items: no .claude file, no lock entry', () => {
+test('writeClaudeFiles skips config items: no .claude file, no lock entry', (t) => {
   const temp = mkdtempSync(path.join(os.tmpdir(), 'haus-config-skip-'))
+  t.after(() => rmSync(temp, { recursive: true, force: true }))
   const fixtureDir = path.join(temp, 'catalog')
   mkdirSync(path.join(fixtureDir, 'configs', 'eslint'), { recursive: true })
   writeFileSync(path.join(fixtureDir, 'configs', 'eslint', 'eslint.config.mjs'), 'export default []\n')
