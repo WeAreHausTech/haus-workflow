@@ -97,7 +97,7 @@ export type CatalogItem = {
   useMode?: CatalogItemUseMode
   /** Risk level of shipping this item. Blocked items must not install. */
   riskLevel?: CatalogItemRiskLevel
-  /** Review gate status. Only "approved" items may be recommended and installed. */
+  /** Review gate status. Only "approved" items may be recommended and installed; "deprecated" is always skipped. */
   reviewStatus?: CatalogItemReviewStatus
   /** Git SHA or version tag pinning the upstream source this item was derived from. */
   pinnedRef?: string

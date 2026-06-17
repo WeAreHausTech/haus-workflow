@@ -2,6 +2,8 @@
 
 import type { CatalogItem } from '../types.js'
 
+import { validateCuratedProvenance, validateReferences } from './manifest-item-fields.js'
+
 const POLLUTION_KEYS = new Set(['__proto__', 'prototype', 'constructor'])
 
 export type ParsedManifest = {
@@ -89,14 +91,10 @@ export function parseManifest(json: string): ParseManifestResult {
       return { ok: false, error: `${item.id}: duplicate path "${normPath}"` }
     }
     seenPaths.add(normPath)
-    if (item.source === 'curated') {
-      if (!isNonEmptyString(item.reviewStatus)) {
-        return { ok: false, error: `${item.id}: curated item missing reviewStatus` }
-      }
-      if (!isNonEmptyString(item.riskLevel)) {
-        return { ok: false, error: `${item.id}: curated item missing riskLevel` }
-      }
-    }
+    const provenanceError = validateCuratedProvenance(item)
+    if (provenanceError) return { ok: false, error: provenanceError }
+    const referencesError = validateReferences(String(item.id), item.references)
+    if (referencesError) return { ok: false, error: referencesError }
     if (!isStringArray(item.tags)) {
       return { ok: false, error: `${item.id}: tags must be a string array` }
     }

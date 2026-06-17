@@ -39,7 +39,7 @@ function writeCatalogContent(catalogDir, items) {
 }
 
 /** Writes a manifest variant listing exactly `items`. */
-function writeManifest(catalogDir, file, items) {
+function writeManifest(catalogDir, file, items, extra = {}) {
   const manifest = {
     version: '1.0.0',
     items: items.map((it) => ({
@@ -48,8 +48,13 @@ function writeManifest(catalogDir, file, items) {
       path: it.relPath,
       title: it.name,
       version: '1.0.0',
-      source: 'haus',
+      source: it.source ?? 'haus',
       tags: [],
+      repoRoles: [],
+      tokenEstimate: 100,
+      ...(it.reviewStatus ? { reviewStatus: it.reviewStatus } : {}),
+      ...(it.riskLevel ? { riskLevel: it.riskLevel } : {}),
+      ...extra,
     })),
   }
   const p = path.join(catalogDir, file)
@@ -214,4 +219,15 @@ test('empty skill dir is pruned after the last item is removed', () => {
   runWrite(root, empty, undefined)
   assert.equal(existsSync(path.join(root, b.dest)), false, 'stale item removed')
   assert.equal(existsSync(path.join(root, '.claude/skills')), false, 'empty skills dir pruned')
+})
+
+test('deprecated item in recommendation is not installed', () => {
+  const { root, catalogDir } = makeProject('apply-deprecated')
+  const dep = { ...skillItem('demo.deprecated'), reviewStatus: 'deprecated' }
+  writeCatalogContent(catalogDir, [dep])
+  const manifest = writeManifest(catalogDir, 'manifest.json', [dep])
+  writeRecommendation(root, [dep])
+  runWrite(root, manifest, undefined)
+  assert.equal(existsSync(path.join(root, dep.dest)), false, 'deprecated skill must not install')
+  assert.deepEqual(lockIds(root), [])
 })

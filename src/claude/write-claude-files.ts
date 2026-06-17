@@ -205,6 +205,10 @@ export async function writeClaudeFiles(
   for (const item of catalogItems) {
     const manifestItem = manifestById.get(item.id)
     if (!manifestItem?.path) continue
+    if (manifestItem.reviewStatus === 'deprecated') {
+      warn(`Skipping ${item.id}: reviewStatus is deprecated`)
+      continue
+    }
     // Curated items must be approved and not blocked before they are written to disk.
     if (manifestItem.source === 'curated') {
       if (manifestItem.reviewStatus !== 'approved') {

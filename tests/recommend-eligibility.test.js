@@ -111,6 +111,26 @@ test('curated-not-approved gate: unapproved curated item skipped', async () => {
   }
 })
 
+test('deprecated gate: haus and curated deprecated items skipped', async () => {
+  setup()
+  try {
+    const result = await recommend(tmpDir, makeContext(tmpDir))
+    for (const id of ['test.deprecated-haus', 'test.curated-deprecated']) {
+      assert.ok(ids(result.skipped).has(id), `${id} should be in skipped`)
+      const entry = findSkipped(result, id)
+      assert.equal(entry.skipReasons[0].code, 'deprecated')
+      assert.equal(entry.skipReasons[0].signal, 'reviewStatus:deprecated')
+    }
+    assert.equal(
+      ids(result.recommended).has('test.deprecated-haus'),
+      false,
+      'deprecated default item must not be recommended',
+    )
+  } finally {
+    teardown()
+  }
+})
+
 test('curated-risk-blocked gate: blocked curated item skipped', async () => {
   setup()
   try {

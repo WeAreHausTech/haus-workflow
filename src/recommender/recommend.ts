@@ -89,6 +89,10 @@ export async function recommend(root: string, context: ContextMap): Promise<Reco
       skip(item.id, 'unsupported-policy', 'Unsupported stack policy')
       continue
     }
+    if (item.reviewStatus === 'deprecated') {
+      skip(item.id, 'deprecated', 'Catalog item is deprecated', 'reviewStatus:deprecated')
+      continue
+    }
     if (item.source === 'curated') {
       const rs = item.reviewStatus
       if (!rs || rs !== 'approved') {

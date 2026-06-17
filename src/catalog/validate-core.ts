@@ -4,12 +4,12 @@ import path from 'node:path'
 import type { CatalogItem } from '../types.js'
 
 import { auditForbiddenTagsInText, extractFrontmatterValue } from './forbidden-content.js'
+import { validateCuratedProvenance, validateReferences } from './manifest-item-fields.js'
 import {
   ALLOWED_NPX_PATTERN,
   ANY_NPX_PATTERN,
   auditDisallowedTags,
   FORBIDDEN_TAGS,
-  HTTP_URL_PATTERN,
   NPX_TSX_ONLY_EXEMPT_TYPES,
   PLACEHOLDER_PATTERN,
   REQUIRED_SKILL_FRONTMATTER,
@@ -61,6 +61,13 @@ function auditManifestStructure(manifestVersion: unknown, items: CatalogItem[]):
       failures.push(`item[${i}]: missing id`)
       continue
     }
+
+    const provenanceError = validateCuratedProvenance(item as Record<string, unknown>)
+    if (provenanceError) failures.push(provenanceError)
+
+    const referencesError = validateReferences(item.id, item.references)
+    if (referencesError) failures.push(referencesError)
+
     if (!item.type) {
       failures.push(`${item.id}: missing type`)
       continue
@@ -96,20 +103,13 @@ function auditManifestStructure(manifestVersion: unknown, items: CatalogItem[]):
       }
 
       const isHaus = item.source === 'haus'
-      const isCuratedApproved = item.source === 'curated' && item.reviewStatus === 'approved'
-      if (!isHaus && !isCuratedApproved) {
-        failures.push(`${item.id}: source must be "haus" or curated with reviewStatus "approved"`)
-      }
-
-      for (const ref of item.references ?? []) {
-        if (/^https?:\/\//i.test(ref)) {
-          if (!ref.startsWith('https://')) {
-            failures.push(`${item.id}: reference must be https:// URL: ${ref}`)
-          }
-          if (HTTP_URL_PATTERN.test(ref)) {
-            failures.push(`${item.id}: reference uses insecure http:// URL: ${ref}`)
-          }
-        }
+      const isCuratedUsableState =
+        item.source === 'curated' &&
+        (item.reviewStatus === 'approved' || item.reviewStatus === 'deprecated')
+      if (!isHaus && !isCuratedUsableState) {
+        failures.push(
+          `${item.id}: source must be "haus" or curated with reviewStatus "approved"/"deprecated"`,
+        )
       }
     }
   }

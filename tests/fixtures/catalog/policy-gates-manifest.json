@@ -15,6 +15,33 @@
       "tokenEstimate": 100
     },
     {
+      "id": "test.deprecated-haus",
+      "source": "haus",
+      "type": "skill",
+      "path": "skills/test.deprecated-haus",
+      "title": "Test: Deprecated Haus Router",
+      "purpose": "Triggers deprecated gate (reviewStatus:deprecated on haus item).",
+      "tags": ["workflow"],
+      "repoRoles": [],
+      "reviewStatus": "deprecated",
+      "default": true,
+      "tokenEstimate": 100
+    },
+    {
+      "id": "test.curated-deprecated",
+      "source": "curated",
+      "type": "skill",
+      "path": "skills/test.curated-deprecated",
+      "title": "Test: Curated Deprecated",
+      "purpose": "Triggers deprecated gate (reviewStatus:deprecated on curated item).",
+      "tags": ["workflow"],
+      "repoRoles": [],
+      "reviewStatus": "deprecated",
+      "riskLevel": "low",
+      "default": false,
+      "tokenEstimate": 100
+    },
+    {
       "id": "test.curated-not-approved",
       "source": "curated",
       "type": "skill",

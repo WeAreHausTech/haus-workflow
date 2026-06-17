@@ -130,6 +130,62 @@ test('rejects manifest when item tags or repoRoles are not arrays', () => {
   assert.match(badRoles.error, /repoRoles must be a string array/)
 })
 
+test('accepts curated provenance fields and large mixed references[]', () => {
+  const refs = [
+    ...Array.from({ length: 18 }, (_, i) => `references/doc-${i}.md`),
+    'https://example.com/llms.txt',
+  ]
+  const json = JSON.stringify({
+    version: '1.0.0',
+    items: [
+      {
+        id: 'haus.curated-provenance',
+        type: 'skill',
+        source: 'curated',
+        path: 'skills/curated-provenance',
+        reviewStatus: 'approved',
+        riskLevel: 'low',
+        originSourceId: 'ecc-affaanm',
+        originUrl: 'https://github.com/example/repo',
+        useMode: 'copy',
+        license: 'MIT',
+        licenseConfidence: 'high',
+        pinnedRef: 'abc123',
+        references: refs,
+        tags: [],
+        repoRoles: [],
+        tokenEstimate: 100,
+      },
+    ],
+  })
+  const result = parseManifest(json)
+  assert.equal(result.ok, true)
+  assert.equal(result.manifest.items[0].references?.length, 19)
+})
+
+test('rejects curated item with http originUrl', () => {
+  const json = JSON.stringify({
+    version: '1.0.0',
+    items: [
+      {
+        id: 'c',
+        type: 'skill',
+        path: 'skills/c',
+        source: 'curated',
+        reviewStatus: 'approved',
+        riskLevel: 'low',
+        originUrl: 'http://insecure.example/item',
+        tags: [],
+        repoRoles: [],
+        tokenEstimate: 1,
+      },
+    ],
+  })
+  const result = parseManifest(json)
+  assert.equal(result.ok, false)
+  assert.match(result.error, /originUrl/)
+})
+
 test('rejects manifest when requiresAny is malformed', () => {
   const badShape = parseManifest(
     JSON.stringify({
@@ -168,4 +224,109 @@ test('rejects manifest when requiresAny is malformed', () => {
   )
   assert.equal(badClause.ok, false)
   assert.match(badClause.error, /requiresAny/)
+})
+
+function curatedBase(overrides = {}) {
+  return {
+    id: 'c',
+    type: 'skill',
+    path: 'skills/c',
+    source: 'curated',
+    reviewStatus: 'approved',
+    riskLevel: 'low',
+    tags: [],
+    repoRoles: [],
+    tokenEstimate: 1,
+    ...overrides,
+  }
+}
+
+test('rejects curated item with invalid provenance enum values', () => {
+  const badReviewStatus = parseManifest(
+    JSON.stringify({ version: '1.0.0', items: [curatedBase({ reviewStatus: 'live' })] }),
+  )
+  assert.equal(badReviewStatus.ok, false)
+  assert.match(badReviewStatus.error, /invalid reviewStatus/)
+
+  const badRiskLevel = parseManifest(
+    JSON.stringify({ version: '1.0.0', items: [curatedBase({ riskLevel: 'critical' })] }),
+  )
+  assert.equal(badRiskLevel.ok, false)
+  assert.match(badRiskLevel.error, /invalid riskLevel/)
+
+  const badUseMode = parseManifest(
+    JSON.stringify({ version: '1.0.0', items: [curatedBase({ useMode: 'fork' })] }),
+  )
+  assert.equal(badUseMode.ok, false)
+  assert.match(badUseMode.error, /invalid useMode/)
+
+  const badLicenseConfidence = parseManifest(
+    JSON.stringify({
+      version: '1.0.0',
+      items: [curatedBase({ licenseConfidence: 'certain' })],
+    }),
+  )
+  assert.equal(badLicenseConfidence.ok, false)
+  assert.match(badLicenseConfidence.error, /invalid licenseConfidence/)
+})
+
+test('rejects manifest when references is not a string array', () => {
+  const badType = parseManifest(
+    JSON.stringify({
+      version: '1.0.0',
+      items: [
+        {
+          id: 'a',
+          type: 'skill',
+          path: 'skills/a',
+          tags: [],
+          repoRoles: [],
+          tokenEstimate: 1,
+          references: 'references/scope.md',
+        },
+      ],
+    }),
+  )
+  assert.equal(badType.ok, false)
+  assert.match(badType.error, /references must be a string array/)
+
+  const badEntry = parseManifest(
+    JSON.stringify({
+      version: '1.0.0',
+      items: [
+        {
+          id: 'b',
+          type: 'skill',
+          path: 'skills/b',
+          tags: [],
+          repoRoles: [],
+          tokenEstimate: 1,
+          references: ['references/scope.md', { url: 'https://example.com' }],
+        },
+      ],
+    }),
+  )
+  assert.equal(badEntry.ok, false)
+  assert.match(badEntry.error, /references must be a string array/)
+})
+
+test('rejects manifest when references contains http URL', () => {
+  const result = parseManifest(
+    JSON.stringify({
+      version: '1.0.0',
+      items: [
+        {
+          id: 'a',
+          type: 'skill',
+          path: 'skills/a',
+          tags: [],
+          repoRoles: [],
+          tokenEstimate: 1,
+          references: ['references/scope.md', 'http://insecure.example/doc'],
+        },
+      ],
+    }),
+  )
+  assert.equal(result.ok, false)
+  assert.match(result.error, /reference must be https/)
 })
