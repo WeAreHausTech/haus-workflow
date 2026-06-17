@@ -1,5 +1,5 @@
 {
-  "version": "2.8.0",
+  "version": "2.9.0",
   "items": [
     {
       "id": "haus.nextjs-patterns",
@@ -3133,6 +3133,45 @@
           "packageNamePattern": "@sentry/*"
         }
       ]
+    },
+    {
+      "id": "haus.eslint-config",
+      "version": "1.0.0",
+      "source": "haus",
+      "type": "config",
+      "path": "configs/eslint/eslint.config.mjs",
+      "title": "Haus ESLint config",
+      "purpose": "ESLint 9.x flat config for Haus Tech TypeScript/React projects.",
+      "whenToUse": "Scaffold into a new project to get the standard Haus ESLint setup. Run `haus scaffold haus.eslint-config`.",
+      "whenNotToUse": "Do not scaffold if the project already has a custom ESLint config that extends beyond the Haus baseline.",
+      "tags": ["frontend", "backend", "typescript", "quality"],
+      "repoRoles": ["next-app", "react-app", "nestjs-api", "vendure-plugin", "vendure-app"],
+      "requiresAny": [
+        {
+          "dependency": "typescript"
+        }
+      ],
+      "tokenEstimate": 0,
+      "installMode": "copy-selected",
+      "reviewStatus": "approved",
+      "riskLevel": "low"
+    },
+    {
+      "id": "haus.prettier-config",
+      "version": "1.0.0",
+      "source": "haus",
+      "type": "config",
+      "path": "configs/prettier",
+      "title": "Haus Prettier config",
+      "purpose": "Prettier config and .prettierignore for Haus Tech projects.",
+      "whenToUse": "Scaffold into a new project to get the standard Haus Prettier setup. Run `haus scaffold haus.prettier-config`.",
+      "whenNotToUse": "Do not scaffold if the project already has a custom Prettier config.",
+      "tags": ["frontend", "backend", "typescript", "quality"],
+      "repoRoles": [],
+      "tokenEstimate": 0,
+      "installMode": "copy-selected",
+      "reviewStatus": "approved",
+      "riskLevel": "low"
     }
   ]
 }
