@@ -1,5 +1,5 @@
 {
-  "version": "2.9.0",
+  "version": "2.9.1",
   "items": [
     {
       "id": "haus.nextjs-patterns",
@@ -251,40 +251,6 @@
       "riskLevel": "low"
     },
     {
-      "id": "haus.sentry-patterns",
-      "version": "1.0.0",
-      "source": "haus",
-      "type": "skill",
-      "path": "skills/haus-owned/stack-patterns/sentry-patterns",
-      "title": "Haus Sentry patterns",
-      "purpose": "Guide Sentry SDK setup, error capture, performance tracing, and PII scrubbing.",
-      "whenToUse": "Use for `@sentry/*` SDK init, scope/breadcrumb config, source map upload, and PII redaction.",
-      "whenNotToUse": "Deprecated — use haus.sentry-sentry-workflow and haus.sentry-sentry-php-sdk from getsentry/sentry-for-ai.",
-      "references": ["https://docs.sentry.io/"],
-      "tokenBudget": 1200,
-      "tags": ["sentry", "observability", "tooling"],
-      "repoRoles": ["next-app", "nestjs-api", "vendure-app"],
-      "requiresAny": [
-        {
-          "stack": "sentry"
-        },
-        {
-          "dependency": "@sentry/node"
-        },
-        {
-          "dependency": "@sentry/nextjs"
-        },
-        {
-          "packageNamePattern": "@sentry/*"
-        }
-      ],
-      "ecosystem": "tooling",
-      "tokenEstimate": 1800,
-      "installMode": "copy-selected",
-      "reviewStatus": "deprecated",
-      "riskLevel": "low"
-    },
-    {
       "id": "haus.prettier-setup",
       "version": "1.1.0",
       "source": "haus",
@@ -333,37 +299,6 @@
       "riskLevel": "low"
     },
     {
-      "id": "haus.stripe-patterns",
-      "version": "1.1.0",
-      "source": "haus",
-      "type": "skill",
-      "path": "skills/haus-owned/stack-patterns/stripe-patterns",
-      "title": "Haus Stripe patterns",
-      "purpose": "Guide Stripe Elements, Checkout, webhook handling, and PCI-safe integration changes.",
-      "whenToUse": "Use for `@stripe/stripe-js` / `@stripe/react-stripe-js` integrations, payment intents, webhooks, and Checkout.",
-      "whenNotToUse": "Deprecated — use haus.stripe-stripe-best-practices (official Stripe skill).",
-      "references": ["https://docs.stripe.com/"],
-      "tokenBudget": 1200,
-      "tags": ["stripe", "payments", "tooling"],
-      "repoRoles": ["next-app", "react-app", "vendure-plugin"],
-      "requiresAny": [
-        {
-          "stack": "stripe"
-        },
-        {
-          "dependency": "@stripe/stripe-js"
-        },
-        {
-          "dependency": "@stripe/react-stripe-js"
-        }
-      ],
-      "ecosystem": "payments",
-      "tokenEstimate": 2000,
-      "installMode": "copy-selected",
-      "reviewStatus": "deprecated",
-      "riskLevel": "medium"
-    },
-    {
       "id": "haus.qliro-patterns",
       "version": "1.0.0",
       "source": "haus",
@@ -389,71 +324,6 @@
       "installMode": "copy-selected",
       "reviewStatus": "approved",
       "riskLevel": "medium"
-    },
-    {
-      "id": "haus.supabase-patterns",
-      "version": "1.1.0",
-      "source": "haus",
-      "type": "skill",
-      "path": "skills/haus-owned/stack-patterns/supabase-patterns",
-      "title": "Haus Supabase patterns",
-      "purpose": "Guide Supabase client wiring, Row-Level Security, edge functions, and auth integration.",
-      "whenToUse": "Use for `@supabase/supabase-js` queries, RLS policies, edge functions, and Supabase Auth flows.",
-      "whenNotToUse": "Deprecated — use haus.supabase-supabase (official Supabase skill).",
-      "references": ["https://supabase.com/docs"],
-      "tokenBudget": 1200,
-      "tags": ["supabase", "database", "backend"],
-      "repoRoles": ["next-app", "react-app"],
-      "requiresAny": [
-        {
-          "stack": "supabase"
-        },
-        {
-          "dependency": "@supabase/supabase-js"
-        },
-        {
-          "packageNamePattern": "@supabase/*"
-        }
-      ],
-      "ecosystem": "database",
-      "tokenEstimate": 2000,
-      "installMode": "copy-selected",
-      "reviewStatus": "deprecated",
-      "riskLevel": "low"
-    },
-    {
-      "id": "haus.sanity-patterns",
-      "version": "1.0.0",
-      "source": "haus",
-      "type": "skill",
-      "path": "skills/haus-owned/stack-patterns/sanity-patterns",
-      "title": "Haus Sanity patterns",
-      "purpose": "Guide Sanity v3/v5 schema, Studio config, GROQ query, and Next.js integration changes.",
-      "whenToUse": "Use for Sanity schema, Studio plugin, GROQ query, or next-sanity integration updates.",
-      "whenNotToUse": "Deprecated — use haus.sanity-content-modeling-best-practices and https://docs.sanity.io/llms.txt.",
-      "references": ["https://docs.sanity.io/llms.txt"],
-      "tokenBudget": 1200,
-      "tags": ["sanity", "backend", "cms"],
-      "repoRoles": ["sanity-studio", "next-app"],
-      "requiresAny": [
-        {
-          "stack": "sanity"
-        },
-        {
-          "role": "sanity-studio"
-        },
-        {
-          "dependency": "sanity"
-        },
-        {
-          "dependency": "next-sanity"
-        }
-      ],
-      "ecosystem": "cms",
-      "tokenEstimate": 2000,
-      "installMode": "copy-selected",
-      "reviewStatus": "deprecated",
-      "riskLevel": "low"
     },
     {
       "id": "haus.strapi-patterns",
@@ -546,34 +416,6 @@
       "tokenEstimate": 3400,
       "installMode": "copy-selected",
       "reviewStatus": "approved",
-      "riskLevel": "low"
-    },
-    {
-      "id": "haus.laravel-patterns",
-      "version": "1.1.0",
-      "source": "haus",
-      "type": "skill",
-      "path": "skills/haus-owned/stack-patterns/laravel-patterns",
-      "title": "Haus Laravel patterns",
-      "purpose": "Guide Laravel domain, routing, policy, and persistence changes.",
-      "whenToUse": "Use for Laravel controllers/services/models/jobs/policies and route changes.",
-      "whenNotToUse": "Deprecated — use haus.ecc-laravel-patterns.",
-      "references": ["https://laravel.com/docs"],
-      "tokenBudget": 1200,
-      "tags": ["backend", "laravel", "php"],
-      "repoRoles": ["laravel-app", "laravel-nova-app"],
-      "requiresAny": [
-        {
-          "stack": "laravel"
-        },
-        {
-          "dependency": "laravel/framework"
-        }
-      ],
-      "ecosystem": "laravel",
-      "tokenEstimate": 2800,
-      "installMode": "copy-selected",
-      "reviewStatus": "deprecated",
       "riskLevel": "low"
     },
     {
@@ -682,37 +524,6 @@
       "tokenEstimate": 3200,
       "installMode": "copy-selected",
       "reviewStatus": "approved",
-      "riskLevel": "low"
-    },
-    {
-      "id": "haus.nestjs-graphql-patterns",
-      "version": "1.0.0",
-      "source": "haus",
-      "type": "skill",
-      "path": "skills/haus-owned/stack-patterns/nestjs-graphql-patterns",
-      "title": "Haus NestJS GraphQL patterns",
-      "purpose": "Guide resolver/module/guard/DTO-safe GraphQL implementation in NestJS.",
-      "whenToUse": "Use for NestJS GraphQL resolver, module, DTO/input, and guard changes.",
-      "whenNotToUse": "Deprecated — use haus.apollo-apollo-server and haus.apollo-graphql-schema for GraphQL in NestJS.",
-      "references": ["https://docs.nestjs.com/"],
-      "tokenBudget": 1200,
-      "tags": ["nestjs", "graphql", "typescript5"],
-      "repoRoles": ["nestjs-api"],
-      "requiresAny": [
-        {
-          "stack": "nestjs"
-        },
-        {
-          "dependency": "@nestjs/core"
-        },
-        {
-          "dependency": "@nestjs/graphql"
-        }
-      ],
-      "ecosystem": "nestjs",
-      "tokenEstimate": 2600,
-      "installMode": "copy-selected",
-      "reviewStatus": "deprecated",
       "riskLevel": "low"
     },
     {
@@ -850,37 +661,6 @@
       "tokenEstimate": 1800,
       "installMode": "copy-selected",
       "reviewStatus": "approved",
-      "riskLevel": "low"
-    },
-    {
-      "id": "haus.tailwind-scss-patterns",
-      "version": "1.1.0",
-      "source": "haus",
-      "type": "skill",
-      "path": "skills/haus-owned/stack-patterns/tailwind-scss-patterns",
-      "title": "Haus Tailwind SCSS patterns",
-      "purpose": "Guide style-system-safe Tailwind and SCSS module changes.",
-      "whenToUse": "Use for Tailwind token/utility and SCSS module behavior updates.",
-      "whenNotToUse": "Deprecated — use haus.wshobson-tailwind-design-system.",
-      "references": ["https://tailwindcss.com/docs"],
-      "tokenBudget": 1200,
-      "tags": ["tailwind", "scss", "react19"],
-      "repoRoles": ["next-app", "react-app", "vite-app"],
-      "requiresAny": [
-        {
-          "dependency": "tailwindcss"
-        },
-        {
-          "dependency": "sass"
-        },
-        {
-          "dependency": "scss"
-        }
-      ],
-      "ecosystem": "tailwind",
-      "tokenEstimate": 1800,
-      "installMode": "copy-selected",
-      "reviewStatus": "deprecated",
       "riskLevel": "low"
     },
     {
@@ -1094,46 +874,6 @@
       "installMode": "copy-selected",
       "reviewStatus": "approved",
       "riskLevel": "medium"
-    },
-    {
-      "id": "haus.database-patterns",
-      "version": "1.2.0",
-      "source": "haus",
-      "type": "skill",
-      "path": "skills/haus-owned/stack-patterns/database-patterns",
-      "title": "Haus database patterns",
-      "purpose": "Guide schema/query/index/search changes across supported data engines.",
-      "whenToUse": "Use for migrations, query behavior, indexing, and Elasticsearch mapping updates.",
-      "whenNotToUse": "Deprecated — use haus.wshobson-postgresql-table-design (PostgreSQL), haus.redis-redis-* (Redis), and https://www.elastic.co/docs/llms.txt (Elasticsearch).",
-      "references": ["https://www.elastic.co/docs/llms.txt"],
-      "tokenBudget": 1200,
-      "tags": ["postgresql", "mariadb", "mysql", "mssql", "elasticsearch", "redis"],
-      "repoRoles": [],
-      "requiresAny": [
-        {
-          "stack": "postgresql"
-        },
-        {
-          "stack": "mariadb"
-        },
-        {
-          "stack": "mysql"
-        },
-        {
-          "stack": "mssql"
-        },
-        {
-          "stack": "elasticsearch"
-        },
-        {
-          "stack": "redis"
-        }
-      ],
-      "tokenEstimate": 1700,
-      "installMode": "copy-selected",
-      "ecosystem": "database",
-      "reviewStatus": "deprecated",
-      "riskLevel": "low"
     },
     {
       "id": "haus.package-manager-yarn4-pnpm89",
