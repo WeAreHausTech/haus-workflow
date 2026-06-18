@@ -3,7 +3,8 @@
  * bundled production catalog (library/catalog/manifest.json).
  *
  * Locks stack-specific recommendations after catalog upgrade waves and asserts
- * deprecated Haus routers never appear in recommended[].
+ * removed Haus routers never appear in recommended[] (deleted from catalog;
+ * they are not evaluated by recommend and do not appear in skipped[]).
  */
 
 import test from 'node:test'
@@ -88,9 +89,9 @@ for (const [fixture, spec] of Object.entries(GOLDEN.profiles)) {
         assert.ok(recommended.has(id), `${fixture}: expected recommended ${id}`)
       }
 
-      for (const id of GOLDEN.deprecatedMustNotRecommend) {
-        assert.ok(!recommended.has(id), `${fixture}: deprecated ${id} must not be recommended`)
-        assert.ok(skipped.has(id), `${fixture}: deprecated ${id} should appear in skipped`)
+      for (const id of GOLDEN.removedMustNotRecommend) {
+        assert.ok(!recommended.has(id), `${fixture}: removed ${id} must not be recommended`)
+        assert.ok(!skipped.has(id), `${fixture}: removed ${id} must not appear in skipped`)
       }
     })
   })
