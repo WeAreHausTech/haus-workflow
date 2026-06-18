@@ -1,7 +1,7 @@
 # Catalog Skills & Agents Cleanup — 2026-06-18
 
 Repos: `haus-workflow` · `haus-workflow-catalog`
-Status: **Open** — plan only; no implementation yet
+Status: **In progress** — P0 ✅ P1 ✅ (2026-06-18); P2+ open
 Context: Full catalog review of 82 skills + 16 agents; duplicate/overlap analysis and baseline token reduction.
 
 ### Content preference policy
@@ -18,30 +18,30 @@ Context: Full catalog review of 82 skills + 16 agents; duplicate/overlap analysi
 
 ## Background
 
-| Metric                          |                                   Current |
-| ------------------------------- | ----------------------------------------: |
-| Catalog items (skills + agents) |                                        98 |
-| Always-installed baseline       |                    22 items (~51k tokens) |
-| Deprecated skills in manifest   | 8 (skipped by recommender; still on disk) |
+| Metric                          |                Current |
+| ------------------------------- | ---------------------: |
+| Catalog items (skills + agents) |                    100 |
+| Always-installed baseline       | 22 items (~51k tokens) |
+| Deprecated skills in manifest   |                      0 |
 
 ### Install model (today)
 
 1. **Baseline** (`default: true`) → always recommended and installed.
 2. **Stack-gated** → `requiresAny` satisfied + tag/role/dependency evidence.
-3. **`reviewStatus: deprecated`** → skipped by `recommend` and `writeClaudeFiles`; **not** re-installed.
-4. **Stale cleanup** → `cleanupStaleCatalogItems` prunes only IDs **removed from manifest** (hash-gated; user edits preserved).
+3. **`reviewStatus: deprecated`** → skipped by `recommend` and `writeClaudeFiles`; **not** re-installed. _(P1: all 8 deprecated entries deleted from manifest.)_
+4. **Stale cleanup** → `cleanupStaleCatalogItems` prunes IDs **removed from manifest** or **`reviewStatus: deprecated`** (hash-gated; user edits preserved). _(P0 shipped.)_
 
-### Deprecated items on update — gap
+### Deprecated items on update — gap _(fixed P0 + P1)_
 
-**Deprecated skills/agents are not removed on `haus apply` / `haus update`.**
+~~**Deprecated skills/agents are not removed on `haus apply` / `haus update`.**~~
 
-| Step                       | Behavior                                      |
-| -------------------------- | --------------------------------------------- |
-| `recommend`                | Skips `reviewStatus: deprecated`              |
-| `writeClaudeFiles`         | Won't install deprecated                      |
-| `cleanupStaleCatalogItems` | Prunes only when ID is **gone** from manifest |
+| Step                       | Behavior                                                                             |
+| -------------------------- | ------------------------------------------------------------------------------------ |
+| `recommend`                | Skips `reviewStatus: deprecated`                                                     |
+| `writeClaudeFiles`         | Won't install deprecated                                                             |
+| `cleanupStaleCatalogItems` | Prunes when ID is **gone** from manifest **or** manifest item is **deprecated** (P0) |
 
-Because deprecated entries remain in the manifest, their IDs stay in `knownIds` and previously installed copies survive under `.claude/` until the manifest entry is deleted entirely. **Phase 0 fixes this.**
+P1 deleted all 8 deprecated manifest entries (catalog `v2.9.1`); removed IDs are pruned on apply/update when lock hash matches.
 
 ---
 
@@ -49,43 +49,45 @@ Because deprecated entries remain in the manifest, their IDs stay in `knownIds` 
 
 Merge each PR to `main` before starting the next branch — no stacking. Run `yarn verify` (CLI) and `yarn validate` + `yarn test` (catalog) when touching each repo.
 
-| Phase   | Repo                                          | Scope                                                    |
-| ------- | --------------------------------------------- | -------------------------------------------------------- |
-| **P0**  | `haus-workflow`                               | Prune deprecated items on apply/update                   |
-| **P1**  | `haus-workflow-catalog`                       | Delete 8 deprecated manifest entries + skill dirs        |
-| **P2**  | `haus-workflow-catalog`                       | Remove redundant haus-owned skills (keep curated)        |
-| **P2f** | `haus-workflow-catalog`                       | Sync more upstream; drop remaining thin haus routers     |
-| **P2g** | `haus-workflow-catalog` (+ recommender)       | Co-install bloat: tier clusters, gate audit **(P2g-10)** |
-| **P3**  | `haus-workflow-catalog` (+ recommender tests) | Tier baseline superpowers + agents                       |
-| **P4**  | `haus-workflow-catalog`                       | Agent dedup                                              |
-| **P5**  | Both                                          | Docs, release notes, fixture sync                        |
+| Phase   | Repo                                          | Scope                                                    | Status                    |
+| ------- | --------------------------------------------- | -------------------------------------------------------- | ------------------------- |
+| **P0**  | `haus-workflow`                               | Prune deprecated items on apply/update                   | ✅ #126                   |
+| **P1**  | `haus-workflow-catalog`                       | Delete 8 deprecated manifest entries + skill dirs        | ✅ `v2.9.1`, fixture #127 |
+| **P2**  | `haus-workflow-catalog`                       | Remove redundant haus-owned skills (keep curated)        |                           |
+| **P2f** | `haus-workflow-catalog`                       | Sync more upstream; drop remaining thin haus routers     |                           |
+| **P2g** | `haus-workflow-catalog` (+ recommender)       | Co-install bloat: tier clusters, gate audit **(P2g-10)** |                           |
+| **P3**  | `haus-workflow-catalog` (+ recommender tests) | Tier baseline superpowers + agents                       |                           |
+| **P4**  | `haus-workflow-catalog`                       | Agent dedup                                              |                           |
+| **P5**  | Both                                          | Docs, release notes, fixture sync                        |                           |
 
 ### Target outcomes
 
-| Metric                                 | Before |        Target |
-| -------------------------------------- | -----: | ------------: |
-| Catalog skills                         |     82 |           ~64 |
-| Baseline token load                    |   ~51k |       ~12–15k |
-| Next.js stack-specific add (on top)    |   ~30k |       ~12–16k |
-| Vendure / Redis-heavy stack add        |   ~17k |        ~8–10k |
-| Deprecated on disk after `haus update` |    Yes | No (after P0) |
+| Metric                                 | Before |          Target |
+| -------------------------------------- | -----: | --------------: |
+| Catalog skills                         |     82 |             ~64 |
+| Baseline token load                    |   ~51k |         ~12–15k |
+| Next.js stack-specific add (on top)    |   ~30k |         ~12–16k |
+| Vendure / Redis-heavy stack add        |   ~17k |          ~8–10k |
+| Deprecated on disk after `haus update` |    Yes | No ✅ (P0 + P1) |
 
 ---
 
 ## Execution checklist
 
-### P0 — CLI: prune deprecated on apply/update (`haus-workflow`)
+### P0 — CLI: prune deprecated on apply/update (`haus-workflow`) ✅
 
-- [ ] **P0-1** — Extend `cleanupStaleCatalogItems` in `src/claude/write-claude-files.ts` to prune lock entries when manifest item has `reviewStatus: deprecated` (same hash gate + user-edit preservation as manifest removal)
-- [ ] **P0-2** — Pass `manifestById` (or equivalent) into cleanup; keep deselected-but-still-approved catalog items untouched
-- [ ] **P0-3** — Add test: previously installed deprecated skill deleted on re-apply (unmodified copy)
-- [ ] **P0-4** — Add test: user-edited deprecated copy preserved with warning
-- [ ] **P0-5** — Add test: deselected item still in manifest and approved → not pruned (regression)
-- [ ] **P0-6** — Update `docs/cli.md` stale-cleanup section (deprecated + removed upstream)
-- [ ] **P0-7** — Update `README.md` stale-cleanup blurb
-- [ ] **P0-8** — `yarn verify`
+- [x] **P0-1** — Extend `cleanupStaleCatalogItems` in `src/claude/write-claude-files.ts` to prune lock entries when manifest item has `reviewStatus: deprecated` (same hash gate + user-edit preservation as manifest removal)
+- [x] **P0-2** — Pass `manifestById` (or equivalent) into cleanup; keep deselected-but-still-approved catalog items untouched
+- [x] **P0-3** — Add test: previously installed deprecated skill deleted on re-apply (unmodified copy)
+- [x] **P0-4** — Add test: user-edited deprecated copy preserved with warning
+- [x] **P0-5** — Add test: deselected item still in manifest and approved → not pruned (regression)
+- [x] **P0-6** — Update `docs/cli.md` stale-cleanup section (deprecated + removed upstream)
+- [x] **P0-7** — Update `README.md` stale-cleanup blurb
+- [x] **P0-8** — `yarn verify`
 
-### P1 — Delete 8 deprecated catalog entries (`haus-workflow-catalog`)
+Merged: [haus-workflow#126](https://github.com/WeAreHausTech/haus-workflow/pull/126)
+
+### P1 — Delete 8 deprecated catalog entries (`haus-workflow-catalog`) ✅
 
 Depends on P0 merged (or document that projects keep stale files until CLI upgrade).
 
@@ -100,12 +102,14 @@ Depends on P0 merged (or document that projects keep stale files until CLI upgra
 | `haus.tailwind-scss-patterns`  | `haus.wshobson-tailwind-design-system`                                                  |
 | `haus.database-patterns`       | `haus.wshobson-postgresql-table-design` + redis skills                                  |
 
-- [ ] **P1-1** — Delete skill dirs under `skills/haus-owned/stack-patterns/` for all 8 items
-- [ ] **P1-2** — Remove manifest entries; bump top-level `manifest.json` version
-- [ ] **P1-3** — `yarn validate` + `yarn test`
-- [ ] **P1-4** — Catalog release (`yarn release`)
-- [ ] **P1-5** — Bump CLI bundled catalog fixture (`haus-workflow`)
-- [ ] **P1-6** — `yarn verify` (CLI)
+- [x] **P1-1** — Delete skill dirs under `skills/haus-owned/stack-patterns/` for all 8 items
+- [x] **P1-2** — Remove manifest entries; version bump via `yarn release` → **`v2.9.1`**
+- [x] **P1-3** — `yarn validate` + `yarn test`
+- [x] **P1-4** — Catalog release (`yarn release`)
+- [x] **P1-5** — Bump CLI bundled catalog fixture (`haus-workflow`)
+- [x] **P1-6** — `yarn verify` (CLI) — includes archetype test fix for removed IDs ([#127](https://github.com/WeAreHausTech/haus-workflow/pull/127))
+
+Merged: catalog `main` @ `b9e41e4`; CLI fixture [haus-workflow#127](https://github.com/WeAreHausTech/haus-workflow/pull/127)
 
 ### P2 — Remove redundant haus-owned skills (`haus-workflow-catalog`)
 
@@ -444,7 +448,7 @@ Estimated savings: ~37k tokens on every project (see P2g-1 for full tier breakdo
 
 | Risk                                                     | Mitigation                                                                          |
 | -------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| Deprecated files linger until P0 CLI ships               | Ship P0 first; note in P1 release                                                   |
+| Deprecated files linger until P0 CLI ships               | ✅ Shipped P0 + P1; upgrade CLI then `haus update` to prune                         |
 | User customized deprecated skill                         | Hash gate preserves copy (unchanged contract)                                       |
 | Baseline tier breaks teams expecting all superpowers     | Release note + explicit opt-in path                                                 |
 | Dropping haus nextjs/react loses thin conventions refs   | ECC frontend is 3–4× richer; haus refs are generic best practices, not org-specific |
@@ -484,7 +488,7 @@ Line counts include `SKILL.md` + all files under the skill dir. **Ratio** = cura
 | Expo / RR v7 / Auth / Vendure / etc. | haus-only (see P2e)                                    | —                                                                 |   ~130–175 |             — |     — | **Keep haus**                                                   |
 | PHPUnit / Vitest / Jest              | `phpunit-patterns`, `vitest-patterns`, `jest-patterns` | `ecc/laravel-tdd`, `wshobson/javascript-testing-patterns` _(P2f)_ |  ~190 each |         ~400+ |   2×+ | **Drop haus; sync upstream** (P2f)                              |
 
-⚠️ = already `reviewStatus: deprecated` (P1 delete).
+⚠️ = deleted in P1 (`v2.9.1`).
 
 ---
 
@@ -492,7 +496,7 @@ Line counts include `SKILL.md` + all files under the skill dir. **Ratio** = cura
 
 | Group                                  | Items                                                            | Recommendation                                                       |
 | -------------------------------------- | ---------------------------------------------------------------- | -------------------------------------------------------------------- |
-| Already deprecated                     | 8 haus `*-patterns`                                              | Delete haus (P1); prune on update (P0)                               |
+| Already deprecated                     | 8 haus `*-patterns`                                              | ✅ Deleted (P1); prune on update (P0)                                |
 | Frontend / React / Next                | `ecc-frontend-patterns` + `nextjs-patterns` + `react19-patterns` | **Drop haus** nextjs + react19 (P2a); keep ECC                       |
 | Vite                                   | `ecc-vite-patterns` + `vite8-patterns`                           | **Drop haus** vite8 (P2a); keep ECC                                  |
 | shadcn / Tailwind                      | `radix-shadcn-patterns` + `wshobson-tailwind-design-system`      | **Drop haus** radix-shadcn (P2a); keep wshobson                      |
