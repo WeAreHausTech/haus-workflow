@@ -288,11 +288,11 @@ export async function writeClaudeFiles(
   }
 
   // Remove items that were installed on a prior run (recorded in the lock) but have
-  // since been removed from the catalog manifest entirely. Items that merely fall out
-  // of the current selection (e.g. `apply --select`) yet still exist in the catalog are
-  // left untouched. Hash-gated: only unmodified copies are deleted, matching the
-  // global-install orphan-cleanup contract.
-  await cleanupStaleCatalogItems(root, new Set(manifestById.keys()), dryRun)
+  // since been removed from the catalog manifest entirely, or marked deprecated.
+  // Items that merely fall out of the current selection (e.g. `apply --select`) yet
+  // still exist in the catalog as approved are left untouched. Hash-gated: only
+  // unmodified copies are deleted, matching the global-install orphan-cleanup contract.
+  await cleanupStaleCatalogItems(root, manifestById, dryRun)
 
   if (dryRun) return [...new Set(files)]
 
@@ -339,21 +339,28 @@ export async function writeClaudeFiles(
 
 type PrevLockEntry = { id?: string; paths?: string[]; hash?: string; catalogRef?: string }
 
+type CleanupManifestItem = { reviewStatus?: string }
+
 /**
  * Deletes catalog items installed on a previous run (per the existing lock) that are no
- * longer present in the catalog manifest. Only removes on-disk copies whose content still
- * matches the recorded lock hash; user-modified files are preserved with a warning. Items
- * still in the manifest but unselected this run are intentionally left in place.
+ * longer present in the catalog manifest or are marked deprecated. Only removes on-disk
+ * copies whose content still matches the recorded lock hash; user-modified files are
+ * preserved with a warning. Items still in the manifest as approved but unselected this
+ * run are intentionally left in place.
  */
 async function cleanupStaleCatalogItems(
   root: string,
-  knownIds: Set<string>,
+  manifestById: Map<string, CleanupManifestItem>,
   dryRun: boolean,
 ): Promise<void> {
   const prevLock = await readJson<PrevLockEntry[]>(hausPath(root, 'haus.lock.json'))
   if (!prevLock?.length) return
   for (const entry of prevLock) {
-    if (!entry.id || knownIds.has(entry.id)) continue
+    if (!entry.id) continue
+    const manifestItem = manifestById.get(entry.id)
+    const removedFromManifest = manifestItem === undefined
+    const deprecated = manifestItem?.reviewStatus === 'deprecated'
+    if (!removedFromManifest && !deprecated) continue
     const relPaths = entry.paths ?? []
     if (relPaths.length === 0) continue
     const existing: string[] = []
@@ -361,28 +368,29 @@ async function cleanupStaleCatalogItems(
       if (await fs.pathExists(path.join(root, rel))) existing.push(rel)
     }
     if (existing.length === 0) continue
+    const pruneReason = deprecated ? 'deprecated' : 'stale'
     if (entry.hash === undefined) {
       warn(
-        `Stale catalog item ${entry.id} has no lock hash — leaving in place: ${existing.join(', ')}`,
+        `${deprecated ? 'Deprecated' : 'Stale'} catalog item ${entry.id} has no lock hash — leaving in place: ${existing.join(', ')}`,
       )
       continue
     }
     const currentHash = await hashInstalledPaths(root, relPaths)
     if (currentHash !== entry.hash) {
       warn(
-        `Stale catalog item ${entry.id} was modified locally — leaving in place: ${existing.join(', ')}`,
+        `${deprecated ? 'Deprecated' : 'Stale'} catalog item ${entry.id} was modified locally — leaving in place: ${existing.join(', ')}`,
       )
       continue
     }
     for (const rel of existing) {
       const abs = path.join(root, rel)
       if (dryRun) {
-        log(`[dry-run] would remove stale ${displayPath(root, abs)} (${entry.id})`)
+        log(`[dry-run] would remove ${pruneReason} ${displayPath(root, abs)} (${entry.id})`)
         continue
       }
       await fs.remove(abs)
       await pruneEmptyDir(path.dirname(abs))
-      log(`Removed stale ${displayPath(root, abs)} (${entry.id})`)
+      log(`Removed ${pruneReason} ${displayPath(root, abs)} (${entry.id})`)
     }
   }
 }

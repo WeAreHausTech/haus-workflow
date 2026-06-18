@@ -82,8 +82,10 @@ Content lives in [`haus-workflow-catalog`](https://github.com/WeAreHausTech/haus
 (version pinned in `library/catalog/manifest.json`). Fetched at runtime from the latest release tag (override with `HAUS_CATALOG_REF`; fallback `main` when no release tag resolves).
 Validation rules sync from catalog → `library/catalog/validation-rules.json` (ADR-0001).
 
-On `haus apply` / `haus update`, items **removed from the catalog** are pruned from the
-project when their on-disk copy still matches the lock hash; user-edited copies are kept.
+On `haus apply` / `haus update`, items **removed from the catalog** or marked
+**deprecated** are pruned from the project when their on-disk copy still matches the
+lock hash; user-edited copies are kept. Approved items deselected via `--select` are
+not pruned.
 
 ## Internal docs
 
