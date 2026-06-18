@@ -1,6 +1,6 @@
 {
-  "_note": "Subset assertions for recommend() on repo archetypes. Full lists drift with defaults; only pin stack-specific must-include IDs.",
-  "deprecatedMustNotRecommend": [
+  "_note": "Subset assertions for recommend() on repo archetypes. Full lists drift with defaults; only pin stack-specific must-include IDs. removedMustNotRecommend: P1-deleted catalog IDs — absent from manifest, so neither recommended nor skipped.",
+  "removedMustNotRecommend": [
     "haus.stripe-patterns",
     "haus.supabase-patterns",
     "haus.sanity-patterns",
