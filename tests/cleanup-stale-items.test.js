@@ -231,3 +231,43 @@ test('deprecated item in recommendation is not installed', () => {
   assert.equal(existsSync(path.join(root, dep.dest)), false, 'deprecated skill must not install')
   assert.deepEqual(lockIds(root), [])
 })
+
+test('previously installed deprecated skill is deleted on re-apply when unmodified', () => {
+  const { root, catalogDir } = makeProject('clean-deprecated')
+  const item = skillItem('demo.legacy')
+  writeCatalogContent(catalogDir, [item])
+  const approved = writeManifest(catalogDir, 'manifest-approved.json', [item])
+  const deprecated = writeManifest(catalogDir, 'manifest-deprecated.json', [
+    { ...item, reviewStatus: 'deprecated' },
+  ])
+
+  writeRecommendation(root, [item])
+  runWrite(root, approved, undefined)
+  assert.equal(existsSync(path.join(root, item.dest)), true)
+  assert.deepEqual(lockIds(root), ['demo.legacy'])
+
+  // Item deprecated upstream; re-apply should prune the unmodified copy.
+  writeRecommendation(root, [])
+  runWrite(root, deprecated, undefined)
+  assert.equal(existsSync(path.join(root, item.dest)), false, 'deprecated item deleted')
+  assert.deepEqual(lockIds(root), [])
+})
+
+test('user-edited deprecated copy is preserved on re-apply', () => {
+  const { root, catalogDir } = makeProject('clean-deprecated-mod')
+  const item = skillItem('demo.legacy')
+  writeCatalogContent(catalogDir, [item])
+  const approved = writeManifest(catalogDir, 'manifest-approved.json', [item])
+  const deprecated = writeManifest(catalogDir, 'manifest-deprecated.json', [
+    { ...item, reviewStatus: 'deprecated' },
+  ])
+
+  writeRecommendation(root, [item])
+  runWrite(root, approved, undefined)
+  writeFileSync(path.join(root, item.dest, 'SKILL.md'), '# locally edited\n')
+
+  writeRecommendation(root, [])
+  runWrite(root, deprecated, undefined)
+  assert.equal(existsSync(path.join(root, item.dest)), true, 'user-modified deprecated item kept')
+  assert.equal(readFileSync(path.join(root, item.dest, 'SKILL.md'), 'utf8'), '# locally edited\n')
+})

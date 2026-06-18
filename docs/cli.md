@@ -42,9 +42,11 @@ Materialize catalog assets into `.claude/` (skills, agents, commands, templates)
 - `--force` — overwrite managed workflow template even when local tamper detection sees edits
 
 **Stale cleanup:** before rewriting the lock, apply compares the previous
-`haus.lock.json` against the current catalog manifest. Items removed upstream are
-deleted from `.claude/` when their content still matches the recorded lock hash;
-user-modified copies are left in place with a warning. Empty parent dirs are pruned.
+`haus.lock.json` against the current catalog manifest. Items removed upstream or marked
+`reviewStatus: deprecated` are deleted from `.claude/` when their content still matches
+the recorded lock hash; user-modified copies are left in place with a warning. Items
+still in the manifest as approved but deselected this run (e.g. via `--select`) are not
+pruned. Empty parent dirs are pruned.
 
 After writing `.claude/settings.json`, apply runs a self-check that it matches `CANONICAL_HOOKS` in `src/claude/load-hooks.ts`. Throws on drift.
 
