@@ -15,6 +15,13 @@ async function cacheHasItems(): Promise<boolean> {
   return Array.isArray(data?.items) && data.items.length > 0
 }
 
+/** Recommended entries `haus apply` may install (excludes config scaffold hints). */
+export function installableRecommendedItems(
+  recommended: Recommendation['recommended'],
+): Recommendation['recommended'] {
+  return recommended.filter((item) => item.install !== false)
+}
+
 /**
  * Applies recommended catalog items and core Claude files to the current project.
  * Requires --dry-run or --write; use --select for interactive item filtering.
@@ -46,23 +53,25 @@ export async function runApply(options: {
     if (!rec) {
       log('No recommendation.json found — run `haus recommend` first. Writing core files only.')
       selectedIds = []
-    } else if (rec.recommended.length === 0) {
-      log('Recommendation contains no catalog items. Writing core files only.')
-      selectedIds = []
     } else {
-      const items = rec.recommended.filter((item) => item.install !== false)
-      const choices = items.map((item) => ({
-        name: `${item.id}  [${item.selectionMode}] — ${item.reason}`,
-        value: item.id,
-        checked: true,
-      }))
-      const chosen = await checkbox({
-        message: 'Select catalog items to apply (space to toggle, enter to confirm):',
-        choices,
-        pageSize: Math.min(20, items.length + 2),
-      })
-      selectedIds = chosen as string[]
-      log(`Selected ${selectedIds.length} of ${items.length} catalog items.`)
+      const items = installableRecommendedItems(rec.recommended)
+      if (items.length === 0) {
+        log('Recommendation contains no catalog items. Writing core files only.')
+        selectedIds = []
+      } else {
+        const choices = items.map((item) => ({
+          name: `${item.id}  [${item.selectionMode}] — ${item.reason}`,
+          value: item.id,
+          checked: true,
+        }))
+        const chosen = await checkbox({
+          message: 'Select catalog items to apply (space to toggle, enter to confirm):',
+          choices,
+          pageSize: Math.min(20, items.length + 2),
+        })
+        selectedIds = chosen as string[]
+        log(`Selected ${selectedIds.length} of ${items.length} catalog items.`)
+      }
     }
   }
 
@@ -72,7 +81,7 @@ export async function runApply(options: {
   // HAUS_FIXTURE_CATALOG and are exempt.
   if (!options.allowEmptyCache && !process.env['HAUS_FIXTURE_CATALOG']) {
     const rec = await readJson<Recommendation>(hausPath(root, 'recommendation.json'))
-    const installableRecommended = rec?.recommended.filter((item) => item.install !== false) ?? []
+    const installableRecommended = installableRecommendedItems(rec?.recommended ?? [])
     const catalogItemCount =
       selectedIds !== undefined ? selectedIds.length : installableRecommended.length
     if (catalogItemCount > 0 && !(await cacheHasItems())) {
