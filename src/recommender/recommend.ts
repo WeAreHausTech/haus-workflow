@@ -157,6 +157,22 @@ export async function recommend(root: string, context: ContextMap): Promise<Reco
       )
       continue
     }
+    if (item.id === 'haus.ecc-database-reviewer' && !roleSet.has('database')) {
+      skip(item.id, 'required-role-missing', 'Required role missing: database', 'role:database')
+      continue
+    }
+    if (
+      item.id === 'haus.ecc-typescript-reviewer' &&
+      (stackSet.has('react') || stackSet.has('nextjs') || stackSet.has('next'))
+    ) {
+      skip(
+        item.id,
+        'co-install-react-reviewer',
+        'Skip typescript-reviewer on React/Next stacks (use react-reviewer)',
+        'stack:react|nextjs',
+      )
+      continue
+    }
 
     // ---- Eligibility signals ----
     const isDefaultBaseline = item.default === true
@@ -233,6 +249,8 @@ export async function recommend(root: string, context: ContextMap): Promise<Reco
     }
   }
 
+  applyCoInstallSuppression(recommended, skipped)
+
   recommended.sort((a, b) => a.id.localeCompare(b.id))
   skipped.sort((a, b) => a.id.localeCompare(b.id))
   const selectedRules = recommended.length
@@ -257,4 +275,88 @@ function buildStackSet(context: ContextMap): Set<string> {
       x.toLowerCase(),
     ),
   )
+}
+
+type RecommendedEntry = Recommendation['recommended'][number]
+type SkippedEntry = Recommendation['skipped'][number]
+
+/** Drop redundant catalog items when a more specific co-installed skill already covers the concern. */
+function applyCoInstallSuppression(recommended: RecommendedEntry[], skipped: SkippedEntry[]): void {
+  const recommendedIds = new Set(recommended.map((r) => r.id))
+  const rules: Array<{
+    suppress: string
+    whenAnyRecommended: string[]
+    code: string
+    message: string
+    signal: string
+  }> = [
+    {
+      suppress: 'haus.sentry-sentry-workflow',
+      whenAnyRecommended: [
+        'haus.sentry-sentry-php-sdk',
+        'haus.sentry-sentry-nextjs-sdk',
+        'haus.sentry-sentry-node-sdk',
+        'haus.sentry-sentry-nestjs-sdk',
+      ],
+      code: 'co-install-sentry-sdk',
+      message: 'Skip sentry-workflow when a stack-specific Sentry SDK skill is selected',
+      signal: 'co-install:sentry-sdk',
+    },
+    {
+      suppress: 'haus.ecc-e2e-runner',
+      whenAnyRecommended: ['haus.ecc-e2e-testing'],
+      code: 'co-install-e2e-skill',
+      message: 'Skip e2e-runner when e2e-testing skill covers patterns',
+      signal: 'co-install:e2e-testing',
+    },
+    {
+      suppress: 'haus.oh-my-claudecode-test-engineer',
+      whenAnyRecommended: ['haus.ecc-e2e-testing', 'haus.ecc-e2e-runner'],
+      code: 'co-install-e2e-coverage',
+      message: 'Skip oh-my test-engineer when ECC e2e skill or agent is selected',
+      signal: 'co-install:e2e-coverage',
+    },
+    {
+      suppress: 'haus.wshobson-js-testing-patterns',
+      whenAnyRecommended: ['haus.ecc-react-testing'],
+      code: 'co-install-react-testing',
+      message: 'Skip js-testing-patterns when ecc-react-testing covers component tests',
+      signal: 'co-install:react-testing',
+    },
+    {
+      suppress: 'haus.superpowers-test-driven-development',
+      whenAnyRecommended: ['haus.wshobson-js-testing-patterns', 'haus.ecc-react-testing'],
+      code: 'co-install-stack-testing',
+      message: 'Skip TDD superpower when a stack testing skill is selected',
+      signal: 'co-install:stack-testing',
+    },
+    {
+      suppress: 'haus.superpowers-specifying-gates',
+      whenAnyRecommended: ['haus.superpowers-checking-gates'],
+      code: 'co-install-gate-workflow',
+      message: 'Skip specifying-gates when checking-gates is selected',
+      signal: 'co-install:checking-gates',
+    },
+    {
+      suppress: 'haus.ecc-redis-patterns',
+      whenAnyRecommended: ['haus.redis-redis-connections'],
+      code: 'co-install-redis-official',
+      message: 'Skip ecc-redis-patterns when official redis-connections skill is selected',
+      signal: 'co-install:redis-connections',
+    },
+  ]
+
+  for (const rule of rules) {
+    if (!recommendedIds.has(rule.suppress)) continue
+    if (!rule.whenAnyRecommended.some((id) => recommendedIds.has(id))) continue
+    const idx = recommended.findIndex((r) => r.id === rule.suppress)
+    if (idx === -1) continue
+    const [removed] = recommended.splice(idx, 1)
+    recommendedIds.delete(rule.suppress)
+    skipped.push({
+      id: removed.id,
+      reason: rule.message,
+      skipReasons: [{ code: rule.code, message: rule.message, signal: rule.signal }],
+    })
+  }
 }

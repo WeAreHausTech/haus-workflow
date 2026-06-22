@@ -189,6 +189,7 @@ export async function writeClaudeFiles(
     originSourceId?: string
     useMode?: string
     license?: string
+    ecosystem?: string
   }
   const { items: manifestItems, contentRoot } = await loadCatalogContext(root)
   const manifestById = new Map((manifestItems as ManifestItem[]).map((item) => [item.id, item]))
