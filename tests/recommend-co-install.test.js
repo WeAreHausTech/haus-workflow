@@ -7,10 +7,12 @@ import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { execaSync } from 'execa'
 
 const CATALOG = path.resolve('library/catalog/manifest.json')
 const CLI = path.resolve('dist/cli.js')
+const REPOS = path.resolve(path.dirname(fileURLToPath(import.meta.url)), 'fixtures/repos')
 const env = { ...process.env, HAUS_FIXTURE_CATALOG: CATALOG }
 
 function withTempRepo(files, fn) {
@@ -41,32 +43,19 @@ function recommendAfterScan(root) {
 const recommendedIds = (result) => new Set(result.recommended.map((x) => x.id))
 const skippedIds = (result) => new Set(result.skipped.map((x) => x.id))
 
-test('co-install: oh-my test-engineer skipped when e2e-testing present', async () => {
-  await withTempRepo(
-    {
-      'package.json': JSON.stringify(
-        {
-          name: 'playwright-next',
-          packageManager: 'yarn@4.5.3',
-          dependencies: {
-            next: '15.0.0',
-            react: '19.0.0',
-            '@playwright/test': '1.49.0',
-          },
-        },
-        null,
-        2,
-      ),
-      'yarn.lock': '# fixture\n',
-    },
-    async (root) => {
-      const result = await scanAndRecommend(root)
-      const ids = recommendedIds(result)
-      assert.ok(ids.has('haus.ecc-e2e-testing') || ids.has('haus.ecc-e2e-runner'))
-      assert.ok(!ids.has('haus.oh-my-claudecode-test-engineer'))
-      assert.ok(skippedIds(result).has('haus.oh-my-claudecode-test-engineer'))
-    },
-  )
+test('co-install: oh-my test-engineer skipped when ecc-e2e-testing present', async () => {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'haus-co-install-nextjs-'))
+  fs.cpSync(path.join(REPOS, 'nextjs-app'), tmp, { recursive: true })
+  try {
+    const result = await scanAndRecommend(tmp)
+    const ids = recommendedIds(result)
+    assert.ok(ids.has('haus.ecc-e2e-testing'))
+    assert.ok(!ids.has('haus.ecc-e2e-runner'))
+    assert.ok(!ids.has('haus.oh-my-claudecode-test-engineer'))
+    assert.ok(skippedIds(result).has('haus.oh-my-claudecode-test-engineer'))
+  } finally {
+    fs.rmSync(tmp, { recursive: true, force: true })
+  }
 })
 
 test('co-install: specifying-gates skipped when checking-gates baseline present', async () => {

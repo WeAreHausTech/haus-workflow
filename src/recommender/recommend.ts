@@ -163,13 +163,18 @@ export async function recommend(root: string, context: ContextMap): Promise<Reco
     }
     if (
       item.id === 'haus.ecc-typescript-reviewer' &&
-      (stackSet.has('react') || stackSet.has('nextjs') || stackSet.has('next'))
+      (stackSet.has('react') ||
+        stackSet.has('react19') ||
+        stackSet.has('nextjs') ||
+        stackSet.has('next') ||
+        roleSet.has('react-app') ||
+        roleSet.has('next-app'))
     ) {
       skip(
         item.id,
         'co-install-react-reviewer',
         'Skip typescript-reviewer on React/Next stacks (use react-reviewer)',
-        'stack:react|nextjs',
+        'stack:react|nextjs|role:react-app|next-app',
       )
       continue
     }
