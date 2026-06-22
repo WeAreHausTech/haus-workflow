@@ -1,7 +1,7 @@
 # Catalog Skills & Agents Cleanup — 2026-06-18
 
 Repos: `haus-workflow` · `haus-workflow-catalog`
-Status: **In progress** — P0 ✅ P1 ✅ P2a ✅ (2026-06-22); P2b+ open
+Status: **In progress** — P0 ✅ P1 ✅ P2a ✅ P2b ✅ P2c ✅ P2d ✅ (2026-06-22); P2f+ open
 Context: Full catalog review of 82 skills + 16 agents; duplicate/overlap analysis and baseline token reduction.
 
 ### Content preference policy
@@ -20,7 +20,7 @@ Context: Full catalog review of 82 skills + 16 agents; duplicate/overlap analysi
 
 | Metric                          |                Current |
 | ------------------------------- | ---------------------: |
-| Catalog items (skills + agents) |                     96 |
+| Catalog items (skills + agents) |                     92 |
 | Always-installed baseline       | 22 items (~51k tokens) |
 | Deprecated skills in manifest   |                      0 |
 
@@ -49,16 +49,16 @@ P1 deleted all 8 deprecated manifest entries (catalog `v2.9.1`); removed IDs are
 
 Merge each PR to `main` before starting the next branch — no stacking. Run `yarn verify` (CLI) and `yarn validate` + `yarn test` (catalog) when touching each repo.
 
-| Phase   | Repo                                          | Scope                                                    | Status                        |
-| ------- | --------------------------------------------- | -------------------------------------------------------- | ----------------------------- |
-| **P0**  | `haus-workflow`                               | Prune deprecated items on apply/update                   | ✅ #126                       |
-| **P1**  | `haus-workflow-catalog`                       | Delete 8 deprecated manifest entries + skill dirs        | ✅ `v2.9.1`, fixture #127     |
-| **P2**  | `haus-workflow-catalog`                       | Remove redundant haus-owned skills (keep curated)        | P2a ✅ `v2.9.2`, fixture #129 |
-| **P2f** | `haus-workflow-catalog`                       | Sync more upstream; drop remaining thin haus routers     |                               |
-| **P2g** | `haus-workflow-catalog` (+ recommender)       | Co-install bloat: tier clusters, gate audit **(P2g-10)** |                               |
-| **P3**  | `haus-workflow-catalog` (+ recommender tests) | Tier baseline superpowers + agents                       |                               |
-| **P4**  | `haus-workflow-catalog`                       | Agent dedup                                              |                               |
-| **P5**  | Both                                          | Docs, release notes, fixture sync                        |                               |
+| Phase   | Repo                                          | Scope                                                    | Status                                                  |
+| ------- | --------------------------------------------- | -------------------------------------------------------- | ------------------------------------------------------- |
+| **P0**  | `haus-workflow`                               | Prune deprecated items on apply/update                   | ✅ #126                                                 |
+| **P1**  | `haus-workflow-catalog`                       | Delete 8 deprecated manifest entries + skill dirs        | ✅ `v2.9.1`, fixture #127                               |
+| **P2**  | `haus-workflow-catalog`                       | Remove redundant haus-owned skills (keep curated)        | P2a ✅ `v2.9.2` #129 · P2b+c+d ✅ `v2.10.0` #131 + #132 |
+| **P2f** | `haus-workflow-catalog`                       | Sync more upstream; drop remaining thin haus routers     |                                                         |
+| **P2g** | `haus-workflow-catalog` (+ recommender)       | Co-install bloat: tier clusters, gate audit **(P2g-10)** |                                                         |
+| **P3**  | `haus-workflow-catalog` (+ recommender tests) | Tier baseline superpowers + agents                       |                                                         |
+| **P4**  | `haus-workflow-catalog`                       | Agent dedup                                              |                                                         |
+| **P5**  | Both                                          | Docs, release notes, fixture sync                        |                                                         |
 
 ### Target outcomes
 
@@ -130,17 +130,19 @@ Merged: catalog `main` @ `b9e41e4`; CLI fixture [haus-workflow#127](https://gith
 
 Merged: catalog release `v2.9.2`; CLI fixture [haus-workflow#129](https://github.com/WeAreHausTech/haus-workflow/pull/129)
 
-#### P2b — Drop niche curated duplicates (token trim; not haus-vs-curated)
+#### P2b — Drop niche curated duplicates (token trim; not haus-vs-curated) ✅
 
 | Remove                        | Keep                                | Rationale                                                   |
 | ----------------------------- | ----------------------------------- | ----------------------------------------------------------- |
 | `haus.stripe-upgrade-stripe`  | `haus.stripe-stripe-best-practices` | Upgrade/migration niche; official best-practices is primary |
 | `haus.stripe-stripe-projects` | same                                | Project-scaffolding niche; overlaps best-practices scope    |
 
-- [ ] **P2b-1** — Remove stripe upgrade + projects manifest entries and skill dirs
-- [ ] **P2b-2** — Validate, release, fixture sync
+- [x] **P2b-1** — Remove stripe upgrade + projects manifest entries and skill dirs
+- [x] **P2b-2** — Validate, release, fixture sync (batched with P2c+d → catalog **`v2.10.0`**, CLI [#131](https://github.com/WeAreHausTech/haus-workflow/pull/131) + archetype golden [#132](https://github.com/WeAreHausTech/haus-workflow/pull/132))
 
-#### P2c — Sync ECC upstream + drop haus-owned (second content pass)
+Merged: catalog `v2.10.0` @ `a5bb588` (batched with P2c+d); CLI [haus-workflow#132](https://github.com/WeAreHausTech/haus-workflow/pull/132)
+
+#### P2c — Sync ECC upstream + drop haus-owned (second content pass) ✅
 
 ECC upstream (`affaan-m/ECC`) has skills **not yet in catalog** that supersede thin haus routers. Sync via `sources.yaml` + `node scripts/sync-upstream.mjs --apply`, then drop haus.
 
@@ -152,18 +154,23 @@ ECC upstream (`affaan-m/ECC`) has skills **not yet in catalog** that supersede t
 | `haus.playwright-patterns`                              | `ecc/e2e-testing`     | ECC ~350L POM, config, CI, flaky-test patterns; haus ~190L router                                                    |
 | `haus.testing-library-patterns`                         | `ecc/react-testing`   | ECC covers RTL + Vitest/Jest + MSW + a11y; haus ~190L router. Gate on `react` / `@testing-library/*`                 |
 
-- [ ] **P2c-1** — Add ECC items to `sources.yaml` (prisma-patterns, vue-patterns, dotnet-patterns, e2e-testing, react-testing)
-- [ ] **P2c-2** — Run `sync-upstream.mjs --apply`; add manifest entries with `reviewStatus: approved`
-- [ ] **P2c-3** — Delete corresponding haus-owned dirs + manifest entries
-- [ ] **P2c-4** — Validate, release, fixture sync
+- [x] **P2c-1** — Add ECC items to `sources.yaml` (prisma-patterns, vue-patterns, dotnet-patterns, e2e-testing, react-testing)
+- [x] **P2c-2** — Run `sync-upstream.mjs --apply`; add manifest entries with `reviewStatus: approved`
+- [x] **P2c-3** — Delete corresponding haus-owned dirs + manifest entries
+- [x] **P2c-4** — Validate, release, fixture sync (see P2b merged note)
+- [x] **P2c-5** — **ADR-0005** — `npxTsxOnlyExemptSources: ["curated"]` so verbatim ECC skills keep `npx prisma` / `npx playwright` without post-sync edits; CLI + catalog validators aligned ([#132](https://github.com/WeAreHausTech/haus-workflow/pull/132))
 
-#### P2d — Drop haus-owned internal duplicates (no new sync)
+Synced ECC manifest IDs: `haus.ecc-prisma-patterns`, `haus.ecc-vue-patterns`, `haus.ecc-dotnet-patterns`, `haus.ecc-e2e-testing`, `haus.ecc-react-testing`
+
+#### P2d — Drop haus-owned internal duplicates (no new sync) ✅
 
 | Drop                      | Keep                                                                        | Rationale                                                                               |
 | ------------------------- | --------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
 | `haus.wordpress-patterns` | `wordpress-bedrock-patterns` + `wordpress-acf-elementor-jetengine-patterns` | On Bedrock sites all three install; generic WP router overlaps bedrock + builder skills |
 
-- [ ] **P2d-1** — Remove `haus.wordpress-patterns`; validate gates still cover `wordpress` / `roots/bedrock` stacks via remaining skills
+- [x] **P2d-1** — Remove `haus.wordpress-patterns`; validate gates still cover `wordpress` / `roots/bedrock` stacks via remaining skills (batched → `v2.10.0`)
+
+**P2b+c+d:** catalog **`v2.10.0`** (92 items). Archetype golden: `removedMustNotRecommend` extended; `nextjs-app` pins `haus.ecc-e2e-testing`; `wordpress-bedrock-site` drops `haus.wordpress-patterns`.
 
 #### P2e — Keep haus-owned (reviewed; no curated substitute or haus adds unique scope)
 
@@ -481,12 +488,12 @@ Line counts include `SKILL.md` + all files under the skill dir. **Ratio** = cura
 | Database                             | `database-patterns` ⚠️                                 | `wshobson-postgresql-table-design` + redis×3                      |       ~190 |        varies |     — | **Drop haus** (P1)                                              |
 | Sentry                               | `sentry-patterns` ⚠️                                   | `sentry-sentry-workflow` + `sentry-sentry-php-sdk`                |       ~190 |    ~49 router |     — | **Drop haus** (P1) — workflow is router; php-sdk adds PHP depth |
 | TypeScript                           | `typescript5-patterns`                                 | —                                                                 |       ~190 |             — |     — | **Keep haus** — no curated skill                                |
-| Vue                                  | `vue-patterns`                                         | `ecc/vue-patterns` _(sync P2c)_                                   |       ~190 |         ~500+ | 2.6×+ | **Drop haus; sync ECC** (P2c)                                   |
-| Prisma                               | `prisma-patterns`                                      | `ecc/prisma-patterns` _(sync P2c)_                                |       ~190 |         ~400+ | 2.1×+ | **Drop haus; sync ECC** (P2c)                                   |
-| Playwright                           | `playwright-patterns`                                  | `ecc/e2e-testing` _(sync P2c)_                                    |       ~190 |         ~350+ | 1.8×+ | **Drop haus; sync ECC** (P2c)                                   |
-| RTL / component tests                | `testing-library-patterns`                             | `ecc/react-testing` _(sync P2c)_                                  |       ~190 |         ~400+ | 2.1×+ | **Drop haus; sync ECC** (P2c)                                   |
-| .NET                                 | `dotnet-patterns` / `dotnet-service-patterns`          | `ecc/dotnet-patterns` _(sync P2c)_ + csharp-testing               |  ~190 each |         ~300+ | 1.6×+ | **Drop haus pair; sync ECC dotnet** (P2c)                       |
-| WordPress (generic)                  | `wordpress-patterns`                                   | bedrock + acf/elementor (haus)                                    |       ~190 |             — |     — | **Drop generic** (P2d)                                          |
+| Vue                                  | `vue-patterns`                                         | `ecc/vue-patterns` ✅ P2c                                         |       ~190 |         ~500+ | 2.6×+ | **Drop haus; sync ECC** (P2c) ✅                                |
+| Prisma                               | `prisma-patterns`                                      | `ecc/prisma-patterns` ✅ P2c                                      |       ~190 |         ~400+ | 2.1×+ | **Drop haus; sync ECC** (P2c) ✅                                |
+| Playwright                           | `playwright-patterns`                                  | `ecc/e2e-testing` ✅ P2c                                          |       ~190 |         ~350+ | 1.8×+ | **Drop haus; sync ECC** (P2c) ✅                                |
+| RTL / component tests                | `testing-library-patterns`                             | `ecc/react-testing` ✅ P2c                                        |       ~190 |         ~400+ | 2.1×+ | **Drop haus; sync ECC** (P2c) ✅                                |
+| .NET                                 | `dotnet-patterns` / `dotnet-service-patterns`          | `ecc/dotnet-patterns` ✅ P2c + csharp-testing                     |  ~190 each |         ~300+ | 1.6×+ | **Drop haus pair; sync ECC dotnet** (P2c) ✅                    |
+| WordPress (generic)                  | `wordpress-patterns`                                   | bedrock + acf/elementor (haus)                                    |       ~190 |             — |     — | **Drop generic** (P2d) ✅                                       |
 | Expo / RR v7 / Auth / Vendure / etc. | haus-only (see P2e)                                    | —                                                                 |   ~130–175 |             — |     — | **Keep haus**                                                   |
 | PHPUnit / Vitest / Jest              | `phpunit-patterns`, `vitest-patterns`, `jest-patterns` | `ecc/laravel-tdd`, `wshobson/javascript-testing-patterns` _(P2f)_ |  ~190 each |         ~400+ |   2×+ | **Drop haus; sync upstream** (P2f)                              |
 
@@ -502,10 +509,10 @@ Line counts include `SKILL.md` + all files under the skill dir. **Ratio** = cura
 | Frontend / React / Next                | `ecc-frontend-patterns` + ~~`nextjs-patterns` + `react19-patterns`~~ | ✅ Drop haus (P2a); keep ECC                                         |
 | Vite                                   | `ecc-vite-patterns` + ~~`vite8-patterns`~~                           | ✅ Drop haus (P2a); keep ECC                                         |
 | shadcn / Tailwind                      | `wshobson-tailwind-design-system` + ~~`radix-shadcn-patterns`~~      | ✅ Drop haus (P2a); keep wshobson                                    |
-| Prisma / Vue / .NET / Playwright / RTL | haus routers vs ECC upstream                                         | **Sync ECC** + drop haus (P2c)                                       |
+| Prisma / Vue / .NET / Playwright / RTL | haus routers vs ECC upstream                                         | ✅ Sync ECC + drop haus (P2c)                                        |
 | PHPUnit / Vitest / Jest                | haus routers vs ECC + wshobson                                       | **Sync** laravel-tdd + javascript-testing; drop haus (P2f)           |
-| WordPress                              | patterns + bedrock + acf/elementor                                   | **Drop generic** patterns (P2d); keep bedrock + acf                  |
-| Stripe                                 | best-practices + upgrade + projects                                  | Keep best-practices; drop upgrade + projects (P2b)                   |
+| WordPress                              | patterns + bedrock + acf/elementor                                   | ✅ Drop generic patterns (P2d); keep bedrock + acf                   |
+| Stripe                                 | best-practices + upgrade + projects                                  | ✅ Keep best-practices; drop upgrade + projects (P2b)                |
 | Laravel                                | ecc-laravel + verification + plugin-discovery + laravel-tdd          | Keep patterns + verification + tdd; gate plugin-discovery (P2g-4)    |
 | Redis                                  | connections + security + observability                               | Tier connections only default (P2g-2)                                |
 | Sentry                                 | workflow router + php-sdk (+ stack SDKs)                             | Drop workflow (P2g-3); **fix php-sdk laravel OR-gate (P2g-10)**      |
@@ -525,18 +532,18 @@ Line counts include `SKILL.md` + all files under the skill dir. **Ratio** = cura
 
 ## Stack install matrix (reference)
 
-| Project profile   | Skills | Agents | Notable stack-specific adds                                                        |
-| ----------------- | -----: | -----: | ---------------------------------------------------------------------------------- |
-| Unknown / minimal |     17 |      5 | —                                                                                  |
-| Next.js           |     23 |     10 | typescript5, ecc-frontend, wshobson-tailwind (+ haus nextjs/react/radix until P2a) |
-| React + Vite      |     22 |      9 | typescript5, ecc-frontend, ecc-vite (+ haus react/vite until P2a)                  |
-| NestJS API        |     21 |      8 | typescript5, ecc-nestjs, apollo×2                                                  |
-| Vendure           |     27 |      7 | vendure-app/plugin, bullmq, redis×3, ecc-nestjs, apollo×2                          |
-| Laravel           |     22 |      6 | phpunit, ecc-laravel×3, sentry-php-sdk                                             |
-| .NET service      |     20 |      6 | dotnet-patterns, dotnet-service, ecc-csharp-testing                                |
-| Vue               |     21 |      8 | vue, vite8, typescript5, ecc-vite                                                  |
-| WordPress Bedrock |     20 |      6 | wordpress×3                                                                        |
-| Expo              |     20 |      5 | expo-rn, react19, ecc-frontend                                                     |
-| Nx monorepo       |     21 |      9 | nx21, react19, typescript5, ecc-frontend                                           |
+| Project profile   | Skills | Agents | Notable stack-specific adds                                                                         |
+| ----------------- | -----: | -----: | --------------------------------------------------------------------------------------------------- |
+| Unknown / minimal |     17 |      5 | —                                                                                                   |
+| Next.js           |     23 |     10 | typescript5, ecc-frontend, ecc-e2e-testing, wshobson-tailwind (P2a dropped haus nextjs/react/radix) |
+| React + Vite      |     22 |      9 | typescript5, ecc-frontend, ecc-vite (P2a dropped haus react/vite)                                   |
+| NestJS API        |     21 |      8 | typescript5, ecc-nestjs, apollo×2                                                                   |
+| Vendure           |     27 |      7 | vendure-app/plugin, bullmq, redis×3, ecc-nestjs, apollo×2                                           |
+| Laravel           |     22 |      6 | phpunit, ecc-laravel×3, sentry-php-sdk                                                              |
+| .NET service      |     20 |      6 | ecc-dotnet-patterns, ecc-csharp-testing (P2c dropped haus dotnet pair)                              |
+| Vue               |     21 |      8 | ecc-vue-patterns, typescript5, ecc-vite (P2c dropped haus vue/vite8)                                |
+| WordPress Bedrock |     20 |      6 | bedrock + acf/elementor (P2d dropped generic wordpress-patterns)                                    |
+| Expo              |     20 |      5 | expo-rn, react19, ecc-frontend                                                                      |
+| Nx monorepo       |     21 |      9 | nx21, react19, typescript5, ecc-frontend                                                            |
 
-_Counts are pre-cleanup. P1 drops 8 deprecated; P2a–P2d drop 10 haus-owned (+ sync 5 ECC); P2f drops 3 haus (+ sync 2). P2g tiers co-install clusters (no catalog delete). P3–P4 reduce baseline/agents._
+_Counts are pre-P2g tiering. P1 dropped 8 deprecated; P2a–P2d dropped 14 haus-owned (+ synced 5 ECC, dropped 2 stripe curated) → **92 items**. P2g tiers co-install clusters (no catalog delete). P3–P4 reduce baseline/agents._
