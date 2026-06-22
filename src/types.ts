@@ -187,7 +187,7 @@ export type Recommendation = {
     id: string
     type: string
     title?: string
-    optInTier: string
+    optInTier: CatalogItemOptInTier
     optInGroup: string
     purpose?: string
     tokenEstimate?: number

@@ -64,14 +64,24 @@ export async function runApply(options: {
       return
     }
     const rec = await readJson<Recommendation>(hausPath(root, 'recommendation.json'))
-    const installableIds = new Set(
-      installableRecommendedItems(rec?.recommended ?? []).map((i) => i.id),
-    )
-    const unknown = explicitIds.filter((id) => !installableIds.has(id))
-    if (unknown.length > 0) {
-      warn(
-        `--ids: ${unknown.join(', ')} not in recommendation.json — run \`haus recommend --include …\` first. Ignoring.`,
-      )
+    const recommended = rec?.recommended ?? []
+    const installableIds = new Set(installableRecommendedItems(recommended).map((i) => i.id))
+    // Diagnose each non-installable id with the reason that actually applies, so the
+    // hint points at the right fix (scaffold for config, --include for skipped, etc.).
+    const configIds = new Set(recommended.filter((i) => i.install === false).map((i) => i.id))
+    const skippedIds = new Set((rec?.skipped ?? []).map((s) => s.id))
+    for (const id of explicitIds.filter((id) => !installableIds.has(id))) {
+      if (configIds.has(id)) {
+        warn(`--ids: "${id}" is a config item — install it with \`haus scaffold ${id}\`. Ignoring.`)
+      } else if (skippedIds.has(id)) {
+        warn(
+          `--ids: "${id}" is not currently recommended (skipped) — add it with \`haus recommend --include ${id}\` first. Ignoring.`,
+        )
+      } else {
+        warn(
+          `--ids: "${id}" is not in recommendation.json — run \`haus recommend\` (or \`--include ${id}\`) first. Ignoring.`,
+        )
+      }
     }
     selectedIds = explicitIds.filter((id) => installableIds.has(id))
     log(`Applying ${selectedIds.length} explicitly selected catalog item(s).`)
