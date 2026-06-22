@@ -21,6 +21,26 @@ import { ROLE_RULES, STACK_RULES } from './detection-registry.js'
 const PACKAGE_MANAGER_STACKS = ['yarn4', 'pnpm89']
 // WordPress roles resolved by scan-project's finalizeRoles (not in ROLE_RULES).
 const WORDPRESS_ROLES = ['wordpress-site', 'wordpress-bedrock-site', 'wordpress-vanilla-site']
+/** Roles satisfied via deep-context.json or explicit opt-in — not shallow scanner signals. */
+const DEEP_CONTEXT_ROLES = new Set([
+  'skill-authoring',
+  'subagent-workflow',
+  'user-gate',
+  'code-review',
+  'isolated-branch',
+  'branch-completion',
+  'tdd-workflow',
+  'performance-review',
+  'refactor-cleanup',
+  'ui-design',
+  'incident-trace',
+  'laravel-plugins',
+  'redis-ops',
+  'database',
+  'security-review',
+  'e2e-authoring',
+  'build-failure',
+])
 
 /** Stack tokens the scanner can produce (registry rules + package-manager bucket). */
 export function producibleStacks(): Set<string> {
@@ -47,7 +67,7 @@ export function isItemRecognisable(
     (c) =>
       'dependency' in c ||
       'packageNamePattern' in c ||
-      ('role' in c && roles.has(c.role)) ||
+      ('role' in c && (roles.has(c.role) || DEEP_CONTEXT_ROLES.has(c.role))) ||
       ('stack' in c && stacks.has(c.stack)),
   )
 }

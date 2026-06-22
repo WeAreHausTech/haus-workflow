@@ -91,6 +91,10 @@ for (const [fixture, spec] of Object.entries(GOLDEN.profiles)) {
         assert.ok(recommended.has(id), `${fixture}: expected recommended ${id}`)
       }
 
+      for (const id of spec.mustNotInclude ?? []) {
+        assert.ok(!recommended.has(id), `${fixture}: must not recommend ${id}`)
+      }
+
       for (const id of GOLDEN.removedMustNotRecommend) {
         assert.ok(!recommended.has(id), `${fixture}: removed ${id} must not be recommended`)
         assert.ok(!skipped.has(id), `${fixture}: removed ${id} must not appear in skipped`)

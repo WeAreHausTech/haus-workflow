@@ -24,42 +24,45 @@
     "haus.wordpress-patterns",
     "haus.phpunit-patterns",
     "haus.vitest-patterns",
-    "haus.jest-patterns"
+    "haus.jest-patterns",
+    "haus.sickn33-docker-expert"
   ],
   "profiles": {
     "nextjs-app": {
       "mustInclude": [
         "haus.ecc-frontend-patterns",
         "haus.ecc-e2e-testing",
-        "haus.ecc-typescript-reviewer",
         "haus.ecc-react-reviewer"
+      ],
+      "mustNotInclude": [
+        "haus.ecc-typescript-reviewer",
+        "haus.ecc-e2e-runner",
+        "haus.superpowers-test-driven-development",
+        "haus.oh-my-claudecode-test-engineer",
+        "haus.superpowers-specifying-gates"
       ]
     },
     "nest-graphql-api": {
       "mustInclude": [
         "haus.ecc-nestjs-patterns",
-        "haus.ecc-security-reviewer",
         "haus.apollo-apollo-server",
         "haus.apollo-graphql-schema",
-        "haus.wshobson-js-testing-patterns",
         "haus.apollo-apollo-federation",
         "haus.apollo-graphql-operations"
-      ]
+      ],
+      "mustNotInclude": ["haus.ecc-security-reviewer", "haus.wshobson-js-testing-patterns"]
     },
     "laravel-app": {
-      "mustInclude": [
-        "haus.ecc-laravel-patterns",
-        "haus.ecc-php-reviewer",
-        "haus.sentry-sentry-php-sdk",
-        "haus.ecc-laravel-tdd"
-      ]
+      "mustInclude": ["haus.ecc-laravel-patterns", "haus.ecc-php-reviewer", "haus.ecc-laravel-tdd"],
+      "mustNotInclude": ["haus.sentry-sentry-php-sdk", "haus.ecc-laravel-plugin-discovery"]
     },
     "vendure-monorepo": {
       "mustInclude": [
         "haus.vendure-app-patterns",
         "haus.vendure-plugin-patterns",
         "haus.ecc-nestjs-patterns"
-      ]
+      ],
+      "mustNotInclude": ["haus.redis-redis-security", "haus.redis-redis-observability"]
     },
     "wordpress-bedrock-site": {
       "mustInclude": ["haus.wordpress-bedrock-patterns", "haus.ecc-php-reviewer"]
