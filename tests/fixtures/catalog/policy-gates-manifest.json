@@ -8,9 +8,10 @@
       "type": "config",
       "path": "configs/eslint/eslint.config.mjs",
       "title": "Test: Config item",
-      "purpose": "Triggers config-scaffold-only gate.",
-      "tags": ["typescript", "quality"],
-      "repoRoles": ["next-app"],
+      "purpose": "Triggers config recommendation when missing-eslint is detected.",
+      "tags": ["eslint", "tooling", "quality"],
+      "repoRoles": [],
+      "requiresAny": [{ "stack": "missing-eslint" }],
       "default": false,
       "tokenEstimate": 0
     },

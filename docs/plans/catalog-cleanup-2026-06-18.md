@@ -11,7 +11,7 @@ Context: Full catalog review of 82 skills + 16 agents; duplicate/overlap analysi
 **Keep haus-owned when:**
 
 - No curated equivalent exists in catalog **or** ECC upstream (Vendure, Qliro, BullMQ, Expo, React Router v7, etc.)
-- Haus skill covers org-specific or niche scope the curated item does not (e.g. `writing-documentation`, config setup skills)
+- Haus skill covers org-specific or niche scope the curated item does not (e.g. `writing-documentation`, `haus.eslint-config` / `haus.prettier-config` via `haus scaffold`)
 - Curated item is a router stub or narrower than haus (e.g. `sentry-sentry-workflow` is a 49-line router — pair with other Sentry skills, do not resurrect haus `sentry-patterns`)
 
 ---
@@ -175,24 +175,24 @@ Synced ECC manifest IDs: `haus.ecc-prisma-patterns`, `haus.ecc-vue-patterns`, `h
 
 #### P2e — Keep haus-owned (reviewed; no curated substitute or haus adds unique scope)
 
-| Haus-owned                                                     | Why keep                                                                                                |
-| -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| `haus.typescript5-patterns`                                    | No curated TS skill (only `ecc-typescript-reviewer` agent)                                              |
-| `haus.expo-react-native-patterns`                              | Expo Router / EAS / managed-vs-bare — not in ECC                                                        |
-| `haus.react-router-v7-patterns`                                | RR v7 framework mode — not in ECC                                                                       |
-| `haus.nextauth-patterns`                                       | Auth.js v4/v5 + middleware edge split — not in ECC                                                      |
-| `haus.auth-oidc-azure-bankid-patterns`                         | Haus enterprise auth (OIDC / Azure AD / BankID / SAML2)                                                 |
-| `haus.tanstack-query-router-patterns`                          | TanStack Query/Router — ECC frontend only mentions `@tanstack/react-virtual`; **tighten gate (P2g-10)** |
-| `haus.bullmq-patterns`                                         | BullMQ/IORedis — no ECC equivalent                                                                      |
-| `haus.qliro-patterns`                                          | `@haus-tech/qliro-plugin` — Haus-specific                                                               |
-| `haus.vendure-app-patterns` + `haus.vendure-plugin-patterns`   | Different roles; Haus Vendure conventions                                                               |
-| `haus.strapi-patterns`                                         | No curated Strapi skill                                                                                 |
-| `haus.laravel-nova-patterns`                                   | Nova-specific; no ECC equivalent                                                                        |
-| `haus.nx21-monorepo-patterns` + `haus.turbo-monorepo-patterns` | Monorepo role gates — haus-only                                                                         |
-| `haus.i18next-patterns`                                        | No curated i18next skill                                                                                |
-| `haus.storybook-patterns`                                      | No curated Storybook skill                                                                              |
-| `haus.package-manager-yarn4-pnpm89`                            | Yarn 4 / pnpm conventions — haus-only                                                                   |
-| `haus.writing-documentation` + config setup skills             | Haus org docs / scaffold flow                                                                           |
+| Haus-owned                                                                   | Why keep                                                                                                |
+| ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `haus.typescript5-patterns`                                                  | No curated TS skill (only `ecc-typescript-reviewer` agent)                                              |
+| `haus.expo-react-native-patterns`                                            | Expo Router / EAS / managed-vs-bare — not in ECC                                                        |
+| `haus.react-router-v7-patterns`                                              | RR v7 framework mode — not in ECC                                                                       |
+| `haus.nextauth-patterns`                                                     | Auth.js v4/v5 + middleware edge split — not in ECC                                                      |
+| `haus.auth-oidc-azure-bankid-patterns`                                       | Haus enterprise auth (OIDC / Azure AD / BankID / SAML2)                                                 |
+| `haus.tanstack-query-router-patterns`                                        | TanStack Query/Router — ECC frontend only mentions `@tanstack/react-virtual`; **tighten gate (P2g-10)** |
+| `haus.bullmq-patterns`                                                       | BullMQ/IORedis — no ECC equivalent                                                                      |
+| `haus.qliro-patterns`                                                        | `@haus-tech/qliro-plugin` — Haus-specific                                                               |
+| `haus.vendure-app-patterns` + `haus.vendure-plugin-patterns`                 | Different roles; Haus Vendure conventions                                                               |
+| `haus.strapi-patterns`                                                       | No curated Strapi skill                                                                                 |
+| `haus.laravel-nova-patterns`                                                 | Nova-specific; no ECC equivalent                                                                        |
+| `haus.nx21-monorepo-patterns` + `haus.turbo-monorepo-patterns`               | Monorepo role gates — haus-only                                                                         |
+| `haus.i18next-patterns`                                                      | No curated i18next skill                                                                                |
+| `haus.storybook-patterns`                                                    | No curated Storybook skill                                                                              |
+| `haus.package-manager-yarn4-pnpm89`                                          | Yarn 4 / pnpm conventions — haus-only                                                                   |
+| `haus.writing-documentation` + `haus.eslint-config` / `haus.prettier-config` | Haus org docs / `haus scaffold` config distribution (see P4-5)                                          |
 
 **Curated pairs — keep both (distinct purpose):**
 
@@ -475,6 +475,23 @@ Estimated savings: ~37k tokens on every project (see P2g-1 for full tier breakdo
 - [ ] **P4-3** — Stripe server-side gate: add `stripe` npm dep to scanner + `stripe-stripe-best-practices` `requiresAny` (backend-only Stripe repos)
 - [ ] **P4-4** — Manifest version bump; validate; release; fixture sync
 
+#### P4-5 — Config scaffold when project already has configs (`haus-workflow`)
+
+**Context:** `haus.eslint-setup` / `haus.prettier-setup` skills removed. `haus.eslint-config` / `haus.prettier-config` (`type: config`) are recommended when the scanner emits `missing-eslint` / `missing-prettier`. Files copy via `haus scaffold`, not `haus apply`.
+
+**Design — preserve-by-default, overwrite is opt-in:**
+
+- Scaffold **must not** overwrite existing project-root config files by default (`eslint.config.*`, `prettier.config.*`, `.prettierrc`, `.prettierignore`).
+- **`--force` is the only overwrite path** — explicit user opt-in to replace existing files with catalog copies. Do not make overwrite the default.
+
+**Gap:** Repos that already have ESLint/Prettier (dep present → no `missing-*` signal) or legacy config files on disk cannot get Haus configs without `haus scaffold … --force` when filenames collide.
+
+- [ ] **P4-5a** — `docs/cli.md` + `haus-setup`: document preserve-by-default; `--force` required to overwrite
+- [ ] **P4-5b** — `haus scaffold`: when skipping existing files, actionable message (paths + `--force` hint); verify current warn output
+- [ ] **P4-5c** — `haus-setup` / `project:add-skills` (P5): when `recommendation.json` includes config items (`install: false`) and target files exist, `AskUserQuestion` — "Overwrite existing ESLint/Prettier configs with Haus baseline?" → `haus scaffold <id> --force` only on confirm
+- [ ] **P4-5d** — Optional: `haus recommend --include haus.eslint-config` for migration without `missing-*` (ties to P5-1b)
+- [ ] **P4-5e** — Tests: scaffold preserves without `--force`; overwrites with `--force`; setup flow never overwrites without confirmation
+
 ### P5 — Opt-in UX (Claude Code–first)
 
 **Problem:** P2g/P3 tier many skills/agents with `default: false` and role-only `requiresAny` gates. Today they surface only when `deep-context.json` supplies matching roles (e.g. `haus-setup` step 3 → second `haus recommend`). `haus apply --select` is **opt-out only** — it toggles items already in `recommended[]`, not skipped opt-in tier items. There is no discoverable path in Claude Code to add tiered helpers later.
@@ -555,6 +572,7 @@ Update `library/global/skills/haus-workflow/SKILL.md`:
 | Redis/security tier leaves ops gaps on Vendure           | P5 opt-in Q&A surfaces redis-ops group; until then deep-context role or `project:add-skills`   |
 | Dropping sentry-workflow loses generic Sentry onboarding | Only drop after P2f-c confirms stack SDK skills cover install/setup flows                      |
 | P2g-10 sentry-php gate breaks laravel golden archetype   | Update golden or add `sentry/sentry` to laravel fixture                                        |
+| Scaffold overwrites custom ESLint/Prettier configs       | P4-5: preserve-by-default; `--force` opt-in only; setup asks before overwrite                  |
 
 ---
 

@@ -50,7 +50,7 @@ export async function runApply(options: {
       log('Recommendation contains no catalog items. Writing core files only.')
       selectedIds = []
     } else {
-      const items = rec.recommended
+      const items = rec.recommended.filter((item) => item.install !== false)
       const choices = items.map((item) => ({
         name: `${item.id}  [${item.selectionMode}] — ${item.reason}`,
         value: item.id,
@@ -72,8 +72,9 @@ export async function runApply(options: {
   // HAUS_FIXTURE_CATALOG and are exempt.
   if (!options.allowEmptyCache && !process.env['HAUS_FIXTURE_CATALOG']) {
     const rec = await readJson<Recommendation>(hausPath(root, 'recommendation.json'))
+    const installableRecommended = rec?.recommended.filter((item) => item.install !== false) ?? []
     const catalogItemCount =
-      selectedIds !== undefined ? selectedIds.length : (rec?.recommended.length ?? 0)
+      selectedIds !== undefined ? selectedIds.length : installableRecommended.length
     if (catalogItemCount > 0 && !(await cacheHasItems())) {
       const message = 'No catalog content found. Run `haus update` first.'
       if (isDryRun) {

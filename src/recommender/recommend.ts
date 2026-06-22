@@ -89,18 +89,6 @@ export async function recommend(root: string, context: ContextMap): Promise<Reco
       skip(item.id, 'unsupported-policy', 'Unsupported stack policy')
       continue
     }
-    // Config items (ESLint, Prettier) are project-root files distributed via
-    // `haus scaffold`, never written to `.claude/` by apply. Keep them out of the
-    // recommended/installed set (and out of token stats) but surface the hint.
-    if (item.type === 'config') {
-      skip(
-        item.id,
-        'config-scaffold-only',
-        'Config item — install with `haus scaffold`',
-        'type:config',
-      )
-      continue
-    }
     if (item.reviewStatus === 'deprecated') {
       skip(item.id, 'deprecated', 'Catalog item is deprecated', 'reviewStatus:deprecated')
       continue
@@ -238,13 +226,24 @@ export async function recommend(root: string, context: ContextMap): Promise<Reco
     // ---- Binary decision: default OR any positive evidence ----
     const hasEvidence = reasons.some((r) => r.code !== 'default-baseline')
     if (isDefaultBaseline || hasEvidence) {
+      const isConfig = item.type === 'config'
+      const entryReasons = isConfig
+        ? [
+            ...reasons,
+            {
+              code: 'config-scaffold',
+              message: 'Install with `haus scaffold`',
+              signal: 'type:config',
+            },
+          ]
+        : reasons
       recommended.push({
         id: item.id,
         type: item.type,
-        reason: reasons.length ? reasons.map((x) => x.message).join(', ') : 'eligible',
-        reasons,
+        reason: entryReasons.length ? entryReasons.map((x) => x.message).join(', ') : 'eligible',
+        reasons: entryReasons,
         selectionMode: isDefaultBaseline && !hasEvidence ? 'baseline' : 'matched',
-        install: true,
+        install: !isConfig,
         tags: item.tags,
         ecosystem: item.ecosystem,
         tokenEstimate: item.tokenEstimate,
@@ -258,7 +257,8 @@ export async function recommend(root: string, context: ContextMap): Promise<Reco
 
   recommended.sort((a, b) => a.id.localeCompare(b.id))
   skipped.sort((a, b) => a.id.localeCompare(b.id))
-  const selectedRules = recommended.length
+  const installableRecommended = recommended.filter((item) => item.install)
+  const selectedRules = installableRecommended.length
   const skippedRules = skipped.length
   const estimatedContextTokens = estimateContextTokens(selectedRules)
   const estimatedTokenReductionPct = tokenReductionPct(selectedRules, skippedRules)

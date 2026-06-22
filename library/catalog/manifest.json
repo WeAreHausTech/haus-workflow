@@ -1194,37 +1194,14 @@
     },
     {
       "id": "haus.eslint-config",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "source": "haus",
       "type": "config",
       "path": "configs/eslint/eslint.config.mjs",
       "title": "Haus ESLint config",
       "purpose": "ESLint 9.x flat config for Haus Tech TypeScript/React projects.",
-      "whenToUse": "Scaffold into a new project to get the standard Haus ESLint setup. Run `haus scaffold haus.eslint-config`.",
+      "whenToUse": "Recommended when `eslint` is missing from the repo. Run `haus scaffold haus.eslint-config` to copy the config into the project root.",
       "whenNotToUse": "Do not scaffold if the project already has a custom ESLint config that extends beyond the Haus baseline.",
-      "tags": ["frontend", "backend", "typescript", "quality"],
-      "repoRoles": ["next-app", "react-app", "nestjs-api", "vendure-plugin", "vendure-app"],
-      "requiresAny": [
-        {
-          "dependency": "typescript"
-        }
-      ],
-      "tokenEstimate": 0,
-      "installMode": "copy-selected",
-      "reviewStatus": "approved",
-      "riskLevel": "low"
-    },
-    {
-      "id": "haus.eslint-setup",
-      "version": "1.1.0",
-      "source": "haus",
-      "type": "skill",
-      "path": "skills/haus-owned/config-setups/eslint-setup",
-      "title": "Haus ESLint setup",
-      "purpose": "Install `@haus-tech/tech-config` and wire ESLint flat config to the shared rules.",
-      "whenToUse": "Use when ESLint is missing from a haus repo or migrating from a legacy `.eslintrc` to flat config.",
-      "whenNotToUse": "Do not use when ESLint is already configured against `@haus-tech/tech-config`.",
-      "tokenBudget": 800,
       "tags": ["eslint", "tooling", "quality"],
       "repoRoles": [],
       "requiresAny": [
@@ -1233,7 +1210,7 @@
         }
       ],
       "ecosystem": "tooling",
-      "tokenEstimate": 1000,
+      "tokenEstimate": 0,
       "installMode": "copy-selected",
       "reviewStatus": "approved",
       "riskLevel": "low"
@@ -1532,32 +1509,14 @@
     },
     {
       "id": "haus.prettier-config",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "source": "haus",
       "type": "config",
       "path": "configs/prettier",
       "title": "Haus Prettier config",
       "purpose": "Prettier config and .prettierignore for Haus Tech projects.",
-      "whenToUse": "Scaffold into a new project to get the standard Haus Prettier setup. Run `haus scaffold haus.prettier-config`.",
+      "whenToUse": "Recommended when `prettier` is missing from the repo. Run `haus scaffold haus.prettier-config` to copy the config into the project root.",
       "whenNotToUse": "Do not scaffold if the project already has a custom Prettier config.",
-      "tags": ["frontend", "backend", "typescript", "quality"],
-      "repoRoles": [],
-      "tokenEstimate": 0,
-      "installMode": "copy-selected",
-      "reviewStatus": "approved",
-      "riskLevel": "low"
-    },
-    {
-      "id": "haus.prettier-setup",
-      "version": "1.1.0",
-      "source": "haus",
-      "type": "skill",
-      "path": "skills/haus-owned/config-setups/prettier-setup",
-      "title": "Haus Prettier setup",
-      "purpose": "Install `@haus-tech/tech-config` and wire `.prettierrc` to the shared prettier config via the `/prettier` subpath export.",
-      "whenToUse": "Use when Prettier is missing from a haus repo, when migrating an ad-hoc config, or when migrating from the deprecated `@haus-tech/prettier-config`.",
-      "whenNotToUse": "Do not use when Prettier is already configured against `@haus-tech/tech-config/prettier`.",
-      "tokenBudget": 800,
       "tags": ["prettier", "tooling", "quality"],
       "repoRoles": [],
       "requiresAny": [
@@ -1566,7 +1525,7 @@
         }
       ],
       "ecosystem": "tooling",
-      "tokenEstimate": 1000,
+      "tokenEstimate": 0,
       "installMode": "copy-selected",
       "reviewStatus": "approved",
       "riskLevel": "low"
