@@ -1,62 +1,6 @@
 {
-  "version": "2.9.1",
+  "version": "2.9.2",
   "items": [
-    {
-      "id": "haus.nextjs-patterns",
-      "version": "1.0.0",
-      "source": "haus",
-      "type": "skill",
-      "path": "skills/haus-owned/stack-patterns/nextjs-patterns",
-      "title": "Haus Next.js patterns",
-      "purpose": "Guide Next.js route, server/client boundary, and middleware-safe changes.",
-      "whenToUse": "Use for App Router pages, layouts, route handlers, and middleware behavior updates.",
-      "whenNotToUse": "Do not use for backend-only or non-Next framework tasks.",
-      "references": ["https://nextjs.org/llms.txt", "https://nextjs.org/docs/llms-full.txt"],
-      "tokenBudget": 1200,
-      "tags": ["frontend", "nextjs", "react", "typescript"],
-      "repoRoles": ["next-app"],
-      "requiresAny": [
-        {
-          "stack": "nextjs"
-        },
-        {
-          "dependency": "next"
-        }
-      ],
-      "ecosystem": "nextjs",
-      "tokenEstimate": 2600,
-      "installMode": "copy-selected",
-      "reviewStatus": "approved",
-      "riskLevel": "low"
-    },
-    {
-      "id": "haus.react19-patterns",
-      "version": "1.0.0",
-      "source": "haus",
-      "type": "skill",
-      "path": "skills/haus-owned/stack-patterns/react19-patterns",
-      "title": "Haus React 19 patterns",
-      "purpose": "Guide React component, hook, and state-boundary changes.",
-      "whenToUse": "Use for React component behavior, hooks, and UI state flow updates.",
-      "whenNotToUse": "Do not use for backend-only changes or framework routing config tasks.",
-      "references": ["https://react.dev/llms.txt"],
-      "tokenBudget": 1200,
-      "tags": ["frontend", "react", "typescript"],
-      "repoRoles": ["react-app", "next-app", "design-system"],
-      "requiresAny": [
-        {
-          "stack": "react19"
-        },
-        {
-          "dependency": "react"
-        }
-      ],
-      "ecosystem": "react",
-      "tokenEstimate": 2200,
-      "installMode": "copy-selected",
-      "reviewStatus": "approved",
-      "riskLevel": "low"
-    },
     {
       "id": "haus.typescript5-patterns",
       "version": "1.1.0",
@@ -92,34 +36,6 @@
       "tokenEstimate": 2200,
       "installMode": "copy-selected",
       "ecosystem": "typescript",
-      "reviewStatus": "approved",
-      "riskLevel": "low"
-    },
-    {
-      "id": "haus.vite8-patterns",
-      "version": "1.0.0",
-      "source": "haus",
-      "type": "skill",
-      "path": "skills/haus-owned/stack-patterns/vite8-patterns",
-      "title": "Haus Vite 8 patterns",
-      "purpose": "Guide Vite config, plugin wiring, and deterministic build pipeline changes.",
-      "whenToUse": "Use for vite config, alias/plugin, and build mode behavior updates.",
-      "whenNotToUse": "Do not use for framework feature logic without build pipeline impact.",
-      "references": ["https://vite.dev/llms.txt"],
-      "tokenBudget": 1200,
-      "tags": ["vite8", "frontend", "typescript"],
-      "repoRoles": ["vite-app", "react-app", "vue-app"],
-      "requiresAny": [
-        {
-          "stack": "vite8"
-        },
-        {
-          "dependency": "vite"
-        }
-      ],
-      "ecosystem": "vite",
-      "tokenEstimate": 1800,
-      "installMode": "copy-selected",
       "reviewStatus": "approved",
       "riskLevel": "low"
     },
@@ -615,50 +531,6 @@
       ],
       "ecosystem": "react",
       "tokenEstimate": 2200,
-      "installMode": "copy-selected",
-      "reviewStatus": "approved",
-      "riskLevel": "low"
-    },
-    {
-      "id": "haus.radix-shadcn-patterns",
-      "version": "1.1.0",
-      "source": "haus",
-      "type": "skill",
-      "path": "skills/haus-owned/stack-patterns/radix-shadcn-patterns",
-      "title": "Haus Radix shadcn patterns",
-      "purpose": "Guide accessible UI primitive and wrapper behavior changes.",
-      "whenToUse": "Use for Radix primitive usage and shadcn wrapper updates.",
-      "whenNotToUse": "Do not use for backend/domain logic changes.",
-      "references": [
-        "https://ui.shadcn.com/llms.txt",
-        "https://ui.shadcn.com/docs",
-        "https://www.radix-ui.com/primitives/docs"
-      ],
-      "tokenBudget": 1200,
-      "tags": ["radix", "shadcn", "react19"],
-      "repoRoles": ["next-app", "react-app"],
-      "requiresAny": [
-        {
-          "stack": "shadcn"
-        },
-        {
-          "dependency": "@radix-ui/react-dialog"
-        },
-        {
-          "dependency": "@radix-ui/themes"
-        },
-        {
-          "dependency": "shadcn-ui"
-        },
-        {
-          "dependency": "@shadcn/ui"
-        },
-        {
-          "packageNamePattern": "@radix-ui/*"
-        }
-      ],
-      "ecosystem": "react",
-      "tokenEstimate": 1800,
       "installMode": "copy-selected",
       "reviewStatus": "approved",
       "riskLevel": "low"
