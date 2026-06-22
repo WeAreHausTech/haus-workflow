@@ -57,7 +57,7 @@ Merge each PR to `main` before starting the next branch — no stacking. Run `ya
 | **P2f** | `haus-workflow-catalog`                       | Sync more upstream; drop remaining thin haus routers     | ✅ catalog [#31](https://github.com/WeAreHausTech/haus-workflow-catalog/pull/31); release + fixture PR open |
 | **P2g** | `haus-workflow-catalog` (+ recommender)       | Co-install bloat: tier clusters, gate audit **(P2g-10)** |                                                                                                             |
 | **P3**  | `haus-workflow-catalog` (+ recommender tests) | Tier baseline superpowers + agents                       |                                                                                                             |
-| **P4**  | `haus-workflow-catalog`                       | Agent dedup                                              |                                                                                                             |
+| **P4**  | `haus-workflow-catalog`                       | Agent dedup                                              | ✅ catalog `v2.12.2`; CLI fixture PR                                                                        |
 | **P5**  | `haus-workflow` (+ catalog metadata)          | Opt-in UX — Claude Code-first; CLI as backend            |                                                                                                             |
 | **P6**  | Both                                          | Docs, release notes, fixture sync                        |                                                                                                             |
 
@@ -192,7 +192,7 @@ Synced ECC manifest IDs: `haus.ecc-prisma-patterns`, `haus.ecc-vue-patterns`, `h
 | `haus.i18next-patterns`                                                      | No curated i18next skill                                                                                |
 | `haus.storybook-patterns`                                                    | No curated Storybook skill                                                                              |
 | `haus.package-manager-yarn4-pnpm89`                                          | Yarn 4 / pnpm conventions — haus-only                                                                   |
-| `haus.writing-documentation` + `haus.eslint-config` / `haus.prettier-config` | Haus org docs / `haus scaffold` config distribution (see P4-5)                                          |
+| `haus.writing-documentation` + `haus.eslint-config` / `haus.prettier-config` | Haus org docs / `haus scaffold` config distribution (see P5-5)                                          |
 
 **Curated pairs — keep both (distinct purpose):**
 
@@ -466,31 +466,14 @@ Estimated savings: ~37k tokens on every project (see P2g-1 for full tier breakdo
 - [x] **P3-1** — Decide extended-workflow auto-install policy for Haus repos (recommender signal vs manual opt-in)
 - [x] **P3-2** — Update `default: true` flags in `manifest.json`
 - [x] **P3-3** — Update golden archetype / `recommend-eligibility` tests in CLI
-- [ ] **P3-4** — `yarn validate` + catalog release + CLI fixture sync + `yarn verify`
+- [x] **P3-4** — `yarn validate` + catalog release + CLI fixture sync + `yarn verify`
 
 ### P4 — Agent dedup + deferred gate work (`haus-workflow-catalog` + CLI)
 
-- [ ] **P4-1** — Remove `haus.ecc-build-error-resolver` (overlaps `haus.ecc-react-build-resolver` on React stacks; co-install skipped — drop instead)
-- [ ] **P4-2** — Keep `haus.ecc-react-reviewer` + `haus.ecc-typescript-reviewer` (complementary scopes; TS reviewer gated off React/Next in recommender)
-- [ ] **P4-3** — Stripe server-side gate: add `stripe` npm dep to scanner + `stripe-stripe-best-practices` `requiresAny` (backend-only Stripe repos)
-- [ ] **P4-4** — Manifest version bump; validate; release; fixture sync
-
-#### P4-5 — Config scaffold when project already has configs (`haus-workflow`)
-
-**Context:** `haus.eslint-setup` / `haus.prettier-setup` skills removed. `haus.eslint-config` / `haus.prettier-config` (`type: config`) are recommended when the scanner emits `missing-eslint` / `missing-prettier`. Files copy via `haus scaffold`, not `haus apply`.
-
-**Design — preserve-by-default, overwrite is opt-in:**
-
-- Scaffold **must not** overwrite existing project-root config files by default (`eslint.config.*`, `prettier.config.*`, `.prettierrc`, `.prettierignore`).
-- **`--force` is the only overwrite path** — explicit user opt-in to replace existing files with catalog copies. Do not make overwrite the default.
-
-**Gap:** Repos that already have ESLint/Prettier (dep present → no `missing-*` signal) or legacy config files on disk cannot get Haus configs without `haus scaffold … --force` when filenames collide.
-
-- [ ] **P4-5a** — `docs/cli.md` + `haus-setup`: document preserve-by-default; `--force` required to overwrite
-- [ ] **P4-5b** — `haus scaffold`: when skipping existing files, actionable message (paths + `--force` hint); verify current warn output
-- [ ] **P4-5c** — `haus-setup` / `project:add-skills` (P5): when `recommendation.json` includes config items (`install: false`) and target files exist, `AskUserQuestion` — "Overwrite existing ESLint/Prettier configs with Haus baseline?" → `haus scaffold <id> --force` only on confirm
-- [ ] **P4-5d** — Optional: `haus recommend --include haus.eslint-config` for migration without `missing-*` (ties to P5-1b)
-- [ ] **P4-5e** — Tests: scaffold preserves without `--force`; overwrites with `--force`; setup flow never overwrites without confirmation
+- [x] **P4-1** — Remove `haus.ecc-build-error-resolver` (overlaps `haus.ecc-react-build-resolver` on React stacks; co-install skipped — drop instead)
+- [x] **P4-2** — Keep `haus.ecc-react-reviewer` + `haus.ecc-typescript-reviewer` (complementary scopes; TS reviewer gated off React/Next in recommender)
+- [x] **P4-3** — Stripe server-side gate: add `stripe` npm dep to scanner + `stripe-stripe-best-practices` `requiresAny` (backend-only Stripe repos)
+- [x] **P4-4** — Manifest version bump; validate; release; fixture sync
 
 ### P5 — Opt-in UX (Claude Code–first)
 
@@ -498,7 +481,7 @@ Estimated savings: ~37k tokens on every project (see P2g-1 for full tier breakdo
 
 **Principle:** **Primary UX = Claude Code desktop** (`/haus-workflow`, `/haus-setup`, `/haus-cloneandsetup`). User sees plain-language choices via `AskUserQuestion` — never raw JSON, never "open a terminal and edit deep-context.json". **CLI flags are the backend** skills invoke via Bash; they are not the product surface.
 
-**Goal:** Every setup path offers opt-in during first run; `haus-workflow` offers a standing **"add skills later"** flow any time.
+**Goal:** Every setup path offers opt-in during first run; `haus-workflow` offers a standing **"add skills later"** flow any time. Config scaffold (ESLint/Prettier) is surfaced the same way — plain-language choices in Claude Code, not raw CLI flags.
 
 #### P5-0 — Catalog metadata for conversational UI (`haus-workflow-catalog`)
 
@@ -541,14 +524,31 @@ Update `library/global/skills/haus-workflow/SKILL.md`:
 - [ ] **P5-4d** — If nothing eligible: plain message ("everything matching your stack is already installed" or "no optional helpers for this stack")
 - [ ] **P5-4e** — Test: skill contract test for menu entry + command sequence (like `haus-setup-command.test.js`)
 
-#### P5-5 — Docs & verification (`both`)
+#### P5-5 — Config scaffold (Claude Code–first)
 
-- [ ] **P5-5a** — `docs/cli.md` — document JSON/include flags as **skill backend**; point readers to `/haus-workflow` and `/haus-setup`
-- [ ] **P5-5b** — `docs/runbook.md` — opt-in groups, role mapping, post-setup add-skills flow
-- [ ] **P5-5c** — Risk matrix row "Baseline tier breaks teams" — concrete Claude Code paths once P5 ships
-- [ ] **P5-5d** — `yarn verify` + catalog `yarn validate`; e2e skill-contract tests for all three entry points
+**Context:** `haus.eslint-config` / `haus.prettier-config` (`type: config`) are recommended when the scanner emits `missing-eslint` / `missing-prettier`. Files copy via `haus scaffold`, not `haus apply`. Users should discover and approve scaffold in Claude Code — same principle as tiered skill opt-in.
 
-**Out of scope for P5:** changing P2g/P3 tier decisions; new catalog items. P5 only surfaces existing tiered items in Claude Code.
+**Design — preserve-by-default, overwrite is opt-in:**
+
+- Scaffold **must not** overwrite existing project-root config files by default (`eslint.config.*`, `prettier.config.*`, `.prettierrc`, `.prettierignore`).
+- **`--force` is the only overwrite path** — explicit user opt-in (via `AskUserQuestion` in setup flows, then `haus scaffold <id> --force`). Never default to overwrite.
+
+**Gap:** Repos that already have ESLint/Prettier (dep present → no `missing-*` signal) or legacy config files on disk cannot get Haus configs without explicit scaffold + `--force` when filenames collide.
+
+- [ ] **P5-5a** — `haus-setup` + `haus-cloneandsetup`: after `haus recommend`, if `recommendation.json` lists config items (`install: false`) or user asks for Haus ESLint/Prettier, `AskUserQuestion` with plain labels ("Add Haus ESLint baseline", "Replace existing Prettier config") — run `haus scaffold <id>` or `haus scaffold <id> --force` only on confirm
+- [ ] **P5-5b** — `haus-workflow` `project:add-skills`: include config scaffold group when eligible (missing deps or `--include` via P5-1b)
+- [ ] **P5-5c** — `haus scaffold`: when skipping existing files, actionable message (paths + `--force` hint)
+- [ ] **P5-5d** — `docs/cli.md`: preserve-by-default + point primary UX to `/haus-setup` and `/haus-workflow` (CLI flags as skill backend only)
+- [ ] **P5-5e** — Tests: scaffold preserves without `--force`; overwrites with `--force`; setup/add-skills flows ask before `--force`
+
+#### P5-6 — Docs & verification (`both`)
+
+- [ ] **P5-6a** — `docs/cli.md` — document JSON/include flags as **skill backend**; point readers to `/haus-workflow` and `/haus-setup` (fold in P5-5d scaffold preserve-by-default)
+- [ ] **P5-6b** — `docs/runbook.md` — opt-in groups, role mapping, post-setup add-skills flow, config scaffold paths
+- [ ] **P5-6c** — Risk matrix row "Baseline tier breaks teams" — concrete Claude Code paths once P5 ships
+- [ ] **P5-6d** — `yarn verify` + catalog `yarn validate`; e2e skill-contract tests for all entry points including config scaffold (P5-5e)
+
+**Out of scope for P5:** changing P2g/P3 tier decisions; new catalog items. P5 only surfaces existing tiered items and config scaffold in Claude Code.
 
 ### P6 — Docs & migration (`both`)
 
@@ -561,18 +561,18 @@ Update `library/global/skills/haus-workflow/SKILL.md`:
 
 ## Risk matrix
 
-| Risk                                                     | Mitigation                                                                                     |
-| -------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| Deprecated files linger until P0 CLI ships               | ✅ Shipped P0 + P1; upgrade CLI then `haus update` to prune                                    |
-| User customized deprecated skill                         | Hash gate preserves copy (unchanged contract)                                                  |
-| Baseline tier breaks teams expecting all superpowers     | Release note; P5 Claude Code opt-in (`haus-setup`, `haus-cloneandsetup`, `project:add-skills`) |
-| Dropping haus nextjs/react loses thin conventions refs   | ECC frontend is 3–4× richer; haus refs are generic best practices, not org-specific            |
-| Curated skill token cost rises on React stacks           | Trade accepted — correctness over minimal token budget for stack guidance                      |
-| P2g recommender gating breaks golden archetypes          | Update `recommend-archetypes-golden.json` per phase; pin must-include only                     |
-| Redis/security tier leaves ops gaps on Vendure           | P5 opt-in Q&A surfaces redis-ops group; until then deep-context role or `project:add-skills`   |
-| Dropping sentry-workflow loses generic Sentry onboarding | Only drop after P2f-c confirms stack SDK skills cover install/setup flows                      |
-| P2g-10 sentry-php gate breaks laravel golden archetype   | Update golden or add `sentry/sentry` to laravel fixture                                        |
-| Scaffold overwrites custom ESLint/Prettier configs       | P4-5: preserve-by-default; `--force` opt-in only; setup asks before overwrite                  |
+| Risk                                                     | Mitigation                                                                                                           |
+| -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| Deprecated files linger until P0 CLI ships               | ✅ Shipped P0 + P1; upgrade CLI then `haus update` to prune                                                          |
+| User customized deprecated skill                         | Hash gate preserves copy (unchanged contract)                                                                        |
+| Baseline tier breaks teams expecting all superpowers     | Release note; P5 Claude Code opt-in (`haus-setup`, `haus-cloneandsetup`, `project:add-skills`, config scaffold P5-5) |
+| Dropping haus nextjs/react loses thin conventions refs   | ECC frontend is 3–4× richer; haus refs are generic best practices, not org-specific                                  |
+| Curated skill token cost rises on React stacks           | Trade accepted — correctness over minimal token budget for stack guidance                                            |
+| P2g recommender gating breaks golden archetypes          | Update `recommend-archetypes-golden.json` per phase; pin must-include only                                           |
+| Redis/security tier leaves ops gaps on Vendure           | P5 opt-in Q&A surfaces redis-ops group; until then deep-context role or `project:add-skills`                         |
+| Dropping sentry-workflow loses generic Sentry onboarding | Only drop after P2f-c confirms stack SDK skills cover install/setup flows                                            |
+| P2g-10 sentry-php gate breaks laravel golden archetype   | Update golden or add `sentry/sentry` to laravel fixture                                                              |
+| Scaffold overwrites custom ESLint/Prettier configs       | P5-5: preserve-by-default; `--force` opt-in only; setup/add-skills ask before overwrite                              |
 
 ---
 

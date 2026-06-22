@@ -123,3 +123,31 @@ test('nextjs archetype: must not recommend typescript-reviewer', () => {
     assert.ok(!ids.has('haus.ecc-typescript-reviewer'))
   })
 })
+
+test('stripe server SDK only: recommends stripe-stripe-best-practices', () => {
+  withTempRepo(
+    {
+      'package.json': JSON.stringify(
+        {
+          name: 'stripe-server-api',
+          packageManager: 'yarn@4.5.3',
+          dependencies: { stripe: '17.0.0', express: '4.21.0' },
+        },
+        null,
+        2,
+      ),
+      'yarn.lock': '# fixture\n',
+    },
+    (root) => {
+      const ids = recommendIds(root)
+      assert.ok(ids.has('haus.stripe-stripe-best-practices'))
+    },
+  )
+})
+
+test('nextjs without stripe deps: must not recommend stripe-stripe-best-practices', () => {
+  withFixtureCopy('nextjs-app', (root) => {
+    const ids = recommendIds(root)
+    assert.ok(!ids.has('haus.stripe-stripe-best-practices'))
+  })
+})
