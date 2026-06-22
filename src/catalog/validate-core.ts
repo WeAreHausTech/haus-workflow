@@ -235,7 +235,7 @@ function auditMarkdownContent(manifestDir: string, items: CatalogItem[]): string
           failures.push(`${rel}:${i + 1}: disallowed npx (only npx tsx allowed)`)
         }
       }
-      if (!rel.includes('/references/')) failures.push(...auditForbiddenTagsInText(text, rel))
+      if (!norm.includes('/references/')) failures.push(...auditForbiddenTagsInText(text, rel))
     })
   }
   return failures

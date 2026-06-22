@@ -66,15 +66,14 @@ export function resolveMarkdownItemSource(
   pathSourceMap: Map<string, string | undefined>,
 ): string | undefined {
   const norm = relPath.replace(/\\/g, '/')
-  let bestPrefix = ''
-  let source: string | undefined
-  for (const [prefix, src] of pathSourceMap) {
-    if ((norm === prefix || norm.startsWith(`${prefix}/`)) && prefix.length > bestPrefix.length) {
-      bestPrefix = prefix
-      source = src
-    }
+  let cursor = norm
+  while (true) {
+    if (pathSourceMap.has(cursor)) return pathSourceMap.get(cursor)
+    const slash = cursor.lastIndexOf('/')
+    if (slash === -1) break
+    cursor = cursor.slice(0, slash)
   }
-  return source
+  return undefined
 }
 
 /** Insecure URL pattern. All references must use https://. */

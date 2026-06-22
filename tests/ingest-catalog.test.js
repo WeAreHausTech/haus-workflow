@@ -53,7 +53,7 @@ test('haus agent content is still bound by the only-npx-tsx rule', () => {
   assert.match(verdict.reason, /npx/i)
 })
 
-test('non-haus skill content is still bound by the only-npx-tsx rule', () => {
+test('haus skill content is still bound by the only-npx-tsx rule', () => {
   const item = { id: 'haus.some-skill', type: 'skill', source: 'haus', path: 'skills/some-skill' }
   const verdict = validateCatalogItem(item, '# Skill\n\nRun `npx playwright test`.\n')
   assert.equal(verdict.ok, false)
