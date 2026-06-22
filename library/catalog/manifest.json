@@ -1,5 +1,5 @@
 {
-  "version": "2.12.1",
+  "version": "2.12.2",
   "items": [
     {
       "id": "haus.agentic-workflow-standard",
@@ -293,42 +293,6 @@
         },
         {
           "stack": "radix"
-        }
-      ],
-      "whenNotToUse": "Do not use when a more specific skill or command applies."
-    },
-    {
-      "version": "1.0.0",
-      "source": "curated",
-      "type": "agent",
-      "repoRoles": [],
-      "installMode": "copy-selected",
-      "reviewStatus": "approved",
-      "riskLevel": "low",
-      "useMode": "copy",
-      "license": "MIT",
-      "licenseConfidence": "high",
-      "originSourceId": "ecc-affaanm",
-      "pinnedRef": "ec92b528471df708c2384ebbcc82b390b60f535a",
-      "default": false,
-      "id": "haus.ecc-build-error-resolver",
-      "path": "agents/ecc/build-error-resolver.md",
-      "title": "Build Error Resolver",
-      "purpose": "Build and TypeScript error resolution specialist. Use PROACTIVELY when build fails or type errors occur. Fixes build/type errors only with minimal diffs, no architectural edits. Focuses on getting the build green quickly.",
-      "whenToUse": "Build and TypeScript error resolution specialist. Use PROACTIVELY when build fails or type errors occur. Fixes build/type errors only with minimal diffs, no architectural edits. Focuses on getting the build green quickly.",
-      "tags": ["agent", "review", "typescript5"],
-      "tokenEstimate": 1191,
-      "ecosystem": "typescript",
-      "originUrl": "https://github.com/affaan-m/ECC/blob/ec92b528471df708c2384ebbcc82b390b60f535a/agents/build-error-resolver.md",
-      "requiresAny": [
-        {
-          "stack": "typescript5"
-        },
-        {
-          "stack": "typescript"
-        },
-        {
-          "dependency": "typescript"
         }
       ],
       "whenNotToUse": "Do not use when a more specific skill or command applies."
@@ -1941,7 +1905,7 @@
     },
     {
       "id": "haus.stripe-stripe-best-practices",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "source": "curated",
       "type": "skill",
       "path": "skills/stripe/stripe-best-practices",
@@ -1966,6 +1930,9 @@
       "requiresAny": [
         {
           "stack": "stripe"
+        },
+        {
+          "dependency": "stripe"
         },
         {
           "dependency": "@stripe/stripe-js"
