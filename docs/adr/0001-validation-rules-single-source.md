@@ -4,9 +4,9 @@
 
 ## Context
 
-Catalog validation rules (forbidden stack tags, banned agent phrases, required
-markdown sections, risky-install regexes, and the stack tag allowlist) were
-maintained as **parallel constants in two languages**:
+Catalog validation rules (forbidden stack tags, risky-install regexes, npx allowlist,
+required frontmatter, and the stack tag allowlist) were maintained as **parallel constants
+in two languages**:
 
 - `haus-workflow/src/catalog/validation-rules.ts` (CLI, TypeScript)
 - `haus-workflow-catalog/scripts/validation-rules.mjs` (catalog, JavaScript)
@@ -101,3 +101,17 @@ discusses TODOs no longer needs path-based exemption.
 (3) fixture-sync reconciles to an identical JSON value → no-op PR;
 `contract-drift` on CLI main green once the catalog change is on `main`.
 See `haus-workflow-catalog/docs/adr/0001`.
+
+## Cross-reference: curated `npx` waiver (catalog ADR-0005)
+
+Verbatim curated items (`source: curated`) may reference non-`tsx` `npx` commands in
+AI-instruction prose (`npx playwright`, `npx prisma`). Haus-owned items stay strict
+(`npx tsx` only). Risky-install patterns (`npx -y`, `dlx`) are never waived.
+
+Policy lives in `validation-rules.json` as `npxTsxOnlyExemptSources: ["curated"]`.
+Both validators resolve waiver by manifest `item.source` (longest `item.path` prefix in
+repo-wide walks). The superseded type-based agent waiver (`npxTsxOnlyExemptTypes`) is
+documented in catalog ADR-0003 (historical) and replaced by catalog ADR-0005.
+
+CLI enforcement: `src/catalog/validation-rules.ts` (`isNpxTsxOnlyExempt`),
+`validate-core.ts` (repo-wide walk), `ingest-catalog.ts` (cache ingest).

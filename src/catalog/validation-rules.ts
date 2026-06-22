@@ -40,12 +40,41 @@ export const ALLOWED_NPX_PATTERN: RegExp = toRegExp(rules.allowedNpxPattern)
 export const ANY_NPX_PATTERN: RegExp = toRegExp(rules.anyNpxPattern)
 
 /**
- * Item types exempt from the "only npx tsx" rule. Agent definitions are AI-instruction
- * prose that legitimately references tools to run (e.g. `npx playwright`, `npx eslint`),
- * not catalog-executed installers — so the non-tsx npx ban does not apply to them.
- * The risky-install patterns (`npx -y` / `dlx`) stay enforced for ALL types (see ADR-0003).
+ * Manifest `source` values exempt from the non-`tsx` npx ban (verbatim curated content).
+ * Risky-install patterns stay enforced. See ADR-0005.
  */
-export const NPX_TSX_ONLY_EXEMPT_TYPES: readonly string[] = rules.npxTsxOnlyExemptTypes ?? []
+export const NPX_TSX_ONLY_EXEMPT_SOURCES: readonly string[] = rules.npxTsxOnlyExemptSources ?? []
+
+/** Whether the non-`tsx` npx ban applies to this item (source-scoped per ADR-0005). */
+export function isNpxTsxOnlyExempt(_itemType: string, itemSource?: string): boolean {
+  return Boolean(itemSource && NPX_TSX_ONLY_EXEMPT_SOURCES.includes(itemSource))
+}
+
+/** Map manifest item.path → source for repo-wide markdown walks. */
+export function buildItemPathSourceMap(items: CatalogItem[]): Map<string, string | undefined> {
+  const map = new Map<string, string | undefined>()
+  for (const item of items) {
+    if (!item.path) continue
+    map.set(String(item.path).replace(/\\/g, '/'), item.source)
+  }
+  return map
+}
+
+/** Longest manifest path prefix matching a shipped markdown file. */
+export function resolveMarkdownItemSource(
+  relPath: string,
+  pathSourceMap: Map<string, string | undefined>,
+): string | undefined {
+  const norm = relPath.replace(/\\/g, '/')
+  let cursor = norm
+  while (true) {
+    if (pathSourceMap.has(cursor)) return pathSourceMap.get(cursor)
+    const slash = cursor.lastIndexOf('/')
+    if (slash === -1) break
+    cursor = cursor.slice(0, slash)
+  }
+  return undefined
+}
 
 /** Insecure URL pattern. All references must use https://. */
 export const HTTP_URL_PATTERN: RegExp = toRegExp(rules.httpUrlPattern)

@@ -20,9 +20,13 @@ Layer integrity controls at the catalog ingest chokepoint:
 2. **Schema validation** — `parseManifest()` rejects malformed manifests
    (including prototype-pollution keys and renamed required fields). Invalid
    manifests fall back to the bundled catalog with a warning.
-3. **Content validation** — `validateCatalogItem()` reuses the same safety rules
-   as `haus validate-catalog` (risky install patterns, banned agent phrases,
-   forbidden tags) before cache write.
+3. **Content validation** — `validateCatalogItem()` applies ingest-time safety rules from
+   the synced `validation-rules.json` fixture before cache write: risky-install patterns,
+   the `npx tsx` allowlist (waived for `source: curated` — catalog
+   [ADR-0005](https://github.com/WeAreHausTech/haus-workflow-catalog/blob/main/docs/adr/0005-npx-tsx-exemption-for-curated-skills.md)),
+   and forbidden stack tags in item prose. Structural checks (manifest schema, file
+   existence, frontmatter) are catalog CI / `haus validate-catalog`; ingest runs the
+   content-safety subset only.
 
 Manifest top-level `version` is **required by ingest schema** (missing/empty fails
 `parseManifest()`), but once accepted it is informational only (display/doctor) —

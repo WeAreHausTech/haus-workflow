@@ -418,7 +418,12 @@ async function syncDirectoryFromPrefix(
     for (const file of fetched) {
       if (file.kind !== 'text' || !isMarkdownPath(file.rel)) continue
       const verdict = validateCatalogItem(
-        { id: item.id, type: 'skill', path: catalogPrefix },
+        {
+          id: item.id,
+          type: 'skill',
+          path: catalogPrefix,
+          ...('source' in item && item.source ? { source: item.source } : {}),
+        },
         file.body,
       )
       if (!verdict.ok) {

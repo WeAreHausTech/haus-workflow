@@ -29,19 +29,47 @@ test('accepts clean content', () => {
   assert.equal(verdict.ok, true)
 })
 
-test('agent content may use non-tsx npx (AI-instruction prose, not an installer)', () => {
-  // See ADR-0003: agents are exempt from the "only npx tsx" rule.
-  const item = { id: 'haus.ecc-e2e-runner', type: 'agent', path: 'agents/ecc/e2e-runner.md' }
+test('curated agent content may use non-tsx npx (ADR-0005)', () => {
+  const item = {
+    id: 'haus.ecc-e2e-runner',
+    type: 'agent',
+    source: 'curated',
+    path: 'agents/ecc/e2e-runner.md',
+  }
   const content = '---\nname: e2e-runner\ndescription: E2E\n---\n\nRun `npx playwright test`.\n'
   const verdict = validateCatalogItem(item, content)
   assert.equal(verdict.ok, true)
 })
 
-test('non-agent content is still bound by the only-npx-tsx rule', () => {
-  const item = { id: 'haus.some-skill', type: 'skill', path: 'skills/some-skill' }
+test('haus agent content is still bound by the only-npx-tsx rule', () => {
+  const item = {
+    id: 'haus.custom-agent',
+    type: 'agent',
+    source: 'haus',
+    path: 'agents/haus/custom-agent.md',
+  }
+  const verdict = validateCatalogItem(item, '# Agent\n\nRun `npx playwright test`.\n')
+  assert.equal(verdict.ok, false)
+  assert.match(verdict.reason, /npx/i)
+})
+
+test('haus skill content is still bound by the only-npx-tsx rule', () => {
+  const item = { id: 'haus.some-skill', type: 'skill', source: 'haus', path: 'skills/some-skill' }
   const verdict = validateCatalogItem(item, '# Skill\n\nRun `npx playwright test`.\n')
   assert.equal(verdict.ok, false)
   assert.match(verdict.reason, /npx/i)
+})
+
+test('curated skill content may use non-tsx npx (verbatim upstream prose, ADR-0005)', () => {
+  const item = {
+    id: 'haus.ecc-e2e-testing',
+    type: 'skill',
+    source: 'curated',
+    path: 'skills/ecc/e2e-testing',
+  }
+  const content = '---\ndescription: E2E\n---\n\nRun `npx playwright test`.\n'
+  const verdict = validateCatalogItem(item, content)
+  assert.equal(verdict.ok, true)
 })
 
 test('agent exemption does NOT waive risky-install patterns', () => {

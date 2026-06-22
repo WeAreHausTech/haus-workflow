@@ -6,7 +6,7 @@ import { auditForbiddenTagsInText } from './forbidden-content.js'
 import {
   ALLOWED_NPX_PATTERN,
   ANY_NPX_PATTERN,
-  NPX_TSX_ONLY_EXEMPT_TYPES,
+  isNpxTsxOnlyExempt,
   RISKY_INSTALL_PATTERNS,
 } from './validation-rules.js'
 
@@ -14,14 +14,13 @@ export type ValidateCatalogItemResult = { ok: true } | { ok: false; reason: stri
 
 /** Validate fetched item content before writing to the local cache. */
 export function validateCatalogItem(
-  item: Pick<CatalogItem, 'id' | 'type' | 'path'>,
+  item: Pick<CatalogItem, 'id' | 'type' | 'path'> & { source?: CatalogItem['source'] },
   content: string,
 ): ValidateCatalogItemResult {
   const label = item.id
-  // Agent definitions are AI-instruction prose where `npx <tool>` is legitimate guidance,
-  // not a catalog-executed installer — waive the "only npx tsx" ban for exempt types.
-  // Risky-install patterns (npx -y / dlx) are NOT waived (see ADR-0003).
-  const checkNonTsxNpx = !NPX_TSX_ONLY_EXEMPT_TYPES.includes(item.type)
+  // Curated verbatim content may name tools (`npx playwright`, etc.).
+  // Risky-install patterns (npx -y / dlx) are NOT waived (ADR-0005).
+  const checkNonTsxNpx = !isNpxTsxOnlyExempt(item.type, item.source)
   const lines = content.split(/\r?\n/)
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i] ?? ''

@@ -72,7 +72,11 @@ describe('scaffoldConfigItems', () => {
       assert.equal(content, '// custom config\n', 'existing file must not be overwritten')
       assert.equal(result.scaffolded.length, 0)
       assert.equal(result.skipped.length, 1)
-      assert.deepEqual(result.skippedExisting, ['eslint.config.js'], 'existing skip is --force-able')
+      assert.deepEqual(
+        result.skippedExisting,
+        ['eslint.config.js'],
+        'existing skip is --force-able',
+      )
     } finally {
       fs.rmSync(projectRoot, { recursive: true, force: true })
     }
@@ -93,10 +97,7 @@ describe('scaffoldConfigItems', () => {
         },
       ])
       assert.ok(fs.existsSync(path.join(projectRoot, 'prettier.config.cjs')))
-      assert.ok(
-        fs.existsSync(path.join(projectRoot, '.prettierignore')),
-        'dotfile must be copied',
-      )
+      assert.ok(fs.existsSync(path.join(projectRoot, '.prettierignore')), 'dotfile must be copied')
       assert.equal(result.scaffolded.length, 2)
     } finally {
       fs.rmSync(projectRoot, { recursive: true, force: true })
@@ -233,7 +234,10 @@ describe('scaffoldConfigItems', () => {
         },
       ])
       assert.equal(result.scaffolded.length, 0)
-      assert.ok(!fs.existsSync(path.join(projectRoot, 'hosts')), 'must not read through parent symlink')
+      assert.ok(
+        !fs.existsSync(path.join(projectRoot, 'hosts')),
+        'must not read through parent symlink',
+      )
     } finally {
       fs.rmSync(projectRoot, { recursive: true, force: true })
       fs.rmSync(linkParent, { force: true })
