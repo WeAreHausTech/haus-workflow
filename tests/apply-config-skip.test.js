@@ -15,7 +15,10 @@ test('writeClaudeFiles skips config items: no .claude file, no lock entry', (t) 
   t.after(() => rmSync(temp, { recursive: true, force: true }))
   const fixtureDir = path.join(temp, 'catalog')
   mkdirSync(path.join(fixtureDir, 'configs', 'eslint'), { recursive: true })
-  writeFileSync(path.join(fixtureDir, 'configs', 'eslint', 'eslint.config.mjs'), 'export default []\n')
+  writeFileSync(
+    path.join(fixtureDir, 'configs', 'eslint', 'eslint.config.mjs'),
+    'export default []\n',
+  )
   const manifestPath = path.join(fixtureDir, 'manifest.json')
   writeFileSync(
     manifestPath,
@@ -62,11 +65,15 @@ test('writeClaudeFiles skips config items: no .claude file, no lock entry', (t) 
       `await writeClaudeFiles(process.argv[2], false, JSON.parse(process.argv[3]));`,
     ].join('\n'),
   )
-  execaSync('node', ['--import', 'tsx/esm', helperPath, project, JSON.stringify(['haus.eslint-config'])], {
-    cwd: path.resolve('.'),
-    reject: true,
-    env,
-  })
+  execaSync(
+    'node',
+    ['--import', 'tsx/esm', helperPath, project, JSON.stringify(['haus.eslint-config'])],
+    {
+      cwd: path.resolve('.'),
+      reject: true,
+      env,
+    },
+  )
 
   const lock = JSON.parse(readFileSync(path.join(project, '.haus-workflow/haus.lock.json'), 'utf8'))
   assert.equal(lock.length, 0, 'config item must not be recorded in the lock')

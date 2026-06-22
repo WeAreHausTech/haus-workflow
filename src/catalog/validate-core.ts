@@ -9,10 +9,12 @@ import {
   ALLOWED_NPX_PATTERN,
   ANY_NPX_PATTERN,
   auditDisallowedTags,
+  buildItemPathSourceMap,
   FORBIDDEN_TAGS,
-  NPX_TSX_ONLY_EXEMPT_TYPES,
+  isNpxTsxOnlyExempt,
   PLACEHOLDER_PATTERN,
   REQUIRED_SKILL_FRONTMATTER,
+  resolveMarkdownItemSource,
   RISKY_INSTALL_PATTERNS,
 } from './validation-rules.js'
 
@@ -211,15 +213,19 @@ function walkMd(dir: string, fn: (file: string) => void): void {
   }
 }
 
-function auditMarkdownContent(manifestDir: string): string[] {
+function auditMarkdownContent(manifestDir: string, items: CatalogItem[]): string[] {
   const failures: string[] = []
+  const pathSourceMap = buildItemPathSourceMap(items)
   for (const dir of ['skills', 'agents', 'templates', 'commands']) {
     const abs = path.join(manifestDir, dir)
     if (!fs.existsSync(abs)) continue
-    const checkNonTsxNpx = !NPX_TSX_ONLY_EXEMPT_TYPES.includes(DIR_ITEM_TYPE[dir] ?? '')
+    const dirType = DIR_ITEM_TYPE[dir] ?? ''
     walkMd(abs, (file) => {
       const text = fs.readFileSync(file, 'utf8')
       const rel = path.relative(manifestDir, file)
+      const norm = rel.replace(/\\/g, '/')
+      const source = resolveMarkdownItemSource(norm, pathSourceMap)
+      const checkNonTsxNpx = !isNpxTsxOnlyExempt(dirType, source)
       const lines = text.split(/\r?\n/)
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i] ?? ''
@@ -244,7 +250,7 @@ export function validateCatalogData(
     ...auditManifestStructure(manifestVersion, items),
     ...auditForbiddenStacks(items),
     ...auditShippedFiles(manifestDir, items),
-    ...auditMarkdownContent(manifestDir),
+    ...auditMarkdownContent(manifestDir, items),
     ...auditDisallowedTags(items),
   ]
   return { ok: failures.length === 0, failures, items }

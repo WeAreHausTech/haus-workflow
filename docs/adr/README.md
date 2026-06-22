@@ -3,6 +3,10 @@
 Write-once records of significant decisions. To change one, add a new ADR that
 supersedes it. See `.claude/WORKFLOW.md` → "Architecture Decision Records".
 
+Catalog-specific validation **policy** ADRs (e.g. npx waiver, upstream sync) live in
+[`haus-workflow-catalog/docs/adr/`](https://github.com/WeAreHausTech/haus-workflow-catalog/tree/main/docs/adr);
+this index covers CLI/repo decisions. ADR-0001 here links to those where the JSON is shared.
+
 | ADR                                                    | Title                                                              | Status   |
 | ------------------------------------------------------ | ------------------------------------------------------------------ | -------- |
 | [0001](0001-validation-rules-single-source.md)         | Validation rules — single source in the catalog, synced to the CLI | Accepted |

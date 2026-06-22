@@ -215,9 +215,7 @@ Invoke skill.
   assert.equal(r.exitCode, 0, r.stderr || r.stdout)
 })
 
-// ADR-0003: the repo-wide markdown audit waives the "only npx tsx" rule for agent
-// content (AI-instruction prose), while keeping it for other types and never waiving
-// risky-install patterns.
+// ADR-0005: curated content may reference non-tsx npx; haus-owned content stays strict.
 const AGENT_NPX_MD = `---
 description: E2E testing agent that runs the browser test tools.
 ---
@@ -227,7 +225,7 @@ description: E2E testing agent that runs the browser test tools.
 Run \`npx playwright test\` and \`npx playwright install\`.
 `
 
-test('validate-catalog accepts an agent that references non-tsx npx (ADR-0003)', () => {
+test('validate-catalog accepts a curated agent that references non-tsx npx (ADR-0005)', () => {
   const root = makeCatalogRoot(
     [
       {
@@ -254,7 +252,42 @@ test('validate-catalog accepts an agent that references non-tsx npx (ADR-0003)',
   assert.equal(r.exitCode, 0, r.stderr || r.stdout)
 })
 
-test('validate-catalog still rejects non-tsx npx in a skill (exemption is type-scoped)', () => {
+test('validate-catalog rejects non-tsx npx in a haus agent', () => {
+  const root = makeCatalogRoot(
+    [
+      {
+        id: 'haus.custom-agent',
+        version: '1.0.0',
+        source: 'haus',
+        type: 'agent',
+        path: 'agents/haus/custom-agent.md',
+        title: 'Custom Agent',
+        purpose: 'x',
+        whenToUse: 'x',
+        whenNotToUse: 'x',
+        tags: ['agent'],
+        repoRoles: [],
+        tokenEstimate: 100,
+        installMode: 'copy-selected',
+        reviewStatus: 'approved',
+        riskLevel: 'low',
+      },
+    ],
+    {
+      'agents/haus/custom-agent.md': `---
+description: Haus agent must not reference non-tsx npx.
+---
+
+Run \`npx playwright test\`.
+`,
+    },
+  )
+  const r = runValidateCatalog(root)
+  assert.equal(r.exitCode, 1)
+  assert.match(r.stderr ?? '', /disallowed npx \(only npx tsx allowed\)/)
+})
+
+test('validate-catalog still rejects non-tsx npx in a haus skill (exemption is scoped)', () => {
   const root = makeCatalogRoot(
     [
       {
@@ -284,6 +317,37 @@ Run \`npx playwright test\`.
   const r = runValidateCatalog(root)
   assert.equal(r.exitCode, 1)
   assert.match(r.stderr ?? '', /disallowed npx \(only npx tsx allowed\)/)
+})
+
+test('validate-catalog accepts curated skill that references non-tsx npx (ADR-0005)', () => {
+  const root = makeCatalogRoot(
+    [
+      {
+        id: 'haus.ecc-prisma-patterns',
+        version: '1.0.0',
+        source: 'curated',
+        type: 'skill',
+        path: 'skills/ecc/prisma-patterns',
+        title: 'Prisma Patterns',
+        tags: ['prisma'],
+        repoRoles: [],
+        tokenEstimate: 100,
+        installMode: 'copy-selected',
+        reviewStatus: 'approved',
+        riskLevel: 'low',
+      },
+    ],
+    {
+      'skills/ecc/prisma-patterns/SKILL.md': `---
+description: Use when working with Prisma migrations.
+---
+
+Run \`npx prisma migrate dev\`.
+`,
+    },
+  )
+  const r = runValidateCatalog(root)
+  assert.equal(r.exitCode, 0, r.stderr || r.stdout)
 })
 
 test('validate-catalog rejects risky-install patterns even for exempt agents', () => {

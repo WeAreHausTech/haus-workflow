@@ -67,6 +67,7 @@ test('CLI fixture has every required key (a malformed sync would drop one)', () 
     'riskyInstallPatterns',
     'allowedNpxPattern',
     'anyNpxPattern',
+    'npxTsxOnlyExemptSources',
     'httpUrlPattern',
     'placeholderPattern',
     'allowedStacks',

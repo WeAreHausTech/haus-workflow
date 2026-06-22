@@ -430,7 +430,7 @@ test('haus update: caches config items (single-file + directory)', async () => {
   const { server, port } = await startMockServer({
     '/manifest.json': { body: JSON.stringify(manifest), contentType: 'application/json' },
     // Single-file item: no tree listing → falls back to a direct fetch.
-    '/configs/eslint/eslint.config.mjs': { body: "export default []\n" },
+    '/configs/eslint/eslint.config.mjs': { body: 'export default []\n' },
     // Empty file is valid content, not a fetch failure.
     '/configs/empty/marker': { body: '' },
     // Directory item: tree lists its files, then each is fetched.

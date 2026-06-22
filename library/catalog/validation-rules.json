@@ -25,7 +25,7 @@
   ],
   "allowedNpxPattern": { "source": "\\bnpx\\s+tsx\\b", "flags": "i" },
   "anyNpxPattern": { "source": "\\bnpx\\s+\\S+", "flags": "i" },
-  "npxTsxOnlyExemptTypes": ["agent"],
+  "npxTsxOnlyExemptSources": ["curated"],
   "httpUrlPattern": { "source": "^http:\\/\\/", "flags": "i" },
   "placeholderPattern": { "source": "\\bTODO\\b|\\bPLACEHOLDER\\b", "flags": "i" },
   "allowedStacks": [

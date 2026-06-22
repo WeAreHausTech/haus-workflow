@@ -79,8 +79,10 @@ function withStripeSupabaseFixture(fn) {
 
 for (const [fixture, spec] of Object.entries(GOLDEN.profiles)) {
   test(`recommend archetype: ${fixture}`, () => {
-    const run = fixture === 'stripe-supabase-app' ? withStripeSupabaseFixture : (fn) =>
-      withFixtureCopy(fixture, fn)
+    const run =
+      fixture === 'stripe-supabase-app'
+        ? withStripeSupabaseFixture
+        : (fn) => withFixtureCopy(fixture, fn)
 
     run((root) => {
       const { recommended, skipped } = recommendIdsForRepo(root)
