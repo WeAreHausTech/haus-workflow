@@ -1,7 +1,7 @@
 # Catalog Skills & Agents Cleanup — 2026-06-18
 
 Repos: `haus-workflow` · `haus-workflow-catalog`
-Status: **In progress** — P0 ✅ P1 ✅ P2a ✅ P2b ✅ P2c ✅ P2d ✅ (2026-06-22); P2f+ open
+Status: **In progress** — P0 ✅ P1 ✅ P2a ✅ P2b ✅ P2c ✅ P2d ✅ P2f catalog ✅ (2026-06-22); fixture PR open; P2g+ open
 Context: Full catalog review of 82 skills + 16 agents; duplicate/overlap analysis and baseline token reduction.
 
 ### Content preference policy
@@ -49,16 +49,16 @@ P1 deleted all 8 deprecated manifest entries (catalog `v2.9.1`); removed IDs are
 
 Merge each PR to `main` before starting the next branch — no stacking. Run `yarn verify` (CLI) and `yarn validate` + `yarn test` (catalog) when touching each repo.
 
-| Phase   | Repo                                          | Scope                                                    | Status                                                  |
-| ------- | --------------------------------------------- | -------------------------------------------------------- | ------------------------------------------------------- |
-| **P0**  | `haus-workflow`                               | Prune deprecated items on apply/update                   | ✅ #126                                                 |
-| **P1**  | `haus-workflow-catalog`                       | Delete 8 deprecated manifest entries + skill dirs        | ✅ `v2.9.1`, fixture #127                               |
-| **P2**  | `haus-workflow-catalog`                       | Remove redundant haus-owned skills (keep curated)        | P2a ✅ `v2.9.2` #129 · P2b+c+d ✅ `v2.10.0` #131 + #132 |
-| **P2f** | `haus-workflow-catalog`                       | Sync more upstream; drop remaining thin haus routers     |                                                         |
-| **P2g** | `haus-workflow-catalog` (+ recommender)       | Co-install bloat: tier clusters, gate audit **(P2g-10)** |                                                         |
-| **P3**  | `haus-workflow-catalog` (+ recommender tests) | Tier baseline superpowers + agents                       |                                                         |
-| **P4**  | `haus-workflow-catalog`                       | Agent dedup                                              |                                                         |
-| **P5**  | Both                                          | Docs, release notes, fixture sync                        |                                                         |
+| Phase   | Repo                                          | Scope                                                    | Status                                                                                                      |
+| ------- | --------------------------------------------- | -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| **P0**  | `haus-workflow`                               | Prune deprecated items on apply/update                   | ✅ #126                                                                                                     |
+| **P1**  | `haus-workflow-catalog`                       | Delete 8 deprecated manifest entries + skill dirs        | ✅ `v2.9.1`, fixture #127                                                                                   |
+| **P2**  | `haus-workflow-catalog`                       | Remove redundant haus-owned skills (keep curated)        | P2a ✅ `v2.9.2` #129 · P2b+c+d ✅ `v2.10.0` #131 + #132                                                     |
+| **P2f** | `haus-workflow-catalog`                       | Sync more upstream; drop remaining thin haus routers     | ✅ catalog [#31](https://github.com/WeAreHausTech/haus-workflow-catalog/pull/31); release + fixture PR open |
+| **P2g** | `haus-workflow-catalog` (+ recommender)       | Co-install bloat: tier clusters, gate audit **(P2g-10)** |                                                                                                             |
+| **P3**  | `haus-workflow-catalog` (+ recommender tests) | Tier baseline superpowers + agents                       |                                                                                                             |
+| **P4**  | `haus-workflow-catalog`                       | Agent dedup                                              |                                                                                                             |
+| **P5**  | Both                                          | Docs, release notes, fixture sync                        |                                                                                                             |
 
 ### Target outcomes
 
@@ -212,11 +212,13 @@ Second upstream pass from configured sources. Sync via `sources.yaml` + `node sc
 | `haus.phpunit-patterns`                       | `ecc/laravel-tdd`             | ECC      | PHPUnit/Pest/Laravel factories/HTTP tests (~500L vs ~190L router)                                   |
 | `haus.vitest-patterns` + `haus.jest-patterns` | `javascript-testing-patterns` | wshobson | Vitest+Jest+mocking+integration; covers NestJS/backend. React stacks covered by P2c `react-testing` |
 
-- [ ] **P2f-a-1** — Add `laravel-tdd`, `javascript-testing-patterns` to `sources.yaml`
-- [ ] **P2f-a-2** — Sync upstream; manifest entries with `reviewStatus: approved`
-- [ ] **P2f-a-3** — Delete `phpunit-patterns`, `vitest-patterns`, `jest-patterns` dirs + manifest entries
-- [ ] **P2f-a-4** — Confirm NestJS fixture still gets JS testing via `javascript-testing-patterns` (not `react-testing`)
-- [ ] **P2f-a-5** — Validate, release, fixture sync
+- [x] **P2f-a-1** — Add `laravel-tdd`, `javascript-testing-patterns` to `sources.yaml`
+- [x] **P2f-a-2** — Sync upstream; manifest entries with `reviewStatus: approved`
+- [x] **P2f-a-3** — Delete `phpunit-patterns`, `vitest-patterns`, `jest-patterns` dirs + manifest entries
+- [x] **P2f-a-4** — Confirm NestJS fixture still gets JS testing via `javascript-testing-patterns` (not `react-testing`)
+- [x] **P2f-a-5** — Validate; release after merge; fixture sync
+
+**Synced IDs:** `haus.ecc-laravel-tdd`, `haus.wshobson-js-testing-patterns` (catalog id; upstream `javascript-testing-patterns` — avoids forbidden `java` substring in id). Dropped 3 haus routers.
 
 #### P2f-b — Add upstream complements (keep haus; no drop)
 
@@ -227,9 +229,11 @@ Second upstream pass from configured sources. Sync via `sources.yaml` + `node sc
 | `sanity-best-practices`            | sanity   | `sanity-content-modeling-best-practices`  | Studio/GROQ depth beyond modeling skill             |
 | `supabase-postgres-best-practices` | supabase | `haus.supabase-supabase`                  | Postgres/RLS patterns beyond main Supabase skill    |
 
-- [ ] **P2f-b-1** — Add complement items to `sources.yaml`; sync + manifest
-- [ ] **P2f-b-2** — Gate complements on same `requiresAny` as paired skill (avoid double-install on unrelated stacks)
-- [ ] **P2f-b-3** — Validate, release, fixture sync
+- [x] **P2f-b-1** — Add complement items to `sources.yaml`; sync + manifest
+- [x] **P2f-b-2** — Gate complements on same `requiresAny` as paired skill (avoid double-install on unrelated stacks)
+- [x] **P2f-b-3** — Validate; release after merge; fixture sync
+
+**Added:** `haus.wshobson-typescript-advanced-types`, `haus.ecc-redis-patterns`, `haus.supabase-supabase-postgres-best-practices`. **Deferred:** `sanity-best-practices` — `references/hydrogen.md` has `pnpm dlx` (verbatim-only; wave 3b pattern). Catalog `forbidden-content.test.mjs` aligned with ADR-0001 (no body `http://` scan).
 
 #### P2f-c — Evaluate stack-specific Sentry + Apollo (defer decision to implementation)
 
@@ -238,9 +242,11 @@ Second upstream pass from configured sources. Sync via `sources.yaml` + `node sc
 | `sentry-sentry-workflow` (633 tok router) + `sentry-sentry-php-sdk` (3588) on Laravel | Sync `sentry-nextjs-sdk`, `sentry-node-sdk`, `sentry-nestjs-sdk`; drop generic workflow when stack SDK installs | Keep workflow + php-sdk pair |
 | `apollo-server` + `graphql-schema` on Vendure/NestJS                                  | Sync `apollo-federation`, `graphql-operations`, `apollo-client`                                                 | Keep server+schema only      |
 
-- [ ] **P2f-c-1** — Spike: compare line counts + overlap per stack fixture
-- [ ] **P2f-c-2** — If workflow is redundant with stack SDK → drop `sentry-sentry-workflow` (P2g-3)
-- [ ] **P2f-c-3** — If federation/operations add value on Vendure → sync; gate behind `graphql` + `@apollo/*`
+- [x] **P2f-c-1** — Spike: compare line counts + overlap per stack fixture
+- [x] **P2f-c-2** — **Keep** `sentry-sentry-workflow` (router; stack SDKs add setup depth — drop deferred to P2g-3)
+- [x] **P2f-c-3** — Sync stack SDKs + Apollo complements; gate behind graphql / `@sentry/*` deps
+
+**P2f-c spike (lines):** `sentry-workflow` 48L router vs `sentry-php-sdk` 350L / `sentry-nestjs-sdk` 665L / `sentry-node-sdk` 888L. Apollo: `apollo-server` 294L + `graphql-schema` 172L; added `apollo-federation` 121L + `graphql-operations` 244L + `apollo-client` 169L. **Synced:** `sentry-nextjs-sdk`, `sentry-node-sdk`, `sentry-nestjs-sdk`, `apollo-federation`, `graphql-operations`, `apollo-client`. Nest archetype pins `js-testing-patterns` + federation + operations.
 
 ### P2g — Co-install bloat pass (`haus-workflow-catalog` + recommender)
 
@@ -473,29 +479,29 @@ Estimated savings: ~37k tokens on every project (see P2g-1 for full tier breakdo
 
 Line counts include `SKILL.md` + all files under the skill dir. **Ratio** = curated ÷ haus.
 
-| Stack                                | Haus-owned                                             | Curated alternative                                               | Haus lines | Curated lines | Ratio | Verdict                                                         |
-| ------------------------------------ | ------------------------------------------------------ | ----------------------------------------------------------------- | ---------: | ------------: | ----: | --------------------------------------------------------------- |
-| Next.js                              | `nextjs-patterns`                                      | `ecc-frontend-patterns`                                           |       ~190 |          ~658 |  3.5× | **Drop haus** (P2a)                                             |
-| React 19                             | `react19-patterns`                                     | `ecc-frontend-patterns`                                           |       ~190 |          ~658 |  3.5× | **Drop haus** (P2a)                                             |
-| Vite 8                               | `vite8-patterns`                                       | `ecc-vite-patterns`                                               |       ~190 |          ~451 |  2.4× | **Drop haus** (P2a)                                             |
-| shadcn/Radix                         | `radix-shadcn-patterns`                                | `wshobson-tailwind-design-system`                                 |       ~190 |          ~893 |  4.7× | **Drop haus** (P2a)                                             |
-| Laravel                              | `laravel-patterns` ⚠️                                  | `ecc-laravel-patterns`                                            |       ~190 |          ~417 |  2.2× | **Drop haus** (P1, deprecated)                                  |
-| NestJS GraphQL                       | `nestjs-graphql-patterns` ⚠️                           | `ecc-nestjs-patterns` + apollo×2                                  |       ~190 |         ~232+ | 1.2×+ | **Drop haus** (P1)                                              |
-| Stripe                               | `stripe-patterns` ⚠️                                   | `stripe-stripe-best-practices`                                    |       ~190 |          ~408 |  2.1× | **Drop haus** (P1)                                              |
-| Supabase                             | `supabase-patterns` ⚠️                                 | `supabase-supabase`                                               |       ~190 |          ~208 |  1.1× | **Drop haus** (P1) — official maintainer skill                  |
-| Sanity                               | `sanity-patterns` ⚠️                                   | `sanity-content-modeling-best-practices`                          |       ~190 |          ~456 |  2.4× | **Drop haus** (P1)                                              |
-| Tailwind/SCSS                        | `tailwind-scss-patterns` ⚠️                            | `wshobson-tailwind-design-system`                                 |       ~190 |          ~893 |  4.7× | **Drop haus** (P1)                                              |
-| Database                             | `database-patterns` ⚠️                                 | `wshobson-postgresql-table-design` + redis×3                      |       ~190 |        varies |     — | **Drop haus** (P1)                                              |
-| Sentry                               | `sentry-patterns` ⚠️                                   | `sentry-sentry-workflow` + `sentry-sentry-php-sdk`                |       ~190 |    ~49 router |     — | **Drop haus** (P1) — workflow is router; php-sdk adds PHP depth |
-| TypeScript                           | `typescript5-patterns`                                 | —                                                                 |       ~190 |             — |     — | **Keep haus** — no curated skill                                |
-| Vue                                  | `vue-patterns`                                         | `ecc/vue-patterns` ✅ P2c                                         |       ~190 |         ~500+ | 2.6×+ | **Drop haus; sync ECC** (P2c) ✅                                |
-| Prisma                               | `prisma-patterns`                                      | `ecc/prisma-patterns` ✅ P2c                                      |       ~190 |         ~400+ | 2.1×+ | **Drop haus; sync ECC** (P2c) ✅                                |
-| Playwright                           | `playwright-patterns`                                  | `ecc/e2e-testing` ✅ P2c                                          |       ~190 |         ~350+ | 1.8×+ | **Drop haus; sync ECC** (P2c) ✅                                |
-| RTL / component tests                | `testing-library-patterns`                             | `ecc/react-testing` ✅ P2c                                        |       ~190 |         ~400+ | 2.1×+ | **Drop haus; sync ECC** (P2c) ✅                                |
-| .NET                                 | `dotnet-patterns` / `dotnet-service-patterns`          | `ecc/dotnet-patterns` ✅ P2c + csharp-testing                     |  ~190 each |         ~300+ | 1.6×+ | **Drop haus pair; sync ECC dotnet** (P2c) ✅                    |
-| WordPress (generic)                  | `wordpress-patterns`                                   | bedrock + acf/elementor (haus)                                    |       ~190 |             — |     — | **Drop generic** (P2d) ✅                                       |
-| Expo / RR v7 / Auth / Vendure / etc. | haus-only (see P2e)                                    | —                                                                 |   ~130–175 |             — |     — | **Keep haus**                                                   |
-| PHPUnit / Vitest / Jest              | `phpunit-patterns`, `vitest-patterns`, `jest-patterns` | `ecc/laravel-tdd`, `wshobson/javascript-testing-patterns` _(P2f)_ |  ~190 each |         ~400+ |   2×+ | **Drop haus; sync upstream** (P2f)                              |
+| Stack                                | Haus-owned                                                 | Curated alternative                                       | Haus lines | Curated lines | Ratio | Verdict                                                         |
+| ------------------------------------ | ---------------------------------------------------------- | --------------------------------------------------------- | ---------: | ------------: | ----: | --------------------------------------------------------------- |
+| Next.js                              | `nextjs-patterns`                                          | `ecc-frontend-patterns`                                   |       ~190 |          ~658 |  3.5× | **Drop haus** (P2a)                                             |
+| React 19                             | `react19-patterns`                                         | `ecc-frontend-patterns`                                   |       ~190 |          ~658 |  3.5× | **Drop haus** (P2a)                                             |
+| Vite 8                               | `vite8-patterns`                                           | `ecc-vite-patterns`                                       |       ~190 |          ~451 |  2.4× | **Drop haus** (P2a)                                             |
+| shadcn/Radix                         | `radix-shadcn-patterns`                                    | `wshobson-tailwind-design-system`                         |       ~190 |          ~893 |  4.7× | **Drop haus** (P2a)                                             |
+| Laravel                              | `laravel-patterns` ⚠️                                      | `ecc-laravel-patterns`                                    |       ~190 |          ~417 |  2.2× | **Drop haus** (P1, deprecated)                                  |
+| NestJS GraphQL                       | `nestjs-graphql-patterns` ⚠️                               | `ecc-nestjs-patterns` + apollo×2                          |       ~190 |         ~232+ | 1.2×+ | **Drop haus** (P1)                                              |
+| Stripe                               | `stripe-patterns` ⚠️                                       | `stripe-stripe-best-practices`                            |       ~190 |          ~408 |  2.1× | **Drop haus** (P1)                                              |
+| Supabase                             | `supabase-patterns` ⚠️                                     | `supabase-supabase`                                       |       ~190 |          ~208 |  1.1× | **Drop haus** (P1) — official maintainer skill                  |
+| Sanity                               | `sanity-patterns` ⚠️                                       | `sanity-content-modeling-best-practices`                  |       ~190 |          ~456 |  2.4× | **Drop haus** (P1)                                              |
+| Tailwind/SCSS                        | `tailwind-scss-patterns` ⚠️                                | `wshobson-tailwind-design-system`                         |       ~190 |          ~893 |  4.7× | **Drop haus** (P1)                                              |
+| Database                             | `database-patterns` ⚠️                                     | `wshobson-postgresql-table-design` + redis×3              |       ~190 |        varies |     — | **Drop haus** (P1)                                              |
+| Sentry                               | `sentry-patterns` ⚠️                                       | `sentry-sentry-workflow` + `sentry-sentry-php-sdk`        |       ~190 |    ~49 router |     — | **Drop haus** (P1) — workflow is router; php-sdk adds PHP depth |
+| TypeScript                           | `typescript5-patterns`                                     | —                                                         |       ~190 |             — |     — | **Keep haus** — no curated skill                                |
+| Vue                                  | `vue-patterns`                                             | `ecc/vue-patterns` ✅ P2c                                 |       ~190 |         ~500+ | 2.6×+ | **Drop haus; sync ECC** (P2c) ✅                                |
+| Prisma                               | `prisma-patterns`                                          | `ecc/prisma-patterns` ✅ P2c                              |       ~190 |         ~400+ | 2.1×+ | **Drop haus; sync ECC** (P2c) ✅                                |
+| Playwright                           | `playwright-patterns`                                      | `ecc/e2e-testing` ✅ P2c                                  |       ~190 |         ~350+ | 1.8×+ | **Drop haus; sync ECC** (P2c) ✅                                |
+| RTL / component tests                | `testing-library-patterns`                                 | `ecc/react-testing` ✅ P2c                                |       ~190 |         ~400+ | 2.1×+ | **Drop haus; sync ECC** (P2c) ✅                                |
+| .NET                                 | `dotnet-patterns` / `dotnet-service-patterns`              | `ecc/dotnet-patterns` ✅ P2c + csharp-testing             |  ~190 each |         ~300+ | 1.6×+ | **Drop haus pair; sync ECC dotnet** (P2c) ✅                    |
+| WordPress (generic)                  | `wordpress-patterns`                                       | bedrock + acf/elementor (haus)                            |       ~190 |             — |     — | **Drop generic** (P2d) ✅                                       |
+| Expo / RR v7 / Auth / Vendure / etc. | haus-only (see P2e)                                        | —                                                         |   ~130–175 |             — |     — | **Keep haus**                                                   |
+| PHPUnit / Vitest / Jest              | ~~`phpunit-patterns`, `vitest-patterns`, `jest-patterns`~~ | `ecc/laravel-tdd`, `wshobson/js-testing-patterns` _(P2f)_ |  ~190 each |         ~400+ |   2×+ | **Drop haus; sync upstream** (P2f) ✅                           |
 
 ⚠️ = deleted in P1 (`v2.9.1`).
 
@@ -510,7 +516,7 @@ Line counts include `SKILL.md` + all files under the skill dir. **Ratio** = cura
 | Vite                                   | `ecc-vite-patterns` + ~~`vite8-patterns`~~                           | ✅ Drop haus (P2a); keep ECC                                         |
 | shadcn / Tailwind                      | `wshobson-tailwind-design-system` + ~~`radix-shadcn-patterns`~~      | ✅ Drop haus (P2a); keep wshobson                                    |
 | Prisma / Vue / .NET / Playwright / RTL | haus routers vs ECC upstream                                         | ✅ Sync ECC + drop haus (P2c)                                        |
-| PHPUnit / Vitest / Jest                | haus routers vs ECC + wshobson                                       | **Sync** laravel-tdd + javascript-testing; drop haus (P2f)           |
+| PHPUnit / Vitest / Jest                | haus routers vs ECC + wshobson                                       | ✅ Sync laravel-tdd + js-testing-patterns; drop haus (P2f)           |
 | WordPress                              | patterns + bedrock + acf/elementor                                   | ✅ Drop generic patterns (P2d); keep bedrock + acf                   |
 | Stripe                                 | best-practices + upgrade + projects                                  | ✅ Keep best-practices; drop upgrade + projects (P2b)                |
 | Laravel                                | ecc-laravel + verification + plugin-discovery + laravel-tdd          | Keep patterns + verification + tdd; gate plugin-discovery (P2g-4)    |
