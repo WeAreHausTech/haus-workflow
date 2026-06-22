@@ -177,7 +177,7 @@ export const STACK_RULES: DetectionRule[] = [
   { stack: ['tooling', 'missing-eslint'], any: [depAbsent('eslint')] },
   {
     stack: ['tooling', 'stripe'],
-    any: [dep('@stripe/stripe-js'), dep('@stripe/react-stripe-js')],
+    any: [dep('stripe'), dep('@stripe/stripe-js'), dep('@stripe/react-stripe-js')],
   },
   { stack: ['tooling', 'qliro'], any: [dep('@haus-tech/qliro-plugin')] },
   {

@@ -25,7 +25,8 @@
     "haus.phpunit-patterns",
     "haus.vitest-patterns",
     "haus.jest-patterns",
-    "haus.sickn33-docker-expert"
+    "haus.sickn33-docker-expert",
+    "haus.ecc-build-error-resolver"
   ],
   "profiles": {
     "nextjs-app": {
