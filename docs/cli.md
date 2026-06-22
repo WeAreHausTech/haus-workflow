@@ -26,7 +26,7 @@ Output: `.haus-workflow/context-map.json`, `.haus-workflow/dependency-map.json`,
 
 ### `haus recommend [--json]`
 
-Recommend catalog items for the detected stack via binary eligibility (policy gates + match signals; no scores). Includes `recommended[]` with `reasons[]` and `selectionMode`, and `skipped[]` with `skipReasons[]`. If `.haus-workflow/deep-context.json` is present (written by the `writing-documentation` skill), its signals are merged in for a second-pass recommendation.
+Recommend catalog items for the detected stack via binary eligibility (policy gates + match signals; no scores). Includes `recommended[]` with `reasons[]`, `selectionMode`, and `install` (`false` for `config` items). `skipped[]` carries `skipReasons[]`. Config items (ESLint, Prettier) appear when the scanner reports `missing-eslint` / `missing-prettier`; install them with `haus scaffold`, not `haus apply`. If `.haus-workflow/deep-context.json` is present (written by the `writing-documentation` skill), its signals are merged in for a second-pass recommendation.
 
 Output: `.haus-workflow/recommendation.json`
 
@@ -51,7 +51,8 @@ pruned. Empty parent dirs are pruned.
 After writing `.claude/settings.json`, apply runs a self-check that it matches `CANONICAL_HOOKS` in `src/claude/load-hooks.ts`. Throws on drift.
 
 > `config`-type catalog items (ESLint, Prettier) are **not** written by apply — they
-> live in the project root and are user-owned. Distribute them with `haus scaffold`.
+> live in the project root and are user-owned. `haus recommend` surfaces them when
+> `eslint` / `prettier` is missing; distribute files with `haus scaffold`.
 
 ### `haus scaffold [ids...] [--force] [--dry-run] [--root <path>]`
 

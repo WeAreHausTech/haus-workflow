@@ -5,6 +5,8 @@ import path from 'node:path'
 import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, existsSync } from 'node:fs'
 import { execaSync } from 'execa'
 
+import { installableRecommendedItems } from '../src/commands/apply.ts'
+
 const cli = path.resolve('dist/cli.js')
 
 function makeProject(prefix, pkgExtra = {}) {
@@ -25,6 +27,31 @@ function makeProject(prefix, pkgExtra = {}) {
   writeFileSync(path.join(temp, 'yarn.lock'), '# lock')
   return temp
 }
+
+test('installableRecommendedItems excludes config scaffold hints (install:false)', () => {
+  const items = installableRecommendedItems([
+    {
+      id: 'haus.eslint-config',
+      type: 'config',
+      reason: 'Install with `haus scaffold`',
+      reasons: [],
+      selectionMode: 'matched',
+      install: false,
+    },
+    {
+      id: 'haus.writing-documentation',
+      type: 'skill',
+      reason: 'stack match',
+      reasons: [],
+      selectionMode: 'matched',
+      install: true,
+    },
+  ])
+  assert.deepEqual(
+    items.map((item) => item.id),
+    ['haus.writing-documentation'],
+  )
+})
 
 test('apply --select errors when stdin is not a TTY', () => {
   // In execaSync, stdin is piped (not a TTY) — this should trigger the error path.

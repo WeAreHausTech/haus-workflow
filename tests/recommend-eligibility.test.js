@@ -96,20 +96,33 @@ test('UNSUPPORTED gate: python item skipped', async () => {
   }
 })
 
-test('config-scaffold-only gate: config item skipped, never recommended', async () => {
+test('config items: recommended on missing tooling signal, install:false, excluded from token stats', async () => {
   setup()
   try {
-    // Match the config item's role so it would be recommended if not gated out.
-    const result = await recommend(tmpDir, makeContext(tmpDir, { repoRoles: ['next-app'] }))
-    assert.ok(ids(result.skipped).has('test.config-item'), 'config item should be in skipped')
-    const entry = findSkipped(result, 'test.config-item')
-    assert.equal(entry.skipReasons[0].code, 'config-scaffold-only')
-    assert.equal(entry.skipReasons[0].signal, 'type:config')
-    assert.equal(
-      ids(result.recommended).has('test.config-item'),
-      false,
-      'config item must never be recommended/installed by apply',
+    const withoutSignal = await recommend(tmpDir, makeContext(tmpDir))
+    assert.ok(
+      ids(withoutSignal.skipped).has('test.config-item'),
+      'config item should be skipped when missing-eslint is absent',
     )
+    const entry = findSkipped(withoutSignal, 'test.config-item')
+    assert.equal(entry.skipReasons[0].code, 'requires-any-unsatisfied')
+
+    const withSignal = await recommend(
+      tmpDir,
+      makeContext(tmpDir, { detectedStacks: { tooling: ['missing-eslint'] } }),
+    )
+    assert.ok(
+      ids(withSignal.recommended).has('test.config-item'),
+      'config item should be recommended when missing-eslint is present',
+    )
+    const recommended = findRecommended(withSignal, 'test.config-item')
+    assert.equal(recommended.install, false)
+    assert.equal(
+      recommended.reasons.some((reason) => reason.code === 'config-scaffold'),
+      true,
+    )
+    assert.equal(withSignal.selectedRules, 1, 'only default-baseline counts toward token stats')
+    assert.equal(withSignal.estimatedContextTokens, 320)
   } finally {
     teardown()
   }
