@@ -6,19 +6,10 @@ import checkbox from '@inquirer/checkbox'
 import { getCacheDir } from '../catalog/remote-catalog.js'
 import { writeClaudeFiles } from '../claude/write-claude-files.js'
 import type { Recommendation } from '../types.js'
+import { parseIdList } from '../utils/args.js'
 import { readJson } from '../utils/fs.js'
 import { error, log, warn } from '../utils/logger.js'
 import { displayPath, hausPath } from '../utils/paths.js'
-
-/** Normalize a commander variadic/CSV option into a flat, trimmed id list. */
-function parseIdList(value: string[] | string | undefined): string[] {
-  if (!value) return []
-  const raw = Array.isArray(value) ? value : [value]
-  return raw
-    .flatMap((v) => v.split(','))
-    .map((v) => v.trim())
-    .filter((v) => v.length > 0)
-}
 
 async function cacheHasItems(): Promise<boolean> {
   const data = await readJson<{ items?: unknown[] }>(path.join(getCacheDir(), 'manifest.json'))
