@@ -1,5 +1,5 @@
 {
-  "version": "2.9.2",
+  "version": "2.10.0",
   "items": [
     {
       "id": "haus.typescript5-patterns",
@@ -273,37 +273,6 @@
       "riskLevel": "low"
     },
     {
-      "id": "haus.prisma-patterns",
-      "version": "1.0.0",
-      "source": "haus",
-      "type": "skill",
-      "path": "skills/haus-owned/stack-patterns/prisma-patterns",
-      "title": "Haus Prisma patterns",
-      "purpose": "Guide Prisma schema, migration, and query-safe ORM changes.",
-      "whenToUse": "Use for prisma/schema.prisma updates, migrations, and PrismaClient query changes.",
-      "whenNotToUse": "Do not use for non-Prisma ORM tasks or pure DB schema work without Prisma.",
-      "references": ["https://www.prisma.io/llms.txt"],
-      "tokenBudget": 1200,
-      "tags": ["prisma", "backend", "database"],
-      "repoRoles": ["next-app", "nestjs-api"],
-      "requiresAny": [
-        {
-          "stack": "prisma"
-        },
-        {
-          "dependency": "@prisma/client"
-        },
-        {
-          "dependency": "prisma"
-        }
-      ],
-      "ecosystem": "database",
-      "tokenEstimate": 2000,
-      "installMode": "copy-selected",
-      "reviewStatus": "approved",
-      "riskLevel": "low"
-    },
-    {
       "id": "haus.vendure-plugin-patterns",
       "version": "1.0.0",
       "source": "haus",
@@ -331,86 +300,6 @@
       "ecosystem": "vendure",
       "tokenEstimate": 3400,
       "installMode": "copy-selected",
-      "reviewStatus": "approved",
-      "riskLevel": "low"
-    },
-    {
-      "id": "haus.wordpress-patterns",
-      "version": "1.0.0",
-      "source": "haus",
-      "type": "skill",
-      "path": "skills/haus-owned/stack-patterns/wordpress-patterns",
-      "title": "Haus WordPress patterns",
-      "purpose": "Guide WordPress hook/template/plugin/theme runtime changes.",
-      "whenToUse": "Use for WordPress hook/filter/template/plugin/theme behavior updates.",
-      "whenNotToUse": "Do not use for Bedrock-only config bootstrap or non-WP backend tasks.",
-      "references": ["https://developer.wordpress.org/"],
-      "tokenBudget": 1200,
-      "tags": ["backend", "wordpress", "php"],
-      "repoRoles": ["wordpress-site", "wordpress-bedrock-site"],
-      "requiresAny": [
-        {
-          "stack": "wordpress"
-        },
-        {
-          "dependency": "roots/bedrock"
-        }
-      ],
-      "ecosystem": "wordpress",
-      "tokenEstimate": 3000,
-      "installMode": "copy-selected",
-      "reviewStatus": "approved",
-      "riskLevel": "low"
-    },
-    {
-      "id": "haus.dotnet-patterns",
-      "version": "1.0.0",
-      "source": "haus",
-      "type": "skill",
-      "path": "skills/haus-owned/stack-patterns/dotnet-patterns",
-      "title": "Haus .NET patterns",
-      "purpose": "Guide .NET API/service/domain/persistence layer changes.",
-      "whenToUse": "Use for .NET service and endpoint behavior changes with domain impact.",
-      "whenNotToUse": "Do not use for frontend-only or non-.NET runtime tasks.",
-      "tokenBudget": 1200,
-      "tags": ["backend", "dotnet", "csharp"],
-      "repoRoles": ["dotnet-service"],
-      "requiresAny": [
-        {
-          "stack": "dotnet"
-        }
-      ],
-      "ecosystem": "dotnet",
-      "tokenEstimate": 2600,
-      "installMode": "copy-selected",
-      "reviewStatus": "approved",
-      "riskLevel": "low"
-    },
-    {
-      "id": "haus.playwright-patterns",
-      "version": "1.0.0",
-      "source": "haus",
-      "type": "skill",
-      "path": "skills/haus-owned/stack-patterns/playwright-patterns",
-      "title": "Haus Playwright workflow",
-      "purpose": "Guide deterministic E2E browser test flow changes.",
-      "whenToUse": "Use for Playwright specs, fixtures, and browser test stability work.",
-      "whenNotToUse": "Do not use for unit-only test tasks without browser automation.",
-      "references": ["https://playwright.dev/docs/intro"],
-      "tokenBudget": 1200,
-      "tags": ["testing", "playwright"],
-      "repoRoles": ["next-app", "react-app", "vue-app", "test-suite"],
-      "requiresAny": [
-        {
-          "stack": "playwright"
-        },
-        {
-          "dependency": "@playwright/test"
-        }
-      ],
-      "tokenEstimate": 2200,
-      "installMode": "copy-selected",
-      "ecosystem": "playwright",
       "reviewStatus": "approved",
       "riskLevel": "low"
     },
@@ -536,34 +425,6 @@
       "riskLevel": "low"
     },
     {
-      "id": "haus.vue-patterns",
-      "version": "1.0.0",
-      "source": "haus",
-      "type": "skill",
-      "path": "skills/haus-owned/stack-patterns/vue-patterns",
-      "title": "Haus Vue patterns",
-      "purpose": "Guide Vue component/composable/state behavior changes.",
-      "whenToUse": "Use for Vue component, composable, route, and state-boundary updates.",
-      "whenNotToUse": "Do not use for React/Next-only component work.",
-      "references": ["https://vuejs.org/llms.txt"],
-      "tokenBudget": 1200,
-      "tags": ["vue"],
-      "repoRoles": ["vue-app"],
-      "requiresAny": [
-        {
-          "stack": "vue"
-        },
-        {
-          "dependency": "vue"
-        }
-      ],
-      "ecosystem": "vue",
-      "tokenEstimate": 2000,
-      "installMode": "copy-selected",
-      "reviewStatus": "approved",
-      "riskLevel": "low"
-    },
-    {
       "id": "haus.laravel-nova-patterns",
       "version": "1.0.0",
       "source": "haus",
@@ -657,33 +518,6 @@
       "riskLevel": "low"
     },
     {
-      "id": "haus.dotnet-service-patterns",
-      "version": "1.0.0",
-      "source": "haus",
-      "type": "skill",
-      "path": "skills/haus-owned/stack-patterns/dotnet-service-patterns",
-      "title": "Haus dotnet service patterns",
-      "purpose": "Guide .NET service-layer contract and orchestration changes.",
-      "whenToUse": "Use for .NET service boundary, orchestration, and handler behavior updates.",
-      "whenNotToUse": "Do not use for route formatting-only tasks with no service impact.",
-      "tokenBudget": 1200,
-      "tags": ["dotnet"],
-      "repoRoles": ["dotnet-service"],
-      "requiresAny": [
-        {
-          "stack": "dotnet"
-        },
-        {
-          "role": "dotnet-service"
-        }
-      ],
-      "ecosystem": "dotnet",
-      "tokenEstimate": 2300,
-      "installMode": "copy-selected",
-      "reviewStatus": "approved",
-      "riskLevel": "low"
-    },
-    {
       "id": "haus.auth-oidc-azure-bankid-patterns",
       "version": "1.1.0",
       "source": "haus",
@@ -771,40 +605,6 @@
       "tokenEstimate": 1200,
       "installMode": "copy-selected",
       "ecosystem": "packagemanager",
-      "reviewStatus": "approved",
-      "riskLevel": "low"
-    },
-    {
-      "id": "haus.testing-library-patterns",
-      "version": "1.0.0",
-      "source": "haus",
-      "type": "skill",
-      "path": "skills/haus-owned/testing-library-patterns",
-      "title": "Haus testing library patterns",
-      "purpose": "Guide user-visible behavior testing with Testing Library.",
-      "whenToUse": "Use for component interaction tests with @testing-library tooling.",
-      "whenNotToUse": "Do not use for full browser journey tests better served by Playwright.",
-      "references": ["https://vitest.dev/guide"],
-      "tokenBudget": 1200,
-      "tags": ["testing-library"],
-      "repoRoles": [],
-      "requiresAny": [
-        {
-          "stack": "testing-library"
-        },
-        {
-          "dependency": "@testing-library/react"
-        },
-        {
-          "dependency": "@testing-library/dom"
-        },
-        {
-          "packageNamePattern": "@testing-library/*"
-        }
-      ],
-      "tokenEstimate": 1500,
-      "installMode": "copy-selected",
-      "ecosystem": "testing",
       "reviewStatus": "approved",
       "riskLevel": "low"
     },
@@ -1288,7 +1088,7 @@
     },
     {
       "id": "haus.superpowers-using-superpowers",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "source": "curated",
       "type": "skill",
       "path": "skills/superpowers/using-superpowers",
@@ -1307,8 +1107,9 @@
       "license": "MIT",
       "licenseConfidence": "high",
       "originSourceId": "superpowers-pcvelz",
-      "originUrl": "https://github.com/pcvelz/superpowers/tree/bd000c6ec1df53449a74397f55305b22802b9a2b/skills/using-superpowers",
-      "ecosystem": "superpowers"
+      "originUrl": "https://github.com/pcvelz/superpowers/tree/2a392d4b1ec35440116477528f7ff91772cda7a3/skills/using-superpowers",
+      "ecosystem": "superpowers",
+      "pinnedRef": "2a392d4b1ec35440116477528f7ff91772cda7a3"
     },
     {
       "id": "haus.superpowers-verification-before-completion",
@@ -2281,72 +2082,6 @@
       ]
     },
     {
-      "id": "haus.stripe-upgrade-stripe",
-      "version": "1.0.1",
-      "source": "curated",
-      "type": "skill",
-      "path": "skills/stripe/upgrade-stripe",
-      "title": "Stripe Upgrade Stripe",
-      "purpose": "Guide for upgrading Stripe API versions and SDKs",
-      "whenToUse": "Guide for upgrading Stripe API versions and SDKs",
-      "whenNotToUse": "Do not use when a more specific skill or command applies.",
-      "tags": ["workflow", "stripe", "payments"],
-      "repoRoles": [],
-      "tokenEstimate": 1405,
-      "installMode": "copy-selected",
-      "default": false,
-      "reviewStatus": "approved",
-      "riskLevel": "low",
-      "useMode": "copy",
-      "license": "MIT",
-      "licenseConfidence": "medium",
-      "originSourceId": "stripe-ai",
-      "originUrl": "https://github.com/stripe/ai/blob/7e7f72eb42e06f79e7bc75f86e9395f4c8232c00/skills/upgrade-stripe/SKILL.md",
-      "pinnedRef": "7e7f72eb42e06f79e7bc75f86e9395f4c8232c00",
-      "ecosystem": "stripe",
-      "requiresAny": [
-        {
-          "stack": "stripe"
-        },
-        {
-          "dependency": "@stripe/stripe-js"
-        }
-      ]
-    },
-    {
-      "id": "haus.stripe-stripe-projects",
-      "version": "1.0.1",
-      "source": "curated",
-      "type": "skill",
-      "path": "skills/stripe/stripe-projects",
-      "title": "Stripe Stripe Projects",
-      "purpose": "Use when the user wants to provision infrastructure or third-party services using Stripe Projects. Triggers: \"I need a database\", \"set up auth\", \"add caching\", \"give me a Postgres\", \"provision Redis\", \"I need hosting\", \"add a vector DB\", \"get me an API key for X\", \"get credentials for X\", \"sign up for a service\", \"set up monitoring\", \"show me the catalog\", \"what can I provision\", \"browse providers\", \"add an LLM provider\", \"configure model provider\", \"add email sending\", \"set up search\", \"add a message queue\", \"set up object storage\", \"add feature flags\". Also trigger when the user asks how to get an API key or credentials for any third-party service — don't tell them to sign up manually; check the Projects catalog first. Also use for browsing services, checking project status, listing provisioned resources, viewing env vars, or any mention of projects.dev or adding/provisioning/connecting a cloud service.",
-      "whenToUse": "Use when the user wants to provision infrastructure or third-party services using Stripe Projects. Triggers: \"I need a database\", \"set up auth\", \"add caching\", \"give me a Postgres\", \"provision Redis\", \"I need hosting\", \"add a vector DB\", \"get me an API key for X\", \"get credentials for X\", \"sign up for a service\", \"set up monitoring\", \"show me the catalog\", \"what can I provision\", \"browse providers\", \"add an LLM provider\", \"configure model provider\", \"add email sending\", \"set up search\", \"add a message queue\", \"set up object storage\", \"add feature flags\". Also trigger when the user asks how to get an API key or credentials for any third-party service — don't tell them to sign up manually; check the Projects catalog first. Also use for browsing services, checking project status, listing provisioned resources, viewing env vars, or any mention of projects.dev or adding/provisioning/connecting a cloud service.",
-      "whenNotToUse": "Do not use when a more specific skill or command applies.",
-      "tags": ["workflow", "stripe", "payments"],
-      "repoRoles": [],
-      "tokenEstimate": 1452,
-      "installMode": "copy-selected",
-      "default": false,
-      "reviewStatus": "approved",
-      "riskLevel": "low",
-      "useMode": "copy",
-      "license": "MIT",
-      "licenseConfidence": "medium",
-      "originSourceId": "stripe-ai",
-      "originUrl": "https://github.com/stripe/ai/blob/7e7f72eb42e06f79e7bc75f86e9395f4c8232c00/skills/stripe-projects/SKILL.md",
-      "pinnedRef": "7e7f72eb42e06f79e7bc75f86e9395f4c8232c00",
-      "ecosystem": "stripe",
-      "requiresAny": [
-        {
-          "stack": "stripe"
-        },
-        {
-          "dependency": "@stripe/stripe-js"
-        }
-      ]
-    },
-    {
       "id": "haus.supabase-supabase",
       "version": "1.0.1",
       "source": "curated",
@@ -2784,6 +2519,184 @@
       "installMode": "copy-selected",
       "reviewStatus": "approved",
       "riskLevel": "low"
+    },
+    {
+      "id": "haus.ecc-prisma-patterns",
+      "version": "1.0.1",
+      "source": "curated",
+      "type": "skill",
+      "path": "skills/ecc/prisma-patterns",
+      "title": "Ecc Prisma Patterns",
+      "purpose": "Prisma ORM patterns for TypeScript backends — schema design, query optimization, transactions, pagination, and critical traps like updateMany returning count not records, $transaction timeouts, migrate dev resetting the DB, @updatedAt skipped on bulk writes, and serverless connection exhaustion.",
+      "whenToUse": "Prisma ORM patterns for TypeScript backends — schema design, query optimization, transactions, pagination, and critical traps like updateMany returning count not records, $transaction timeouts, migrate dev resetting the DB, @updatedAt skipped on bulk writes, and serverless connection exhaustion.",
+      "whenNotToUse": "Do not use when a more specific skill or command applies.",
+      "tags": ["workflow", "prisma", "backend", "database"],
+      "repoRoles": ["next-app", "nestjs-api"],
+      "tokenEstimate": 3456,
+      "installMode": "copy-selected",
+      "default": false,
+      "reviewStatus": "approved",
+      "riskLevel": "low",
+      "useMode": "copy",
+      "license": "MIT",
+      "licenseConfidence": "high",
+      "originSourceId": "ecc",
+      "originUrl": "https://github.com/affaan-m/ECC/blob/71d22d0a77b7e0684f4e51cba03749b788993cdb/skills/ecc/prisma-patterns/SKILL.md",
+      "pinnedRef": "71d22d0a77b7e0684f4e51cba03749b788993cdb",
+      "ecosystem": "database",
+      "requiresAny": [
+        {
+          "stack": "prisma"
+        },
+        {
+          "dependency": "@prisma/client"
+        },
+        {
+          "dependency": "prisma"
+        }
+      ],
+      "references": ["https://www.prisma.io/llms.txt"]
+    },
+    {
+      "id": "haus.ecc-vue-patterns",
+      "version": "1.0.0",
+      "source": "curated",
+      "type": "skill",
+      "path": "skills/ecc/vue-patterns",
+      "title": "Ecc Vue Patterns",
+      "purpose": "Vue.js 3 Composition API patterns, component architecture, reactivity best practices, Pinia state management, Vue Router navigation, and Nuxt SSR patterns. Activates for Vue, Nuxt, Vite, or Pinia projects.",
+      "whenToUse": "Vue.js 3 Composition API patterns, component architecture, reactivity best practices, Pinia state management, Vue Router navigation, and Nuxt SSR patterns. Activates for Vue, Nuxt, Vite, or Pinia projects.",
+      "whenNotToUse": "Do not use when a more specific skill or command applies.",
+      "tags": ["workflow", "vue"],
+      "repoRoles": ["vue-app"],
+      "tokenEstimate": 3268,
+      "installMode": "copy-selected",
+      "default": false,
+      "reviewStatus": "approved",
+      "riskLevel": "low",
+      "useMode": "copy",
+      "license": "MIT",
+      "licenseConfidence": "high",
+      "originSourceId": "ecc",
+      "originUrl": "https://github.com/affaan-m/ECC/blob/71d22d0a77b7e0684f4e51cba03749b788993cdb/skills/ecc/vue-patterns/SKILL.md",
+      "pinnedRef": "71d22d0a77b7e0684f4e51cba03749b788993cdb",
+      "ecosystem": "vue",
+      "requiresAny": [
+        {
+          "stack": "vue"
+        },
+        {
+          "dependency": "vue"
+        }
+      ],
+      "references": ["https://vuejs.org/llms.txt"]
+    },
+    {
+      "id": "haus.ecc-dotnet-patterns",
+      "version": "1.0.0",
+      "source": "curated",
+      "type": "skill",
+      "path": "skills/ecc/dotnet-patterns",
+      "title": "Ecc Dotnet Patterns",
+      "purpose": "Idiomatic C# and .NET patterns, conventions, dependency injection, async/await, and best practices for building robust, maintainable .NET applications.",
+      "whenToUse": "Idiomatic C# and .NET patterns, conventions, dependency injection, async/await, and best practices for building robust, maintainable .NET applications.",
+      "whenNotToUse": "Do not use when a more specific skill or command applies.",
+      "tags": ["workflow", "backend", "dotnet", "csharp"],
+      "repoRoles": ["dotnet-service"],
+      "tokenEstimate": 2308,
+      "installMode": "copy-selected",
+      "default": false,
+      "reviewStatus": "approved",
+      "riskLevel": "low",
+      "useMode": "copy",
+      "license": "MIT",
+      "licenseConfidence": "high",
+      "originSourceId": "ecc",
+      "originUrl": "https://github.com/affaan-m/ECC/blob/71d22d0a77b7e0684f4e51cba03749b788993cdb/skills/ecc/dotnet-patterns/SKILL.md",
+      "pinnedRef": "71d22d0a77b7e0684f4e51cba03749b788993cdb",
+      "ecosystem": "dotnet",
+      "requiresAny": [
+        {
+          "stack": "dotnet"
+        },
+        {
+          "role": "dotnet-service"
+        }
+      ]
+    },
+    {
+      "id": "haus.ecc-e2e-testing",
+      "version": "1.0.1",
+      "source": "curated",
+      "type": "skill",
+      "path": "skills/ecc/e2e-testing",
+      "title": "Ecc E2e Testing",
+      "purpose": "Playwright E2E testing patterns, Page Object Model, configuration, CI/CD integration, artifact management, and flaky test strategies.",
+      "whenToUse": "Playwright E2E testing patterns, Page Object Model, configuration, CI/CD integration, artifact management, and flaky test strategies.",
+      "whenNotToUse": "Do not use when a more specific skill or command applies.",
+      "tags": ["workflow", "testing", "playwright"],
+      "repoRoles": ["next-app", "react-app", "vue-app", "test-suite"],
+      "tokenEstimate": 2020,
+      "installMode": "copy-selected",
+      "default": false,
+      "reviewStatus": "approved",
+      "riskLevel": "low",
+      "useMode": "copy",
+      "license": "MIT",
+      "licenseConfidence": "high",
+      "originSourceId": "ecc",
+      "originUrl": "https://github.com/affaan-m/ECC/blob/71d22d0a77b7e0684f4e51cba03749b788993cdb/skills/ecc/e2e-testing/SKILL.md",
+      "pinnedRef": "71d22d0a77b7e0684f4e51cba03749b788993cdb",
+      "ecosystem": "playwright",
+      "requiresAny": [
+        {
+          "stack": "playwright"
+        },
+        {
+          "dependency": "@playwright/test"
+        }
+      ],
+      "references": ["https://playwright.dev/docs/intro"]
+    },
+    {
+      "id": "haus.ecc-react-testing",
+      "version": "1.0.0",
+      "source": "curated",
+      "type": "skill",
+      "path": "skills/ecc/react-testing",
+      "title": "Ecc React Testing",
+      "purpose": "React component testing with React Testing Library, Vitest/Jest, MSW for network mocking, accessibility assertions with axe, and the decision boundary between component tests and Playwright/Cypress end-to-end runs. Use when writing or fixing tests for React components, hooks, or pages.",
+      "whenToUse": "React component testing with React Testing Library, Vitest/Jest, MSW for network mocking, accessibility assertions with axe, and the decision boundary between component tests and Playwright/Cypress end-to-end runs. Use when writing or fixing tests for React components, hooks, or pages.",
+      "whenNotToUse": "Do not use when a more specific skill or command applies.",
+      "tags": ["workflow", "testing-library", "testing"],
+      "repoRoles": [],
+      "tokenEstimate": 3292,
+      "installMode": "copy-selected",
+      "default": false,
+      "reviewStatus": "approved",
+      "riskLevel": "low",
+      "useMode": "copy",
+      "license": "MIT",
+      "licenseConfidence": "high",
+      "originSourceId": "ecc",
+      "originUrl": "https://github.com/affaan-m/ECC/blob/71d22d0a77b7e0684f4e51cba03749b788993cdb/skills/ecc/react-testing/SKILL.md",
+      "pinnedRef": "71d22d0a77b7e0684f4e51cba03749b788993cdb",
+      "ecosystem": "testing",
+      "requiresAny": [
+        {
+          "stack": "testing-library"
+        },
+        {
+          "dependency": "@testing-library/react"
+        },
+        {
+          "dependency": "@testing-library/dom"
+        },
+        {
+          "dependency": "react"
+        }
+      ],
+      "references": ["https://vitest.dev/guide"]
     }
   ]
 }
