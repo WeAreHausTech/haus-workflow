@@ -1,5 +1,5 @@
 {
-  "_note": "Subset assertions for recommend() on repo archetypes. Full lists drift with defaults; only pin stack-specific must-include IDs. removedMustNotRecommend: P1-deleted catalog IDs — absent from manifest, so neither recommended nor skipped.",
+  "_note": "Subset assertions for recommend() on repo archetypes. removedMustNotRecommend: deleted catalog IDs — absent from manifest.",
   "removedMustNotRecommend": [
     "haus.stripe-patterns",
     "haus.supabase-patterns",
@@ -12,12 +12,22 @@
     "haus.nextjs-patterns",
     "haus.react19-patterns",
     "haus.vite8-patterns",
-    "haus.radix-shadcn-patterns"
+    "haus.radix-shadcn-patterns",
+    "haus.stripe-upgrade-stripe",
+    "haus.stripe-stripe-projects",
+    "haus.prisma-patterns",
+    "haus.vue-patterns",
+    "haus.dotnet-patterns",
+    "haus.dotnet-service-patterns",
+    "haus.playwright-patterns",
+    "haus.testing-library-patterns",
+    "haus.wordpress-patterns"
   ],
   "profiles": {
     "nextjs-app": {
       "mustInclude": [
         "haus.ecc-frontend-patterns",
+        "haus.ecc-e2e-testing",
         "haus.ecc-typescript-reviewer",
         "haus.ecc-react-reviewer"
       ]
@@ -45,11 +55,7 @@
       ]
     },
     "wordpress-bedrock-site": {
-      "mustInclude": [
-        "haus.wordpress-bedrock-patterns",
-        "haus.wordpress-patterns",
-        "haus.ecc-php-reviewer"
-      ]
+      "mustInclude": ["haus.wordpress-bedrock-patterns", "haus.ecc-php-reviewer"]
     },
     "stripe-supabase-app": {
       "mustInclude": ["haus.stripe-stripe-best-practices", "haus.supabase-supabase"]
