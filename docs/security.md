@@ -1,5 +1,9 @@
 # Security
 
+Runtime agent policy for projects using haus. Catalog **content supply-chain** rules
+(forbidden stacks, install patterns, upstream trust) live in
+[haus-workflow-catalog `docs/security.md`](https://github.com/WeAreHausTech/haus-workflow-catalog/blob/main/docs/security.md).
+
 Defense in depth across three timings: **deterministic** `permissions.deny` / `permissions.ask`
 (PreToolUse, before the model sees the call), **dynamic** PreToolUse guard hooks (real-time
 backstop for the deny tier only), and **commit-time** secret scanning (Lefthook + gitleaks).
