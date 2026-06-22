@@ -1,0 +1,66 @@
+{
+  "version": "1.0.0",
+  "items": [
+    {
+      "id": "test.baseline",
+      "source": "haus",
+      "type": "skill",
+      "path": "skills/baseline",
+      "title": "Test: Baseline",
+      "purpose": "Always recommended.",
+      "tags": ["workflow"],
+      "repoRoles": [],
+      "default": true,
+      "tokenEstimate": 100
+    },
+    {
+      "id": "test.opt-in-code-review",
+      "source": "haus",
+      "type": "skill",
+      "path": "skills/opt-in-code-review",
+      "title": "Test: Code review opt-in",
+      "purpose": "Structured code review workflow.",
+      "tags": ["workflow"],
+      "repoRoles": [],
+      "default": false,
+      "requiresAny": [{ "role": "code-review" }],
+      "ecosystem": "workflow",
+      "optInTier": "workflow",
+      "optInGroup": "Code review workflow",
+      "tokenEstimate": 700
+    },
+    {
+      "id": "test.opt-in-redis-ops",
+      "source": "haus",
+      "type": "skill",
+      "path": "skills/opt-in-redis-ops",
+      "title": "Test: Redis ops opt-in",
+      "purpose": "Redis security & observability.",
+      "tags": ["redis"],
+      "repoRoles": [],
+      "default": false,
+      "requiresAny": [{ "role": "redis-ops" }],
+      "ecosystem": "redis",
+      "optInTier": "ops",
+      "optInGroup": "Redis security & observability",
+      "tokenEstimate": 1900
+    },
+    {
+      "id": "test.deprecated",
+      "source": "haus",
+      "type": "skill",
+      "path": "skills/deprecated",
+      "title": "Test: Deprecated",
+      "purpose": "Hard-blocked; never force-installable.",
+      "tags": ["workflow"],
+      "repoRoles": [],
+      "default": false,
+      "reviewStatus": "deprecated",
+      "requiresAny": [{ "role": "code-review" }],
+      "ecosystem": "workflow",
+      "optInTier": "workflow",
+      "optInGroup": "Code review workflow",
+      "tokenEstimate": 100
+    }
+  ]
+}

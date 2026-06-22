@@ -57,7 +57,14 @@ validateRuntimeNodeVersion()
 
 program.name('haus').description('Haus AI workflow CLI').version(cliVersion())
 program.command('scan').option('--json').action(runScan)
-program.command('recommend').option('--json').action(runRecommend)
+program
+  .command('recommend')
+  .option('--json')
+  .option(
+    '--include <ids...>',
+    'Force opt-in catalog items into the recommendation as manual selections (space- or comma-separated ids)',
+  )
+  .action(runRecommend)
 program.command('setup-project').option('--json').action(runSetupProject)
 program
   .command('doctor')
@@ -68,6 +75,10 @@ program
   .option('--dry-run')
   .option('--write')
   .option('--select', 'Interactively select catalog items before applying')
+  .option(
+    '--ids <ids...>',
+    'Install exactly these recommended item ids non-interactively (skill backend; space- or comma-separated)',
+  )
   .option(
     '--allow-empty-cache',
     'Apply core files only when catalog cache is empty (skip catalog items without error)',

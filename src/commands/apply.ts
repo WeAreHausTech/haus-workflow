@@ -10,6 +10,16 @@ import { readJson } from '../utils/fs.js'
 import { error, log, warn } from '../utils/logger.js'
 import { displayPath, hausPath } from '../utils/paths.js'
 
+/** Normalize a commander variadic/CSV option into a flat, trimmed id list. */
+function parseIdList(value: string[] | string | undefined): string[] {
+  if (!value) return []
+  const raw = Array.isArray(value) ? value : [value]
+  return raw
+    .flatMap((v) => v.split(','))
+    .map((v) => v.trim())
+    .filter((v) => v.length > 0)
+}
+
 async function cacheHasItems(): Promise<boolean> {
   const data = await readJson<{ items?: unknown[] }>(path.join(getCacheDir(), 'manifest.json'))
   return Array.isArray(data?.items) && data.items.length > 0
@@ -30,6 +40,7 @@ export async function runApply(options: {
   dryRun?: boolean
   write?: boolean
   select?: boolean
+  ids?: string[] | string
   allowEmptyCache?: boolean
   refillConfig?: boolean
   force?: boolean
@@ -42,6 +53,29 @@ export async function runApply(options: {
   const isDryRun = Boolean(options.dryRun) && !options.write
 
   let selectedIds: string[] | undefined
+
+  // Non-interactive explicit selection (skill backend; no TTY checkbox).
+  // `--ids` and `--select` are mutually exclusive.
+  const explicitIds = parseIdList(options.ids)
+  if (explicitIds.length > 0) {
+    if (options.select) {
+      error('Use either --select (interactive) or --ids (explicit), not both')
+      process.exitCode = 1
+      return
+    }
+    const rec = await readJson<Recommendation>(hausPath(root, 'recommendation.json'))
+    const installableIds = new Set(
+      installableRecommendedItems(rec?.recommended ?? []).map((i) => i.id),
+    )
+    const unknown = explicitIds.filter((id) => !installableIds.has(id))
+    if (unknown.length > 0) {
+      warn(
+        `--ids: ${unknown.join(', ')} not in recommendation.json — run \`haus recommend --include …\` first. Ignoring.`,
+      )
+    }
+    selectedIds = explicitIds.filter((id) => installableIds.has(id))
+    log(`Applying ${selectedIds.length} explicitly selected catalog item(s).`)
+  }
 
   if (options.select) {
     if (!process.stdin.isTTY) {

@@ -56,6 +56,9 @@ export type CatalogItemRiskLevel = 'low' | 'medium' | 'high' | 'blocked'
 /** Confidence level of the license determination for a curated catalog item. */
 export type CatalogItemLicenseConfidence = 'high' | 'medium' | 'low' | 'unknown'
 
+/** Coarse opt-in category for role-gated items surfaced in the conversational setup UX. */
+export type CatalogItemOptInTier = 'workflow' | 'ops' | 'review' | 'design'
+
 // Schema: https://raw.githubusercontent.com/WeAreHausTech/haus-workflow-catalog/main/schema/catalog-item.schema.json
 // Keep this type in sync with catalog-item.schema.json (haus-workflow-catalog/schema/).
 /** A single entry in the catalog manifest describing a skill, agent, template, or command. */
@@ -84,6 +87,10 @@ export type CatalogItem = {
   requiresAny?: RequiresAnyClause[]
   /** Optional ecosystem family identifier (e.g. `wordpress`, `laravel`, `vendure`, `nextjs`, `nestjs`, `dotnet`, `nx`, `turbo`). Used by recommender for cross-ecosystem conflict detection. */
   ecosystem?: string
+  /** Coarse opt-in category for role-gated (non-default) items, used to surface them in the conversational setup UX. Set together with `optInGroup`. */
+  optInTier?: CatalogItemOptInTier
+  /** Human-readable group label shown when offering this item as an opt-in (e.g. "Code review workflow"). Items toggled together share a group. Set together with `optInTier`. */
+  optInGroup?: string
   // Curated external provenance — present when source === "curated"
   /** Catalog source id for this item's origin (e.g. `anthropic-skills`). */
   originSourceId?: string
@@ -156,7 +163,8 @@ export type Recommendation = {
     type: string
     reason: string
     reasons: Array<{ code: string; message: string; signal?: string }>
-    selectionMode: 'baseline' | 'matched'
+    /** `baseline` = catalog default with no signals; `matched` = signal-driven; `manual` = forced in via `--include`. */
+    selectionMode: 'baseline' | 'matched' | 'manual'
     install: boolean
     /** Catalog tags echoed from the manifest entry. Additive optional field. */
     tags?: string[]
@@ -169,6 +177,22 @@ export type Recommendation = {
     id: string
     reason: string
     skipReasons: Array<{ code: string; message: string; signal?: string }>
+  }>
+  /**
+   * Opt-in tier items the user could add but which were skipped because their
+   * role gate is unsatisfied. Surfaced (grouped by optInGroup) so the setup UX
+   * can offer them via `haus recommend --include <id>`. Additive optional field.
+   */
+  optInEligible?: Array<{
+    id: string
+    type: string
+    title?: string
+    optInTier: string
+    optInGroup: string
+    purpose?: string
+    tokenEstimate?: number
+    /** Human description of the gate that would need to be satisfied (e.g. "role=code-review"). */
+    requires: string
   }>
   warnings: string[]
   estimatedContextTokens: number
