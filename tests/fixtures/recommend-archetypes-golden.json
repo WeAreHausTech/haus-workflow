@@ -21,7 +21,10 @@
     "haus.dotnet-service-patterns",
     "haus.playwright-patterns",
     "haus.testing-library-patterns",
-    "haus.wordpress-patterns"
+    "haus.wordpress-patterns",
+    "haus.phpunit-patterns",
+    "haus.vitest-patterns",
+    "haus.jest-patterns"
   ],
   "profiles": {
     "nextjs-app": {
@@ -37,14 +40,18 @@
         "haus.ecc-nestjs-patterns",
         "haus.ecc-security-reviewer",
         "haus.apollo-apollo-server",
-        "haus.apollo-graphql-schema"
+        "haus.apollo-graphql-schema",
+        "haus.wshobson-js-testing-patterns",
+        "haus.apollo-apollo-federation",
+        "haus.apollo-graphql-operations"
       ]
     },
     "laravel-app": {
       "mustInclude": [
         "haus.ecc-laravel-patterns",
         "haus.ecc-php-reviewer",
-        "haus.sentry-sentry-php-sdk"
+        "haus.sentry-sentry-php-sdk",
+        "haus.ecc-laravel-tdd"
       ]
     },
     "vendure-monorepo": {
@@ -58,7 +65,11 @@
       "mustInclude": ["haus.wordpress-bedrock-patterns", "haus.ecc-php-reviewer"]
     },
     "stripe-supabase-app": {
-      "mustInclude": ["haus.stripe-stripe-best-practices", "haus.supabase-supabase"]
+      "mustInclude": [
+        "haus.stripe-stripe-best-practices",
+        "haus.supabase-supabase",
+        "haus.supabase-supabase-postgres-best-practices"
+      ]
     }
   }
 }

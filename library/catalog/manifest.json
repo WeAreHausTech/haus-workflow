@@ -1,5 +1,5 @@
 {
-  "version": "2.10.0",
+  "version": "2.11.0",
   "items": [
     {
       "id": "haus.typescript5-patterns",
@@ -605,100 +605,6 @@
       "tokenEstimate": 1200,
       "installMode": "copy-selected",
       "ecosystem": "packagemanager",
-      "reviewStatus": "approved",
-      "riskLevel": "low"
-    },
-    {
-      "id": "haus.vitest-patterns",
-      "version": "1.0.0",
-      "source": "haus",
-      "type": "skill",
-      "path": "skills/haus-owned/stack-patterns/vitest-patterns",
-      "title": "Haus Vitest patterns",
-      "purpose": "Guide Vitest unit/integration test structure, mocking, and coverage config.",
-      "whenToUse": "Use when writing or modifying Vitest tests in TypeScript/JS frontends and Node services.",
-      "whenNotToUse": "Do not use for Jest, Playwright, or PHPUnit test tasks.",
-      "references": ["https://vitest.dev/llms.txt"],
-      "tokenBudget": 1200,
-      "tags": ["testing", "vitest", "typescript"],
-      "repoRoles": [
-        "next-app",
-        "react-app",
-        "vue-app",
-        "vite-app",
-        "vendure-app",
-        "vendure-plugin"
-      ],
-      "requiresAny": [
-        {
-          "stack": "vitest"
-        },
-        {
-          "dependency": "vitest"
-        }
-      ],
-      "ecosystem": "testing",
-      "tokenEstimate": 1500,
-      "installMode": "copy-selected",
-      "reviewStatus": "approved",
-      "riskLevel": "low"
-    },
-    {
-      "id": "haus.jest-patterns",
-      "version": "1.0.0",
-      "source": "haus",
-      "type": "skill",
-      "path": "skills/haus-owned/stack-patterns/jest-patterns",
-      "title": "Haus Jest patterns",
-      "purpose": "Guide Jest unit/integration test structure, mocking, and Nx-style setup.",
-      "whenToUse": "Use when writing or modifying Jest tests, including Nx workspace projects.",
-      "whenNotToUse": "Do not use for Vitest, Playwright, or PHPUnit test tasks.",
-      "references": ["https://jestjs.io/docs/getting-started"],
-      "tokenBudget": 1200,
-      "tags": ["testing", "jest", "typescript"],
-      "repoRoles": ["next-app", "react-app", "nx-monorepo"],
-      "requiresAny": [
-        {
-          "stack": "jest"
-        },
-        {
-          "dependency": "jest"
-        },
-        {
-          "dependency": "jest-environment-jsdom"
-        }
-      ],
-      "ecosystem": "testing",
-      "tokenEstimate": 1500,
-      "installMode": "copy-selected",
-      "reviewStatus": "approved",
-      "riskLevel": "low"
-    },
-    {
-      "id": "haus.phpunit-patterns",
-      "version": "1.0.0",
-      "source": "haus",
-      "type": "skill",
-      "path": "skills/haus-owned/stack-patterns/phpunit-patterns",
-      "title": "Haus PHPUnit patterns",
-      "purpose": "Guide PHPUnit feature/unit test changes for PHP/Laravel behavior.",
-      "whenToUse": "Use for PHPUnit tests tied to backend behavior updates.",
-      "whenNotToUse": "Do not use for frontend/browser-only test tasks.",
-      "references": ["https://laravel.com/docs"],
-      "tokenBudget": 1200,
-      "tags": ["phpunit"],
-      "repoRoles": ["laravel-app", "laravel-nova-app"],
-      "requiresAny": [
-        {
-          "stack": "phpunit"
-        },
-        {
-          "dependency": "phpunit/phpunit"
-        }
-      ],
-      "ecosystem": "laravel",
-      "tokenEstimate": 1500,
-      "installMode": "copy-selected",
       "reviewStatus": "approved",
       "riskLevel": "low"
     },
@@ -2478,6 +2384,427 @@
         },
         {
           "packageNamePattern": "@sentry/*"
+        }
+      ]
+    },
+    {
+      "id": "haus.ecc-laravel-tdd",
+      "version": "1.0.0",
+      "source": "curated",
+      "type": "skill",
+      "path": "skills/ecc/laravel-tdd",
+      "title": "Ecc Laravel Tdd",
+      "purpose": "Laravel testing strategies with PHPUnit, Pest, model factories, HTTP tests, Sanctum authentication testing, mocking, and coverage.",
+      "whenToUse": "Laravel testing strategies with PHPUnit, Pest, model factories, HTTP tests, Sanctum authentication testing, mocking, and coverage.",
+      "whenNotToUse": "Do not use when a more specific skill or command applies.",
+      "tags": ["workflow", "laravel", "phpunit", "testing"],
+      "repoRoles": ["laravel-app", "laravel-nova-app"],
+      "tokenEstimate": 4443,
+      "installMode": "copy-selected",
+      "default": false,
+      "reviewStatus": "approved",
+      "riskLevel": "low",
+      "useMode": "copy",
+      "license": "MIT",
+      "licenseConfidence": "high",
+      "originSourceId": "ecc-affaanm",
+      "originUrl": "https://github.com/affaan-m/ECC/blob/71d22d0a77b7e0684f4e51cba03749b788993cdb/skills/laravel-tdd/SKILL.md",
+      "pinnedRef": "71d22d0a77b7e0684f4e51cba03749b788993cdb",
+      "ecosystem": "laravel",
+      "requiresAny": [
+        {
+          "stack": "laravel"
+        },
+        {
+          "dependency": "laravel/framework"
+        },
+        {
+          "stack": "phpunit"
+        },
+        {
+          "dependency": "phpunit/phpunit"
+        }
+      ]
+    },
+    {
+      "id": "haus.wshobson-js-testing-patterns",
+      "version": "1.0.0",
+      "source": "curated",
+      "type": "skill",
+      "path": "skills/wshobson/js-testing-patterns",
+      "title": "Wshobson Javascript Testing Patterns",
+      "purpose": "Implement comprehensive testing strategies using Jest, Vitest, and Testing Library for unit tests, integration tests, and end-to-end testing with mocking, fixtures, and test-driven development. Use when writing JavaScript/TypeScript tests, setting up test infrastructure, or implementing TDD/BDD workflows.",
+      "whenToUse": "Implement comprehensive testing strategies using Jest, Vitest, and Testing Library for unit tests, integration tests, and end-to-end testing with mocking, fixtures, and test-driven development. Use when writing JavaScript/TypeScript tests, setting up test infrastructure, or implementing TDD/BDD workflows.",
+      "whenNotToUse": "Prefer ecc-react-testing for React component tests with Testing Library.",
+      "tags": ["workflow", "testing", "vitest", "jest", "typescript"],
+      "repoRoles": [
+        "next-app",
+        "react-app",
+        "vue-app",
+        "vite-app",
+        "vendure-app",
+        "vendure-plugin",
+        "nx-monorepo",
+        "nestjs-api"
+      ],
+      "tokenEstimate": 3658,
+      "installMode": "copy-selected",
+      "default": false,
+      "reviewStatus": "approved",
+      "riskLevel": "low",
+      "useMode": "copy",
+      "license": "MIT",
+      "licenseConfidence": "medium",
+      "originSourceId": "wshobson-agents",
+      "originUrl": "https://github.com/wshobson/agents/blob/cc37bfdd292ce520ba1c44df7a3a70d5f8137236/plugins/javascript-typescript/skills/javascript-testing-patterns/SKILL.md",
+      "pinnedRef": "cc37bfdd292ce520ba1c44df7a3a70d5f8137236",
+      "ecosystem": "testing",
+      "requiresAny": [
+        {
+          "stack": "vitest"
+        },
+        {
+          "dependency": "vitest"
+        },
+        {
+          "stack": "jest"
+        },
+        {
+          "dependency": "jest"
+        },
+        {
+          "dependency": "jest-environment-jsdom"
+        },
+        {
+          "stack": "nestjs"
+        },
+        {
+          "dependency": "@nestjs/core"
+        }
+      ]
+    },
+    {
+      "id": "haus.wshobson-typescript-advanced-types",
+      "version": "1.0.0",
+      "source": "curated",
+      "type": "skill",
+      "path": "skills/wshobson/typescript-advanced-types",
+      "title": "Wshobson Typescript Advanced Types",
+      "purpose": "Master TypeScript's advanced type system including generics, conditional types, mapped types, template literals, and utility types for building type-safe applications. Use when implementing complex type logic, creating reusable type utilities, or ensuring compile-time type safety in TypeScript projects.",
+      "whenToUse": "Master TypeScript's advanced type system including generics, conditional types, mapped types, template literals, and utility types for building type-safe applications. Use when implementing complex type logic, creating reusable type utilities, or ensuring compile-time type safety in TypeScript projects.",
+      "whenNotToUse": "Use haus.typescript5-patterns for contract boundaries and migration-safe typing.",
+      "tags": ["workflow", "typescript", "frontend", "backend"],
+      "repoRoles": [
+        "next-app",
+        "react-app",
+        "nestjs-api",
+        "vendure-plugin",
+        "vendure-app",
+        "shared-package"
+      ],
+      "tokenEstimate": 2009,
+      "installMode": "copy-selected",
+      "default": false,
+      "reviewStatus": "approved",
+      "riskLevel": "low",
+      "useMode": "copy",
+      "license": "MIT",
+      "licenseConfidence": "medium",
+      "originSourceId": "wshobson-agents",
+      "originUrl": "https://github.com/wshobson/agents/blob/cc37bfdd292ce520ba1c44df7a3a70d5f8137236/plugins/javascript-typescript/skills/typescript-advanced-types/SKILL.md",
+      "pinnedRef": "cc37bfdd292ce520ba1c44df7a3a70d5f8137236",
+      "ecosystem": "typescript",
+      "requiresAny": [
+        {
+          "stack": "typescript5"
+        },
+        {
+          "stack": "typescript"
+        },
+        {
+          "dependency": "typescript"
+        }
+      ]
+    },
+    {
+      "id": "haus.ecc-redis-patterns",
+      "version": "1.0.0",
+      "source": "curated",
+      "type": "skill",
+      "path": "skills/ecc/redis-patterns",
+      "title": "Ecc Redis Patterns",
+      "purpose": "Redis data structure patterns, caching strategies, distributed locks, rate limiting, pub/sub, and connection management for production applications.",
+      "whenToUse": "Redis data structure patterns, caching strategies, distributed locks, rate limiting, pub/sub, and connection management for production applications.",
+      "whenNotToUse": "Use haus.bullmq-patterns for BullMQ queue-specific work.",
+      "tags": ["workflow", "redis", "backend", "database"],
+      "repoRoles": ["vendure-app", "nestjs-api"],
+      "tokenEstimate": 2966,
+      "installMode": "copy-selected",
+      "default": false,
+      "reviewStatus": "approved",
+      "riskLevel": "low",
+      "useMode": "copy",
+      "license": "MIT",
+      "licenseConfidence": "high",
+      "originSourceId": "ecc-affaanm",
+      "originUrl": "https://github.com/affaan-m/ECC/blob/71d22d0a77b7e0684f4e51cba03749b788993cdb/skills/redis-patterns/SKILL.md",
+      "pinnedRef": "71d22d0a77b7e0684f4e51cba03749b788993cdb",
+      "ecosystem": "database",
+      "requiresAny": [
+        {
+          "stack": "redis"
+        },
+        {
+          "dependency": "redis"
+        },
+        {
+          "dependency": "ioredis"
+        }
+      ]
+    },
+    {
+      "id": "haus.supabase-supabase-postgres-best-practices",
+      "version": "1.0.0",
+      "source": "curated",
+      "type": "skill",
+      "path": "skills/supabase/supabase-postgres-best-practices",
+      "title": "Supabase Supabase Postgres Best Practices",
+      "purpose": "Postgres performance optimization and best practices from Supabase. Use this skill when writing, reviewing, or optimizing Postgres queries, schema designs, or database configurations.",
+      "whenToUse": "Postgres performance optimization and best practices from Supabase. Use this skill when writing, reviewing, or optimizing Postgres queries, schema designs, or database configurations.",
+      "whenNotToUse": "Use haus.supabase-supabase for product workflow, auth, and client integration.",
+      "tags": ["workflow", "supabase", "backend", "database"],
+      "repoRoles": [],
+      "tokenEstimate": 644,
+      "installMode": "copy-selected",
+      "default": false,
+      "reviewStatus": "approved",
+      "riskLevel": "low",
+      "useMode": "copy",
+      "license": "MIT",
+      "licenseConfidence": "medium",
+      "originSourceId": "supabase-agent-skills",
+      "originUrl": "https://github.com/supabase/agent-skills/blob/1356046015476711a769601079262b5635929427/skills/supabase-postgres-best-practices/SKILL.md",
+      "pinnedRef": "1356046015476711a769601079262b5635929427",
+      "ecosystem": "supabase",
+      "requiresAny": [
+        {
+          "stack": "supabase"
+        },
+        {
+          "dependency": "@supabase/supabase-js"
+        }
+      ]
+    },
+    {
+      "id": "haus.sentry-sentry-nextjs-sdk",
+      "version": "1.0.0",
+      "source": "curated",
+      "type": "skill",
+      "path": "skills/sentry/sentry-nextjs-sdk",
+      "title": "Sentry Sentry Nextjs Sdk",
+      "purpose": "Full Sentry SDK setup for Next.js. Use when asked to \"add Sentry to Next.js\", \"install @sentry/nextjs\", or configure error monitoring, tracing, session replay, logging, profiling, AI monitoring, or crons for Next.js applications. Supports Next.js 13+ with App Router and Pages Router.",
+      "whenToUse": "Full Sentry SDK setup for Next.js. Use when asked to \"add Sentry to Next.js\", \"install @sentry/nextjs\", or configure error monitoring, tracing, session replay, logging, profiling, AI monitoring, or crons for Next.js applications. Supports Next.js 13+ with App Router and Pages Router.",
+      "whenNotToUse": "Do not use when a more specific skill or command applies.",
+      "tags": ["workflow", "sentry", "nextjs", "observability"],
+      "repoRoles": [],
+      "tokenEstimate": 4542,
+      "installMode": "copy-selected",
+      "default": false,
+      "reviewStatus": "approved",
+      "riskLevel": "low",
+      "useMode": "copy",
+      "license": "MIT",
+      "licenseConfidence": "high",
+      "originSourceId": "getsentry-sentry-for-ai",
+      "originUrl": "https://github.com/getsentry/sentry-for-ai/blob/9ab3551758913a4144517d4fafb71476a48c64f8/skills/sentry-nextjs-sdk/SKILL.md",
+      "pinnedRef": "9ab3551758913a4144517d4fafb71476a48c64f8",
+      "ecosystem": "sentry",
+      "requiresAny": [
+        {
+          "dependency": "@sentry/nextjs"
+        },
+        {
+          "stack": "sentry"
+        }
+      ]
+    },
+    {
+      "id": "haus.sentry-sentry-node-sdk",
+      "version": "1.0.0",
+      "source": "curated",
+      "type": "skill",
+      "path": "skills/sentry/sentry-node-sdk",
+      "title": "Sentry Sentry Node Sdk",
+      "purpose": "Full Sentry SDK setup for Node.js, Bun, and Deno. Use when asked to \"add Sentry to Node.js\", \"add Sentry to Bun\", \"add Sentry to Deno\", \"install @sentry/node\", \"@sentry/bun\", or \"@sentry/deno\", or configure error monitoring, tracing, logging, profiling, metrics, crons, or AI monitoring for server-side JavaScript/TypeScript runtimes.",
+      "whenToUse": "Full Sentry SDK setup for Node.js, Bun, and Deno. Use when asked to \"add Sentry to Node.js\", \"add Sentry to Bun\", \"add Sentry to Deno\", \"install @sentry/node\", \"@sentry/bun\", or \"@sentry/deno\", or configure error monitoring, tracing, logging, profiling, metrics, crons, or AI monitoring for server-side JavaScript/TypeScript runtimes.",
+      "whenNotToUse": "Prefer sentry-nestjs-sdk for NestJS apps using @sentry/nestjs.",
+      "tags": ["workflow", "sentry", "backend", "observability"],
+      "repoRoles": [],
+      "tokenEstimate": 8085,
+      "installMode": "copy-selected",
+      "default": false,
+      "reviewStatus": "approved",
+      "riskLevel": "low",
+      "useMode": "copy",
+      "license": "MIT",
+      "licenseConfidence": "high",
+      "originSourceId": "getsentry-sentry-for-ai",
+      "originUrl": "https://github.com/getsentry/sentry-for-ai/blob/9ab3551758913a4144517d4fafb71476a48c64f8/skills/sentry-node-sdk/SKILL.md",
+      "pinnedRef": "9ab3551758913a4144517d4fafb71476a48c64f8",
+      "ecosystem": "sentry",
+      "requiresAny": [
+        {
+          "dependency": "@sentry/node"
+        },
+        {
+          "stack": "sentry"
+        }
+      ]
+    },
+    {
+      "id": "haus.sentry-sentry-nestjs-sdk",
+      "version": "1.0.0",
+      "source": "curated",
+      "type": "skill",
+      "path": "skills/sentry/sentry-nestjs-sdk",
+      "title": "Sentry Sentry Nestjs Sdk",
+      "purpose": "Full Sentry SDK setup for NestJS. Use when asked to \"add Sentry to NestJS\", \"install @sentry/nestjs\", \"setup Sentry in NestJS\", or configure error monitoring, tracing, profiling, logging, metrics, crons, or AI monitoring for NestJS applications. Supports Express and Fastify adapters, GraphQL, microservices, WebSockets, and background jobs.",
+      "whenToUse": "Full Sentry SDK setup for NestJS. Use when asked to \"add Sentry to NestJS\", \"install @sentry/nestjs\", \"setup Sentry in NestJS\", or configure error monitoring, tracing, profiling, logging, metrics, crons, or AI monitoring for NestJS applications. Supports Express and Fastify adapters, GraphQL, microservices, WebSockets, and background jobs.",
+      "whenNotToUse": "Do not use when a more specific skill or command applies.",
+      "tags": ["workflow", "sentry", "nestjs", "observability"],
+      "repoRoles": [],
+      "tokenEstimate": 8787,
+      "installMode": "copy-selected",
+      "default": false,
+      "reviewStatus": "approved",
+      "riskLevel": "low",
+      "useMode": "copy",
+      "license": "MIT",
+      "licenseConfidence": "high",
+      "originSourceId": "getsentry-sentry-for-ai",
+      "originUrl": "https://github.com/getsentry/sentry-for-ai/blob/9ab3551758913a4144517d4fafb71476a48c64f8/skills/sentry-nestjs-sdk/SKILL.md",
+      "pinnedRef": "9ab3551758913a4144517d4fafb71476a48c64f8",
+      "ecosystem": "sentry",
+      "requiresAny": [
+        {
+          "dependency": "@sentry/nestjs"
+        },
+        {
+          "stack": "sentry"
+        }
+      ]
+    },
+    {
+      "id": "haus.apollo-apollo-federation",
+      "version": "1.0.0",
+      "source": "curated",
+      "type": "skill",
+      "path": "skills/apollo/apollo-federation",
+      "title": "Apollo Apollo Federation",
+      "purpose": ">",
+      "whenToUse": ">",
+      "whenNotToUse": "Do not use when a more specific skill or command applies.",
+      "tags": ["workflow", "graphql", "nestjs"],
+      "repoRoles": [],
+      "tokenEstimate": 900,
+      "installMode": "copy-selected",
+      "default": false,
+      "reviewStatus": "approved",
+      "riskLevel": "low",
+      "useMode": "copy",
+      "license": "MIT",
+      "licenseConfidence": "high",
+      "originSourceId": "apollographql-skills",
+      "originUrl": "https://github.com/apollographql/skills/blob/605089108a198e412f7f0c1926c91eb94a6d1727/skills/apollo-federation/SKILL.md",
+      "pinnedRef": "605089108a198e412f7f0c1926c91eb94a6d1727",
+      "ecosystem": "graphql",
+      "requiresAny": [
+        {
+          "stack": "graphql"
+        },
+        {
+          "dependency": "graphql"
+        },
+        {
+          "dependency": "@apollo/server"
+        },
+        {
+          "dependency": "@nestjs/graphql"
+        }
+      ]
+    },
+    {
+      "id": "haus.apollo-graphql-operations",
+      "version": "1.0.0",
+      "source": "curated",
+      "type": "skill",
+      "path": "skills/apollo/graphql-operations",
+      "title": "Apollo Graphql Operations",
+      "purpose": ">",
+      "whenToUse": ">",
+      "whenNotToUse": "Do not use when a more specific skill or command applies.",
+      "tags": ["workflow", "graphql"],
+      "repoRoles": [],
+      "tokenEstimate": 1128,
+      "installMode": "copy-selected",
+      "default": false,
+      "reviewStatus": "approved",
+      "riskLevel": "low",
+      "useMode": "copy",
+      "license": "MIT",
+      "licenseConfidence": "high",
+      "originSourceId": "apollographql-skills",
+      "originUrl": "https://github.com/apollographql/skills/blob/605089108a198e412f7f0c1926c91eb94a6d1727/skills/graphql-operations/SKILL.md",
+      "pinnedRef": "605089108a198e412f7f0c1926c91eb94a6d1727",
+      "ecosystem": "graphql",
+      "requiresAny": [
+        {
+          "stack": "graphql"
+        },
+        {
+          "dependency": "graphql"
+        },
+        {
+          "dependency": "@apollo/server"
+        },
+        {
+          "dependency": "@nestjs/graphql"
+        }
+      ]
+    },
+    {
+      "id": "haus.apollo-apollo-client",
+      "version": "1.0.0",
+      "source": "curated",
+      "type": "skill",
+      "path": "skills/apollo/apollo-client",
+      "title": "Apollo Apollo Client",
+      "purpose": ">",
+      "whenToUse": ">",
+      "whenNotToUse": "Do not use when a more specific skill or command applies.",
+      "tags": ["workflow", "graphql", "react", "nextjs"],
+      "repoRoles": [],
+      "tokenEstimate": 1856,
+      "installMode": "copy-selected",
+      "default": false,
+      "reviewStatus": "approved",
+      "riskLevel": "low",
+      "useMode": "copy",
+      "license": "MIT",
+      "licenseConfidence": "high",
+      "originSourceId": "apollographql-skills",
+      "originUrl": "https://github.com/apollographql/skills/blob/605089108a198e412f7f0c1926c91eb94a6d1727/skills/apollo-client/SKILL.md",
+      "pinnedRef": "605089108a198e412f7f0c1926c91eb94a6d1727",
+      "ecosystem": "graphql",
+      "requiresAny": [
+        {
+          "dependency": "@apollo/client"
+        },
+        {
+          "stack": "graphql"
+        },
+        {
+          "dependency": "graphql"
         }
       ]
     },
