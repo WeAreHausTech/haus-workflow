@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.30.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.29.0...v0.30.0) (2026-06-22)
+
+### Features
+
+- auto recommend config setups ([#137](https://github.com/WeAreHausTech/haus-workflow/issues/137)) ([56e7941](https://github.com/WeAreHausTech/haus-workflow/commit/56e79413a6cfe00e35f5e48abd03baeeb377214f))
+- **cloneandsetup:** reuse local env values, never commit secrets ([#130](https://github.com/WeAreHausTech/haus-workflow/issues/130)) ([cf74a19](https://github.com/WeAreHausTech/haus-workflow/commit/cf74a196d369fbc59798de97e76bbcd3120155f7))
+- co-install suppression and recommender gates ([#134](https://github.com/WeAreHausTech/haus-workflow/issues/134)) ([4ca1f20](https://github.com/WeAreHausTech/haus-workflow/commit/4ca1f20a6b90645cd7007d195e6cc474558cc971))
+- curated source tools exempt from non-tsx npx ban and update archetype dependencies ([#132](https://github.com/WeAreHausTech/haus-workflow/issues/132)) ([a63d0b2](https://github.com/WeAreHausTech/haus-workflow/commit/a63d0b224ee9d1fd7b686b9aa3979562228f2333))
+- prune deprecated catalog items on apply/update ([#126](https://github.com/WeAreHausTech/haus-workflow/issues/126)) ([fdf6ecc](https://github.com/WeAreHausTech/haus-workflow/commit/fdf6ecc1d36f4eb090cdaa8d9b044381c5836c77))
+- stripe server gate [#139](https://github.com/WeAreHausTech/haus-workflow/issues/139) ([fb2dc35](https://github.com/WeAreHausTech/haus-workflow/commit/fb2dc35b0d332cdd6f3c7dcbaebef94dce06899c))
+
 ## [0.29.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.28.1...v0.29.0) (2026-06-17)
 
 ### Features
