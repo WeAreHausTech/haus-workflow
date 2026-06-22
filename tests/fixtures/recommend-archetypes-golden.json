@@ -8,13 +8,16 @@
     "haus.laravel-patterns",
     "haus.nestjs-graphql-patterns",
     "haus.tailwind-scss-patterns",
-    "haus.database-patterns"
+    "haus.database-patterns",
+    "haus.nextjs-patterns",
+    "haus.react19-patterns",
+    "haus.vite8-patterns",
+    "haus.radix-shadcn-patterns"
   ],
   "profiles": {
     "nextjs-app": {
       "mustInclude": [
-        "haus.nextjs-patterns",
-        "haus.react19-patterns",
+        "haus.ecc-frontend-patterns",
         "haus.ecc-typescript-reviewer",
         "haus.ecc-react-reviewer"
       ]
