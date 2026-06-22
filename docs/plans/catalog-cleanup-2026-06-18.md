@@ -1,7 +1,7 @@
 # Catalog Skills & Agents Cleanup — 2026-06-18
 
 Repos: `haus-workflow` · `haus-workflow-catalog`
-Status: **In progress** — P0 ✅ P1 ✅ P2a ✅ P2b ✅ P2c ✅ P2d ✅ P2f catalog ✅ (2026-06-22); fixture PR open; P2g+ open
+Status: **In progress** — P0 ✅ P1 ✅ P2a ✅ P2b ✅ P2c ✅ P2d ✅ P2f catalog ✅ P5 ✅ (2026-06-22, catalog `v2.13.0` #33; CLI branch `feat/p5-opt-in-ux`); P2g+ / P3 / P4 tracked above
 Context: Full catalog review of 82 skills + 16 agents; duplicate/overlap analysis and baseline token reduction.
 
 ### Content preference policy
@@ -58,7 +58,7 @@ Merge each PR to `main` before starting the next branch — no stacking. Run `ya
 | **P2g** | `haus-workflow-catalog` (+ recommender)       | Co-install bloat: tier clusters, gate audit **(P2g-10)** |                                                                                                             |
 | **P3**  | `haus-workflow-catalog` (+ recommender tests) | Tier baseline superpowers + agents                       |                                                                                                             |
 | **P4**  | `haus-workflow-catalog`                       | Agent dedup                                              | ✅ catalog `v2.12.2`; CLI fixture PR                                                                        |
-| **P5**  | `haus-workflow` (+ catalog metadata)          | Opt-in UX — Claude Code-first; CLI as backend            |                                                                                                             |
+| **P5**  | `haus-workflow` (+ catalog metadata)          | Opt-in UX — Claude Code-first; CLI as backend            | ✅ catalog `v2.13.0` #33; CLI branch `feat/p5-opt-in-ux` (P5-3 N/A — see note)                              |
 | **P6**  | Both                                          | Docs, release notes, fixture sync                        |                                                                                                             |
 
 ### Target outcomes
@@ -483,46 +483,44 @@ Estimated savings: ~37k tokens on every project (see P2g-1 for full tier breakdo
 
 **Goal:** Every setup path offers opt-in during first run; `haus-workflow` offers a standing **"add skills later"** flow any time. Config scaffold (ESLint/Prettier) is surfaced the same way — plain-language choices in Claude Code, not raw CLI flags.
 
-#### P5-0 — Catalog metadata for conversational UI (`haus-workflow-catalog`)
+#### P5-0 — Catalog metadata for conversational UI (`haus-workflow-catalog`) ✅
 
-- [ ] **P5-0a** — Add manifest fields (or a derived `opt-in-catalog.json` artifact) so skills can present human labels: `optInTier`, `optInGroup` (e.g. "Workflow", "Code review", "Redis ops"), one-line `purpose` blurb, `tokenEstimate`
-- [ ] **P5-0b** — Map role-only gates → opt-in groups (e.g. `role:code-review` → receiving + requesting superpowers; `role:redis-ops` → security + observability)
-- [ ] **P5-0c** — `yarn validate` accepts new fields; fixture lists expected opt-in groups per archetype
+- [x] **P5-0a** — Added manifest fields `optInTier` (enum `workflow|ops|review|design`) + `optInGroup` to the 16 role-gated items (`purpose`/`tokenEstimate` already present). Schema + `validate-core.mjs` audit (co-presence, tier enum, baseline-exclusion, role-only completeness)
+- [x] **P5-0b** — Role → opt-in group mapped on every role-only item (e.g. `code-review` → "Code review workflow"; `redis-ops` → "Redis security & observability")
+- [x] **P5-0c** — `yarn validate` accepts the fields; `tests/opt-in-metadata.test.mjs` asserts all 16 labelled + co-presence/enum/baseline rules. Released catalog `v2.13.0` ([catalog #33](https://github.com/WeAreHausTech/haus-workflow-catalog/pull/33))
 
-#### P5-1 — CLI primitives (invoked by skills, not documented as primary UX)
+#### P5-1 — CLI primitives (invoked by skills, not documented as primary UX) ✅
 
-- [ ] **P5-1a** — `haus recommend --json` (or new `haus catalog opt-in --json`) emits `optInEligible[]` — skipped items user may add, with id / title / group / tokens / satisfied gates
-- [ ] **P5-1b** — `haus recommend --include <id>…` — force into `recommended[]` with `selectionMode: 'manual'`; validate id; warn if `requiresAny` unsatisfied
-- [ ] **P5-1c** — Extended selection payload for `haus apply --write` (skill passes chosen ids; no TTY checkbox required in Claude Code)
-- [ ] **P5-1d** — Tests for JSON shape + include + apply with explicit id list
+- [x] **P5-1a** — `haus recommend` emits `optInEligible[]` (role-gated tier items skipped for an unsatisfied gate) with id / type / title / `optInTier` / `optInGroup` / `purpose` / `tokenEstimate` / `requires`
+- [x] **P5-1b** — `haus recommend --include <ids...>` — promotes to `selectionMode: 'manual'`; warns on unknown id / unsatisfied gate; hard policy blocks never forced
+- [x] **P5-1c** — `haus apply --ids <ids...>` — non-interactive explicit selection (mutually exclusive with `--select`; unknown ids warn + ignored)
+- [x] **P5-1d** — `tests/recommend-opt-in.test.js` (optInEligible + include promote/block/unknown) + `tests/apply-ids.test.js` (explicit install, unknown-id warn, --select conflict)
 
-#### P5-2 — `haus-setup` conversational opt-in (during `project:init`)
+#### P5-2 — `haus-setup` conversational opt-in (during `project:init`) ✅
 
-Update `library/global/commands/haus-setup.md` — insert between current steps 3 and 4:
+Updated `library/global/commands/haus-setup.md` — new **step 5** between `haus recommend` (step 4) and the final `haus apply --write` (step 6):
 
-- [ ] **P5-2a** — After deep read + `deep-context.json`, **before** second recommend: `AskUserQuestion` with grouped opt-in options (unchecked by default). Plain labels, e.g. "Code review workflow skills", "TDD superpower", "Git worktrees / branch finishing", "Redis security & observability (ops)"
-- [ ] **P5-2b** — Selected answers append roles to `.haus-workflow/deep-context.json` (merge, don't overwrite deep-read roles)
-- [ ] **P5-2c** — Step 4 `haus recommend` picks up roles; step 5 `haus apply --write` installs baseline + user opt-ins + deep-discovered matches
-- [ ] **P5-2d** — Confirm line names opted-in helpers explicitly ("you chose M optional helpers: …")
-- [ ] **P5-2e** — Test: `tests/haus-setup-command.test.js` asserts opt-in question + role merge + recommend ordering
+- [x] **P5-2a** — After step-4 recommend, before the final apply: `AskUserQuestion` (unchecked by default) with one option per `optInGroup`, labelled from each item's `purpose`/`tokenEstimate`
+- [x] **P5-2b** — **Deviation (better):** instead of appending roles to `deep-context.json`, chosen groups are added via `haus recommend --include <ids>` (the P5-1b primitive). Cleaner — the skill never needs to know role names, and the promotion is explicit `selectionMode: manual`. Role-append remains available for advanced users (documented in runbook)
+- [x] **P5-2c** — Final `haus apply --write` (step 6) installs baseline + matched + manual opt-ins
+- [x] **P5-2d** — Step 7 confirm line names the opted-in helpers explicitly
+- [x] **P5-2e** — `tests/haus-setup-command.test.js` asserts the opt-in question (optInEligible + AskUserQuestion + `--include`), ordering (after recommend, before final apply), and scaffold preserve-by-default
 
-#### P5-3 — `haus-cloneandsetup` per-repo opt-in
+#### P5-3 — `haus-cloneandsetup` per-repo opt-in — **N/A (premise no longer holds)**
 
-Update `library/global/commands/haus-cloneandsetup.md` — after each repo's `haus-setup` (or equivalent init), before marking repo done:
+The current `haus-cloneandsetup.md` does **not** run `haus-setup` / `haus apply` / `haus recommend` per repo — it is clone → prerequisite gate → dependency install → localdev orchestration (running the workspace), not haus-context install. There is no per-repo recommend step to hook an opt-in pass onto, so bolting opt-in Q&A into localdev bring-up would be incoherent. **Decision:** opt-in for cloned repos is reached by running `/haus-setup` (now opt-in-aware, P5-2) or `/haus-workflow → project:add-skills` (P5-4) per repo. Revisit only if cloneandsetup regains a per-repo context-setup phase.
 
-- [ ] **P5-3a** — Per repo: same opt-in Q&A as P5-2 (stack-aware — only show groups relevant to that repo's detection)
-- [ ] **P5-3b** — Batch workspace summary at end: "Repo A: +3 optional skills; Repo B: baseline only"
-- [ ] **P5-3c** — Reused clones: offer opt-in pass even when skipping full setup ("add optional skills to this repo?")
+- [ ] ~~**P5-3a/b/c**~~ — superseded; see note above
 
-#### P5-4 — `haus-workflow` skill — post-setup "add skills" flow
+#### P5-4 — `haus-workflow` skill — post-setup "add skills" flow ✅
 
-Update `library/global/skills/haus-workflow/SKILL.md`:
+Updated `library/global/skills/haus-workflow/SKILL.md`:
 
-- [ ] **P5-4a** — New task: `project:add-skills` (`add-skills`, `opt-in`) — **"Add optional skills & agents"**
-- [ ] **P5-4b** — Add to no-arg `AskUserQuestion` menu (option 6 or under refresh): always visible so users can opt in later without re-running full setup
-- [ ] **P5-4c** — Flow: `haus scan` → `haus recommend` → read `optInEligible[]` + already-installed from `haus.lock.json` → present only **not yet installed** items in grouped `AskUserQuestion` → user selects → `haus recommend --include …` → `haus apply --write` → confirm with names + token estimate
-- [ ] **P5-4d** — If nothing eligible: plain message ("everything matching your stack is already installed" or "no optional helpers for this stack")
-- [ ] **P5-4e** — Test: skill contract test for menu entry + command sequence (like `haus-setup-command.test.js`)
+- [x] **P5-4a** — New task `project:add-skills` (`add-skills`, `opt-in`) in the alias table
+- [x] **P5-4b** — Added to the no-arg menu as **option 6** (always visible)
+- [x] **P5-4c** — Procedure: `haus scan` → `haus recommend` → read `optInEligible[]` + `haus.lock.json` → present only not-yet-installed items grouped by `optInGroup` → `haus recommend --include …` / `haus scaffold` → `haus apply --write` → confirm with names + token estimate
+- [x] **P5-4d** — Nothing-eligible path returns a plain message
+- [x] **P5-4e** — `tests/haus-workflow-skill-add-skills.test.js` (alias table, menu option 6, procedure command sequence, empty case, config scaffold)
 
 #### P5-5 — Config scaffold (Claude Code–first)
 
@@ -535,18 +533,18 @@ Update `library/global/skills/haus-workflow/SKILL.md`:
 
 **Gap:** Repos that already have ESLint/Prettier (dep present → no `missing-*` signal) or legacy config files on disk cannot get Haus configs without explicit scaffold + `--force` when filenames collide.
 
-- [ ] **P5-5a** — `haus-setup` + `haus-cloneandsetup`: after `haus recommend`, if `recommendation.json` lists config items (`install: false`) or user asks for Haus ESLint/Prettier, `AskUserQuestion` with plain labels ("Add Haus ESLint baseline", "Replace existing Prettier config") — run `haus scaffold <id>` or `haus scaffold <id> --force` only on confirm
-- [ ] **P5-5b** — `haus-workflow` `project:add-skills`: include config scaffold group when eligible (missing deps or `--include` via P5-1b)
-- [ ] **P5-5c** — `haus scaffold`: when skipping existing files, actionable message (paths + `--force` hint)
-- [ ] **P5-5d** — `docs/cli.md`: preserve-by-default + point primary UX to `/haus-setup` and `/haus-workflow` (CLI flags as skill backend only)
-- [ ] **P5-5e** — Tests: scaffold preserves without `--force`; overwrites with `--force`; setup/add-skills flows ask before `--force`
+- [x] **P5-5a** — `haus-setup` step 5 offers config items (`install: false`) via `AskUserQuestion`; runs `haus scaffold <id>` (or `--force` only on explicit replace). (`haus-cloneandsetup` N/A — see P5-3)
+- [x] **P5-5b** — `project:add-skills` includes the config scaffold group when eligible
+- [x] **P5-5c** — `haus scaffold` skip message prints the project-relative path + `--force` hint (`src/install/scaffold.ts`)
+- [x] **P5-5d** — `docs/cli.md` documents preserve-by-default + points primary UX to `/haus-setup` / `/haus-workflow`
+- [x] **P5-5e** — Existing `tests/scaffold.test.js` covers preserve/`--force`; md contract tests assert setup + add-skills ask before `--force`
 
-#### P5-6 — Docs & verification (`both`)
+#### P5-6 — Docs & verification (`both`) ✅
 
-- [ ] **P5-6a** — `docs/cli.md` — document JSON/include flags as **skill backend**; point readers to `/haus-workflow` and `/haus-setup` (fold in P5-5d scaffold preserve-by-default)
-- [ ] **P5-6b** — `docs/runbook.md` — opt-in groups, role mapping, post-setup add-skills flow, config scaffold paths
-- [ ] **P5-6c** — Risk matrix row "Baseline tier breaks teams" — concrete Claude Code paths once P5 ships
-- [ ] **P5-6d** — `yarn verify` + catalog `yarn validate`; e2e skill-contract tests for all entry points including config scaffold (P5-5e)
+- [x] **P5-6a** — `docs/cli.md` documents `--include` / `optInEligible` / `apply --ids` and `selectionMode: manual` as skill backend; points to `/haus-workflow` + `/haus-setup`
+- [x] **P5-6b** — `docs/runbook.md` adds the opt-in model, role → group map, add-skills flow, and scaffold preserve/`--force` entry
+- [x] **P5-6c** — Risk matrix "Baseline tier breaks teams" row already names the concrete Claude Code paths (`haus-setup`, `project:add-skills`, config scaffold)
+- [x] **P5-6d** — `yarn verify` green (554 tests); catalog `yarn validate` + `yarn test` green (released `v2.13.0`)
 
 **Out of scope for P5:** changing P2g/P3 tier decisions; new catalog items. P5 only surfaces existing tiered items and config scaffold in Claude Code.
 
