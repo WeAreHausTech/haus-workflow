@@ -465,7 +465,7 @@
     },
     {
       "id": "haus.ecc-dotnet-patterns",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "source": "curated",
       "type": "skill",
       "path": "skills/ecc/dotnet-patterns",
@@ -484,7 +484,7 @@
       "license": "MIT",
       "licenseConfidence": "high",
       "originSourceId": "ecc",
-      "originUrl": "https://github.com/affaan-m/ECC/blob/71d22d0a77b7e0684f4e51cba03749b788993cdb/skills/ecc/dotnet-patterns/SKILL.md",
+      "originUrl": "https://github.com/affaan-m/ECC/blob/71d22d0a77b7e0684f4e51cba03749b788993cdb/skills/dotnet-patterns/SKILL.md",
       "pinnedRef": "71d22d0a77b7e0684f4e51cba03749b788993cdb",
       "ecosystem": "dotnet",
       "requiresAny": [
@@ -530,7 +530,7 @@
     },
     {
       "id": "haus.ecc-e2e-testing",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "source": "curated",
       "type": "skill",
       "path": "skills/ecc/e2e-testing",
@@ -549,7 +549,7 @@
       "license": "MIT",
       "licenseConfidence": "high",
       "originSourceId": "ecc",
-      "originUrl": "https://github.com/affaan-m/ECC/blob/71d22d0a77b7e0684f4e51cba03749b788993cdb/skills/ecc/e2e-testing/SKILL.md",
+      "originUrl": "https://github.com/affaan-m/ECC/blob/71d22d0a77b7e0684f4e51cba03749b788993cdb/skills/e2e-testing/SKILL.md",
       "pinnedRef": "71d22d0a77b7e0684f4e51cba03749b788993cdb",
       "ecosystem": "playwright",
       "requiresAny": [
@@ -827,7 +827,7 @@
     },
     {
       "id": "haus.ecc-prisma-patterns",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "source": "curated",
       "type": "skill",
       "path": "skills/ecc/prisma-patterns",
@@ -846,7 +846,7 @@
       "license": "MIT",
       "licenseConfidence": "high",
       "originSourceId": "ecc",
-      "originUrl": "https://github.com/affaan-m/ECC/blob/71d22d0a77b7e0684f4e51cba03749b788993cdb/skills/ecc/prisma-patterns/SKILL.md",
+      "originUrl": "https://github.com/affaan-m/ECC/blob/71d22d0a77b7e0684f4e51cba03749b788993cdb/skills/prisma-patterns/SKILL.md",
       "pinnedRef": "71d22d0a77b7e0684f4e51cba03749b788993cdb",
       "ecosystem": "database",
       "requiresAny": [
@@ -928,7 +928,7 @@
     },
     {
       "id": "haus.ecc-react-testing",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "source": "curated",
       "type": "skill",
       "path": "skills/ecc/react-testing",
@@ -947,7 +947,7 @@
       "license": "MIT",
       "licenseConfidence": "high",
       "originSourceId": "ecc",
-      "originUrl": "https://github.com/affaan-m/ECC/blob/71d22d0a77b7e0684f4e51cba03749b788993cdb/skills/ecc/react-testing/SKILL.md",
+      "originUrl": "https://github.com/affaan-m/ECC/blob/71d22d0a77b7e0684f4e51cba03749b788993cdb/skills/react-testing/SKILL.md",
       "pinnedRef": "71d22d0a77b7e0684f4e51cba03749b788993cdb",
       "ecosystem": "testing",
       "requiresAny": [
@@ -1127,7 +1127,7 @@
     },
     {
       "id": "haus.ecc-vue-patterns",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "source": "curated",
       "type": "skill",
       "path": "skills/ecc/vue-patterns",
@@ -1146,7 +1146,7 @@
       "license": "MIT",
       "licenseConfidence": "high",
       "originSourceId": "ecc",
-      "originUrl": "https://github.com/affaan-m/ECC/blob/71d22d0a77b7e0684f4e51cba03749b788993cdb/skills/ecc/vue-patterns/SKILL.md",
+      "originUrl": "https://github.com/affaan-m/ECC/blob/71d22d0a77b7e0684f4e51cba03749b788993cdb/skills/vue-patterns/SKILL.md",
       "pinnedRef": "71d22d0a77b7e0684f4e51cba03749b788993cdb",
       "ecosystem": "vue",
       "requiresAny": [
