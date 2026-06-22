@@ -32,3 +32,24 @@ test('haus-setup runs `haus recommend` after the docs skill and before the final
   assert.ok(recommendIdx > firstSkillRef, '`haus recommend` must come after the docs skill')
   assert.ok(recommendIdx < lastApplyIdx, '`haus recommend` must come before the final apply')
 })
+
+test('haus-setup offers opt-in helpers (optInEligible) between recommend and final apply', () => {
+  assert.ok(CMD.includes('optInEligible'), 'must read optInEligible from recommendation.json')
+  assert.ok(CMD.includes('AskUserQuestion'), 'must use AskUserQuestion to offer opt-ins')
+  assert.ok(CMD.includes('haus recommend --include'), 'must add opt-ins via recommend --include')
+  // The opt-in step must sit after the first recommend and before the final apply.
+  const recommendIdx = CMD.indexOf('haus recommend')
+  const optInIdx = CMD.indexOf('optInEligible')
+  const lastApplyIdx = CMD.lastIndexOf('haus apply --write')
+  assert.ok(optInIdx > recommendIdx, 'opt-in offer must come after the first recommend')
+  assert.ok(optInIdx < lastApplyIdx, 'opt-in offer must come before the final apply')
+})
+
+test('haus-setup surfaces config scaffold preserve-by-default (force only on explicit replace)', () => {
+  assert.ok(CMD.includes('haus scaffold'), 'must offer config scaffold')
+  assert.ok(CMD.includes('--force'), 'must mention --force as the explicit overwrite path')
+  assert.ok(
+    /preserve|preserves|by default/i.test(CMD),
+    'must state scaffold preserves existing files by default',
+  )
+})

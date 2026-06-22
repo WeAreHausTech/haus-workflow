@@ -93,13 +93,13 @@ export async function scaffoldConfigItems(
     if (stat.isFile()) {
       const filename = path.basename(sourcePath)
       const dest = path.join(projectRoot, filename)
-      record(filename, await scaffoldFile(sourcePath, dest, item.id, opts))
+      record(filename, await scaffoldFile(sourcePath, dest, item.id, projectRoot, opts))
     } else if (stat.isDirectory()) {
       const entries = await fs.readdir(sourcePath)
       for (const entry of entries) {
         const src = path.join(sourcePath, entry)
         const dest = path.join(projectRoot, entry)
-        record(entry, await scaffoldFile(src, dest, item.id, opts))
+        record(entry, await scaffoldFile(src, dest, item.id, projectRoot, opts))
       }
     }
   }
@@ -113,8 +113,10 @@ async function scaffoldFile(
   src: string,
   dest: string,
   itemId: string,
+  projectRoot: string,
   opts: { force?: boolean; dryRun?: boolean },
 ): Promise<ScaffoldFileOutcome> {
+  const destDisplay = path.relative(projectRoot, dest) || path.basename(dest)
   // Refuse symlinked catalog content: a malicious link could point outside the
   // catalog root, which the string-based containment check above cannot detect.
   const srcStat = await fs.lstat(src).catch(() => null)
@@ -130,7 +132,7 @@ async function scaffoldFile(
   const exists = await fs.pathExists(dest)
 
   if (exists && !opts.force) {
-    warn(`Skipping ${path.basename(dest)}: already exists (use --force to overwrite)`)
+    warn(`Skipping ${destDisplay}: already exists — re-run with --force to overwrite it`)
     return 'skipped-exists'
   }
 

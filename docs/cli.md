@@ -24,19 +24,24 @@ Scan repo and write context-map. Detects stacks, roles, package manager, and dep
 
 Output: `.haus-workflow/context-map.json`, `.haus-workflow/dependency-map.json`, `.haus-workflow/scan-hashes.json`, `.haus-workflow/repo-summary.md`
 
-### `haus recommend [--json]`
+### `haus recommend [--json] [--include <ids...>]`
 
-Recommend catalog items for the detected stack via binary eligibility (policy gates + match signals; no scores). Includes `recommended[]` with `reasons[]`, `selectionMode`, and `install` (`false` for `config` items). `skipped[]` carries `skipReasons[]`. Config items (ESLint, Prettier) appear when the scanner reports `missing-eslint` / `missing-prettier`; install them with `haus scaffold`, not `haus apply`. If `.haus-workflow/deep-context.json` is present (written by the `writing-documentation` skill), its signals are merged in for a second-pass recommendation.
+Recommend catalog items for the detected stack via binary eligibility (policy gates + match signals; no scores). Includes `recommended[]` with `reasons[]`, `selectionMode` (`baseline` | `matched` | `manual`), and `install` (`false` for `config` items). `skipped[]` carries `skipReasons[]`. Config items (ESLint, Prettier) appear when the scanner reports `missing-eslint` / `missing-prettier`; install them with `haus scaffold`, not `haus apply`. If `.haus-workflow/deep-context.json` is present (written by the `writing-documentation` skill), its signals are merged in for a second-pass recommendation.
+
+- `--include <ids...>` — force opt-in catalog items into `recommended[]` as `manual` selections (space- or comma-separated). Hard policy blocks (deprecated/blocked/unsupported/sensitive/untrusted-source) are never forced — they warn instead; unknown ids and unsatisfied `requiresAny` gates also warn.
+
+`recommendation.json` also carries **`optInEligible[]`**: role-gated tier items skipped because their role gate is unsatisfied, each with `optInTier`, `optInGroup`, `purpose`, and `tokenEstimate`. These are the items `--include` can add. **This and `--include` are the backend for the Claude Code opt-in UX** (`/haus-setup`, `/haus-workflow → project:add-skills`) — surface them as plain-language choices, not raw flags.
 
 Output: `.haus-workflow/recommendation.json`
 
-### `haus apply [--dry-run] [--write] [--select] [--allow-empty-cache] [--refill-config] [--force]`
+### `haus apply [--dry-run] [--write] [--select] [--ids <ids...>] [--allow-empty-cache] [--refill-config] [--force]`
 
 Materialize catalog assets into `.claude/` (skills, agents, commands, templates).
 
 - `--dry-run` — preview what would be written without writing
 - `--write` — write `.claude/` files, `.haus-workflow/selected-context.json`, and `.haus-workflow/haus.lock.json`
 - `--select` — interactively select catalog items before applying (deselected items that remain in the catalog are **not** removed from disk)
+- `--ids <ids...>` — install exactly these recommended item ids non-interactively (skill backend; no TTY needed). Ids absent from `recommendation.json` warn and are ignored. Mutually exclusive with `--select`.
 - `--allow-empty-cache` — apply core files only when catalog cache is empty (skip catalog items without error)
 - `--refill-config` — fill still-blank `<!-- fill in -->` fields in `workflow-config.md` from auto-detected values, without touching fields you've edited
 - `--force` — overwrite managed workflow template even when local tamper detection sees edits
@@ -58,7 +63,10 @@ After writing `.claude/settings.json`, apply runs a self-check that it matches `
 
 Copy `config`-type catalog items (ESLint, Prettier) into the project root. Explicit,
 one-time bootstrapping — never auto-run by apply, so customised configs are not
-clobbered on update. Existing files are skipped (preserved) unless `--force`.
+clobbered on update. **Existing project-root config files are preserved by default**;
+`--force` is the only overwrite path. When a file is skipped, the command prints the
+project-relative path and the `--force` hint. The Claude Code setup flows
+(`/haus-setup`, `project:add-skills`) ask before ever passing `--force`.
 
 - pass item IDs (e.g. `haus.eslint-config haus.prettier-config`) to scaffold specific items; omit to scaffold all approved config items
 - `--force` — overwrite existing files
