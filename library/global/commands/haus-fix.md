@@ -1,3 +1,7 @@
+---
+description: Diagnose and fix this project's haus setup.
+---
+
 Diagnose and fix this project's haus setup.
 
 1. Run `haus doctor` and read the verdict.

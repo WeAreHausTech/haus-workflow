@@ -291,19 +291,30 @@ describe('applyInstall dry-run (real invocation, stubbed HOME)', () => {
     const { applyInstall } = await import('../src/install/apply.js')
     await applyInstall({})
     const commandsDir = path.join(tmpDir, '.claude', 'commands')
-    for (const name of ['haus-setup', 'haus-doctor', 'haus-fix']) {
+    // Assert the frontmatter stamp on EVERY seeded command, not a subset — applyInstall
+    // seeds all library/global/commands/*.md, so any of them could regress to the old
+    // line-1 comment form without a per-file check.
+    const commandNames = fs
+      .readdirSync(commandsDir)
+      .filter((f) => f.endsWith('.md'))
+      .map((f) => f.replace(/\.md$/, ''))
+    assert.ok(commandNames.length >= 5, 'expected all bundled commands to be seeded')
+    for (const name of commandNames) {
       const file = path.join(commandsDir, `${name}.md`)
-      assert.ok(fs.existsSync(file), `expected ${name}.md to be seeded`)
-      // Frontmatter-free body: the haus stamp on line 1 is a harmless HTML comment.
-      assert.ok(fs.readFileSync(file, 'utf8').startsWith('<!-- HAUS-MANAGED id=command.'))
+      // Commands carry frontmatter so Claude Code shows a clean `description:` on hover;
+      // the haus stamp lives in a `haus_managed:` field inside the block (ADR-0006).
+      const body = fs.readFileSync(file, 'utf8')
+      assert.ok(body.startsWith('---\n'), `${name}.md should open with frontmatter`)
+      assert.match(body, /^description: .+/m, `${name}.md should expose a description`)
+      assert.match(body, /^haus_managed: "id=command\./m, `${name}.md should carry the haus marker`)
     }
     const manifest = JSON.parse(
       fs.readFileSync(path.join(tmpDir, '.claude', 'haus', 'install-manifest.json'), 'utf8'),
     )
     const ids = manifest.files.map((f) => f.stableId)
-    assert.ok(ids.includes('command.haus-setup'))
-    assert.ok(ids.includes('command.haus-doctor'))
-    assert.ok(ids.includes('command.haus-fix'))
+    for (const name of commandNames) {
+      assert.ok(ids.includes(`command.${name}`), `manifest should track command.${name}`)
+    }
   })
 
   it('writes scoped permissions.allow for haus subcommands, never a blanket allow (WS6)', async () => {
