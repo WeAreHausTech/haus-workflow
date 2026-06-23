@@ -95,7 +95,7 @@ test('laravel without sentry: must not recommend sentry-php-sdk', () => {
   )
 })
 
-test('nx eslint-plugin only: must not recommend nx21-monorepo-patterns', () => {
+test('nx eslint-plugin only: must not recommend nx-monorepo-patterns', () => {
   withTempRepo(
     {
       'package.json': JSON.stringify(
@@ -111,7 +111,7 @@ test('nx eslint-plugin only: must not recommend nx21-monorepo-patterns', () => {
     },
     (root) => {
       const ids = recommendIds(root)
-      assert.ok(!ids.has('haus.nx21-monorepo-patterns'))
+      assert.ok(!ids.has('haus.nx-monorepo-patterns'))
     },
   )
 })
