@@ -58,6 +58,21 @@ describe('write-prettierignore: injectPrettierIgnoreBlock', () => {
     assert.ok(out.startsWith('dist/'), 'user content preserved')
     assert.equal(out.match(/HAUS:BEGIN/g)?.length, 1)
   })
+
+  it('preserves user blank lines outside the managed block on refresh', () => {
+    const withGaps = 'dist/\n\n\n\ncoverage/\n# HAUS:BEGIN haus-managed v=1\nold/\n# HAUS:END haus-managed\n'
+    const out = injectPrettierIgnoreBlock(withGaps, block)
+    assert.ok(out.startsWith('dist/\n\n\n\ncoverage/'), 'user blank lines kept')
+  })
+
+  it('repairs a malformed file with BEGIN but no END', () => {
+    const broken = 'dist/\n# HAUS:BEGIN haus-managed v=1\norphan-entry/\n'
+    const out = injectPrettierIgnoreBlock(broken, block)
+    assert.equal(out.match(/HAUS:BEGIN/g)?.length, 1)
+    assert.ok(!out.includes('orphan-entry/'))
+    assert.ok(out.includes('.haus-workflow/'))
+    assert.ok(out.startsWith('dist/'))
+  })
 })
 
 describe('write-prettierignore: stripPrettierIgnoreBlock', () => {
@@ -71,6 +86,12 @@ describe('write-prettierignore: stripPrettierIgnoreBlock', () => {
   it('returns empty string when the file held only the managed block', () => {
     const onlyBlock = injectPrettierIgnoreBlock('', buildPrettierIgnoreBlock())
     assert.equal(stripPrettierIgnoreBlock(onlyBlock), '')
+  })
+
+  it('preserves leading whitespace in user content', () => {
+    const withLeading = '\n\ndist/\n' + buildPrettierIgnoreBlock() + '\n'
+    const stripped = stripPrettierIgnoreBlock(withLeading)
+    assert.ok(stripped.startsWith('\n\ndist/'), 'leading newlines kept')
   })
 })
 

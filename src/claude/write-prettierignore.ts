@@ -72,8 +72,17 @@ export function injectPrettierIgnoreBlock(existing: string, block: string): stri
   if (range) {
     const before = existing.slice(0, range.start)
     const after = existing.slice(range.end)
-    return `${before}${block}${after}`.replace(/\n{3,}/g, '\n\n').replace(/\n*$/, '\n')
+    return `${before}${block}${after}`.replace(/\n*$/, '\n')
   }
+
+  // Malformed prior file (BEGIN present but END missing): replace trailing broken block.
+  const loneBegin = findLineMarker(existing, PRETTIERIGNORE_BEGIN)
+  if (loneBegin) {
+    const before = existing.slice(0, loneBegin.start).trimEnd()
+    if (before.length === 0) return `${block}\n`
+    return `${before}\n\n${block}\n`
+  }
+
   const trimmed = existing.trimEnd()
   if (trimmed.length === 0) return `${block}\n`
   return `${trimmed}\n\n${block}\n`
@@ -85,7 +94,7 @@ export function stripPrettierIgnoreBlock(existing: string): string {
   if (!range) return existing
   const before = existing.slice(0, range.start)
   const after = existing.slice(range.end)
-  const merged = `${before}${after}`.replace(/\n{3,}/g, '\n\n').trim()
+  const merged = `${before}${after}`.replace(/\n{3,}/g, '\n\n').trimEnd()
   return merged.length > 0 ? `${merged}\n` : ''
 }
 
