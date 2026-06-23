@@ -31,13 +31,37 @@ Do this in order:
    deep read discovered. You MUST run this before the next apply — `haus apply`
    does not re-calculate recommendations on its own.
 
-5. **Apply the rest.** Run `haus apply --write` again. It only writes what changed,
-   so this just adds the newly-matched helpers from step 4.
+5. **Offer optional helpers.** Read `.haus-workflow/recommendation.json` yourself
+   (never show the JSON). Two kinds of optional extras may be listed; offer only
+   the ones present, all **unchecked** by default — these are opt-in:
+   - **Optional skills & agents** (`optInEligible[]`): workflow/ops/review/design
+     helpers that don't auto-install for this stack. Group them by their
+     `optInGroup` label and present one `AskUserQuestion` option per group
+     (use each item's `purpose` and `tokenEstimate` to describe it in plain
+     language, e.g. "Code review workflow — request/receive structured reviews").
+     Collect the item ids from **all** the groups the user picked into one list
+     and run a **single** `haus recommend --include <id> <id> …` (one command with
+     every chosen id). Don't run it once per group — each run rewrites
+     `recommendation.json`, so repeated calls would drop the earlier includes.
+   - **Project config** (entries in `recommended[]` with `install: false`, e.g.
+     Haus ESLint / Prettier baselines): offer each as a plain choice ("Add the
+     Haus ESLint baseline"). On confirm, run `haus scaffold <id>`. `haus scaffold`
+     **preserves existing config files by default** and tells you when a file
+     already exists — only re-run with `haus scaffold <id> --force` if the user
+     explicitly chooses to **replace** their current config.
 
-6. **Confirm.** End with one plain-language line, for example:
+   If neither list has anything, skip this step silently — don't ask an empty
+   question.
+
+6. **Apply the rest.** Run `haus apply --write` again. It only writes what changed,
+   so this adds the newly-matched helpers from step 4 plus any opt-ins from step 5.
+
+7. **Confirm.** End with one plain-language line, for example:
    "✅ Your project is configured — I wrote your project docs, added N guardrails
-   and M coding helpers (K matched after reading your code in depth). Run
-   `/haus-doctor` any time to re-check." Fill the numbers from the apply output.
+   and M coding helpers (K matched after reading your code in depth), plus the J
+   optional helpers you chose: <name them>. Run `/haus-doctor` any time to
+   re-check." Fill the numbers from the apply output, and name the opt-ins the
+   user picked in step 5 (omit that clause if they chose none).
 
 If anything fails, explain what happened in plain language and what you'll try
 next — don't dump raw errors.

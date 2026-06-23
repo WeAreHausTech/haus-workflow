@@ -56,6 +56,46 @@ only deletes stale items when on-disk content still matches the hash in
 `haus apply --write` / `haus update`. Items you deselected with `apply --select` but
 that still exist in the catalog are intentionally left in place.
 
+## An opt-in skill/agent never installs (and how to add one later)
+
+**Symptom:** A tier helper (code-review superpowers, TDD, git-worktrees, Redis
+security/observability, security/performance/refactor reviewers, the UI designer,
+incident tracer, Laravel plugin discovery) is in the catalog but `haus apply` never
+installs it. **Cause:** these are **opt-in tier** items — `default: false` and gated
+by a `role:*` `requiresAny`. With no matching role in the scan or
+`.haus-workflow/deep-context.json`, they are skipped (`requires-any-unsatisfied`) and
+listed under `recommendation.json#optInEligible[]` (grouped by `optInGroup`), not
+installed. This is intended — it keeps the baseline lean.
+
+**Fix / how to add one:**
+
+- In Claude Code (preferred): run `/haus-workflow` → **`project:add-skills`**, or pick
+  the opt-in options during `/haus-setup`. Both present the groups in plain language
+  and wire the commands for you.
+- By hand: run `haus recommend --include <id> [<id> …]` (promotes them to the
+  `manual` selection mode), then `haus apply --write`. Or add the gating role to
+  `.haus-workflow/deep-context.json#roles` and re-run `haus recommend` followed by
+  `haus apply --write`.
+
+**Role → opt-in group map** (catalog `optInGroup`, set in `manifest.json`):
+`code-review` → Code review workflow · `tdd-workflow` → TDD workflow ·
+`isolated-branch` + `branch-completion` → Git worktrees & branch finishing ·
+`user-gate` → Quality gates · `subagent-workflow` → Subagent-driven development ·
+`skill-authoring` → Skill authoring · `redis-ops` → Redis security & observability ·
+`laravel-plugins` → Laravel plugin discovery · `security-review` → Security review ·
+`performance-review` → Performance review · `refactor-cleanup` → Refactor cleanup ·
+`incident-trace` → Incident tracing · `ui-design` → UI design.
+
+## Haus ESLint/Prettier config won't install / overwrote nothing
+
+**Symptom:** `haus scaffold` reports `Skipping <path>: already exists` and writes
+nothing for a project that already has an `eslint.config.*` / `prettier.config.*` /
+`.prettierrc`. **Cause:** scaffold **preserves existing project-root config by
+default** — it never clobbers a user-owned config on a plain run. **Fix:** to replace
+it deliberately, re-run `haus scaffold <id> --force`. In Claude Code the `/haus-setup`
+and `project:add-skills` flows ask before passing `--force`; never default to
+overwrite.
+
 ## Coverage ratchet says raise the floor
 
 **Symptom:** `coverage-ratchet.mjs` prints a non-fatal hint

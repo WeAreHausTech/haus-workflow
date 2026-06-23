@@ -26,6 +26,7 @@ The short legacy aliases still work but the names below are canonical.
 | `project:init` (`setup`, `init`)                                  | _Setup procedure below_         | project | First-time setup of an **existing** repo: adds AI skills, commands, workflow + project docs                                                                                               |
 | `project:clone [name]` (`clone`)                                  | _Clone procedure below_         | project | No name: clone a **workspace**'s repos from `repos.manifest.json`. With a `name`: find & clone one repo by name from GitHub                                                               |
 | `project:cloneandsetup [name]` (`cloneandsetup`)                  | _Clone & setup procedure below_ | project | Run `project:clone`, then set up each repo for local dev — deps, databases, cross-repo links, and env — via each repo's `.haus-workflow/localdev.yml` (+ the workspace's order/links/env) |
+| `project:add-skills` (`add-skills`, `opt-in`)                     | _Add-skills procedure below_    | project | Add optional skills, agents, or config (ESLint/Prettier) to an already-set-up project without re-running full setup                                                                       |
 | `project:refresh` (`apply`, `refresh`, `claude-md`, `regenerate`) | `haus apply --write`            | project | Re-run setup / refresh `.claude/` context + regenerate root `CLAUDE.md` import block                                                                                                      |
 | `project:doctor` (`doctor`, `check`)                              | `haus doctor`                   | project | Check for install drift                                                                                                                                                                   |
 | `update` (`upgrade`)                                              | `haus update`                   | global  | Update npm package + catalog + `~/.claude/` (also refreshes this project)                                                                                                                 |
@@ -51,6 +52,8 @@ Options:
      (no name: clone a workspace from repos.manifest.json; with a name: find & clone one repo by name from GitHub)
   5. [project] project:cloneandsetup [name] — clone repos, then set them up for local dev
      (project:clone, then per-repo deps + databases + cross-repo links + env from localdev.yml)
+  6. [project] project:add-skills — add optional skills, agents, or config to this project
+     (offers opt-in helpers matching your stack that aren't installed yet — no full re-setup)
 ```
 
 Map the user's selection to the command from the alias table, then continue to Step 2.
@@ -64,6 +67,8 @@ Run the mapped command via Bash. Quote the exact command you are running before 
 **Exception — `project:clone` (`clone`):** this asks the user a question before running, so it is a short procedure too. Skip to **Clone (`project:clone`)** under Step 3 and follow it.
 
 **Exception — `project:cloneandsetup` (`cloneandsetup`):** clone followed by a per-repo setup pass, with confirmations. Skip to **Clone & setup (`project:cloneandsetup`)** under Step 3 and follow it.
+
+**Exception — `project:add-skills` (`add-skills` / `opt-in`):** a short scan → recommend → choose → apply procedure. Skip to **Add optional skills (`project:add-skills`)** under Step 3 and follow it.
 
 ## Step 3 — Post-run steps
 
@@ -81,6 +86,31 @@ After the command completes, follow the relevant post-run steps below.
 ### Clone & setup (`project:cloneandsetup`)
 
 1. Open and follow `~/.claude/commands/haus-cloneandsetup.md` — it runs the full `project:clone` flow, then sets up each cloned repo locally: selects the node version (`nvm install` from `.nvmrc`), enables corepack, installs JS/PHP dependencies, and seeds `.env`, confirming before each phase. It does not start servers.
+
+### Add optional skills (`project:add-skills`)
+
+For a project that's already set up but where the user wants more helpers later —
+without re-running the full `project:init` flow. Never show raw JSON; offer plain
+choices.
+
+1. Refresh the picture: run `haus scan --json` then `haus recommend` (it re-reads
+   `.haus-workflow/deep-context.json` if present).
+2. Read `.haus-workflow/recommendation.json` and `.haus-workflow/haus.lock.json`
+   yourself. Build the choices from items **not already installed** (lock ids):
+   - **Optional skills & agents** — `optInEligible[]`, grouped by `optInGroup`
+     (each carries `purpose` + `tokenEstimate` for a plain-language label).
+   - **Project config** — `recommended[]` entries with `install: false` (Haus
+     ESLint / Prettier) whose files aren't already present.
+3. If nothing is eligible, say so plainly and stop — e.g. "Everything matching
+   your stack is already installed" or "No optional helpers for this stack."
+4. Otherwise present a single `AskUserQuestion` (multi-select, all unchecked)
+   with one option per group / config item. Then:
+   - Skills/agents → `haus recommend --include <id> <id> …`, then
+     `haus apply --write`.
+   - Config → `haus scaffold <id>` (add `--force` only if the user chose to
+     replace an existing file; scaffold preserves files by default).
+5. Confirm with the names added and their combined token estimate, e.g.
+   "Added 2 optional helpers: Code review workflow, TDD workflow (~3k tokens)."
 
 ### After `haus apply --write`
 

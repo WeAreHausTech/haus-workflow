@@ -14,7 +14,7 @@ type RecommendationLike = Partial<Recommendation> & {
     type?: string
     reason?: string
     reasons?: Array<{ message?: string; code?: string; signal?: string }>
-    selectionMode?: 'baseline' | 'matched'
+    selectionMode?: 'baseline' | 'matched' | 'manual'
     install?: boolean
     tags?: string[]
     ecosystem?: string
@@ -31,7 +31,7 @@ type RecommendationLike = Partial<Recommendation> & {
 type ExplainRecommendation = {
   selected: Array<{
     id: string
-    selectionMode: 'baseline' | 'matched'
+    selectionMode: 'baseline' | 'matched' | 'manual'
     reasons: string[]
   }>
   skipped: Array<{

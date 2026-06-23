@@ -13,7 +13,7 @@
 
 import { loadCatalog } from '../catalog/load-catalog.js'
 import { SENSITIVE_ITEM_KEYWORDS } from '../security/sensitive-paths.js'
-import type { ContextMap, DeepContext, Recommendation } from '../types.js'
+import type { CatalogItem, ContextMap, DeepContext, Recommendation } from '../types.js'
 import { readJson } from '../utils/fs.js'
 import { hausPath } from '../utils/paths.js'
 
@@ -34,7 +34,11 @@ type ReasonHit = { code: string; message: string; signal?: string }
  * Loads catalog items, gates and matches each against the ContextMap (plus any
  * deep-context enrichment), and returns the eligible set.
  */
-export async function recommend(root: string, context: ContextMap): Promise<Recommendation> {
+export async function recommend(
+  root: string,
+  context: ContextMap,
+  opts: { include?: string[] } = {},
+): Promise<Recommendation> {
   const items = await loadCatalog(root)
   const sources =
     (await readJson<{ items?: Array<{ id: string; status?: string }> }>(
@@ -255,6 +259,13 @@ export async function recommend(root: string, context: ContextMap): Promise<Reco
 
   applyCoInstallSuppression(recommended, skipped)
 
+  // Manual includes win over gates/suppression (but never over hard policy blocks).
+  const includeWarnings = applyManualIncludes(opts.include ?? [], items, recommended, skipped)
+
+  // Opt-in eligible: role-gated tier items the user could add but whose role gate
+  // is unsatisfied. Surfaced so the setup UX can offer them via `--include`.
+  const optInEligible = buildOptInEligible(items, skipped)
+
   recommended.sort((a, b) => a.id.localeCompare(b.id))
   skipped.sort((a, b) => a.id.localeCompare(b.id))
   const installableRecommended = recommended.filter((item) => item.install)
@@ -265,7 +276,8 @@ export async function recommend(root: string, context: ContextMap): Promise<Reco
   return {
     recommended,
     skipped,
-    warnings: mergeRecommendationWarnings(context),
+    optInEligible,
+    warnings: [...mergeRecommendationWarnings(context), ...includeWarnings],
     estimatedContextTokens,
     selectedRules,
     skippedRules,
@@ -364,4 +376,102 @@ function applyCoInstallSuppression(recommended: RecommendedEntry[], skipped: Ski
       skipReasons: [{ code: rule.code, message: rule.message, signal: rule.signal }],
     })
   }
+}
+
+/**
+ * Skip codes that represent hard policy blocks — items skipped for these reasons
+ * must NOT be force-installed via `--include` (they are correctness/security gates).
+ */
+const HARD_SKIP_CODES = new Set([
+  'unsupported-policy',
+  'deprecated',
+  'curated-not-approved',
+  'curated-risk-blocked',
+  'sensitive-policy',
+  'source-trust',
+  'source-approval',
+])
+
+/**
+ * Promote explicitly requested ids into the recommended set as `manual` selections.
+ * Honors hard policy blocks (those are never forced), warns on unknown ids and on
+ * promoting an item whose requiresAny gate is unsatisfied. Returns warning lines.
+ */
+function applyManualIncludes(
+  include: string[],
+  items: CatalogItem[],
+  recommended: RecommendedEntry[],
+  skipped: SkippedEntry[],
+): string[] {
+  const warnings: string[] = []
+  if (include.length === 0) return warnings
+  const byId = new Map(items.map((i) => [i.id, i]))
+  const recommendedIds = new Set(recommended.map((r) => r.id))
+
+  for (const id of include) {
+    const item = byId.get(id)
+    if (!item) {
+      warnings.push(`--include: unknown catalog id "${id}" (not in manifest)`)
+      continue
+    }
+    if (recommendedIds.has(id)) continue // already eligible
+
+    const skipIdx = skipped.findIndex((s) => s.id === id)
+    const skipCode = skipIdx >= 0 ? skipped[skipIdx]!.skipReasons[0]?.code : undefined
+    if (skipCode && HARD_SKIP_CODES.has(skipCode)) {
+      warnings.push(`--include: "${id}" cannot be force-installed (blocked by ${skipCode})`)
+      continue
+    }
+    if (skipCode === 'requires-any-unsatisfied') {
+      warnings.push(`--include: "${id}" added manually though its requiresAny gate is unsatisfied`)
+    }
+    if (skipIdx >= 0) skipped.splice(skipIdx, 1)
+
+    const isConfig = item.type === 'config'
+    recommended.push({
+      id: item.id,
+      type: item.type,
+      reason: 'manually included',
+      reasons: [
+        {
+          code: 'manual-include',
+          message: 'manually included via --include',
+          signal: 'selection:manual',
+        },
+      ],
+      selectionMode: 'manual',
+      install: !isConfig,
+      tags: item.tags,
+      ecosystem: item.ecosystem,
+      tokenEstimate: item.tokenEstimate,
+    })
+    recommendedIds.add(id)
+  }
+  return warnings
+}
+
+/** Build the opt-in-eligible list: role-gated tier items skipped for an unsatisfied gate. */
+function buildOptInEligible(
+  items: CatalogItem[],
+  skipped: SkippedEntry[],
+): NonNullable<Recommendation['optInEligible']> {
+  const byId = new Map(items.map((i) => [i.id, i]))
+  const eligible: NonNullable<Recommendation['optInEligible']> = []
+  for (const entry of skipped) {
+    if (entry.skipReasons[0]?.code !== 'requires-any-unsatisfied') continue
+    const item = byId.get(entry.id)
+    if (!item?.optInTier || !item.optInGroup) continue
+    eligible.push({
+      id: item.id,
+      type: item.type,
+      title: item.title,
+      optInTier: item.optInTier,
+      optInGroup: item.optInGroup,
+      purpose: item.purpose,
+      tokenEstimate: item.tokenEstimate,
+      requires: entry.skipReasons[0]?.signal ?? describeRequiresAny(item.requiresAny ?? []),
+    })
+  }
+  eligible.sort((a, b) => a.optInGroup.localeCompare(b.optInGroup) || a.id.localeCompare(b.id))
+  return eligible
 }

@@ -1,5 +1,5 @@
 {
-  "version": "2.12.2",
+  "version": "2.13.0",
   "items": [
     {
       "id": "haus.agentic-workflow-standard",
@@ -619,6 +619,8 @@
       "originUrl": "https://github.com/affaan-m/ECC/blob/ec92b528471df708c2384ebbcc82b390b60f535a/skills/laravel-plugin-discovery/SKILL.md",
       "pinnedRef": "ec92b528471df708c2384ebbcc82b390b60f535a",
       "ecosystem": "laravel",
+      "optInTier": "ops",
+      "optInGroup": "Laravel plugin discovery",
       "requiresAny": [
         {
           "role": "laravel-plugins"
@@ -753,6 +755,8 @@
       "originUrl": "https://github.com/affaan-m/ECC/blob/5b173d2e6c11b976a0f13b2f59125e08956c1d47/agents/performance-optimizer.md",
       "pinnedRef": "5b173d2e6c11b976a0f13b2f59125e08956c1d47",
       "ecosystem": "ecc",
+      "optInTier": "review",
+      "optInGroup": "Performance review",
       "default": false,
       "requiresAny": [
         {
@@ -986,6 +990,8 @@
       "originUrl": "https://github.com/affaan-m/ECC/blob/5b173d2e6c11b976a0f13b2f59125e08956c1d47/.kiro/agents/refactor-cleaner.md",
       "pinnedRef": "5b173d2e6c11b976a0f13b2f59125e08956c1d47",
       "ecosystem": "ecc",
+      "optInTier": "review",
+      "optInGroup": "Refactor cleanup",
       "default": false,
       "requiresAny": [
         {
@@ -1015,6 +1021,8 @@
       "tags": ["agent", "review", "security"],
       "tokenEstimate": 1369,
       "ecosystem": "security",
+      "optInTier": "review",
+      "optInGroup": "Security review",
       "originUrl": "https://github.com/affaan-m/ECC/blob/ec92b528471df708c2384ebbcc82b390b60f535a/agents/security-reviewer.md",
       "requiresAny": [
         {
@@ -1374,6 +1382,8 @@
       "originUrl": "https://github.com/yeachan-heo/oh-my-claudecode/blob/50f6ff05eb5d9ebed66f05d8c4580c0b119f37af/agents/designer.md",
       "pinnedRef": "50f6ff05eb5d9ebed66f05d8c4580c0b119f37af",
       "ecosystem": "oh-my-claudecode",
+      "optInTier": "design",
+      "optInGroup": "UI design",
       "default": false,
       "requiresAny": [
         {
@@ -1437,6 +1447,8 @@
       "originUrl": "https://github.com/yeachan-heo/oh-my-claudecode/blob/50f6ff05eb5d9ebed66f05d8c4580c0b119f37af/agents/tracer.md",
       "pinnedRef": "50f6ff05eb5d9ebed66f05d8c4580c0b119f37af",
       "ecosystem": "oh-my-claudecode",
+      "optInTier": "review",
+      "optInGroup": "Incident tracing",
       "default": false,
       "requiresAny": [
         {
@@ -1609,6 +1621,8 @@
       "originUrl": "https://github.com/redis/agent-skills/blob/5ca2e1a2d82a768221e8f71a02e3ca095a37d38e/skills/redis-observability/SKILL.md",
       "pinnedRef": "5ca2e1a2d82a768221e8f71a02e3ca095a37d38e",
       "ecosystem": "redis",
+      "optInTier": "ops",
+      "optInGroup": "Redis security & observability",
       "requiresAny": [
         {
           "role": "redis-ops"
@@ -1639,6 +1653,8 @@
       "originUrl": "https://github.com/redis/agent-skills/blob/5ca2e1a2d82a768221e8f71a02e3ca095a37d38e/skills/redis-security/SKILL.md",
       "pinnedRef": "5ca2e1a2d82a768221e8f71a02e3ca095a37d38e",
       "ecosystem": "redis",
+      "optInTier": "ops",
+      "optInGroup": "Redis security & observability",
       "requiresAny": [
         {
           "role": "redis-ops"
@@ -2124,6 +2140,8 @@
       "originSourceId": "superpowers-pcvelz",
       "originUrl": "https://github.com/pcvelz/superpowers/tree/bd000c6ec1df53449a74397f55305b22802b9a2b/skills/finishing-a-development-branch",
       "ecosystem": "superpowers",
+      "optInTier": "workflow",
+      "optInGroup": "Git worktrees & branch finishing",
       "requiresAny": [
         {
           "role": "branch-completion"
@@ -2153,6 +2171,8 @@
       "originSourceId": "superpowers-pcvelz",
       "originUrl": "https://github.com/pcvelz/superpowers/tree/bd000c6ec1df53449a74397f55305b22802b9a2b/skills/receiving-code-review",
       "ecosystem": "superpowers",
+      "optInTier": "workflow",
+      "optInGroup": "Code review workflow",
       "requiresAny": [
         {
           "role": "code-review"
@@ -2182,6 +2202,8 @@
       "originSourceId": "superpowers-pcvelz",
       "originUrl": "https://github.com/pcvelz/superpowers/tree/bd000c6ec1df53449a74397f55305b22802b9a2b/skills/requesting-code-review",
       "ecosystem": "superpowers",
+      "optInTier": "workflow",
+      "optInGroup": "Code review workflow",
       "requiresAny": [
         {
           "role": "code-review"
@@ -2211,6 +2233,8 @@
       "originSourceId": "superpowers-pcvelz",
       "originUrl": "https://github.com/pcvelz/superpowers/tree/bd000c6ec1df53449a74397f55305b22802b9a2b/skills/specifying-gates",
       "ecosystem": "superpowers",
+      "optInTier": "workflow",
+      "optInGroup": "Quality gates",
       "requiresAny": [
         {
           "role": "user-gate"
@@ -2240,6 +2264,8 @@
       "originSourceId": "superpowers-pcvelz",
       "originUrl": "https://github.com/pcvelz/superpowers/tree/48f5123e18a1a92dfba962da8dc2509391c821ee/skills/subagent-driven-development",
       "ecosystem": "superpowers",
+      "optInTier": "workflow",
+      "optInGroup": "Subagent-driven development",
       "pinnedRef": "48f5123e18a1a92dfba962da8dc2509391c821ee",
       "requiresAny": [
         {
@@ -2294,6 +2320,8 @@
       "originSourceId": "superpowers-pcvelz",
       "originUrl": "https://github.com/pcvelz/superpowers/tree/bd000c6ec1df53449a74397f55305b22802b9a2b/skills/test-driven-development",
       "ecosystem": "superpowers",
+      "optInTier": "workflow",
+      "optInGroup": "TDD workflow",
       "requiresAny": [
         {
           "role": "tdd-workflow"
@@ -2323,6 +2351,8 @@
       "originSourceId": "superpowers-pcvelz",
       "originUrl": "https://github.com/pcvelz/superpowers/tree/20c0b1ed71cb073c847432fe01379f48c5278a5f/skills/using-git-worktrees",
       "ecosystem": "superpowers",
+      "optInTier": "workflow",
+      "optInGroup": "Git worktrees & branch finishing",
       "pinnedRef": "20c0b1ed71cb073c847432fe01379f48c5278a5f",
       "requiresAny": [
         {
@@ -2427,6 +2457,8 @@
       "originSourceId": "superpowers-pcvelz",
       "originUrl": "https://github.com/pcvelz/superpowers/tree/bd000c6ec1df53449a74397f55305b22802b9a2b/skills/writing-skills",
       "ecosystem": "superpowers",
+      "optInTier": "workflow",
+      "optInGroup": "Skill authoring",
       "requiresAny": [
         {
           "role": "skill-authoring"
