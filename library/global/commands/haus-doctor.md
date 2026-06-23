@@ -1,3 +1,7 @@
+---
+description: Check this project's haus setup health and explain it in plain language.
+---
+
 Check the health of this project's haus setup and explain it in plain language.
 
 1. Run `haus doctor`.
