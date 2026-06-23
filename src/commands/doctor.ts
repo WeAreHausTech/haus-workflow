@@ -197,6 +197,22 @@ export async function runDoctor(options?: { hooks?: boolean }): Promise<void> {
     }
   }
 
+  // Guard against the formatter mutating managed files: prettier reformatting
+  // .haus-workflow/WORKFLOW.md breaks the hash in its managed header and makes the
+  // check above report a phantom edit. .prettierignore must cover .haus-workflow/.
+  if (workflowExists) {
+    const prettierIgnore = (await readText(path.join(root, '.prettierignore'))) ?? ''
+    if (!prettierIgnore.split('\n').some((l) => l.trim() === '.haus-workflow/')) {
+      flag(
+        '- .prettierignore: not protecting .haus-workflow/ (run `haus apply --write`)',
+        'The formatter may reformat managed files and trigger false "modified locally" reports',
+        'haus apply --write',
+      )
+    } else {
+      ok('- .prettierignore: protects .haus-workflow/')
+    }
+  }
+
   const cacheAgeMs = await getCacheManifestAge()
   if (cacheAgeMs === null) {
     flag(
