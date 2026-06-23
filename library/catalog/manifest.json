@@ -1,5 +1,5 @@
 {
-  "version": "2.13.1",
+  "version": "3.0.0",
   "items": [
     {
       "id": "haus.agentic-workflow-standard",
@@ -1050,7 +1050,7 @@
       "title": "TypeScript Reviewer",
       "purpose": "Expert TypeScript/JavaScript code reviewer specializing in type safety, async correctness, Node/web security, and idiomatic patterns. Use for all TypeScript and JavaScript code changes. MUST BE USED for TypeScript/JavaScript projects.",
       "whenToUse": "Expert TypeScript/JavaScript code reviewer specializing in type safety, async correctness, Node/web security, and idiomatic patterns. Use for all TypeScript and JavaScript code changes. MUST BE USED for TypeScript/JavaScript projects.",
-      "tags": ["agent", "review", "typescript5"],
+      "tags": ["agent", "review", "typescript"],
       "tokenEstimate": 2270,
       "ecosystem": "typescript",
       "originUrl": "https://github.com/affaan-m/ECC/blob/ec92b528471df708c2384ebbcc82b390b60f535a/agents/typescript-reviewer.md",
@@ -1332,18 +1332,18 @@
       "riskLevel": "medium"
     },
     {
-      "id": "haus.nx21-monorepo-patterns",
-      "version": "1.0.1",
+      "id": "haus.nx-monorepo-patterns",
+      "version": "1.1.0",
       "source": "haus",
       "type": "skill",
-      "path": "skills/haus-owned/stack-patterns/nx21-monorepo-patterns",
-      "title": "Haus Nx 21 monorepo patterns",
+      "path": "skills/haus-owned/stack-patterns/nx-monorepo-patterns",
+      "title": "Haus Nx monorepo patterns",
       "purpose": "Guide Nx project graph, target pipeline, and workspace boundaries.",
       "whenToUse": "Use for Nx workspace graph, target, and generator configuration updates.",
       "whenNotToUse": "Do not use for app-only feature edits without workspace impact.",
       "references": ["https://nx.dev/llms.txt"],
       "tokenBudget": 1200,
-      "tags": ["nx21", "yarn4"],
+      "tags": ["nx", "yarn4"],
       "repoRoles": ["nx-monorepo"],
       "requiresAny": [
         {
@@ -2498,7 +2498,7 @@
     },
     {
       "id": "haus.turbo-monorepo-patterns",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "source": "haus",
       "type": "skill",
       "path": "skills/haus-owned/stack-patterns/turbo-monorepo-patterns",
@@ -2525,12 +2525,12 @@
       "riskLevel": "low"
     },
     {
-      "id": "haus.typescript5-patterns",
-      "version": "1.1.0",
+      "id": "haus.typescript-patterns",
+      "version": "1.2.0",
       "source": "haus",
       "type": "skill",
-      "path": "skills/haus-owned/stack-patterns/typescript5-patterns",
-      "title": "Haus TypeScript 5 patterns",
+      "path": "skills/haus-owned/stack-patterns/typescript-patterns",
+      "title": "Haus TypeScript patterns",
       "purpose": "Guide TypeScript contract and migration-safe typing changes.",
       "whenToUse": "Use for shared types, DTOs, interface boundaries, and type-safe refactors.",
       "whenNotToUse": "Do not use for runtime-only changes without type-contract impact.",
@@ -2836,7 +2836,7 @@
       "title": "Wshobson Typescript Advanced Types",
       "purpose": "Master TypeScript's advanced type system including generics, conditional types, mapped types, template literals, and utility types for building type-safe applications. Use when implementing complex type logic, creating reusable type utilities, or ensuring compile-time type safety in TypeScript projects.",
       "whenToUse": "Master TypeScript's advanced type system including generics, conditional types, mapped types, template literals, and utility types for building type-safe applications. Use when implementing complex type logic, creating reusable type utilities, or ensuring compile-time type safety in TypeScript projects.",
-      "whenNotToUse": "Use haus.typescript5-patterns for contract boundaries and migration-safe typing.",
+      "whenNotToUse": "Use haus.typescript-patterns for contract boundaries and migration-safe typing.",
       "tags": ["workflow", "typescript", "frontend", "backend"],
       "repoRoles": [
         "next-app",

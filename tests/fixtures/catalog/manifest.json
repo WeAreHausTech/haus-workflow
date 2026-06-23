@@ -564,7 +564,7 @@
       "whenNotToUse": "Do not use for app-only feature edits without workspace impact.",
       "references": ["references/scope.md", "references/workflow.md", "https://nx.dev/docs"],
       "tokenBudget": 1200,
-      "tags": ["nx21", "yarn4"],
+      "tags": ["nx", "yarn4"],
       "repoRoles": ["nx-monorepo"],
       "requiresAny": [
         { "role": "nx-monorepo" },
