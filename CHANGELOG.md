@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.31.1](https://github.com/WeAreHausTech/haus-workflow/compare/v0.31.0...v0.31.1) (2026-06-23)
+
+### Bug Fixes
+
+- **apply:** stop the formatter triggering phantom WORKFLOW.md edits ([#145](https://github.com/WeAreHausTech/haus-workflow/issues/145)) ([931b95f](https://github.com/WeAreHausTech/haus-workflow/commit/931b95ff1c43aa5a1dd697f25a10964d808467a6))
+- **install:** give global commands a hover description ([#144](https://github.com/WeAreHausTech/haus-workflow/issues/144)) ([8aa0165](https://github.com/WeAreHausTech/haus-workflow/commit/8aa01654856a8e0383c857415a010b5622f54e04))
+
 ## [0.31.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.30.0...v0.31.0) (2026-06-23)
 
 ### Features
