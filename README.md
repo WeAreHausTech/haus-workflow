@@ -87,6 +87,10 @@ On `haus apply` / `haus update`, items **removed from the catalog** or marked
 lock hash; user-edited copies are kept. Approved items deselected via `--select` are
 not pruned.
 
+> **Upgrading from a pre-`0.30.0` CLI:** deprecated-skill pruning shipped in `0.30.0`.
+> If an older CLI left deprecated skills on disk, upgrade first
+> (`npm i -g @haus-tech/haus-workflow`) then run `haus update` to prune them.
+
 ## Internal docs
 
 [docs/SUMMARY.md](docs/SUMMARY.md) — full documentation index

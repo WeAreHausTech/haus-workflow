@@ -46,15 +46,20 @@ and carries a real `name`/`description`. Then confirm in Desktop that the menu
 appears; if it still does not after a valid frontmatter install, the gap is
 client-side `AskUserQuestion` rendering, not the skill file — raise separately.
 
-## Stale catalog item not removed after update
+## Stale or deprecated catalog item not removed after update
 
-**Symptom:** An item was removed from the catalog manifest but its copy remains under
-`.claude/skills/` (or agents/commands/templates) after `haus update`. **Cause:** apply
-only deletes stale items when on-disk content still matches the hash in
-`haus.lock.json` — if you edited the file locally, cleanup skips it with a warning.
-**Fix:** delete the path manually, or restore the original content and re-run
-`haus apply --write` / `haus update`. Items you deselected with `apply --select` but
-that still exist in the catalog are intentionally left in place.
+**Symptom:** An item was removed from the catalog manifest — or marked
+`reviewStatus: deprecated` — but its copy remains under `.claude/skills/` (or
+agents/commands/templates) after `haus update`. **Cause:** two possibilities. (1)
+apply only deletes stale/deprecated items when on-disk content still matches the hash
+in `haus.lock.json` — if you edited the file locally, cleanup skips it with a warning.
+(2) The deprecated-prune path shipped in CLI `0.30.0` (#126) — an older CLI never
+prunes deprecated items, it only stops re-installing them. **Fix:** upgrade the CLI
+first (`npm i -g @haus-tech/haus-workflow`), then run `haus update` so the
+stale-cleanup pass removes them. For a locally-edited copy, delete the path manually or
+restore the original content and re-run `haus apply --write`. Items you deselected with
+`apply --select` but that still exist in the catalog as approved are intentionally left
+in place.
 
 ## An opt-in skill/agent never installs (and how to add one later)
 

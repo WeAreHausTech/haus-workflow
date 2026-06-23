@@ -1,7 +1,7 @@
 # Catalog Skills & Agents Cleanup — 2026-06-18
 
 Repos: `haus-workflow` · `haus-workflow-catalog`
-Status: **In progress** — P0 ✅ P1 ✅ P2a ✅ P2b ✅ P2c ✅ P2d ✅ P2f catalog ✅ P5 ✅ (2026-06-22, catalog `v2.13.0` #33; CLI branch `feat/p5-opt-in-ux`); P2g+ / P3 / P4 tracked above
+Status: **Complete** — P0–P6 all ✅ (2026-06-23). P5 catalog `v2.13.0` #33 / CLI #141; P6 docs on branches `docs/p6-migration-notes` (CLI) + `docs/p6-baseline-tiering-adr` (catalog)
 Context: Full catalog review of 82 skills + 16 agents; duplicate/overlap analysis and baseline token reduction.
 
 ### Content preference policy
@@ -59,7 +59,7 @@ Merge each PR to `main` before starting the next branch — no stacking. Run `ya
 | **P3**  | `haus-workflow-catalog` (+ recommender tests) | Tier baseline superpowers + agents                       |                                                                                                             |
 | **P4**  | `haus-workflow-catalog`                       | Agent dedup                                              | ✅ catalog `v2.12.2`; CLI fixture PR                                                                        |
 | **P5**  | `haus-workflow` (+ catalog metadata)          | Opt-in UX — Claude Code-first; CLI as backend            | ✅ catalog `v2.13.0` #33; CLI branch `feat/p5-opt-in-ux` (P5-3 N/A — see note)                              |
-| **P6**  | Both                                          | Docs, release notes, fixture sync                        |                                                                                                             |
+| **P6**  | Both                                          | Docs, release notes, fixture sync                        | ✅ runbook + README upgrade note (CLI) · ADR-0007 baseline tiering (catalog)                                |
 
 ### Target outcomes
 
@@ -331,7 +331,7 @@ Next.js fixture (`@playwright/test` in deps) can load:
 | `ecc-build-error-resolver` |   1191 | **Drop** (P4) — subset of react-build-resolver    |
 
 - [x] **P2g-6** — Gate `ecc-typescript-reviewer`: install on `typescript` stack **without** `react` / `nextjs` tag match, OR when `.ts` files dominate (scanner signal TBD)
-- [ ] **P2g-6** — On pure React/Next repos: react-reviewer only (~2.3k saved)
+- [x] **P2g-6** — On pure React/Next repos: react-reviewer only (~2.3k saved) — `src/recommender/recommend.ts:157` skips `ecc-typescript-reviewer` on React/Next; regression test `tests/recommend-gate-regression.test.js`
 
 #### P2g-7 — Database skill + agent overlap (Prisma / Postgres stacks)
 
@@ -405,7 +405,7 @@ Next.js fixture (`@playwright/test` in deps) can load:
   - Nx fixture with only `@nx/eslint-plugin` (no `nx` dep / role) → **must not** recommend `nx21-monorepo-patterns`
 - [x] **P2g-10-4** — Update `recommend-archetypes-golden.json`: remove `sentry-sentry-php-sdk` from `laravel-app.mustInclude` (or add `sentry/sentry` to laravel fixture if Sentry install is still desired in that archetype)
 - [x] **P2g-10-5** — `yarn validate` + `yarn test` (catalog); golden archetype tests + `yarn verify` (CLI)
-- [ ] **P2g-10-6** — Document gate-audit convention in catalog `docs/` or validation-rules ADR: **no catch-all `packageNamePattern` unless scope is intentionally broad; stack OR-branches must match skill purpose**
+- [x] **P2g-10-6** — Document gate-audit convention — catalog **ADR-0006** (`docs/adr/0006-requiresany-gate-audit.md`): no catch-all `packageNamePattern` unless scope intentionally broad; stack OR-branches must match skill purpose
 
 #### P2g-11 — Hardening pass (branch `co-install-tier-gates`)
 
@@ -550,10 +550,10 @@ Updated `library/global/skills/haus-workflow/SKILL.md`:
 
 ### P6 — Docs & migration (`both`)
 
-- [ ] **P6-1** — `haus-workflow/docs/runbook.md` — add deprecated prune behavior after P0
-- [ ] **P6-2** — `haus-workflow-catalog/docs/` — baseline tiering note or ADR (if P3 ships)
-- [ ] **P6-3** — Release notes: "Upgrade CLI, then run `haus update` to prune deprecated skills"
-- [ ] **P6-4** — Confirm writing-documentation skill run if CLI/catalog structure docs changed
+- [x] **P6-1** — `haus-workflow/docs/runbook.md` — "Stale or deprecated catalog item not removed after update" entry extended: names `reviewStatus: deprecated`, the `0.30.0` (#126) prune path, and the upgrade-then-`haus update` fix
+- [x] **P6-2** — `haus-workflow-catalog/docs/adr/0007-baseline-skill-tiering.md` — baseline tiering ADR (10 core `default: true`; cluster winners; opt-in tier list); indexed in `docs/adr/README.md`
+- [x] **P6-3** — Upgrade guidance in `haus-workflow/README.md` Catalog section (pre-`0.30.0` upgrade → `haus update` prunes deprecated). CHANGELOG is commit-generated; prune feature already lands in `0.30.0` #126
+- [x] **P6-4** — N/A — P6 changed only docs (runbook entry, README note, ADR); no CLI/catalog command/structure/deploy change, so writing-documentation skill not required
 
 ---
 
