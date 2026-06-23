@@ -39,9 +39,10 @@ Do this in order:
      `optInGroup` label and present one `AskUserQuestion` option per group
      (use each item's `purpose` and `tokenEstimate` to describe it in plain
      language, e.g. "Code review workflow — request/receive structured reviews").
-     For every group the user picks, collect that group's item ids and run
-     `haus recommend --include <id> <id> …` (this re-runs recommend and adds them
-     as manual selections).
+     Collect the item ids from **all** the groups the user picked into one list
+     and run a **single** `haus recommend --include <id> <id> …` (one command with
+     every chosen id). Don't run it once per group — each run rewrites
+     `recommendation.json`, so repeated calls would drop the earlier includes.
    - **Project config** (entries in `recommended[]` with `install: false`, e.g.
      Haus ESLint / Prettier baselines): offer each as a plain choice ("Add the
      Haus ESLint baseline"). On confirm, run `haus scaffold <id>`. `haus scaffold`

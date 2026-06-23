@@ -36,14 +36,17 @@ function makeContext(root, overrides = {}) {
 }
 
 let tmpDir
+let prevFixture
 function setup() {
   tmpDir = mkdtempSync(path.join(os.tmpdir(), 'haus-opt-in-'))
   mkdirSync(path.join(tmpDir, '.haus-workflow'), { recursive: true })
+  prevFixture = process.env.HAUS_FIXTURE_CATALOG
   process.env.HAUS_FIXTURE_CATALOG = FIXTURE
 }
 function teardown() {
   if (tmpDir) rmSync(tmpDir, { recursive: true, force: true })
-  delete process.env.HAUS_FIXTURE_CATALOG
+  if (prevFixture === undefined) delete process.env.HAUS_FIXTURE_CATALOG
+  else process.env.HAUS_FIXTURE_CATALOG = prevFixture
 }
 
 const find = (list, id) => list.find((x) => x.id === id)

@@ -72,10 +72,10 @@ installed. This is intended — it keeps the baseline lean.
 - In Claude Code (preferred): run `/haus-workflow` → **`project:add-skills`**, or pick
   the opt-in options during `/haus-setup`. Both present the groups in plain language
   and wire the commands for you.
-- By hand: `haus recommend --include <id> [<id> …]` (promotes them to `selectionMode:
-manual`), then `haus apply --write`. Or add the gating role to
-  `.haus-workflow/deep-context.json#roles` and re-run `haus recommend` → `haus apply
---write`.
+- By hand: run `haus recommend --include <id> [<id> …]` (promotes them to the
+  `manual` selection mode), then `haus apply --write`. Or add the gating role to
+  `.haus-workflow/deep-context.json#roles` and re-run `haus recommend` followed by
+  `haus apply --write`.
 
 **Role → opt-in group map** (catalog `optInGroup`, set in `manifest.json`):
 `code-review` → Code review workflow · `tdd-workflow` → TDD workflow ·
