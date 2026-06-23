@@ -294,8 +294,12 @@ describe('applyInstall dry-run (real invocation, stubbed HOME)', () => {
     for (const name of ['haus-setup', 'haus-doctor', 'haus-fix']) {
       const file = path.join(commandsDir, `${name}.md`)
       assert.ok(fs.existsSync(file), `expected ${name}.md to be seeded`)
-      // Frontmatter-free body: the haus stamp on line 1 is a harmless HTML comment.
-      assert.ok(fs.readFileSync(file, 'utf8').startsWith('<!-- HAUS-MANAGED id=command.'))
+      // Commands carry frontmatter so Claude Code shows a clean `description:` on hover;
+      // the haus stamp lives in a `haus_managed:` field inside the block (ADR-0006).
+      const body = fs.readFileSync(file, 'utf8')
+      assert.ok(body.startsWith('---\n'), `${name}.md should open with frontmatter`)
+      assert.match(body, /^description: .+/m, `${name}.md should expose a description`)
+      assert.match(body, /^haus_managed: "id=command\./m, `${name}.md should carry the haus marker`)
     }
     const manifest = JSON.parse(
       fs.readFileSync(path.join(tmpDir, '.claude', 'haus', 'install-manifest.json'), 'utf8'),

@@ -1,3 +1,7 @@
+---
+description: Set up this project with haus, conversationally — no terminal needed.
+---
+
 Set up this project with haus, conversationally. The person you're helping may
 not be a developer — never make them open a terminal or read JSON. You run the
 commands; they read plain language and approve.
