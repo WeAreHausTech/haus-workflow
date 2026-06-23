@@ -109,3 +109,17 @@ coverage climbed comfortably above the recorded floor; the floor should ratchet
 up to lock in the gain. **Fix:** bump the corresponding metric floor in
 `.c8rc.json` to the suggested value (never auto-edited; raise by hand only).
 Re-run `yarn test:coverage && node scripts/coverage-ratchet.mjs` to confirm PASS.
+
+## `haus doctor` says WORKFLOW.md was edited when it wasn't
+
+**Symptom:** `haus doctor` reports `.haus-workflow/WORKFLOW.md: modified locally`
+(and `haus apply` skips it as "content modified by user") on a file the user never
+touched — recurring even right after `haus update`. **Cause:** the project formatter
+reformats the managed file. `WORKFLOW.md` carries a content hash in its HAUS-MANAGED
+header; when prettier rewrites the body (via the lefthook `format` step, editor
+format-on-save, or a manual run) the body no longer matches the embedded hash, so
+detection reports a phantom edit. **Fix:** `haus apply --write` now writes a
+`.prettierignore` block covering `.haus-workflow/` (see
+`src/claude/write-prettierignore.ts`) so the formatter leaves managed files alone.
+On an already-mutated file, restore it once with `haus apply --write --force`; the
+ignore prevents recurrence.

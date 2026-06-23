@@ -23,6 +23,7 @@ import {
   installSuperpowersShared,
 } from './superpowers-install.js'
 import { assertPostApplySettingsHausContract } from './verify-hooks-contract.js'
+import { writePrettierIgnore } from './write-prettierignore.js'
 import { writeRootClaudeMd } from './write-root-claude-md.js'
 import { writeWorkflowConfig } from './write-workflow-config.js'
 import { writeWorkflow } from './write-workflow.js'
@@ -75,10 +76,15 @@ export async function writeClaudeFiles(
   const workflowConfigPath = await writeWorkflowConfig(root, dryRun, {
     refill: opts.refillConfig,
   })
+  // Keep the project formatter off haus-owned output: prettier reformatting
+  // .haus-workflow/WORKFLOW.md breaks the hash embedded in its managed header and
+  // makes doctor report a phantom user edit. See write-prettierignore.ts.
+  const prettierIgnorePath = await writePrettierIgnore(root, dryRun)
   const p6Files = [
     rootClaudeMdPath,
     ...(workflowPath ? [workflowPath] : []),
     ...(workflowConfigPath ? [workflowConfigPath] : []),
+    prettierIgnorePath,
   ]
   const files = dryRun
     ? [...coreFiles, ...p6Files]
