@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.31.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.30.0...v0.31.0) (2026-06-23)
+
+### Features
+
+- opt-in UX for tiered skills + config scaffold ([#141](https://github.com/WeAreHausTech/haus-workflow/issues/141)) ([f60207b](https://github.com/WeAreHausTech/haus-workflow/commit/f60207b78af4651656d457c6f80665bd25deaa7f)), closes [#33](https://github.com/WeAreHausTech/haus-workflow/issues/33) [#33](https://github.com/WeAreHausTech/haus-workflow/issues/33)
+
 ## [0.30.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.29.0...v0.30.0) (2026-06-22)
 
 ### Features
