@@ -1,5 +1,5 @@
 {
-  "version": "2.13.0",
+  "version": "2.13.1",
   "items": [
     {
       "id": "haus.agentic-workflow-standard",
@@ -1730,7 +1730,7 @@
     },
     {
       "id": "haus.sentry-sentry-nextjs-sdk",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "source": "curated",
       "type": "skill",
       "path": "skills/sentry/sentry-nextjs-sdk",
@@ -1740,7 +1740,7 @@
       "whenNotToUse": "Do not use when a more specific skill or command applies.",
       "tags": ["workflow", "sentry", "nextjs", "observability"],
       "repoRoles": [],
-      "tokenEstimate": 4542,
+      "tokenEstimate": 4544,
       "installMode": "copy-selected",
       "default": false,
       "reviewStatus": "approved",
@@ -1749,8 +1749,8 @@
       "license": "MIT",
       "licenseConfidence": "high",
       "originSourceId": "getsentry-sentry-for-ai",
-      "originUrl": "https://github.com/getsentry/sentry-for-ai/blob/9ab3551758913a4144517d4fafb71476a48c64f8/skills/sentry-nextjs-sdk/SKILL.md",
-      "pinnedRef": "9ab3551758913a4144517d4fafb71476a48c64f8",
+      "originUrl": "https://github.com/getsentry/sentry-for-ai/blob/bd84576db74e3e1d13361c7eda3bb303ae017b90/skills/sentry-nextjs-sdk/SKILL.md",
+      "pinnedRef": "bd84576db74e3e1d13361c7eda3bb303ae017b90",
       "ecosystem": "sentry",
       "requiresAny": [
         {
@@ -1763,7 +1763,7 @@
     },
     {
       "id": "haus.sentry-sentry-node-sdk",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "source": "curated",
       "type": "skill",
       "path": "skills/sentry/sentry-node-sdk",
@@ -1773,7 +1773,7 @@
       "whenNotToUse": "Prefer sentry-nestjs-sdk for NestJS apps using @sentry/nestjs.",
       "tags": ["workflow", "sentry", "backend", "observability"],
       "repoRoles": [],
-      "tokenEstimate": 8085,
+      "tokenEstimate": 8087,
       "installMode": "copy-selected",
       "default": false,
       "reviewStatus": "approved",
@@ -1782,8 +1782,8 @@
       "license": "MIT",
       "licenseConfidence": "high",
       "originSourceId": "getsentry-sentry-for-ai",
-      "originUrl": "https://github.com/getsentry/sentry-for-ai/blob/9ab3551758913a4144517d4fafb71476a48c64f8/skills/sentry-node-sdk/SKILL.md",
-      "pinnedRef": "9ab3551758913a4144517d4fafb71476a48c64f8",
+      "originUrl": "https://github.com/getsentry/sentry-for-ai/blob/bd84576db74e3e1d13361c7eda3bb303ae017b90/skills/sentry-node-sdk/SKILL.md",
+      "pinnedRef": "bd84576db74e3e1d13361c7eda3bb303ae017b90",
       "ecosystem": "sentry",
       "requiresAny": [
         {
