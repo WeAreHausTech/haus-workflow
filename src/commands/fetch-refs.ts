@@ -65,7 +65,7 @@ export async function runFetchRefs(options: {
   }
 
   for (const [url, filePath] of Object.entries(summary.cachedFiles)) {
-    log(`Cached: ${filePath}  (${url})`)
+    log(`Cached: ${filePath} (${url})`)
   }
   if (summary.fetched > 0) log(`Fetched: ${summary.fetched} URL(s)`)
   if (summary.unchanged > 0) log(`Unchanged (etag match): ${summary.unchanged} URL(s)`)
