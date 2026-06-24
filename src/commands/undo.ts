@@ -90,8 +90,12 @@ async function stripRootClaudeMd(root: string): Promise<boolean> {
 
 async function pruneDirIfEmpty(dir: string): Promise<void> {
   if (!(await fs.pathExists(dir))) return
-  const entries = await fs.readdir(dir)
-  if (entries.length === 0) await fs.remove(dir)
+  try {
+    const entries = await fs.readdir(dir)
+    if (entries.length === 0) await fs.remove(dir)
+  } catch {
+    // Leave directory in place if unreadable
+  }
 }
 
 async function backupManagedFilesBeforeUndo(

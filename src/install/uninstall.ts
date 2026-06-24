@@ -91,8 +91,12 @@ export async function runUninstall(options: UninstallOptions = {}): Promise<Unin
     await fs.remove(manifestPath)
   }
   if (fs.pathExistsSync(hausDir)) {
-    const remaining = await fs.readdir(hausDir)
-    if (remaining.length === 0) await fs.remove(hausDir)
+    try {
+      const remaining = await fs.readdir(hausDir)
+      if (remaining.length === 0) await fs.remove(hausDir)
+    } catch {
+      // Leave directory in place if unreadable
+    }
   }
 
   return result
