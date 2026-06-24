@@ -1,6 +1,6 @@
 /** `haus fetch-refs` — fetches and caches llms.txt content from catalog item references. */
 import { loadCatalog } from '../catalog/load-catalog.js'
-import { fetchRefsForItems } from '../refs/fetch-refs.js'
+import { fetchRefsForItems, isLlmsTxtUrl } from '../refs/fetch-refs.js'
 import { log, warn } from '../utils/logger.js'
 import { hausPath } from '../utils/paths.js'
 
@@ -40,7 +40,7 @@ export async function runFetchRefs(options: {
     }
   }
 
-  const withRefs = items.filter((item) => (item.references ?? []).length > 0)
+  const withRefs = items.filter((item) => (item.references ?? []).some(isLlmsTxtUrl))
 
   if (withRefs.length === 0) {
     if (options.json) {
