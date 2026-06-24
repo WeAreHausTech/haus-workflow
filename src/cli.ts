@@ -10,6 +10,7 @@ import { runClone } from './commands/clone.js'
 import { runDecisions } from './commands/decisions.js'
 import { runDoctor } from './commands/doctor.js'
 import { runExplainRecommendation } from './commands/explain-recommendation.js'
+import { runFetchRefs } from './commands/fetch-refs.js'
 import { runGuard } from './commands/guard.js'
 import { runInit } from './commands/init.js'
 import { runInstall } from './commands/install.js'
@@ -71,6 +72,13 @@ program
   .command('doctor')
   .option('--hooks', 'Verify .claude/settings.json matches the hook contract')
   .action(runDoctor)
+program
+  .command('fetch-refs')
+  .description('Fetch and cache llms.txt content from catalog item references')
+  .option('--all', 'Fetch for all catalog items (default)')
+  .option('--id <id>', 'Fetch for a single catalog item by id')
+  .option('--json', 'Emit machine-readable JSON summary to stdout')
+  .action(runFetchRefs)
 program
   .command('apply')
   .option('--dry-run')

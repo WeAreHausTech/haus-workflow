@@ -5,8 +5,14 @@ import path from 'node:path'
 import fs from 'fs/promises'
 import { mkdtempSync } from 'node:fs'
 import http from 'node:http'
+import { fileURLToPath } from 'node:url'
+
+import { execa } from 'execa'
 
 import { readCacheMeta, writeCacheMeta } from '../src/refs/cache-meta.js'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const DIST_CLI = path.resolve(__dirname, '../dist/cli.js')
 
 function startMockServer(handlers) {
   return new Promise((resolve) => {
@@ -178,4 +184,48 @@ test('fetchRefsForItems deduplicates URLs across items', async (t) => {
   const summary = await fetchRefsForItems(items, dir)
   assert.equal(summary.fetched, 1)
   assert.equal(fetchCount, 1)
+})
+
+test('haus fetch-refs --help exits 0', async () => {
+  const result = await execa('node', [DIST_CLI, 'fetch-refs', '--help'], { reject: false })
+  assert.equal(result.exitCode, 0)
+  assert.ok(result.stdout.includes('fetch-refs'))
+})
+
+test('haus fetch-refs --all exits 0 when no llms.txt refs in catalog', async (t) => {
+  const dir = mkdtempSync(path.join(os.tmpdir(), 'haus-proj-'))
+  t.after(async () => fs.rm(dir, { recursive: true }))
+  const result = await execa('node', [DIST_CLI, 'fetch-refs', '--all'], {
+    cwd: dir,
+    reject: false,
+    env: { ...process.env, HAUS_FIXTURE_CATALOG: '1' },
+  })
+  assert.equal(result.exitCode, 0)
+})
+
+test('haus fetch-refs --id unknown exits 1', async (t) => {
+  const dir = mkdtempSync(path.join(os.tmpdir(), 'haus-proj-'))
+  t.after(async () => fs.rm(dir, { recursive: true }))
+  const result = await execa('node', [DIST_CLI, 'fetch-refs', '--id', 'haus.does-not-exist'], {
+    cwd: dir,
+    reject: false,
+    env: { ...process.env, HAUS_FIXTURE_CATALOG: '1' },
+  })
+  assert.equal(result.exitCode, 1)
+})
+
+test('haus fetch-refs --json emits valid JSON', async (t) => {
+  const dir = mkdtempSync(path.join(os.tmpdir(), 'haus-proj-'))
+  t.after(async () => fs.rm(dir, { recursive: true }))
+  const result = await execa('node', [DIST_CLI, 'fetch-refs', '--all', '--json'], {
+    cwd: dir,
+    reject: false,
+    env: { ...process.env, HAUS_FIXTURE_CATALOG: '1' },
+  })
+  assert.equal(result.exitCode, 0)
+  const parsed = JSON.parse(result.stdout)
+  assert.ok('fetched' in parsed)
+  assert.ok('unchanged' in parsed)
+  assert.ok('failed' in parsed)
+  assert.ok('cachedFiles' in parsed)
 })
