@@ -86,11 +86,14 @@ jobs:
           curl -fsSL \
             "https://raw.githubusercontent.com/WeAreHausTech/haus-workflow-catalog/${REF}/validation-rules.json" \
             -o library/catalog/validation-rules.json
+          curl -fsSL \
+            "https://raw.githubusercontent.com/WeAreHausTech/haus-workflow-catalog/${REF}/decisions-triggers.json" \
+            -o library/catalog/decisions-triggers.json
 
       - name: Check for changes
         id: diff
         run: |
-          if git diff --quiet library/catalog/manifest.json library/catalog/validation-rules.json; then
+          if git diff --quiet library/catalog/manifest.json library/catalog/validation-rules.json library/catalog/decisions-triggers.json; then
             echo "changed=false" >> $GITHUB_OUTPUT
           else
             echo "changed=true" >> $GITHUB_OUTPUT
@@ -109,6 +112,7 @@ jobs:
           CATALOG_REF="${{ steps.ref.outputs.catalog_ref }}"
           CATALOG_MANIFEST_URL="https://raw.githubusercontent.com/WeAreHausTech/haus-workflow-catalog/${CATALOG_REF}/manifest.json"
           CATALOG_RULES_URL="https://raw.githubusercontent.com/WeAreHausTech/haus-workflow-catalog/${CATALOG_REF}/validation-rules.json"
+          CATALOG_DECISIONS_URL="https://raw.githubusercontent.com/WeAreHausTech/haus-workflow-catalog/${CATALOG_REF}/decisions-triggers.json"
           git fetch origin main
           git fetch origin "$BRANCH" || true
           LEASE_REF=""
@@ -118,7 +122,8 @@ jobs:
           git checkout -B "$BRANCH" origin/main
           curl -fsSL "$CATALOG_MANIFEST_URL" -o library/catalog/manifest.json
           curl -fsSL "$CATALOG_RULES_URL" -o library/catalog/validation-rules.json
-          git add library/catalog/manifest.json library/catalog/validation-rules.json
+          curl -fsSL "$CATALOG_DECISIONS_URL" -o library/catalog/decisions-triggers.json
+          git add library/catalog/manifest.json library/catalog/validation-rules.json library/catalog/decisions-triggers.json
           git commit -m "chore(catalog): sync fixtures from haus-workflow-catalog ${CATALOG_REF}" || echo "No commit needed"
           if [ -n "$LEASE_REF" ]; then
             git push --force-with-lease="$BRANCH:$LEASE_REF" origin "HEAD:$BRANCH"
