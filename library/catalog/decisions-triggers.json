@@ -21,6 +21,6 @@
   "minLinesChanged": 200,
   "exemptGlobs": ["docs/**", "tests/**", "**/*.md", ".haus-workflow/**"],
   "requiredSections": ["## Context", "## Decision", "## Consequences"],
-  "recommendedSections": ["## Motivation", "## Alternatives"],
+  "recommendedSections": ["## Motivation (why)", "## Alternatives considered"],
   "decisionFilePattern": "^\\d{4}-.+\\.md$"
 }
