@@ -3,8 +3,10 @@ import path from 'node:path'
 
 import checkbox from '@inquirer/checkbox'
 
+import { loadCatalog } from '../catalog/load-catalog.js'
 import { getCacheDir } from '../catalog/remote-catalog.js'
 import { writeClaudeFiles } from '../claude/write-claude-files.js'
+import { fetchRefsForItems } from '../refs/fetch-refs.js'
 import type { Recommendation } from '../types.js'
 import { parseIdList } from '../utils/args.js'
 import { readJson } from '../utils/fs.js'
@@ -135,6 +137,26 @@ export async function runApply(options: {
     refillConfig: options.refillConfig,
     force: options.force,
   })
+
+  if (!isDryRun) {
+    // Best-effort: fetch llms.txt refs for all catalog items. Warn on failure, never abort apply.
+    try {
+      const cacheDir = hausPath(root, 'llms-cache')
+      const allItems = await loadCatalog(root)
+      const summary = await fetchRefsForItems(allItems, cacheDir)
+      if (summary.fetched > 0)
+        log(`Fetched ${summary.fetched} llms.txt reference(s) to ${cacheDir}`)
+      if (summary.failed > 0)
+        warn(
+          `Failed to fetch ${summary.failed} llms.txt reference(s): ${summary.failedUrls.join(', ')}`,
+        )
+    } catch (err) {
+      warn(
+        `Could not fetch llms.txt references: ${err instanceof Error ? err.message : String(err)}`,
+      )
+    }
+  }
+
   if (isDryRun) {
     log(`Dry-run complete — ${files.length} file(s) planned, none written. Run --write to apply.`)
   } else {

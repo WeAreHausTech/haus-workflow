@@ -229,3 +229,24 @@ test('haus fetch-refs --json emits valid JSON', async (t) => {
   assert.ok('failed' in parsed)
   assert.ok('cachedFiles' in parsed)
 })
+
+test('haus apply --write exits 0 after refs integration', async (t) => {
+  const dir = mkdtempSync(path.join(os.tmpdir(), 'haus-apply-refs-'))
+  t.after(async () => fs.rm(dir, { recursive: true }))
+  const hausDir = path.join(dir, '.haus-workflow')
+  await fs.mkdir(hausDir)
+  await fs.writeFile(
+    path.join(hausDir, 'recommendation.json'),
+    JSON.stringify({ recommended: [], skipped: [] }),
+  )
+  const result = await execa('node', [DIST_CLI, 'apply', '--write'], {
+    cwd: dir,
+    reject: false,
+    env: {
+      ...process.env,
+      HAUS_FIXTURE_CATALOG: '1',
+      HAUS_CATALOG_CACHE_DIR_OVERRIDE: path.join(dir, 'catalog-cache'),
+    },
+  })
+  assert.equal(result.exitCode, 0, `apply failed: ${result.stderr}`)
+})
