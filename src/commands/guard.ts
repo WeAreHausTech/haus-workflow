@@ -15,8 +15,26 @@ function stdin(): string {
   }
 }
 
+/**
+ * Emits the PreToolUse deny verdict in the exact shape Claude Code consumes.
+ *
+ * IMPORTANT: the fields MUST be nested under `hookSpecificOutput` with
+ * `hookEventName: "PreToolUse"`, and the process MUST exit 0. A bare top-level
+ * `permissionDecision` is silently ignored, and Claude Code only parses hook
+ * JSON on exit 0 (a non-zero exit discards it) — either mistake makes the guard
+ * fail OPEN: the dangerous command/path is allowed through. Do not "tidy" this
+ * by setting a non-zero exit code on deny.
+ */
 function deny(reason: string): void {
-  log(JSON.stringify({ permissionDecision: 'deny', permissionDecisionReason: reason }))
+  log(
+    JSON.stringify({
+      hookSpecificOutput: {
+        hookEventName: 'PreToolUse',
+        permissionDecision: 'deny',
+        permissionDecisionReason: reason,
+      },
+    }),
+  )
 }
 
 /**
@@ -34,8 +52,8 @@ export async function runGuard(
       const parsed: unknown = JSON.parse(raw)
       if (isRecord(parsed)) payload = parsed
     } catch {
+      // Fail closed: a malformed payload denies (exit 0 so the JSON is honored).
       deny('Malformed hook payload')
-      process.exitCode = 1
       return
     }
   }
@@ -47,8 +65,6 @@ export async function runGuard(
     if (reason) {
       // Emit the guard's own plain-language reason (the human reads this).
       deny(reason)
-      process.exitCode = 1
-      return
     }
     return
   }
@@ -56,6 +72,5 @@ export async function runGuard(
   const reason = guardBash(command)
   if (reason) {
     deny(reason)
-    process.exitCode = 1
   }
 }
