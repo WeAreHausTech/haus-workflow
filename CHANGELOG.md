@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.32.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.31.1...v0.32.0) (2026-06-24)
+
+### Features
+
+- **decisions:** add ADR gate CLI, Stop hook, and docs/decisions migration ([be526bb](https://github.com/WeAreHausTech/haus-workflow/commit/be526bb055045203d325f8e1b755d80656686740))
+- **decisions:** seed index on apply, contract sync, rollout docs ([2c5fb2b](https://github.com/WeAreHausTech/haus-workflow/commit/2c5fb2bb871fde99bd8d133cf68e2e691ee2aab3)), closes [BP#1b](https://github.com/WeAreHausTech/BP/issues/1b)
+- **refs:** add haus fetch-refs command with etag caching ([#154](https://github.com/WeAreHausTech/haus-workflow/issues/154)) ([f710956](https://github.com/WeAreHausTech/haus-workflow/commit/f710956d852df0ff8e5a0de05d7a1536d2f8ed65))
+
+### Bug Fixes
+
+- command audit — guard fail-open, exit codes, EPERM hardening, --json ([#150](https://github.com/WeAreHausTech/haus-workflow/issues/150)) ([cf147f9](https://github.com/WeAreHausTech/haus-workflow/commit/cf147f98fbc7cabbd8b1452576d8455c56d57917))
+
 ## [0.31.1](https://github.com/WeAreHausTech/haus-workflow/compare/v0.31.0...v0.31.1) (2026-06-23)
 
 ### Bug Fixes
