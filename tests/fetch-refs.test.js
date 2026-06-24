@@ -1,4 +1,4 @@
-import test from 'node:test'
+import test, { after } from 'node:test'
 import assert from 'node:assert/strict'
 import os from 'node:os'
 import path from 'node:path'
@@ -7,15 +7,16 @@ import { mkdtempSync } from 'node:fs'
 
 import { readCacheMeta, writeCacheMeta } from '../src/refs/cache-meta.js'
 
-test('readCacheMeta returns empty object when file missing', async () => {
+test('readCacheMeta returns empty object when file missing', async (t) => {
   const dir = mkdtempSync(path.join(os.tmpdir(), 'haus-refs-'))
+  t.after(async () => fs.rm(dir, { recursive: true }))
   const meta = await readCacheMeta(dir)
   assert.deepEqual(meta, {})
-  await fs.rm(dir, { recursive: true })
 })
 
-test('writeCacheMeta + readCacheMeta round-trips', async () => {
+test('writeCacheMeta + readCacheMeta round-trips', async (t) => {
   const dir = mkdtempSync(path.join(os.tmpdir(), 'haus-refs-'))
+  t.after(async () => fs.rm(dir, { recursive: true }))
   const entry = {
     url: 'https://www.prisma.io/llms.txt',
     etag: '"abc123"',
@@ -34,5 +35,4 @@ test('writeCacheMeta + readCacheMeta round-trips', async () => {
     file: 'www-prisma-io-llms-txt.md',
   } }
   assert.deepEqual(result, expected)
-  await fs.rm(dir, { recursive: true })
 })

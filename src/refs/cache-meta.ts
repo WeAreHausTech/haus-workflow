@@ -21,6 +21,8 @@ export async function readCacheMeta(cacheDir: string): Promise<RefsCacheMeta> {
     const raw = await fs.readFile(metaPath, 'utf8')
     return JSON.parse(raw) as RefsCacheMeta
   } catch {
+    // Cache miss (file absent) or corrupt JSON — both are safe to treat as empty:
+    // missing means first run, corrupt means we re-fetch and overwrite.
     return {}
   }
 }
