@@ -83,7 +83,7 @@ test('fetchSingleRef downloads content and stores etag', async (t) => {
   const meta = {}
   const result = await fetchSingleRef(url, dir, meta)
 
-  assert.equal(result, 'fetched')
+  assert.equal(result.result, 'fetched')
   assert.ok(meta[url])
   assert.equal(meta[url].etag, '"v1"')
   assert.ok(meta[url].file.endsWith('.md'))
@@ -112,7 +112,7 @@ test('fetchSingleRef returns unchanged on 304', async (t) => {
     },
   }
   const result = await fetchSingleRef(url, dir, meta)
-  assert.equal(result, 'unchanged')
+  assert.equal(result.result, 'unchanged')
 })
 
 test('fetchSingleRef returns failed on network error', async (t) => {
@@ -123,7 +123,7 @@ test('fetchSingleRef returns failed on network error', async (t) => {
   const url = 'http://127.0.0.1:1/llms.txt' // nothing listening
   const meta = {}
   const result = await fetchSingleRef(url, dir, meta)
-  assert.equal(result, 'failed')
+  assert.equal(result.result, 'failed')
 })
 
 test('fetchRefsForItems fetches llms.txt URLs only, skips local refs', async (t) => {

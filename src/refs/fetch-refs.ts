@@ -10,6 +10,11 @@ import { readCacheMeta, writeCacheMeta } from './cache-meta.js'
 
 export type FetchRefResult = 'fetched' | 'unchanged' | 'failed'
 
+export type FetchSingleRefOutcome =
+  | { result: 'fetched'; file: string }
+  | { result: 'unchanged' }
+  | { result: 'failed' }
+
 export type FetchRefsSummary = {
   fetched: number
   unchanged: number
@@ -42,12 +47,13 @@ export function isLlmsTxtUrl(ref: string): boolean {
 /**
  * Fetches a single llms.txt URL into cacheDir using etag/Last-Modified for
  * conditional requests. Mutates `meta` in place on a successful fetch.
+ * Returns an outcome object with the file path on success.
  */
 export async function fetchSingleRef(
   url: string,
   cacheDir: string,
   meta: RefsCacheMeta,
-): Promise<FetchRefResult> {
+): Promise<FetchSingleRefOutcome> {
   const existing = meta[url]
   const headers: Record<string, string> = {}
   if (existing?.etag) headers['If-None-Match'] = existing.etag
@@ -55,8 +61,8 @@ export async function fetchSingleRef(
 
   try {
     const res = await fetch(url, { headers, signal: AbortSignal.timeout(10_000) })
-    if (res.status === 304) return 'unchanged'
-    if (!res.ok) return 'failed'
+    if (res.status === 304) return { result: 'unchanged' }
+    if (!res.ok) return { result: 'failed' }
 
     const text = await res.text()
     const file = `${urlToSlug(url)}.md`
@@ -70,9 +76,9 @@ export async function fetchSingleRef(
       fetchedAt: new Date().toISOString(),
       file,
     }
-    return 'fetched'
+    return { result: 'fetched', file }
   } catch {
-    return 'failed'
+    return { result: 'failed' }
   }
 }
 
@@ -100,11 +106,11 @@ export async function fetchRefsForItems(
 
   await Promise.all(
     urls.map(async (url) => {
-      const result = await fetchSingleRef(url, cacheDir, meta)
-      if (result === 'fetched') {
+      const outcome = await fetchSingleRef(url, cacheDir, meta)
+      if (outcome.result === 'fetched') {
         summary.fetched++
-        summary.cachedFiles[url] = path.join(cacheDir, meta[url].file)
-      } else if (result === 'unchanged') {
+        summary.cachedFiles[url] = path.join(cacheDir, outcome.file)
+      } else if (outcome.result === 'unchanged') {
         summary.unchanged++
         if (meta[url]?.file) summary.cachedFiles[url] = path.join(cacheDir, meta[url].file)
       } else {
