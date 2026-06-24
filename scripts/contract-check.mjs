@@ -164,6 +164,36 @@ function schemaPropertyKeys(schema) {
 }
 
 // ---------------------------------------------------------------------------
+// BP#1b — decisions-triggers.json: committed copy must match the live catalog.
+// ---------------------------------------------------------------------------
+async function checkDecisionsTriggers() {
+  console.log('BP#1b decisions-triggers.json (live vs committed):')
+  const committedPath = resolve(repoRoot, 'library/catalog/decisions-triggers.json')
+  if (!existsSync(committedPath)) {
+    fail(`committed decisions-triggers.json not found at ${committedPath}`)
+    return
+  }
+  const committed = readJson(committedPath)
+  const live = await fetchJsonOrNull('decisions-triggers.json')
+  if (!live) {
+    skip('live catalog has no decisions-triggers.json yet')
+    return
+  }
+  const a = JSON.stringify(canonical(committed))
+  const b = JSON.stringify(canonical(live))
+  if (a === b) {
+    ok('committed decisions-triggers.json matches live catalog')
+  } else {
+    const diffs = topLevelKeyDiffs(committed, live)
+    fail(
+      `decisions-triggers.json DRIFT vs live catalog (ref ${catalogRef ?? 'main'}). ` +
+        `Sync library/catalog/decisions-triggers.json from haus-workflow-catalog.` +
+        (diffs.length ? ` Differing keys: ${diffs.join(', ')}` : ''),
+    )
+  }
+}
+
+// ---------------------------------------------------------------------------
 // BP#1 — validation-rules.json: committed copy must match the live catalog.
 // ---------------------------------------------------------------------------
 async function checkValidationRules() {
@@ -373,6 +403,7 @@ async function main() {
     const resolvedRef = await resolveCatalogRef()
     console.log(`contract-check: catalog ref "${resolvedRef}" (${STRICT ? 'STRICT' : 'advisory'})`)
     await checkValidationRules()
+    await checkDecisionsTriggers()
     await checkManifest()
     await checkFixtureAgainstSchema()
     await checkLockSchema()

@@ -12,9 +12,30 @@ stale. **Fix:** run the catalog sync to refresh the committed copy and merge the
 resulting sync PR (the same mechanism that syncs `manifest.json`; see ADR-0001).
 Re-run `node scripts/contract-check.mjs` to confirm BP#1 passes.
 
+## decisions-triggers.json drift (contract-check BP#1b FAIL)
+
+**Symptom:** `contract-check.mjs` BP#1b reports `decisions-triggers.json DRIFT vs live catalog`.
+**Cause:** `haus-workflow-catalog/decisions-triggers.json` changed and
+`library/catalog/decisions-triggers.json` in the CLI repo is stale.
+**Fix:** copy or sync from catalog release (same flow as `validation-rules.json`;
+see ADR-0008). Re-run contract-check.
+
+## Enable ADR enforcement in a client repo
+
+**Goal:** decision-worthy PRs require `docs/decisions/NNNN-*.md` + README index row.
+**Steps:**
+
+1. Merge catalog release with `haus.adr-decisions` skill and workflow template v1.1+.
+2. `haus apply --write` — seeds `docs/decisions/README.md`, Stop hook, `@import` in `CLAUDE.md`.
+3. Paste `templates/decisions-ci-gate.yml` into `.github/workflows/ci.yml` (or use `haus workspace setup` when available).
+4. Optional: add `haus decisions check --staged` to lefthook pre-commit.
+5. Migrate brownfield `docs/adr/` → `docs/decisions/` if present (`git mv`).
+
+**Escape hatch:** `[adr-skip]` in PR body with justification (not for auth/security paths).
+
 ## Catalog fixture sync (manifest + validation-rules)
 
-**Primary:** `sync-catalog-from-release` workflow in `.github/workflows/` — runs weekly (Monday 06:00 UTC) and on `workflow_dispatch`. Resolves latest `vX.Y.Z` tag from [haus-workflow-catalog](https://github.com/WeAreHausTech/haus-workflow-catalog), diffs `library/catalog/*`, opens/updates PR on branch `chore/sync-catalog-fixture`. No catalog-repo PAT required.
+**Primary:** `sync-catalog-from-release` workflow in `.github/workflows/` — runs weekly (Monday 06:00 UTC) and on `workflow_dispatch`. Resolves latest `vX.Y.Z` tag from [haus-workflow-catalog](https://github.com/WeAreHausTech/haus-workflow-catalog), diffs `library/catalog/*` (including `validation-rules.json` and `decisions-triggers.json`), opens/updates PR on branch `chore/sync-catalog-fixture`. No catalog-repo PAT required.
 
 **Backup:** catalog `dispatch-fixture-sync` on release tag push still fires `repository_dispatch` → `sync-catalog-fixture` (same PR branch). Retire `HAUS_WORKFLOW_DISPATCH_TOKEN` after pull-based sync is stable in production.
 

@@ -199,4 +199,4 @@ jobs:
         run: |
           set -euo pipefail
           git fetch --no-tags origin "$BASE_REF"
-          node dist/cli.js decisions check --range "origin/$BASE_REF..HEAD"
+          node scripts/decisions-gate.mjs --range "origin/$BASE_REF..HEAD"

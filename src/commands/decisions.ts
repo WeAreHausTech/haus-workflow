@@ -40,6 +40,9 @@ export async function runDecisions(
       return
     }
     if (result.satisfied) {
+      if (result.reasons.some((r) => r.includes('[adr-skip]'))) {
+        warn(`::warning::${result.reasons.join('; ')}`)
+      }
       log(`decisions gate: satisfied (${result.reasons.join('; ')})`)
       return
     }
