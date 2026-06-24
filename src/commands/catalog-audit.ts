@@ -14,8 +14,9 @@ export function auditForbiddenTags(items: CatalogItem[]): string[] {
   const forbidden = new Set(FORBIDDEN_TAGS.map((w) => w.toLowerCase()))
   for (const item of items) {
     // Exact-match each tag. Substring matching would flag "go" inside "mongodb"
-    // or "django", producing false positives.
-    for (const tag of item.tags) {
+    // or "django", producing false positives. Guard against a manifest item that
+    // ships `tags` absent or non-array (a raw manifest may not be normalized).
+    for (const tag of Array.isArray(item.tags) ? item.tags : []) {
       if (forbidden.has(tag.toLowerCase())) failures.push(`${item.id} has unsupported tag ${tag}`)
     }
     // Check the id separately, tokenised on non-alphanumeric boundaries (keeping

@@ -112,8 +112,6 @@ export async function scanProject(root: string): Promise<ScanResult> {
     crossRepoHints.push('Containerized services detected')
   if (safeFiles.some((f) => f.includes('turbo.json') || f.includes('nx.json')))
     crossRepoHints.push('Monorepo orchestration detected')
-  if (safeFiles.some((f) => f.includes('wp-content/uploads')))
-    securityRisks.push('Uploads directory present')
 
   const unsupportedSignals = collectUnsupportedSignals(safeFiles)
   // detectionStatus / unsupportedSignals are structured fields — the recommender and

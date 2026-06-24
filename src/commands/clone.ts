@@ -83,7 +83,10 @@ export async function runClone(url: string, opts: CloneOptions = {}): Promise<vo
     return
   }
 
-  const res = await runGit(['clone', url, target], { env: cloneEnv(), extendEnv: false })
+  // `--` terminates option parsing so a URL/path beginning with `-` is treated as
+  // a positional, never as a git flag (argument injection). No shell is involved
+  // (argv is passed directly to execa), so this is the only injection vector.
+  const res = await runGit(['clone', '--', url, target], { env: cloneEnv(), extendEnv: false })
   if (res.exitCode !== 0) {
     error(`clone failed for ${url}: ${(res.stderr || res.stdout).trim()}`)
     process.exitCode = 1

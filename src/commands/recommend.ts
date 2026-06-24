@@ -28,5 +28,8 @@ export async function runRecommend(options: {
       `Opt-in available: ${result.optInEligible.length} (add with \`haus recommend --include <id>\`)`,
     )
   }
-  for (const w of result.warnings.filter((w) => w.startsWith('--include:'))) log(w)
+  // Surface every recommender warning (not only `--include:` ones). Hiding the
+  // rest left users on unsupported stacks with "Recommended: 0" and no reason,
+  // while the explanation sat only in recommendation.json on disk.
+  for (const w of result.warnings) log(`- WARN: ${w}`)
 }
