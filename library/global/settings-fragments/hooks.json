@@ -14,6 +14,13 @@
       "event": "PreToolUse",
       "matcher": "Bash",
       "command": "haus guard bash --from-hook"
+    },
+    {
+      "id": "hook.decisions.suggest",
+      "gate": "keep",
+      "event": "Stop",
+      "matcher": "*",
+      "command": "haus decisions suggest --from-hook"
     }
   ]
 }

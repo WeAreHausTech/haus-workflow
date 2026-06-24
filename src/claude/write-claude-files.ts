@@ -23,6 +23,7 @@ import {
   installSuperpowersShared,
 } from './superpowers-install.js'
 import { assertPostApplySettingsHausContract } from './verify-hooks-contract.js'
+import { writeDecisionsSeed } from './write-decisions-seed.js'
 import { writePrettierIgnore } from './write-prettierignore.js'
 import { writeRootClaudeMd } from './write-root-claude-md.js'
 import { writeWorkflowConfig } from './write-workflow-config.js'
@@ -73,6 +74,7 @@ export async function writeClaudeFiles(
     claudePath(root, 'commands', 'haus-doctor.md'),
   ]
   const rootClaudeMdPath = await writeRootClaudeMd(root, dryRun)
+  const decisionsSeedPath = await writeDecisionsSeed(root, dryRun)
   const workflowPath = await writeWorkflow(root, hausVersion, dryRun, opts.force)
   const workflowConfigPath = await writeWorkflowConfig(root, dryRun, {
     refill: opts.refillConfig,
@@ -83,6 +85,7 @@ export async function writeClaudeFiles(
   const prettierIgnorePath = await writePrettierIgnore(root, dryRun)
   const p6Files = [
     rootClaudeMdPath,
+    ...(decisionsSeedPath ? [decisionsSeedPath] : []),
     ...(workflowPath ? [workflowPath] : []),
     ...(workflowConfigPath ? [workflowConfigPath] : []),
     prettierIgnorePath,

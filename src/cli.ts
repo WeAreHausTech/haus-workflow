@@ -7,6 +7,7 @@ import { Command } from 'commander'
 import { runApply } from './commands/apply.js'
 import { runCatalogAudit } from './commands/catalog-audit.js'
 import { runClone } from './commands/clone.js'
+import { runDecisions } from './commands/decisions.js'
 import { runDoctor } from './commands/doctor.js'
 import { runExplainRecommendation } from './commands/explain-recommendation.js'
 import { runGuard } from './commands/guard.js'
@@ -133,6 +134,32 @@ guard
   .command('bash')
   .option('--from-hook')
   .action((opts) => runGuard('bash', opts))
+
+function registerDecisionsCommand(name: string): void {
+  const cmd = program
+    .command(name)
+    .description('Architecture decision records (ADR) gate and drafts')
+  cmd
+    .command('check')
+    .option('--staged', 'Check staged changes only')
+    .option('--range <range>', 'Git revision range (e.g. origin/main..HEAD)')
+    .action((opts: { staged?: boolean; range?: string }) => runDecisions('check', undefined, opts))
+  cmd
+    .command('suggest')
+    .option('--from-hook', 'Emit JSON for Claude Code Stop hook')
+    .option('--title <title>', 'Draft title')
+    .action((opts: { fromHook?: boolean; title?: string }) =>
+      runDecisions('suggest', undefined, opts),
+    )
+  cmd.command('next-number').action(() => runDecisions('next-number'))
+  cmd
+    .command('validate')
+    .argument('[path]', 'Decision markdown file')
+    .action((filePath: string | undefined) => runDecisions('validate', filePath))
+}
+
+registerDecisionsCommand('decisions')
+registerDecisionsCommand('adr')
 
 const workspace = program.command('workspace')
 workspace.command('init').action(() => runWorkspace('init'))

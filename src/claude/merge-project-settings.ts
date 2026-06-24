@@ -37,6 +37,13 @@ const PROJECT_HOOK_FRAGMENTS: HookFragment[] = [
     matcher: 'Bash',
     command: 'haus guard bash --from-hook',
   },
+  {
+    id: 'haus.decisions-suggest',
+    gate: 'keep',
+    event: 'Stop',
+    matcher: '*',
+    command: 'haus decisions suggest --from-hook',
+  },
 ]
 
 /** Reads project `.claude/settings.json`, returning `{}` when missing. */

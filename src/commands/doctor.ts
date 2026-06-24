@@ -7,6 +7,7 @@ import { getCacheDir, getCacheManifestAge } from '../catalog/remote-catalog.js'
 import { normaliseLF } from '../claude/managed-template.js'
 import { verifyProjectSettingsHooksContract } from '../claude/verify-hooks-contract.js'
 import { BLOCK_BEGIN, BLOCK_END } from '../claude/write-root-claude-md.js'
+import { auditDecisionsLayout } from '../decisions/doctor.js'
 import { readContextOrScan } from '../scanner/read-context.js'
 import { fetchNpmVersionStatus, NPM_PACKAGE_NAME } from '../update/npm-version.js'
 import { hashText, readJson, readText } from '../utils/fs.js'
@@ -229,6 +230,11 @@ export async function runDoctor(options?: { hooks?: boolean }): Promise<void> {
     } else {
       ok('- .prettierignore: protects .haus-workflow/')
     }
+  }
+
+  for (const finding of await auditDecisionsLayout(root)) {
+    if (finding.level === 'ok') ok(finding.line)
+    else suggest(finding.line, finding.sentence, finding.fix)
   }
 
   const cacheAgeMs = await getCacheManifestAge()

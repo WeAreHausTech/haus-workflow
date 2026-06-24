@@ -192,6 +192,35 @@ allowlist with `source: curated` waiver per catalog ADR-0005, tag allowlist), an
 `source: curated` + `reviewStatus: approved` gate. Rules load from bundled
 `library/catalog/validation-rules.json` (synced from catalog — ADR-0001).
 
+### `haus decisions` / `haus adr`
+
+Architecture Decision Record (ADR) gate and drafts. Alias: `haus adr` = `haus decisions`.
+
+| Subcommand                         | Purpose                                                                      |
+| ---------------------------------- | ---------------------------------------------------------------------------- |
+| `check [--staged \| --range A..B]` | Fail when decision-worthy diff lacks `docs/decisions/NNNN-*.md` + README row |
+| `suggest [--from-hook] [--title]`  | Draft ADR from diff; `--from-hook` for Stop hook JSON on stdout              |
+| `next-number`                      | Print next four-digit decision number                                        |
+| `validate <path>`                  | Validate decision markdown structure                                         |
+
+**Triggers** load from `library/catalog/decisions-triggers.json` (synced from catalog).
+Escape hatch: `[adr-skip]` in PR body (ignored for security/auth path changes).
+Disable gate: `.haus-workflow/adr-gate.json` with `{ "mode": "off" }` (doctor advises).
+
+`haus apply --write` seeds `docs/decisions/README.md` when missing and adds
+`@docs/decisions/README.md` to the `CLAUDE.md` import block.
+
+**Consumer CI:** paste `templates/decisions-ci-gate.yml` from the catalog, or run
+`node scripts/decisions-gate.mjs --range origin/main..HEAD` after `yarn build`.
+
+**Optional lefthook** (pre-commit):
+
+```yaml
+decisions-check:
+  run: haus decisions check --staged
+  fail_text: 'Staged change needs an ADR under docs/decisions/. Run `haus decisions suggest`.'
+```
+
 ---
 
 ## Global slash commands (Claude Code)
