@@ -23,7 +23,7 @@ Layer integrity controls at the catalog ingest chokepoint:
 3. **Content validation** — `validateCatalogItem()` applies ingest-time safety rules from
    the synced `validation-rules.json` fixture before cache write: risky-install patterns,
    the `npx tsx` allowlist (waived for `source: curated` — catalog
-   [ADR-0005](https://github.com/WeAreHausTech/haus-workflow-catalog/blob/main/docs/adr/0005-npx-tsx-exemption-for-curated-skills.md)),
+   [ADR-0005](https://github.com/WeAreHausTech/haus-workflow-catalog/blob/main/docs/decisions/0005-npx-tsx-exemption-for-curated-skills.md)),
    and forbidden stack tags in item prose. Structural checks (manifest schema, file
    existence, frontmatter) are catalog CI / `haus validate-catalog`; ingest runs the
    content-safety subset only.

@@ -13,7 +13,7 @@
 | UX flows      | `docs/UX.md`                                                          |
 | Mockups       | `docs/design/` (gitignore binaries, commit README.txt)                |
 | Plans         | `docs/plans/<feature-slug>.md` (one per feature, persist after merge) |
-| Decision log  | `docs/adr/`                                                           |
+| Decision log  | `docs/decisions/`                                                     |
 | Failure modes | `docs/runbook.md`                                                     |
 
 When the user says "spec", "design", "ux", "plan", or "mockup": resolve to the rows above.
@@ -93,10 +93,14 @@ Add to `.claude/settings.json`:
       "Bash(git commit --no-verify:*)",
       "Bash(git push --force:*)",
       "Bash(git push -f:*)",
-      "Write(.env:*)",
-      "Write(*.pem:*)",
-      "Write(*.key:*)"
-    ]
+      "Read(*.pem)",
+      "Edit(*.pem)",
+      "Write(*.pem)",
+      "Read(*.key)",
+      "Edit(*.key)",
+      "Write(*.key)"
+    ],
+    "ask": ["Edit(.env)", "Write(.env)"]
   }
 }
 ```
@@ -172,24 +176,32 @@ pre-commit:
 
 ## Architecture Decision Records (ADR)
 
+Architecture Decision Records capture **why** a significant choice was made. The machine drafts; the human approves.
+
 Write an ADR when: choosing a library or framework, defining a data or security model, picking a merge or deploy strategy, setting an API contract, or resolving a spec conflict. If you would otherwise make an assumption: write an ADR instead.
 
-- Location: `docs/adr/`, filename: `NNNN-kebab-case-title.md`
+- Location: `docs/decisions/`, filename: `NNNN-kebab-case-title.md`
+- Index: `docs/decisions/README.md` — keep a one-line **why** per ADR; `@import` the index from `CLAUDE.md`
 - Write-once. To change: new ADR that "Supersedes ADR-NNNN". Statuses: `Proposed`, `Accepted`, `Deprecated`, `Superseded by ADR-XXXX`.
-- Maintain index table in `docs/adr/README.md`.
+- Enforcement: `haus decisions check` (CI + optional lefthook); `haus decisions suggest` drafts from the diff.
 
 ```markdown
 # ADR-NNNN: [Title]
 
-- **Status:** Accepted | **Date:** YYYY-MM-DD
+- **Status:** Proposed | Accepted | **Date:** YYYY-MM-DD
+- **Decided by:** [person] (draft by [agent])
+- **Affects:** [paths/components]
+- **Related:** [PR/issue]
 
 ## Context
 
 ## Decision
 
-## Consequences
+## Motivation (why)
 
 ## Alternatives considered
+
+## Consequences
 ```
 
 ---
@@ -214,7 +226,7 @@ Each fact has exactly one home. Never duplicate across layers.
 | --------------------------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------ |
 | `AGENTS.md` / `CLAUDE.md`   | Stable rules, commands, conventions                                    | Loaded in full, every session. Keep small.                         |
 | Auto memory (`MEMORY.md`)   | Learnings the agent discovers (build quirks, debug insights, patterns) | First ~200 lines / 25 KB loaded. Accumulates without manual edits. |
-| ADR (`docs/adr/`)           | Architectural decisions, library choices, policy                       | On demand. Permanent, write-once.                                  |
+| ADR (`docs/decisions/`)     | Architectural decisions, library choices, policy                       | On demand. Permanent, write-once.                                  |
 | Runbook (`docs/runbook.md`) | Failure modes + exact fix                                              | On demand. Permanent, append-only.                                 |
 | `workflow-config.md`        | Doc paths, test commands, highest-stakes, tool choices                 | Loaded with WORKFLOW.md. Project-owned.                            |
 

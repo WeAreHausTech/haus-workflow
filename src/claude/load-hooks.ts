@@ -6,10 +6,14 @@
 import { buildAskRules } from '../security/ask-rules.js'
 import { buildDenyRules } from '../security/deny-rules.js'
 
+type HookBlock = { matcher: string; hooks: Array<{ type: 'command'; command: string }> }
+
 /** Shape written to `.claude/settings.json` under `hooks` (+ deterministic deny/ask rules). */
 export type ClaudeHooksSettings = {
   hooks: {
-    PreToolUse: Array<{ matcher: string; hooks: Array<{ type: 'command'; command: string }> }>
+    PreToolUse?: HookBlock[]
+    Stop?: HookBlock[]
+    [event: string]: HookBlock[] | undefined
   }
   permissions?: { deny: string[]; ask?: string[] }
 }
@@ -32,6 +36,12 @@ export const CANONICAL_HOOKS: ClaudeHooksSettings = {
       {
         matcher: 'Bash',
         hooks: [{ type: 'command', command: 'haus guard bash --from-hook' }],
+      },
+    ],
+    Stop: [
+      {
+        matcher: '*',
+        hooks: [{ type: 'command', command: 'haus decisions suggest --from-hook' }],
       },
     ],
   },

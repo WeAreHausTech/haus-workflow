@@ -100,7 +100,7 @@ discusses TODOs no longer needs path-based exemption.
 (2) catalog PR with the identical canonical JSON + validator logic → merge;
 (3) fixture-sync reconciles to an identical JSON value → no-op PR;
 `contract-drift` on CLI main green once the catalog change is on `main`.
-See `haus-workflow-catalog/docs/adr/0001`.
+See `haus-workflow-catalog/docs/decisions/0001`.
 
 ## Cross-reference: curated `npx` waiver (catalog ADR-0005)
 

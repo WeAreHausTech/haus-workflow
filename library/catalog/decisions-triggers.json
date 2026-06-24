@@ -1,0 +1,26 @@
+{
+  "decisionsDir": "docs/decisions",
+  "legacyDecisionsDir": "docs/adr",
+  "pathGlobs": [
+    "**/package.json",
+    "**/pnpm-lock.yaml",
+    "**/yarn.lock",
+    "**/package-lock.json",
+    "**/migrations/**",
+    "**/prisma/schema.prisma",
+    "**/.github/workflows/**",
+    "**/Dockerfile*",
+    "**/docker-compose*.yml",
+    "**/terraform/**",
+    "**/openapi*.yaml",
+    "**/schema.graphql"
+  ],
+  "securityPathGlobs": ["**/.env.example", "**/auth/**", "**/middleware/**"],
+  "pathRegex": ["(^|/)src/.*/auth/", "(^|/)middleware/", "\\.env\\.example$"],
+  "minFilesChanged": 8,
+  "minLinesChanged": 200,
+  "exemptGlobs": ["docs/**", "tests/**", "**/*.md", ".haus-workflow/**"],
+  "requiredSections": ["## Context", "## Decision", "## Consequences"],
+  "recommendedSections": ["## Motivation", "## Alternatives"],
+  "decisionFilePattern": "^\\d{4}-.+\\.md$"
+}
