@@ -17,3 +17,4 @@ this index covers CLI/repo decisions. ADR-0001 here links to those where the JSO
 | [0006](0006-ownership-marking-on-frontmatter-files.md) | Ownership marker moves inside frontmatter for skill files          | Accepted |
 | [0007](0007-catalog-integrity-model.md)                | Catalog integrity — release tags, schema + content validation      | Accepted |
 | [0008](0008-adr-enforcement-heuristics.md)             | Decision gate heuristics and `decisions-triggers.json`             | Accepted |
+| [0009](0009-llms-txt-reference-fetching.md)            | llms.txt reference fetching and local cache                        | Accepted |
