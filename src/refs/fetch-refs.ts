@@ -24,10 +24,15 @@ export type FetchRefsSummary = {
   cachedFiles: Record<string, string>
 }
 
-/** Converts a URL to a safe filename stem. e.g. https://www.prisma.io/llms.txt → www-prisma-io-llms-txt */
+/**
+ * Converts a URL to a safe filename stem.
+ * Uses u.host (hostname + port) so URLs on different ports get distinct slugs.
+ * e.g. https://www.prisma.io/llms.txt → www-prisma-io-llms-txt
+ *      http://127.0.0.1:3000/llms.txt → 127-0-0-1-3000-llms-txt
+ */
 export function urlToSlug(url: string): string {
   const u = new URL(url)
-  return (u.hostname + u.pathname)
+  return (u.host + u.pathname)
     .replace(/[^a-zA-Z0-9]+/g, '-')
     .replace(/-+/g, '-')
     .replace(/^-|-$/g, '')
@@ -57,9 +62,10 @@ export async function fetchSingleRef(
   const existing = meta[url]
   const headers: Record<string, string> = {}
   // Only send conditional headers when the cached file actually exists on disk.
-  // If the file was deleted, omit headers so the server returns a full 200 response.
-  const cachedFileExists =
-    existing?.file && (await fs.pathExists(path.join(cacheDir, existing.file)))
+  // Reject non-basename paths (e.g. "../../etc") from cache-meta to prevent path traversal.
+  // If the file is missing or the path is unsafe, omit headers so the server returns a full 200.
+  const safeFile = existing?.file && existing.file === path.basename(existing.file)
+  const cachedFileExists = safeFile && (await fs.pathExists(path.join(cacheDir, existing.file)))
   if (cachedFileExists) {
     if (existing?.etag) headers['If-None-Match'] = existing.etag
     if (existing?.lastModified) headers['If-Modified-Since'] = existing.lastModified
