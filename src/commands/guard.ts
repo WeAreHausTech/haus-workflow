@@ -39,7 +39,7 @@ function deny(reason: string): void {
 
 /**
  * Reads a Claude Code hook payload from stdin and denies the tool call if it violates security rules.
- * Outputs a JSON `{ permissionDecision: "deny", ... }` response when blocking.
+ * Outputs a JSON `{ hookSpecificOutput: { hookEventName, permissionDecision, permissionDecisionReason } }` response when blocking.
  */
 export async function runGuard(
   kind: 'file-access' | 'bash',

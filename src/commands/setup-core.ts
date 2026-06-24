@@ -150,7 +150,6 @@ export async function runSetupCore(root: string, opts: SetupCoreOptions): Promis
     process.exitCode = 1
   } else {
     say(`- HOOKS OK: ${hooksAfter.message}`)
-    if (process.exitCode === 1) process.exitCode = 0
   }
 
   return { ...baseResult, hooksOk: hooksOkAfter, written: files }
