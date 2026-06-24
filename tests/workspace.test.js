@@ -134,14 +134,18 @@ test('runWorkspace scan with malformed yaml sets a non-zero exit instead of thro
   })()
 })
 
-test('runWorkspace scan throws a clean error when a repo path is not a directory', async () => {
-  const ws = makeWorkspace()
+test('runWorkspace scan skips a non-directory repo path and continues (exit 1)', async () => {
+  // One bad repo entry must not abort the whole cross-repo scan: the good repos
+  // still get scanned, the bad one is recorded as a failure, and the run exits 1.
+  const ws = makeWorkspace() // adds two valid repos (frontend, api)
   writeFileSync(path.join(ws, 'not-a-dir'), 'regular file')
   writeFileSync(
     path.join(ws, 'haus.workspace.yaml'),
     [
       'client: acme',
       'repos:',
+      '  - name: acme-frontend',
+      '    path: frontend',
       '  - name: bad',
       '    path: not-a-dir',
       'relationships: []',
@@ -149,10 +153,9 @@ test('runWorkspace scan throws a clean error when a repo path is not a directory
     ].join('\n'),
   )
   await inWorkspace(ws, async () => {
-    await assert.rejects(
-      () => runWorkspace('scan'),
-      /not a directory/,
-      'a non-directory repo path surfaces a clean message',
-    )
+    await assert.doesNotReject(() => runWorkspace('scan'))
+    assert.equal(process.exitCode, 1, 'a skipped repo marks the run failed')
+    // The good repo's artifacts are still written despite the bad entry.
+    assert.ok(existsSync(path.join(ws, '.haus-workflow')), 'artifacts written for valid repos')
   })()
 })

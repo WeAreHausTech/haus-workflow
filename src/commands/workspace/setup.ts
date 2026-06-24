@@ -104,7 +104,21 @@ export async function runWorkspaceSetup(
     return { workspaceRoot, statuses: [], written: [] }
   }
 
+  // Under --json the caller (this function) owns stdout: mute human chatter so the
+  // single JSON document emitted at the end is the only thing on stdout.
+  const say = options.json ? () => {} : log
+
   const onlySet = options.only && options.only.length > 0 ? new Set(options.only) : undefined
+  if (onlySet) {
+    // A --only name that matches no configured repo is almost always a typo. Failing
+    // loudly beats silently running zero repos and reporting "0 ok, 0 failed".
+    const unknown = [...onlySet].filter((name) => !config.repos.some((r) => r.name === name))
+    if (unknown.length > 0) {
+      error(`--only matched no configured repo(s): ${unknown.join(', ')}`)
+      process.exitCode = 1
+      return { workspaceRoot, statuses: [], written: [] }
+    }
+  }
   const repos = onlySet ? config.repos.filter((r) => onlySet.has(r.name)) : config.repos
 
   const statuses: RepoSetupStatus[] = []
@@ -112,7 +126,7 @@ export async function runWorkspaceSetup(
 
   for (const repo of repos) {
     const repoRoot = path.resolve(workspaceRoot, repo.path)
-    log(`\n→ ${repo.name} (${repo.path})`)
+    say(`\n→ ${repo.name} (${repo.path})`)
     try {
       // Guard a misconfigured path (missing dir, or a file) before the scan
       // pipeline: handing a non-directory to fast-glob's cwd throws ENOTDIR on
@@ -122,9 +136,11 @@ export async function runWorkspaceSetup(
         throw new Error(`Repo path is not a directory: ${repo.path}`)
       }
       const res = await runSetupCore(repoRoot, {
-        json: options.json,
         apply,
         dryRun: options.dryRun,
+        // Under --json, mute the inner pipeline entirely; we serialize the
+        // aggregated result below. Otherwise let it print its normal human output.
+        quiet: options.json,
       })
       statuses.push({
         name: repo.name,
@@ -175,7 +191,9 @@ export async function runWorkspaceSetup(
       collision,
       dryRun: options.dryRun,
     })
-    written.push(docPath)
+    // Under dryRun nothing was actually written; don't report the doc path in
+    // `written` (which is meant to list real on-disk changes).
+    if (!options.dryRun) written.push(docPath)
   }
 
   // Workspace manifest — derived/advisory record of per-repo setup state. Written
@@ -252,6 +270,15 @@ export async function runWorkspaceSetup(
 
   const ok = statuses.filter((s) => s.status === 'ok').length
   const failed = statuses.length - ok
-  log(`\nWorkspace setup complete: ${ok} ok, ${failed} failed.`)
-  return { workspaceRoot, statuses, written }
+  const result: WorkspaceSetupResult = { workspaceRoot, statuses, written }
+  if (options.json) {
+    // The single machine-readable document for the whole run (inner pipeline muted).
+    log(JSON.stringify(result, null, 2))
+  } else if (!apply) {
+    // Default run is preview-only — don't imply files were written.
+    say(`\nWorkspace preview complete: ${ok} ok, ${failed} failed. Re-run with --write to apply.`)
+  } else {
+    say(`\nWorkspace setup complete: ${ok} ok, ${failed} failed. Wrote ${written.length} file(s).`)
+  }
+  return result
 }
