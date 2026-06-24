@@ -1,5 +1,5 @@
 {
-  "version": "3.1.0",
+  "version": "3.2.0",
   "items": [
     {
       "id": "haus.agentic-workflow-standard",
@@ -238,7 +238,7 @@
     },
     {
       "id": "haus.bullmq-patterns",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "source": "haus",
       "type": "skill",
       "path": "skills/haus-owned/stack-patterns/bullmq-patterns",
@@ -1226,7 +1226,7 @@
     },
     {
       "id": "haus.i18next-patterns",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "source": "haus",
       "type": "skill",
       "path": "skills/haus-owned/stack-patterns/i18next-patterns",
@@ -1257,7 +1257,7 @@
     },
     {
       "id": "haus.laravel-nova-patterns",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "source": "haus",
       "type": "skill",
       "path": "skills/haus-owned/stack-patterns/laravel-nova-patterns",
@@ -1390,7 +1390,7 @@
     },
     {
       "id": "haus.nx-monorepo-patterns",
-      "version": "1.1.0",
+      "version": "1.1.1",
       "source": "haus",
       "type": "skill",
       "path": "skills/haus-owned/stack-patterns/nx-monorepo-patterns",
@@ -1916,7 +1916,7 @@
     },
     {
       "id": "haus.storybook-patterns",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "source": "haus",
       "type": "skill",
       "path": "skills/haus-owned/stack-patterns/storybook-patterns",
@@ -1947,7 +1947,7 @@
     },
     {
       "id": "haus.strapi-patterns",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "source": "haus",
       "type": "skill",
       "path": "skills/haus-owned/stack-patterns/strapi-patterns",
@@ -2524,7 +2524,7 @@
     },
     {
       "id": "haus.tanstack-query-router-patterns",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "source": "haus",
       "type": "skill",
       "path": "skills/haus-owned/stack-patterns/tanstack-query-router-patterns",
@@ -2555,7 +2555,7 @@
     },
     {
       "id": "haus.turbo-monorepo-patterns",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "source": "haus",
       "type": "skill",
       "path": "skills/haus-owned/stack-patterns/turbo-monorepo-patterns",
@@ -2621,7 +2621,7 @@
     },
     {
       "id": "haus.vendure-app-patterns",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "source": "haus",
       "type": "skill",
       "path": "skills/haus-owned/stack-patterns/vendure-app-patterns",
@@ -2649,7 +2649,7 @@
     },
     {
       "id": "haus.vendure-plugin-patterns",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "source": "haus",
       "type": "skill",
       "path": "skills/haus-owned/stack-patterns/vendure-plugin-patterns",
