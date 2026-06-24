@@ -1,4 +1,4 @@
-import test, { after } from 'node:test'
+import test from 'node:test'
 import assert from 'node:assert/strict'
 import os from 'node:os'
 import path from 'node:path'
@@ -194,33 +194,62 @@ test('haus fetch-refs --help exits 0', async () => {
 
 test('haus fetch-refs --all exits 0 when no llms.txt refs in catalog', async (t) => {
   const dir = mkdtempSync(path.join(os.tmpdir(), 'haus-proj-'))
+  const manifestPath = path.join(dir, 'manifest.json')
+  await fs.writeFile(
+    manifestPath,
+    JSON.stringify({
+      version: '0.0.1',
+      items: [
+        {
+          id: 'haus.test-item',
+          source: 'haus',
+          type: 'skill',
+          path: 'skills/test',
+          title: 'Test',
+          purpose: 'test',
+          whenToUse: 'test',
+          whenNotToUse: 'test',
+        },
+      ],
+    }),
+  )
   t.after(async () => fs.rm(dir, { recursive: true }))
   const result = await execa('node', [DIST_CLI, 'fetch-refs', '--all'], {
     cwd: dir,
     reject: false,
-    env: { ...process.env, HAUS_FIXTURE_CATALOG: '1' },
+    env: { ...process.env, HAUS_FIXTURE_CATALOG: manifestPath },
   })
   assert.equal(result.exitCode, 0)
 })
 
 test('haus fetch-refs --id unknown exits 1', async (t) => {
   const dir = mkdtempSync(path.join(os.tmpdir(), 'haus-proj-'))
+  const manifestPath = path.join(dir, 'manifest.json')
+  await fs.writeFile(
+    manifestPath,
+    JSON.stringify({ version: '0.0.1', items: [{ id: 'haus.known-item', source: 'haus', type: 'skill', path: 'skills/test', title: 'Test', purpose: 'test', whenToUse: 'test', whenNotToUse: 'test' }] }),
+  )
   t.after(async () => fs.rm(dir, { recursive: true }))
   const result = await execa('node', [DIST_CLI, 'fetch-refs', '--id', 'haus.does-not-exist'], {
     cwd: dir,
     reject: false,
-    env: { ...process.env, HAUS_FIXTURE_CATALOG: '1' },
+    env: { ...process.env, HAUS_FIXTURE_CATALOG: manifestPath },
   })
   assert.equal(result.exitCode, 1)
 })
 
 test('haus fetch-refs --json emits valid JSON', async (t) => {
   const dir = mkdtempSync(path.join(os.tmpdir(), 'haus-proj-'))
+  const manifestPath = path.join(dir, 'manifest.json')
+  await fs.writeFile(
+    manifestPath,
+    JSON.stringify({ version: '0.0.1', items: [{ id: 'haus.test-item', source: 'haus', type: 'skill', path: 'skills/test', title: 'Test', purpose: 'test', whenToUse: 'test', whenNotToUse: 'test' }] }),
+  )
   t.after(async () => fs.rm(dir, { recursive: true }))
   const result = await execa('node', [DIST_CLI, 'fetch-refs', '--all', '--json'], {
     cwd: dir,
     reject: false,
-    env: { ...process.env, HAUS_FIXTURE_CATALOG: '1' },
+    env: { ...process.env, HAUS_FIXTURE_CATALOG: manifestPath },
   })
   assert.equal(result.exitCode, 0)
   const parsed = JSON.parse(result.stdout)
@@ -239,12 +268,17 @@ test('haus apply --write exits 0 after refs integration', async (t) => {
     path.join(hausDir, 'recommendation.json'),
     JSON.stringify({ recommended: [], skipped: [] }),
   )
+  const manifestPath = path.join(dir, 'manifest.json')
+  await fs.writeFile(
+    manifestPath,
+    JSON.stringify({ version: '0.0.1', items: [{ id: 'haus.test-item', source: 'haus', type: 'skill', path: 'skills/test', title: 'Test', purpose: 'test', whenToUse: 'test', whenNotToUse: 'test' }] }),
+  )
   const result = await execa('node', [DIST_CLI, 'apply', '--write'], {
     cwd: dir,
     reject: false,
     env: {
       ...process.env,
-      HAUS_FIXTURE_CATALOG: '1',
+      HAUS_FIXTURE_CATALOG: manifestPath,
       HAUS_CATALOG_CACHE_DIR_OVERRIDE: path.join(dir, 'catalog-cache'),
     },
   })

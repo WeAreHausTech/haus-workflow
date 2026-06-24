@@ -56,8 +56,14 @@ export async function fetchSingleRef(
 ): Promise<FetchSingleRefOutcome> {
   const existing = meta[url]
   const headers: Record<string, string> = {}
-  if (existing?.etag) headers['If-None-Match'] = existing.etag
-  if (existing?.lastModified) headers['If-Modified-Since'] = existing.lastModified
+  // Only send conditional headers when the cached file actually exists on disk.
+  // If the file was deleted, omit headers so the server returns a full 200 response.
+  const cachedFileExists =
+    existing?.file && (await fs.pathExists(path.join(cacheDir, existing.file)))
+  if (cachedFileExists) {
+    if (existing?.etag) headers['If-None-Match'] = existing.etag
+    if (existing?.lastModified) headers['If-Modified-Since'] = existing.lastModified
+  }
 
   try {
     const res = await fetch(url, { headers, signal: AbortSignal.timeout(10_000) })
