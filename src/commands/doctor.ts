@@ -43,14 +43,25 @@ export async function runDoctor(options?: { hooks?: boolean }): Promise<void> {
 
   // Detail lines are buffered (preserving their log/warn stream) so the
   // plain-language verdict can be printed FIRST, above the developer detail.
-  // Each thing that needs attention also records a one-sentence summary + the
-  // exact fix command, which a non-dev (or the agent narrating to them) reads.
+  // Findings split two ways:
+  //  - `flag()`   → a BLOCKING problem: setup is broken/incomplete (missing or
+  //                 tampered managed files, hooks not installed, broken imports).
+  //                 Drives the ⚠️ verdict AND a non-zero exit code so CI can gate.
+  //  - `suggest()`→ an ADVISORY notice: setup works but something could be improved
+  //                 (config fields to fill, stale catalog cache, a newer CLI). Shown
+  //                 separately and never fails the exit code — these are expected
+  //                 immediately after `apply` and must not break `doctor &&` chains.
   const detail: Array<{ stream: 'log' | 'warn'; text: string }> = []
   const attention: Array<{ sentence: string; fix: string }> = []
+  const suggestions: Array<{ sentence: string; fix: string }> = []
   const ok = (text: string) => detail.push({ stream: 'log', text })
   const flag = (text: string, sentence: string, fix: string) => {
     detail.push({ stream: 'warn', text })
     attention.push({ sentence, fix })
+  }
+  const suggest = (text: string, sentence: string, fix: string) => {
+    detail.push({ stream: 'warn', text })
+    suggestions.push({ sentence, fix })
   }
 
   ok(`Repo: ${context.repoName}`)
@@ -64,7 +75,14 @@ export async function runDoctor(options?: { hooks?: boolean }): Promise<void> {
 
   const hooks = await verifyProjectSettingsHooksContract(root)
   if (hooks.skipped) {
-    ok(`- HOOKS: (skipped) ${hooks.message}`)
+    // A project with no settings.json has NO security hooks installed — the most
+    // security-relevant misconfiguration. Flag it, consistent with `doctor --hooks`
+    // (which exits 1 on the same condition); reporting it as healthy would mislead.
+    flag(
+      `- HOOKS: (skipped) ${hooks.message}`,
+      'No Claude Code settings.json — haus security hooks are not installed',
+      'haus apply --write',
+    )
   } else if (!hooks.ok) {
     flag(
       `- HOOKS FAIL: ${hooks.message}`,
@@ -160,7 +178,7 @@ export async function runDoctor(options?: { hooks?: boolean }): Promise<void> {
         if (storedHashMatch && templateContent) {
           const currentHash = hashText(normaliseLF(templateContent))
           if (storedHashMatch[1] !== currentHash) {
-            flag(
+            suggest(
               '- .haus-workflow/WORKFLOW.md: stale (template updated — run `haus apply --write`)',
               'The workflow standard is out of date',
               'haus apply --write',
@@ -187,7 +205,7 @@ export async function runDoctor(options?: { hooks?: boolean }): Promise<void> {
     const cfg = await fs.readFile(workflowConfigPath, 'utf8')
     const unfilled = cfg.split('\n').filter((l) => l.includes('<!-- fill in')).length
     if (unfilled > 0) {
-      flag(
+      suggest(
         `- .haus-workflow/workflow-config.md: ${unfilled} field(s) still unfilled (run \`haus apply --refill-config\` to auto-fill detectable ones)`,
         `${unfilled} workflow-config field(s) are still blank`,
         'haus apply --refill-config',
@@ -215,7 +233,7 @@ export async function runDoctor(options?: { hooks?: boolean }): Promise<void> {
 
   const cacheAgeMs = await getCacheManifestAge()
   if (cacheAgeMs === null) {
-    flag(
+    suggest(
       '- CATALOG CACHE: absent (run `haus update` to populate)',
       "The catalog cache hasn't been downloaded yet",
       'haus update',
@@ -223,7 +241,7 @@ export async function runDoctor(options?: { hooks?: boolean }): Promise<void> {
   } else {
     const cacheAgeDays = Math.floor(cacheAgeMs / (1000 * 60 * 60 * 24))
     if (cacheAgeDays >= 7) {
-      flag(
+      suggest(
         `- CATALOG CACHE: stale (${cacheAgeDays}d old — run \`haus update\`)`,
         `The catalog cache is ${cacheAgeDays} days old`,
         'haus update',
@@ -237,7 +255,7 @@ export async function runDoctor(options?: { hooks?: boolean }): Promise<void> {
   const currentVersion = pkgJson?.version ?? '0.0.0'
   const npmStatus = await fetchNpmVersionStatus(currentVersion)
   if (npmStatus.updateAvailable && npmStatus.latest !== null) {
-    flag(
+    suggest(
       `- CLI UPDATE: ${currentVersion} → ${npmStatus.latest} available (run: npm install -g ${NPM_PACKAGE_NAME})`,
       `A newer haus (${npmStatus.latest}) is available`,
       `npm install -g ${NPM_PACKAGE_NAME}`,
@@ -248,6 +266,11 @@ export async function runDoctor(options?: { hooks?: boolean }): Promise<void> {
     ok(`- CLI: ${currentVersion} (version check unavailable)`)
   }
 
+  // Exit code is driven by BLOCKING problems only, so it matches the ⚠️ verdict
+  // and CI can gate on `haus doctor`. Advisory suggestions never fail the exit
+  // code (they are expected right after `apply`).
+  if (attention.length > 0) process.exitCode = 1
+
   // The very first line is the plain-language verdict (the only line a non-dev
   // needs); the "Haus Doctor" title and developer detail follow beneath.
   if (attention.length === 0) {
@@ -255,6 +278,12 @@ export async function runDoctor(options?: { hooks?: boolean }): Promise<void> {
   } else {
     log(`⚠️ ${attention.length} thing(s) need attention:`)
     for (const a of attention) log(`  • ${a.sentence} — fix: ${a.fix}`)
+  }
+  // Suggestions are shown after the verdict whether or not the setup is healthy —
+  // they're improvements, not failures (status by text + icon, never colour alone).
+  if (suggestions.length > 0) {
+    log(`💡 ${suggestions.length} suggestion(s):`)
+    for (const s of suggestions) log(`  • ${s.sentence} — try: ${s.fix}`)
   }
   log('Haus Doctor')
   for (const line of detail) {
