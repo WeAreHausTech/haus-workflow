@@ -269,17 +269,19 @@ const DIR_ITEM_TYPE: Record<string, string> = {
   commands: 'command',
 }
 
-function walkMd(dir: string, fn: (file: string) => void): void {
+function walkMd(dir: string, fn: (file: string) => void, failures: string[]): void {
   let entries: fs.Dirent[]
   try {
     entries = fs.readdirSync(dir, { withFileTypes: true })
-  } catch {
-    // Skip an unreadable subtree rather than aborting the whole validation run.
+  } catch (err) {
+    failures.push(
+      `${dir}: unreadable subtree (${err instanceof Error ? err.message : String(err)})`,
+    )
     return
   }
   for (const entry of entries) {
     const full = path.join(dir, entry.name)
-    if (entry.isDirectory()) walkMd(full, fn)
+    if (entry.isDirectory()) walkMd(full, fn, failures)
     else if (entry.name.endsWith('.md')) fn(full)
   }
 }
@@ -291,24 +293,28 @@ function auditMarkdownContent(manifestDir: string, items: CatalogItem[]): string
     const abs = path.join(manifestDir, dir)
     if (!fs.existsSync(abs)) continue
     const dirType = DIR_ITEM_TYPE[dir] ?? ''
-    walkMd(abs, (file) => {
-      const rel = path.relative(manifestDir, file)
-      const text = readForAudit(file, rel, failures)
-      if (text === null) return
-      const norm = rel.replace(/\\/g, '/')
-      const source = resolveMarkdownItemSource(norm, pathSourceMap)
-      const checkNonTsxNpx = !isNpxTsxOnlyExempt(dirType, source)
-      const lines = text.split(/\r?\n/)
-      for (let i = 0; i < lines.length; i++) {
-        const line = lines[i] ?? ''
-        if (RISKY_INSTALL_PATTERNS.some((re) => re.test(line)))
-          failures.push(`${rel}:${i + 1}: risky install pattern`)
-        if (checkNonTsxNpx && ANY_NPX_PATTERN.test(line) && !ALLOWED_NPX_PATTERN.test(line)) {
-          failures.push(`${rel}:${i + 1}: disallowed npx (only npx tsx allowed)`)
+    walkMd(
+      abs,
+      (file) => {
+        const rel = path.relative(manifestDir, file)
+        const text = readForAudit(file, rel, failures)
+        if (text === null) return
+        const norm = rel.replace(/\\/g, '/')
+        const source = resolveMarkdownItemSource(norm, pathSourceMap)
+        const checkNonTsxNpx = !isNpxTsxOnlyExempt(dirType, source)
+        const lines = text.split(/\r?\n/)
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i] ?? ''
+          if (RISKY_INSTALL_PATTERNS.some((re) => re.test(line)))
+            failures.push(`${rel}:${i + 1}: risky install pattern`)
+          if (checkNonTsxNpx && ANY_NPX_PATTERN.test(line) && !ALLOWED_NPX_PATTERN.test(line)) {
+            failures.push(`${rel}:${i + 1}: disallowed npx (only npx tsx allowed)`)
+          }
         }
-      }
-      if (!norm.includes('/references/')) failures.push(...auditForbiddenTagsInText(text, rel))
-    })
+        if (!norm.includes('/references/')) failures.push(...auditForbiddenTagsInText(text, rel))
+      },
+      failures,
+    )
   }
   return failures
 }

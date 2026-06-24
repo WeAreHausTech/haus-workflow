@@ -134,7 +134,7 @@ export async function runSetupCore(root: string, opts: SetupCoreOptions): Promis
     }
   }
 
-  const files = await writeClaudeFiles(root, dryRun ?? false)
+  const files = await writeClaudeFiles(root, dryRun ?? false, undefined, { quiet: opts.quiet })
   say('Applied files:')
   files.forEach((f) => say(`- ${displayPath(root, f)}`))
 

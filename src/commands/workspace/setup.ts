@@ -190,6 +190,7 @@ export async function runWorkspaceSetup(
       members: config.repos.map((r) => ({ name: r.name, path: r.path })),
       collision,
       dryRun: options.dryRun,
+      quiet: options.json,
     })
     // Under dryRun nothing was actually written; don't report the doc path in
     // `written` (which is meant to list real on-disk changes).
