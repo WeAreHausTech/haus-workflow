@@ -70,6 +70,30 @@ test('update check and apply create backup', () => {
   )
 })
 
+// Regression: an un-set-up project (no haus.lock.json) must NOT make
+// `haus update --check` exit non-zero. checkLock returns ok:false for an empty
+// lockfile, but that means "not set up by haus", not "drift" — only real drift
+// (an existing lock whose hashes no longer match) should fail the check.
+test('update --check exits 0 on a project that was never set up (no lockfile)', () => {
+  const temp = mkdtempSync(path.join(os.tmpdir(), 'haus-update-nolock-'))
+  writeFileSync(
+    path.join(temp, 'package.json'),
+    JSON.stringify({ name: 'nolock-temp', packageManager: 'yarn@4.5.3' }, null, 2),
+  )
+  const env = {
+    HAUS_CATALOG_CACHE_DIR_OVERRIDE: path.join(temp, 'cache'),
+    HAUS_CATALOG_REMOTE_BASE: 'http://127.0.0.1:0',
+    HOME: path.join(temp, 'home'),
+    USERPROFILE: path.join(temp, 'home'),
+  }
+  const r = execaSync('node', [path.resolve('dist/cli.js'), 'update', '--check'], {
+    cwd: temp,
+    env,
+    reject: false,
+  })
+  assert.equal(r.exitCode, 0, 'no lockfile is not a failure')
+})
+
 test('update --check output includes npmVersion field', () => {
   const temp = mkdtempSync(path.join(os.tmpdir(), 'haus-update-npmver-'))
   mkdirSync(path.join(temp, '.haus-workflow'), { recursive: true })
