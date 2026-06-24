@@ -214,8 +214,14 @@ function isMarkdownPath(rel: string): boolean {
 
 async function listFilesRecursive(dir: string, base = dir): Promise<string[]> {
   const out: string[] = []
-  if (!(await fs.pathExists(dir))) return out
-  for (const entry of await fs.readdir(dir, { withFileTypes: true })) {
+  let entries: fs.Dirent[]
+  try {
+    if (!(await fs.pathExists(dir))) return out
+    entries = await fs.readdir(dir, { withFileTypes: true })
+  } catch {
+    return out
+  }
+  for (const entry of entries) {
     const full = path.join(dir, entry.name)
     if (entry.isDirectory()) {
       out.push(...(await listFilesRecursive(full, base)))
@@ -563,7 +569,9 @@ async function syncOneItem(
     return 'failed'
   }
   const text = await fetchText(`${base}/${item.path}`)
-  if (!text) {
+  // fetchText returns null on fetch failure and '' for a legitimately empty file;
+  // only the former is an error (mirror syncConfigItem, which also tests === null).
+  if (text === null) {
     warn(`Failed to fetch content for ${item.id}`)
     return 'failed'
   }

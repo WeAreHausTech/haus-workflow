@@ -49,8 +49,11 @@ export async function runUpdate(options: { check?: boolean }): Promise<void> {
         2,
       ),
     )
-    if (!status.ok) process.exitCode = 1
-    if (status.driftCount > 0) process.exitCode = 1
+    // An empty/missing lockfile means "this project was never set up by haus",
+    // not "drift" — don't fail the check for it. Only fail when an existing
+    // lockfile has real drift or invalid versions (status.ok is false despite
+    // having lock items).
+    if (status.count > 0 && !status.ok) process.exitCode = 1
     return
   }
 
@@ -127,9 +130,9 @@ async function refreshGlobalInstall(): Promise<void> {
     } else {
       log('~/.claude already up to date.')
     }
-    if (result.skipped.length > 0) {
+    if (result.userEdited.length > 0) {
       log(
-        `Preserved ${result.skipped.length} locally-edited file(s) (run \`haus install --force\` to overwrite).`,
+        `Preserved ${result.userEdited.length} locally-edited file(s) (run \`haus install --force\` to overwrite).`,
       )
     }
   } catch (err) {

@@ -173,10 +173,26 @@ function checkRequiredFrontmatter(text: string, label: string): string[] {
   return failures
 }
 
+/**
+ * Reads a shipped file for content auditing, converting any IO error (permission,
+ * race, path-is-a-directory) into an audit failure rather than throwing. This
+ * command is CI-facing: an unreadable file must produce a clean failure + exit 1,
+ * never an uncaught stack trace.
+ */
+function readForAudit(absPath: string, label: string, failures: string[]): string | null {
+  try {
+    return fs.readFileSync(absPath, 'utf8')
+  } catch (err) {
+    failures.push(`${label}: unreadable (${err instanceof Error ? err.message : String(err)})`)
+    return null
+  }
+}
+
 function auditTemplateContent(manifestDir: string, absPath: string, itemId: string): string[] {
   const rel = path.relative(manifestDir, absPath)
-  const text = fs.readFileSync(absPath, 'utf8')
   const failures: string[] = []
+  const text = readForAudit(absPath, `${itemId}: ${rel}`, failures)
+  if (text === null) return failures
   const lines = text.split(/\r?\n/)
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i] ?? ''
@@ -203,7 +219,8 @@ function auditShippedFiles(manifestDir: string, items: CatalogItem[]): string[] 
         failures.push(`${item.id}: missing ${path.relative(manifestDir, skillMd)}`)
         continue
       }
-      const text = fs.readFileSync(skillMd, 'utf8')
+      const text = readForAudit(skillMd, `${item.id}: SKILL.md`, failures)
+      if (text === null) continue
       failures.push(...checkRequiredFrontmatter(text, `${item.id}: SKILL.md`))
       failures.push(
         ...auditForbiddenTagsInText(text, `${item.id}: ${path.relative(manifestDir, skillMd)}`),
@@ -213,8 +230,9 @@ function auditShippedFiles(manifestDir: string, items: CatalogItem[]): string[] 
         failures.push(`${item.id}: missing agent file ${item.path}`)
         continue
       }
-      const text = fs.readFileSync(absPath, 'utf8')
       const rel = path.relative(manifestDir, absPath)
+      const text = readForAudit(absPath, `${item.id}: ${rel}`, failures)
+      if (text === null) continue
       failures.push(...checkRequiredFrontmatter(text, `${item.id}: ${rel}`))
       failures.push(...auditForbiddenTagsInText(text, `${item.id}: ${rel}`))
     } else if (item.type === 'template') {
@@ -228,8 +246,9 @@ function auditShippedFiles(manifestDir: string, items: CatalogItem[]): string[] 
         failures.push(`${item.id}: missing command file ${item.path}`)
         continue
       }
-      const text = fs.readFileSync(absPath, 'utf8')
       const rel = path.relative(manifestDir, absPath)
+      const text = readForAudit(absPath, `${item.id}: ${rel}`, failures)
+      if (text === null) continue
       failures.push(...checkRequiredFrontmatter(text, `${item.id}: ${rel}`))
       failures.push(...auditTemplateContent(manifestDir, absPath, item.id))
     } else if (item.type === 'config') {
@@ -250,10 +269,19 @@ const DIR_ITEM_TYPE: Record<string, string> = {
   commands: 'command',
 }
 
-function walkMd(dir: string, fn: (file: string) => void): void {
-  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+function walkMd(dir: string, fn: (file: string) => void, failures: string[]): void {
+  let entries: fs.Dirent[]
+  try {
+    entries = fs.readdirSync(dir, { withFileTypes: true })
+  } catch (err) {
+    failures.push(
+      `${dir}: unreadable subtree (${err instanceof Error ? err.message : String(err)})`,
+    )
+    return
+  }
+  for (const entry of entries) {
     const full = path.join(dir, entry.name)
-    if (entry.isDirectory()) walkMd(full, fn)
+    if (entry.isDirectory()) walkMd(full, fn, failures)
     else if (entry.name.endsWith('.md')) fn(full)
   }
 }
@@ -265,23 +293,28 @@ function auditMarkdownContent(manifestDir: string, items: CatalogItem[]): string
     const abs = path.join(manifestDir, dir)
     if (!fs.existsSync(abs)) continue
     const dirType = DIR_ITEM_TYPE[dir] ?? ''
-    walkMd(abs, (file) => {
-      const text = fs.readFileSync(file, 'utf8')
-      const rel = path.relative(manifestDir, file)
-      const norm = rel.replace(/\\/g, '/')
-      const source = resolveMarkdownItemSource(norm, pathSourceMap)
-      const checkNonTsxNpx = !isNpxTsxOnlyExempt(dirType, source)
-      const lines = text.split(/\r?\n/)
-      for (let i = 0; i < lines.length; i++) {
-        const line = lines[i] ?? ''
-        if (RISKY_INSTALL_PATTERNS.some((re) => re.test(line)))
-          failures.push(`${rel}:${i + 1}: risky install pattern`)
-        if (checkNonTsxNpx && ANY_NPX_PATTERN.test(line) && !ALLOWED_NPX_PATTERN.test(line)) {
-          failures.push(`${rel}:${i + 1}: disallowed npx (only npx tsx allowed)`)
+    walkMd(
+      abs,
+      (file) => {
+        const rel = path.relative(manifestDir, file)
+        const text = readForAudit(file, rel, failures)
+        if (text === null) return
+        const norm = rel.replace(/\\/g, '/')
+        const source = resolveMarkdownItemSource(norm, pathSourceMap)
+        const checkNonTsxNpx = !isNpxTsxOnlyExempt(dirType, source)
+        const lines = text.split(/\r?\n/)
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i] ?? ''
+          if (RISKY_INSTALL_PATTERNS.some((re) => re.test(line)))
+            failures.push(`${rel}:${i + 1}: risky install pattern`)
+          if (checkNonTsxNpx && ANY_NPX_PATTERN.test(line) && !ALLOWED_NPX_PATTERN.test(line)) {
+            failures.push(`${rel}:${i + 1}: disallowed npx (only npx tsx allowed)`)
+          }
         }
-      }
-      if (!norm.includes('/references/')) failures.push(...auditForbiddenTagsInText(text, rel))
-    })
+        if (!norm.includes('/references/')) failures.push(...auditForbiddenTagsInText(text, rel))
+      },
+      failures,
+    )
   }
   return failures
 }

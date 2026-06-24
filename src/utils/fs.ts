@@ -107,6 +107,7 @@ export async function listFiles(root: string, patterns: string[]): Promise<strin
     cwd: root,
     dot: true,
     onlyFiles: true,
+    suppressErrors: true,
     ignore: ['**/node_modules/**', '**/.git/**', '**/dist/**'],
   })
   return files.sort((a, b) => a.localeCompare(b))

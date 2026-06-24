@@ -50,8 +50,9 @@ export async function writeClaudeFiles(
   root: string,
   dryRun: boolean,
   selectedIds?: string[],
-  opts: { refillConfig?: boolean; force?: boolean } = {},
+  opts: { refillConfig?: boolean; force?: boolean; quiet?: boolean } = {},
 ): Promise<string[]> {
+  const say = opts.quiet ? () => {} : log
   const rec = (await readJson<Recommendation>(hausPath(root, 'recommendation.json'))) ?? {
     recommended: [],
     skipped: [],
@@ -113,7 +114,7 @@ export async function writeClaudeFiles(
     const stub = 'Run `haus context --task "code review"` then review diff.'
     if (content === stub || content === `${stub}\n` || content === `${stub}\r\n`) {
       if (dryRun) {
-        log(`[dry-run] would remove stale ${displayPath(root, legacyReviewPath)}`)
+        say(`[dry-run] would remove stale ${displayPath(root, legacyReviewPath)}`)
       } else {
         await fs.remove(legacyReviewPath)
       }
@@ -155,7 +156,7 @@ export async function writeClaudeFiles(
     const stub = '- Never read secrets.\n- Block dangerous shell commands.'
     if (content === stub || content === `${stub}\n` || content === `${stub}\r\n`) {
       if (dryRun) {
-        log(`[dry-run] would remove stale ${displayPath(root, legacySecurityPath)}`)
+        say(`[dry-run] would remove stale ${displayPath(root, legacySecurityPath)}`)
       } else {
         await fs.remove(legacySecurityPath)
       }
@@ -178,7 +179,7 @@ export async function writeClaudeFiles(
     const legacyPath = hausPath(root, rel)
     if (await fs.pathExists(legacyPath)) {
       if (dryRun) {
-        log(`[dry-run] would remove stale ${displayPath(root, legacyPath)}`)
+        say(`[dry-run] would remove stale ${displayPath(root, legacyPath)}`)
       } else {
         await fs.remove(legacyPath)
       }
@@ -252,7 +253,7 @@ export async function writeClaudeFiles(
     if (await fs.pathExists(sourcePath)) {
       if (dryRun) {
         const exists = await fs.pathExists(destination)
-        log(
+        say(
           `${displayPath(root, destination)}: ${exists ? 'would overwrite' : 'would create'} (${item.id})`,
         )
       } else if (item.type === 'skill') {
@@ -299,7 +300,7 @@ export async function writeClaudeFiles(
   // Items that merely fall out of the current selection (e.g. `apply --select`) yet
   // still exist in the catalog as approved are left untouched. Hash-gated: only
   // unmodified copies are deleted, matching the global-install orphan-cleanup contract.
-  await cleanupStaleCatalogItems(root, manifestById, dryRun)
+  await cleanupStaleCatalogItems(root, manifestById, dryRun, opts.quiet)
 
   if (dryRun) return [...new Set(files)]
 
@@ -359,7 +360,9 @@ async function cleanupStaleCatalogItems(
   root: string,
   manifestById: Map<string, CleanupManifestItem>,
   dryRun: boolean,
+  quiet?: boolean,
 ): Promise<void> {
+  const say = quiet ? () => {} : log
   const prevLock = await readJson<PrevLockEntry[]>(hausPath(root, 'haus.lock.json'))
   if (!prevLock?.length) return
   for (const entry of prevLock) {
@@ -392,12 +395,12 @@ async function cleanupStaleCatalogItems(
     for (const rel of existing) {
       const abs = path.join(root, rel)
       if (dryRun) {
-        log(`[dry-run] would remove ${pruneReason} ${displayPath(root, abs)} (${entry.id})`)
+        say(`[dry-run] would remove ${pruneReason} ${displayPath(root, abs)} (${entry.id})`)
         continue
       }
       await fs.remove(abs)
       await pruneEmptyDir(path.dirname(abs))
-      log(`Removed ${pruneReason} ${displayPath(root, abs)} (${entry.id})`)
+      say(`Removed ${pruneReason} ${displayPath(root, abs)} (${entry.id})`)
     }
   }
 }

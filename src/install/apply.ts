@@ -50,6 +50,10 @@ export interface ApplyResult {
   created: string[]
   updated: string[]
   skipped: string[]
+  /** Files skipped because they exist without a haus header — treated as user-created. */
+  userOwned: string[]
+  /** Files that were skipped because they have a haus header but the content differs from the manifest hash — meaning the user edited them. */
+  userEdited: string[]
   deleted: string[]
   /** Hook IDs registered into settings.json during this run. */
   hookIds: string[]
@@ -143,6 +147,8 @@ export async function applyInstall(options: ApplyOptions = {}): Promise<ApplyRes
     created: [],
     updated: [],
     skipped: [],
+    userOwned: [],
+    userEdited: [],
     deleted: [],
     hookIds: [],
     drift: false,
@@ -184,11 +190,13 @@ export async function applyInstall(options: ApplyOptions = {}): Promise<ApplyRes
         if (!hasHeader) {
           warn(`Refusing to overwrite user-owned file: ${entry.destPath}`)
           result.skipped.push(entry.destPath)
+          result.userOwned.push(entry.destPath)
           continue
         }
         if (existing && hashContent(currentContent) !== existing.hash && !force) {
           warn(`User edited haus file (skipping): ${entry.destPath} — use --force to overwrite`)
           result.skipped.push(entry.destPath)
+          result.userEdited.push(entry.destPath)
           manifestFiles.push(existing)
           continue
         }
@@ -214,17 +222,25 @@ export async function applyInstall(options: ApplyOptions = {}): Promise<ApplyRes
     })
   }
 
-  const fragmentPath = path.join(srcDir, 'settings-fragments', 'hooks.json')
-  const fragments = await loadHooksFragment(fragmentPath)
-  const settings = await readSettings()
-  const { settings: hookSettings, addedIds } = mergeHooks(settings, fragments)
-  // Write the deterministic NEVER rules into permissions.deny (WORKFLOW.md "enforce in both").
-  const { settings: deniedSettings } = mergeDenyRules(hookSettings, buildDenyRules())
-  // Pre-allow haus's own scoped subcommands so non-devs aren't prompted on every step (WS6).
-  const { settings: allowedSettings } = mergeAllowRules(deniedSettings, buildAllowRules())
-  // Write ask-tier rules into permissions.ask so Claude prompts before executing them.
-  const { settings: mergedSettings } = mergeAskRules(allowedSettings, buildAskRules())
-  result.hookIds = addedIds
+  // Settings merge is a write-path concern: it only matters when we actually
+  // persist settings.json below (not dryRun, not check). In check mode we must
+  // NOT report hookIds — that is a read-only drift probe and claiming hooks were
+  // "added" misrepresents it. Compute the merge lazily so check mode skips it.
+  let mergedSettings: Awaited<ReturnType<typeof readSettings>> | undefined
+  if (!check) {
+    const fragmentPath = path.join(srcDir, 'settings-fragments', 'hooks.json')
+    const fragments = await loadHooksFragment(fragmentPath)
+    const settings = await readSettings()
+    const { settings: hookSettings, addedIds } = mergeHooks(settings, fragments)
+    // Write the deterministic NEVER rules into permissions.deny (WORKFLOW.md "enforce in both").
+    const { settings: deniedSettings } = mergeDenyRules(hookSettings, buildDenyRules())
+    // Pre-allow haus's own scoped subcommands so non-devs aren't prompted on every step (WS6).
+    const { settings: allowedSettings } = mergeAllowRules(deniedSettings, buildAllowRules())
+    // Write ask-tier rules into permissions.ask so Claude prompts before executing them.
+    const merged = mergeAskRules(allowedSettings, buildAskRules())
+    mergedSettings = merged.settings
+    result.hookIds = addedIds
+  }
 
   // Delete files that were in the old manifest but are no longer in the current package.
   if (!check && existingManifest) {
@@ -246,10 +262,10 @@ export async function applyInstall(options: ApplyOptions = {}): Promise<ApplyRes
     }
   }
 
-  if (!dryRun && !check) {
+  if (!dryRun && !check && mergedSettings) {
     await writeSettings(mergedSettings)
     const manifest = buildManifest(source, manifestFiles, [
-      ...new Set([...(existingManifest?.hooks ?? []), ...addedIds]),
+      ...new Set([...(existingManifest?.hooks ?? []), ...result.hookIds]),
     ])
     await writeManifest(manifest)
   }
@@ -272,9 +288,10 @@ export function printApplyResult(result: ApplyResult, dryRun: boolean): void {
     log(`${prefix}Deleted (orphaned):`)
     result.deleted.forEach((p) => log(`  x ${p}`))
   }
-  if (result.skipped.length) {
+  const silentlySkipped = result.skipped.filter((p) => !result.userOwned.includes(p))
+  if (silentlySkipped.length) {
     log(`${prefix}Skipped:`)
-    result.skipped.forEach((p) => log(`  - ${p}`))
+    silentlySkipped.forEach((p) => log(`  - ${p}`))
   }
   if (result.hookIds.length) {
     log(`${prefix}Hooks added: ${result.hookIds.join(', ')}`)

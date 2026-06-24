@@ -12,4 +12,8 @@ export async function runScan(options: { json?: boolean }): Promise<void> {
   log('Haus scan complete')
   log(`Roles: ${result.repoRoles.join(', ') || 'unknown'}`)
   log(`Package manager: ${result.packageManager}`)
+  // Surface warnings (e.g. Node-engine mismatch, unsupported-stack hints) in human
+  // mode too — previously they were written only to context-map.json on disk, so a
+  // user seeing "Roles: unknown" had no explanation for it.
+  for (const w of result.warnings) log(`- WARN: ${w}`)
 }

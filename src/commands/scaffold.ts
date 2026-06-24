@@ -47,13 +47,14 @@ export async function runScaffold(
       log(`✓ Scaffolded: ${result.scaffolded.join(', ')}`)
     }
   }
-  if (result.skipped.length > 0) {
-    log(`Skipped: ${result.skipped.join(', ')}`)
+  // `skipped` is the superset (includes skippedExisting). Split the two so each
+  // file is reported once: refused (unsafe/missing source) vs already-present.
+  const refused = result.skipped.filter((name) => !result.skippedExisting.includes(name))
+  if (refused.length > 0) {
+    log(`Skipped (source unavailable): ${refused.join(', ')}`)
+  }
+  if (result.skippedExisting.length > 0) {
     // Only existing files are resolvable with --force; unsafe/missing sources are not.
-    if (result.skippedExisting.length > 0) {
-      log(
-        `Already present (re-run with --force to overwrite): ${result.skippedExisting.join(', ')}`,
-      )
-    }
+    log(`Already present (re-run with --force to overwrite): ${result.skippedExisting.join(', ')}`)
   }
 }

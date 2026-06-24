@@ -16,7 +16,7 @@ import path from 'node:path'
 
 import { scanProject } from '../scanner/scan-project.js'
 import { readText, writeText } from '../utils/fs.js'
-import { error, log } from '../utils/logger.js'
+import { error, log, warn } from '../utils/logger.js'
 
 import { writeWorkspaceArtifacts, type WorkspaceRepoInput } from './workspace/aggregate.js'
 import { parseWorkspaceConfig, WORKSPACE_FILE } from './workspace/config.js'
@@ -48,7 +48,11 @@ function normalizeOnly(only: WorkspaceOptions['only']): string[] | undefined {
 function normalizeMaxDepth(maxDepth: WorkspaceOptions['maxDepth']): number | undefined {
   if (maxDepth === undefined) return undefined
   const n = typeof maxDepth === 'number' ? maxDepth : Number.parseInt(maxDepth, 10)
-  return Number.isFinite(n) && n > 0 ? Math.floor(n) : undefined
+  if (Number.isFinite(n) && n > 0) return Math.floor(n)
+  // The user passed --max-depth but it didn't parse to a positive number; warn
+  // rather than silently falling back to the default depth as if they'd set it.
+  warn(`Ignoring invalid --max-depth "${String(maxDepth)}"; using the default depth.`)
+  return undefined
 }
 
 /** Scaffold a minimal workspace yaml in the current directory. */
@@ -86,22 +90,34 @@ async function scanWorkspace(workspaceRoot: string, opts: { json?: boolean }): P
   }
 
   const inputs: WorkspaceRepoInput[] = []
+  const failures: string[] = []
   for (const repo of config.repos) {
     const repoRoot = path.resolve(workspaceRoot, repo.path)
-    // Guard a misconfigured path before fast-glob (a non-directory cwd throws ENOTDIR
-    // on Linux) so a bad entry surfaces a clean message, not a stack trace.
-    if (!existsSync(repoRoot) || !statSync(repoRoot).isDirectory()) {
-      throw new Error(`Repo path is not a directory: ${repo.path}`)
+    // One unreadable/misconfigured repo must not abort the cross-repo scan and
+    // discard every other repo's result; record it and continue. statSync itself
+    // can throw (EPERM), so it lives inside the try alongside the scan.
+    try {
+      if (!existsSync(repoRoot) || !statSync(repoRoot).isDirectory()) {
+        throw new Error('path is not a directory')
+      }
+      const result = await scanProject(repoRoot)
+      inputs.push({ name: repo.name, path: repo.path, context: result })
+    } catch (err) {
+      failures.push(
+        `${repo.name} (${repo.path}): ${err instanceof Error ? err.message : String(err)}`,
+      )
     }
-    const result = await scanProject(repoRoot)
-    inputs.push({ name: repo.name, path: repo.path, context: result })
   }
   const written = await writeWorkspaceArtifacts(workspaceRoot, inputs, config.relationships)
   if (opts.json) {
-    log(JSON.stringify({ written }, null, 2))
+    log(JSON.stringify({ written, scanned: inputs.length, failed: failures }, null, 2))
   } else {
-    log(`Workspace scan complete. Wrote ${written.length} artifact(s) under .haus-workflow/.`)
+    log(
+      `Workspace scan complete. Scanned ${inputs.length} repo(s); wrote ${written.length} artifact(s) under .haus-workflow/.`,
+    )
+    for (const f of failures) warn(`- skipped ${f}`)
   }
+  if (failures.length > 0) process.exitCode = 1
 }
 
 /**

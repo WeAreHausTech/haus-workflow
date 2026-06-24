@@ -71,7 +71,10 @@ test('doctor prints each shared warning once', () => {
   )
   const cli = path.resolve('dist/cli.js')
   const r = execaSync('node', [cli, 'doctor'], { cwd: temp, reject: false })
-  assert.equal(r.exitCode, 0)
+  // This fixture is deliberately minimal (no CLAUDE.md / settings.json), so doctor
+  // reports blocking problems and exits 1 — that's expected; this test only asserts
+  // the shared warning is de-duplicated, printed exactly once.
+  assert.equal(r.exitCode, 1)
   const hits = (r.stdout ?? '').split(dup).length - 1
   assert.equal(hits, 1)
 })

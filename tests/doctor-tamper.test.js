@@ -9,6 +9,9 @@ import { runDoctor } from '../src/commands/doctor.js'
 test('doctor flags a locally modified WORKFLOW.md body', async () => {
   const dir = mkdtempSync(path.join(os.tmpdir(), 'haus-doctor-tamper-'))
   const prevCwd = process.cwd()
+  // doctor sets process.exitCode = 1 on blocking findings (tampered WORKFLOW.md,
+  // missing settings.json, etc); isolate it so it doesn't leak to the runner.
+  const prevExit = process.exitCode
   const prevFixture = process.env.HAUS_FIXTURE_CATALOG
   process.env.HAUS_FIXTURE_CATALOG = path.resolve('tests/fixtures/catalog/manifest.json')
 
@@ -69,7 +72,10 @@ test('doctor flags a locally modified WORKFLOW.md body', async () => {
 
     const output = lines.join('\n')
     assert.match(output, /modified locally|edited after haus wrote it/i)
+    // A tampered managed file is a blocking finding → non-zero exit.
+    assert.equal(process.exitCode, 1)
   } finally {
+    process.exitCode = prevExit
     process.chdir(prevCwd)
     if (prevFixture === undefined) delete process.env.HAUS_FIXTURE_CATALOG
     else process.env.HAUS_FIXTURE_CATALOG = prevFixture

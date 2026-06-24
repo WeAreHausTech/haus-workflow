@@ -43,6 +43,8 @@ export type WriteWorkspaceClaudeMdOptions = {
   /** True when the workspace root is also a member repo (`path: .`). */
   collision: boolean
   dryRun?: boolean
+  /** Suppress stdout logging (used under --json to keep output parseable). */
+  quiet?: boolean
 }
 
 /**
@@ -65,6 +67,8 @@ export async function writeWorkspaceClaudeMd(
     ? hausPath(workspaceRoot, 'WORKSPACE.md')
     : path.join(workspaceRoot, 'CLAUDE.md')
 
+  const say = opts.quiet ? () => {} : log
+
   // The standalone WORKSPACE.md is haus-owned, so it is written verbatim. The shared
   // CLAUDE.md is injected so any user content outside the sentinels is preserved.
   const prev = (await fs.pathExists(filePath)) ? await fs.readFile(filePath, 'utf8') : ''
@@ -73,11 +77,11 @@ export async function writeWorkspaceClaudeMd(
 
   if (dryRun) {
     if (!prev) {
-      log(createUnifiedDiff(printable, '', next))
+      say(createUnifiedDiff(printable, '', next))
     } else if (hasTextChanged(prev, next)) {
-      log(createUnifiedDiff(printable, prev, next))
+      say(createUnifiedDiff(printable, prev, next))
     } else {
-      log(`${printable}: unchanged`)
+      say(`${printable}: unchanged`)
     }
     return filePath
   }
@@ -85,7 +89,7 @@ export async function writeWorkspaceClaudeMd(
   if (hasTextChanged(prev, next) && prev.length > 0) {
     const diffText = createUnifiedDiff(printable, prev, next)
     const summary = summarizeDiff(diffText)
-    log(`Overwriting ${printable} (diff +${summary.additions} -${summary.deletions})`)
+    say(`Overwriting ${printable} (diff +${summary.additions} -${summary.deletions})`)
   }
 
   await writeText(filePath, next)

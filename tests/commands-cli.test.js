@@ -43,9 +43,11 @@ test('guard bash CLI denies dangerous command from stdin payload', () => {
     input: payload,
     reject: false,
   })
-  assert.equal(r.exitCode, 1)
+  // Deny must exit 0: Claude Code only parses hook JSON on exit 0.
+  assert.equal(r.exitCode, 0)
   const parsed = JSON.parse(r.stdout)
-  assert.equal(parsed.permissionDecision, 'deny')
+  assert.equal(parsed.hookSpecificOutput.hookEventName, 'PreToolUse')
+  assert.equal(parsed.hookSpecificOutput.permissionDecision, 'deny')
 })
 
 test('guard file-access CLI allows ordinary paths', () => {

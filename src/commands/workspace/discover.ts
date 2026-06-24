@@ -70,6 +70,9 @@ export async function discoverRepos(
     onlyFiles: false,
     deep: maxDepth,
     followSymbolicLinks: false,
+    // Discovery walks arbitrary directories under the workspace root; an
+    // unreadable subtree (EPERM/EACCES) must be skipped, not abort the whole scan.
+    suppressErrors: true,
     ignore: IGNORE,
   })
 
@@ -194,18 +197,23 @@ export async function runDiscover(
   const merged = mergeWorkspaceConfig(existing, discovered, { client: opts.client })
   const yamlText = renderWorkspaceYaml(merged)
 
-  if (opts.json) {
-    log(JSON.stringify({ discovered, config: merged }, null, 2))
-  }
-
   if (opts.write) {
     await writeText(yamlPath, yamlText)
-    log(`Wrote ${merged.repos.length} repo(s) to haus.workspace.yaml`)
+    if (opts.json) {
+      // Single JSON document — include the write outcome instead of appending a
+      // human line after it (which would make stdout non-parseable).
+      log(JSON.stringify({ discovered, config: merged, wrote: yamlPath }, null, 2))
+    } else {
+      log(`Wrote ${merged.repos.length} repo(s) to haus.workspace.yaml`)
+    }
     return
   }
 
-  if (!opts.json) {
-    log('Proposed haus.workspace.yaml (run with --write to persist):\n')
-    log(yamlText)
+  if (opts.json) {
+    log(JSON.stringify({ discovered, config: merged }, null, 2))
+    return
   }
+
+  log('Proposed haus.workspace.yaml (run with --write to persist):\n')
+  log(yamlText)
 }
