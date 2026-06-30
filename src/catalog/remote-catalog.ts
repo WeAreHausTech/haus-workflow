@@ -22,6 +22,11 @@ import {
 import { validateCatalogItem } from './ingest-catalog.js'
 import { parseManifest } from './manifest-schema.js'
 
+/** True when running under test mode — only then is HAUS_CATALOG_REMOTE_BASE honoured. */
+function isTestMode(): boolean {
+  return process.env['HAUS_TEST_MODE'] === '1' || process.env['NODE_ENV'] === 'test'
+}
+
 // HAUS_CATALOG_CACHE_DIR_OVERRIDE redirects cache writes/reads for isolated tests.
 /** Resolves the catalog cache directory (per call so tests can override env after import). */
 export function getCacheDir(): string {
@@ -127,8 +132,7 @@ async function remoteBase(): Promise<string> {
   // HAUS_CATALOG_REMOTE_BASE is only honoured in test mode (HAUS_TEST_MODE=1 or
   // NODE_ENV=test) to prevent a poisoned shell env from redirecting the supply
   // chain to an attacker-controlled server in production builds.
-  const isTestMode = process.env['HAUS_TEST_MODE'] === '1' || process.env['NODE_ENV'] === 'test'
-  if (isTestMode && process.env['HAUS_CATALOG_REMOTE_BASE']) {
+  if (isTestMode() && process.env['HAUS_CATALOG_REMOTE_BASE']) {
     return process.env['HAUS_CATALOG_REMOTE_BASE']
   }
   if (cachedCatalogRef === undefined) {
@@ -347,7 +351,7 @@ async function fetchGitHubRecursiveBlobPaths(ref: string): Promise<string[] | nu
 /** All blob paths in the catalog repo at the resolved ref (cached per sync). */
 export async function fetchCatalogBlobPaths(_base: string): Promise<string[] | null> {
   if (cachedBlobPaths) return cachedBlobPaths
-  if (process.env['HAUS_CATALOG_REMOTE_BASE']) return null
+  if (isTestMode() && process.env['HAUS_CATALOG_REMOTE_BASE']) return null
   const ref = getResolvedCatalogRef()
   const paths = await fetchGitHubRecursiveBlobPaths(ref)
   if (paths) cachedBlobPaths = paths
@@ -363,7 +367,7 @@ export async function listFilesUnderCatalogPrefix(
   const prefixSlash = `${normalized}/`
 
   let relFiles: string[] | null
-  if (process.env['HAUS_CATALOG_REMOTE_BASE']) {
+  if (isTestMode() && process.env['HAUS_CATALOG_REMOTE_BASE']) {
     relFiles = await listMockPrefixFiles(base, normalized)
   } else {
     const blobs = await fetchCatalogBlobPaths(base)
@@ -733,7 +737,7 @@ function compareSemver(a: [number, number, number], b: [number, number, number])
  */
 export async function fetchLatestCatalogTag(): Promise<string | null> {
   // Skip in test environments to avoid network calls.
-  if (process.env['HAUS_CATALOG_REMOTE_BASE']) return null
+  if (isTestMode() && process.env['HAUS_CATALOG_REMOTE_BASE']) return null
   try {
     const res = await fetch(CATALOG_TAGS_API_URL, {
       signal: AbortSignal.timeout(5_000),
