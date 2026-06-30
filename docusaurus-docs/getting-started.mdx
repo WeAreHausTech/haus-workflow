@@ -1,0 +1,52 @@
+---
+sidebar_position: 1
+title: Getting started
+description: Install haus-workflow and run your first project setup.
+---
+
+# Getting started
+
+## Prerequisites
+
+- Node 22+
+- Claude Code (for slash commands and agent context assets)
+
+## Install
+
+```bash
+npm install -g @haus-tech/haus-workflow
+```
+
+A global install triggers `haus install` automatically (via postinstall hook). This:
+- Seeds `~/.claude/` with the haus-workflow skill and global slash commands
+- Merges security rules into `~/.claude/settings.json`
+- Is non-fatal, idempotent, and global-only
+
+Re-run or repair any time:
+
+```bash
+haus install
+```
+
+Undo global install:
+
+```bash
+haus uninstall
+```
+
+## Set up a project
+
+```bash
+cd your-project
+haus init
+```
+
+`haus init` runs the full scan → recommend → apply pipeline and writes `.claude/` and `.haus-workflow/` into your project.
+
+## Update
+
+```bash
+haus update
+```
+
+Fetches the latest [haus-workflow-catalog](/docs/agent-harness/haus-workflow-catalog/README), refreshes `~/.claude/`, and re-applies project context assets.
