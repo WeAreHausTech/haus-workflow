@@ -1,4 +1,4 @@
-# ADR 0010: Supply-chain hardening — fail-closed defaults and defence-in-depth
+# ADR-0010: Supply-chain hardening — fail-closed defaults and defence-in-depth
 
 ## Status
 
