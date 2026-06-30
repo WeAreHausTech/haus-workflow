@@ -124,7 +124,11 @@ export async function resolveCatalogRef(opts?: {
 }
 
 async function remoteBase(): Promise<string> {
-  if (process.env['HAUS_CATALOG_REMOTE_BASE']) {
+  // HAUS_CATALOG_REMOTE_BASE is only honoured in test mode (HAUS_TEST_MODE=1 or
+  // NODE_ENV=test) to prevent a poisoned shell env from redirecting the supply
+  // chain to an attacker-controlled server in production builds.
+  const isTestMode = process.env['HAUS_TEST_MODE'] === '1' || process.env['NODE_ENV'] === 'test'
+  if (isTestMode && process.env['HAUS_CATALOG_REMOTE_BASE']) {
     return process.env['HAUS_CATALOG_REMOTE_BASE']
   }
   if (cachedCatalogRef === undefined) {

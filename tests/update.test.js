@@ -42,6 +42,7 @@ test('update check and apply create backup', () => {
   )
 
   const env = {
+    HAUS_TEST_MODE: '1',
     HAUS_CATALOG_CACHE_DIR_OVERRIDE: path.join(temp, 'cache'),
     HAUS_CATALOG_REMOTE_BASE: 'http://127.0.0.1:0',
     HOME: path.join(temp, 'home'),
@@ -81,6 +82,7 @@ test('update --check exits 0 on a project that was never set up (no lockfile)', 
     JSON.stringify({ name: 'nolock-temp', packageManager: 'yarn@4.5.3' }, null, 2),
   )
   const env = {
+    HAUS_TEST_MODE: '1',
     HAUS_CATALOG_CACHE_DIR_OVERRIDE: path.join(temp, 'cache'),
     HAUS_CATALOG_REMOTE_BASE: 'http://127.0.0.1:0',
     HOME: path.join(temp, 'home'),
@@ -125,6 +127,7 @@ test('update --check output includes npmVersion field', () => {
     cwd: temp,
     reject: false,
     env: {
+      HAUS_TEST_MODE: '1',
       HAUS_CATALOG_CACHE_DIR_OVERRIDE: path.join(temp, 'cache'),
       HAUS_CATALOG_REMOTE_BASE: 'http://127.0.0.1:0',
       HOME: path.join(temp, 'home'),
@@ -168,6 +171,7 @@ test('update recomputes hash from tracked file paths', () => {
   )
 
   const env = {
+    HAUS_TEST_MODE: '1',
     HAUS_CATALOG_CACHE_DIR_OVERRIDE: path.join(temp, 'cache'),
     HAUS_CATALOG_REMOTE_BASE: 'http://127.0.0.1:0',
     HOME: path.join(temp, 'home'),
@@ -214,6 +218,7 @@ test('update refreshes ~/.claude global files', () => {
   )
 
   const env = {
+    HAUS_TEST_MODE: '1',
     HAUS_CATALOG_CACHE_DIR_OVERRIDE: path.join(temp, 'cache'),
     HAUS_CATALOG_REMOTE_BASE: 'http://127.0.0.1:0',
     HOME: home,
@@ -244,6 +249,7 @@ test('update re-applies project files and preserves user settings merge', () => 
   writeFileSync(path.join(temp, 'yarn.lock'), '# lock')
 
   const env = {
+    HAUS_TEST_MODE: '1',
     HAUS_FIXTURE_CATALOG: path.resolve('tests/fixtures/catalog/manifest.json'),
     HAUS_CATALOG_CACHE_DIR_OVERRIDE: path.join(temp, 'cache'),
     HAUS_CATALOG_REMOTE_BASE: 'http://127.0.0.1:0',
@@ -293,6 +299,7 @@ test('update skips project re-apply when no prior haus setup', () => {
     JSON.stringify({ name: 'no-haus', packageManager: 'yarn@4.5.3' }, null, 2),
   )
   const env = {
+    HAUS_TEST_MODE: '1',
     HAUS_CATALOG_CACHE_DIR_OVERRIDE: path.join(temp, 'cache'),
     HAUS_CATALOG_REMOTE_BASE: 'http://127.0.0.1:0',
     HOME: home,
