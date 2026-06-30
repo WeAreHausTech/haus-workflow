@@ -165,24 +165,6 @@ export async function recommend(
       skip(item.id, 'required-role-missing', 'Required role missing: database', 'role:database')
       continue
     }
-    if (
-      item.id === 'haus.ecc-typescript-reviewer' &&
-      (stackSet.has('react') ||
-        stackSet.has('react19') ||
-        stackSet.has('nextjs') ||
-        stackSet.has('next') ||
-        roleSet.has('react-app') ||
-        roleSet.has('next-app'))
-    ) {
-      skip(
-        item.id,
-        'co-install-react-reviewer',
-        'Skip typescript-reviewer on React/Next stacks (use react-reviewer)',
-        'stack:react|nextjs|role:react-app|next-app',
-      )
-      continue
-    }
-
     // ---- Eligibility signals ----
     const isDefaultBaseline = item.default === true
     const reasons: ReasonHit[] = []
@@ -210,9 +192,11 @@ export async function recommend(
       )
     }
 
-    const configSignal = item.tags.find((t) =>
-      context.warnings.join(' ').toLowerCase().includes(t.toLowerCase()),
-    )
+    const configSignal = item.tags.find((t) => {
+      const escaped = t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+      const re = new RegExp(`(?:^|\\W)${escaped}(?:\\W|$)`, 'i')
+      return context.warnings.some((w) => re.test(w))
+    })
     if (configSignal) push('config-signal-match', 'config signal match', `warning:${configSignal}`)
 
     const idSegment = item.id.split('.').pop() ?? ''
@@ -372,6 +356,13 @@ function applyCoInstallSuppression(recommended: RecommendedEntry[], skipped: Ski
       code: 'co-install-redis-official',
       message: 'Skip ecc-redis-patterns when official redis-connections skill is selected',
       signal: 'co-install:redis-connections',
+    },
+    {
+      suppress: 'haus.ecc-typescript-reviewer',
+      whenAnyRecommended: ['haus.ecc-react-reviewer'],
+      code: 'co-install-react-reviewer',
+      message: 'Skip typescript-reviewer on React/Next stacks (use react-reviewer)',
+      signal: 'co-install:react-reviewer',
     },
   ]
 

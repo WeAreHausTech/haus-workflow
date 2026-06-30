@@ -145,9 +145,13 @@ async function remoteBase(): Promise<string> {
 async function fetchText(url: string): Promise<string | null> {
   try {
     const res = await fetch(url, { signal: AbortSignal.timeout(10_000) })
-    if (!res.ok) return null
+    if (!res.ok) {
+      warn(`Catalog fetch HTTP ${res.status}: ${url}`)
+      return null
+    }
     return await res.text()
-  } catch {
+  } catch (e) {
+    warn(`Catalog fetch failed (${e instanceof Error ? e.constructor.name : String(e)}): ${url}`)
     return null
   }
 }
@@ -156,9 +160,13 @@ async function fetchText(url: string): Promise<string | null> {
 async function fetchBytes(url: string): Promise<Buffer | null> {
   try {
     const res = await fetch(url, { signal: AbortSignal.timeout(10_000) })
-    if (!res.ok) return null
+    if (!res.ok) {
+      warn(`Catalog fetch HTTP ${res.status}: ${url}`)
+      return null
+    }
     return Buffer.from(await res.arrayBuffer())
-  } catch {
+  } catch (e) {
+    warn(`Catalog fetch failed (${e instanceof Error ? e.constructor.name : String(e)}): ${url}`)
     return null
   }
 }
