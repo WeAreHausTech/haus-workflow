@@ -54,6 +54,7 @@ jobs:
         run: node scripts/contract-check.mjs
         env:
           CONTRACT_STRICT: '1'
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Validate tag matches package.json version
         run: |

@@ -40,3 +40,5 @@ jobs:
       # global fetch (Node >=18). Strictness is derived from GITHUB_EVENT_NAME.
       - name: Contract check (live catalog vs committed)
         run: node scripts/contract-check.mjs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

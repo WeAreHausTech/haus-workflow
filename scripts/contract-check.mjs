@@ -101,9 +101,9 @@ function compareSemver(a, b) {
 async function fetchLatestCatalogTag() {
   if (process.env.HAUS_CATALOG_REMOTE_BASE) return null
   try {
-    const res = await fetch(CATALOG_TAGS_API_URL, {
-      headers: { 'user-agent': 'haus-contract-check' },
-    })
+    const headers = { 'user-agent': 'haus-contract-check' }
+    if (process.env.GITHUB_TOKEN) headers['authorization'] = `Bearer ${process.env.GITHUB_TOKEN}`
+    const res = await fetch(CATALOG_TAGS_API_URL, { headers })
     if (!res.ok) throw new NetworkError(`fetch ${CATALOG_TAGS_API_URL} -> HTTP ${res.status}`)
     const tags = await res.json()
     if (!Array.isArray(tags)) return null
