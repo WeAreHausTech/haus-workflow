@@ -43,8 +43,8 @@ jobs:
         run: |
           set -euo pipefail
           SRC_DIR="docusaurus-docs"
-          DEST_DIR="../wearehaustech.github.io/docs/agent-harness/haus-workflow"
-          PROTECTED_BASENAMES="README.mdx"
+          DEST_DIR="../wearehaustech.github.io/docs/haus-workflow"
+          PROTECTED_BASENAMES="README.mdx claude-code-guide.mdx"
 
           FULL_SYNC=false
           if [ "${{ github.event.inputs.forceFullSync }}" = "true" ]; then
@@ -109,6 +109,6 @@ jobs:
           cd ../wearehaustech.github.io
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
-          git add docs/agent-harness/haus-workflow/
-          git commit -m "docs(agent-harness): sync haus-workflow docusaurus-docs" || echo "No changes to commit"
+          git add docs/haus-workflow/
+          git commit -m "docs(haus-workflow): sync docusaurus-docs" || echo "No changes to commit"
           git push
