@@ -7,6 +7,7 @@ import path from 'node:path'
 
 import fs from 'fs-extra'
 
+import { validateCatalogItem } from '../catalog/ingest-catalog.js'
 import { catalogItemContentPath, loadCatalogContext } from '../catalog/load-catalog.js'
 import { getResolvedCatalogRef, isCatalogRefResolved } from '../catalog/remote-catalog.js'
 import type { Recommendation } from '../types.js'
@@ -265,6 +266,20 @@ export async function writeClaudeFiles(
           dryRun: false,
         })
       } else {
+        const fileContent = await fs.readFile(sourcePath, 'utf8')
+        const validation = validateCatalogItem(
+          {
+            id: manifestItem.id,
+            type: manifestItem.type as 'skill' | 'agent' | 'template' | 'command' | 'config',
+            path: manifestItem.path,
+            source: manifestItem.source,
+          },
+          fileContent,
+        )
+        if (!validation.ok) {
+          warn(`Skipping ${item.id}: pre-copy validation failed — ${validation.reason}`)
+          continue
+        }
         await fs.ensureDir(path.dirname(destination))
         await fs.copy(sourcePath, destination, { overwrite: true, errorOnExist: false })
       }
