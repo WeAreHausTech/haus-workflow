@@ -19,7 +19,6 @@ import {
 } from './validation-rules.js'
 
 const ITEM_SEMVER_RE = /^\d+\.\d+\.\d+$/
-const MANIFEST_SEMVER_RE = /^\d+\.\d+\.\d+(?:-[\w.-]+)?(?:\+[\w.-]+)?$/
 
 export type ValidateCatalogResult = {
   ok: boolean
@@ -95,10 +94,8 @@ function auditManifestStructure(manifestVersion: unknown, items: CatalogItem[]):
   const seenIds = new Map<string, number>()
   const seenPaths = new Map<string, string>()
 
-  if (typeof manifestVersion !== 'string' || !MANIFEST_SEMVER_RE.test(manifestVersion)) {
-    failures.push(
-      'manifest.json: top-level "version" is not valid semver (expected X.Y.Z or X.Y.Z-pre)',
-    )
+  if (typeof manifestVersion !== 'string' || !ITEM_SEMVER_RE.test(manifestVersion)) {
+    failures.push('manifest.json: top-level "version" is not valid semver (expected X.Y.Z)')
   }
 
   for (let i = 0; i < items.length; i++) {

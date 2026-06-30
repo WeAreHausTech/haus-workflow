@@ -50,6 +50,11 @@ jobs:
       - name: Pack dry-run
         run: npm pack --dry-run
 
+      - name: Contract check (bundled fixtures vs live catalog)
+        run: node scripts/contract-check.mjs
+        env:
+          CONTRACT_STRICT: '1'
+
       - name: Validate tag matches package.json version
         run: |
           TAG_VERSION="${GITHUB_REF_NAME#v}"

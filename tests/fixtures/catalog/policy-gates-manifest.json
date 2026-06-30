@@ -106,6 +106,20 @@
       "tokenEstimate": 100
     },
     {
+      "id": "test.live-rejected-source",
+      "source": "external-plugin",
+      "type": "skill",
+      "path": "skills/test.live-rejected-source",
+      "title": "Test: Live-Rejected Source (A4 regression)",
+      "purpose": "Triggers source-trust gate via live reviewStatus. No on-disk sources-report.json needed — trust is always derived from in-memory catalog items, never the stale file.",
+      "tags": ["typescript"],
+      "repoRoles": [],
+      "reviewStatus": "candidate",
+      "riskLevel": "low",
+      "default": false,
+      "tokenEstimate": 100
+    },
+    {
       "id": "test.requires-svelte",
       "source": "haus",
       "type": "skill",
@@ -140,6 +154,42 @@
       "tags": ["nextjs", "frontend"],
       "repoRoles": ["next-app"],
       "requiresAny": [{ "stack": "nextjs" }],
+      "default": false,
+      "tokenEstimate": 100
+    },
+    {
+      "id": "test.javascript-skill",
+      "source": "haus",
+      "type": "skill",
+      "path": "skills/test.javascript-skill",
+      "title": "Test: JavaScript Skill",
+      "purpose": "Regression: 'javascript' tag must NOT be dropped by the 'java' forbidden gate (A3).",
+      "tags": ["javascript", "frontend"],
+      "repoRoles": [],
+      "default": true,
+      "tokenEstimate": 100
+    },
+    {
+      "id": "test.mongodb-skill",
+      "source": "haus",
+      "type": "skill",
+      "path": "skills/test.mongodb-skill",
+      "title": "Test: MongoDB Skill",
+      "purpose": "Regression: 'mongodb' tag must NOT be dropped by the 'go' forbidden gate (A3).",
+      "tags": ["mongodb", "backend"],
+      "repoRoles": [],
+      "default": true,
+      "tokenEstimate": 100
+    },
+    {
+      "id": "test.java-skill",
+      "source": "haus",
+      "type": "skill",
+      "path": "skills/test.java-skill",
+      "title": "Test: Java Skill (must be blocked)",
+      "purpose": "Regression: exact 'java' tag MUST still be blocked by the forbidden gate (A3).",
+      "tags": ["java", "backend"],
+      "repoRoles": [],
       "default": false,
       "tokenEstimate": 100
     },

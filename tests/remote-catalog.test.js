@@ -486,3 +486,37 @@ test('haus update: caches config items (single-file + directory)', async () => {
     fs.rmSync(temp, { recursive: true, force: true })
   }
 })
+
+// Security regression: HAUS_CATALOG_REMOTE_BASE must be ignored when HAUS_TEST_MODE is not set.
+// Without this gate, a poisoned shell env (CI, direnv, .env) could redirect supply-chain
+// fetches to an attacker-controlled server in production builds.
+test('HAUS_CATALOG_REMOTE_BASE is ignored in production (no HAUS_TEST_MODE)', async () => {
+  const temp = makeProjectDir()
+  // Point REMOTE_BASE at a closed port so any fetch attempt immediately fails.
+  const closedPort = await getClosedPort()
+  const out = await runCli(['update'], {
+    cwd: temp,
+    env: {
+      ...process.env,
+      // Explicitly unset HAUS_TEST_MODE to simulate a production environment.
+      HAUS_TEST_MODE: '',
+      NODE_ENV: '',
+      HAUS_CATALOG_REMOTE_BASE: `http://127.0.0.1:${closedPort}`,
+    },
+  })
+  // The CLI must not have used the poisoned base — it should exit 0 (offline fallback to
+  // bundled ref) rather than 1 (connection refused from an honoured REMOTE_BASE).
+  // If REMOTE_BASE were honoured, the fetch would hit the closed port and the manifest
+  // fetch would fail; but the command still exits 0 because remoteBase() falls through to
+  // the real GitHub URL (which also fails in this offline test, triggering the same
+  // offline-fallback path). The key invariant: the closed-port URL is NOT used as the base.
+  //
+  // We verify by checking that stdout/stderr does NOT contain the attacker URL as a
+  // referenced host — the CLI should only reference the real GitHub domain or nothing.
+  const combined = out.stdout + out.stderr
+  assert.equal(
+    combined.includes(`127.0.0.1:${closedPort}`),
+    false,
+    'HAUS_CATALOG_REMOTE_BASE must be ignored when HAUS_TEST_MODE is unset — poisoned env should not redirect fetches',
+  )
+})

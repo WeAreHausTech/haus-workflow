@@ -12,6 +12,7 @@
  */
 
 import { loadCatalog } from '../catalog/load-catalog.js'
+import { buildSourcesReport } from '../scanner/write-sources-report.js'
 import { SENSITIVE_ITEM_KEYWORDS } from '../security/sensitive-paths.js'
 import type { CatalogItem, ContextMap, DeepContext, Recommendation } from '../types.js'
 import { readJson } from '../utils/fs.js'
@@ -40,10 +41,10 @@ export async function recommend(
   opts: { include?: string[] } = {},
 ): Promise<Recommendation> {
   const items = await loadCatalog(root)
-  const sources =
-    (await readJson<{ items?: Array<{ id: string; status?: string }> }>(
-      hausPath(root, 'sources-report.json'),
-    )) ?? {}
+  // Derive trust from live catalog items — NOT from on-disk sources-report.json which may
+  // be stale (generated before a reviewStatus downgrade). This prevents a rejected item
+  // from leaking through if the file hasn't been regenerated since the catalog changed.
+  const sources = buildSourcesReport(items)
   const deep = (await readJson<DeepContext>(hausPath(root, 'deep-context.json'))) ?? {}
 
   // Scanner (shallow) signal sets.
@@ -74,7 +75,7 @@ export async function recommend(
 
   const recommended: Recommendation['recommended'] = []
   const skipped: Recommendation['skipped'] = []
-  const sourceTrust = new Map((sources.items ?? []).map((x) => [x.id, x.status ?? 'candidate']))
+  const sourceTrust = new Map(sources.items.map((x) => [x.source, x.status]))
   const changedFiles = await readChangedFiles(root)
 
   const skip = (id: string, code: string, message: string, signal?: string) => {
@@ -86,10 +87,22 @@ export async function recommend(
     scannerStacks.has(name.toLowerCase()) ? `tag:${name}` : `deep:tag:${name}`
 
   for (const item of items) {
-    const itemSearchText = `${item.id} ${item.tags.join(' ')}`.toLowerCase()
+    // Fail-closed: items with a missing or whitespace-only source field cannot be
+    // trust-checked, so block them unconditionally before any policy gate runs.
+    const normSource = typeof item.source === 'string' ? item.source.trim() : ''
+    if (!normSource) {
+      skip(item.id, 'invalid-source', 'Item source is missing or empty')
+      continue
+    }
+
+    // Normalised tag array — used for exact-tag gates to prevent substring false positives
+    // (e.g. "javascript" tag must not match the "java" forbidden gate).
+    const itemTags = item.tags.map((t) => t.toLowerCase())
 
     // ---- Policy gates (hard include/exclude — correctness & security) ----
-    if (UNSUPPORTED.some((x) => itemSearchText.includes(x))) {
+    // Use exact tag-array membership so "javascript" never fires the "java" gate,
+    // "mongodb" never fires the "go" gate, etc.
+    if (UNSUPPORTED.some((x) => itemTags.includes(x))) {
       skip(item.id, 'unsupported-policy', 'Unsupported stack policy')
       continue
     }
@@ -97,7 +110,7 @@ export async function recommend(
       skip(item.id, 'deprecated', 'Catalog item is deprecated', 'reviewStatus:deprecated')
       continue
     }
-    if (item.source === 'curated') {
+    if (normSource === 'curated') {
       const rs = item.reviewStatus
       if (!rs || rs !== 'approved') {
         skip(
@@ -118,17 +131,24 @@ export async function recommend(
         continue
       }
     }
-    if (SENSITIVE_ITEM_KEYWORDS.some((x) => itemSearchText.includes(x))) {
+    // Sensitive-keyword check: match against id (for path-like keywords such as ".env", ".pem")
+    // AND exact tag membership (for keyword-tags such as "secrets", "exports").
+    // Splitting the two avoids "exports" in an item id like "haus.exports-handler" being
+    // blocked by the plain-English "exports" tag keyword — but also ensures an id that
+    // literally contains ".env" is still caught.
+    const sensitiveInId = SENSITIVE_ITEM_KEYWORDS.some((x) => item.id.toLowerCase().includes(x))
+    const sensitiveInTags = SENSITIVE_ITEM_KEYWORDS.some((x) => itemTags.includes(x))
+    if (sensitiveInId || sensitiveInTags) {
       skip(item.id, 'sensitive-policy', 'Sensitive content policy block')
       continue
     }
-    const trust = sourceTrust.get(item.source)
+    const trust = sourceTrust.get(normSource)
     if (trust === 'candidate' || trust === 'rejected') {
       skip(item.id, 'source-trust', 'Source trust policy block', `trust:${trust}`)
       continue
     }
-    if (item.source && item.source !== 'haus' && trust !== 'approved') {
-      skip(item.id, 'source-approval', 'Source not approved', `source:${item.source}`)
+    if (normSource !== 'haus' && trust !== 'approved') {
+      skip(item.id, 'source-approval', 'Source not approved', `source:${normSource}`)
       continue
     }
     if (item.id === 'haus.nx21-monorepo-patterns' && !roleSet.has('nx-monorepo')) {
@@ -153,24 +173,6 @@ export async function recommend(
       skip(item.id, 'required-role-missing', 'Required role missing: database', 'role:database')
       continue
     }
-    if (
-      item.id === 'haus.ecc-typescript-reviewer' &&
-      (stackSet.has('react') ||
-        stackSet.has('react19') ||
-        stackSet.has('nextjs') ||
-        stackSet.has('next') ||
-        roleSet.has('react-app') ||
-        roleSet.has('next-app'))
-    ) {
-      skip(
-        item.id,
-        'co-install-react-reviewer',
-        'Skip typescript-reviewer on React/Next stacks (use react-reviewer)',
-        'stack:react|nextjs|role:react-app|next-app',
-      )
-      continue
-    }
-
     // ---- Eligibility signals ----
     const isDefaultBaseline = item.default === true
     const reasons: ReasonHit[] = []
@@ -198,9 +200,11 @@ export async function recommend(
       )
     }
 
-    const configSignal = item.tags.find((t) =>
-      context.warnings.join(' ').toLowerCase().includes(t.toLowerCase()),
-    )
+    const configSignal = item.tags.find((t) => {
+      const escaped = t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+      const re = new RegExp(`(?:^|\\W)${escaped}(?:\\W|$)`, 'i')
+      return context.warnings.some((w) => re.test(w))
+    })
     if (configSignal) push('config-signal-match', 'config signal match', `warning:${configSignal}`)
 
     const idSegment = item.id.split('.').pop() ?? ''
@@ -360,6 +364,13 @@ function applyCoInstallSuppression(recommended: RecommendedEntry[], skipped: Ski
       code: 'co-install-redis-official',
       message: 'Skip ecc-redis-patterns when official redis-connections skill is selected',
       signal: 'co-install:redis-connections',
+    },
+    {
+      suppress: 'haus.ecc-typescript-reviewer',
+      whenAnyRecommended: ['haus.ecc-react-reviewer'],
+      code: 'co-install-react-reviewer',
+      message: 'Skip typescript-reviewer on React/Next stacks (use react-reviewer)',
+      signal: 'co-install:react-reviewer',
     },
   ]
 

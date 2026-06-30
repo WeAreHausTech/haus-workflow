@@ -7,6 +7,7 @@ import path from 'node:path'
 
 import fs from 'fs-extra'
 
+import { normaliseLF } from '../claude/managed-template.js'
 import { buildAskRules } from '../security/ask-rules.js'
 import { buildDenyRules } from '../security/deny-rules.js'
 import { readText, writeText } from '../utils/fs.js'
@@ -61,9 +62,9 @@ export interface ApplyResult {
   drift: boolean
 }
 
-/** Returns a sha256 prefixed hash of the given string content. */
+/** Returns a sha256 prefixed hash of the given string content (LF-normalised for cross-platform consistency). */
 function hashContent(content: string): string {
-  return `sha256-${crypto.createHash('sha256').update(content).digest('hex')}`
+  return `sha256-${crypto.createHash('sha256').update(normaliseLF(content)).digest('hex')}`
 }
 
 /** Reads package.json to build a "name@version" source string for stamping installed files. */

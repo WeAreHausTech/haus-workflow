@@ -11,6 +11,7 @@ import fs from 'fs-extra'
 import type { CatalogItem } from '../types.js'
 import { mapWithConcurrency } from '../utils/fs.js'
 import { warn } from '../utils/logger.js'
+import { packageRoot } from '../utils/paths.js'
 
 import {
   CATALOG_CACHE_SUBDIR,
@@ -20,6 +21,11 @@ import {
 } from './constants.js'
 import { validateCatalogItem } from './ingest-catalog.js'
 import { parseManifest } from './manifest-schema.js'
+
+/** True when running under test mode — only then is HAUS_CATALOG_REMOTE_BASE honoured. */
+function isTestMode(): boolean {
+  return process.env['HAUS_TEST_MODE'] === '1' || process.env['NODE_ENV'] === 'test'
+}
 
 // HAUS_CATALOG_CACHE_DIR_OVERRIDE redirects cache writes/reads for isolated tests.
 /** Resolves the catalog cache directory (per call so tests can override env after import). */
@@ -32,9 +38,36 @@ export function getCacheDir(): string {
 let cachedCatalogRef: string | undefined
 let cachedBlobPaths: string[] | undefined
 
+/**
+ * Returns the version tag from the bundled catalog snapshot (e.g. "v3.2.0").
+ * Used as the last-resort fallback ref when tag resolution fails and no cached ref exists.
+ * Returns undefined if the bundled manifest cannot be read.
+ */
+export function getBundledCatalogRef(): string | undefined {
+  try {
+    const manifestPath = path.join(packageRoot(), 'library/catalog/manifest.json')
+    const raw = fs.readFileSync(manifestPath, 'utf8')
+    const data = JSON.parse(raw) as { version?: string }
+    if (typeof data.version === 'string' && data.version) {
+      // Normalize to a tag format: "3.2.0" → "v3.2.0", "v3.2.0" → "v3.2.0"
+      return data.version.startsWith('v') ? data.version : `v${data.version}`
+    }
+  } catch {
+    // bundled manifest unreadable — caller handles undefined
+  }
+  return undefined
+}
+
 /** Latest resolved catalog ref for this process (informational / lock metadata). */
 export function getResolvedCatalogRef(): string {
-  return cachedCatalogRef ?? process.env['HAUS_CATALOG_REF'] ?? 'main'
+  const resolved = cachedCatalogRef ?? process.env['HAUS_CATALOG_REF'] ?? getBundledCatalogRef()
+  if (!resolved) {
+    warn(
+      'Could not determine catalog ref from cache, env, or bundled snapshot — falling back to main (moving target).',
+    )
+    return 'main'
+  }
+  return resolved
 }
 
 /** True after sync or when HAUS_CATALOG_REF is set (not the unsynced `main` fallback). */
@@ -44,25 +77,66 @@ export function isCatalogRefResolved(): boolean {
 
 /**
  * Resolve which git ref to fetch the catalog from.
- * Honors HAUS_CATALOG_REF; else latest release tag; else `main`.
+ * Honors HAUS_CATALOG_REF (warns when set to 'main' — it is a moving target).
+ * Otherwise uses the latest release tag from GitHub.
+ * When tag resolution fails (network error, timeout, rate-limit), falls back to
+ * `fallbackRef` (a previously known good ref) rather than 'main'.
+ * Only serves 'main' when HAUS_CATALOG_REF=main is explicitly set in env.
  */
 export async function resolveCatalogRef(opts?: {
   env?: NodeJS.ProcessEnv
   fetchLatestTag?: () => Promise<string | null>
+  /** Ref to use when tag resolution fails (e.g. cached lock ref or bundled snapshot ref). */
+  fallbackRef?: string
 }): Promise<string> {
   const env = opts?.env ?? process.env
-  if (env['HAUS_CATALOG_REF']) return env['HAUS_CATALOG_REF']
+  if (env['HAUS_CATALOG_REF']) {
+    if (env['HAUS_CATALOG_REF'] === 'main') {
+      warn(
+        'HAUS_CATALOG_REF=main is set — fetching from the moving main branch. ' +
+          'Pin to a release tag for reproducible installs.',
+      )
+    }
+    return env['HAUS_CATALOG_REF']
+  }
   const fetchLatest = opts?.fetchLatestTag ?? fetchLatestCatalogTag
   const tag = await fetchLatest()
-  return tag ?? 'main'
+  if (tag !== null) return tag
+  // Tag resolution failed. Use the provided fallback ref instead of silently serving 'main'.
+  const fallback = opts?.fallbackRef
+  if (fallback) {
+    warn(
+      `Tag resolution failed — using cached ref ${fallback}. ` +
+        'To use latest, retry or set HAUS_CATALOG_REF explicitly.',
+    )
+    return fallback
+  }
+  // Last resort: bundled snapshot ref. This avoids fetching unreviewed content from main.
+  const bundled = getBundledCatalogRef()
+  if (bundled) {
+    warn(
+      `Tag resolution failed — using bundled snapshot ref ${bundled}. ` +
+        'To use latest, retry or set HAUS_CATALOG_REF explicitly.',
+    )
+    return bundled
+  }
+  // Absolute last resort — only reached when the bundled manifest is unreadable.
+  warn(
+    'Tag resolution failed and no fallback ref is available. ' +
+      'Set HAUS_CATALOG_REF explicitly to avoid fetching from main.',
+  )
+  return 'main'
 }
 
 async function remoteBase(): Promise<string> {
-  if (process.env['HAUS_CATALOG_REMOTE_BASE']) {
+  // HAUS_CATALOG_REMOTE_BASE is only honoured in test mode (HAUS_TEST_MODE=1 or
+  // NODE_ENV=test) to prevent a poisoned shell env from redirecting the supply
+  // chain to an attacker-controlled server in production builds.
+  if (isTestMode() && process.env['HAUS_CATALOG_REMOTE_BASE']) {
     return process.env['HAUS_CATALOG_REMOTE_BASE']
   }
   if (cachedCatalogRef === undefined) {
-    cachedCatalogRef = await resolveCatalogRef()
+    cachedCatalogRef = await resolveCatalogRef({ fallbackRef: getBundledCatalogRef() })
   }
   return `${CATALOG_REPO_URL}/${cachedCatalogRef}`
 }
@@ -71,9 +145,13 @@ async function remoteBase(): Promise<string> {
 async function fetchText(url: string): Promise<string | null> {
   try {
     const res = await fetch(url, { signal: AbortSignal.timeout(10_000) })
-    if (!res.ok) return null
+    if (!res.ok) {
+      warn(`Catalog fetch HTTP ${res.status}: ${url}`)
+      return null
+    }
     return await res.text()
-  } catch {
+  } catch (e) {
+    warn(`Catalog fetch failed (${e instanceof Error ? e.constructor.name : String(e)}): ${url}`)
     return null
   }
 }
@@ -82,9 +160,13 @@ async function fetchText(url: string): Promise<string | null> {
 async function fetchBytes(url: string): Promise<Buffer | null> {
   try {
     const res = await fetch(url, { signal: AbortSignal.timeout(10_000) })
-    if (!res.ok) return null
+    if (!res.ok) {
+      warn(`Catalog fetch HTTP ${res.status}: ${url}`)
+      return null
+    }
     return Buffer.from(await res.arrayBuffer())
-  } catch {
+  } catch (e) {
+    warn(`Catalog fetch failed (${e instanceof Error ? e.constructor.name : String(e)}): ${url}`)
     return null
   }
 }
@@ -277,7 +359,7 @@ async function fetchGitHubRecursiveBlobPaths(ref: string): Promise<string[] | nu
 /** All blob paths in the catalog repo at the resolved ref (cached per sync). */
 export async function fetchCatalogBlobPaths(_base: string): Promise<string[] | null> {
   if (cachedBlobPaths) return cachedBlobPaths
-  if (process.env['HAUS_CATALOG_REMOTE_BASE']) return null
+  if (isTestMode() && process.env['HAUS_CATALOG_REMOTE_BASE']) return null
   const ref = getResolvedCatalogRef()
   const paths = await fetchGitHubRecursiveBlobPaths(ref)
   if (paths) cachedBlobPaths = paths
@@ -293,7 +375,7 @@ export async function listFilesUnderCatalogPrefix(
   const prefixSlash = `${normalized}/`
 
   let relFiles: string[] | null
-  if (process.env['HAUS_CATALOG_REMOTE_BASE']) {
+  if (isTestMode() && process.env['HAUS_CATALOG_REMOTE_BASE']) {
     relFiles = await listMockPrefixFiles(base, normalized)
   } else {
     const blobs = await fetchCatalogBlobPaths(base)
@@ -488,7 +570,7 @@ async function syncConfigItem(
   if (relFiles && relFiles.length > 0) {
     try {
       return await syncDirectoryFromPrefix(item, item.path, dest, base, {
-        validateMarkdown: false,
+        validateMarkdown: true,
         requireSkillMd: false,
         relFiles,
       })
@@ -663,7 +745,7 @@ function compareSemver(a: [number, number, number], b: [number, number, number])
  */
 export async function fetchLatestCatalogTag(): Promise<string | null> {
   // Skip in test environments to avoid network calls.
-  if (process.env['HAUS_CATALOG_REMOTE_BASE']) return null
+  if (isTestMode() && process.env['HAUS_CATALOG_REMOTE_BASE']) return null
   try {
     const res = await fetch(CATALOG_TAGS_API_URL, {
       signal: AbortSignal.timeout(5_000),

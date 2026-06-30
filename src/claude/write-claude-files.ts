@@ -7,6 +7,7 @@ import path from 'node:path'
 
 import fs from 'fs-extra'
 
+import { validateCatalogItem } from '../catalog/ingest-catalog.js'
 import { catalogItemContentPath, loadCatalogContext } from '../catalog/load-catalog.js'
 import { getResolvedCatalogRef, isCatalogRefResolved } from '../catalog/remote-catalog.js'
 import type { Recommendation } from '../types.js'
@@ -260,11 +261,50 @@ export async function writeClaudeFiles(
           `${displayPath(root, destination)}: ${exists ? 'would overwrite' : 'would create'} (${item.id})`,
         )
       } else if (item.type === 'skill') {
+        const skillFiles = (await fs.readdir(sourcePath, { recursive: true })).filter(
+          (f): f is string => typeof f === 'string' && f.endsWith('.md'),
+        )
+        let skillValid = true
+        for (const relFile of skillFiles) {
+          const mdPath = path.join(sourcePath, relFile)
+          const mdContent = await fs.readFile(mdPath, 'utf8')
+          const mdValidation = validateCatalogItem(
+            {
+              id: manifestItem.id,
+              type: 'skill',
+              path: manifestItem.path,
+              source: manifestItem.source,
+            },
+            mdContent,
+          )
+          if (!mdValidation.ok) {
+            warn(
+              `Skipping ${item.id}: pre-copy validation failed (${relFile}) — ${mdValidation.reason}`,
+            )
+            skillValid = false
+            break
+          }
+        }
+        if (!skillValid) continue
         await installCatalogSkill(sourcePath, destination, {
           originSourceId: manifestItem.originSourceId,
           dryRun: false,
         })
       } else {
+        const fileContent = await fs.readFile(sourcePath, 'utf8')
+        const validation = validateCatalogItem(
+          {
+            id: manifestItem.id,
+            type: manifestItem.type as 'skill' | 'agent' | 'template' | 'command' | 'config',
+            path: manifestItem.path,
+            source: manifestItem.source,
+          },
+          fileContent,
+        )
+        if (!validation.ok) {
+          warn(`Skipping ${item.id}: pre-copy validation failed — ${validation.reason}`)
+          continue
+        }
         await fs.ensureDir(path.dirname(destination))
         await fs.copy(sourcePath, destination, { overwrite: true, errorOnExist: false })
       }

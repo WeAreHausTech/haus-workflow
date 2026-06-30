@@ -18,7 +18,7 @@ if (files.length === 0) {
 const result = spawnSync(
   process.execPath,
   ['--import', 'tsx', '--test', '--test-reporter', reporter, ...files],
-  { cwd: repoRoot, stdio: 'inherit' },
+  { cwd: repoRoot, stdio: 'inherit', env: { ...process.env, HAUS_TEST_MODE: '1' } },
 )
 
 process.exit(result.status ?? 1)
