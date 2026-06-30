@@ -261,6 +261,23 @@ export async function writeClaudeFiles(
           `${displayPath(root, destination)}: ${exists ? 'would overwrite' : 'would create'} (${item.id})`,
         )
       } else if (item.type === 'skill') {
+        const skillMdPath = path.join(sourcePath, 'SKILL.md')
+        if (await fs.pathExists(skillMdPath)) {
+          const skillContent = await fs.readFile(skillMdPath, 'utf8')
+          const skillValidation = validateCatalogItem(
+            {
+              id: manifestItem.id,
+              type: 'skill',
+              path: manifestItem.path,
+              source: manifestItem.source,
+            },
+            skillContent,
+          )
+          if (!skillValidation.ok) {
+            warn(`Skipping ${item.id}: pre-copy validation failed — ${skillValidation.reason}`)
+            continue
+          }
+        }
         await installCatalogSkill(sourcePath, destination, {
           originSourceId: manifestItem.originSourceId,
           dryRun: false,
