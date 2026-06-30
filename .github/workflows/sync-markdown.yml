@@ -1,0 +1,114 @@
+name: Sync Docusaurus Docs to wearehaustech.github.io
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'docusaurus-docs/**'
+  workflow_dispatch:
+    inputs:
+      forceFullSync:
+        description: 'Force a full sync of all docusaurus-docs files'
+        required: false
+        default: 'true'
+
+concurrency:
+  group: sync-docusaurus-docs-workflow
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  sync-docusaurus-docs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Set up SSH for wearehaustech.github.io
+        uses: webfactory/ssh-agent@v0.10.0
+        with:
+          ssh-private-key: ${{ secrets.WEAREHAUSTECH_GITHUB_IO_DEPLOY_KEY }}
+
+      - name: Clone wearehaustech.github.io
+        run: |
+          git clone git@github.com:WeAreHausTech/wearehaustech.github.io.git ../wearehaustech.github.io
+
+      - name: Copy docusaurus-docs files
+        run: |
+          set -euo pipefail
+          SRC_DIR="docusaurus-docs"
+          DEST_DIR="../wearehaustech.github.io/docs/agent-harness/haus-workflow"
+          PROTECTED_BASENAMES="README.mdx"
+
+          FULL_SYNC=false
+          if [ "${{ github.event.inputs.forceFullSync }}" = "true" ]; then
+            FULL_SYNC=true
+          fi
+
+          if [ "$FULL_SYNC" = true ]; then
+            echo "Full sync — copy all docusaurus-docs files and remove orphaned synced files."
+            mkdir -p "$DEST_DIR"
+            mapfile -t SOURCE_FILES < <(find "$SRC_DIR" -type f \( -name '*.md' -o -name '*.mdx' \) ! -name 'README.md' ! -name 'README.mdx' | sort)
+
+            for file in "${SOURCE_FILES[@]}"; do
+              rel="${file#$SRC_DIR/}"
+              mkdir -p "$DEST_DIR/$(dirname "$rel")"
+              cp "$file" "$DEST_DIR/$rel"
+            done
+
+            mapfile -t DEST_FILES < <(find "$DEST_DIR" -type f \( -name '*.md' -o -name '*.mdx' \) | sort)
+            for dest_file in "${DEST_FILES[@]}"; do
+              base="$(basename "$dest_file")"
+              for protected in $PROTECTED_BASENAMES; do
+                if [ "$base" = "$protected" ]; then
+                  continue 2
+                fi
+              done
+              rel="${dest_file#$DEST_DIR/}"
+              if [ ! -f "$SRC_DIR/$rel" ]; then
+                echo "Deleting orphaned synced file $dest_file"
+                rm -f "$dest_file"
+              fi
+            done
+          else
+            BEFORE="${{ github.event.before }}"
+            AFTER="${{ github.sha }}"
+            CHANGED_FILES=$(git diff --name-only "$BEFORE" "$AFTER" | grep -E '^docusaurus-docs/.*\.(md|mdx)$' | grep -vE 'docusaurus-docs/README\.mdx?$' || true)
+            DELETED_FILES=$(git diff --name-only --diff-filter=D "$BEFORE" "$AFTER" | grep -E '^docusaurus-docs/.*\.(md|mdx)$' | grep -vE 'docusaurus-docs/README\.mdx?$' || true)
+
+            if [ -z "$CHANGED_FILES" ] && [ -z "$DELETED_FILES" ]; then
+              echo "No changed or deleted docusaurus-docs markdown files."
+            else
+              mkdir -p "$DEST_DIR"
+              for file in $CHANGED_FILES; do
+                [ -f "$file" ] || continue
+                echo "Processing $file"
+                rel="${file#$SRC_DIR/}"
+                mkdir -p "$DEST_DIR/$(dirname "$rel")"
+                cp "$file" "$DEST_DIR/$rel"
+              done
+              for file in $DELETED_FILES; do
+                rel="${file#docusaurus-docs/}"
+                dest_file="$DEST_DIR/$rel"
+                if [ -f "$dest_file" ]; then
+                  echo "Deleting removed file $dest_file"
+                  rm -f "$dest_file"
+                fi
+              done
+            fi
+          fi
+
+      - name: Commit and Push to wearehaustech.github.io
+        run: |
+          cd ../wearehaustech.github.io
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add docs/agent-harness/haus-workflow/
+          git commit -m "docs(agent-harness): sync haus-workflow docusaurus-docs" || echo "No changes to commit"
+          git push

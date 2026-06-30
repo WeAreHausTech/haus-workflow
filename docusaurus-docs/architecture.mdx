@@ -1,0 +1,55 @@
+---
+sidebar_position: 4
+title: Architecture
+description: How haus-workflow scans, recommends, and applies context assets.
+---
+
+# Architecture
+
+## The scan → recommend → apply pipeline
+
+```mermaid
+graph TD
+  scan["haus scan\n(reads repo)"]
+  context[".haus-workflow/context-map.json\n(stack tokens, roles, intents)"]
+  recommend["haus recommend\n(matches catalog items)"]
+  recommendation[".haus-workflow/recommendation.json"]
+  apply["haus apply --write\n(fetch + write)"]
+  dotclaude[".claude/ in your project\n(skills, agents, commands, templates)"]
+  lock[".haus-workflow/haus.lock.json\n(content hashes)"]
+
+  scan --> context
+  context --> recommend
+  recommend --> recommendation
+  recommendation --> apply
+  apply --> dotclaude
+  apply --> lock
+```
+
+## Catalog fetch
+
+Catalog items are **not** bundled into the npm package. They are fetched at runtime from [haus-workflow-catalog](https://github.com/WeAreHausTech/haus-workflow-catalog) and cached locally.
+
+```mermaid
+graph LR
+  catalog["github.com/WeAreHausTech/haus-workflow-catalog\nmanifest.json + skills/ + agents/"]
+  cache["~/.haus-workflow/cache/"]
+  project[".claude/ in your project"]
+
+  catalog -->|"haus update"| cache
+  cache -->|"haus apply"| project
+```
+
+## Output ownership
+
+haus-workflow writes exclusively to `.claude/` and `.haus-workflow/`. It never modifies application source code, package.json, or CI configuration.
+
+Hand-edits inside haus-managed blocks (`<!-- HAUS:BEGIN … -->` … `<!-- HAUS:END … -->`) are overwritten on next `haus apply`. Edit source in the catalog; let apply propagate changes.
+
+## Lock file
+
+`.haus-workflow/haus.lock.json` records per-item content hashes. On `haus apply`:
+- New items are fetched and written
+- Changed items are updated (if the on-disk copy still matches the lock hash)
+- Items dropped from the catalog are removed (if unmodified)
+- User-edited copies are kept (hash mismatch = skip + warn)

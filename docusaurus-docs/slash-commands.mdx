@@ -1,0 +1,27 @@
+---
+sidebar_position: 3
+title: Slash commands
+description: /haus-workflow slash commands available in Claude Code after global install.
+---
+
+# Slash commands
+
+After `npm install -g @haus-tech/haus-workflow`, Claude Code gains `/haus-workflow`.
+
+## Usage
+
+```
+/haus-workflow                              # interactive menu
+/haus-workflow project:init                 # add haus to an existing repo
+/haus-workflow project:clone [name]         # clone a repo from the workspace manifest
+/haus-workflow project:cloneandsetup [name] # clone + local setup (node version, deps, .env)
+/haus-workflow project:refresh              # refresh .claude/ and regenerate CLAUDE.md imports
+/haus-workflow project:doctor               # health check for drift
+/haus-workflow update                       # update npm package + catalog + ~/.claude/
+```
+
+Without an argument, the skill presents an interactive menu so you can pick a task.
+
+## Short aliases
+
+Legacy short names still work: `/haus-setup`, `/haus-doctor`, `/haus-fix`, `/haus-clone`, `/haus-cloneandsetup`.

@@ -1,0 +1,42 @@
+---
+sidebar_position: 2
+title: CLI commands
+description: Primary haus CLI commands for day-to-day use.
+---
+
+# CLI commands
+
+## Project commands
+
+| Command | Description |
+|---------|-------------|
+| `haus init` | First-run setup: scan → recommend → apply |
+| `haus setup-project` | Re-run setup on an existing project |
+| `haus scan` | Scan repo; write context-map, dependency-map, scan-hashes, repo-summary to `.haus-workflow/` |
+| `haus recommend [--include <ids...>]` | Recommend catalog items (binary eligibility); `--include` forces opt-in items |
+| `haus apply [--dry-run] [--write] [--select] [--ids <ids...>] [--refill-config] [--force]` | Materialize catalog assets into `.claude/` |
+| `haus scaffold [ids...] [--force] [--dry-run]` | Copy `config`-type items (ESLint, Prettier) to project root — not run by apply |
+| `haus doctor` | Health check — hooks, CLAUDE.md imports, catalog cache, drift |
+| `haus undo` | Remove haus-managed project files (lock-tracked paths) |
+| `haus clone <url> [dir]` | Clone a single git repo by URL |
+| `haus workspace` | Multi-repo ops: discover, scan, setup, doctor across a workspace |
+
+## Global commands
+
+| Command | Description |
+|---------|-------------|
+| `haus install` | Seed `~/.claude/` with haus-workflow skill + commands; merge security rules |
+| `haus uninstall` | Remove haus-managed files from `~/.claude/` |
+| `haus update [--check]` | Fetch latest catalog + refresh `~/.claude/` + re-apply project files; `--check` previews only |
+| `haus guard bash\|file-access` | Security guard hook; invoked by PreToolUse |
+
+## Output files
+
+| Path | Description |
+|------|-------------|
+| `.haus-workflow/haus.lock.json` | Per-item content hashes; tracks what was applied and at what version |
+| `.haus-workflow/context-map.json` | Repo scan output: stack tokens, roles, intents |
+| `.haus-workflow/recommendation.json` | Recommended catalog items for this project |
+| `.claude/skills/` | Applied skills |
+| `.claude/agents/` | Applied agents |
+| `.claude/commands/` | Applied slash commands |
