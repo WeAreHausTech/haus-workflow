@@ -1,5 +1,5 @@
 {
-  "version": "3.2.0",
+  "version": "3.2.1",
   "items": [
     {
       "id": "haus.agentic-workflow-standard",
@@ -1754,7 +1754,7 @@
     },
     {
       "id": "haus.sentry-sentry-nestjs-sdk",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "source": "curated",
       "type": "skill",
       "path": "skills/sentry/sentry-nestjs-sdk",
@@ -1773,8 +1773,8 @@
       "license": "MIT",
       "licenseConfidence": "high",
       "originSourceId": "getsentry-sentry-for-ai",
-      "originUrl": "https://github.com/getsentry/sentry-for-ai/blob/9ab3551758913a4144517d4fafb71476a48c64f8/skills/sentry-nestjs-sdk/SKILL.md",
-      "pinnedRef": "9ab3551758913a4144517d4fafb71476a48c64f8",
+      "originUrl": "https://github.com/getsentry/sentry-for-ai/blob/cc302403ebf647fd21c3ca736e1ec7ef6e4ed5a3/skills/sentry-nestjs-sdk/SKILL.md",
+      "pinnedRef": "cc302403ebf647fd21c3ca736e1ec7ef6e4ed5a3",
       "ecosystem": "sentry",
       "requiresAny": [
         {
@@ -1787,7 +1787,7 @@
     },
     {
       "id": "haus.sentry-sentry-nextjs-sdk",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "source": "curated",
       "type": "skill",
       "path": "skills/sentry/sentry-nextjs-sdk",
@@ -1806,8 +1806,8 @@
       "license": "MIT",
       "licenseConfidence": "high",
       "originSourceId": "getsentry-sentry-for-ai",
-      "originUrl": "https://github.com/getsentry/sentry-for-ai/blob/bd84576db74e3e1d13361c7eda3bb303ae017b90/skills/sentry-nextjs-sdk/SKILL.md",
-      "pinnedRef": "bd84576db74e3e1d13361c7eda3bb303ae017b90",
+      "originUrl": "https://github.com/getsentry/sentry-for-ai/blob/cc302403ebf647fd21c3ca736e1ec7ef6e4ed5a3/skills/sentry-nextjs-sdk/SKILL.md",
+      "pinnedRef": "cc302403ebf647fd21c3ca736e1ec7ef6e4ed5a3",
       "ecosystem": "sentry",
       "requiresAny": [
         {
@@ -1820,7 +1820,7 @@
     },
     {
       "id": "haus.sentry-sentry-node-sdk",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "source": "curated",
       "type": "skill",
       "path": "skills/sentry/sentry-node-sdk",
@@ -1839,8 +1839,8 @@
       "license": "MIT",
       "licenseConfidence": "high",
       "originSourceId": "getsentry-sentry-for-ai",
-      "originUrl": "https://github.com/getsentry/sentry-for-ai/blob/bd84576db74e3e1d13361c7eda3bb303ae017b90/skills/sentry-node-sdk/SKILL.md",
-      "pinnedRef": "bd84576db74e3e1d13361c7eda3bb303ae017b90",
+      "originUrl": "https://github.com/getsentry/sentry-for-ai/blob/cc302403ebf647fd21c3ca736e1ec7ef6e4ed5a3/skills/sentry-node-sdk/SKILL.md",
+      "pinnedRef": "cc302403ebf647fd21c3ca736e1ec7ef6e4ed5a3",
       "ecosystem": "sentry",
       "requiresAny": [
         {
@@ -1978,7 +1978,7 @@
     },
     {
       "id": "haus.stripe-stripe-best-practices",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "source": "curated",
       "type": "skill",
       "path": "skills/stripe/stripe-best-practices",
@@ -1988,7 +1988,7 @@
       "whenNotToUse": "Do not use when a more specific skill or command applies.",
       "tags": ["workflow", "stripe", "payments"],
       "repoRoles": [],
-      "tokenEstimate": 7509,
+      "tokenEstimate": 1018,
       "installMode": "copy-selected",
       "default": false,
       "reviewStatus": "approved",
@@ -1997,8 +1997,8 @@
       "license": "MIT",
       "licenseConfidence": "medium",
       "originSourceId": "stripe-ai",
-      "originUrl": "https://github.com/stripe/ai/blob/7e7f72eb42e06f79e7bc75f86e9395f4c8232c00/skills/stripe-best-practices/SKILL.md",
-      "pinnedRef": "7e7f72eb42e06f79e7bc75f86e9395f4c8232c00",
+      "originUrl": "https://github.com/stripe/ai/blob/f54c9e6c0e8b6cfe4e648745eec68ecab3ddc994/skills/stripe-best-practices/SKILL.md",
+      "pinnedRef": "f54c9e6c0e8b6cfe4e648745eec68ecab3ddc994",
       "ecosystem": "stripe",
       "requiresAny": [
         {
