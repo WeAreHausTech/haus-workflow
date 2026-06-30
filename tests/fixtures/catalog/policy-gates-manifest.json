@@ -106,6 +106,20 @@
       "tokenEstimate": 100
     },
     {
+      "id": "test.live-rejected-source",
+      "source": "external-plugin",
+      "type": "skill",
+      "path": "skills/test.live-rejected-source",
+      "title": "Test: Live-Rejected Source (A4 regression)",
+      "purpose": "Triggers source-trust gate via live reviewStatus. No on-disk sources-report.json needed — trust is always derived from in-memory catalog items, never the stale file.",
+      "tags": ["typescript"],
+      "repoRoles": [],
+      "reviewStatus": "candidate",
+      "riskLevel": "low",
+      "default": false,
+      "tokenEstimate": 100
+    },
+    {
       "id": "test.requires-svelte",
       "source": "haus",
       "type": "skill",

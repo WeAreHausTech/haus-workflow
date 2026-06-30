@@ -195,16 +195,19 @@ test('sensitive-policy gate: item with secrets tag skipped', async () => {
   }
 })
 
-test('source-approval gate: third-party unapproved item skipped', async () => {
+test('source-trust gate: third-party unapproved item skipped via live source trust', async () => {
   setup()
   try {
+    // With A4 fix: trust is derived from live catalog items, not sources-report.json.
+    // test.third-party-unapproved has no reviewStatus:approved → source is 'candidate'
+    // in buildSourcesReport → hits the source-trust gate (not source-approval).
     const result = await recommend(tmpDir, makeContext(tmpDir))
     assert.ok(
       ids(result.skipped).has('test.third-party-unapproved'),
       'third-party item should be in skipped',
     )
     const entry = findSkipped(result, 'test.third-party-unapproved')
-    assert.equal(entry.skipReasons[0].code, 'source-approval')
+    assert.equal(entry.skipReasons[0].code, 'source-trust')
   } finally {
     teardown()
   }
@@ -400,6 +403,40 @@ test('requiresAny satisfied: role-matched item recommended when nextjs in stacks
     assert.ok(
       ids(result.recommended).has('test.role-matched'),
       'test.role-matched should be recommended when nextjs is in detectedStacks',
+    )
+  } finally {
+    teardown()
+  }
+})
+
+// ---------------------------------------------------------------------------
+// A4 regression: source trust from live reviewStatus, not stale file
+// ---------------------------------------------------------------------------
+
+test('A4 regression: live-rejected item blocked even with stale approved sources-report on disk', async () => {
+  setup()
+  try {
+    // Write a stale sources-report.json that claims external-plugin is 'approved'.
+    // Before the fix, this stale file would allow test.live-rejected-source through.
+    // After the fix, trust is derived from live catalog items, so the candidate
+    // reviewStatus on the item itself causes source-trust to be 'candidate' → blocked.
+    writeFileSync(
+      path.join(tmpDir, '.haus-workflow', 'sources-report.json'),
+      JSON.stringify({
+        generatedAt: '2024-01-01T00:00:00.000Z',
+        items: [{ source: 'external-plugin', status: 'approved' }],
+      }),
+    )
+
+    const result = await recommend(tmpDir, makeContext(tmpDir))
+    assert.ok(
+      ids(result.skipped).has('test.live-rejected-source'),
+      'item from non-approved live source must be skipped even when stale file claims approved',
+    )
+    const entry = findSkipped(result, 'test.live-rejected-source')
+    assert.ok(
+      entry.skipReasons[0].code === 'source-trust' || entry.skipReasons[0].code === 'source-approval',
+      `expected source-trust or source-approval skip code, got: ${entry.skipReasons[0].code}`,
     )
   } finally {
     teardown()

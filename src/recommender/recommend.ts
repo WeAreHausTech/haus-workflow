@@ -12,6 +12,7 @@
  */
 
 import { loadCatalog } from '../catalog/load-catalog.js'
+import { buildSourcesReport } from '../scanner/write-sources-report.js'
 import { SENSITIVE_ITEM_KEYWORDS } from '../security/sensitive-paths.js'
 import type { CatalogItem, ContextMap, DeepContext, Recommendation } from '../types.js'
 import { readJson } from '../utils/fs.js'
@@ -40,10 +41,10 @@ export async function recommend(
   opts: { include?: string[] } = {},
 ): Promise<Recommendation> {
   const items = await loadCatalog(root)
-  const sources =
-    (await readJson<{ items?: Array<{ source: string; status?: string }> }>(
-      hausPath(root, 'sources-report.json'),
-    )) ?? {}
+  // Derive trust from live catalog items — NOT from on-disk sources-report.json which may
+  // be stale (generated before a reviewStatus downgrade). This prevents a rejected item
+  // from leaking through if the file hasn't been regenerated since the catalog changed.
+  const sources = buildSourcesReport(items)
   const deep = (await readJson<DeepContext>(hausPath(root, 'deep-context.json'))) ?? {}
 
   // Scanner (shallow) signal sets.
@@ -74,7 +75,7 @@ export async function recommend(
 
   const recommended: Recommendation['recommended'] = []
   const skipped: Recommendation['skipped'] = []
-  const sourceTrust = new Map((sources.items ?? []).map((x) => [x.source, x.status ?? 'candidate']))
+  const sourceTrust = new Map(sources.items.map((x) => [x.source, x.status]))
   const changedFiles = await readChangedFiles(root)
 
   const skip = (id: string, code: string, message: string, signal?: string) => {
