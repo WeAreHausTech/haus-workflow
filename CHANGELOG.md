@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.32.1](https://github.com/WeAreHausTech/haus-workflow/compare/v0.32.0...v0.32.1) (2026-06-30)
+
+### Bug Fixes
+
+- **security:** audit hardening — fail-closed, recommender gates, CI hardening ([#157](https://github.com/WeAreHausTech/haus-workflow/issues/157)) ([e545194](https://github.com/WeAreHausTech/haus-workflow/commit/e545194fd3d3eb553bc2955a7ca17574bd98be71))
+
 ## [0.32.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.31.1...v0.32.0) (2026-06-24)
 
 ### Features
