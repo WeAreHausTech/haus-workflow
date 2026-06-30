@@ -1,0 +1,271 @@
+---
+sidebar_position: 2
+title: Claude Code in Action
+description: Illustrated examples of every /haus-workflow slash command in Claude Code.
+---
+
+<!-- SITE SHELL: not synced from haus-workflow repo -->
+
+import { ClaudeChatMockup } from '@site/src/components/ClaudeChatMockup'
+
+# Claude Code in Action
+
+Haus Workflow integrates with **Claude Code** through `/haus-workflow`. After `npm install -g @haus-tech/haus-workflow`, every task below is available from chat — the skill runs the CLI and returns structured results.
+
+## Interactive menu (`/haus-workflow`)
+
+Run without arguments to open the task picker. Options render as checkboxes; reply with a number or type the subcommand directly.
+
+<ClaudeChatMockup
+  title="Claude Code"
+  path="~/Projects/legacy-storefront"
+  inputPlaceholder="/haus-workflow"
+  ariaLabel="Haus Workflow interactive menu with checkbox options"
+  caption="Checkbox menu matches Claude Code skill UI — select a task or type the subcommand."
+  messages={[
+    { role: 'user', content: '/haus-workflow' },
+    {
+      role: 'assistant',
+      content: [
+        {
+          type: 'menu',
+          title: 'Haus Workflow — choose a task',
+          options: [
+            {
+              command: 'project:init',
+              description: 'Add Haus Workflow to this repo (scan → recommend → apply)',
+            },
+            {
+              command: 'project:clone [name]',
+              description: 'Clone a repo from the workspace manifest',
+            },
+            {
+              command: 'project:cloneandsetup [name]',
+              description: 'Clone + Node version, deps, and .env setup',
+            },
+            {
+              command: 'project:refresh',
+              description: 'Refresh .claude/ and regenerate CLAUDE.md imports',
+            },
+            {
+              command: 'project:doctor',
+              description: 'Health check for hooks, drift, and catalog cache',
+            },
+            { command: 'update', description: 'Update npm package, catalog, and ~/.claude/' },
+          ],
+        },
+      ],
+    },
+  ]}
+/>
+
+## `project:init` — add Haus Workflow to a repo
+
+Runs `haus scan` → `haus recommend` → `haus apply --write`. Idempotent — safe to re-run when the stack or catalog changes.
+
+<ClaudeChatMockup
+  title="Claude Code"
+  path="~/Projects/legacy-storefront"
+  inputPlaceholder="/haus-workflow project:init"
+  ariaLabel="Haus Workflow project init conversation"
+  caption="Init writes .claude/ and .haus-workflow/ from catalog recommendations."
+  messages={[
+    { role: 'user', content: '/haus-workflow project:init' },
+    {
+      role: 'assistant',
+      content: [
+        { type: 'text', text: 'Running Haus Workflow setup on this repo…' },
+        {
+          type: 'status',
+          lines: [
+            { state: 'ok', text: 'haus scan — react-app, vendure-plugin, yarn4' },
+            { state: 'ok', text: 'haus recommend — 12 skills, 3 agents matched' },
+            {
+              state: 'ok',
+              text: 'haus apply --write — .claude/skills/, .claude/agents/, .claude/commands/',
+            },
+          ],
+        },
+        {
+          type: 'bullets',
+          items: [
+            'haus.typescript-patterns',
+            'haus.vendure-plugin-patterns',
+            'haus.writing-documentation',
+          ],
+        },
+        {
+          type: 'text',
+          text: 'Review .haus-workflow/recommendation.json or run /haus-workflow project:doctor.',
+        },
+      ],
+    },
+  ]}
+/>
+
+## `project:clone` — clone from workspace manifest
+
+Clones a named repo from your workspace configuration without leaving chat.
+
+<ClaudeChatMockup
+  title="Claude Code"
+  path="~/Projects"
+  inputPlaceholder="/haus-workflow project:clone haus-storefront"
+  ariaLabel="Haus Workflow project clone conversation"
+  caption="Repo names come from your workspace manifest — not arbitrary URLs."
+  messages={[
+    { role: 'user', content: '/haus-workflow project:clone haus-storefront' },
+    {
+      role: 'assistant',
+      content: [
+        { type: 'text', text: 'Cloning from workspace manifest…' },
+        {
+          type: 'status',
+          lines: [
+            { state: 'ok', text: 'Resolved haus-storefront → WeAreHausTech/haus-storefront' },
+            { state: 'ok', text: 'git clone → ~/Projects/haus-storefront' },
+          ],
+        },
+        {
+          type: 'text',
+          text: 'Clone complete. Run /haus-workflow project:cloneandsetup haus-storefront for deps + .env, or project:init inside the repo.',
+        },
+      ],
+    },
+  ]}
+/>
+
+## `project:cloneandsetup` — clone and local setup
+
+Clone plus Node version, dependency install, and `.env` scaffolding.
+
+<ClaudeChatMockup
+  title="Claude Code"
+  path="~/Projects"
+  inputPlaceholder="/haus-workflow project:cloneandsetup haus-storefront"
+  ariaLabel="Haus Workflow clone and setup conversation"
+  caption="Setup reads toolchain hints from the repo (e.g. .nvmrc, package manager lockfile)."
+  messages={[
+    { role: 'user', content: '/haus-workflow project:cloneandsetup haus-storefront' },
+    {
+      role: 'assistant',
+      content: [
+        { type: 'text', text: 'Clone + local setup for haus-storefront…' },
+        {
+          type: 'status',
+          lines: [
+            { state: 'ok', text: 'git clone → ~/Projects/haus-storefront' },
+            { state: 'ok', text: 'Node 22 (from .nvmrc)' },
+            { state: 'ok', text: 'yarn install — lockfile clean' },
+            { state: 'ok', text: '.env.local scaffolded from .env.example' },
+          ],
+        },
+        {
+          type: 'text',
+          text: 'Ready. Run /haus-workflow project:init in the repo to add Haus Workflow context.',
+        },
+      ],
+    },
+  ]}
+/>
+
+## `project:refresh` — refresh project context
+
+Re-applies catalog assets and regenerates CLAUDE.md import blocks without a full re-init.
+
+<ClaudeChatMockup
+  title="Claude Code"
+  path="~/Projects/legacy-storefront"
+  inputPlaceholder="/haus-workflow project:refresh"
+  ariaLabel="Haus Workflow project refresh conversation"
+  caption="Use after catalog updates or when recommendation.json changed."
+  messages={[
+    { role: 'user', content: '/haus-workflow project:refresh' },
+    {
+      role: 'assistant',
+      content: [
+        { type: 'text', text: 'Refreshing project context…' },
+        {
+          type: 'status',
+          lines: [
+            { state: 'ok', text: 'haus recommend — 12 skills, 3 agents (unchanged)' },
+            { state: 'ok', text: 'haus apply --write — 2 skills updated, 10 unchanged' },
+            { state: 'ok', text: 'CLAUDE.md haus-imports block regenerated' },
+          ],
+        },
+        {
+          type: 'text',
+          text: 'User-edited files with hash mismatch were skipped (see project:doctor).',
+        },
+      ],
+    },
+  ]}
+/>
+
+## `project:doctor` — health check
+
+Compares lock hashes, hook wiring, and catalog cache freshness.
+
+<ClaudeChatMockup
+  title="Claude Code"
+  path="~/Projects/legacy-storefront"
+  inputPlaceholder="/haus-workflow project:doctor"
+  ariaLabel="Haus Workflow project doctor conversation"
+  caption="Warnings mean on-disk edits diverged from the lock — Haus Workflow will not overwrite them silently."
+  messages={[
+    { role: 'user', content: '/haus-workflow project:doctor' },
+    {
+      role: 'assistant',
+      content: [
+        { type: 'text', text: 'Haus Workflow doctor' },
+        {
+          type: 'status',
+          lines: [
+            { state: 'ok', text: '.claude/settings.json — PreToolUse hooks present' },
+            { state: 'ok', text: 'Catalog cache — manifest 2026-06-30' },
+            {
+              state: 'warn',
+              text: 'haus.typescript-patterns — hash mismatch (user-edited; skip on apply)',
+            },
+            { state: 'ok', text: 'Lock file — 11/12 items match' },
+          ],
+        },
+        {
+          type: 'text',
+          text: 'No action required. Reset edited skills via catalog + apply, or keep local copies.',
+        },
+      ],
+    },
+  ]}
+/>
+
+## `update` — package, catalog, and global `~/.claude/`
+
+Bumps `@haus-tech/haus-workflow`, fetches the latest [Haus Workflow Catalog](../catalog), and refreshes global slash commands.
+
+<ClaudeChatMockup
+  title="Claude Code"
+  path="~/Projects/legacy-storefront"
+  inputPlaceholder="/haus-workflow update"
+  ariaLabel="Haus Workflow update conversation"
+  caption="Update re-applies project assets when lock hashes still match."
+  messages={[
+    { role: 'user', content: '/haus-workflow update' },
+    {
+      role: 'assistant',
+      content: [
+        { type: 'text', text: 'Updating Haus Workflow…' },
+        {
+          type: 'status',
+          lines: [
+            { state: 'ok', text: '@haus-tech/haus-workflow → 1.2.0' },
+            { state: 'ok', text: 'Catalog manifest — 94 items' },
+            { state: 'ok', text: '~/.claude/ — skill + slash commands refreshed' },
+            { state: 'ok', text: 'Project re-apply — 11 updated, 1 skipped (user-edited)' },
+          ],
+        },
+        { type: 'text', text: 'Run /haus-workflow project:doctor to verify.' },
+      ],
+    },
+  ]}
+/>

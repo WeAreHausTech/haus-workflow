@@ -49,6 +49,7 @@ Hand-edits inside haus-managed blocks (`<!-- HAUS:BEGIN … -->` … `<!-- HAUS:
 ## Lock file
 
 `.haus-workflow/haus.lock.json` records per-item content hashes. On `haus apply`:
+
 - New items are fetched and written
 - Changed items are updated (if the on-disk copy still matches the lock hash)
 - Items dropped from the catalog are removed (if unmodified)

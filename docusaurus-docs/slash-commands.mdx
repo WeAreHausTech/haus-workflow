@@ -6,21 +6,50 @@ description: /haus-workflow slash commands available in Claude Code after global
 
 # Slash commands
 
-After `npm install -g @haus-tech/haus-workflow`, Claude Code gains `/haus-workflow`.
+After `npm install -g @haus-tech/haus-workflow`, Claude Code gains `/haus-workflow` — your in-chat interface to Haus Workflow without switching to the terminal.
 
-## Usage
+:::tip Illustrated examples
+See **[Claude Code in Action](../claude-code-guide)** for a chat mockup of every subcommand (menu, init, clone, cloneandsetup, refresh, doctor, update).
+:::
 
+## Command reference
+
+| Command                                       | Description                             |
+| :-------------------------------------------- | :-------------------------------------- |
+| `/haus-workflow`                              | Interactive checkbox menu               |
+| `/haus-workflow project:init`                 | Add Haus Workflow to this repo          |
+| `/haus-workflow project:clone [name]`         | Clone from workspace manifest           |
+| `/haus-workflow project:cloneandsetup [name]` | Clone + Node, deps, `.env`              |
+| `/haus-workflow project:refresh`              | Refresh `.claude/` + CLAUDE.md imports  |
+| `/haus-workflow project:doctor`               | Health check for drift                  |
+| `/haus-workflow update`                       | Update package + catalog + `~/.claude/` |
+
+Without an argument, the skill presents an interactive menu with checkbox options.
+
+## When to use chat vs terminal
+
+| Prefer slash command                    | Prefer `haus` in terminal         |
+| :-------------------------------------- | :-------------------------------- |
+| First-time project setup in Claude Code | CI scripts and automation         |
+| Quick doctor / refresh while coding     | `haus workspace` multi-repo ops   |
+| Update catalog between sessions         | `haus scan` with custom flags     |
+| Explaining results in conversation      | `haus apply --dry-run` inspection |
+
+## What happens under the hood
+
+```mermaid
+sequenceDiagram
+  participant you as You (Claude Code)
+  participant skill as /haus-workflow skill
+  participant cli as haus CLI
+  participant repo as .claude/ + .haus-workflow/
+
+  you->>skill: /haus-workflow project:init
+  skill->>cli: haus scan → recommend → apply --write
+  cli->>repo: write skills, agents, commands
+  cli-->>skill: summary + file list
+  skill-->>you: human-readable result
 ```
-/haus-workflow                              # interactive menu
-/haus-workflow project:init                 # add haus to an existing repo
-/haus-workflow project:clone [name]         # clone a repo from the workspace manifest
-/haus-workflow project:cloneandsetup [name] # clone + local setup (node version, deps, .env)
-/haus-workflow project:refresh              # refresh .claude/ and regenerate CLAUDE.md imports
-/haus-workflow project:doctor               # health check for drift
-/haus-workflow update                       # update npm package + catalog + ~/.claude/
-```
-
-Without an argument, the skill presents an interactive menu so you can pick a task.
 
 ## Short aliases
 

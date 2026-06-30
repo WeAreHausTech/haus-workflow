@@ -18,6 +18,7 @@ npm install -g @haus-tech/haus-workflow
 ```
 
 A global install triggers `haus install` automatically (via postinstall hook). This:
+
 - Seeds `~/.claude/` with the haus-workflow skill and global slash commands
 - Merges security rules into `~/.claude/settings.json`
 - Is non-fatal, idempotent, and global-only
@@ -49,4 +50,4 @@ haus init
 haus update
 ```
 
-Fetches the latest [haus-workflow-catalog](/docs/agent-harness/haus-workflow-catalog), refreshes `~/.claude/`, and re-applies project context assets.
+Fetches the latest [Haus Workflow Catalog](/docs/haus-workflow/catalog), refreshes `~/.claude/`, and re-applies project context assets.
