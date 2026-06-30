@@ -41,7 +41,7 @@ export async function recommend(
 ): Promise<Recommendation> {
   const items = await loadCatalog(root)
   const sources =
-    (await readJson<{ items?: Array<{ id: string; status?: string }> }>(
+    (await readJson<{ items?: Array<{ source: string; status?: string }> }>(
       hausPath(root, 'sources-report.json'),
     )) ?? {}
   const deep = (await readJson<DeepContext>(hausPath(root, 'deep-context.json'))) ?? {}
@@ -74,7 +74,7 @@ export async function recommend(
 
   const recommended: Recommendation['recommended'] = []
   const skipped: Recommendation['skipped'] = []
-  const sourceTrust = new Map((sources.items ?? []).map((x) => [x.id, x.status ?? 'candidate']))
+  const sourceTrust = new Map((sources.items ?? []).map((x) => [x.source, x.status ?? 'candidate']))
   const changedFiles = await readChangedFiles(root)
 
   const skip = (id: string, code: string, message: string, signal?: string) => {

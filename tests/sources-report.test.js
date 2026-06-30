@@ -22,7 +22,28 @@ test('buildSourcesReport approves curated when reviewStatus is approved', () => 
       tokenEstimate: 1,
     },
   ])
-  assert.deepEqual(report.items, [{ id: 'curated', status: 'approved' }])
+  assert.deepEqual(report.items, [{ source: 'curated', status: 'approved' }])
+})
+
+test('buildSourcesReport entries use field name "source" not "id"', () => {
+  const report = buildSourcesReport([
+    {
+      id: 'y',
+      source: 'curated',
+      type: 'skill',
+      path: 'skills/y',
+      tags: [],
+      repoRoles: [],
+      reviewStatus: 'approved',
+      tokenEstimate: 1,
+    },
+  ])
+  assert.equal(report.items.length, 1)
+  const entry = report.items[0]
+  // The serialised entry must have the key "source", not "id".
+  assert.ok('source' in entry, 'entry must have a "source" field')
+  assert.ok(!('id' in entry), 'entry must NOT have an "id" field — use "source" to prevent naming landmine')
+  assert.equal(entry.source, 'curated')
 })
 
 test('writeSourcesReport writes sources-report.json from catalog sources', async () => {

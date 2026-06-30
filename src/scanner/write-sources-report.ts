@@ -1,5 +1,5 @@
 /**
- * Writes `.haus-workflow/sources-report.json` — trust status per catalog source id.
+ * Writes `.haus-workflow/sources-report.json` — trust status per catalog source name.
  * The recommender reads this to gate non-haus items (see recommend.ts source-approval).
  */
 import { loadCatalog } from '../catalog/load-catalog.js'
@@ -11,7 +11,7 @@ export type SourceTrustStatus = 'approved' | 'candidate' | 'rejected'
 
 export type SourcesReport = {
   generatedAt: string
-  items: Array<{ id: string; status: SourceTrustStatus }>
+  items: Array<{ source: string; status: SourceTrustStatus }>
 }
 
 /** Derive per-source trust from catalog metadata (haus sources are implicit). */
@@ -41,8 +41,8 @@ export function buildSourcesReport(items: CatalogItem[]): SourcesReport {
   return {
     generatedAt: new Date().toISOString(),
     items: [...statusBySource.entries()]
-      .map(([id, status]) => ({ id, status }))
-      .sort((a, b) => a.id.localeCompare(b.id)),
+      .map(([source, status]) => ({ source, status }))
+      .sort((a, b) => a.source.localeCompare(b.source)),
   }
 }
 
