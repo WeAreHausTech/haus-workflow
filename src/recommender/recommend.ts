@@ -87,6 +87,14 @@ export async function recommend(
     scannerStacks.has(name.toLowerCase()) ? `tag:${name}` : `deep:tag:${name}`
 
   for (const item of items) {
+    // Fail-closed: items with a missing or whitespace-only source field cannot be
+    // trust-checked, so block them unconditionally before any policy gate runs.
+    const normSource = typeof item.source === 'string' ? item.source.trim() : ''
+    if (!normSource) {
+      skip(item.id, 'invalid-source', 'Item source is missing or empty')
+      continue
+    }
+
     // Normalised tag array — used for exact-tag gates to prevent substring false positives
     // (e.g. "javascript" tag must not match the "java" forbidden gate).
     const itemTags = item.tags.map((t) => t.toLowerCase())
@@ -102,7 +110,7 @@ export async function recommend(
       skip(item.id, 'deprecated', 'Catalog item is deprecated', 'reviewStatus:deprecated')
       continue
     }
-    if (item.source === 'curated') {
+    if (normSource === 'curated') {
       const rs = item.reviewStatus
       if (!rs || rs !== 'approved') {
         skip(
@@ -134,13 +142,13 @@ export async function recommend(
       skip(item.id, 'sensitive-policy', 'Sensitive content policy block')
       continue
     }
-    const trust = sourceTrust.get(item.source)
+    const trust = sourceTrust.get(normSource)
     if (trust === 'candidate' || trust === 'rejected') {
       skip(item.id, 'source-trust', 'Source trust policy block', `trust:${trust}`)
       continue
     }
-    if (item.source && item.source !== 'haus' && trust !== 'approved') {
-      skip(item.id, 'source-approval', 'Source not approved', `source:${item.source}`)
+    if (normSource !== 'haus' && trust !== 'approved') {
+      skip(item.id, 'source-approval', 'Source not approved', `source:${normSource}`)
       continue
     }
     if (item.id === 'haus.nx21-monorepo-patterns' && !roleSet.has('nx-monorepo')) {
