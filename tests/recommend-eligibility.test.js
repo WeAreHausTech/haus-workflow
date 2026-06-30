@@ -121,8 +121,10 @@ test('config items: recommended on missing tooling signal, install:false, exclud
       recommended.reasons.some((reason) => reason.code === 'config-scaffold'),
       true,
     )
-    assert.equal(withSignal.selectedRules, 1, 'only default-baseline counts toward token stats')
-    assert.equal(withSignal.estimatedContextTokens, 320)
+    // selectedRules counts install:true items only (config items are excluded).
+    // Fixture default-baseline + test.javascript-skill + test.mongodb-skill = 3.
+    assert.equal(withSignal.selectedRules, 3, 'config items must not count toward selectedRules')
+    assert.equal(withSignal.estimatedContextTokens, 960)
   } finally {
     teardown()
   }
@@ -287,6 +289,64 @@ test('deep-context schema drift: stacks as string coerced to [] not thrown (regr
       Array.isArray(result.recommended),
       'recommend() should return normally despite malformed deep-context',
     )
+  } finally {
+    teardown()
+  }
+})
+
+// ---------------------------------------------------------------------------
+// A3 regression: exact-tag matching for FORBIDDEN_TAGS gates
+// ---------------------------------------------------------------------------
+
+test('A3 regression: javascript-tagged item NOT dropped by java forbidden gate', async () => {
+  setup()
+  try {
+    const result = await recommend(tmpDir, makeContext(tmpDir))
+    // 'javascript' contains 'java' as a substring — the old substring check would
+    // incorrectly drop this item. The fix uses exact tag-array membership.
+    assert.ok(
+      !ids(result.skipped).has('test.javascript-skill'),
+      'javascript-tagged item must NOT be skipped by the java forbidden gate',
+    )
+    assert.ok(
+      ids(result.recommended).has('test.javascript-skill'),
+      'javascript-tagged default item must be recommended',
+    )
+  } finally {
+    teardown()
+  }
+})
+
+test('A3 regression: mongodb-tagged item NOT dropped by go forbidden gate', async () => {
+  setup()
+  try {
+    const result = await recommend(tmpDir, makeContext(tmpDir))
+    // 'mongodb' contains 'go' as a substring — the old substring check would
+    // incorrectly drop this item. The fix uses exact tag-array membership.
+    assert.ok(
+      !ids(result.skipped).has('test.mongodb-skill'),
+      'mongodb-tagged item must NOT be skipped by the go forbidden gate',
+    )
+    assert.ok(
+      ids(result.recommended).has('test.mongodb-skill'),
+      'mongodb-tagged default item must be recommended',
+    )
+  } finally {
+    teardown()
+  }
+})
+
+test('A3 regression: exact java tag IS still dropped by the forbidden gate', async () => {
+  setup()
+  try {
+    const result = await recommend(tmpDir, makeContext(tmpDir))
+    // An item whose tags contain exactly 'java' must still be blocked.
+    assert.ok(
+      ids(result.skipped).has('test.java-skill'),
+      'java-tagged item must be blocked by the forbidden gate',
+    )
+    const entry = findSkipped(result, 'test.java-skill')
+    assert.equal(entry.skipReasons[0].code, 'unsupported-policy')
   } finally {
     teardown()
   }

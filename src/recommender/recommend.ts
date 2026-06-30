@@ -86,10 +86,14 @@ export async function recommend(
     scannerStacks.has(name.toLowerCase()) ? `tag:${name}` : `deep:tag:${name}`
 
   for (const item of items) {
-    const itemSearchText = `${item.id} ${item.tags.join(' ')}`.toLowerCase()
+    // Normalised tag array — used for exact-tag gates to prevent substring false positives
+    // (e.g. "javascript" tag must not match the "java" forbidden gate).
+    const itemTags = item.tags.map((t) => t.toLowerCase())
 
     // ---- Policy gates (hard include/exclude — correctness & security) ----
-    if (UNSUPPORTED.some((x) => itemSearchText.includes(x))) {
+    // Use exact tag-array membership so "javascript" never fires the "java" gate,
+    // "mongodb" never fires the "go" gate, etc.
+    if (UNSUPPORTED.some((x) => itemTags.includes(x))) {
       skip(item.id, 'unsupported-policy', 'Unsupported stack policy')
       continue
     }
@@ -118,7 +122,14 @@ export async function recommend(
         continue
       }
     }
-    if (SENSITIVE_ITEM_KEYWORDS.some((x) => itemSearchText.includes(x))) {
+    // Sensitive-keyword check: match against id (for path-like keywords such as ".env", ".pem")
+    // AND exact tag membership (for keyword-tags such as "secrets", "exports").
+    // Splitting the two avoids "exports" in an item id like "haus.exports-handler" being
+    // blocked by the plain-English "exports" tag keyword — but also ensures an id that
+    // literally contains ".env" is still caught.
+    const sensitiveInId = SENSITIVE_ITEM_KEYWORDS.some((x) => item.id.toLowerCase().includes(x))
+    const sensitiveInTags = SENSITIVE_ITEM_KEYWORDS.some((x) => itemTags.includes(x))
+    if (sensitiveInId || sensitiveInTags) {
       skip(item.id, 'sensitive-policy', 'Sensitive content policy block')
       continue
     }

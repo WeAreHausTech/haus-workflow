@@ -144,6 +144,42 @@
       "tokenEstimate": 100
     },
     {
+      "id": "test.javascript-skill",
+      "source": "haus",
+      "type": "skill",
+      "path": "skills/test.javascript-skill",
+      "title": "Test: JavaScript Skill",
+      "purpose": "Regression: 'javascript' tag must NOT be dropped by the 'java' forbidden gate (A3).",
+      "tags": ["javascript", "frontend"],
+      "repoRoles": [],
+      "default": true,
+      "tokenEstimate": 100
+    },
+    {
+      "id": "test.mongodb-skill",
+      "source": "haus",
+      "type": "skill",
+      "path": "skills/test.mongodb-skill",
+      "title": "Test: MongoDB Skill",
+      "purpose": "Regression: 'mongodb' tag must NOT be dropped by the 'go' forbidden gate (A3).",
+      "tags": ["mongodb", "backend"],
+      "repoRoles": [],
+      "default": true,
+      "tokenEstimate": 100
+    },
+    {
+      "id": "test.java-skill",
+      "source": "haus",
+      "type": "skill",
+      "path": "skills/test.java-skill",
+      "title": "Test: Java Skill (must be blocked)",
+      "purpose": "Regression: exact 'java' tag MUST still be blocked by the forbidden gate (A3).",
+      "tags": ["java", "backend"],
+      "repoRoles": [],
+      "default": false,
+      "tokenEstimate": 100
+    },
+    {
       "id": "haus.nx21-monorepo-patterns",
       "source": "haus",
       "type": "skill",
