@@ -55,7 +55,14 @@ export function getBundledCatalogRef(): string | undefined {
 
 /** Latest resolved catalog ref for this process (informational / lock metadata). */
 export function getResolvedCatalogRef(): string {
-  return cachedCatalogRef ?? process.env['HAUS_CATALOG_REF'] ?? getBundledCatalogRef() ?? 'main'
+  const resolved = cachedCatalogRef ?? process.env['HAUS_CATALOG_REF'] ?? getBundledCatalogRef()
+  if (!resolved) {
+    warn(
+      'Could not determine catalog ref from cache, env, or bundled snapshot — falling back to main (moving target).',
+    )
+    return 'main'
+  }
+  return resolved
 }
 
 /** True after sync or when HAUS_CATALOG_REF is set (not the unsynced `main` fallback). */
