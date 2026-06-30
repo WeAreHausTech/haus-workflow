@@ -54,7 +54,7 @@ jobs:
           if [ "$FULL_SYNC" = true ]; then
             echo "Full sync — copy all docusaurus-docs files and remove orphaned synced files."
             mkdir -p "$DEST_DIR"
-            mapfile -t SOURCE_FILES < <(find "$SRC_DIR" -type f \( -name '*.md' -o -name '*.mdx' \) ! -name 'README.mdx' | sort)
+            mapfile -t SOURCE_FILES < <(find "$SRC_DIR" -type f \( -name '*.md' -o -name '*.mdx' \) ! -name 'README.md' ! -name 'README.mdx' | sort)
 
             for file in "${SOURCE_FILES[@]}"; do
               rel="${file#$SRC_DIR/}"
@@ -79,8 +79,8 @@ jobs:
           else
             BEFORE="${{ github.event.before }}"
             AFTER="${{ github.sha }}"
-            CHANGED_FILES=$(git diff --name-only "$BEFORE" "$AFTER" | grep -E '^docusaurus-docs/.*\.(md|mdx)$' | grep -v 'docusaurus-docs/README.mdx' || true)
-            DELETED_FILES=$(git diff --name-only --diff-filter=D "$BEFORE" "$AFTER" | grep -E '^docusaurus-docs/.*\.(md|mdx)$' | grep -v 'docusaurus-docs/README.mdx' || true)
+            CHANGED_FILES=$(git diff --name-only "$BEFORE" "$AFTER" | grep -E '^docusaurus-docs/.*\.(md|mdx)$' | grep -vE 'docusaurus-docs/README\.mdx?$' || true)
+            DELETED_FILES=$(git diff --name-only --diff-filter=D "$BEFORE" "$AFTER" | grep -E '^docusaurus-docs/.*\.(md|mdx)$' | grep -vE 'docusaurus-docs/README\.mdx?$' || true)
 
             if [ -z "$CHANGED_FILES" ] && [ -z "$DELETED_FILES" ]; then
               echo "No changed or deleted docusaurus-docs markdown files."
