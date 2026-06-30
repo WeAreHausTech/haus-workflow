@@ -72,15 +72,46 @@ export async function writeWorkflow(
     }
 
     const existingContent = existing.slice(firstLine.length + 1)
-    if (!parsed.hash && !force) {
-      warn(
-        `${printable}: managed header missing hash — cannot verify tamper status, skipping. Use --force to overwrite.`,
-      )
-      return null
-    }
-    if (parsed.hash && hashText(normaliseLF(existingContent)) !== parsed.hash && !force) {
-      warn(`${printable}: content modified by user — skipping. Use --force to overwrite.`)
-      return null
+
+    // Determine tamper status.
+    // - parsed.hash present: we can verify cryptographically
+    // - parsed.hash absent: header has id/v (haus-owned) but hash is missing or uses a
+    //   legacy format that doesn't match the current sha256- regex. We cannot verify the
+    //   body cryptographically, but we can check whether the body still matches the
+    //   current template to distinguish "unchanged catalog content" from "user edit".
+    const bodyMatchesTemplate = hashText(normaliseLF(existingContent)) === contentHash
+
+    if (parsed.hash) {
+      // Known hash format — standard tamper check
+      const bodyIntact = hashText(normaliseLF(existingContent)) === parsed.hash
+      if (!bodyIntact && !force) {
+        warn(`${printable}: content modified by user — skipping. Use --force to overwrite.`)
+        return null
+      }
+    } else {
+      // No valid hash (missing field or legacy format).
+      // Gate on body match: if the body still matches the current template it is safe to
+      // rewrite (migrate the header to the current hash format). If the body has diverged
+      // it may be a user edit — preserve the body but migrate the header so future runs
+      // can verify correctly.
+      if (!bodyMatchesTemplate && !force) {
+        // Body differs and we can't verify — preserve body, migrate header only.
+        const migratedHeader = makeWorkflowHeader(
+          pkgVersion,
+          hashText(normaliseLF(existingContent)),
+        )
+        const migrated = `${migratedHeader}\n${existingContent}`
+        if (hasTextChanged(existing, migrated)) {
+          if (dryRun) {
+            log(`${printable}: migrating legacy hash header (body preserved)`)
+          } else {
+            await writeText(destPath, migrated)
+          }
+        } else if (dryRun) {
+          log(`${printable}: unchanged`)
+        }
+        return destPath
+      }
     }
 
     if (!hasTextChanged(existing, next)) {
