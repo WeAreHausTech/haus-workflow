@@ -1,6 +1,6 @@
 /**
  * Writes `.haus-workflow/sources-report.json` — trust status per catalog source name.
- * The recommender reads this to gate non-haus items (see recommend.ts source-approval).
+ * The recommender reads this to gate non-haus items (see recommend.ts source-trust).
  */
 import { loadCatalog } from '../catalog/load-catalog.js'
 import type { CatalogItem } from '../types.js'

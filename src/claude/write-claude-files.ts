@@ -261,23 +261,31 @@ export async function writeClaudeFiles(
           `${displayPath(root, destination)}: ${exists ? 'would overwrite' : 'would create'} (${item.id})`,
         )
       } else if (item.type === 'skill') {
-        const skillMdPath = path.join(sourcePath, 'SKILL.md')
-        if (await fs.pathExists(skillMdPath)) {
-          const skillContent = await fs.readFile(skillMdPath, 'utf8')
-          const skillValidation = validateCatalogItem(
+        const skillFiles = (await fs.readdir(sourcePath, { recursive: true })).filter(
+          (f): f is string => typeof f === 'string' && f.endsWith('.md'),
+        )
+        let skillValid = true
+        for (const relFile of skillFiles) {
+          const mdPath = path.join(sourcePath, relFile)
+          const mdContent = await fs.readFile(mdPath, 'utf8')
+          const mdValidation = validateCatalogItem(
             {
               id: manifestItem.id,
               type: 'skill',
               path: manifestItem.path,
               source: manifestItem.source,
             },
-            skillContent,
+            mdContent,
           )
-          if (!skillValidation.ok) {
-            warn(`Skipping ${item.id}: pre-copy validation failed — ${skillValidation.reason}`)
-            continue
+          if (!mdValidation.ok) {
+            warn(
+              `Skipping ${item.id}: pre-copy validation failed (${relFile}) — ${mdValidation.reason}`,
+            )
+            skillValid = false
+            break
           }
         }
+        if (!skillValid) continue
         await installCatalogSkill(sourcePath, destination, {
           originSourceId: manifestItem.originSourceId,
           dryRun: false,

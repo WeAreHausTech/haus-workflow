@@ -18,3 +18,4 @@ this index covers CLI/repo decisions. ADR-0001 here links to those where the JSO
 | [0007](0007-catalog-integrity-model.md)                | Catalog integrity — release tags, schema + content validation      | Accepted |
 | [0008](0008-adr-enforcement-heuristics.md)             | Decision gate heuristics and `decisions-triggers.json`             | Accepted |
 | [0009](0009-llms-txt-reference-fetching.md)            | llms.txt reference fetching and local cache                        | Accepted |
+| [0010](0010-supply-chain-hardening.md)                 | Supply-chain hardening — fail-closed defaults and defence-in-depth | Accepted |
