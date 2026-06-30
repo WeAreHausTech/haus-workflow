@@ -562,7 +562,7 @@ async function syncConfigItem(
   if (relFiles && relFiles.length > 0) {
     try {
       return await syncDirectoryFromPrefix(item, item.path, dest, base, {
-        validateMarkdown: false,
+        validateMarkdown: true,
         requireSkillMd: false,
         relFiles,
       })
