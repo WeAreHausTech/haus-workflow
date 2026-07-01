@@ -12,6 +12,7 @@ import {
 } from 'node:fs'
 import { execaSync } from 'execa'
 
+import { runFromHookCheck } from '../src/commands/update.js'
 import { hashText } from '../src/utils/fs.js'
 import { EMPTY_LOCK_PATHS_TOKEN } from '../src/update/hash-installed.js'
 
@@ -288,6 +289,188 @@ test('update re-applies project files and preserves user settings merge', () => 
   )
   assert.equal(out.includes('Refreshing project .claude/ files...'), true)
   assert.equal(out.includes('Project refreshed:'), true)
+})
+
+test('update --from-hook is silent for a project that was never set up (no lockfile)', () => {
+  const temp = mkdtempSync(path.join(os.tmpdir(), 'haus-update-hook-nolock-'))
+  writeFileSync(
+    path.join(temp, 'package.json'),
+    JSON.stringify({ name: 'hook-nolock-temp', packageManager: 'yarn@4.5.3' }, null, 2),
+  )
+  const env = {
+    HAUS_TEST_MODE: '1',
+    HAUS_SKIP_NPM_CHECK: '1',
+    HAUS_CATALOG_CACHE_DIR_OVERRIDE: path.join(temp, 'cache'),
+    HAUS_CATALOG_REMOTE_BASE: 'http://127.0.0.1:0',
+    HOME: path.join(temp, 'home'),
+    USERPROFILE: path.join(temp, 'home'),
+  }
+  const r = execaSync('node', [path.resolve('dist/cli.js'), 'update', '--from-hook'], {
+    cwd: temp,
+    env,
+    reject: false,
+  })
+  assert.equal(r.exitCode, 0, 'a failed/skipped hook check must never fail the session')
+  assert.equal(r.stdout.trim(), '', 'no lockfile means nothing to nudge about — stay silent')
+})
+
+// `update --from-hook` now only checks the cheap lock summary (count + catalogRef, no
+// per-item content hashing — see readLockSummary) plus the npm/catalog version checks, so
+// this exercises the "has a real lock, but nothing is actually behind" silent path — the
+// hash-drift signal that used to also feed this hook was removed for cost (Copilot review);
+// `haus doctor`/`project:fix` remain the tools for catching local file drift.
+test('update --from-hook is silent for a healthy project with a real lock', () => {
+  const temp = mkdtempSync(path.join(os.tmpdir(), 'haus-update-hook-healthy-'))
+  mkdirSync(path.join(temp, '.haus-workflow'), { recursive: true })
+  writeFileSync(
+    path.join(temp, 'package.json'),
+    JSON.stringify({ name: 'hook-healthy-temp', packageManager: 'yarn@4.5.3' }, null, 2),
+  )
+  writeFileSync(
+    path.join(temp, '.haus-workflow/haus.lock.json'),
+    JSON.stringify(
+      [
+        {
+          id: 'x',
+          type: 'skill',
+          source: 'haus',
+          version: '0.1.0',
+          hash: hashText(EMPTY_LOCK_PATHS_TOKEN),
+          installMode: 'copied',
+          paths: [],
+        },
+      ],
+      null,
+      2,
+    ),
+  )
+  const env = {
+    HAUS_TEST_MODE: '1',
+    HAUS_SKIP_NPM_CHECK: '1',
+    HAUS_CATALOG_CACHE_DIR_OVERRIDE: path.join(temp, 'cache'),
+    HAUS_CATALOG_REMOTE_BASE: 'http://127.0.0.1:0',
+    HOME: path.join(temp, 'home'),
+    USERPROFILE: path.join(temp, 'home'),
+  }
+  const r = execaSync('node', [path.resolve('dist/cli.js'), 'update', '--from-hook'], {
+    cwd: temp,
+    env,
+    reject: false,
+  })
+  assert.equal(r.exitCode, 0)
+  assert.equal(r.stdout.trim(), '', 'nothing is behind — stay silent')
+})
+
+// Direct unit test (in-process, mocked fetch — same style as tests/npm-version.test.js)
+// rather than a CLI subprocess: there is no offline way to force `fetchLatestCatalogTag`
+// or `fetchNpmVersionStatus` to report "behind" via env vars alone (HAUS_CATALOG_REMOTE_BASE
+// only ever short-circuits fetchLatestCatalogTag to null in test mode), so this proves the
+// "behind" branch and its exact JSON shape without depending on live network state.
+test('runFromHookCheck emits a SessionStart note when npm reports a newer version', async () => {
+  const temp = mkdtempSync(path.join(os.tmpdir(), 'haus-hook-npm-behind-'))
+  mkdirSync(path.join(temp, '.haus-workflow'), { recursive: true })
+  writeFileSync(
+    path.join(temp, '.haus-workflow/haus.lock.json'),
+    JSON.stringify(
+      [
+        {
+          id: 'x',
+          type: 'skill',
+          source: 'haus',
+          version: '0.1.0',
+          hash: hashText(EMPTY_LOCK_PATHS_TOKEN),
+          installMode: 'copied',
+          paths: [],
+        },
+      ],
+      null,
+      2,
+    ),
+  )
+
+  const prevFetch = globalThis.fetch
+  const prevEnv = { ...process.env }
+  const prevLog = console.log
+  const logs = []
+  console.log = (msg) => logs.push(msg) // eslint-disable-line no-console
+  globalThis.fetch = async (url) => {
+    if (new URL(String(url)).hostname === 'registry.npmjs.org') {
+      return { ok: true, json: async () => ({ version: '999.0.0' }) }
+    }
+    throw new Error(`unexpected fetch() call in test: ${url}`)
+  }
+  process.env.HAUS_TEST_MODE = '1'
+  // Short-circuits fetchLatestCatalogTag() to null so only the npm-behind reason fires —
+  // must NOT set HAUS_SKIP_NPM_CHECK here, or the mocked fetch above is never exercised.
+  process.env.HAUS_CATALOG_REMOTE_BASE = 'http://127.0.0.1:0'
+  delete process.env.HAUS_SKIP_NPM_CHECK
+
+  try {
+    await runFromHookCheck(temp)
+  } finally {
+    globalThis.fetch = prevFetch
+    console.log = prevLog
+    process.env = prevEnv
+  }
+
+  assert.equal(logs.length, 1, 'exactly one hook JSON line should be printed')
+  const parsed = JSON.parse(logs[0])
+  assert.equal(parsed.hookSpecificOutput.hookEventName, 'SessionStart')
+  assert.match(parsed.hookSpecificOutput.additionalContext, /project:refresh/)
+  assert.match(parsed.hookSpecificOutput.additionalContext, /999\.0\.0/)
+})
+
+// Regression: a lock with no catalogRef used to fall back to comparing against 'main',
+// which is almost always "behind" any real release tag — a false-positive nudge. With no
+// recorded catalogRef the comparison must be skipped entirely (Copilot review).
+test('runFromHookCheck does not report "behind" when the lock has no catalogRef, even if a newer catalog tag exists', async () => {
+  const temp = mkdtempSync(path.join(os.tmpdir(), 'haus-hook-no-catalogref-'))
+  mkdirSync(path.join(temp, '.haus-workflow'), { recursive: true })
+  writeFileSync(
+    path.join(temp, '.haus-workflow/haus.lock.json'),
+    JSON.stringify(
+      [
+        {
+          id: 'x',
+          type: 'skill',
+          source: 'haus',
+          version: '0.1.0',
+          hash: hashText(EMPTY_LOCK_PATHS_TOKEN),
+          installMode: 'copied',
+          paths: [],
+          // deliberately no catalogRef
+        },
+      ],
+      null,
+      2,
+    ),
+  )
+
+  const prevFetch = globalThis.fetch
+  const prevEnv = { ...process.env }
+  const prevLog = console.log
+  const logs = []
+  console.log = (msg) => logs.push(msg) // eslint-disable-line no-console
+  globalThis.fetch = async (url) => {
+    if (new URL(String(url)).hostname === 'api.github.com') {
+      // A real, newer-looking tag list — would trigger a false "behind" without the fix.
+      return { ok: true, json: async () => [{ name: 'v3.0.0' }, { name: 'v2.0.0' }] }
+    }
+    throw new Error(`unexpected fetch() call in test: ${url}`)
+  }
+  process.env.HAUS_TEST_MODE = '1'
+  process.env.HAUS_SKIP_NPM_CHECK = '1' // isolate: only the catalog-ref comparison is under test
+  delete process.env.HAUS_CATALOG_REMOTE_BASE // must NOT be set, or fetchLatestCatalogTag short-circuits before hitting the mock
+
+  try {
+    await runFromHookCheck(temp)
+  } finally {
+    globalThis.fetch = prevFetch
+    console.log = prevLog
+    process.env = prevEnv
+  }
+
+  assert.equal(logs.length, 0, 'no recorded catalogRef means nothing to compare — must stay silent')
 })
 
 test('update skips project re-apply when no prior haus setup', () => {

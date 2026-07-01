@@ -30,7 +30,7 @@ Recommend catalog items for the detected stack via binary eligibility (policy ga
 
 - `--include <ids...>` — force opt-in catalog items into `recommended[]` as `manual` selections (space- or comma-separated). Hard policy blocks (deprecated/blocked/unsupported/sensitive/untrusted-source) are never forced — they warn instead; unknown ids and unsatisfied `requiresAny` gates also warn.
 
-`recommendation.json` also carries **`optInEligible[]`**: role-gated tier items skipped because their role gate is unsatisfied, each with `optInTier`, `optInGroup`, `purpose`, and `tokenEstimate`. These are the items `--include` can add. **This and `--include` are the backend for the Claude Code opt-in UX** (`/haus-setup`, `/haus-workflow → project:add-skills`) — surface them as plain-language choices, not raw flags.
+`recommendation.json` also carries **`optInEligible[]`**: role-gated tier items skipped because their role gate is unsatisfied, each with `optInTier`, `optInGroup`, `purpose`, and `tokenEstimate`. These are the items `--include` can add. **This and `--include` are the backend for the Claude Code opt-in UX** (`/haus-workflow project:init`, `/haus-workflow project:add-skills`) — surface them as plain-language choices, not raw flags.
 
 Output: `.haus-workflow/recommendation.json`
 
@@ -66,7 +66,8 @@ one-time bootstrapping — never auto-run by apply, so customised configs are no
 clobbered on update. **Existing project-root config files are preserved by default**;
 `--force` is the only overwrite path. When a file is skipped, the command prints the
 project-relative path and the `--force` hint. The Claude Code setup flows
-(`/haus-setup`, `project:add-skills`) ask before ever passing `--force`.
+(`/haus-workflow project:init`, `/haus-workflow project:add-skills`) ask before ever
+passing `--force`.
 
 - pass item IDs (e.g. `haus.eslint-config haus.prettier-config`) to scaffold specific items; omit to scaffold all approved config items
 - `--force` — overwrite existing files
@@ -77,11 +78,18 @@ Single-file items copy the file to the root (`configs/eslint/eslint.config.mjs` 
 `<root>/eslint.config.mjs`); directory items copy each entry (`configs/prettier/` →
 `<root>/`). Logic: `src/install/scaffold.ts`; command: `src/commands/scaffold.ts`.
 
-### `haus update [--check]`
+### `haus update [--check] [--from-hook]`
 
 Sync remote catalog, refresh global install (`~/.claude/`), and re-apply project files.
 
 - `--check` — validate lock presence and version fields; exit non-zero if stale
+- `--from-hook` — SessionStart hook mode (installed per-project as `haus.update-check`,
+  see `src/claude/merge-project-settings.ts`). Silently checks whether the installed npm
+  package version or catalog ref is behind the latest available. The lockfile is only
+  read to confirm this is a haus project and to get its recorded `catalogRef` — no
+  per-item content hashing, unlike `--check`. Prints nothing when up to date. When
+  behind, emits a `hookSpecificOutput.additionalContext` note recommending a refresh.
+  Never fails the session on a network error — fails silent instead.
 - (no flag) — back up lockfile to `.haus-workflow/backups/`, fetch latest catalog into cache, refresh global `haus install`, re-run project apply (including stale-item cleanup), recompute per-item hashes, print unified lock diff
 
 ---
@@ -223,12 +231,25 @@ decisions-check:
 
 ---
 
-## Global slash commands (Claude Code)
+## Global slash command (Claude Code)
 
-`haus install` seeds `~/.claude/commands/` so these appear in the `/` menu of every
-project — including before first setup, the main discovery path for non-developers:
+`haus install` seeds `~/.claude/skills/haus-workflow/` so `/haus-workflow` appears in
+every project's `/` menu — including before first setup, the main discovery path for
+non-developers. Everything routes through this one skill; there are no separate
+`/haus-setup`, `/haus-clone`, `/haus-cloneandsetup`, `/haus-doctor`, or `/haus-fix`
+commands. Pass a task name, or invoke with none for a menu:
 
-- `/haus-setup` — agent runs `haus setup-project --json`, narrates detection in
-  plain language, then applies the basics and writes the project docs.
-- `/haus-doctor` — agent runs `haus doctor` and relays the verdict in plain language.
-- `/haus-fix` — agent runs `haus doctor` then applies each suggested fix.
+- `/haus-workflow project:init` (aliases `setup`, `init`) — runs `haus setup-project --json`,
+  narrates detection in plain language, then applies the basics and writes the project docs.
+- `/haus-workflow project:reinit` (aliases `reinit`, `re-init`) — full re-setup: confirms,
+  runs `haus undo --yes` (backs up haus-managed files first), then re-runs `project:init`.
+- `/haus-workflow project:doctor` (aliases `doctor`, `check`) — runs `haus doctor` and
+  relays the verdict in plain language.
+- `/haus-workflow project:fix` (alias `fix`) — runs `haus doctor` then applies each
+  suggested fix, re-checking until green.
+- `/haus-workflow help` (alias `?`) — explains what haus-workflow is and lists tasks;
+  touches no files.
+
+See [`library/global/skills/haus-workflow/SKILL.md`](../library/global/skills/haus-workflow/SKILL.md)
+for the full task table (`project:clone`, `project:cloneandsetup`, `project:add-skills`,
+`project:refresh`, `update`, `install`, `uninstall`).

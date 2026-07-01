@@ -95,9 +95,9 @@ installed. This is intended — it keeps the baseline lean.
 
 **Fix / how to add one:**
 
-- In Claude Code (preferred): run `/haus-workflow` → **`project:add-skills`**, or pick
-  the opt-in options during `/haus-setup`. Both present the groups in plain language
-  and wire the commands for you.
+- In Claude Code (preferred): run `/haus-workflow project:add-skills`, or pick
+  the opt-in options during `/haus-workflow project:init`. Both present the groups in
+  plain language and wire the commands for you.
 - By hand: run `haus recommend --include <id> [<id> …]` (promotes them to the
   `manual` selection mode), then `haus apply --write`. Or add the gating role to
   `.haus-workflow/deep-context.json#roles` and re-run `haus recommend` followed by
@@ -118,9 +118,9 @@ installed. This is intended — it keeps the baseline lean.
 nothing for a project that already has an `eslint.config.*` / `prettier.config.*` /
 `.prettierrc`. **Cause:** scaffold **preserves existing project-root config by
 default** — it never clobbers a user-owned config on a plain run. **Fix:** to replace
-it deliberately, re-run `haus scaffold <id> --force`. In Claude Code the `/haus-setup`
-and `project:add-skills` flows ask before passing `--force`; never default to
-overwrite.
+it deliberately, re-run `haus scaffold <id> --force`. In Claude Code the
+`/haus-workflow project:init` and `project:add-skills` flows ask before passing
+`--force`; never default to overwrite.
 
 ## Coverage ratchet says raise the floor
 
@@ -156,3 +156,16 @@ regardless of install state (`src/commands/apply.ts`). **Fix:** apply now filter
 `haus.lock.json` ids before fetching, and calls `pruneOrphanedRefs` to delete cached
 entries for items no longer installed. Re-run `haus apply --write` once to clean up an
 already-polluted cache — no manual deletion needed.
+
+## `haus doctor --hooks` fails right after upgrading haus, before touching anything
+
+**Symptom:** `haus doctor --hooks` (or the plain-language `haus doctor` verdict) reports
+a hook-contract failure immediately after `npm install -g @haus-tech/haus-workflow` /
+`haus update` to a newer version, on a project that was healthy before the upgrade.
+**Cause:** the canonical hook contract (`src/claude/load-hooks.ts`) can grow a new
+required hook between releases (e.g. the `haus.update-check` `SessionStart` hook added
+to detect project staleness) — an already-applied project's `.claude/settings.json`
+predates it until re-applied. This is expected, the same way a new required deny/ask
+rule would also show red until the next apply. **Fix:** run
+`/haus-workflow project:refresh` (or `haus apply --write`) once; `doctor --hooks`
+goes green.

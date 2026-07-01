@@ -17,7 +17,6 @@ test('generated claude primitives stay compact routers', () => {
   // Root CLAUDE.md is now canonical (P6); .claude/CLAUDE.md is no longer written
   const claudemd = fs.readFileSync(path.join(cwd, 'CLAUDE.md'), 'utf8')
   const ruleHaus = fs.readFileSync(path.join(cwd, '.claude/rules/haus.md'), 'utf8')
-  const cmdDoctor = fs.readFileSync(path.join(cwd, '.claude/commands/haus-doctor.md'), 'utf8')
 
   assert.equal(claudemd.length < 300, true, 'root CLAUDE.md import block should stay tiny')
   assert.equal(
@@ -28,5 +27,9 @@ test('generated claude primitives stay compact routers', () => {
   // Carries the "Driving haus" NL-trigger block (WS6), the folded security lines, and the
   // hand-edit guard — but must stay a compact router, not an essay.
   assert.equal(ruleHaus.length < 1000, true, 'haus rule should stay compact')
-  assert.equal(cmdDoctor.length < 200, true, 'command router should stay compact')
+  assert.equal(
+    fs.existsSync(path.join(cwd, '.claude/commands/haus-doctor.md')),
+    false,
+    'the standalone haus-doctor.md stub is no longer written — everything routes through /haus-workflow',
+  )
 })

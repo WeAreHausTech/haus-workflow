@@ -4,7 +4,13 @@ import os from 'node:os'
 import path from 'node:path'
 import { afterEach, beforeEach, test } from 'node:test'
 
-import { checkLock, applyLock, diffLock, hasLocalOverrides } from '../src/update/lockfile.js'
+import {
+  checkLock,
+  applyLock,
+  diffLock,
+  hasLocalOverrides,
+  readLockSummary,
+} from '../src/update/lockfile.js'
 import { hashText } from '../src/utils/fs.js'
 import { EMPTY_LOCK_PATHS_TOKEN } from '../src/update/hash-installed.js'
 
@@ -85,6 +91,40 @@ test('checkLock: multiple items all sharing catalogRef returns first item catalo
   const result = await checkLock(tmpDir)
   assert.equal(result.catalogRef, 'main')
   assert.equal(result.count, 3)
+})
+
+// ---- readLockSummary ---------------------------------------------------------
+
+test('readLockSummary: missing lock file returns count:0, catalogRef:null', async () => {
+  const result = await readLockSummary(tmpDir)
+  assert.deepEqual(result, { count: 0, catalogRef: null })
+})
+
+test('readLockSummary: does not hash any file content (cheap by design)', async () => {
+  // A hash mismatch here would fail checkLock() but must not affect readLockSummary(),
+  // which only reads the lockfile's own JSON — never the installed files it references.
+  writeLock([
+    { id: 'skill.a', type: 'skill', catalogRef: 'v1.0.0', hash: 'sha256-wrong', paths: ['nope.md'] },
+  ])
+  const result = await readLockSummary(tmpDir)
+  assert.deepEqual(result, { count: 1, catalogRef: 'v1.0.0' })
+})
+
+test('readLockSummary: falls back to a later item when the first has no catalogRef', async () => {
+  // An older/mixed lock could have catalogRef missing on item 0 while later items carry
+  // it — must not report catalogRef:null just because the first entry lacks it.
+  writeLock([
+    { id: 'skill.a', type: 'skill' },
+    { id: 'skill.b', type: 'skill', catalogRef: 'v2.0.0' },
+  ])
+  const result = await readLockSummary(tmpDir)
+  assert.deepEqual(result, { count: 2, catalogRef: 'v2.0.0' })
+})
+
+test('readLockSummary: catalogRef is null when no item has one', async () => {
+  writeLock([{ id: 'skill.a', type: 'skill' }])
+  const result = await readLockSummary(tmpDir)
+  assert.deepEqual(result, { count: 1, catalogRef: null })
 })
 
 test('checkLock: detects hash drift when installed files changed', async () => {

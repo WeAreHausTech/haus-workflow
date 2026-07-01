@@ -69,11 +69,7 @@ export async function writeClaudeFiles(
     (await readJson<{ version?: string }>(path.join(pkgRoot, 'package.json')))?.version ?? '0.0.0'
 
   // The lock is only written during actual apply, not dry-run.
-  const coreFiles = [
-    claudePath(root, 'settings.json'),
-    claudePath(root, 'rules', 'haus.md'),
-    claudePath(root, 'commands', 'haus-doctor.md'),
-  ]
+  const coreFiles = [claudePath(root, 'settings.json'), claudePath(root, 'rules', 'haus.md')]
   const rootClaudeMdPath = await writeRootClaudeMd(root, dryRun)
   const decisionsSeedPath = await writeDecisionsSeed(root, dryRun)
   const workflowPath = await writeWorkflow(root, hausVersion, dryRun, opts.force)
@@ -101,12 +97,6 @@ export async function writeClaudeFiles(
     await applyProjectSettingsMerge(root)
     await assertPostApplySettingsHausContract(root)
   }
-  await writeManagedText(
-    root,
-    claudePath(root, 'commands', 'haus-doctor.md'),
-    'Run `haus doctor`.',
-    dryRun,
-  )
   // Legacy: haus-review was a managed core command, removed in favour of the review
   // skills. Delete the stale stub from projects that installed it earlier, but only
   // when its content byte-for-byte matches the historical stub so a user-customised
@@ -121,6 +111,23 @@ export async function writeClaudeFiles(
         say(`[dry-run] would remove stale ${displayPath(root, legacyReviewPath)}`)
       } else {
         await fs.remove(legacyReviewPath)
+      }
+    }
+  }
+  // Legacy: haus-doctor.md was a managed core command stub (a bare, description-less
+  // one-liner), removed in favour of routing everything through the /haus-workflow
+  // skill. Delete the stale stub from projects that installed it earlier, but only
+  // when its content byte-for-byte matches the historical stub so a user-customised
+  // file is never destroyed.
+  const legacyDoctorPath = claudePath(root, 'commands', 'haus-doctor.md')
+  if (await fs.pathExists(legacyDoctorPath)) {
+    const content = await fs.readFile(legacyDoctorPath, 'utf8')
+    const stub = 'Run `haus doctor`.'
+    if (content === stub || content === `${stub}\n` || content === `${stub}\r\n`) {
+      if (dryRun) {
+        say(`[dry-run] would remove stale ${displayPath(root, legacyDoctorPath)}`)
+      } else {
+        await fs.remove(legacyDoctorPath)
       }
     }
   }
@@ -146,7 +153,7 @@ export async function writeClaudeFiles(
       'results in plain language — never make them use a terminal or read JSON.',
       '- Set up / configure / fix / check → `haus setup-project`, `haus apply --write`, `haus doctor`',
       '- Update package + catalog → `haus update`',
-      '- The `/haus-workflow`, `/haus-setup`, `/haus-doctor`, and `/haus-fix` commands do the same.',
+      '- `/haus-workflow <task>` does the same conversationally (e.g. `init`, `fix`, `doctor`, `reinit`).',
       '',
     ].join('\n'),
     dryRun,

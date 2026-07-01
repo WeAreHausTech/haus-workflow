@@ -44,6 +44,12 @@ export const CANONICAL_HOOKS: ClaudeHooksSettings = {
         hooks: [{ type: 'command', command: 'haus decisions suggest --from-hook' }],
       },
     ],
+    SessionStart: [
+      {
+        matcher: '*',
+        hooks: [{ type: 'command', command: 'haus update --from-hook' }],
+      },
+    ],
   },
 }
 

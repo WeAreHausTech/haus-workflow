@@ -44,6 +44,13 @@ const PROJECT_HOOK_FRAGMENTS: HookFragment[] = [
     matcher: '*',
     command: 'haus decisions suggest --from-hook',
   },
+  {
+    id: 'haus.update-check',
+    gate: 'keep',
+    event: 'SessionStart',
+    matcher: '*',
+    command: 'haus update --from-hook',
+  },
 ]
 
 /** Reads project `.claude/settings.json`, returning `{}` when missing. */

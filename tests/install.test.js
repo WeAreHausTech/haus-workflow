@@ -287,34 +287,63 @@ describe('applyInstall dry-run (real invocation, stubbed HOME)', () => {
     assert.equal(settings._haus?.denyRules, undefined)
   })
 
-  it('seeds global slash commands flat into ~/.claude/commands and tracks them (WS6)', async () => {
+  it('no longer seeds standalone haus-* commands — everything routes through the haus-workflow skill', async () => {
     const { applyInstall } = await import('../src/install/apply.js')
     await applyInstall({})
     const commandsDir = path.join(tmpDir, '.claude', 'commands')
-    // Assert the frontmatter stamp on EVERY seeded command, not a subset — applyInstall
-    // seeds all library/global/commands/*.md, so any of them could regress to the old
-    // line-1 comment form without a per-file check.
-    const commandNames = fs
-      .readdirSync(commandsDir)
-      .filter((f) => f.endsWith('.md'))
-      .map((f) => f.replace(/\.md$/, ''))
-    assert.ok(commandNames.length >= 5, 'expected all bundled commands to be seeded')
-    for (const name of commandNames) {
-      const file = path.join(commandsDir, `${name}.md`)
-      // Commands carry frontmatter so Claude Code shows a clean `description:` on hover;
+    assert.equal(
+      fs.existsSync(commandsDir),
+      false,
+      'library/global/commands/ is empty — no commands should be seeded',
+    )
+  })
+
+  it('seeds global skills flat into ~/.claude/skills and tracks them (WS6)', async () => {
+    const { applyInstall } = await import('../src/install/apply.js')
+    await applyInstall({})
+    const skillsDir = path.join(tmpDir, '.claude', 'skills')
+    const skillNames = fs.readdirSync(skillsDir)
+    assert.ok(skillNames.length >= 1, 'expected all bundled skills to be seeded')
+    for (const name of skillNames) {
+      const file = path.join(skillsDir, name, 'SKILL.md')
+      // Skills carry frontmatter so Claude Code shows a clean `description:` on hover;
       // the haus stamp lives in a `haus_managed:` field inside the block (ADR-0006).
       const body = fs.readFileSync(file, 'utf8')
-      assert.ok(body.startsWith('---\n'), `${name}.md should open with frontmatter`)
-      assert.match(body, /^description: .+/m, `${name}.md should expose a description`)
-      assert.match(body, /^haus_managed: "id=command\./m, `${name}.md should carry the haus marker`)
+      assert.ok(body.startsWith('---\n'), `${name}/SKILL.md should open with frontmatter`)
+      assert.match(body, /^description: .+/m, `${name}/SKILL.md should expose a description`)
+      assert.match(
+        body,
+        /^haus_managed: "id=skill\./m,
+        `${name}/SKILL.md should carry the haus marker`,
+      )
     }
     const manifest = JSON.parse(
       fs.readFileSync(path.join(tmpDir, '.claude', 'haus', 'install-manifest.json'), 'utf8'),
     )
     const ids = manifest.files.map((f) => f.stableId)
-    for (const name of commandNames) {
-      assert.ok(ids.includes(`command.${name}`), `manifest should track command.${name}`)
+    for (const name of skillNames) {
+      assert.ok(ids.includes(`skill.${name}`), `manifest should track skill.${name}`)
     }
+  })
+
+  it('installs a skill\'s references/ folder alongside SKILL.md, not just the entry file', async () => {
+    // applyInstall stamps/copies files individually rather than fs.copy-ing whole skill
+    // directories — the haus-workflow skill's SKILL.md points at `references/init.md`
+    // etc, so those files must be seeded too or the skill breaks at runtime.
+    const { applyInstall } = await import('../src/install/apply.js')
+    await applyInstall({})
+    const referencesDir = path.join(tmpDir, '.claude', 'skills', 'haus-workflow', 'references')
+    assert.ok(fs.existsSync(referencesDir), 'references/ folder should be seeded')
+    const refFiles = fs.readdirSync(referencesDir)
+    assert.ok(refFiles.includes('init.md'), 'references/init.md should be seeded')
+    const manifest = JSON.parse(
+      fs.readFileSync(path.join(tmpDir, '.claude', 'haus', 'install-manifest.json'), 'utf8'),
+    )
+    const ids = manifest.files.map((f) => f.stableId)
+    assert.ok(
+      ids.includes('skill.haus-workflow.references.init.md'),
+      'manifest should track the reference file',
+    )
   })
 
   it('writes scoped permissions.allow for haus subcommands, never a blanket allow (WS6)', async () => {
@@ -330,7 +359,7 @@ describe('applyInstall dry-run (real invocation, stubbed HOME)', () => {
     assert.ok((settings._haus?.allowRules?.length ?? 0) > 0, 'allow rules tracked in _haus')
   })
 
-  it('strips haus allow rules and removes seeded commands on uninstall (WS6)', async () => {
+  it('strips haus allow rules and removes seeded skills (incl. references/) on uninstall (WS6)', async () => {
     const { applyInstall } = await import('../src/install/apply.js')
     const { runUninstall } = await import('../src/install/uninstall.js')
     await applyInstall({})
@@ -342,9 +371,16 @@ describe('applyInstall dry-run (real invocation, stubbed HOME)', () => {
     assert.ok(!allow.includes('Bash(haus doctor:*)'), 'haus allow rules stripped on uninstall')
     assert.equal(settings._haus?.allowRules, undefined)
     assert.equal(
-      fs.existsSync(path.join(tmpDir, '.claude', 'commands', 'haus-setup.md')),
+      fs.existsSync(path.join(tmpDir, '.claude', 'skills', 'haus-workflow', 'SKILL.md')),
       false,
-      'seeded command should be removed on uninstall',
+      'seeded skill should be removed on uninstall',
+    )
+    assert.equal(
+      fs.existsSync(
+        path.join(tmpDir, '.claude', 'skills', 'haus-workflow', 'references', 'init.md'),
+      ),
+      false,
+      'seeded skill reference files should be removed on uninstall too',
     )
   })
 })
