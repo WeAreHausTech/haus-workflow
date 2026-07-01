@@ -144,3 +144,15 @@ detection reports a phantom edit. **Fix:** `haus apply --write` now writes a
 `src/claude/write-prettierignore.ts`) so the formatter leaves managed files alone.
 On an already-mutated file, restore it once with `haus apply --write --force`; the
 ignore prevents recurrence.
+
+## `.haus-workflow/llms-cache/` has refs for skills the project doesn't have
+
+**Symptom:** `.haus-workflow/llms-cache/` accumulates `.md` files and `cache-meta.json`
+entries for catalog skills/agents that were never recommended or installed in this
+project. **Cause:** `haus apply --write`'s post-apply ref-fetch step called
+`loadCatalog(root)` (the full ~94-item catalog) instead of scoping to the items just
+written to `haus.lock.json` — every item with an `llms.txt` reference got fetched,
+regardless of install state (`src/commands/apply.ts`). **Fix:** apply now filters to
+`haus.lock.json` ids before fetching, and calls `pruneOrphanedRefs` to delete cached
+entries for items no longer installed. Re-run `haus apply --write` once to clean up an
+already-polluted cache — no manual deletion needed.

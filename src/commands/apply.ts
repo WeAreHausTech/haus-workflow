@@ -6,8 +6,9 @@ import checkbox from '@inquirer/checkbox'
 import { loadCatalog } from '../catalog/load-catalog.js'
 import { getCacheDir } from '../catalog/remote-catalog.js'
 import { writeClaudeFiles } from '../claude/write-claude-files.js'
-import { fetchRefsForItems } from '../refs/fetch-refs.js'
+import { collectLlmsTxtUrls, fetchRefsForItems, pruneOrphanedRefs } from '../refs/fetch-refs.js'
 import type { Recommendation } from '../types.js'
+import type { LockItem } from '../update/lockfile.js'
 import { parseIdList } from '../utils/args.js'
 import { readJson } from '../utils/fs.js'
 import { error, log, warn } from '../utils/logger.js'
@@ -139,16 +140,26 @@ export async function runApply(options: {
   })
 
   if (!isDryRun) {
-    // Best-effort: fetch llms.txt refs for all catalog items. Warn on failure, never abort apply.
+    // Best-effort: fetch llms.txt refs only for items this run actually installed
+    // (per the lock just written by writeClaudeFiles), and drop cached refs for
+    // items that are no longer installed. Warn on failure, never abort apply.
     try {
       const cacheDir = hausPath(root, 'llms-cache')
+      const lock = (await readJson<LockItem[]>(hausPath(root, 'haus.lock.json'))) ?? []
+      const installedIds = new Set(lock.map((entry) => entry.id))
       const allItems = await loadCatalog(root)
-      const summary = await fetchRefsForItems(allItems, cacheDir)
+      const installedItems = allItems.filter((item) => installedIds.has(item.id))
+      const summary = await fetchRefsForItems(installedItems, cacheDir)
       if (summary.fetched > 0)
         log(`Fetched ${summary.fetched} llms.txt reference(s) to ${cacheDir}`)
       if (summary.failed > 0)
         warn(
           `Failed to fetch ${summary.failed} llms.txt reference(s): ${summary.failedUrls.join(', ')}`,
+        )
+      const pruned = await pruneOrphanedRefs(cacheDir, new Set(collectLlmsTxtUrls(installedItems)))
+      if (pruned > 0)
+        log(
+          `Removed ${pruned} orphaned llms.txt cache entr${pruned === 1 ? 'y' : 'ies'} from ${cacheDir}`,
         )
     } catch (err) {
       warn(

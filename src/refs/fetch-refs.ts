@@ -94,6 +94,33 @@ export async function fetchSingleRef(
   }
 }
 
+/** Collects deduplicated llms.txt URLs referenced by the given catalog items. */
+export function collectLlmsTxtUrls(items: Pick<CatalogItem, 'id' | 'references'>[]): string[] {
+  return [...new Set(items.flatMap((item) => (item.references ?? []).filter(isLlmsTxtUrl)))]
+}
+
+/**
+ * Removes cached llms.txt files and metadata entries whose URL is not in `keepUrls`.
+ * Used by `apply` to keep the cache scoped to currently-installed catalog items —
+ * best-effort: a cached file that's already missing on disk is not an error.
+ * Returns the number of entries removed.
+ */
+export async function pruneOrphanedRefs(cacheDir: string, keepUrls: Set<string>): Promise<number> {
+  const meta = await readCacheMeta(cacheDir)
+  let removed = 0
+  for (const [url, entry] of Object.entries(meta)) {
+    if (keepUrls.has(url)) continue
+    delete meta[url]
+    removed++
+    // Reject non-basename paths (e.g. "../../etc") from cache-meta to prevent path
+    // traversal, same guard as fetchSingleRef applies before trusting `entry.file`.
+    const safeFile = typeof entry.file === 'string' && entry.file === path.basename(entry.file)
+    if (safeFile) await fs.remove(path.join(cacheDir, entry.file)).catch(() => {})
+  }
+  if (removed > 0) await writeCacheMeta(cacheDir, meta)
+  return removed
+}
+
 /**
  * Fetches all llms.txt references from the given catalog items into cacheDir.
  * Deduplicates URLs, reads existing etag metadata, writes updated metadata after fetching.
@@ -103,7 +130,7 @@ export async function fetchRefsForItems(
   items: Pick<CatalogItem, 'id' | 'references'>[],
   cacheDir: string,
 ): Promise<FetchRefsSummary> {
-  const urls = [...new Set(items.flatMap((item) => (item.references ?? []).filter(isLlmsTxtUrl)))]
+  const urls = collectLlmsTxtUrls(items)
 
   const summary: FetchRefsSummary = {
     fetched: 0,

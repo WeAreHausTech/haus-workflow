@@ -186,6 +186,90 @@ test('fetchRefsForItems deduplicates URLs across items', async (t) => {
   assert.equal(fetchCount, 1)
 })
 
+test('collectLlmsTxtUrls dedupes and filters non-llms.txt refs', async () => {
+  const { collectLlmsTxtUrls } = await import('../src/refs/fetch-refs.js')
+  const items = [
+    { id: 'a', references: ['https://x.dev/llms.txt', 'references/local.md'] },
+    { id: 'b', references: ['https://x.dev/llms.txt'] },
+    { id: 'c' }, // no references field
+  ]
+  assert.deepEqual(collectLlmsTxtUrls(items), ['https://x.dev/llms.txt'])
+})
+
+test('pruneOrphanedRefs removes cache entries not in keepUrls', async (t) => {
+  const dir = mkdtempSync(path.join(os.tmpdir(), 'haus-refs-'))
+  t.after(async () => fs.rm(dir, { recursive: true }))
+  const { pruneOrphanedRefs } = await import('../src/refs/fetch-refs.js')
+  const { writeCacheMeta, readCacheMeta } = await import('../src/refs/cache-meta.js')
+
+  await fs.writeFile(path.join(dir, 'keep.md'), '# keep')
+  await fs.writeFile(path.join(dir, 'drop.md'), '# drop')
+  await writeCacheMeta(dir, {
+    'https://keep.example/llms.txt': {
+      url: 'https://keep.example/llms.txt',
+      fetchedAt: '2026-06-24T00:00:00.000Z',
+      file: 'keep.md',
+    },
+    'https://drop.example/llms.txt': {
+      url: 'https://drop.example/llms.txt',
+      fetchedAt: '2026-06-24T00:00:00.000Z',
+      file: 'drop.md',
+    },
+  })
+
+  const removed = await pruneOrphanedRefs(dir, new Set(['https://keep.example/llms.txt']))
+  assert.equal(removed, 1)
+
+  const meta = await readCacheMeta(dir)
+  assert.deepEqual(Object.keys(meta), ['https://keep.example/llms.txt'])
+  const dropExists = await fs
+    .access(path.join(dir, 'drop.md'))
+    .then(() => true, () => false)
+  const keepExists = await fs
+    .access(path.join(dir, 'keep.md'))
+    .then(() => true, () => false)
+  assert.equal(dropExists, false)
+  assert.equal(keepExists, true)
+})
+
+test('pruneOrphanedRefs rejects a non-basename file path (path traversal)', async (t) => {
+  const parent = mkdtempSync(path.join(os.tmpdir(), 'haus-refs-parent-'))
+  t.after(async () => fs.rm(parent, { recursive: true }))
+  const dir = path.join(parent, 'cache')
+  await fs.mkdir(dir)
+  const { pruneOrphanedRefs } = await import('../src/refs/fetch-refs.js')
+  const { writeCacheMeta, readCacheMeta } = await import('../src/refs/cache-meta.js')
+
+  const outsideFile = path.join(parent, 'secret.txt')
+  await fs.writeFile(outsideFile, 'do not delete me')
+
+  await writeCacheMeta(dir, {
+    'https://drop.example/llms.txt': {
+      url: 'https://drop.example/llms.txt',
+      fetchedAt: '2026-06-24T00:00:00.000Z',
+      file: '../secret.txt',
+    },
+  })
+
+  const removed = await pruneOrphanedRefs(dir, new Set())
+  assert.equal(removed, 1)
+
+  const meta = await readCacheMeta(dir)
+  assert.deepEqual(meta, {})
+  const outsideFileStillExists = await fs
+    .access(outsideFile)
+    .then(() => true, () => false)
+  assert.equal(outsideFileStillExists, true)
+})
+
+test('pruneOrphanedRefs is a no-op when cache-meta is empty', async (t) => {
+  const dir = mkdtempSync(path.join(os.tmpdir(), 'haus-refs-'))
+  t.after(async () => fs.rm(dir, { recursive: true }))
+  const { pruneOrphanedRefs } = await import('../src/refs/fetch-refs.js')
+  const removed = await pruneOrphanedRefs(dir, new Set())
+  assert.equal(removed, 0)
+})
+
 test('haus fetch-refs --help exits 0', async () => {
   const result = await execa('node', [DIST_CLI, 'fetch-refs', '--help'], { reject: false })
   assert.equal(result.exitCode, 0)
@@ -283,4 +367,95 @@ test('haus apply --write exits 0 after refs integration', async (t) => {
     },
   })
   assert.equal(result.exitCode, 0, `apply failed: ${result.stderr}`)
+})
+
+test('haus apply --write only caches llms.txt refs for installed items', async (t) => {
+  const dir = mkdtempSync(path.join(os.tmpdir(), 'haus-apply-refs-scope-'))
+  t.after(async () => fs.rm(dir, { recursive: true }))
+
+  const { server, port } = await startMockServer({
+    '/installed/llms.txt': { body: '# Installed docs' },
+    '/uninstalled/llms.txt': { body: '# Uninstalled docs' },
+  })
+  t.after(() => stopServer(server))
+
+  const skillMd = (name) =>
+    `---\nname: ${name}\ndescription: Fixture stub for CLI tests.\n---\n\n# ${name}\n`
+  await fs.mkdir(path.join(dir, 'skills/installed-skill'), { recursive: true })
+  await fs.writeFile(
+    path.join(dir, 'skills/installed-skill/SKILL.md'),
+    skillMd('installed-skill'),
+  )
+  await fs.mkdir(path.join(dir, 'skills/uninstalled-skill'), { recursive: true })
+  await fs.writeFile(
+    path.join(dir, 'skills/uninstalled-skill/SKILL.md'),
+    skillMd('uninstalled-skill'),
+  )
+
+  const manifestPath = path.join(dir, 'manifest.json')
+  await fs.writeFile(
+    manifestPath,
+    JSON.stringify({
+      version: '0.0.1',
+      items: [
+        {
+          id: 'haus.installed-skill',
+          source: 'haus',
+          type: 'skill',
+          path: 'skills/installed-skill',
+          title: 'Installed',
+          purpose: 'test',
+          whenToUse: 'test',
+          whenNotToUse: 'test',
+          references: [`http://127.0.0.1:${port}/installed/llms.txt`],
+        },
+        {
+          id: 'haus.uninstalled-skill',
+          source: 'haus',
+          type: 'skill',
+          path: 'skills/uninstalled-skill',
+          title: 'Uninstalled',
+          purpose: 'test',
+          whenToUse: 'test',
+          whenNotToUse: 'test',
+          references: [`http://127.0.0.1:${port}/uninstalled/llms.txt`],
+        },
+      ],
+    }),
+  )
+
+  const hausDir = path.join(dir, '.haus-workflow')
+  await fs.mkdir(hausDir, { recursive: true })
+  await fs.writeFile(
+    path.join(hausDir, 'recommendation.json'),
+    JSON.stringify({
+      recommended: [
+        {
+          id: 'haus.installed-skill',
+          type: 'skill',
+          reason: 'test',
+          reasons: [],
+          selectionMode: 'manual',
+          install: true,
+        },
+      ],
+      skipped: [],
+    }),
+  )
+
+  const result = await execa('node', [DIST_CLI, 'apply', '--write'], {
+    cwd: dir,
+    reject: false,
+    env: { ...process.env, HAUS_FIXTURE_CATALOG: manifestPath },
+  })
+  assert.equal(result.exitCode, 0, `apply failed: ${result.stderr}`)
+
+  const lock = JSON.parse(await fs.readFile(path.join(hausDir, 'haus.lock.json'), 'utf8'))
+  assert.deepEqual(lock.map((e) => e.id), ['haus.installed-skill'])
+
+  const { readCacheMeta } = await import('../src/refs/cache-meta.js')
+  const meta = await readCacheMeta(path.join(hausDir, 'llms-cache'))
+  const cachedUrls = Object.keys(meta)
+  assert.equal(cachedUrls.includes(`http://127.0.0.1:${port}/installed/llms.txt`), true)
+  assert.equal(cachedUrls.includes(`http://127.0.0.1:${port}/uninstalled/llms.txt`), false)
 })

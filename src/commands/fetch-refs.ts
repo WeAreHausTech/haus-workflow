@@ -40,6 +40,9 @@ export async function runFetchRefs(options: {
     }
   }
 
+  // Intentionally catalog-wide (unlike `apply`'s auto-fetch step, which scopes to
+  // installed items and prunes orphans) — this command exists to let a user explicitly
+  // pre-fetch or inspect any catalog item's llms.txt, regardless of install state.
   const withRefs = items.filter((item) => (item.references ?? []).some(isLlmsTxtUrl))
 
   if (withRefs.length === 0) {
