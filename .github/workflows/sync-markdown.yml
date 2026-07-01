@@ -1,4 +1,4 @@
-name: Sync Docusaurus Docs to wearehaustech.github.io
+name: Sync Docusaurus Docs
 
 on:
   push:
