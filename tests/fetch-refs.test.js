@@ -338,3 +338,94 @@ test('haus apply --write exits 0 after refs integration', async (t) => {
   })
   assert.equal(result.exitCode, 0, `apply failed: ${result.stderr}`)
 })
+
+test('haus apply --write only caches llms.txt refs for installed items', async (t) => {
+  const dir = mkdtempSync(path.join(os.tmpdir(), 'haus-apply-refs-scope-'))
+  t.after(async () => fs.rm(dir, { recursive: true }))
+
+  const { server, port } = await startMockServer({
+    '/installed/llms.txt': { body: '# Installed docs' },
+    '/uninstalled/llms.txt': { body: '# Uninstalled docs' },
+  })
+  t.after(() => stopServer(server))
+
+  const skillMd = (name) =>
+    `---\nname: ${name}\ndescription: Fixture stub for CLI tests.\n---\n\n# ${name}\n`
+  await fs.mkdir(path.join(dir, 'skills/installed-skill'), { recursive: true })
+  await fs.writeFile(
+    path.join(dir, 'skills/installed-skill/SKILL.md'),
+    skillMd('installed-skill'),
+  )
+  await fs.mkdir(path.join(dir, 'skills/uninstalled-skill'), { recursive: true })
+  await fs.writeFile(
+    path.join(dir, 'skills/uninstalled-skill/SKILL.md'),
+    skillMd('uninstalled-skill'),
+  )
+
+  const manifestPath = path.join(dir, 'manifest.json')
+  await fs.writeFile(
+    manifestPath,
+    JSON.stringify({
+      version: '0.0.1',
+      items: [
+        {
+          id: 'haus.installed-skill',
+          source: 'haus',
+          type: 'skill',
+          path: 'skills/installed-skill',
+          title: 'Installed',
+          purpose: 'test',
+          whenToUse: 'test',
+          whenNotToUse: 'test',
+          references: [`http://127.0.0.1:${port}/installed/llms.txt`],
+        },
+        {
+          id: 'haus.uninstalled-skill',
+          source: 'haus',
+          type: 'skill',
+          path: 'skills/uninstalled-skill',
+          title: 'Uninstalled',
+          purpose: 'test',
+          whenToUse: 'test',
+          whenNotToUse: 'test',
+          references: [`http://127.0.0.1:${port}/uninstalled/llms.txt`],
+        },
+      ],
+    }),
+  )
+
+  const hausDir = path.join(dir, '.haus-workflow')
+  await fs.mkdir(hausDir, { recursive: true })
+  await fs.writeFile(
+    path.join(hausDir, 'recommendation.json'),
+    JSON.stringify({
+      recommended: [
+        {
+          id: 'haus.installed-skill',
+          type: 'skill',
+          reason: 'test',
+          reasons: [],
+          selectionMode: 'manual',
+          install: true,
+        },
+      ],
+      skipped: [],
+    }),
+  )
+
+  const result = await execa('node', [DIST_CLI, 'apply', '--write'], {
+    cwd: dir,
+    reject: false,
+    env: { ...process.env, HAUS_FIXTURE_CATALOG: manifestPath },
+  })
+  assert.equal(result.exitCode, 0, `apply failed: ${result.stderr}`)
+
+  const lock = JSON.parse(await fs.readFile(path.join(hausDir, 'haus.lock.json'), 'utf8'))
+  assert.deepEqual(lock.map((e) => e.id), ['haus.installed-skill'])
+
+  const { readCacheMeta } = await import('../src/refs/cache-meta.js')
+  const meta = await readCacheMeta(path.join(hausDir, 'llms-cache'))
+  const cachedUrls = Object.keys(meta)
+  assert.equal(cachedUrls.includes(`http://127.0.0.1:${port}/installed/llms.txt`), true)
+  assert.equal(cachedUrls.includes(`http://127.0.0.1:${port}/uninstalled/llms.txt`), false)
+})
