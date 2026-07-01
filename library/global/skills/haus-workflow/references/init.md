@@ -57,6 +57,13 @@ Do this in order:
 
 6. **Apply the rest.** Run `haus apply --write` again. It only writes what changed,
    so this adds the newly-matched helpers from step 4 plus any opt-ins from step 5.
+   Then verify the root `CLAUDE.md` imports all three haus files — add any missing:
+
+   ```
+   @.haus-workflow/WORKFLOW.md
+   @.haus-workflow/workflow-config.md
+   @.haus-workflow/project.md
+   ```
 
 7. **Confirm.** End with one plain-language line, for example:
    "✅ Your project is configured — I wrote your project docs, added N guardrails

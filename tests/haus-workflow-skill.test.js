@@ -55,6 +55,30 @@ test('project:fix task is defined with a diagnose-then-fix procedure', () => {
   assert.ok(SKILL.includes('haus doctor'), 'fix procedure must run haus doctor')
 })
 
+test('project:refresh is a full non-destructive sync (haus update + re-run init), not a bare apply', () => {
+  const aliasRow = SKILL.split('\n').find((l) => l.includes('`project:refresh`'))
+  assert.ok(aliasRow, 'aliases table must include a project:refresh row')
+  assert.ok(
+    !/\|\s*`haus apply --write`\s*\|/.test(aliasRow),
+    'project:refresh must no longer map directly to a bare `haus apply --write`',
+  )
+
+  assert.ok(
+    SKILL.includes('### Refresh (`project:refresh`)'),
+    'must have a Refresh procedure section',
+  )
+  const section = SKILL.slice(
+    SKILL.indexOf('### Refresh (`project:refresh`)'),
+    SKILL.indexOf('### Clone (`project:clone`)'),
+  )
+  assert.ok(section.includes('haus update'), 'refresh must run haus update first')
+  assert.ok(!section.includes('haus undo'), 'refresh must NOT remove anything first (see reinit)')
+  assert.ok(
+    section.includes('Setup (`project:init`)'),
+    'refresh must hand off to the project:init procedure to redo scan/docs/recommend/apply',
+  )
+})
+
 test('help task skips running a command entirely', () => {
   const aliasRow = SKILL.split('\n').find((l) => l.includes('`help`'))
   assert.ok(aliasRow, 'aliases table must include a help row')
