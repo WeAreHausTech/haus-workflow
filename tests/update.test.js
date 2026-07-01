@@ -394,7 +394,7 @@ test('runFromHookCheck emits a SessionStart note when npm reports a newer versio
   const logs = []
   console.log = (msg) => logs.push(msg) // eslint-disable-line no-console
   globalThis.fetch = async (url) => {
-    if (String(url).includes('registry.npmjs.org')) {
+    if (new URL(String(url)).hostname === 'registry.npmjs.org') {
       return { ok: true, json: async () => ({ version: '999.0.0' }) }
     }
     throw new Error(`unexpected fetch() call in test: ${url}`)
