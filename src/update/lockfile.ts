@@ -52,7 +52,10 @@ export type LockSummary = { count: number; catalogRef: string | null }
  */
 export async function readLockSummary(root: string): Promise<LockSummary> {
   const lock = (await readJson<LockItem[]>(hausPath(root, 'haus.lock.json'))) ?? []
-  return { count: lock.length, catalogRef: lock[0]?.catalogRef ?? null }
+  // `catalogRef` is optional per item — don't assume item 0 carries it (an older/mixed
+  // lock could have it missing on the first entry while later entries have it set).
+  const catalogRef = lock.find((item) => item.catalogRef)?.catalogRef ?? null
+  return { count: lock.length, catalogRef }
 }
 
 /** Validates the lockfile and compares stored hashes to installed file content. */

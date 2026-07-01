@@ -420,6 +420,59 @@ test('runFromHookCheck emits a SessionStart note when npm reports a newer versio
   assert.match(parsed.hookSpecificOutput.additionalContext, /999\.0\.0/)
 })
 
+// Regression: a lock with no catalogRef used to fall back to comparing against 'main',
+// which is almost always "behind" any real release tag — a false-positive nudge. With no
+// recorded catalogRef the comparison must be skipped entirely (Copilot review).
+test('runFromHookCheck does not report "behind" when the lock has no catalogRef, even if a newer catalog tag exists', async () => {
+  const temp = mkdtempSync(path.join(os.tmpdir(), 'haus-hook-no-catalogref-'))
+  mkdirSync(path.join(temp, '.haus-workflow'), { recursive: true })
+  writeFileSync(
+    path.join(temp, '.haus-workflow/haus.lock.json'),
+    JSON.stringify(
+      [
+        {
+          id: 'x',
+          type: 'skill',
+          source: 'haus',
+          version: '0.1.0',
+          hash: hashText(EMPTY_LOCK_PATHS_TOKEN),
+          installMode: 'copied',
+          paths: [],
+          // deliberately no catalogRef
+        },
+      ],
+      null,
+      2,
+    ),
+  )
+
+  const prevFetch = globalThis.fetch
+  const prevEnv = { ...process.env }
+  const prevLog = console.log
+  const logs = []
+  console.log = (msg) => logs.push(msg) // eslint-disable-line no-console
+  globalThis.fetch = async (url) => {
+    if (new URL(String(url)).hostname === 'api.github.com') {
+      // A real, newer-looking tag list — would trigger a false "behind" without the fix.
+      return { ok: true, json: async () => [{ name: 'v3.0.0' }, { name: 'v2.0.0' }] }
+    }
+    throw new Error(`unexpected fetch() call in test: ${url}`)
+  }
+  process.env.HAUS_TEST_MODE = '1'
+  process.env.HAUS_SKIP_NPM_CHECK = '1' // isolate: only the catalog-ref comparison is under test
+  delete process.env.HAUS_CATALOG_REMOTE_BASE // must NOT be set, or fetchLatestCatalogTag short-circuits before hitting the mock
+
+  try {
+    await runFromHookCheck(temp)
+  } finally {
+    globalThis.fetch = prevFetch
+    console.log = prevLog
+    process.env = prevEnv
+  }
+
+  assert.equal(logs.length, 0, 'no recorded catalogRef means nothing to compare — must stay silent')
+})
+
 test('update skips project re-apply when no prior haus setup', () => {
   const temp = mkdtempSync(path.join(os.tmpdir(), 'haus-update-noproj-'))
   const home = path.join(temp, 'home')

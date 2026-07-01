@@ -133,8 +133,12 @@ export async function runFromHookCheck(root: string): Promise<void> {
       fetchLatestCatalogTag(),
     ])
 
-    const installedRef = summary.catalogRef ?? 'main'
-    const catalogBehind = latestCatalogTag !== null && installedRef !== latestCatalogTag
+    // No recorded catalogRef means we genuinely don't know what it was installed from —
+    // treat that as "unknown", not "main", so it's never wrongly compared against a real
+    // release tag (a lock with no ref would otherwise almost always report false "behind").
+    const installedRef = summary.catalogRef
+    const catalogBehind =
+      installedRef !== null && latestCatalogTag !== null && installedRef !== latestCatalogTag
     const npmBehind = npmVersion.updateAvailable && npmVersion.latest !== null
 
     if (!npmBehind && !catalogBehind) return

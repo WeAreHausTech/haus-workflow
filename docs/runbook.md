@@ -166,5 +166,6 @@ a hook-contract failure immediately after `npm install -g @haus-tech/haus-workfl
 required hook between releases (e.g. the `haus.update-check` `SessionStart` hook added
 to detect project staleness) — an already-applied project's `.claude/settings.json`
 predates it until re-applied. This is expected, the same way a new required deny/ask
-rule would also show red until the next apply. **Fix:** run `/haus-workflow
-project:refresh` (or `haus apply --write`) once; `doctor --hooks` goes green.
+rule would also show red until the next apply. **Fix:** run
+`/haus-workflow project:refresh` (or `haus apply --write`) once; `doctor --hooks`
+goes green.
