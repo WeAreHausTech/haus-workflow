@@ -67,6 +67,8 @@ Options:
      (removes all haus-managed project files, backed up first, then re-runs project:init)
   3. [global] update — update haus package + catalog + global files
      (haus update — checks npm for new version, fetches catalog, refreshes ~/.claude/)
+  4. [—] help — explain what haus-workflow is and list all available tasks
+     (touches no files — points to docs/cli.md and docs/runbook.md for depth)
 ```
 
 Map the user's selection to the command from the alias table, then continue to Step 2.

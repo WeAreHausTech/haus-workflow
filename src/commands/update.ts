@@ -5,7 +5,13 @@ import { fetchLatestCatalogTag, syncRemoteCatalog } from '../catalog/remote-cata
 import { refreshProjectApply } from '../claude/refresh-project.js'
 import { applyInstall } from '../install/apply.js'
 import { diffGeneratedFiles, summarizeLockDiff } from '../update/diff-generated-files.js'
-import { applyLock, checkLock, diffLock, hasLocalOverrides } from '../update/lockfile.js'
+import {
+  applyLock,
+  checkLock,
+  diffLock,
+  hasLocalOverrides,
+  readLockSummary,
+} from '../update/lockfile.js'
 import { fetchNpmVersionStatus } from '../update/npm-version.js'
 import { readJson } from '../utils/fs.js'
 import { log, warn } from '../utils/logger.js'
@@ -109,13 +115,16 @@ export async function runUpdate(options: { check?: boolean; fromHook?: boolean }
  * user toward `/haus-workflow project:refresh`. Prints nothing when up to date, and never
  * throws — an offline or unreachable registry must not block session start.
  */
-async function runFromHookCheck(root: string): Promise<void> {
+export async function runFromHookCheck(root: string): Promise<void> {
   try {
-    const status = await checkLock(root)
+    // Cheap: just the lock's item count + catalog ref, no per-item content hashing (that's
+    // what `checkLock` does, and this hook runs on every SessionStart — hashing every
+    // tracked file's content that often is needless latency for a version/ref check).
+    const summary = await readLockSummary(root)
     // No (or empty) lockfile means this project was never set up by haus — nothing to
     // nudge about, and comparing versions/catalog refs would be meaningless noise. Check
     // this BEFORE the network calls below so a non-haus directory costs nothing.
-    if (status.count === 0) return
+    if (summary.count === 0) return
 
     const pkgJson = await readJson<{ version?: string }>(path.join(packageRoot(), 'package.json'))
     const currentVersion = pkgJson?.version ?? '0.0.0'
@@ -124,19 +133,17 @@ async function runFromHookCheck(root: string): Promise<void> {
       fetchLatestCatalogTag(),
     ])
 
-    const installedRef = status.catalogRef ?? 'main'
+    const installedRef = summary.catalogRef ?? 'main'
     const catalogBehind = latestCatalogTag !== null && installedRef !== latestCatalogTag
     const npmBehind = npmVersion.updateAvailable && npmVersion.latest !== null
-    const lockBroken = !status.ok
 
-    if (!npmBehind && !catalogBehind && !lockBroken) return
+    if (!npmBehind && !catalogBehind) return
 
     const reasons: string[] = []
     if (npmBehind) reasons.push(`haus package ${currentVersion} → ${npmVersion.latest} available`)
     if (catalogBehind) {
       reasons.push(`catalog installed from ${installedRef}, latest is ${latestCatalogTag}`)
     }
-    if (lockBroken) reasons.push('project lockfile has drift (hashes no longer match)')
 
     log(
       JSON.stringify({

@@ -12,6 +12,7 @@ import {
 } from 'node:fs'
 import { execaSync } from 'execa'
 
+import { runFromHookCheck } from '../src/commands/update.js'
 import { hashText } from '../src/utils/fs.js'
 import { EMPTY_LOCK_PATHS_TOKEN } from '../src/update/hash-installed.js'
 
@@ -313,15 +314,18 @@ test('update --from-hook is silent for a project that was never set up (no lockf
   assert.equal(r.stdout.trim(), '', 'no lockfile means nothing to nudge about — stay silent')
 })
 
-test('update --from-hook emits a SessionStart note when the lockfile has drift', () => {
-  const temp = mkdtempSync(path.join(os.tmpdir(), 'haus-update-hook-drift-'))
+// `update --from-hook` now only checks the cheap lock summary (count + catalogRef, no
+// per-item content hashing — see readLockSummary) plus the npm/catalog version checks, so
+// this exercises the "has a real lock, but nothing is actually behind" silent path — the
+// hash-drift signal that used to also feed this hook was removed for cost (Copilot review);
+// `haus doctor`/`project:fix` remain the tools for catching local file drift.
+test('update --from-hook is silent for a healthy project with a real lock', () => {
+  const temp = mkdtempSync(path.join(os.tmpdir(), 'haus-update-hook-healthy-'))
   mkdirSync(path.join(temp, '.haus-workflow'), { recursive: true })
-  mkdirSync(path.join(temp, '.claude'), { recursive: true })
   writeFileSync(
     path.join(temp, 'package.json'),
-    JSON.stringify({ name: 'hook-drift-temp', packageManager: 'yarn@4.5.3' }, null, 2),
+    JSON.stringify({ name: 'hook-healthy-temp', packageManager: 'yarn@4.5.3' }, null, 2),
   )
-  writeFileSync(path.join(temp, '.claude/tracked.md'), 'content-v1')
   writeFileSync(
     path.join(temp, '.haus-workflow/haus.lock.json'),
     JSON.stringify(
@@ -331,9 +335,9 @@ test('update --from-hook emits a SessionStart note when the lockfile has drift',
           type: 'skill',
           source: 'haus',
           version: '0.1.0',
-          hash: 'sha256-stale', // deliberately wrong — checkLock() will report drift
+          hash: hashText(EMPTY_LOCK_PATHS_TOKEN),
           installMode: 'copied',
-          paths: ['.claude/tracked.md'],
+          paths: [],
         },
       ],
       null,
@@ -354,10 +358,66 @@ test('update --from-hook emits a SessionStart note when the lockfile has drift',
     reject: false,
   })
   assert.equal(r.exitCode, 0)
-  const parsed = JSON.parse(r.stdout)
+  assert.equal(r.stdout.trim(), '', 'nothing is behind — stay silent')
+})
+
+// Direct unit test (in-process, mocked fetch — same style as tests/npm-version.test.js)
+// rather than a CLI subprocess: there is no offline way to force `fetchLatestCatalogTag`
+// or `fetchNpmVersionStatus` to report "behind" via env vars alone (HAUS_CATALOG_REMOTE_BASE
+// only ever short-circuits fetchLatestCatalogTag to null in test mode), so this proves the
+// "behind" branch and its exact JSON shape without depending on live network state.
+test('runFromHookCheck emits a SessionStart note when npm reports a newer version', async () => {
+  const temp = mkdtempSync(path.join(os.tmpdir(), 'haus-hook-npm-behind-'))
+  mkdirSync(path.join(temp, '.haus-workflow'), { recursive: true })
+  writeFileSync(
+    path.join(temp, '.haus-workflow/haus.lock.json'),
+    JSON.stringify(
+      [
+        {
+          id: 'x',
+          type: 'skill',
+          source: 'haus',
+          version: '0.1.0',
+          hash: hashText(EMPTY_LOCK_PATHS_TOKEN),
+          installMode: 'copied',
+          paths: [],
+        },
+      ],
+      null,
+      2,
+    ),
+  )
+
+  const prevFetch = globalThis.fetch
+  const prevEnv = { ...process.env }
+  const prevLog = console.log
+  const logs = []
+  console.log = (msg) => logs.push(msg) // eslint-disable-line no-console
+  globalThis.fetch = async (url) => {
+    if (String(url).includes('registry.npmjs.org')) {
+      return { ok: true, json: async () => ({ version: '999.0.0' }) }
+    }
+    throw new Error(`unexpected fetch() call in test: ${url}`)
+  }
+  process.env.HAUS_TEST_MODE = '1'
+  // Short-circuits fetchLatestCatalogTag() to null so only the npm-behind reason fires —
+  // must NOT set HAUS_SKIP_NPM_CHECK here, or the mocked fetch above is never exercised.
+  process.env.HAUS_CATALOG_REMOTE_BASE = 'http://127.0.0.1:0'
+  delete process.env.HAUS_SKIP_NPM_CHECK
+
+  try {
+    await runFromHookCheck(temp)
+  } finally {
+    globalThis.fetch = prevFetch
+    console.log = prevLog
+    process.env = prevEnv
+  }
+
+  assert.equal(logs.length, 1, 'exactly one hook JSON line should be printed')
+  const parsed = JSON.parse(logs[0])
   assert.equal(parsed.hookSpecificOutput.hookEventName, 'SessionStart')
   assert.match(parsed.hookSpecificOutput.additionalContext, /project:refresh/)
-  assert.match(parsed.hookSpecificOutput.additionalContext, /drift/i)
+  assert.match(parsed.hookSpecificOutput.additionalContext, /999\.0\.0/)
 })
 
 test('update skips project re-apply when no prior haus setup', () => {
