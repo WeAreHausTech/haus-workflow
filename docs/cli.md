@@ -84,13 +84,12 @@ Sync remote catalog, refresh global install (`~/.claude/`), and re-apply project
 
 - `--check` — validate lock presence and version fields; exit non-zero if stale
 - `--from-hook` — SessionStart hook mode (installed per-project as `haus.update-check`,
-  see `src/claude/merge-project-settings.ts`): silently checks whether this project's
-  installed npm package version or catalog ref is behind the latest available (the
-  lockfile is only read to confirm this is a haus project and to get its recorded
-  `catalogRef` — no per-item content hashing, unlike `--check`); prints nothing when up
-  to date, emits a `hookSpecificOutput.additionalContext` note nudging `/haus-workflow
-project:refresh` when it's behind. Never fails the session on a network error — fails
-  silent instead.
+  see `src/claude/merge-project-settings.ts`). Silently checks whether the installed npm
+  package version or catalog ref is behind the latest available. The lockfile is only
+  read to confirm this is a haus project and to get its recorded `catalogRef` — no
+  per-item content hashing, unlike `--check`. Prints nothing when up to date. When
+  behind, emits a `hookSpecificOutput.additionalContext` note recommending a refresh.
+  Never fails the session on a network error — fails silent instead.
 - (no flag) — back up lockfile to `.haus-workflow/backups/`, fetch latest catalog into cache, refresh global `haus install`, re-run project apply (including stale-item cleanup), recompute per-item hashes, print unified lock diff
 
 ---
