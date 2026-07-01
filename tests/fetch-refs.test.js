@@ -186,6 +186,60 @@ test('fetchRefsForItems deduplicates URLs across items', async (t) => {
   assert.equal(fetchCount, 1)
 })
 
+test('collectLlmsTxtUrls dedupes and filters non-llms.txt refs', async () => {
+  const { collectLlmsTxtUrls } = await import('../src/refs/fetch-refs.js')
+  const items = [
+    { id: 'a', references: ['https://x.dev/llms.txt', 'references/local.md'] },
+    { id: 'b', references: ['https://x.dev/llms.txt'] },
+    { id: 'c' }, // no references field
+  ]
+  assert.deepEqual(collectLlmsTxtUrls(items), ['https://x.dev/llms.txt'])
+})
+
+test('pruneOrphanedRefs removes cache entries not in keepUrls', async (t) => {
+  const dir = mkdtempSync(path.join(os.tmpdir(), 'haus-refs-'))
+  t.after(async () => fs.rm(dir, { recursive: true }))
+  const { pruneOrphanedRefs } = await import('../src/refs/fetch-refs.js')
+  const { writeCacheMeta, readCacheMeta } = await import('../src/refs/cache-meta.js')
+
+  await fs.writeFile(path.join(dir, 'keep.md'), '# keep')
+  await fs.writeFile(path.join(dir, 'drop.md'), '# drop')
+  await writeCacheMeta(dir, {
+    'https://keep.example/llms.txt': {
+      url: 'https://keep.example/llms.txt',
+      fetchedAt: '2026-06-24T00:00:00.000Z',
+      file: 'keep.md',
+    },
+    'https://drop.example/llms.txt': {
+      url: 'https://drop.example/llms.txt',
+      fetchedAt: '2026-06-24T00:00:00.000Z',
+      file: 'drop.md',
+    },
+  })
+
+  const removed = await pruneOrphanedRefs(dir, new Set(['https://keep.example/llms.txt']))
+  assert.equal(removed, 1)
+
+  const meta = await readCacheMeta(dir)
+  assert.deepEqual(Object.keys(meta), ['https://keep.example/llms.txt'])
+  const dropExists = await fs
+    .access(path.join(dir, 'drop.md'))
+    .then(() => true, () => false)
+  const keepExists = await fs
+    .access(path.join(dir, 'keep.md'))
+    .then(() => true, () => false)
+  assert.equal(dropExists, false)
+  assert.equal(keepExists, true)
+})
+
+test('pruneOrphanedRefs is a no-op when cache-meta is empty', async (t) => {
+  const dir = mkdtempSync(path.join(os.tmpdir(), 'haus-refs-'))
+  t.after(async () => fs.rm(dir, { recursive: true }))
+  const { pruneOrphanedRefs } = await import('../src/refs/fetch-refs.js')
+  const removed = await pruneOrphanedRefs(dir, new Set())
+  assert.equal(removed, 0)
+})
+
 test('haus fetch-refs --help exits 0', async () => {
   const result = await execa('node', [DIST_CLI, 'fetch-refs', '--help'], { reject: false })
   assert.equal(result.exitCode, 0)
