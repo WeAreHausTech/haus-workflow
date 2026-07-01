@@ -112,7 +112,10 @@ export async function pruneOrphanedRefs(cacheDir: string, keepUrls: Set<string>)
     if (keepUrls.has(url)) continue
     delete meta[url]
     removed++
-    await fs.remove(path.join(cacheDir, entry.file)).catch(() => {})
+    // Reject non-basename paths (e.g. "../../etc") from cache-meta to prevent path
+    // traversal, same guard as fetchSingleRef applies before trusting `entry.file`.
+    const safeFile = typeof entry.file === 'string' && entry.file === path.basename(entry.file)
+    if (safeFile) await fs.remove(path.join(cacheDir, entry.file)).catch(() => {})
   }
   if (removed > 0) await writeCacheMeta(cacheDir, meta)
   return removed

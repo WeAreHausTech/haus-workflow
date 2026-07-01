@@ -232,6 +232,36 @@ test('pruneOrphanedRefs removes cache entries not in keepUrls', async (t) => {
   assert.equal(keepExists, true)
 })
 
+test('pruneOrphanedRefs rejects a non-basename file path (path traversal)', async (t) => {
+  const parent = mkdtempSync(path.join(os.tmpdir(), 'haus-refs-parent-'))
+  t.after(async () => fs.rm(parent, { recursive: true }))
+  const dir = path.join(parent, 'cache')
+  await fs.mkdir(dir)
+  const { pruneOrphanedRefs } = await import('../src/refs/fetch-refs.js')
+  const { writeCacheMeta, readCacheMeta } = await import('../src/refs/cache-meta.js')
+
+  const outsideFile = path.join(parent, 'secret.txt')
+  await fs.writeFile(outsideFile, 'do not delete me')
+
+  await writeCacheMeta(dir, {
+    'https://drop.example/llms.txt': {
+      url: 'https://drop.example/llms.txt',
+      fetchedAt: '2026-06-24T00:00:00.000Z',
+      file: '../secret.txt',
+    },
+  })
+
+  const removed = await pruneOrphanedRefs(dir, new Set())
+  assert.equal(removed, 1)
+
+  const meta = await readCacheMeta(dir)
+  assert.deepEqual(meta, {})
+  const outsideFileStillExists = await fs
+    .access(outsideFile)
+    .then(() => true, () => false)
+  assert.equal(outsideFileStillExists, true)
+})
+
 test('pruneOrphanedRefs is a no-op when cache-meta is empty', async (t) => {
   const dir = mkdtempSync(path.join(os.tmpdir(), 'haus-refs-'))
   t.after(async () => fs.rm(dir, { recursive: true }))
