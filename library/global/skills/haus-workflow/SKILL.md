@@ -42,8 +42,10 @@ repo's files. The short legacy aliases still work but the names below are canoni
 
 **If a task argument was passed:** look it up in the alias table above. If no match, tell the user and list valid options. If matched, skip to Step 2.
 
-**If no task was passed:** the menu has more options than a single `AskUserQuestion` call can
-hold (max 4 options per question), so split it into two grouped questions in one call:
+**If no task was passed:** the menu has more options than one `AskUserQuestion` question can
+hold (max 4 options per question). Ask two separate questions, one after another — first
+Question 1, read the answer, then ask Question 2 (a second, sequential `AskUserQuestion`
+call; do not try to cram both into a single question):
 
 ```
 Question 1: "What would you like to do?"
