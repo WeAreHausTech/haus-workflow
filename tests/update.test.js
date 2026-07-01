@@ -290,6 +290,76 @@ test('update re-applies project files and preserves user settings merge', () => 
   assert.equal(out.includes('Project refreshed:'), true)
 })
 
+test('update --from-hook is silent for a project that was never set up (no lockfile)', () => {
+  const temp = mkdtempSync(path.join(os.tmpdir(), 'haus-update-hook-nolock-'))
+  writeFileSync(
+    path.join(temp, 'package.json'),
+    JSON.stringify({ name: 'hook-nolock-temp', packageManager: 'yarn@4.5.3' }, null, 2),
+  )
+  const env = {
+    HAUS_TEST_MODE: '1',
+    HAUS_SKIP_NPM_CHECK: '1',
+    HAUS_CATALOG_CACHE_DIR_OVERRIDE: path.join(temp, 'cache'),
+    HAUS_CATALOG_REMOTE_BASE: 'http://127.0.0.1:0',
+    HOME: path.join(temp, 'home'),
+    USERPROFILE: path.join(temp, 'home'),
+  }
+  const r = execaSync('node', [path.resolve('dist/cli.js'), 'update', '--from-hook'], {
+    cwd: temp,
+    env,
+    reject: false,
+  })
+  assert.equal(r.exitCode, 0, 'a failed/skipped hook check must never fail the session')
+  assert.equal(r.stdout.trim(), '', 'no lockfile means nothing to nudge about — stay silent')
+})
+
+test('update --from-hook emits a SessionStart note when the lockfile has drift', () => {
+  const temp = mkdtempSync(path.join(os.tmpdir(), 'haus-update-hook-drift-'))
+  mkdirSync(path.join(temp, '.haus-workflow'), { recursive: true })
+  mkdirSync(path.join(temp, '.claude'), { recursive: true })
+  writeFileSync(
+    path.join(temp, 'package.json'),
+    JSON.stringify({ name: 'hook-drift-temp', packageManager: 'yarn@4.5.3' }, null, 2),
+  )
+  writeFileSync(path.join(temp, '.claude/tracked.md'), 'content-v1')
+  writeFileSync(
+    path.join(temp, '.haus-workflow/haus.lock.json'),
+    JSON.stringify(
+      [
+        {
+          id: 'x',
+          type: 'skill',
+          source: 'haus',
+          version: '0.1.0',
+          hash: 'sha256-stale', // deliberately wrong — checkLock() will report drift
+          installMode: 'copied',
+          paths: ['.claude/tracked.md'],
+        },
+      ],
+      null,
+      2,
+    ),
+  )
+  const env = {
+    HAUS_TEST_MODE: '1',
+    HAUS_SKIP_NPM_CHECK: '1',
+    HAUS_CATALOG_CACHE_DIR_OVERRIDE: path.join(temp, 'cache'),
+    HAUS_CATALOG_REMOTE_BASE: 'http://127.0.0.1:0',
+    HOME: path.join(temp, 'home'),
+    USERPROFILE: path.join(temp, 'home'),
+  }
+  const r = execaSync('node', [path.resolve('dist/cli.js'), 'update', '--from-hook'], {
+    cwd: temp,
+    env,
+    reject: false,
+  })
+  assert.equal(r.exitCode, 0)
+  const parsed = JSON.parse(r.stdout)
+  assert.equal(parsed.hookSpecificOutput.hookEventName, 'SessionStart')
+  assert.match(parsed.hookSpecificOutput.additionalContext, /project:refresh/)
+  assert.match(parsed.hookSpecificOutput.additionalContext, /drift/i)
+})
+
 test('update skips project re-apply when no prior haus setup', () => {
   const temp = mkdtempSync(path.join(os.tmpdir(), 'haus-update-noproj-'))
   const home = path.join(temp, 'home')

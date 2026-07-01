@@ -113,7 +113,11 @@ program
 program.command('refresh').action(runRefresh)
 program.command('catalog-audit').action(runCatalogAudit)
 program.command('validate-catalog').argument('[manifest]').action(runValidateCatalog)
-program.command('update').option('--check').action(runUpdate)
+program
+  .command('update')
+  .option('--check')
+  .option('--from-hook', 'Emit JSON for the Claude Code SessionStart hook (silent if up to date)')
+  .action(runUpdate)
 program
   .command('install')
   .option('--dry-run')

@@ -102,6 +102,42 @@ test('apply writes guards-only hook contract and doctor --hooks passes', () => {
   assert.match(doctor.stdout, /hook contract/i)
 })
 
+test('apply writes a SessionStart hook that checks for project staleness', () => {
+  const temp = mkdtempSync(path.join(os.tmpdir(), 'haus-apply-session-start-hook-'))
+  writeFileSync(
+    path.join(temp, 'package.json'),
+    JSON.stringify(
+      { name: 'session-start-hook', packageManager: 'yarn@4.5.3', dependencies: { react: '19.0.0' } },
+      null,
+      2,
+    ),
+  )
+  writeFileSync(path.join(temp, 'yarn.lock'), '# lock')
+
+  const env = {
+    ...process.env,
+    HAUS_FIXTURE_CATALOG: path.resolve('tests/fixtures/catalog/manifest.json'),
+  }
+  execaSync('node', [path.resolve('dist/cli.js'), 'scan', '--json'], { cwd: temp, env })
+  execaSync('node', [path.resolve('dist/cli.js'), 'recommend', '--json'], { cwd: temp, env })
+  execaSync('node', [path.resolve('dist/cli.js'), 'apply', '--write'], { cwd: temp, env })
+
+  const settings = JSON.parse(readFileSync(path.join(temp, '.claude/settings.json'), 'utf8'))
+  const sessionStart = settings.hooks.SessionStart
+  assert.ok(Array.isArray(sessionStart) && sessionStart.length > 0, 'SessionStart hook must exist')
+  assert.ok(
+    sessionStart.some((entry) => entry.hooks.some((h) => h.command === 'haus update --from-hook')),
+    'SessionStart hook must run `haus update --from-hook`',
+  )
+
+  const doctor = execaSync('node', [path.resolve('dist/cli.js'), 'doctor', '--hooks'], {
+    cwd: temp,
+    env,
+    reject: false,
+  })
+  assert.equal(doctor.exitCode, 0, doctor.stderr)
+})
+
 test('apply upgrades legacy settings by pruning the retired context UserPromptSubmit hook', () => {
   const temp = mkdtempSync(path.join(os.tmpdir(), 'haus-apply-upgrade-context-hook-'))
   mkdirSync(path.join(temp, '.claude'), { recursive: true })

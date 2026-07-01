@@ -78,11 +78,16 @@ Single-file items copy the file to the root (`configs/eslint/eslint.config.mjs` 
 `<root>/eslint.config.mjs`); directory items copy each entry (`configs/prettier/` →
 `<root>/`). Logic: `src/install/scaffold.ts`; command: `src/commands/scaffold.ts`.
 
-### `haus update [--check]`
+### `haus update [--check] [--from-hook]`
 
 Sync remote catalog, refresh global install (`~/.claude/`), and re-apply project files.
 
 - `--check` — validate lock presence and version fields; exit non-zero if stale
+- `--from-hook` — SessionStart hook mode (installed per-project as `haus.update-check`,
+  see `src/claude/merge-project-settings.ts`): silently checks whether this project is
+  behind the installed haus npm package/catalog/lock; prints nothing when up to date,
+  emits a `hookSpecificOutput.additionalContext` note nudging `/haus-workflow project:refresh`
+  when it's behind. Never fails the session on a network error — fails silent instead.
 - (no flag) — back up lockfile to `.haus-workflow/backups/`, fetch latest catalog into cache, refresh global `haus install`, re-run project apply (including stale-item cleanup), recompute per-item hashes, print unified lock diff
 
 ---

@@ -33,7 +33,7 @@ repo's files. The short legacy aliases still work but the names below are canoni
 | `project:refresh` (`apply`, `refresh`, `claude-md`, `regenerate`) | _Refresh procedure below_       | project | **Full non-destructive sync.** Updates the haus package + catalog first, then re-runs `project:init`'s pipeline in place — nothing is removed up front; new catalog items get added, changed ones updated, and anything removed upstream gets pruned by `apply`'s existing orphan-pruning |
 | `project:doctor` (`doctor`, `check`)                              | `haus doctor`                   | project | Check for install drift                                                                                                                                                                                                                                                                   |
 | `project:fix` (`fix`)                                             | _Fix procedure below_           | project | Diagnose and fix install drift: run doctor, apply the suggested fixes, confirm green                                                                                                                                                                                                      |
-| `update` (`upgrade`)                                              | `haus update`                   | global  | Update npm package + catalog + `~/.claude/` (also refreshes this project)                                                                                                                                                                                                                 |
+| `update` (`upgrade`)                                              | `haus update`                   | global  | Update npm package + catalog + `~/.claude/`; if run inside an already-set-up project, fully refreshes it too (same pipeline as `project:refresh`)                                                                                                                                         |
 | `install` (`global`)                                              | `haus install`                  | global  | Seed `~/.claude/` with haus-owned files                                                                                                                                                                                                                                                   |
 | `uninstall`                                                       | `haus uninstall`                | global  | Remove all haus global files from `~/.claude/`                                                                                                                                                                                                                                            |
 | `help` (`?`)                                                      | _Answer directly below_         | —       | Explain what haus-workflow is, list available tasks, point to deeper docs — touches no files                                                                                                                                                                                              |
@@ -124,7 +124,8 @@ upstream gets pruned automatically by `apply`'s existing orphan-pruning.
 
 1. Run `haus update`. This bumps the npm package (or reports one's available), syncs the
    catalog cache, refreshes `~/.claude/`, and does a light re-apply of this project's
-   already-tracked files.
+   already-tracked files. Apply the same reactions as **After `haus update`** below
+   (version-bump command, `WORKFLOW.md` update nudge, catalog-changes summary).
 2. Immediately follow **Setup (`project:init`)** above, end to end. Re-running it is safe
    on an already-set-up project — it re-scans, re-applies, redoes the deep docs read (so
    `CLAUDE.md`/`docs/` catch up with any code drift), and re-recommends against the
@@ -183,6 +184,12 @@ decision you can't make safely, stop and ask in plain language.
 1. If CLI output says a new version is available, run `npm i -g @haus-tech/haus-workflow` and confirm the version bump.
 2. If `WORKFLOW.md` was updated, remind the user: "WORKFLOW.md updated — review `workflow-config.md` for any new sections that need project-specific values."
 3. If CLI output shows catalog changes, summarise which templates changed.
+4. **If the current directory has a `.haus-workflow/` folder** (this project was already
+   set up by haus), don't stop at the global update — continue immediately into
+   **Setup (`project:init`)** above to fully sync this project too (rescan, redo the deep
+   docs read, re-recommend, apply). This is what makes `update`'s scope note ("also
+   refreshes this project") literally true, not just a light lock-replay. No `.haus-workflow/`
+   folder → nothing more to do here, `update` only touched global files.
 
 ### After `haus doctor` (`project:doctor`)
 
