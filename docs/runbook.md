@@ -95,9 +95,9 @@ installed. This is intended — it keeps the baseline lean.
 
 **Fix / how to add one:**
 
-- In Claude Code (preferred): run `/haus-workflow` → **`project:add-skills`**, or pick
-  the opt-in options during `/haus-setup`. Both present the groups in plain language
-  and wire the commands for you.
+- In Claude Code (preferred): run `/haus-workflow project:add-skills`, or pick
+  the opt-in options during `/haus-workflow project:init`. Both present the groups in
+  plain language and wire the commands for you.
 - By hand: run `haus recommend --include <id> [<id> …]` (promotes them to the
   `manual` selection mode), then `haus apply --write`. Or add the gating role to
   `.haus-workflow/deep-context.json#roles` and re-run `haus recommend` followed by
@@ -118,9 +118,9 @@ installed. This is intended — it keeps the baseline lean.
 nothing for a project that already has an `eslint.config.*` / `prettier.config.*` /
 `.prettierrc`. **Cause:** scaffold **preserves existing project-root config by
 default** — it never clobbers a user-owned config on a plain run. **Fix:** to replace
-it deliberately, re-run `haus scaffold <id> --force`. In Claude Code the `/haus-setup`
-and `project:add-skills` flows ask before passing `--force`; never default to
-overwrite.
+it deliberately, re-run `haus scaffold <id> --force`. In Claude Code the
+`/haus-workflow project:init` and `project:add-skills` flows ask before passing
+`--force`; never default to overwrite.
 
 ## Coverage ratchet says raise the floor
 

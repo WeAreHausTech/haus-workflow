@@ -287,6 +287,10 @@ test('apply --dry-run shows diffs and does not write files', () => {
 
 const LEGACY_REVIEW_STUB = 'Run `haus context --task "code review"` then review diff.'
 
+// haus-doctor.md was a managed core command stub, removed in favour of routing everything
+// through the /haus-workflow skill — same legacy-stub-cleanup shape as haus-review above.
+const LEGACY_DOCTOR_STUB = 'Run `haus doctor`.'
+
 // Security lines were folded into haus.md; the standalone security.md is removed on apply
 // when it still matches this historical stub, and preserved when a user has edited it.
 const LEGACY_SECURITY_STUB = '- Never read secrets.\n- Block dangerous shell commands.'
@@ -312,16 +316,18 @@ function scaffoldApplyProject() {
   return { temp, env }
 }
 
-test('apply does not write haus-review command (removed)', () => {
+test('apply does not write haus-review or haus-doctor commands (both removed)', () => {
   const { temp } = scaffoldApplyProject()
   assert.equal(fs.existsSync(path.join(temp, '.claude/commands/haus-review.md')), false)
-  // haus-doctor is retained
-  assert.equal(fs.existsSync(path.join(temp, '.claude/commands/haus-doctor.md')), true)
+  assert.equal(fs.existsSync(path.join(temp, '.claude/commands/haus-doctor.md')), false)
 })
 
 test('apply removes a legacy haus-review stub that matches the historical content', () => {
   const { temp, env } = scaffoldApplyProject()
   const reviewPath = path.join(temp, '.claude/commands/haus-review.md')
+  // `.claude/commands/` is no longer seeded by a fresh apply (no standalone commands
+  // ship anymore), so the legacy fixture must create it before writing into it.
+  mkdirSync(path.dirname(reviewPath), { recursive: true })
 
   // Exact stub (no trailing newline) — must be removed.
   writeFileSync(reviewPath, LEGACY_REVIEW_STUB)
@@ -337,6 +343,7 @@ test('apply removes a legacy haus-review stub that matches the historical conten
 test('apply preserves a user-modified haus-review.md', () => {
   const { temp, env } = scaffoldApplyProject()
   const reviewPath = path.join(temp, '.claude/commands/haus-review.md')
+  mkdirSync(path.dirname(reviewPath), { recursive: true })
 
   // Genuinely customised content — must be preserved.
   const custom = 'Run our in-house review checklist, then `haus context`.'
@@ -351,6 +358,35 @@ test('apply preserves a user-modified haus-review.md', () => {
   execaSync('node', [path.resolve('dist/cli.js'), 'apply', '--write'], { cwd: temp, env })
   assert.equal(fs.existsSync(reviewPath), true, 'whitespace-edited file should be preserved')
   assert.equal(readFileSync(reviewPath, 'utf8'), whitespaceEdited)
+})
+
+test('apply removes a legacy haus-doctor stub that matches the historical content', () => {
+  const { temp, env } = scaffoldApplyProject()
+  const doctorPath = path.join(temp, '.claude/commands/haus-doctor.md')
+  mkdirSync(path.dirname(doctorPath), { recursive: true })
+
+  // Exact stub (no trailing newline) — must be removed.
+  writeFileSync(doctorPath, LEGACY_DOCTOR_STUB)
+  execaSync('node', [path.resolve('dist/cli.js'), 'apply', '--write'], { cwd: temp, env })
+  assert.equal(fs.existsSync(doctorPath), false, 'exact legacy stub should be removed')
+
+  // Stub with a single trailing newline — must also be removed.
+  writeFileSync(doctorPath, `${LEGACY_DOCTOR_STUB}\n`)
+  execaSync('node', [path.resolve('dist/cli.js'), 'apply', '--write'], { cwd: temp, env })
+  assert.equal(fs.existsSync(doctorPath), false, 'stub + trailing newline should be removed')
+})
+
+test('apply preserves a user-modified haus-doctor.md', () => {
+  const { temp, env } = scaffoldApplyProject()
+  const doctorPath = path.join(temp, '.claude/commands/haus-doctor.md')
+  mkdirSync(path.dirname(doctorPath), { recursive: true })
+
+  // Genuinely customised content — must be preserved.
+  const custom = 'Run our in-house health check, then `haus doctor`.'
+  writeFileSync(doctorPath, custom)
+  execaSync('node', [path.resolve('dist/cli.js'), 'apply', '--write'], { cwd: temp, env })
+  assert.equal(fs.existsSync(doctorPath), true, 'customised file should be preserved')
+  assert.equal(readFileSync(doctorPath, 'utf8'), custom, 'customised content should be untouched')
 })
 
 test('apply folds security lines into haus.md and writes no standalone security.md', () => {
