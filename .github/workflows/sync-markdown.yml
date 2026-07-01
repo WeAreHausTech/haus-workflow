@@ -45,6 +45,7 @@ jobs:
           SRC_DIR="docusaurus-docs"
           DEST_DIR="../wearehaustech.github.io/docs/haus-workflow"
           PROTECTED_BASENAMES="README.mdx claude-code-guide.mdx"
+          PROTECTED_DIRS="catalog"
 
           FULL_SYNC=false
           if [ "${{ github.event.inputs.forceFullSync }}" = "true" ]; then
@@ -65,12 +66,17 @@ jobs:
             mapfile -t DEST_FILES < <(find "$DEST_DIR" -type f \( -name '*.md' -o -name '*.mdx' \) | sort)
             for dest_file in "${DEST_FILES[@]}"; do
               base="$(basename "$dest_file")"
+              rel="${dest_file#$DEST_DIR/}"
               for protected in $PROTECTED_BASENAMES; do
                 if [ "$base" = "$protected" ]; then
                   continue 2
                 fi
               done
-              rel="${dest_file#$DEST_DIR/}"
+              for dir in $PROTECTED_DIRS; do
+                case "$rel" in
+                  "$dir"/*) continue 2 ;;
+                esac
+              done
               if [ ! -f "$SRC_DIR/$rel" ]; then
                 echo "Deleting orphaned synced file $dest_file"
                 rm -f "$dest_file"
