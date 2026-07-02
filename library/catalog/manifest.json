@@ -1,5 +1,5 @@
 {
-  "version": "3.2.1",
+  "version": "3.3.0",
   "items": [
     {
       "id": "haus.agentic-workflow-standard",
@@ -1334,7 +1334,7 @@
       "ecosystem": "general",
       "installMode": "copy-selected",
       "tokenEstimate": 120,
-      "default": false,
+      "default": true,
       "reviewStatus": "approved",
       "riskLevel": "low"
     },
@@ -1353,7 +1353,7 @@
       "ecosystem": "general",
       "tokenEstimate": 650,
       "tokenBudget": 900,
-      "default": false,
+      "default": true,
       "reviewStatus": "approved",
       "riskLevel": "low"
     },
