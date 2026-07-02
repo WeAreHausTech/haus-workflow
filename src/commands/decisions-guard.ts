@@ -46,7 +46,13 @@ export async function runDecisionsGuard(options: DecisionsGuardOptions = {}): Pr
   if (!baseRef) return // no discoverable base branch — fail open rather than block on ambiguity
 
   const range = `${baseRef}...HEAD`
-  const commitMessages = (await runGit(['log', '--format=%B', range], { cwd: root })).stdout
+  // `git log` with a triple-dot range is a *symmetric* difference (commits reachable from
+  // either side but not both), unlike `git diff`'s triple-dot (diff against the merge-base).
+  // Using `range` here would pull in base-branch-only commit messages, so a `[adr-skip]`
+  // token committed to the base branch could wrongly waive the gate for this feature branch.
+  // Use an ancestry-only range so only commits unique to HEAD are considered.
+  const logRange = `${baseRef}..HEAD`
+  const commitMessages = (await runGit(['log', '--format=%B', logRange], { cwd: root })).stdout
 
   const result = await runDecisionsCheck(root, { range, commitMessages })
   if (result.triggered && !result.satisfied) {

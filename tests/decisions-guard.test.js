@@ -94,6 +94,32 @@ describe('runDecisionsGuard', () => {
     }
   })
 
+  it('does not honor an [adr-skip] token that only exists on the base branch', async () => {
+    // git log with a triple-dot range is a symmetric difference (base-only commits are
+    // included), unlike git diff's triple-dot (merge-base diff). A base-branch-only
+    // [adr-skip] must not leak into the feature branch's skip check.
+    const dir = makeRepoWithFeatureBranch({ changePackageJson: true })
+    git(dir, ['checkout', 'main'])
+    fs.writeFileSync(path.join(dir, 'unrelated.txt'), 'x\n')
+    git(dir, ['add', '.'])
+    git(dir, ['commit', '-m', 'unrelated change [adr-skip]'])
+    git(dir, ['checkout', 'feature'])
+    const logSpy = mock.method(console, 'log')
+    try {
+      await withCwd(dir, () =>
+        runDecisionsGuard({
+          fromHook: true,
+          stdinPayload: JSON.stringify({ tool_input: { command: 'gh pr create --fill' } }),
+        }),
+      )
+      assert.equal(logSpy.mock.calls.length, 1)
+      const decision = JSON.parse(logSpy.mock.calls[0].arguments[0])
+      assert.equal(decision.hookSpecificOutput.permissionDecision, 'deny')
+    } finally {
+      logSpy.mock.restore()
+    }
+  })
+
   it('allows gh pr create when the diff is not decision-worthy', async () => {
     const dir = makeRepoWithFeatureBranch({ changePackageJson: false })
     fs.writeFileSync(path.join(dir, 'README.md'), 'docs only\n')
