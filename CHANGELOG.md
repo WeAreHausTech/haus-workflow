@@ -1,5 +1,159 @@
 # Changelog
 
+## [1.0.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.32.1...v1.0.0) (2026-07-02)
+
+### ⚠ BREAKING CHANGES
+
+- **workflow:** the standalone /haus-setup, /haus-clone,
+  /haus-cloneandsetup, /haus-doctor, and /haus-fix slash commands no longer
+  exist. Use /haus-workflow <task> instead (e.g. /haus-workflow project:init,
+  /haus-workflow project:doctor). Existing global installs self-clean the
+  old files on the next `haus update`/`haus install` via the installer's
+  existing orphan-pruning.
+
+- docs(decisions): add ADR-0011 for the haus-workflow command consolidation
+
+Satisfies the decisions-gate CI check for the breaking-change command
+removal + skill-install mechanism change in the prior commit.
+
+- fix(workflow): clarify the Step 1 menu is two sequential AskUserQuestion calls
+
+Copilot review flagged ambiguous wording ("split into two grouped
+questions in one call") that could read as cramming both question
+blocks into a single AskUserQuestion invocation. AskUserQuestion is
+not guaranteed multi-question across every environment this skill
+runs in, so make the instruction unambiguous: ask Question 1, read
+the answer, then ask Question 2 as a second, separate call.
+
+- feat(workflow): upgrade project:refresh to a full non-destructive sync
+
+Previously project:refresh just ran `haus apply --write` (reapply from
+the already-computed recommendation, no package/catalog update, no
+rescan, no docs refresh). Upgrade it to: run `haus update` first (npm
+package + catalog + global install), then re-run the project:init
+pipeline in place (rescan, redo the deep docs read, re-recommend,
+apply) — nothing removed first, contrasting with project:reinit which
+wipes everything before re-running the same pipeline.
+
+Moves the root-CLAUDE.md-imports check from a now-orphaned SKILL.md
+section into references/init.md's own apply step, since project:init,
+project:reinit, and project:refresh all funnel through it.
+
+- feat(workflow): full project:refresh sync + SessionStart staleness hook
+
+project:refresh now runs `haus update` (npm package + catalog) first,
+then re-runs the project:init pipeline in place (rescan, redo docs,
+re-recommend, apply) instead of just `haus apply --write`. The `update`
+task's own post-run steps cascade into the same pipeline when run
+inside an already-set-up project, so its "also refreshes this project"
+scope note is now literally true.
+
+Adds a new SessionStart hook (`haus.update-check`, in both
+PROJECT_HOOK_FRAGMENTS and CANONICAL_HOOKS) running `haus update
+--from-hook`: silent when the project is up to date, emits a
+SessionStart hookSpecificOutput note nudging `/haus-workflow
+project:refresh` when the npm package, catalog, or lockfile has
+drifted. Never blocks session start on a network failure.
+
+Fixes found by adversarial review before landing:
+
+- fetchNpmVersionStatus had no test-mode gate, so the new --from-hook
+  tests hit the real npm registry; added HAUS_SKIP_NPM_CHECK (mirrors
+  HAUS_CATALOG_REMOTE_BASE's test-only-when-explicit pattern) rather
+  than gating on bare HAUS_TEST_MODE, which the whole test run already
+  sets and would have broken tests/npm-version.test.js's fetch mocks.
+- checkLock() now runs before the npm/catalog network calls in the
+  hook check, so a non-haus directory costs nothing.
+- matcher parity between the two hardcoded hook-fragment lists.
+- project:refresh's step 1 now explicitly inherits the "After `haus
+update`" reactions (version bump, WORKFLOW.md nudge, catalog
+  summary), which it was silently skipping despite running the same
+  command.
+- runbook entry: doctor --hooks going red right after an upgrade,
+  before the next apply, is expected (same as any new required rule)
+  — documented with the fix (re-apply once).
+
+yarn verify: 627/627 tests green.
+
+- fix(workflow): drop expensive lock-hash check from the SessionStart hook, add help to the menu
+
+Copilot review, two fixes:
+
+- runFromHookCheck() called checkLock(), which hashes the content of
+  every installed managed path on every single SessionStart. Replaced
+  with a new readLockSummary() (count + catalogRef only, no hashing) —
+  the hook only ever needed those two cheap facts. Drops the
+  lock-drift reason from the hook's output entirely; doctor/project:fix
+  remain the tools for catching local file tamper, which is a
+  different concern than "is this project behind the installed
+  package/catalog" (what this hook actually checks).
+- The Step 1 no-arg menu didn't offer `help`, even though it's a real
+  task in the alias table. Added as Question 2 option 4 (still within
+  the 4-option cap).
+
+Test changes: replaced the lock-drift `--from-hook` test (no longer
+applicable — the hook no longer looks at hashes) with a "healthy
+project with a real lock stays silent" integration test, plus a new
+direct unit test for the "npm behind" JSON-emission path (mocked
+fetch, same style as tests/npm-version.test.js) — there's no way to
+force fetchLatestCatalogTag/fetchNpmVersionStatus to report "behind"
+via env vars alone, so this exercises the actual behind branch and its
+JSON shape deterministically instead of only ever testing silence.
+
+yarn verify: 628/628 tests green.
+
+- fix(test): use exact hostname match instead of substring for npm registry mock
+
+CodeQL flagged String(url).includes('registry.npmjs.org') as an
+incomplete URL substring sanitization (a host like
+evil.com/registry.npmjs.org or registry.npmjs.org.evil.com would also
+match). Not exploitable here (url comes from our own hardcoded fetch
+call, not untrusted input), but the check should still be precise —
+parse the URL and compare new URL(url).hostname exactly.
+
+- fix(workflow): stop false-positive catalog-behind nudges, fix docs
+
+Copilot review, four fixes:
+
+- docs/runbook.md: a backtick code span was split across a line wrap
+  ("`/haus-workflow\nproject:refresh`"), rendering broken. Rewrapped.
+- docs/cli.md: --from-hook's description said it checks npm/catalog/
+  lock; it never inspected lock content (no hashing) and only reads
+  the lock to confirm this is a haus project and get its catalogRef.
+  Corrected the wording.
+- readLockSummary() only ever read catalogRef from lock item 0. An
+  older/mixed lock could have it missing there while later items carry
+  it. Now searches all items for the first defined catalogRef.
+- runFromHookCheck() fell back to 'main' when catalogRef was absent,
+  which then almost always compared "behind" against any real release
+  tag — a false-positive nudge, and a wrong claim ("installed from
+  main") when the ref was actually unknown. Now skips the catalog
+  comparison entirely when catalogRef is null.
+
+New tests: readLockSummary's cross-item catalogRef fallback (and that
+it never hashes file content, unlike checkLock), plus a regression
+test proving no false "behind" nudge fires when catalogRef is missing
+even if the catalog has newer tags (mocked GitHub tags API).
+
+yarn verify: 633/633 tests green.
+
+- fix(docs): avoid a prettier-reflowed broken inline code span in cli.md
+
+The previous commit's own pre-commit prettier pass reflowed the
+--from-hook bullet and split a `/haus-workflow project:refresh`
+code span across the wrap (the same bug class Copilot flagged in
+runbook.md moments earlier) — verified by re-running prettier on
+docs/cli.md, docs/runbook.md, and SKILL.md directly; all three are
+now stable ("unchanged") under formatting.
+
+### Features
+
+- **workflow:** consolidate haus-\* commands into /haus-workflow skill ([#161](https://github.com/WeAreHausTech/haus-workflow/issues/161)) ([e5c34f7](https://github.com/WeAreHausTech/haus-workflow/commit/e5c34f73f723520041d54523f6cf384d890d6c99))
+
+### Bug Fixes
+
+- **apply:** scope llms.txt cache to items actually installed ([#162](https://github.com/WeAreHausTech/haus-workflow/issues/162)) ([f331f08](https://github.com/WeAreHausTech/haus-workflow/commit/f331f08a5c2e58bff2d8beda062f30515661685e))
+
 ## [0.32.1](https://github.com/WeAreHausTech/haus-workflow/compare/v0.32.0...v0.32.1) (2026-06-30)
 
 ### Bug Fixes
