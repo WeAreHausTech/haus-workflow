@@ -38,6 +38,13 @@ const PROJECT_HOOK_FRAGMENTS: HookFragment[] = [
     command: 'haus guard bash --from-hook',
   },
   {
+    id: 'haus.decisions-guard',
+    gate: 'keep',
+    event: 'PreToolUse',
+    matcher: 'Bash',
+    command: 'haus decisions guard --from-hook',
+  },
+  {
     id: 'haus.decisions-suggest',
     gate: 'keep',
     event: 'Stop',

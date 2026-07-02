@@ -37,6 +37,10 @@ export const CANONICAL_HOOKS: ClaudeHooksSettings = {
         matcher: 'Bash',
         hooks: [{ type: 'command', command: 'haus guard bash --from-hook' }],
       },
+      {
+        matcher: 'Bash',
+        hooks: [{ type: 'command', command: 'haus decisions guard --from-hook' }],
+      },
     ],
     Stop: [
       {

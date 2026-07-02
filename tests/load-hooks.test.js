@@ -9,9 +9,10 @@ describe('loadClaudeHooksSettings', () => {
   it('keeps the canonical PreToolUse guard hooks and Stop decisions hook', async () => {
     const s = await loadClaudeHooksSettings()
     assert.equal(s.hooks.UserPromptSubmit, undefined)
-    assert.equal(s.hooks.PreToolUse?.length, 2)
+    assert.equal(s.hooks.PreToolUse?.length, 3)
     assert.equal(s.hooks.PreToolUse?.[0].hooks[0].command, 'haus guard file-access --from-hook')
     assert.equal(s.hooks.PreToolUse?.[1].hooks[0].command, 'haus guard bash --from-hook')
+    assert.equal(s.hooks.PreToolUse?.[2].hooks[0].command, 'haus decisions guard --from-hook')
     assert.equal(s.hooks.Stop?.length, 1)
     assert.equal(s.hooks.Stop?.[0].hooks[0].command, 'haus decisions suggest --from-hook')
   })
