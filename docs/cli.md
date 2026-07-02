@@ -207,11 +207,16 @@ Architecture Decision Record (ADR) gate and drafts. Alias: `haus adr` = `haus de
 | Subcommand                         | Purpose                                                                      |
 | ---------------------------------- | ---------------------------------------------------------------------------- |
 | `check [--staged \| --range A..B]` | Fail when decision-worthy diff lacks `docs/decisions/NNNN-*.md` + README row |
+| `guard [--from-hook]`              | PreToolUse hook: denies `gh pr create` when the diff needs an ADR            |
 | `suggest [--from-hook] [--title]`  | Draft ADR from diff; `--from-hook` for Stop hook JSON on stdout              |
 | `next-number`                      | Print next four-digit decision number                                        |
 | `validate <path>`                  | Validate decision markdown structure                                         |
 
 **Triggers** load from `library/catalog/decisions-triggers.json` (synced from catalog).
+
+**Local gate:** `guard` is wired as a `PreToolUse` hook (see `docs/security.md`) so a
+decision-worthy PR is blocked locally before it is even opened, not just at CI.
+
 Escape hatch: `[adr-skip]` in PR body (ignored for security/auth path changes).
 Disable gate: `.haus-workflow/adr-gate.json` with `{ "mode": "off" }` (doctor advises).
 
