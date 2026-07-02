@@ -20,3 +20,4 @@ this index covers CLI/repo decisions. ADR-0001 here links to those where the JSO
 | [0009](0009-llms-txt-reference-fetching.md)                   | llms.txt reference fetching and local cache                        | Accepted |
 | [0010](0010-supply-chain-hardening.md)                        | Supply-chain hardening — fail-closed defaults and defence-in-depth | Accepted |
 | [0011](0011-consolidate-commands-into-haus-workflow-skill.md) | Consolidate haus-\* commands into the haus-workflow skill          | Accepted |
+| [0012](0012-local-pre-pr-decisions-guard-hook.md)             | Local pre-PR decisions guard hook (`decisions guard`)              | Accepted |
