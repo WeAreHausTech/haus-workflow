@@ -11,7 +11,7 @@ on:
       forceFullSync:
         description: 'Force a full sync of all docusaurus-docs files'
         required: false
-        default: 'true'
+        default: 'false'
 
 concurrency:
   group: sync-docusaurus-docs-workflow
