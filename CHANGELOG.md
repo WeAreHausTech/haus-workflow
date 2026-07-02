@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.1.0](https://github.com/WeAreHausTech/haus-workflow/compare/v1.0.0...v1.1.0) (2026-07-02)
+
+### Features
+
+- **decisions:** add local pre-PR ADR gate (decisions guard hook) ([#163](https://github.com/WeAreHausTech/haus-workflow/issues/163)) ([2f2d8fb](https://github.com/WeAreHausTech/haus-workflow/commit/2f2d8fb0840389a9b4d1631b686da996064fc8e6))
+
 ## [1.0.0](https://github.com/WeAreHausTech/haus-workflow/compare/v0.32.1...v1.0.0) (2026-07-02)
 
 ### ⚠ BREAKING CHANGES
