@@ -91,7 +91,7 @@ test('apply writes guards-only hook contract and doctor --hooks passes', () => {
 
   const settings = JSON.parse(readFileSync(path.join(temp, '.claude/settings.json'), 'utf8'))
   assert.equal(settings.hooks.UserPromptSubmit, undefined)
-  assert.equal(settings.hooks.PreToolUse.length, 2)
+  assert.equal(settings.hooks.PreToolUse.length, 3)
 
   const doctor = execaSync('node', [path.resolve('dist/cli.js'), 'doctor', '--hooks'], {
     cwd: temp,
@@ -177,7 +177,7 @@ test('apply upgrades legacy settings by pruning the retired context UserPromptSu
 
   const settings = JSON.parse(readFileSync(path.join(temp, '.claude/settings.json'), 'utf8'))
   assert.equal(settings.hooks.UserPromptSubmit, undefined)
-  assert.equal(settings.hooks.PreToolUse.length, 2)
+  assert.equal(settings.hooks.PreToolUse.length, 3)
   assert.equal(settings._haus?.hookCommands?.includes('haus context --from-hook'), false)
 })
 

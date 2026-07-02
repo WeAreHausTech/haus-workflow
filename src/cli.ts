@@ -7,6 +7,7 @@ import { Command } from 'commander'
 import { runApply } from './commands/apply.js'
 import { runCatalogAudit } from './commands/catalog-audit.js'
 import { runClone } from './commands/clone.js'
+import { runDecisionsGuard } from './commands/decisions-guard.js'
 import { runDecisions } from './commands/decisions.js'
 import { runDoctor } from './commands/doctor.js'
 import { runExplainRecommendation } from './commands/explain-recommendation.js'
@@ -164,6 +165,10 @@ function registerDecisionsCommand(name: string): void {
       runDecisions('suggest', undefined, opts),
     )
   cmd.command('next-number').action(() => runDecisions('next-number'))
+  cmd
+    .command('guard')
+    .option('--from-hook', 'Emit JSON for Claude Code PreToolUse hook')
+    .action((opts: { fromHook?: boolean }) => runDecisionsGuard(opts))
   cmd
     .command('validate')
     .argument('[path]', 'Decision markdown file')
