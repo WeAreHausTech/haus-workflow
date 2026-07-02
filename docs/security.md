@@ -34,6 +34,15 @@ preserved when editing the command/path lists.
 - Both guards return explicit, plain-language deny reasons (that still name the blocked
   command/path) — non-developers hit these and must understand them
 
+### PR-time decisions gate (separate from the guards above)
+
+`haus decisions guard --from-hook` is a distinct PreToolUse hook, not part of the
+deny-tier guards. It no-ops on every Bash call except `gh pr create`; when matched,
+it runs the same `runDecisionsCheck` engine as `haus decisions check` (CI) over the
+diff against the repo's default branch, and denies the tool call if the diff is
+decision-worthy and lacks a valid ADR under `docs/decisions/`. See ADR-0010 in
+`haus-workflow-catalog`.
+
 ### Deny-tier bash commands (hard block)
 
 `src/security/dangerous-commands.ts` `DENY_COMMANDS`: `sudo`, `chmod -R 777`,
