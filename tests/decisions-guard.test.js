@@ -75,6 +75,25 @@ describe('runDecisionsGuard', () => {
     }
   })
 
+  it('denies with a malformed-payload message when stdin is invalid JSON', async () => {
+    const dir = makeRepoWithFeatureBranch({ changePackageJson: false })
+    const logSpy = mock.method(console, 'log')
+    try {
+      await withCwd(dir, () =>
+        runDecisionsGuard({
+          fromHook: true,
+          stdinPayload: '{not json',
+        }),
+      )
+      assert.equal(logSpy.mock.calls.length, 1)
+      const decision = JSON.parse(logSpy.mock.calls[0].arguments[0])
+      assert.equal(decision.hookSpecificOutput.permissionDecision, 'deny')
+      assert.equal(decision.hookSpecificOutput.permissionDecisionReason, 'Malformed hook payload')
+    } finally {
+      logSpy.mock.restore()
+    }
+  })
+
   it('allows gh pr create when the diff is not decision-worthy', async () => {
     const dir = makeRepoWithFeatureBranch({ changePackageJson: false })
     fs.writeFileSync(path.join(dir, 'README.md'), 'docs only\n')
