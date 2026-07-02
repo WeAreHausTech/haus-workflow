@@ -1,10 +1,13 @@
-// tests/haus-setup-command.test.js
+// tests/haus-workflow-init-reference.test.js
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import path from 'node:path'
 
-const CMD = fs.readFileSync('library/global/commands/haus-setup.md', 'utf8')
+const CMD = fs.readFileSync(
+  'library/global/skills/haus-workflow/references/init.md',
+  'utf8',
+)
 const MANIFEST = JSON.parse(fs.readFileSync('library/catalog/manifest.json', 'utf8'))
 
 function docsSkillBasename() {
@@ -13,16 +16,16 @@ function docsSkillBasename() {
   return path.basename(entry.path) // skills/haus-owned/general/writing-documentation -> writing-documentation
 }
 
-test('haus-setup references the installed docs skill at the manifest-derived path', () => {
+test('project:init reference cites the installed docs skill at the manifest-derived path', () => {
   const expectedPath = `.claude/skills/${docsSkillBasename()}/SKILL.md`
-  assert.ok(CMD.includes(expectedPath), `command should tell the agent to read ${expectedPath}`)
+  assert.ok(CMD.includes(expectedPath), `reference should tell the agent to read ${expectedPath}`)
 })
 
-test('haus-setup instructs writing deep-context.json', () => {
-  assert.ok(CMD.includes('deep-context.json'), 'command must mention deep-context.json')
+test('project:init reference instructs writing deep-context.json', () => {
+  assert.ok(CMD.includes('deep-context.json'), 'reference must mention deep-context.json')
 })
 
-test('haus-setup runs `haus recommend` after the docs skill and before the final apply', () => {
+test('project:init reference runs `haus recommend` after the docs skill and before the final apply', () => {
   const firstSkillRef = CMD.indexOf('writing-documentation')
   const recommendIdx = CMD.indexOf('haus recommend')
   const lastApplyIdx = CMD.lastIndexOf('haus apply --write')
@@ -33,7 +36,7 @@ test('haus-setup runs `haus recommend` after the docs skill and before the final
   assert.ok(recommendIdx < lastApplyIdx, '`haus recommend` must come before the final apply')
 })
 
-test('haus-setup offers opt-in helpers (optInEligible) between recommend and final apply', () => {
+test('project:init reference offers opt-in helpers (optInEligible) between recommend and final apply', () => {
   assert.ok(CMD.includes('optInEligible'), 'must read optInEligible from recommendation.json')
   assert.ok(CMD.includes('AskUserQuestion'), 'must use AskUserQuestion to offer opt-ins')
   assert.ok(CMD.includes('haus recommend --include'), 'must add opt-ins via recommend --include')
@@ -45,7 +48,7 @@ test('haus-setup offers opt-in helpers (optInEligible) between recommend and fin
   assert.ok(optInIdx < lastApplyIdx, 'opt-in offer must come before the final apply')
 })
 
-test('haus-setup surfaces config scaffold preserve-by-default (force only on explicit replace)', () => {
+test('project:init reference surfaces config scaffold preserve-by-default (force only on explicit replace)', () => {
   assert.ok(CMD.includes('haus scaffold'), 'must offer config scaffold')
   assert.ok(CMD.includes('--force'), 'must mention --force as the explicit overwrite path')
   assert.ok(

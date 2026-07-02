@@ -13,9 +13,11 @@ test('add-skills task is in the alias table', () => {
   assert.ok(/add-skills.*opt-in/.test(SKILL), 'should document add-skills / opt-in aliases')
 })
 
-test('add-skills appears in the no-arg menu as option 6', () => {
-  const menu = SKILL.slice(SKILL.indexOf('Question: "What would you like to do?"'))
-  assert.ok(/6\.\s*\[project\]\s*project:add-skills/.test(menu), 'menu must offer option 6')
+test('add-skills appears in the no-arg menu', () => {
+  // The menu is split into two <=4-option AskUserQuestion questions (see the
+  // Step 1 test in haus-workflow-skill.test.js); add-skills lives in the second.
+  const menu = SKILL.slice(SKILL.indexOf('Question 1: "What would you like to do?"'))
+  assert.ok(/\d\.\s*\[project\]\s*project:add-skills/.test(menu), 'menu must offer add-skills')
 })
 
 test('add-skills procedure scans, recommends, offers opt-ins, and applies', () => {

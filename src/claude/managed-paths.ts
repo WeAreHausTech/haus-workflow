@@ -5,7 +5,7 @@
 import { claudePath, hausPath } from '../utils/paths.js'
 
 /** Haus-managed files under `.claude/` always written by apply (excluding settings.json). */
-export const PROJECT_MANAGED_CLAUDE_REL = ['rules/haus.md', 'commands/haus-doctor.md'] as const
+export const PROJECT_MANAGED_CLAUDE_REL = ['rules/haus.md'] as const
 
 /** Haus-managed artifacts under `.haus-workflow/` written during apply. */
 export const PROJECT_MANAGED_HAUS_REL = ['haus.lock.json'] as const

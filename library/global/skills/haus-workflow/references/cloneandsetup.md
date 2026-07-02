@@ -1,6 +1,4 @@
----
-description: Clone a project's repos and set each one up for local development.
----
+# project:cloneandsetup procedure
 
 Clone a project's repos **and** set each one up for local development — node version, dependencies, databases, cross-repo links, and env. This is `project:clone` followed by a per-repo setup pass and a localdev orchestration pass.
 
@@ -8,7 +6,7 @@ Clone a project's repos **and** set each one up for local development — node v
 
 ## Step 1 — Clone
 
-Run the full `project:clone` flow by following `~/.claude/commands/haus-clone.md` end to end (name → one repo; no name → workspace repos from `repos.manifest.json`). Carry the resulting repo list into Step 2.
+Run the full `project:clone` flow by following `references/clone.md` end to end (name → one repo; no name → workspace repos from `repos.manifest.json`). Carry the resulting repo list into Step 2.
 
 ## Step 2 — Prerequisite gate (one consolidated check)
 

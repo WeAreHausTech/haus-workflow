@@ -91,6 +91,33 @@ interface SourceFile {
   destPath: string
 }
 
+/**
+ * Enumerates auxiliary files a global skill ships alongside SKILL.md (e.g. a
+ * `references/` folder of procedures SKILL.md points to) so they install too —
+ * `applyInstall` stamps and copies files individually, it does not `fs.copy` whole
+ * directories the way project-level catalog skills do.
+ */
+function collectSkillAuxFiles(
+  skillsDir: string,
+  claudeDir: string,
+  skillName: string,
+): SourceFile[] {
+  const skillDir = path.join(skillsDir, skillName)
+  const entries: SourceFile[] = []
+  for (const rel of fs.readdirSync(skillDir, { recursive: true }) as string[]) {
+    if (rel === 'SKILL.md') continue
+    const abs = path.join(skillDir, rel)
+    if (!fs.statSync(abs).isFile()) continue
+    const posixRel = rel.split(path.sep).join('/')
+    entries.push({
+      stableId: `skill.${skillName}.${posixRel.replace(/\//g, '.')}`,
+      srcRelPath: path.join('library', 'global', 'skills', skillName, rel),
+      destPath: path.join(claudeDir, 'skills', skillName, rel),
+    })
+  }
+  return entries
+}
+
 /** Enumerates all skills and global slash commands under `srcDir` into SourceFile entries. */
 function collectSourceFiles(srcDir: string, claudeDir: string): SourceFile[] {
   const entries: SourceFile[] = []
@@ -105,6 +132,7 @@ function collectSourceFiles(srcDir: string, claudeDir: string): SourceFile[] {
           srcRelPath: path.join('library', 'global', 'skills', skillName, 'SKILL.md'),
           destPath: path.join(claudeDir, 'skills', skillName, 'SKILL.md'),
         })
+        entries.push(...collectSkillAuxFiles(skillsDir, claudeDir, skillName))
       }
     }
   }

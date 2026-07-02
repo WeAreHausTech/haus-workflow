@@ -1,10 +1,8 @@
----
-description: Clone this project's repositories onto disk (per-repo setup is separate).
----
+# project:clone procedure
 
 Clone repositories for this project. Per-repo setup (install, Docker, `.env`) is a separate step that isn't wired yet — this command only gets repos onto disk.
 
-Cloning a single repo is always `haus clone <url> [dir]`. This command picks _which_ repos to clone and runs that primitive for each. There are two modes, chosen by whether a name was given.
+Cloning a single repo is always `haus clone <url> [dir]`. This procedure picks _which_ repos to clone and runs that primitive for each. There are two modes, chosen by whether a name was given.
 
 **Always ask before cloning — never assume.** The user may already have the repos on disk. Do not start cloning until they have confirmed. A missing `repos.local.json` does **not** mean they want a fresh clone; it just means nothing is recorded yet — you must still ask.
 

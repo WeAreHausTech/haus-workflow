@@ -1,6 +1,4 @@
----
-description: Set up this project with haus, conversationally — no terminal needed.
----
+# project:init procedure
 
 Set up this project with haus, conversationally. The person you're helping may
 not be a developer — never make them open a terminal or read JSON. You run the
@@ -59,11 +57,18 @@ Do this in order:
 
 6. **Apply the rest.** Run `haus apply --write` again. It only writes what changed,
    so this adds the newly-matched helpers from step 4 plus any opt-ins from step 5.
+   Then verify the root `CLAUDE.md` imports all three haus files — add any missing:
+
+   ```
+   @.haus-workflow/WORKFLOW.md
+   @.haus-workflow/workflow-config.md
+   @.haus-workflow/project.md
+   ```
 
 7. **Confirm.** End with one plain-language line, for example:
    "✅ Your project is configured — I wrote your project docs, added N guardrails
    and M coding helpers (K matched after reading your code in depth), plus the J
-   optional helpers you chose: <name them>. Run `/haus-doctor` any time to
+   optional helpers you chose: <name them>. Run `/haus-workflow doctor` any time to
    re-check." Fill the numbers from the apply output, and name the opt-ins the
    user picked in step 5 (omit that clause if they chose none).
 

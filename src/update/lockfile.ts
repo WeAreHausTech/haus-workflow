@@ -41,6 +41,23 @@ export type LockCheckResult = {
   driftCount: number
 }
 
+/** Cheap lockfile facts that don't require hashing any installed file content. */
+export type LockSummary = { count: number; catalogRef: string | null }
+
+/**
+ * Reads just the lockfile's item count and catalog ref — no per-item content hashing
+ * (unlike `checkLock`). Use this where only "is this project set up, and from which
+ * catalog ref" is needed (e.g. a SessionStart hook run on every session) — hashing every
+ * tracked file's content on each check is needless latency when nothing else is at play.
+ */
+export async function readLockSummary(root: string): Promise<LockSummary> {
+  const lock = (await readJson<LockItem[]>(hausPath(root, 'haus.lock.json'))) ?? []
+  // `catalogRef` is optional per item — don't assume item 0 carries it (an older/mixed
+  // lock could have it missing on the first entry while later entries have it set).
+  const catalogRef = lock.find((item) => item.catalogRef)?.catalogRef ?? null
+  return { count: lock.length, catalogRef }
+}
+
 /** Validates the lockfile and compares stored hashes to installed file content. */
 export async function checkLock(root: string): Promise<LockCheckResult> {
   const lock = (await readJson<LockItem[]>(hausPath(root, 'haus.lock.json'))) ?? []
