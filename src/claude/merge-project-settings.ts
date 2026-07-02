@@ -21,8 +21,12 @@ import {
 } from '../utils/fs.js'
 import { claudePath } from '../utils/paths.js'
 
-/** Hook fragments derived from the inlined canonical project hook set. */
-const PROJECT_HOOK_FRAGMENTS: HookFragment[] = [
+/**
+ * Hook fragments derived from the inlined canonical project hook set.
+ * Exported so tests can assert cross-list parity with `CANONICAL_HOOKS`
+ * (`src/claude/load-hooks.ts`) — see `tests/hook-lists-parity.test.js`.
+ */
+export const PROJECT_HOOK_FRAGMENTS: HookFragment[] = [
   {
     id: 'haus.guard-file',
     gate: 'keep',
