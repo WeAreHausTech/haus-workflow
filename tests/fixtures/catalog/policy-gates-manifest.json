@@ -197,7 +197,7 @@
       "id": "haus.turborepo-turborepo",
       "source": "haus",
       "type": "skill",
-      "path": "skills/haus.turborepo-turborepo",
+      "path": "skills/turborepo-turborepo",
       "title": "Turborepo",
       "purpose": "Triggers required-role-missing gate when turbo-monorepo role is absent. Hardcoded check in recommend().",
       "tags": ["turbo", "workflow"],

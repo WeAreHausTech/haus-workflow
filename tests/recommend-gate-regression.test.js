@@ -95,7 +95,7 @@ test('laravel without sentry: must not recommend sentry-php-sdk', () => {
   )
 })
 
-test('nx eslint-plugin only: must not recommend official nx workspace skills', () => {
+test('nx eslint-plugin only: must not recommend nx-monorepo role-gated skills', () => {
   withTempRepo(
     {
       'package.json': JSON.stringify(
