@@ -85,8 +85,8 @@ jobs:
           else
             BEFORE="${{ github.event.before }}"
             AFTER="${{ github.sha }}"
-            CHANGED_FILES=$(git diff --name-only "$BEFORE" "$AFTER" | grep -E '^docusaurus-docs/.*\.(md|mdx)$' | grep -vE 'docusaurus-docs/README\.mdx?$' || true)
-            DELETED_FILES=$(git diff --name-only --diff-filter=D "$BEFORE" "$AFTER" | grep -E '^docusaurus-docs/.*\.(md|mdx)$' | grep -vE 'docusaurus-docs/README\.mdx?$' || true)
+            CHANGED_FILES=$(git diff --name-only "$BEFORE" "$AFTER" | grep -E '^docusaurus-docs/.*\.(md|mdx)$' | grep -vE 'docusaurus-docs/(README|claude-code-guide)\.mdx?$' || true)
+            DELETED_FILES=$(git diff --name-only --diff-filter=D "$BEFORE" "$AFTER" | grep -E '^docusaurus-docs/.*\.(md|mdx)$' | grep -vE 'docusaurus-docs/(README|claude-code-guide)\.mdx?$' || true)
 
             if [ -z "$CHANGED_FILES" ] && [ -z "$DELETED_FILES" ]; then
               echo "No changed or deleted docusaurus-docs markdown files."
