@@ -1,5 +1,5 @@
 {
-  "version": "3.3.0",
+  "version": "3.4.0",
   "items": [
     {
       "id": "haus.agentic-workflow-standard",
@@ -571,7 +571,7 @@
       "title": "Ecc Laravel Patterns",
       "purpose": "Laravel architecture patterns, routing/controllers, Eloquent ORM, service layers, queues, events, caching, and API resources for production apps.",
       "whenToUse": "Laravel architecture patterns, routing/controllers, Eloquent ORM, service layers, queues, events, caching, and API resources for production apps.",
-      "whenNotToUse": "Do not use when a more specific skill or command applies.",
+      "whenNotToUse": "Do not use when a more specific skill or command applies. For deeper Livewire, Horizon queue, or Sanctum-auth-specific guidance with a validation-checkpoint workflow, see haus.jeffallan-laravel-specialist.",
       "tags": ["workflow", "laravel"],
       "repoRoles": [],
       "tokenEstimate": 2638,
@@ -587,6 +587,75 @@
       "pinnedRef": "ec92b528471df708c2384ebbcc82b390b60f535a",
       "ecosystem": "laravel",
       "requiresAny": [
+        {
+          "stack": "laravel"
+        },
+        {
+          "dependency": "laravel/framework"
+        }
+      ]
+    },
+    {
+      "id": "haus.jeffallan-laravel-specialist",
+      "version": "1.0.1",
+      "source": "curated",
+      "type": "skill",
+      "path": "skills/jeffallan/laravel-specialist",
+      "title": "Laravel Specialist",
+      "purpose": "Build and configure Laravel 10+ applications, including creating Eloquent models and relationships, implementing Sanctum authentication, configuring Horizon queues, designing RESTful APIs with API resources, and building reactive interfaces with Livewire. Use when creating Laravel models, setting up queue workers, implementing Sanctum auth flows, building Livewire components, optimising Eloquent queries, or writing Pest/PHPUnit tests for Laravel features.",
+      "whenToUse": "Build and configure Laravel 10+ applications, including creating Eloquent models and relationships, implementing Sanctum authentication, configuring Horizon queues, designing RESTful APIs with API resources, and building reactive interfaces with Livewire. Use when creating Laravel models, setting up queue workers, implementing Sanctum auth flows, building Livewire components, optimising Eloquent queries, or writing Pest/PHPUnit tests for Laravel features.",
+      "whenNotToUse": "Do not use when a more specific skill or command applies.",
+      "tags": ["workflow", "laravel"],
+      "repoRoles": [],
+      "tokenEstimate": 2087,
+      "installMode": "copy-selected",
+      "default": true,
+      "reviewStatus": "approved",
+      "riskLevel": "low",
+      "useMode": "copy",
+      "license": "MIT",
+      "licenseConfidence": "high",
+      "originSourceId": "jeffallan-claude-skills",
+      "originUrl": "https://github.com/jeffallan/claude-skills/blob/e8be415bc94d8d6ebddc2fb50e5d03c6e27d4319/skills/laravel-specialist/SKILL.md",
+      "pinnedRef": "e8be415bc94d8d6ebddc2fb50e5d03c6e27d4319",
+      "ecosystem": "laravel",
+      "requiresAny": [
+        {
+          "stack": "laravel"
+        },
+        {
+          "dependency": "laravel/framework"
+        }
+      ]
+    },
+    {
+      "id": "haus.jeffallan-php-pro",
+      "version": "1.0.1",
+      "source": "curated",
+      "type": "skill",
+      "path": "skills/jeffallan/php-pro",
+      "title": "PHP Pro",
+      "purpose": "Use when building PHP applications with modern PHP 8.3+ features, Laravel, or Symfony frameworks. Invokes strict typing, PHPStan level 9, async patterns with Swoole, and PSR standards. Creates controllers, configures middleware, generates migrations, writes PHPUnit/Pest tests, defines typed DTOs and value objects, sets up dependency injection, and scaffolds REST/GraphQL APIs. Use when working with Eloquent, Doctrine, Composer, Psalm, ReactPHP, or any PHP API development.",
+      "whenToUse": "Use when building PHP applications with modern PHP 8.3+ features, Laravel, or Symfony frameworks. Invokes strict typing, PHPStan level 9, async patterns with Swoole, and PSR standards. Creates controllers, configures middleware, generates migrations, writes PHPUnit/Pest tests, defines typed DTOs and value objects, sets up dependency injection, and scaffolds REST/GraphQL APIs. Use when working with Eloquent, Doctrine, Composer, Psalm, ReactPHP, or any PHP API development.",
+      "whenNotToUse": "Do not use for reviewing existing PHP code changes — use haus.ecc-php-reviewer for that. Do not use when a more specific skill or command applies.",
+      "tags": ["workflow", "php"],
+      "repoRoles": [],
+      "tokenEstimate": 1519,
+      "installMode": "copy-selected",
+      "default": true,
+      "reviewStatus": "approved",
+      "riskLevel": "low",
+      "useMode": "copy",
+      "license": "MIT",
+      "licenseConfidence": "high",
+      "originSourceId": "jeffallan-claude-skills",
+      "originUrl": "https://github.com/jeffallan/claude-skills/blob/e8be415bc94d8d6ebddc2fb50e5d03c6e27d4319/skills/php-pro/SKILL.md",
+      "pinnedRef": "e8be415bc94d8d6ebddc2fb50e5d03c6e27d4319",
+      "ecosystem": "php",
+      "requiresAny": [
+        {
+          "stack": "php"
+        },
         {
           "stack": "laravel"
         },
@@ -773,7 +842,7 @@
       "title": "PHP Reviewer",
       "purpose": "Expert PHP code reviewer specializing in PSR-12 compliance, PHP type system, Eloquent ORM patterns, security, and performance. Use for all PHP code changes. MUST BE USED for PHP projects.",
       "whenToUse": "Expert PHP code reviewer specializing in PSR-12 compliance, PHP type system, Eloquent ORM patterns, security, and performance. Use for all PHP code changes. MUST BE USED for PHP projects.",
-      "whenNotToUse": "Do not use when a more specific skill or command applies.",
+      "whenNotToUse": "Do not use for authoring new PHP code — use haus.jeffallan-php-pro for that. Do not use when a more specific skill or command applies.",
       "tags": ["agent", "review", "php"],
       "repoRoles": [],
       "tokenEstimate": 1431,
@@ -795,7 +864,7 @@
     },
     {
       "id": "haus.ecc-prisma-patterns",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "source": "curated",
       "type": "skill",
       "path": "skills/ecc/prisma-patterns",
@@ -805,7 +874,7 @@
       "whenNotToUse": "Do not use when a more specific skill or command applies.",
       "tags": ["workflow", "prisma", "backend", "database"],
       "repoRoles": ["next-app", "nestjs-api"],
-      "tokenEstimate": 3456,
+      "tokenEstimate": 3792,
       "installMode": "copy-selected",
       "default": false,
       "reviewStatus": "approved",
@@ -814,8 +883,8 @@
       "license": "MIT",
       "licenseConfidence": "high",
       "originSourceId": "ecc",
-      "originUrl": "https://github.com/affaan-m/ECC/blob/71d22d0a77b7e0684f4e51cba03749b788993cdb/skills/prisma-patterns/SKILL.md",
-      "pinnedRef": "71d22d0a77b7e0684f4e51cba03749b788993cdb",
+      "originUrl": "https://github.com/affaan-m/ECC/blob/81af40761939056ab3dc54732fd4f562a27309d0/skills/prisma-patterns/SKILL.md",
+      "pinnedRef": "81af40761939056ab3dc54732fd4f562a27309d0",
       "ecosystem": "database",
       "requiresAny": [
         {
@@ -1106,7 +1175,7 @@
       "title": "Ecc Vue Patterns",
       "purpose": "Vue.js 3 Composition API patterns, component architecture, reactivity best practices, Pinia state management, Vue Router navigation, and Nuxt SSR patterns. Activates for Vue, Nuxt, Vite, or Pinia projects.",
       "whenToUse": "Vue.js 3 Composition API patterns, component architecture, reactivity best practices, Pinia state management, Vue Router navigation, and Nuxt SSR patterns. Activates for Vue, Nuxt, Vite, or Pinia projects.",
-      "whenNotToUse": "Do not use when a more specific skill or command applies.",
+      "whenNotToUse": "Use haus.antfu-vue for the authoritative, doc-generated core Composition API/reactivity reference.",
       "tags": ["workflow", "vue"],
       "repoRoles": ["vue-app"],
       "tokenEstimate": 3268,
@@ -1183,43 +1252,6 @@
       ],
       "ecosystem": "tooling",
       "tokenEstimate": 0,
-      "installMode": "copy-selected",
-      "reviewStatus": "approved",
-      "riskLevel": "low"
-    },
-    {
-      "id": "haus.expo-react-native-patterns",
-      "version": "1.0.1",
-      "source": "haus",
-      "type": "skill",
-      "path": "skills/haus-owned/stack-patterns/expo-react-native-patterns",
-      "title": "Haus Expo / React Native patterns",
-      "purpose": "Guide Expo Router, React Native component, native module, and EAS build changes.",
-      "whenToUse": "Use for Expo Router routes, RN components, native modules, expo config plugins, and EAS build/submit.",
-      "whenNotToUse": "Do not use for web-only React apps or unrelated mobile native projects (Swift/Kotlin without Expo).",
-      "references": ["https://docs.expo.dev/"],
-      "tokenBudget": 1200,
-      "tags": ["expo", "react-native", "mobile"],
-      "repoRoles": ["expo-app"],
-      "requiresAny": [
-        {
-          "stack": "expo"
-        },
-        {
-          "stack": "react-native"
-        },
-        {
-          "role": "expo-app"
-        },
-        {
-          "dependency": "expo"
-        },
-        {
-          "dependency": "react-native"
-        }
-      ],
-      "ecosystem": "mobile",
-      "tokenEstimate": 2200,
       "installMode": "copy-selected",
       "reviewStatus": "approved",
       "riskLevel": "low"
@@ -1387,34 +1419,6 @@
       "installMode": "copy-selected",
       "reviewStatus": "approved",
       "riskLevel": "medium"
-    },
-    {
-      "id": "haus.nx-monorepo-patterns",
-      "version": "1.1.1",
-      "source": "haus",
-      "type": "skill",
-      "path": "skills/haus-owned/stack-patterns/nx-monorepo-patterns",
-      "title": "Haus Nx monorepo patterns",
-      "purpose": "Guide Nx project graph, target pipeline, and workspace boundaries.",
-      "whenToUse": "Use for Nx workspace graph, target, and generator configuration updates.",
-      "whenNotToUse": "Do not use for app-only feature edits without workspace impact.",
-      "references": ["https://nx.dev/llms.txt"],
-      "tokenBudget": 1200,
-      "tags": ["nx", "yarn4"],
-      "repoRoles": ["nx-monorepo"],
-      "requiresAny": [
-        {
-          "role": "nx-monorepo"
-        },
-        {
-          "dependency": "nx"
-        }
-      ],
-      "ecosystem": "nx",
-      "tokenEstimate": 2200,
-      "installMode": "copy-selected",
-      "reviewStatus": "approved",
-      "riskLevel": "low"
     },
     {
       "id": "haus.oh-my-claudecode-designer",
@@ -1754,7 +1758,7 @@
     },
     {
       "id": "haus.sentry-sentry-nestjs-sdk",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "source": "curated",
       "type": "skill",
       "path": "skills/sentry/sentry-nestjs-sdk",
@@ -1773,8 +1777,8 @@
       "license": "MIT",
       "licenseConfidence": "high",
       "originSourceId": "getsentry-sentry-for-ai",
-      "originUrl": "https://github.com/getsentry/sentry-for-ai/blob/cc302403ebf647fd21c3ca736e1ec7ef6e4ed5a3/skills/sentry-nestjs-sdk/SKILL.md",
-      "pinnedRef": "cc302403ebf647fd21c3ca736e1ec7ef6e4ed5a3",
+      "originUrl": "https://github.com/getsentry/sentry-for-ai/blob/bef529f88175f0f9bbce6d203f93383e394d1467/skills/sentry-nestjs-sdk/SKILL.md",
+      "pinnedRef": "bef529f88175f0f9bbce6d203f93383e394d1467",
       "ecosystem": "sentry",
       "requiresAny": [
         {
@@ -1787,7 +1791,7 @@
     },
     {
       "id": "haus.sentry-sentry-nextjs-sdk",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "source": "curated",
       "type": "skill",
       "path": "skills/sentry/sentry-nextjs-sdk",
@@ -1797,7 +1801,7 @@
       "whenNotToUse": "Do not use when a more specific skill or command applies.",
       "tags": ["workflow", "sentry", "nextjs", "observability"],
       "repoRoles": [],
-      "tokenEstimate": 4544,
+      "tokenEstimate": 4731,
       "installMode": "copy-selected",
       "default": false,
       "reviewStatus": "approved",
@@ -1806,8 +1810,8 @@
       "license": "MIT",
       "licenseConfidence": "high",
       "originSourceId": "getsentry-sentry-for-ai",
-      "originUrl": "https://github.com/getsentry/sentry-for-ai/blob/cc302403ebf647fd21c3ca736e1ec7ef6e4ed5a3/skills/sentry-nextjs-sdk/SKILL.md",
-      "pinnedRef": "cc302403ebf647fd21c3ca736e1ec7ef6e4ed5a3",
+      "originUrl": "https://github.com/getsentry/sentry-for-ai/blob/bef529f88175f0f9bbce6d203f93383e394d1467/skills/sentry-nextjs-sdk/SKILL.md",
+      "pinnedRef": "bef529f88175f0f9bbce6d203f93383e394d1467",
       "ecosystem": "sentry",
       "requiresAny": [
         {
@@ -1820,7 +1824,7 @@
     },
     {
       "id": "haus.sentry-sentry-node-sdk",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "source": "curated",
       "type": "skill",
       "path": "skills/sentry/sentry-node-sdk",
@@ -1830,7 +1834,7 @@
       "whenNotToUse": "Prefer sentry-nestjs-sdk for NestJS apps using @sentry/nestjs.",
       "tags": ["workflow", "sentry", "backend", "observability"],
       "repoRoles": [],
-      "tokenEstimate": 8087,
+      "tokenEstimate": 8466,
       "installMode": "copy-selected",
       "default": false,
       "reviewStatus": "approved",
@@ -1839,8 +1843,8 @@
       "license": "MIT",
       "licenseConfidence": "high",
       "originSourceId": "getsentry-sentry-for-ai",
-      "originUrl": "https://github.com/getsentry/sentry-for-ai/blob/cc302403ebf647fd21c3ca736e1ec7ef6e4ed5a3/skills/sentry-node-sdk/SKILL.md",
-      "pinnedRef": "cc302403ebf647fd21c3ca736e1ec7ef6e4ed5a3",
+      "originUrl": "https://github.com/getsentry/sentry-for-ai/blob/bef529f88175f0f9bbce6d203f93383e394d1467/skills/sentry-node-sdk/SKILL.md",
+      "pinnedRef": "bef529f88175f0f9bbce6d203f93383e394d1467",
       "ecosystem": "sentry",
       "requiresAny": [
         {
@@ -1978,7 +1982,7 @@
     },
     {
       "id": "haus.stripe-stripe-best-practices",
-      "version": "1.0.3",
+      "version": "1.0.4",
       "source": "curated",
       "type": "skill",
       "path": "skills/stripe/stripe-best-practices",
@@ -1988,7 +1992,7 @@
       "whenNotToUse": "Do not use when a more specific skill or command applies.",
       "tags": ["workflow", "stripe", "payments"],
       "repoRoles": [],
-      "tokenEstimate": 1018,
+      "tokenEstimate": 862,
       "installMode": "copy-selected",
       "default": false,
       "reviewStatus": "approved",
@@ -1997,8 +2001,8 @@
       "license": "MIT",
       "licenseConfidence": "medium",
       "originSourceId": "stripe-ai",
-      "originUrl": "https://github.com/stripe/ai/blob/f54c9e6c0e8b6cfe4e648745eec68ecab3ddc994/skills/stripe-best-practices/SKILL.md",
-      "pinnedRef": "f54c9e6c0e8b6cfe4e648745eec68ecab3ddc994",
+      "originUrl": "https://github.com/stripe/ai/blob/b8d7e28d0cc5690fb0c0be54c84cbfdd7df6e4cd/skills/stripe-best-practices/SKILL.md",
+      "pinnedRef": "b8d7e28d0cc5690fb0c0be54c84cbfdd7df6e4cd",
       "ecosystem": "stripe",
       "requiresAny": [
         {
@@ -2055,7 +2059,7 @@
       "purpose": "Postgres performance optimization and best practices from Supabase. Use this skill when writing, reviewing, or optimizing Postgres queries, schema designs, or database configurations.",
       "whenToUse": "Postgres performance optimization and best practices from Supabase. Use this skill when writing, reviewing, or optimizing Postgres queries, schema designs, or database configurations.",
       "whenNotToUse": "Use haus.supabase-supabase for product workflow, auth, and client integration.",
-      "tags": ["workflow", "supabase", "backend", "database"],
+      "tags": ["workflow", "supabase", "postgresql", "backend", "database"],
       "repoRoles": [],
       "tokenEstimate": 644,
       "installMode": "copy-selected",
@@ -2072,6 +2076,9 @@
       "requiresAny": [
         {
           "stack": "supabase"
+        },
+        {
+          "stack": "postgresql"
         },
         {
           "dependency": "@supabase/supabase-js"
@@ -2554,19 +2561,29 @@
       "riskLevel": "low"
     },
     {
-      "id": "haus.turbo-monorepo-patterns",
-      "version": "1.0.2",
-      "source": "haus",
+      "id": "haus.turborepo-turborepo",
+      "version": "1.0.1",
+      "source": "curated",
       "type": "skill",
-      "path": "skills/haus-owned/stack-patterns/turbo-monorepo-patterns",
-      "title": "Haus Turbo monorepo patterns",
-      "purpose": "Guide Turbo pipeline and cache-safe monorepo orchestration changes.",
-      "whenToUse": "Use for turbo pipeline graph and package task orchestration updates.",
-      "whenNotToUse": "Do not use for package-local feature edits without pipeline impact.",
-      "references": ["https://turbo.build/docs/llms.txt"],
-      "tokenBudget": 1200,
-      "tags": ["turbo", "yarn4"],
+      "path": "skills/turborepo/turborepo",
+      "title": "Turborepo",
+      "purpose": "Turborepo monorepo build system guidance. Triggers on: turbo.json, task pipelines, dependsOn, caching, remote cache, the \"turbo\" CLI, --filter, --affected, CI optimization, environment variables, internal packages, monorepo structure/best practices, and boundaries. Use when user: configures tasks/workflows/pipelines, creates packages, sets up monorepo, shares code between apps, runs changed/affected packages, debugs cache, or has apps/packages directories.",
+      "whenToUse": "Turborepo monorepo build system guidance. Triggers on: turbo.json, task pipelines, dependsOn, caching, remote cache, the \"turbo\" CLI, --filter, --affected, CI optimization, environment variables, internal packages, monorepo structure/best practices, and boundaries. Use when user: configures tasks/workflows/pipelines, creates packages, sets up monorepo, shares code between apps, runs changed/affected packages, debugs cache, or has apps/packages directories.",
+      "whenNotToUse": "Do not use when a more specific skill or command applies.",
+      "tags": ["turbo", "workflow"],
       "repoRoles": ["turbo-monorepo"],
+      "tokenEstimate": 7118,
+      "installMode": "copy-selected",
+      "default": true,
+      "reviewStatus": "approved",
+      "riskLevel": "low",
+      "useMode": "copy",
+      "license": "MIT",
+      "licenseConfidence": "high",
+      "originSourceId": "vercel-turborepo",
+      "originUrl": "https://github.com/vercel/turborepo/blob/abd84cf51f95e4cc539cda4fdd7e8d7dddcac11c/skills/turborepo/SKILL.md",
+      "pinnedRef": "abd84cf51f95e4cc539cda4fdd7e8d7dddcac11c",
+      "ecosystem": "turbo",
       "requiresAny": [
         {
           "role": "turbo-monorepo"
@@ -2574,12 +2591,7 @@
         {
           "dependency": "turbo"
         }
-      ],
-      "ecosystem": "turbo",
-      "tokenEstimate": 2200,
-      "installMode": "copy-selected",
-      "reviewStatus": "approved",
-      "riskLevel": "low"
+      ]
     },
     {
       "id": "haus.typescript-patterns",
@@ -2745,6 +2757,123 @@
       "installMode": "copy-selected",
       "reviewStatus": "approved",
       "riskLevel": "low"
+    },
+    {
+      "id": "haus.wordpress-wordpress-router",
+      "version": "1.0.1",
+      "source": "curated",
+      "type": "skill",
+      "path": "skills/wordpress/wordpress-router",
+      "title": "WordPress Router",
+      "purpose": "Use when the user asks about WordPress codebases (plugins, themes, block themes, Gutenberg blocks, WP core checkouts) and you need to quickly classify the repo and route to the correct workflow/skill (blocks, theme.json, REST API, WP-CLI, performance, security, testing, release packaging).",
+      "whenToUse": "Use when the user asks about WordPress codebases (plugins, themes, block themes, Gutenberg blocks, WP core checkouts) and you need to quickly classify the repo and route to the correct workflow/skill (blocks, theme.json, REST API, WP-CLI, performance, security, testing, release packaging).",
+      "whenNotToUse": "Do not use for non-WordPress PHP projects or when the target skill is already known.",
+      "tags": ["wordpress"],
+      "repoRoles": ["wordpress-bedrock-site", "wordpress-vanilla-site"],
+      "tokenEstimate": 557,
+      "installMode": "copy-selected",
+      "default": true,
+      "reviewStatus": "approved",
+      "riskLevel": "low",
+      "useMode": "copy",
+      "license": "GPL-2.0-or-later",
+      "licenseConfidence": "high",
+      "originSourceId": "wordpress-agent-skills",
+      "originUrl": "https://github.com/WordPress/agent-skills/blob/9de2279ae789ee5e5f27f65d714867769283dabf/skills/wordpress-router/SKILL.md",
+      "pinnedRef": "9de2279ae789ee5e5f27f65d714867769283dabf",
+      "ecosystem": "wordpress",
+      "requiresAny": [
+        {
+          "role": "wordpress-bedrock-site"
+        },
+        {
+          "role": "wordpress-vanilla-site"
+        },
+        {
+          "stack": "wordpress"
+        },
+        {
+          "dependency": "wp-cli"
+        }
+      ]
+    },
+    {
+      "id": "haus.wordpress-wp-plugin-development",
+      "version": "1.0.1",
+      "source": "curated",
+      "type": "skill",
+      "path": "skills/wordpress/wp-plugin-development",
+      "title": "WordPress Plugin Development",
+      "purpose": "Use when developing WordPress plugins: architecture and hooks, activation/deactivation/uninstall, admin UI and Settings API, data storage, cron/tasks, security (nonces/capabilities/sanitization/escaping), and release packaging.",
+      "whenToUse": "Use when developing WordPress plugins: architecture and hooks, activation/deactivation/uninstall, admin UI and Settings API, data storage, cron/tasks, security (nonces/capabilities/sanitization/escaping), and release packaging.",
+      "whenNotToUse": "Do not use for theme-only or block-only work with no plugin code involved.",
+      "tags": ["wordpress"],
+      "repoRoles": ["wordpress-bedrock-site", "wordpress-vanilla-site"],
+      "tokenEstimate": 1000,
+      "installMode": "copy-selected",
+      "default": true,
+      "reviewStatus": "approved",
+      "riskLevel": "low",
+      "useMode": "copy",
+      "license": "GPL-2.0-or-later",
+      "licenseConfidence": "high",
+      "originSourceId": "wordpress-agent-skills",
+      "originUrl": "https://github.com/WordPress/agent-skills/blob/9de2279ae789ee5e5f27f65d714867769283dabf/skills/wp-plugin-development/SKILL.md",
+      "pinnedRef": "9de2279ae789ee5e5f27f65d714867769283dabf",
+      "ecosystem": "wordpress",
+      "requiresAny": [
+        {
+          "role": "wordpress-bedrock-site"
+        },
+        {
+          "role": "wordpress-vanilla-site"
+        },
+        {
+          "stack": "wordpress"
+        },
+        {
+          "dependency": "wp-cli"
+        }
+      ]
+    },
+    {
+      "id": "haus.wordpress-wp-block-development",
+      "version": "1.0.1",
+      "source": "curated",
+      "type": "skill",
+      "path": "skills/wordpress/wp-block-development",
+      "title": "WordPress Block Development",
+      "purpose": "Use when developing WordPress (Gutenberg) blocks: block.json metadata, register_block_type(_from_metadata), attributes/serialization, supports, dynamic rendering (render.php/render_callback), deprecations/migrations, viewScript vs viewScriptModule, and @wordpress/scripts/@wordpress/create-block build and test workflows.",
+      "whenToUse": "Use when developing WordPress (Gutenberg) blocks: block.json metadata, register_block_type(_from_metadata), attributes/serialization, supports, dynamic rendering (render.php/render_callback), deprecations/migrations, viewScript vs viewScriptModule, and @wordpress/scripts/@wordpress/create-block build and test workflows.",
+      "whenNotToUse": "Do not use for classic (non-block) widget or shortcode-only development.",
+      "tags": ["wordpress"],
+      "repoRoles": ["wordpress-bedrock-site", "wordpress-vanilla-site"],
+      "tokenEstimate": 1623,
+      "installMode": "copy-selected",
+      "default": true,
+      "reviewStatus": "approved",
+      "riskLevel": "low",
+      "useMode": "copy",
+      "license": "GPL-2.0-or-later",
+      "licenseConfidence": "high",
+      "originSourceId": "wordpress-agent-skills",
+      "originUrl": "https://github.com/WordPress/agent-skills/blob/9de2279ae789ee5e5f27f65d714867769283dabf/skills/wp-block-development/SKILL.md",
+      "pinnedRef": "9de2279ae789ee5e5f27f65d714867769283dabf",
+      "ecosystem": "wordpress",
+      "requiresAny": [
+        {
+          "role": "wordpress-bedrock-site"
+        },
+        {
+          "role": "wordpress-vanilla-site"
+        },
+        {
+          "stack": "wordpress"
+        },
+        {
+          "dependency": "wp-cli"
+        }
+      ]
     },
     {
       "id": "haus.writing-documentation",
@@ -2924,6 +3053,772 @@
         },
         {
           "dependency": "typescript"
+        }
+      ]
+    },
+    {
+      "id": "haus.mariadb-mariadb-features",
+      "version": "1.0.1",
+      "source": "curated",
+      "type": "skill",
+      "path": "skills/mariadb/mariadb-features",
+      "title": "Mariadb Features",
+      "purpose": "MariaDB-specific features and capabilities that go beyond standard MySQL. Use when evaluating MariaDB, optimizing an existing MariaDB application, reviewing code or schema for MariaDB improvements, asking what MariaDB can do that other databases cannot, or migrating from Oracle to MariaDB. Also use when the user asks what could be improved in how a codebase uses MariaDB, or asks about MariaDB advantages over MySQL or PostgreSQL.",
+      "whenToUse": "MariaDB-specific features and capabilities that go beyond standard MySQL. Use when evaluating MariaDB, optimizing an existing MariaDB application, reviewing code or schema for MariaDB improvements, asking what MariaDB can do that other databases cannot, or migrating from Oracle to MariaDB. Also use when the user asks what could be improved in how a codebase uses MariaDB, or asks about MariaDB advantages over MySQL or PostgreSQL.",
+      "whenNotToUse": "Do not use when a more specific skill or command applies.",
+      "tags": ["mariadb", "database"],
+      "repoRoles": [],
+      "tokenEstimate": 6480,
+      "installMode": "copy-selected",
+      "default": true,
+      "reviewStatus": "approved",
+      "riskLevel": "low",
+      "useMode": "copy",
+      "license": "MIT",
+      "licenseConfidence": "high",
+      "originSourceId": "mariadb-skills",
+      "originUrl": "https://github.com/mariadb/skills/blob/86623494f8051e766c973d35c1f07368c3b4c267/mariadb-features/SKILL.md",
+      "pinnedRef": "86623494f8051e766c973d35c1f07368c3b4c267",
+      "ecosystem": "mariadb",
+      "requiresAny": [
+        {
+          "stack": "mariadb"
+        },
+        {
+          "dependency": "mariadb"
+        }
+      ]
+    },
+    {
+      "id": "haus.mariadb-mariadb-query-optimization",
+      "version": "1.0.1",
+      "source": "curated",
+      "type": "skill",
+      "path": "skills/mariadb/mariadb-query-optimization",
+      "title": "Mariadb Query Optimization",
+      "purpose": "Best practices for query optimization in MariaDB — indexing strategies, EXPLAIN analysis, pagination, histogram statistics, and MariaDB-specific optimizer settings. Use when diagnosing slow queries, designing indexes, reviewing schema or query performance, or when queries involve large tables, pagination, GROUP BY, or ORDER BY. Also use when the user asks about MariaDB query performance, EXPLAIN output, or optimizer behavior.",
+      "whenToUse": "Best practices for query optimization in MariaDB — indexing strategies, EXPLAIN analysis, pagination, histogram statistics, and MariaDB-specific optimizer settings. Use when diagnosing slow queries, designing indexes, reviewing schema or query performance, or when queries involve large tables, pagination, GROUP BY, or ORDER BY. Also use when the user asks about MariaDB query performance, EXPLAIN output, or optimizer behavior.",
+      "whenNotToUse": "Do not use when a more specific skill or command applies.",
+      "tags": ["mariadb", "database"],
+      "repoRoles": [],
+      "tokenEstimate": 5786,
+      "installMode": "copy-selected",
+      "default": true,
+      "reviewStatus": "approved",
+      "riskLevel": "low",
+      "useMode": "copy",
+      "license": "MIT",
+      "licenseConfidence": "high",
+      "originSourceId": "mariadb-skills",
+      "originUrl": "https://github.com/mariadb/skills/blob/86623494f8051e766c973d35c1f07368c3b4c267/mariadb-query-optimization/SKILL.md",
+      "pinnedRef": "86623494f8051e766c973d35c1f07368c3b4c267",
+      "ecosystem": "mariadb",
+      "requiresAny": [
+        {
+          "stack": "mariadb"
+        },
+        {
+          "dependency": "mariadb"
+        }
+      ]
+    },
+    {
+      "id": "haus.elasticsearch-elasticsearch-onboarding",
+      "version": "1.0.2",
+      "source": "curated",
+      "type": "skill",
+      "path": "skills/elasticsearch/elasticsearch-onboarding",
+      "title": "Elasticsearch Onboarding",
+      "purpose": "Help developers new to Elasticsearch get from zero to a working search experience. Guide them through understanding their intent, mapping their data, and building a search experience with best practices baked in. Use this when the user shows intent to build search-related functionality, asks about Elasticsearch-related concepts for their use case, or expresses the need for help getting started with Elasticsearch.",
+      "whenToUse": "Help developers new to Elasticsearch get from zero to a working search experience. Guide them through understanding their intent, mapping their data, and building a search experience with best practices baked in. Use this when the user shows intent to build search-related functionality, asks about Elasticsearch-related concepts for their use case, or expresses the need for help getting started with Elasticsearch.",
+      "whenNotToUse": "Do not use when a more specific skill or command applies.",
+      "tags": ["elasticsearch", "database"],
+      "repoRoles": [],
+      "tokenEstimate": 666,
+      "installMode": "copy-selected",
+      "default": true,
+      "reviewStatus": "approved",
+      "riskLevel": "low",
+      "useMode": "copy",
+      "license": "Apache-2.0",
+      "licenseConfidence": "high",
+      "originSourceId": "elastic-agent-skills",
+      "originUrl": "https://github.com/elastic/agent-skills/blob/96736bec4aa27f236580a3fefc4b14582f0f8aa0/skills/elasticsearch/elasticsearch-onboarding/SKILL.md",
+      "pinnedRef": "96736bec4aa27f236580a3fefc4b14582f0f8aa0",
+      "ecosystem": "elasticsearch",
+      "requiresAny": [
+        {
+          "stack": "elasticsearch"
+        },
+        {
+          "dependency": "@elastic/elasticsearch"
+        }
+      ]
+    },
+    {
+      "id": "haus.elasticsearch-elasticsearch-esql",
+      "version": "1.0.2",
+      "source": "curated",
+      "type": "skill",
+      "path": "skills/elasticsearch/elasticsearch-esql",
+      "title": "Elasticsearch Esql",
+      "purpose": "Execute ES|QL (Elasticsearch Query Language) queries, use when the user wants to query Elasticsearch data, analyze logs, aggregate metrics, explore data, or create charts and dashboards from ES|QL results.",
+      "whenToUse": "Execute ES|QL (Elasticsearch Query Language) queries, use when the user wants to query Elasticsearch data, analyze logs, aggregate metrics, explore data, or create charts and dashboards from ES|QL results.",
+      "whenNotToUse": "Do not use when a more specific skill or command applies.",
+      "tags": ["elasticsearch", "database"],
+      "repoRoles": [],
+      "tokenEstimate": 4851,
+      "installMode": "copy-selected",
+      "default": true,
+      "reviewStatus": "approved",
+      "riskLevel": "low",
+      "useMode": "copy",
+      "license": "Apache-2.0",
+      "licenseConfidence": "high",
+      "originSourceId": "elastic-agent-skills",
+      "originUrl": "https://github.com/elastic/agent-skills/blob/96736bec4aa27f236580a3fefc4b14582f0f8aa0/skills/elasticsearch/elasticsearch-esql/SKILL.md",
+      "pinnedRef": "96736bec4aa27f236580a3fefc4b14582f0f8aa0",
+      "ecosystem": "elasticsearch",
+      "requiresAny": [
+        {
+          "stack": "elasticsearch"
+        },
+        {
+          "dependency": "@elastic/elasticsearch"
+        }
+      ]
+    },
+    {
+      "id": "haus.mysql-mysql",
+      "version": "1.0.1",
+      "source": "curated",
+      "type": "skill",
+      "path": "skills/mysql/mysql",
+      "title": "Mysql",
+      "purpose": "Plan and review MySQL/InnoDB schema, indexing, query tuning, transactions, and operations. Use when creating or modifying MySQL tables, indexes, or queries; diagnosing slow/locking behavior; planning migrations; or troubleshooting replication and connection issues. Load when using a MySQL database.",
+      "whenToUse": "Plan and review MySQL/InnoDB schema, indexing, query tuning, transactions, and operations. Use when creating or modifying MySQL tables, indexes, or queries; diagnosing slow/locking behavior; planning migrations; or troubleshooting replication and connection issues. Load when using a MySQL database.",
+      "whenNotToUse": "Do not use when a more specific skill or command applies.",
+      "tags": ["mysql", "database"],
+      "repoRoles": [],
+      "tokenEstimate": 1408,
+      "installMode": "copy-selected",
+      "default": true,
+      "reviewStatus": "approved",
+      "riskLevel": "low",
+      "useMode": "copy",
+      "license": "MIT",
+      "licenseConfidence": "medium",
+      "originSourceId": "planetscale-database-skills",
+      "originUrl": "https://github.com/planetscale/database-skills/blob/8942f83c3a6c9557868169b965bba5536cde5e91/skills/mysql/SKILL.md",
+      "pinnedRef": "8942f83c3a6c9557868169b965bba5536cde5e91",
+      "ecosystem": "mysql",
+      "requiresAny": [
+        {
+          "stack": "mysql"
+        },
+        {
+          "dependency": "mysql2"
+        },
+        {
+          "dependency": "mysql"
+        }
+      ]
+    },
+    {
+      "id": "haus.prisma-prisma-client-api",
+      "version": "1.0.1",
+      "source": "curated",
+      "type": "skill",
+      "path": "skills/prisma/prisma-client-api",
+      "title": "Prisma Client Api",
+      "purpose": "Prisma Client API reference covering model queries, filters, operators, and client methods. Use when writing database queries, using CRUD operations, filtering data, or configuring Prisma Client. Triggers on \"prisma query\", \"findMany\", \"create\", \"update\", \"delete\", \"$transaction\".",
+      "whenToUse": "Prisma Client API reference covering model queries, filters, operators, and client methods. Use when writing database queries, using CRUD operations, filtering data, or configuring Prisma Client. Triggers on \"prisma query\", \"findMany\", \"create\", \"update\", \"delete\", \"$transaction\".",
+      "whenNotToUse": "Do not use when a more specific skill or command applies.",
+      "tags": ["prisma", "database", "backend"],
+      "repoRoles": [],
+      "tokenEstimate": 1587,
+      "installMode": "copy-selected",
+      "default": true,
+      "reviewStatus": "approved",
+      "riskLevel": "low",
+      "useMode": "copy",
+      "license": "MIT",
+      "licenseConfidence": "high",
+      "originSourceId": "prisma-skills",
+      "originUrl": "https://github.com/prisma/skills/blob/dc08577cacd642af075e1017f0f7fe93177b06b4/prisma-client-api/SKILL.md",
+      "pinnedRef": "dc08577cacd642af075e1017f0f7fe93177b06b4",
+      "ecosystem": "database",
+      "requiresAny": [
+        {
+          "stack": "prisma"
+        },
+        {
+          "dependency": "prisma"
+        },
+        {
+          "dependency": "@prisma/client"
+        }
+      ]
+    },
+    {
+      "id": "haus.prisma-prisma-database-setup",
+      "version": "1.0.1",
+      "source": "curated",
+      "type": "skill",
+      "path": "skills/prisma/prisma-database-setup",
+      "title": "Prisma Database Setup",
+      "purpose": "Guides for configuring Prisma with different database providers (PostgreSQL, MySQL, SQLite, MongoDB, etc.). Use when setting up a new project, changing databases, or troubleshooting connection issues. Triggers on \"configure postgres\", \"connect to mysql\", \"setup mongodb\", \"sqlite setup\".",
+      "whenToUse": "Guides for configuring Prisma with different database providers (PostgreSQL, MySQL, SQLite, MongoDB, etc.). Use when setting up a new project, changing databases, or troubleshooting connection issues. Triggers on \"configure postgres\", \"connect to mysql\", \"setup mongodb\", \"sqlite setup\".",
+      "whenNotToUse": "Do not use when a more specific skill or command applies.",
+      "tags": ["prisma", "database", "backend"],
+      "repoRoles": [],
+      "tokenEstimate": 1414,
+      "installMode": "copy-selected",
+      "default": true,
+      "reviewStatus": "approved",
+      "riskLevel": "low",
+      "useMode": "copy",
+      "license": "MIT",
+      "licenseConfidence": "high",
+      "originSourceId": "prisma-skills",
+      "originUrl": "https://github.com/prisma/skills/blob/dc08577cacd642af075e1017f0f7fe93177b06b4/prisma-database-setup/SKILL.md",
+      "pinnedRef": "dc08577cacd642af075e1017f0f7fe93177b06b4",
+      "ecosystem": "database",
+      "requiresAny": [
+        {
+          "stack": "prisma"
+        },
+        {
+          "dependency": "prisma"
+        },
+        {
+          "dependency": "@prisma/client"
+        }
+      ]
+    },
+    {
+      "id": "haus.dotnet-analyzing-dotnet-performance",
+      "version": "1.0.1",
+      "source": "curated",
+      "type": "skill",
+      "path": "skills/dotnet/analyzing-dotnet-performance",
+      "title": "Analyzing Dotnet Performance",
+      "purpose": "Scans .NET code for ~50 performance anti-patterns across async, memory, strings, collections, LINQ, regex, serialization, and I/O with tiered severity classification. Use when analyzing .NET code for optimization opportunities, reviewing hot paths, or auditing allocation-heavy patterns.",
+      "whenToUse": "Scans .NET code for ~50 performance anti-patterns across async, memory, strings, collections, LINQ, regex, serialization, and I/O with tiered severity classification. Use when analyzing .NET code for optimization opportunities, reviewing hot paths, or auditing allocation-heavy patterns.",
+      "whenNotToUse": "Do not use when a more specific skill or command applies.",
+      "tags": ["dotnet", "csharp", "backend"],
+      "repoRoles": [],
+      "tokenEstimate": 2852,
+      "installMode": "copy-selected",
+      "default": true,
+      "reviewStatus": "approved",
+      "riskLevel": "low",
+      "useMode": "copy",
+      "license": "MIT",
+      "licenseConfidence": "high",
+      "originSourceId": "dotnet-skills",
+      "originUrl": "https://github.com/dotnet/skills/blob/ce75c355694bb358162464058081121645767d6f/plugins/dotnet-diag/skills/analyzing-dotnet-performance/SKILL.md",
+      "pinnedRef": "ce75c355694bb358162464058081121645767d6f",
+      "ecosystem": "dotnet",
+      "requiresAny": [
+        {
+          "stack": "dotnet"
+        },
+        {
+          "role": "dotnet-service"
+        }
+      ]
+    },
+    {
+      "id": "haus.dotnet-optimizing-ef-core-queries",
+      "version": "1.0.1",
+      "source": "curated",
+      "type": "skill",
+      "path": "skills/dotnet/optimizing-ef-core-queries",
+      "title": "Optimizing Ef Core Queries",
+      "purpose": "Optimize Entity Framework Core queries by fixing N+1 problems, choosing correct tracking modes, using compiled queries, and avoiding common performance traps. Use when EF Core queries are slow, generating excessive SQL, or causing high database load.",
+      "whenToUse": "Optimize Entity Framework Core queries by fixing N+1 problems, choosing correct tracking modes, using compiled queries, and avoiding common performance traps. Use when EF Core queries are slow, generating excessive SQL, or causing high database load.",
+      "whenNotToUse": "Do not use when a more specific skill or command applies.",
+      "tags": ["dotnet", "csharp", "backend"],
+      "repoRoles": [],
+      "tokenEstimate": 1442,
+      "installMode": "copy-selected",
+      "default": true,
+      "reviewStatus": "approved",
+      "riskLevel": "low",
+      "useMode": "copy",
+      "license": "MIT",
+      "licenseConfidence": "high",
+      "originSourceId": "dotnet-skills",
+      "originUrl": "https://github.com/dotnet/skills/blob/ce75c355694bb358162464058081121645767d6f/plugins/dotnet-data/skills/optimizing-ef-core-queries/SKILL.md",
+      "pinnedRef": "ce75c355694bb358162464058081121645767d6f",
+      "ecosystem": "dotnet",
+      "requiresAny": [
+        {
+          "stack": "dotnet"
+        },
+        {
+          "role": "dotnet-service"
+        }
+      ]
+    },
+    {
+      "id": "haus.dotnet-csharp-coding-standards",
+      "version": "1.0.1",
+      "source": "curated",
+      "type": "skill",
+      "path": "skills/dotnet/csharp-coding-standards",
+      "title": "Csharp Coding Standards",
+      "purpose": "Write modern, high-performance C# code using records, pattern matching, value objects, async/await, Span<T>/Memory<T>, and best-practice API design patterns. Emphasizes functional-style programming with C# 12+ features.",
+      "whenToUse": "Write modern, high-performance C# code using records, pattern matching, value objects, async/await, Span<T>/Memory<T>, and best-practice API design patterns. Emphasizes functional-style programming with C# 12+ features.",
+      "whenNotToUse": "Do not use when a more specific skill or command applies.",
+      "tags": ["dotnet", "csharp", "backend"],
+      "repoRoles": [],
+      "tokenEstimate": 2664,
+      "installMode": "copy-selected",
+      "default": true,
+      "reviewStatus": "approved",
+      "riskLevel": "low",
+      "useMode": "copy",
+      "license": "MIT",
+      "licenseConfidence": "high",
+      "originSourceId": "aaronontheweb-dotnet-skills",
+      "originUrl": "https://github.com/aaronontheweb/dotnet-skills/blob/4a97d4e91217c98a313894af4d89056425991c78/skills/csharp-coding-standards/SKILL.md",
+      "pinnedRef": "4a97d4e91217c98a313894af4d89056425991c78",
+      "ecosystem": "dotnet",
+      "requiresAny": [
+        {
+          "stack": "dotnet"
+        },
+        {
+          "role": "dotnet-service"
+        }
+      ]
+    },
+    {
+      "id": "haus.redis-redis-core",
+      "version": "1.0.1",
+      "source": "curated",
+      "type": "skill",
+      "path": "skills/redis/redis-core",
+      "title": "Redis Redis Core",
+      "purpose": "Core Redis modeling guidance — choose the right data structure (String, Hash, List, Set, Sorted Set, JSON, Stream, Vector Set) and use consistent colon-separated key names. Use when designing a Redis data model, caching objects, deciding between Hash and JSON, building counters, leaderboards, membership sets, or session stores, or when reviewing/cleaning up Redis key naming.",
+      "whenToUse": "Core Redis modeling guidance — choose the right data structure (String, Hash, List, Set, Sorted Set, JSON, Stream, Vector Set) and use consistent colon-separated key names. Use when designing a Redis data model, caching objects, deciding between Hash and JSON, building counters, leaderboards, membership sets, or session stores, or when reviewing/cleaning up Redis key naming.",
+      "whenNotToUse": "Use haus.redis-redis-connections for client/connection-pooling guidance, haus.redis-redis-security for security hardening, or haus.redis-redis-observability for monitoring.",
+      "tags": ["redis", "database"],
+      "repoRoles": [],
+      "tokenEstimate": 760,
+      "installMode": "copy-selected",
+      "default": true,
+      "reviewStatus": "approved",
+      "riskLevel": "low",
+      "useMode": "copy",
+      "license": "MIT",
+      "licenseConfidence": "medium",
+      "originSourceId": "redis-agent-skills-extra",
+      "originUrl": "https://github.com/redis/agent-skills/blob/3d6f25505ea2adff4dd62d5a0e7f4a5b076fa047/skills/redis-core/SKILL.md",
+      "pinnedRef": "3d6f25505ea2adff4dd62d5a0e7f4a5b076fa047",
+      "ecosystem": "redis",
+      "requiresAny": [
+        {
+          "stack": "redis"
+        },
+        {
+          "dependency": "redis"
+        }
+      ]
+    },
+    {
+      "id": "haus.antfu-vite",
+      "version": "1.0.1",
+      "source": "curated",
+      "type": "skill",
+      "path": "skills/antfu/vite",
+      "title": "Vite",
+      "purpose": "Vite build tool configuration, plugin API, SSR, and Vite 8 Rolldown migration. Use when working with Vite projects, vite.config.ts, Vite plugins, or building libraries/SSR apps with Vite.",
+      "whenToUse": "Vite build tool configuration, plugin API, SSR, and Vite 8 Rolldown migration. Use when working with Vite projects, vite.config.ts, Vite plugins, or building libraries/SSR apps with Vite.",
+      "whenNotToUse": "Do not use when a more specific skill or command applies.",
+      "tags": ["vite8", "frontend"],
+      "repoRoles": [],
+      "tokenEstimate": 616,
+      "installMode": "copy-selected",
+      "default": true,
+      "reviewStatus": "approved",
+      "riskLevel": "low",
+      "useMode": "copy",
+      "license": "MIT",
+      "licenseConfidence": "high",
+      "originSourceId": "antfu-skills",
+      "originUrl": "https://github.com/antfu/skills/blob/a74f281a27dadc02397bc1a174b0f2c97531b6ae/skills/vite/SKILL.md",
+      "pinnedRef": "a74f281a27dadc02397bc1a174b0f2c97531b6ae",
+      "ecosystem": "vite",
+      "requiresAny": [
+        {
+          "stack": "vite8"
+        },
+        {
+          "dependency": "vite"
+        }
+      ]
+    },
+    {
+      "id": "haus.storybookjs-storybook-upgrade",
+      "version": "1.0.2",
+      "source": "curated",
+      "type": "skill",
+      "path": "skills/storybookjs/storybook-upgrade",
+      "title": "Storybook Upgrade",
+      "purpose": "Upgrade Storybook to a specific version (canary or release). Use this when upgrading Storybook packages in an external app, reproduction, or test project.",
+      "whenToUse": "Upgrade Storybook to a specific version (canary or release). Use this when upgrading Storybook packages in an external app, reproduction, or test project.",
+      "whenNotToUse": "Use haus.storybook-patterns for general story coverage and component API documentation, not version upgrades.",
+      "tags": ["storybook", "workflow"],
+      "repoRoles": [],
+      "tokenEstimate": 372,
+      "installMode": "copy-selected",
+      "default": true,
+      "reviewStatus": "approved",
+      "riskLevel": "low",
+      "useMode": "copy",
+      "license": "MIT",
+      "licenseConfidence": "high",
+      "originSourceId": "storybookjs-storybook",
+      "originUrl": "https://github.com/storybookjs/storybook/blob/15dcad567565f0979562316400d936e94b18459f/.agents/skills/storybook-upgrade/SKILL.md",
+      "pinnedRef": "15dcad567565f0979562316400d936e94b18459f",
+      "ecosystem": "storybook",
+      "requiresAny": [
+        {
+          "stack": "storybook"
+        },
+        {
+          "dependency": "storybook"
+        }
+      ]
+    },
+    {
+      "id": "haus.currents-dev-playwright-best-practices",
+      "version": "1.0.1",
+      "source": "curated",
+      "type": "skill",
+      "path": "skills/currents-dev/playwright-best-practices",
+      "title": "Playwright Best Practices",
+      "purpose": "Use when writing Playwright tests, fixing flaky tests, debugging failures, implementing Page Object Model, configuring CI/CD, optimizing performance, mocking APIs, handling authentication or OAuth, testing accessibility (axe-core), file uploads/downloads, date/time mocking, WebSockets, geolocation, permissions, multi-tab/popup flows, mobile/responsive layouts, touch gestures, GraphQL, error handling, offline mode, multi-user collaboration, third-party services (payments, email verification), console error monitoring, global setup/teardown, test annotations (skip, fixme, slow), test tags (@smoke, @fast, @critical, filtering with --grep), project dependencies, security testing (XSS, CSRF, auth), performance budgets (Web Vitals, Lighthouse), iframes, component testing, canvas/WebGL, service workers/PWA, test coverage, i18n/localization, Electron apps, or browser extension testing. Covers E2E, component, API, visual, accessibility, security, Electron, and extension testing.",
+      "whenToUse": "Use when writing Playwright tests, fixing flaky tests, debugging failures, implementing Page Object Model, configuring CI/CD, optimizing performance, mocking APIs, handling authentication or OAuth, testing accessibility (axe-core), file uploads/downloads, date/time mocking, WebSockets, geolocation, permissions, multi-tab/popup flows, mobile/responsive layouts, touch gestures, GraphQL, error handling, offline mode, multi-user collaboration, third-party services (payments, email verification), console error monitoring, global setup/teardown, test annotations (skip, fixme, slow), test tags (@smoke, @fast, @critical, filtering with --grep), project dependencies, security testing (XSS, CSRF, auth), performance budgets (Web Vitals, Lighthouse), iframes, component testing, canvas/WebGL, service workers/PWA, test coverage, i18n/localization, Electron apps, or browser extension testing. Covers E2E, component, API, visual, accessibility, security, Electron, and extension testing.",
+      "whenNotToUse": "Use haus.ecc-e2e-testing for Page-Object-Model, CI/CD integration, and flaky-test strategy guidance.",
+      "tags": ["playwright", "testing"],
+      "repoRoles": [],
+      "tokenEstimate": 6577,
+      "installMode": "copy-selected",
+      "default": true,
+      "reviewStatus": "approved",
+      "riskLevel": "low",
+      "useMode": "copy",
+      "license": "MIT",
+      "licenseConfidence": "high",
+      "originSourceId": "currents-dev-playwright-best-practices-skill",
+      "originUrl": "https://github.com/currents-dev/playwright-best-practices-skill/blob/ef329e7e65149918e1ff0eed2cf7d2e6e6f9eb5b/SKILL.md",
+      "pinnedRef": "ef329e7e65149918e1ff0eed2cf7d2e6e6f9eb5b",
+      "ecosystem": "playwright",
+      "requiresAny": [
+        {
+          "stack": "playwright"
+        },
+        {
+          "dependency": "@playwright/test"
+        }
+      ]
+    },
+    {
+      "id": "haus.nx-nx-workspace",
+      "version": "1.0.1",
+      "source": "curated",
+      "type": "skill",
+      "path": "skills/nx/nx-workspace",
+      "title": "Nx Workspace",
+      "purpose": "Explore and understand Nx workspaces. USE WHEN answering questions about the workspace, projects, or tasks. ALSO USE WHEN an nx command fails or you need to check available targets/configuration before running a task. EXAMPLES: 'What projects are in this workspace?', 'How is project X configured?', 'What depends on library Y?', 'What targets can I run?', 'Cannot find configuration for task', 'debug nx task failure'.",
+      "whenToUse": "Explore and understand Nx workspaces. USE WHEN answering questions about the workspace, projects, or tasks. ALSO USE WHEN an nx command fails or you need to check available targets/configuration before running a task. EXAMPLES: 'What projects are in this workspace?', 'How is project X configured?', 'What depends on library Y?', 'What targets can I run?', 'Cannot find configuration for task', 'debug nx task failure'.",
+      "whenNotToUse": "Do not use when a more specific skill or command applies.",
+      "tags": ["nx", "workflow"],
+      "repoRoles": ["nx-monorepo"],
+      "tokenEstimate": 1918,
+      "installMode": "copy-selected",
+      "default": true,
+      "reviewStatus": "approved",
+      "riskLevel": "low",
+      "useMode": "copy",
+      "license": "MIT",
+      "licenseConfidence": "high",
+      "originSourceId": "nrwl-nx-ai-agents-config",
+      "originUrl": "https://github.com/nrwl/nx-ai-agents-config/blob/9609810013040356b2d93c0688a50d9078cdc35a/skills/nx-workspace/SKILL.md",
+      "pinnedRef": "9609810013040356b2d93c0688a50d9078cdc35a",
+      "ecosystem": "nx",
+      "requiresAny": [
+        {
+          "role": "nx-monorepo"
+        },
+        {
+          "dependency": "nx"
+        }
+      ]
+    },
+    {
+      "id": "haus.nx-nx-generate",
+      "version": "1.0.1",
+      "source": "curated",
+      "type": "skill",
+      "path": "skills/nx/nx-generate",
+      "title": "Nx Generate",
+      "purpose": "Generate code using nx generators. INVOKE IMMEDIATELY when user mentions scaffolding, setup, structure, creating apps/libs, or setting up project structure. Trigger words - scaffold, setup, create a new app, create a new lib, project structure, generate, add a new project. ALWAYS use this BEFORE calling nx_docs or exploring - this skill handles discovery internally.",
+      "whenToUse": "Generate code using nx generators. INVOKE IMMEDIATELY when user mentions scaffolding, setup, structure, creating apps/libs, or setting up project structure. Trigger words - scaffold, setup, create a new app, create a new lib, project structure, generate, add a new project. ALWAYS use this BEFORE calling nx_docs or exploring - this skill handles discovery internally.",
+      "whenNotToUse": "Do not use when a more specific skill or command applies.",
+      "tags": ["nx", "workflow"],
+      "repoRoles": ["nx-monorepo"],
+      "tokenEstimate": 1952,
+      "installMode": "copy-selected",
+      "default": true,
+      "reviewStatus": "approved",
+      "riskLevel": "low",
+      "useMode": "copy",
+      "license": "MIT",
+      "licenseConfidence": "high",
+      "originSourceId": "nrwl-nx-ai-agents-config",
+      "originUrl": "https://github.com/nrwl/nx-ai-agents-config/blob/9609810013040356b2d93c0688a50d9078cdc35a/skills/nx-generate/SKILL.md",
+      "pinnedRef": "9609810013040356b2d93c0688a50d9078cdc35a",
+      "ecosystem": "nx",
+      "requiresAny": [
+        {
+          "role": "nx-monorepo"
+        },
+        {
+          "dependency": "nx"
+        }
+      ]
+    },
+    {
+      "id": "haus.nx-tag-conventions",
+      "version": "1.0.0",
+      "source": "haus",
+      "type": "skill",
+      "path": "skills/haus-owned/stack-patterns/nx-tag-conventions",
+      "title": "Haus Nx tag conventions",
+      "purpose": "Haus-specific Nx project tag, module-boundary, and generator-placement conventions not covered by the official nx-workspace/nx-generate skills.",
+      "whenToUse": "Use alongside haus.nx-nx-workspace / haus.nx-nx-generate when naming tags, placing generators/executors, or enforcing module boundaries.",
+      "whenNotToUse": "Use haus.nx-nx-workspace or haus.nx-nx-generate for general Nx exploration/generation.",
+      "references": ["https://nx.dev/llms.txt"],
+      "tokenBudget": 800,
+      "tags": ["nx", "workflow"],
+      "repoRoles": ["nx-monorepo"],
+      "requiresAny": [
+        {
+          "role": "nx-monorepo"
+        },
+        {
+          "dependency": "nx"
+        }
+      ],
+      "ecosystem": "nx",
+      "tokenEstimate": 383,
+      "installMode": "copy-selected",
+      "reviewStatus": "approved",
+      "riskLevel": "low"
+    },
+    {
+      "id": "haus.expo-building-native-ui",
+      "version": "1.0.1",
+      "source": "curated",
+      "type": "skill",
+      "path": "skills/expo/building-native-ui",
+      "title": "Expo Building Native UI",
+      "purpose": "Complete guide for building beautiful apps with Expo Router. Covers fundamentals, styling, components, navigation, animations, patterns, and native tabs.",
+      "whenToUse": "Complete guide for building beautiful apps with Expo Router. Covers fundamentals, styling, components, navigation, animations, patterns, and native tabs.",
+      "whenNotToUse": "Do not use when a more specific skill or command applies.",
+      "tags": ["expo", "react-native", "mobile"],
+      "repoRoles": ["expo-app"],
+      "tokenEstimate": 3344,
+      "installMode": "copy-selected",
+      "default": true,
+      "reviewStatus": "approved",
+      "riskLevel": "low",
+      "useMode": "copy",
+      "license": "MIT",
+      "licenseConfidence": "high",
+      "originSourceId": "expo-skills",
+      "originUrl": "https://github.com/expo/skills/blob/1f9951197dc6acff61c4f0f19521fa0e62c33e51/plugins/expo/skills/building-native-ui/SKILL.md",
+      "pinnedRef": "1f9951197dc6acff61c4f0f19521fa0e62c33e51",
+      "ecosystem": "expo",
+      "requiresAny": [
+        {
+          "stack": "expo"
+        },
+        {
+          "stack": "react-native"
+        },
+        {
+          "role": "expo-app"
+        },
+        {
+          "dependency": "expo"
+        },
+        {
+          "dependency": "react-native"
+        }
+      ]
+    },
+    {
+      "id": "haus.expo-native-data-fetching",
+      "version": "1.0.1",
+      "source": "curated",
+      "type": "skill",
+      "path": "skills/expo/native-data-fetching",
+      "title": "Expo Native Data Fetching",
+      "purpose": "Use when implementing or debugging ANY network request, API call, or data fetching. Covers fetch API, React Query, SWR, error handling, caching, offline support, and Expo Router data loaders (`useLoaderData`).",
+      "whenToUse": "Use when implementing or debugging ANY network request, API call, or data fetching. Covers fetch API, React Query, SWR, error handling, caching, offline support, and Expo Router data loaders (`useLoaderData`).",
+      "whenNotToUse": "Do not use when a more specific skill or command applies.",
+      "tags": ["expo", "react-native", "mobile"],
+      "repoRoles": ["expo-app"],
+      "tokenEstimate": 2911,
+      "installMode": "copy-selected",
+      "default": true,
+      "reviewStatus": "approved",
+      "riskLevel": "low",
+      "useMode": "copy",
+      "license": "MIT",
+      "licenseConfidence": "high",
+      "originSourceId": "expo-skills",
+      "originUrl": "https://github.com/expo/skills/blob/1f9951197dc6acff61c4f0f19521fa0e62c33e51/plugins/expo/skills/native-data-fetching/SKILL.md",
+      "pinnedRef": "1f9951197dc6acff61c4f0f19521fa0e62c33e51",
+      "ecosystem": "expo",
+      "requiresAny": [
+        {
+          "stack": "expo"
+        },
+        {
+          "stack": "react-native"
+        },
+        {
+          "role": "expo-app"
+        },
+        {
+          "dependency": "expo"
+        },
+        {
+          "dependency": "react-native"
+        }
+      ]
+    },
+    {
+      "id": "haus.expo-upgrading-expo",
+      "version": "1.0.1",
+      "source": "curated",
+      "type": "skill",
+      "path": "skills/expo/upgrading-expo",
+      "title": "Expo Upgrading Expo",
+      "purpose": "Guidelines for upgrading Expo SDK versions and fixing dependency issues",
+      "whenToUse": "Guidelines for upgrading Expo SDK versions and fixing dependency issues",
+      "whenNotToUse": "Do not use when a more specific skill or command applies.",
+      "tags": ["expo", "react-native", "mobile"],
+      "repoRoles": ["expo-app"],
+      "tokenEstimate": 1452,
+      "installMode": "copy-selected",
+      "default": true,
+      "reviewStatus": "approved",
+      "riskLevel": "low",
+      "useMode": "copy",
+      "license": "MIT",
+      "licenseConfidence": "high",
+      "originSourceId": "expo-skills",
+      "originUrl": "https://github.com/expo/skills/blob/1f9951197dc6acff61c4f0f19521fa0e62c33e51/plugins/expo/skills/upgrading-expo/SKILL.md",
+      "pinnedRef": "1f9951197dc6acff61c4f0f19521fa0e62c33e51",
+      "ecosystem": "expo",
+      "requiresAny": [
+        {
+          "stack": "expo"
+        },
+        {
+          "stack": "react-native"
+        },
+        {
+          "role": "expo-app"
+        },
+        {
+          "dependency": "expo"
+        },
+        {
+          "dependency": "react-native"
+        }
+      ]
+    },
+    {
+      "id": "haus.callstack-react-native-best-practices",
+      "version": "1.0.1",
+      "source": "curated",
+      "type": "skill",
+      "path": "skills/callstack/react-native-best-practices",
+      "title": "Callstack React Native Best Practices",
+      "purpose": "Provides React Native performance optimization guidelines for FPS, TTI, bundle size, memory leaks, re-renders, and animations. Applies to tasks involving Hermes optimization, JS thread blocking, bridge overhead, FlashList, native modules, or debugging jank and frame drops.",
+      "whenToUse": "Provides React Native performance optimization guidelines for FPS, TTI, bundle size, memory leaks, re-renders, and animations. Applies to tasks involving Hermes optimization, JS thread blocking, bridge overhead, FlashList, native modules, or debugging jank and frame drops.",
+      "whenNotToUse": "Do not use when a more specific skill or command applies.",
+      "tags": ["expo", "react-native", "mobile"],
+      "repoRoles": ["expo-app"],
+      "tokenEstimate": 3081,
+      "installMode": "copy-selected",
+      "default": true,
+      "reviewStatus": "approved",
+      "riskLevel": "low",
+      "useMode": "copy",
+      "license": "MIT",
+      "licenseConfidence": "high",
+      "originSourceId": "callstackincubator-agent-skills",
+      "originUrl": "https://github.com/callstackincubator/agent-skills/blob/553dccbe87ba678b14e33aedd4dc274f5b92c85a/skills/react-native-best-practices/SKILL.md",
+      "pinnedRef": "553dccbe87ba678b14e33aedd4dc274f5b92c85a",
+      "ecosystem": "react-native",
+      "requiresAny": [
+        {
+          "stack": "expo"
+        },
+        {
+          "stack": "react-native"
+        },
+        {
+          "role": "expo-app"
+        },
+        {
+          "dependency": "expo"
+        },
+        {
+          "dependency": "react-native"
+        }
+      ]
+    },
+    {
+      "id": "haus.antfu-vue",
+      "version": "1.0.1",
+      "source": "curated",
+      "type": "skill",
+      "path": "skills/antfu/vue",
+      "title": "Vue",
+      "purpose": "Vue 3 Composition API, script setup macros, reactivity system, and built-in components. Use when writing Vue SFCs, defineProps/defineEmits/defineModel, watchers, or using Transition/Teleport/Suspense/KeepAlive.",
+      "whenToUse": "Vue 3 Composition API, script setup macros, reactivity system, and built-in components. Use when writing Vue SFCs, defineProps/defineEmits/defineModel, watchers, or using Transition/Teleport/Suspense/KeepAlive.",
+      "whenNotToUse": "Use haus.ecc-vue-patterns for project structure, Pinia, Vue Router, Nuxt SSR, and testing guidance — this skill covers only core Composition API/reactivity/built-ins.",
+      "tags": ["vue", "workflow"],
+      "repoRoles": ["vue-app"],
+      "tokenEstimate": 612,
+      "installMode": "copy-selected",
+      "default": true,
+      "reviewStatus": "approved",
+      "riskLevel": "low",
+      "useMode": "copy",
+      "license": "MIT",
+      "licenseConfidence": "high",
+      "originSourceId": "antfu-skills",
+      "originUrl": "https://github.com/antfu/skills/blob/a74f281a27dadc02397bc1a174b0f2c97531b6ae/skills/vue/SKILL.md",
+      "pinnedRef": "a74f281a27dadc02397bc1a174b0f2c97531b6ae",
+      "ecosystem": "vue",
+      "requiresAny": [
+        {
+          "stack": "vue"
+        },
+        {
+          "dependency": "vue"
         }
       ]
     }
