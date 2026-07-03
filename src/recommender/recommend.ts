@@ -151,16 +151,7 @@ export async function recommend(
       skip(item.id, 'source-approval', 'Source not approved', `source:${normSource}`)
       continue
     }
-    if (item.id === 'haus.nx21-monorepo-patterns' && !roleSet.has('nx-monorepo')) {
-      skip(
-        item.id,
-        'required-role-missing',
-        'Required role missing: nx-monorepo',
-        'role:nx-monorepo',
-      )
-      continue
-    }
-    if (item.id === 'haus.turbo-monorepo-patterns' && !roleSet.has('turbo-monorepo')) {
+    if (item.id === 'haus.turborepo-turborepo' && !roleSet.has('turbo-monorepo')) {
       skip(
         item.id,
         'required-role-missing',

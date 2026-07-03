@@ -124,11 +124,11 @@
       "installMode": "copy-selected"
     },
     {
-      "id": "haus.expo-react-native-patterns",
+      "id": "haus.expo-building-native-ui",
       "source": "haus",
       "type": "skill",
-      "path": "skills/expo-react-native-patterns",
-      "title": "Haus Expo / React Native patterns",
+      "path": "skills/expo-building-native-ui",
+      "title": "Expo Building Native UI",
       "purpose": "Guide Expo Router, React Native component, native module, and EAS build changes.",
       "whenToUse": "Use for Expo Router routes, RN components, native modules, expo config plugins, and EAS build/submit.",
       "whenNotToUse": "Do not use for web-only React apps or unrelated mobile native projects (Swift/Kotlin without Expo).",
@@ -554,11 +554,11 @@
       "installMode": "copy-selected"
     },
     {
-      "id": "haus.nx21-monorepo-patterns",
+      "id": "haus.nx-nx-workspace",
       "source": "haus",
       "type": "skill",
-      "path": "skills/nx21-monorepo-patterns",
-      "title": "Haus Nx 21 monorepo patterns",
+      "path": "skills/nx-nx-workspace",
+      "title": "Nx Workspace",
       "purpose": "Guide Nx project graph, target pipeline, and workspace boundaries.",
       "whenToUse": "Use for Nx workspace graph, target, and generator configuration updates.",
       "whenNotToUse": "Do not use for app-only feature edits without workspace impact.",
@@ -576,11 +576,11 @@
       "installMode": "copy-selected"
     },
     {
-      "id": "haus.turbo-monorepo-patterns",
+      "id": "haus.turborepo-turborepo",
       "source": "haus",
       "type": "skill",
-      "path": "skills/turbo-monorepo-patterns",
-      "title": "Haus Turbo monorepo patterns",
+      "path": "skills/turborepo-turborepo",
+      "title": "Turborepo",
       "purpose": "Guide Turbo pipeline and cache-safe monorepo orchestration changes.",
       "whenToUse": "Use for turbo pipeline graph and package task orchestration updates.",
       "whenNotToUse": "Do not use for package-local feature edits without pipeline impact.",

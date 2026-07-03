@@ -7,6 +7,8 @@ import os from 'node:os'
 import { execaSync } from 'execa'
 
 const CLI = path.resolve('dist/cli.js')
+const CATALOG = path.resolve('library/catalog/manifest.json')
+const env = { ...process.env, HAUS_FIXTURE_CATALOG: CATALOG }
 
 // Sets up a plain React repo (no Nx signal) and returns its temp root.
 function reactRepo() {
@@ -24,8 +26,8 @@ function reactRepo() {
 }
 
 function recommend(temp) {
-  execaSync('node', [CLI, 'scan', '--json'], { cwd: temp })
-  execaSync('node', [CLI, 'recommend', '--json'], { cwd: temp })
+  execaSync('node', [CLI, 'scan', '--json'], { cwd: temp, env })
+  execaSync('node', [CLI, 'recommend', '--json'], { cwd: temp, env })
   return JSON.parse(readFileSync(path.join(temp, '.haus-workflow', 'recommendation.json'), 'utf8'))
 }
 
@@ -36,8 +38,8 @@ test('deep-context.json roles make a role-gated skill eligible (pass 2)', () => 
 
   // Pass 1: no Nx signal → the Nx-gated skill is skipped.
   const pass1 = recommend(temp)
-  assert.equal(ids(pass1.recommended).has('haus.nx-monorepo-patterns'), false)
-  assert.equal(ids(pass1.skipped).has('haus.nx-monorepo-patterns'), true)
+  assert.equal(ids(pass1.recommended).has('haus.nx-nx-workspace'), false)
+  assert.equal(ids(pass1.skipped).has('haus.nx-nx-workspace'), true)
 
   // The docs skill discovers an Nx workspace the shallow scanner missed.
   writeFileSync(
@@ -47,7 +49,7 @@ test('deep-context.json roles make a role-gated skill eligible (pass 2)', () => 
 
   // Pass 2: enriched signal makes the skill eligible.
   const pass2 = recommend(temp)
-  const nx = pass2.recommended.find((x) => x.id === 'haus.nx-monorepo-patterns')
+  const nx = pass2.recommended.find((x) => x.id === 'haus.nx-nx-workspace')
   assert.ok(nx, 'Nx skill should be recommended after enrichment')
   assert.ok(
     nx.reasons.some((r) => (r.signal ?? '').startsWith('deep:role:')),
@@ -57,7 +59,7 @@ test('deep-context.json roles make a role-gated skill eligible (pass 2)', () => 
   // Removing the enrichment reverts to the pass-1 result (determinism intact).
   rmSync(path.join(temp, '.haus-workflow', 'deep-context.json'))
   const pass3 = recommend(temp)
-  assert.equal(ids(pass3.recommended).has('haus.nx-monorepo-patterns'), false)
+  assert.equal(ids(pass3.recommended).has('haus.nx-nx-workspace'), false)
 
   rmSync(temp, { recursive: true, force: true })
 })
@@ -78,6 +80,6 @@ test('malformed deep-context.json is ignored, not thrown on', () => {
   // Must not throw; enrichment is simply ignored (headless path stays alive).
   const out = recommend(temp)
   assert.ok(Array.isArray(out.recommended), 'recommend should return normally')
-  assert.equal(ids(out.recommended).has('haus.nx-monorepo-patterns'), false)
+  assert.equal(ids(out.recommended).has('haus.nx-nx-workspace'), false)
   rmSync(temp, { recursive: true, force: true })
 })
