@@ -99,7 +99,10 @@ export async function exists(file: string): Promise<boolean> {
 }
 
 /**
- * Glob for files matching `patterns` under `root`, excluding node_modules, .git, and dist.
+ * Glob for files matching `patterns` under `root`, excluding node_modules, .git, dist,
+ * and test fixtures. tests/fixtures/** holds sample repos used by the scanner's own
+ * test suite (e.g. a fake .csproj or vendure-config.ts) — without this exclusion,
+ * unanchored SAFE_FILES globs match them as if they were real project signals.
  * Results are sorted for stable ordering across platforms.
  */
 export async function listFiles(root: string, patterns: string[]): Promise<string[]> {
@@ -108,7 +111,7 @@ export async function listFiles(root: string, patterns: string[]): Promise<strin
     dot: true,
     onlyFiles: true,
     suppressErrors: true,
-    ignore: ['**/node_modules/**', '**/.git/**', '**/dist/**'],
+    ignore: ['**/node_modules/**', '**/.git/**', '**/dist/**', '**/tests/fixtures/**'],
   })
   return files.sort((a, b) => a.localeCompare(b))
 }
