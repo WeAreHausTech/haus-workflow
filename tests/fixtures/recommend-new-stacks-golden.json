@@ -40,9 +40,9 @@
         "haus.ecc-prisma-patterns"
       ]
     },
-    "vite8-dep": {
+    "vite-stack": {
       "packageJson": {
-        "name": "vite8-dep-fixture",
+        "name": "vite-stack-fixture",
         "packageManager": "yarn@4.5.3",
         "dependencies": { "react": "19.0.0" },
         "devDependencies": { "vite": "6.0.0" }

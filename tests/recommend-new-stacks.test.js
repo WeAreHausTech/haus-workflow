@@ -8,10 +8,8 @@ import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 import { execaSync } from 'execa'
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const CLI = path.resolve('dist/cli.js')
 const CATALOG = path.resolve('library/catalog/manifest.json')
 const GOLDEN = JSON.parse(
