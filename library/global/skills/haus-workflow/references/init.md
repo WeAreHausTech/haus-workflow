@@ -62,7 +62,7 @@ Do this in order:
    ```
    @.haus-workflow/WORKFLOW.md
    @.haus-workflow/workflow-config.md
-   @.haus-workflow/project.md
+   @docs/decisions/README.md
    ```
 
 7. **Confirm.** End with one plain-language line, for example:
