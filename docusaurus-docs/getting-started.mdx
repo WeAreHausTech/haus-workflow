@@ -8,8 +8,9 @@ description: Install haus-workflow and run your first project setup.
 
 ## Prerequisites
 
-- Node 22+
-- Claude Code (for slash commands and agent context assets)
+- Node ≥22
+- Claude Code (for slash commands and agent context assets) — haus-workflow also works from a plain terminal without it, but you lose the conversational setup flow and most day-to-day convenience
+- A git repository — haus scans the current project, so run it from inside one
 
 ## Install
 
@@ -19,9 +20,11 @@ npm install -g @haus-tech/haus-workflow
 
 A global install triggers `haus install` automatically (via postinstall hook). This:
 
-- Seeds `~/.claude/` with the haus-workflow skill and global slash commands
-- Merges security rules into `~/.claude/settings.json`
-- Is non-fatal, idempotent, and global-only
+- Seeds `~/.claude/` with the haus-workflow skill and global slash commands, so `/haus-workflow` appears in Claude Code's `/` menu in **every** project — even ones you haven't set up yet
+- Merges security guardrails into `~/.claude/settings.json`
+- Is non-fatal, idempotent, and global-only — it never touches any project until you explicitly set one up
+
+Disable the automatic postinstall with `HAUS_NO_POSTINSTALL=1 npm install -g @haus-tech/haus-workflow` if you want to install the CLI without touching `~/.claude/` yet.
 
 Re-run or repair any time:
 
@@ -37,12 +40,41 @@ haus uninstall
 
 ## Set up a project
 
+The easiest path is entirely conversational — open Claude Code in your project and type:
+
+```
+/haus-workflow project:init
+```
+
+It detects your stack, explains what it found in plain language, applies the matching skills/agents/guardrails, does a deeper read of your code to catch anything a quick scan would miss, and writes your project's `CLAUDE.md` + `docs/`. See [Slash commands](./slash-commands) for the full conversational flow, or [Claude Code in Action](./claude-code-guide) for what the chat actually looks like.
+
+From a terminal, the equivalent is:
+
 ```bash
 cd your-project
 haus init
 ```
 
-`haus init` runs the full scan → recommend → apply pipeline and writes `.claude/` and `.haus-workflow/` into your project.
+`haus init` runs the full scan → recommend → apply pipeline in one step — no conversational narration, no deep code read, just the mechanical scan → recommend → apply → write pass.
+
+### What you get
+
+After either path, your project has:
+
+- **`.claude/skills/`, `.claude/agents/`, `.claude/commands/`** — the AI context assets matched to your stack (see [CLI commands](./commands) and the [Haus Workflow Catalog](./catalog) for what's available)
+- **`.claude/settings.json`** — security guardrails (permission deny/ask rules, hooks) merged in alongside anything you already had
+- **`.haus-workflow/WORKFLOW.md` + `workflow-config.md`** — the agentic development workflow standard, plus your project's specific bindings to it (test commands, source-of-truth doc paths, highest-stakes logic)
+- **`CLAUDE.md`** updated with a managed import block pulling in the above
+
+See [Configuration reference](./configuration) for what every file is and which ones are safe to hand-edit.
+
+## Check on it later
+
+```bash
+haus doctor
+```
+
+or `/haus-workflow project:doctor` in Claude Code — a one-line plain-language verdict (healthy, or a list of what needs attention and the exact fix command for each). Run this any time you're not sure your setup is current.
 
 ## Update
 
@@ -50,4 +82,11 @@ haus init
 haus update
 ```
 
-Fetches the latest [Haus Workflow Catalog](/docs/haus-workflow/catalog), refreshes `~/.claude/`, and re-applies project context assets.
+or `/haus-workflow update` in Claude Code. Fetches the latest [Haus Workflow Catalog](./catalog), refreshes `~/.claude/`, and — if run inside an already-set-up project — re-applies project context assets too (new catalog items get added, changed ones updated, anything removed upstream gets pruned).
+
+## Next steps
+
+- [CLI commands](./commands) — the full command reference
+- [Configuration reference](./configuration) — every file haus writes, and what's safe to edit
+- [Workspace mode](./workspace) — working across multiple repos at once
+- [Troubleshooting & FAQ](./troubleshooting) — common issues and their exact fix

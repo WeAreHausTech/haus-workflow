@@ -1,0 +1,67 @@
+---
+sidebar_position: 8
+title: Troubleshooting & FAQ
+description: Common problems, what causes them, and the exact command that fixes them.
+---
+
+# Troubleshooting & FAQ
+
+Run `haus doctor` (or `/haus-workflow project:doctor` in Claude Code) first — it names the exact issue and the fix command for most of what's below. This page explains the *why* behind the most common ones.
+
+## "`/haus-workflow` doesn't show up in Claude Code, or shows a weird description"
+
+**Cause:** the global install stamped ownership metadata in a way Claude Code couldn't parse the skill's frontmatter from (older haus versions only — fixed since).
+**Fix:** `haus install --force` to restamp it, then restart Claude Code. If it still doesn't appear, that's a Claude Code–side rendering gap, not a skill file problem — worth reporting separately.
+
+## "An item was removed from the catalog but is still in `.claude/`"
+
+**Cause:** two possibilities. Either you edited that file locally — `apply`'s stale-cleanup only removes items whose on-disk content still matches the hash it recorded, so a hand-edit protects it from deletion (and from silently vanishing) — or you're on an old CLI version that predates the deprecated-item cleanup logic.
+**Fix:** `npm i -g @haus-tech/haus-workflow` to get the latest CLI, then `haus update`. For a file you edited on purpose and want gone anyway, delete it by hand or restore the original and re-run `haus apply --write`.
+
+## "A skill/agent I want isn't installing even though it's in the catalog"
+
+**Cause:** it's an **opt-in tier** item — gated behind a role signal (e.g. Redis usage, a UI framework) that your scan didn't detect. This is intentional: it keeps the default install lean. These show up under `optInEligible[]` in `recommendation.json`, grouped by category (code review workflow, TDD workflow, git worktrees, security review, and so on).
+**Fix:** in Claude Code, run `/haus-workflow project:add-skills` (or pick opt-ins during `/haus-workflow project:init`) — both present the available groups in plain language. From the terminal: `haus recommend --include <id> [<id> …]` then `haus apply --write`.
+
+## "`haus scaffold` says it skipped my ESLint/Prettier config"
+
+**Cause:** working as intended. `scaffold` never overwrites a config file you already have — that would clobber your customizations on every `update`.
+**Fix:** if you actually want haus's baseline to replace what you have, re-run with `--force`: `haus scaffold <id> --force`. The Claude Code flows always ask before ever passing `--force` themselves.
+
+## "`haus doctor` says `WORKFLOW.md` was modified locally, but I never touched it"
+
+**Cause:** your editor or a formatter (Prettier running on save, or in a pre-commit hook) reformatted the file. `WORKFLOW.md` carries a content hash in its managed header; any reformatting — even whitespace-only — breaks that hash and reads as a hand-edit.
+**Fix:** `haus apply --write` now ships a `.prettierignore` entry covering `.haus-workflow/`, so this shouldn't recur going forward. If it's already happened once, restore the file with `haus apply --write --force`.
+
+## "`.haus-workflow/llms-cache/` has files for skills I don't have installed"
+
+**Cause:** a stale cache from an older CLI version that fetched reference docs for the *entire* catalog instead of just what got installed.
+**Fix:** run `haus apply --write` once on a current CLI version — it now scopes the fetch to what's actually in `haus.lock.json` and prunes cache entries for anything no longer installed.
+
+## "`haus doctor --hooks` fails right after I upgraded haus, before I touched anything"
+
+**Cause:** newer haus versions can add a new required hook (for example, a `SessionStart` hook that checks whether your install is stale). An already-applied project's `settings.json` predates it until you re-apply — same as any new required permission rule would show red until the next apply.
+**Fix:** `/haus-workflow project:refresh` (or `haus apply --write`) once, then `doctor --hooks` goes green.
+
+## "haus detected the wrong stack for my repo" (roles/stacks look nonsensical)
+
+**Cause:** the scanner walks your whole repo tree (excluding `node_modules/`, `.git/`, `dist/`, and `tests/fixtures/`) looking for stack markers like `package.json` dependencies, `*.csproj`/`*.sln` files, or `vendure-config.*`. If your repo vendors, mirrors, or fixtures a different stack's files somewhere else on disk, those can register as real signals.
+**Fix:** run `haus scan --json` and check `.haus-workflow/context-map.json` — if a role/stack looks wrong, find what file triggered it (search for the exact marker file: a stray `.sln`, an old `vendure-config.ts` left in an example folder, etc.) and either remove it or move it somewhere the scan doesn't need to touch. `haus doctor`'s detection status (`supported` / `partial` / `unknown`) is a quick signal something's off — a stack you don't recognize is worth investigating before trusting the recommendations that follow.
+
+## "I want to turn off the ADR (decision record) requirement"
+
+Not a bug — it's opt-out by design. Create `.haus-workflow/adr-gate.json` with:
+
+```json
+{ "mode": "off" }
+```
+
+`haus doctor` will confirm this is set. To re-enable, delete the file (or set `mode` back to anything else).
+
+## "I want a completely clean slate"
+
+`haus undo` (or `/haus-workflow project:reinit` in Claude Code, which confirms first) removes every haus-managed file — lock-tracked catalog items, core rules/commands, haus's parts of `settings.json` and `CLAUDE.md` — after backing them up. Your own `.claude/` content and anything you've written in `.haus-workflow/workflow-config.md` or `docs/` is never touched. Re-run `haus init` (or `project:init`) afterward to start fresh.
+
+## Still stuck?
+
+Haus Workflow is maintained internally by the Haus Tech team — external issues and PRs aren't accepted on this repo, but if you're inside the org, `haus doctor` output plus the exact command you ran is the fastest way to get help.

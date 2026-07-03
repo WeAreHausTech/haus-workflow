@@ -158,7 +158,7 @@ Initialize `haus.workspace.yaml` in the current directory.
 
 ### `haus workspace discover`
 
-Auto-discover workspace member repos and write `.haus-workflow/workspace-manifest.json`.
+Auto-discover workspace member repos and write `haus.workspace.yaml`.
 
 ### `haus workspace scan`
 
@@ -166,7 +166,9 @@ Run scans across discovered/configured workspace repos.
 
 ### `haus workspace setup`
 
-Run setup flow across workspace repos.
+Run setup flow across workspace repos. Records each repo's outcome to
+`.haus-workflow/workspace.manifest.json` — a derived, advisory record; per-repo
+`haus.lock.json` stays the source of truth.
 
 ### `haus workspace doctor`
 

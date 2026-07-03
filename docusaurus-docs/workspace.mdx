@@ -1,0 +1,110 @@
+---
+sidebar_position: 4
+title: Workspace mode
+description: Working across multiple repos — cloning a workspace, local dev orchestration, and cross-repo health checks.
+---
+
+# Workspace mode
+
+Workspace mode is for when your work spans several repos that belong together (a storefront + a headless CMS + a shared design system, say). It's built from three independent pieces — knowing which one you want avoids a lot of confusion, since two of them use similarly-named files for different jobs.
+
+| Piece                    | Driven by                                  | File it reads                        | What it does                                                   |
+| :--------------------------- | :-------------------------------------------- | :--------------------------------------- | :-------------------------------------------------------------- |
+| Cloning a workspace's repos | `/haus-workflow project:clone` (Claude Code) | `repos.manifest.json`, `repos.local.json` | Gets repos onto disk                                            |
+| Local dev orchestration    | `/haus-workflow project:cloneandsetup` (Claude Code) | `.haus-workflow/localdev.yml` (per repo + workspace) | Node version, deps, Docker services, cross-repo links, `.env`, seeding |
+| Cross-repo CLI ops         | `haus workspace <subcommand>`              | `haus.workspace.yaml`                | Scan, setup, and doctor across repos you've already cloned      |
+
+The first two are **Claude Code skill procedures** — there's no raw CLI flag that replicates the whole flow, because they involve judgment calls (asking before cloning, checking auth/Docker/data-access up front, confirming destructive steps). The third, `haus workspace`, is a real CLI command you can script or run in CI.
+
+## Cloning a workspace (`project:clone` / `repos.manifest.json`)
+
+A workspace's `repos.manifest.json` lists its member repos:
+
+```json
+{
+  "repos": [
+    { "id": "storefront", "folder": "storefront", "repo": "git@github.com:org/storefront.git" },
+    { "id": "cms", "folder": "cms", "repo": "git@github.com:org/cms.git" }
+  ]
+}
+```
+
+Run `/haus-workflow project:clone` (no name) from the workspace root. It will:
+
+1. Confirm the manifest exists, then read it.
+2. Check `repos.local.json` for a `pathOverrides` map — repos you've told it you already have elsewhere on disk, so it won't re-clone them.
+3. **Always ask before cloning anything** — clean clone, "I already have some of these," or cancel. It never assumes.
+4. Clone each repo with `haus clone <url> <folder>` (the one real CLI primitive underneath — it just clones a single git URL, nothing more), falling back from SSH to HTTPS automatically if your SSH isn't set up, and telling you when it does.
+5. Report what was cloned, reused, skipped, or failed.
+
+Pass a name instead — `/haus-workflow project:clone <name>` — to find and clone a **single** repo by name from GitHub (searches repos you own or belong to), no manifest required. This is Mode A; the manifest-driven flow above is Mode B.
+
+`repos.manifest.json` and `repos.local.json` are read entirely by the Claude Code skill, not by the `haus` binary — there's no `haus clone-workspace` command. `haus clone <url> [dir]` is the one primitive the skill calls once per repo.
+
+## Local dev orchestration (`project:cloneandsetup` / `localdev.yml`)
+
+`/haus-workflow project:cloneandsetup [name]` runs the clone flow above, then takes the workspace from "cloned" to "ready to run": per-repo dependency install, then an orchestration pass driven by `.haus-workflow/localdev.yml` files.
+
+**Per-repo** `<repo>/.haus-workflow/localdev.yml` describes only what can't be inferred about that one repo:
+
+```yaml
+needs: [mysql] # services this repo requires (provisioned in Docker)
+build: 'yarn build' # optional build step
+seed: 'dep db:pull staging' # optional: how to load data
+serve:
+  via: herd # herd | valet | docker | command
+  url: 'https://example.test'
+  start: 'yarn dev'
+```
+
+**Workspace-level** `<workspace>/.haus-workflow/localdev.yml` is the glue *between* repos — setup order, symlinks/path deps between sibling repos, and the single source of truth for cross-repo env values (DB names, ports, shared URLs) so a value chosen once gets written consistently into every repo's `.env`:
+
+```yaml
+order: [cms, storefront]
+links:
+  - { type: yarn-link, in: [storefront], dep: cms }
+env:
+  - value: 'app_local'
+    sinks:
+      - { repo: storefront, key: DB_NAME }
+```
+
+The orchestration pass:
+
+1. Runs one consolidated **prerequisite check** up front — auth tokens, Docker daemon, PHP environment, WP-CLI, Node versions, and (importantly) whether you can actually reach every data source a `seed:` step will need. This catches "can't pull the DB" *before* the expensive install work, not after — the single most common way a setup run leaves you half-configured.
+2. Installs dependencies per repo (Node version from `.nvmrc`, package manager from the lockfile).
+3. Brings up `needs:` services in a shared, workspace-owned Docker Compose project — namespaced so multiple workspace instances don't collide.
+4. Wires `links` (symlinks, `yarn link`, Composer path repos) between sibling repos.
+5. Writes each repo's `.env` deterministically from known values — workspace `env` map first, then generated secrets, then a value already present in a sibling's `.env`, then a small table of sane dev defaults. Secrets that exist nowhere locally (third-party API keys) are never invented — they're reported as a blank you need to fill, with what it unlocks and how to get it.
+6. Runs `seed:` steps (confirm-gated for anything remote or destructive), honoring whatever you chose in the data-access preflight — "seed now" or "leave empty for later," never a silent partial state.
+7. Asks whether to start the dev servers now, or just print the start commands.
+
+It never installs global/system tools (Homebrew, Docker, Herd) without asking first, and never overrides a PHP environment you already have running.
+
+## Cross-repo CLI ops (`haus workspace`)
+
+Once repos are cloned, `haus workspace` runs the single-repo commands (`scan`, `setup`, `doctor`) across all of them, driven by `haus.workspace.yaml` — a small, flat config, unrelated to `repos.manifest.json` above:
+
+```yaml
+client: acme
+repos:
+  - { name: storefront, path: ./storefront, role: frontend }
+  - { name: cms, path: ./cms, role: backend }
+relationships: []
+```
+
+| Command                   | What it does                                                      |
+| :---------------------------- | :---------------------------------------------------------------- |
+| `haus workspace init`     | Create an empty `haus.workspace.yaml` in the current directory    |
+| `haus workspace discover` | Auto-detect member repos on disk and write the config for you (`--write` to persist, otherwise prints a preview) |
+| `haus workspace scan`     | Run `haus scan` in every configured repo                          |
+| `haus workspace setup`    | Run the setup flow in every configured repo                       |
+| `haus workspace doctor`   | Run `haus doctor` in every configured repo, one health verdict per repo |
+
+This is a real CLI surface (unlike clone/cloneandsetup) — safe to script or wire into CI for a periodic "are all our repos still healthy" check.
+
+## Which one do I want?
+
+- **Getting a multi-repo project onto a new machine** → `/haus-workflow project:cloneandsetup` (or `project:clone` if you just want the code, no local-dev setup)
+- **Already have all the repos, want to run `haus doctor`/`haus scan` across them** → `haus workspace doctor` / `haus workspace scan`
+- **Just working on one repo** → none of this; use `haus init` / `/haus-workflow project:init` as normal
