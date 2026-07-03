@@ -1,0 +1,415 @@
+[
+  {
+    "id": "haus.adr-decisions",
+    "type": "skill",
+    "source": "haus",
+    "version": "1.1.1",
+    "catalogRef": "v3.5.0",
+    "hash": "sha256-a04277ab73e0179f3add585adf1368d91c6fd14baf37968bba940060cc3a0af6",
+    "installMode": "copied",
+    "paths": [
+      ".claude/skills/adr-decisions"
+    ]
+  },
+  {
+    "id": "haus.agentic-workflow-standard",
+    "type": "template",
+    "source": "haus",
+    "version": "1.1.1",
+    "catalogRef": "v3.5.0",
+    "hash": "sha256-79a386ef29689cebd34806449a66ee7b8b1ec1235820764509b1942e460d70f8",
+    "installMode": "copied",
+    "paths": [
+      ".claude/templates/agentic-workflow-standard.md"
+    ]
+  },
+  {
+    "id": "haus.decisions-ci-gate",
+    "type": "template",
+    "source": "haus",
+    "version": "1.1.1",
+    "catalogRef": "v3.5.0",
+    "hash": "sha256-0e713dd643f23838ae635ed53daca067efae5667e296a139da2fe7902115b4eb",
+    "installMode": "copied",
+    "paths": [
+      ".claude/templates/decisions-ci-gate.yml"
+    ]
+  },
+  {
+    "id": "haus.ecc-performance-optimizer",
+    "type": "agent",
+    "source": "curated",
+    "version": "1.1.1",
+    "catalogRef": "v3.5.0",
+    "hash": "sha256-4bfd9066450c322d6420cb2dddd383028aa01fc2940c503b8ec615294f5e67f1",
+    "installMode": "copied",
+    "paths": [
+      ".claude/agents/performance-optimizer.md"
+    ],
+    "originSourceId": "ecc-affaanm",
+    "useMode": "copy",
+    "license": "MIT",
+    "riskLevel": "low",
+    "reviewStatus": "approved"
+  },
+  {
+    "id": "haus.ecc-refactor-cleaner",
+    "type": "agent",
+    "source": "curated",
+    "version": "1.1.1",
+    "catalogRef": "v3.5.0",
+    "hash": "sha256-60030bb9176b3280c7289ec60fb0c3211c0fcb22ce147e448da990b29dbf0aaf",
+    "installMode": "copied",
+    "paths": [
+      ".claude/agents/refactor-cleaner.md"
+    ],
+    "originSourceId": "ecc-affaanm",
+    "useMode": "copy",
+    "license": "MIT",
+    "riskLevel": "low",
+    "reviewStatus": "approved"
+  },
+  {
+    "id": "haus.ecc-typescript-reviewer",
+    "type": "agent",
+    "source": "curated",
+    "version": "1.1.1",
+    "catalogRef": "v3.5.0",
+    "hash": "sha256-e4c0b4d5e80eb9cfe64b75271745852d94b73e3384328f83688378302004a509",
+    "installMode": "copied",
+    "paths": [
+      ".claude/agents/typescript-reviewer.md"
+    ],
+    "originSourceId": "ecc-affaanm",
+    "useMode": "copy",
+    "license": "MIT",
+    "riskLevel": "low",
+    "reviewStatus": "approved"
+  },
+  {
+    "id": "haus.oh-my-claudecode-tracer",
+    "type": "agent",
+    "source": "curated",
+    "version": "1.1.1",
+    "catalogRef": "v3.5.0",
+    "hash": "sha256-94f147ef99ddb13f4bd24498f623756a10117d74fb647efbe93b8698e2320703",
+    "installMode": "copied",
+    "paths": [
+      ".claude/agents/tracer.md"
+    ],
+    "originSourceId": "omcc-yeachanheo",
+    "useMode": "copy",
+    "license": "MIT",
+    "riskLevel": "low",
+    "reviewStatus": "approved"
+  },
+  {
+    "id": "haus.package-manager-yarn4-pnpm89",
+    "type": "skill",
+    "source": "haus",
+    "version": "1.1.1",
+    "catalogRef": "v3.5.0",
+    "hash": "sha256-a516c28c304398fe3b444880a138a7b365790e08bf4d98a32f998c122d9361ce",
+    "installMode": "copied",
+    "paths": [
+      ".claude/skills/package-manager-yarn4-pnpm89"
+    ]
+  },
+  {
+    "id": "haus.superpowers-brainstorming",
+    "type": "skill",
+    "source": "curated",
+    "version": "1.1.1",
+    "catalogRef": "v3.5.0",
+    "hash": "sha256-ccace77897cdd1fe7ee11180cb0dea7af62f7a08af8820806c9b61d15585b02c",
+    "installMode": "copied",
+    "paths": [
+      ".claude/skills/brainstorming",
+      ".claude/skills/shared"
+    ],
+    "originSourceId": "superpowers-pcvelz",
+    "useMode": "copy",
+    "license": "MIT",
+    "riskLevel": "low",
+    "reviewStatus": "approved"
+  },
+  {
+    "id": "haus.superpowers-checking-gates",
+    "type": "skill",
+    "source": "curated",
+    "version": "1.1.1",
+    "catalogRef": "v3.5.0",
+    "hash": "sha256-68de91fff9fddadbad85b5d5d1c7702b0be6d55ec9a11e86c27b5b93cbf73898",
+    "installMode": "copied",
+    "paths": [
+      ".claude/skills/checking-gates"
+    ],
+    "originSourceId": "superpowers-pcvelz",
+    "useMode": "copy",
+    "license": "MIT",
+    "riskLevel": "low",
+    "reviewStatus": "approved"
+  },
+  {
+    "id": "haus.superpowers-dispatching-parallel-agents",
+    "type": "skill",
+    "source": "curated",
+    "version": "1.1.1",
+    "catalogRef": "v3.5.0",
+    "hash": "sha256-44071acf658454b8993175a1aeae8b790ba3a1a08f3067a0ccd5fa0735d14e31",
+    "installMode": "copied",
+    "paths": [
+      ".claude/skills/dispatching-parallel-agents"
+    ],
+    "originSourceId": "superpowers-pcvelz",
+    "useMode": "copy",
+    "license": "MIT",
+    "riskLevel": "low",
+    "reviewStatus": "approved"
+  },
+  {
+    "id": "haus.superpowers-executing-plans",
+    "type": "skill",
+    "source": "curated",
+    "version": "1.1.1",
+    "catalogRef": "v3.5.0",
+    "hash": "sha256-8aaadfd5d2ec973cc696fae9aa017868a3d89dec67efb9b79e01e09f3b6ca69a",
+    "installMode": "copied",
+    "paths": [
+      ".claude/skills/executing-plans"
+    ],
+    "originSourceId": "superpowers-pcvelz",
+    "useMode": "copy",
+    "license": "MIT",
+    "riskLevel": "low",
+    "reviewStatus": "approved"
+  },
+  {
+    "id": "haus.superpowers-finishing-a-development-branch",
+    "type": "skill",
+    "source": "curated",
+    "version": "1.1.1",
+    "catalogRef": "v3.5.0",
+    "hash": "sha256-baaf175d6e01af6e90050b0f436b100648ed8a37f7729f55330d3c6db94e2f4f",
+    "installMode": "copied",
+    "paths": [
+      ".claude/skills/finishing-a-development-branch"
+    ],
+    "originSourceId": "superpowers-pcvelz",
+    "useMode": "copy",
+    "license": "MIT",
+    "riskLevel": "low",
+    "reviewStatus": "approved"
+  },
+  {
+    "id": "haus.superpowers-receiving-code-review",
+    "type": "skill",
+    "source": "curated",
+    "version": "1.1.1",
+    "catalogRef": "v3.5.0",
+    "hash": "sha256-ff669e8a0eff68ed48631d3c1a617d80b3494329dd7383fee8f0c13aa175f862",
+    "installMode": "copied",
+    "paths": [
+      ".claude/skills/receiving-code-review"
+    ],
+    "originSourceId": "superpowers-pcvelz",
+    "useMode": "copy",
+    "license": "MIT",
+    "riskLevel": "low",
+    "reviewStatus": "approved"
+  },
+  {
+    "id": "haus.superpowers-requesting-code-review",
+    "type": "skill",
+    "source": "curated",
+    "version": "1.1.1",
+    "catalogRef": "v3.5.0",
+    "hash": "sha256-bae6d9aba2fa0d57c7be879831ab8dfe104449dbb7bc6cd231b4fe9b78998792",
+    "installMode": "copied",
+    "paths": [
+      ".claude/skills/requesting-code-review"
+    ],
+    "originSourceId": "superpowers-pcvelz",
+    "useMode": "copy",
+    "license": "MIT",
+    "riskLevel": "low",
+    "reviewStatus": "approved"
+  },
+  {
+    "id": "haus.superpowers-specifying-gates",
+    "type": "skill",
+    "source": "curated",
+    "version": "1.1.1",
+    "catalogRef": "v3.5.0",
+    "hash": "sha256-a7dae87b58f649a6c3745d440d4ec7158116073280899fa7da399cfd72919121",
+    "installMode": "copied",
+    "paths": [
+      ".claude/skills/specifying-gates"
+    ],
+    "originSourceId": "superpowers-pcvelz",
+    "useMode": "copy",
+    "license": "MIT",
+    "riskLevel": "low",
+    "reviewStatus": "approved"
+  },
+  {
+    "id": "haus.superpowers-subagent-driven-development",
+    "type": "skill",
+    "source": "curated",
+    "version": "1.1.1",
+    "catalogRef": "v3.5.0",
+    "hash": "sha256-e3fb1c1b1546e2d1277e50f5c93abd9ff6d208cfe942e6b6a96f2488b09e1185",
+    "installMode": "copied",
+    "paths": [
+      ".claude/skills/subagent-driven-development"
+    ],
+    "originSourceId": "superpowers-pcvelz",
+    "useMode": "copy",
+    "license": "MIT",
+    "riskLevel": "low",
+    "reviewStatus": "approved"
+  },
+  {
+    "id": "haus.superpowers-systematic-debugging",
+    "type": "skill",
+    "source": "curated",
+    "version": "1.1.1",
+    "catalogRef": "v3.5.0",
+    "hash": "sha256-252b183f7910c0af013319638a17bc401c12fe9d1712a40c70a7093a72be68a8",
+    "installMode": "copied",
+    "paths": [
+      ".claude/skills/systematic-debugging"
+    ],
+    "originSourceId": "superpowers-pcvelz",
+    "useMode": "copy",
+    "license": "MIT",
+    "riskLevel": "low",
+    "reviewStatus": "approved"
+  },
+  {
+    "id": "haus.superpowers-test-driven-development",
+    "type": "skill",
+    "source": "curated",
+    "version": "1.1.1",
+    "catalogRef": "v3.5.0",
+    "hash": "sha256-6f4a0eaaf0976016be40373def97b1e6239ac0f5046d3663081a59ad5243ade5",
+    "installMode": "copied",
+    "paths": [
+      ".claude/skills/test-driven-development"
+    ],
+    "originSourceId": "superpowers-pcvelz",
+    "useMode": "copy",
+    "license": "MIT",
+    "riskLevel": "low",
+    "reviewStatus": "approved"
+  },
+  {
+    "id": "haus.superpowers-using-git-worktrees",
+    "type": "skill",
+    "source": "curated",
+    "version": "1.1.1",
+    "catalogRef": "v3.5.0",
+    "hash": "sha256-81f02fcd61d09550edf9ca287eb16e0c9d26f57390fb239d5ae27c54766caaf9",
+    "installMode": "copied",
+    "paths": [
+      ".claude/skills/using-git-worktrees"
+    ],
+    "originSourceId": "superpowers-pcvelz",
+    "useMode": "copy",
+    "license": "MIT",
+    "riskLevel": "low",
+    "reviewStatus": "approved"
+  },
+  {
+    "id": "haus.superpowers-using-superpowers",
+    "type": "skill",
+    "source": "curated",
+    "version": "1.1.1",
+    "catalogRef": "v3.5.0",
+    "hash": "sha256-854a6c8110af79812bbfbcc0745d8f84a360a7996353dcd8a26f03d33430f9ca",
+    "installMode": "copied",
+    "paths": [
+      ".claude/skills/using-superpowers"
+    ],
+    "originSourceId": "superpowers-pcvelz",
+    "useMode": "copy",
+    "license": "MIT",
+    "riskLevel": "low",
+    "reviewStatus": "approved"
+  },
+  {
+    "id": "haus.superpowers-verification-before-completion",
+    "type": "skill",
+    "source": "curated",
+    "version": "1.1.1",
+    "catalogRef": "v3.5.0",
+    "hash": "sha256-cbca8c8ba4c6dba9b6ada1366789cc4f63e3aaaf9940e84edc268e8de1a25d62",
+    "installMode": "copied",
+    "paths": [
+      ".claude/skills/verification-before-completion"
+    ],
+    "originSourceId": "superpowers-pcvelz",
+    "useMode": "copy",
+    "license": "MIT",
+    "riskLevel": "low",
+    "reviewStatus": "approved"
+  },
+  {
+    "id": "haus.superpowers-writing-plans",
+    "type": "skill",
+    "source": "curated",
+    "version": "1.1.1",
+    "catalogRef": "v3.5.0",
+    "hash": "sha256-9bdc83fd8925e045a2d57eb1a3043a8699f1677ea4370d9c0b31de9544697d45",
+    "installMode": "copied",
+    "paths": [
+      ".claude/skills/writing-plans"
+    ],
+    "originSourceId": "superpowers-pcvelz",
+    "useMode": "copy",
+    "license": "MIT",
+    "riskLevel": "low",
+    "reviewStatus": "approved"
+  },
+  {
+    "id": "haus.typescript-patterns",
+    "type": "skill",
+    "source": "haus",
+    "version": "1.1.1",
+    "catalogRef": "v3.5.0",
+    "hash": "sha256-4300c9895f2cdba041545b13f8d44011aafa872faabda2f22852c37853278347",
+    "installMode": "copied",
+    "paths": [
+      ".claude/skills/typescript-patterns"
+    ]
+  },
+  {
+    "id": "haus.writing-documentation",
+    "type": "skill",
+    "source": "haus",
+    "version": "1.1.1",
+    "catalogRef": "v3.5.0",
+    "hash": "sha256-71317e337dc9ee248e3fd63d6d190a97aa04e16dd1646094a4a69753c0cd7134",
+    "installMode": "copied",
+    "paths": [
+      ".claude/skills/writing-documentation"
+    ]
+  },
+  {
+    "id": "haus.wshobson-typescript-advanced-types",
+    "type": "skill",
+    "source": "curated",
+    "version": "1.1.1",
+    "catalogRef": "v3.5.0",
+    "hash": "sha256-538effbf20d1527c4565ed412c72ec86f6b2b366b0ef5aea2ac6d1479ffa5d61",
+    "installMode": "copied",
+    "paths": [
+      ".claude/skills/typescript-advanced-types"
+    ],
+    "originSourceId": "wshobson-agents",
+    "useMode": "copy",
+    "license": "MIT",
+    "riskLevel": "low",
+    "reviewStatus": "approved"
+  }
+]

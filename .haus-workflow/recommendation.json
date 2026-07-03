@@ -1,0 +1,1669 @@
+{
+  "recommended": [
+    {
+      "id": "haus.adr-decisions",
+      "type": "skill",
+      "reason": "catalog default baseline",
+      "reasons": [
+        {
+          "code": "default-baseline",
+          "message": "catalog default baseline",
+          "signal": "policy:default"
+        }
+      ],
+      "selectionMode": "baseline",
+      "install": true,
+      "tags": [
+        "workflow",
+        "haus",
+        "project-instructions"
+      ],
+      "ecosystem": "general",
+      "tokenEstimate": 650
+    },
+    {
+      "id": "haus.agentic-workflow-standard",
+      "type": "template",
+      "reason": "catalog default baseline",
+      "reasons": [
+        {
+          "code": "default-baseline",
+          "message": "catalog default baseline",
+          "signal": "policy:default"
+        }
+      ],
+      "selectionMode": "baseline",
+      "install": true,
+      "tags": [
+        "workflow",
+        "baseline",
+        "project-instructions"
+      ],
+      "tokenEstimate": 2200
+    },
+    {
+      "id": "haus.decisions-ci-gate",
+      "type": "template",
+      "reason": "catalog default baseline",
+      "reasons": [
+        {
+          "code": "default-baseline",
+          "message": "catalog default baseline",
+          "signal": "policy:default"
+        }
+      ],
+      "selectionMode": "baseline",
+      "install": true,
+      "tags": [
+        "workflow",
+        "quality"
+      ],
+      "ecosystem": "general",
+      "tokenEstimate": 120
+    },
+    {
+      "id": "haus.ecc-performance-optimizer",
+      "type": "agent",
+      "reason": "manually included",
+      "reasons": [
+        {
+          "code": "manual-include",
+          "message": "manually included via --include",
+          "signal": "selection:manual"
+        }
+      ],
+      "selectionMode": "manual",
+      "install": true,
+      "tags": [
+        "agent",
+        "quality"
+      ],
+      "ecosystem": "ecc",
+      "tokenEstimate": 3367
+    },
+    {
+      "id": "haus.ecc-refactor-cleaner",
+      "type": "agent",
+      "reason": "manually included",
+      "reasons": [
+        {
+          "code": "manual-include",
+          "message": "manually included via --include",
+          "signal": "selection:manual"
+        }
+      ],
+      "selectionMode": "manual",
+      "install": true,
+      "tags": [
+        "agent",
+        "quality"
+      ],
+      "ecosystem": "ecc",
+      "tokenEstimate": 670
+    },
+    {
+      "id": "haus.ecc-typescript-reviewer",
+      "type": "agent",
+      "reason": "requires-any signal match",
+      "reasons": [
+        {
+          "code": "requires-any-match",
+          "message": "requires-any signal match",
+          "signal": "stack:typescript5"
+        }
+      ],
+      "selectionMode": "matched",
+      "install": true,
+      "tags": [
+        "agent",
+        "review",
+        "typescript"
+      ],
+      "ecosystem": "typescript",
+      "tokenEstimate": 2270
+    },
+    {
+      "id": "haus.oh-my-claudecode-tracer",
+      "type": "agent",
+      "reason": "manually included",
+      "reasons": [
+        {
+          "code": "manual-include",
+          "message": "manually included via --include",
+          "signal": "selection:manual"
+        }
+      ],
+      "selectionMode": "manual",
+      "install": true,
+      "tags": [
+        "agent",
+        "quality"
+      ],
+      "ecosystem": "oh-my-claudecode",
+      "tokenEstimate": 3004
+    },
+    {
+      "id": "haus.package-manager-yarn4-pnpm89",
+      "type": "skill",
+      "reason": "stack/dependency match, package manager match",
+      "reasons": [
+        {
+          "code": "stack-match",
+          "message": "stack/dependency match",
+          "signal": "tag:yarn4"
+        },
+        {
+          "code": "package-manager-match",
+          "message": "package manager match",
+          "signal": "packageManager:yarn"
+        }
+      ],
+      "selectionMode": "matched",
+      "install": true,
+      "tags": [
+        "yarn4",
+        "pnpm89"
+      ],
+      "ecosystem": "packagemanager",
+      "tokenEstimate": 1200
+    },
+    {
+      "id": "haus.superpowers-brainstorming",
+      "type": "skill",
+      "reason": "catalog default baseline",
+      "reasons": [
+        {
+          "code": "default-baseline",
+          "message": "catalog default baseline",
+          "signal": "policy:default"
+        }
+      ],
+      "selectionMode": "baseline",
+      "install": true,
+      "tags": [
+        "workflow",
+        "core-skill"
+      ],
+      "ecosystem": "superpowers",
+      "tokenEstimate": 3023
+    },
+    {
+      "id": "haus.superpowers-checking-gates",
+      "type": "skill",
+      "reason": "catalog default baseline",
+      "reasons": [
+        {
+          "code": "default-baseline",
+          "message": "catalog default baseline",
+          "signal": "policy:default"
+        }
+      ],
+      "selectionMode": "baseline",
+      "install": true,
+      "tags": [
+        "workflow",
+        "workflow-skill"
+      ],
+      "ecosystem": "superpowers",
+      "tokenEstimate": 1142
+    },
+    {
+      "id": "haus.superpowers-dispatching-parallel-agents",
+      "type": "skill",
+      "reason": "catalog default baseline",
+      "reasons": [
+        {
+          "code": "default-baseline",
+          "message": "catalog default baseline",
+          "signal": "policy:default"
+        }
+      ],
+      "selectionMode": "baseline",
+      "install": true,
+      "tags": [
+        "workflow",
+        "workflow-skill"
+      ],
+      "ecosystem": "superpowers",
+      "tokenEstimate": 1884
+    },
+    {
+      "id": "haus.superpowers-executing-plans",
+      "type": "skill",
+      "reason": "catalog default baseline",
+      "reasons": [
+        {
+          "code": "default-baseline",
+          "message": "catalog default baseline",
+          "signal": "policy:default"
+        }
+      ],
+      "selectionMode": "baseline",
+      "install": true,
+      "tags": [
+        "workflow",
+        "core-skill"
+      ],
+      "ecosystem": "superpowers",
+      "tokenEstimate": 1433
+    },
+    {
+      "id": "haus.superpowers-finishing-a-development-branch",
+      "type": "skill",
+      "reason": "manually included",
+      "reasons": [
+        {
+          "code": "manual-include",
+          "message": "manually included via --include",
+          "signal": "selection:manual"
+        }
+      ],
+      "selectionMode": "manual",
+      "install": true,
+      "tags": [
+        "workflow",
+        "quality"
+      ],
+      "ecosystem": "superpowers",
+      "tokenEstimate": 1766
+    },
+    {
+      "id": "haus.superpowers-receiving-code-review",
+      "type": "skill",
+      "reason": "manually included",
+      "reasons": [
+        {
+          "code": "manual-include",
+          "message": "manually included via --include",
+          "signal": "selection:manual"
+        }
+      ],
+      "selectionMode": "manual",
+      "install": true,
+      "tags": [
+        "review",
+        "review-skill"
+      ],
+      "ecosystem": "superpowers",
+      "tokenEstimate": 1579
+    },
+    {
+      "id": "haus.superpowers-requesting-code-review",
+      "type": "skill",
+      "reason": "manually included",
+      "reasons": [
+        {
+          "code": "manual-include",
+          "message": "manually included via --include",
+          "signal": "selection:manual"
+        }
+      ],
+      "selectionMode": "manual",
+      "install": true,
+      "tags": [
+        "review",
+        "review-skill"
+      ],
+      "ecosystem": "superpowers",
+      "tokenEstimate": 702
+    },
+    {
+      "id": "haus.superpowers-specifying-gates",
+      "type": "skill",
+      "reason": "manually included",
+      "reasons": [
+        {
+          "code": "manual-include",
+          "message": "manually included via --include",
+          "signal": "selection:manual"
+        }
+      ],
+      "selectionMode": "manual",
+      "install": true,
+      "tags": [
+        "workflow",
+        "workflow-skill"
+      ],
+      "ecosystem": "superpowers",
+      "tokenEstimate": 1724
+    },
+    {
+      "id": "haus.superpowers-subagent-driven-development",
+      "type": "skill",
+      "reason": "manually included",
+      "reasons": [
+        {
+          "code": "manual-include",
+          "message": "manually included via --include",
+          "signal": "selection:manual"
+        }
+      ],
+      "selectionMode": "manual",
+      "install": true,
+      "tags": [
+        "workflow",
+        "workflow-skill"
+      ],
+      "ecosystem": "superpowers",
+      "tokenEstimate": 3948
+    },
+    {
+      "id": "haus.superpowers-systematic-debugging",
+      "type": "skill",
+      "reason": "catalog default baseline",
+      "reasons": [
+        {
+          "code": "default-baseline",
+          "message": "catalog default baseline",
+          "signal": "policy:default"
+        }
+      ],
+      "selectionMode": "baseline",
+      "install": true,
+      "tags": [
+        "workflow",
+        "quality"
+      ],
+      "ecosystem": "superpowers",
+      "tokenEstimate": 2480
+    },
+    {
+      "id": "haus.superpowers-test-driven-development",
+      "type": "skill",
+      "reason": "manually included",
+      "reasons": [
+        {
+          "code": "manual-include",
+          "message": "manually included via --include",
+          "signal": "selection:manual"
+        }
+      ],
+      "selectionMode": "manual",
+      "install": true,
+      "tags": [
+        "testing",
+        "workflow"
+      ],
+      "ecosystem": "superpowers",
+      "tokenEstimate": 2467
+    },
+    {
+      "id": "haus.superpowers-using-git-worktrees",
+      "type": "skill",
+      "reason": "manually included",
+      "reasons": [
+        {
+          "code": "manual-include",
+          "message": "manually included via --include",
+          "signal": "selection:manual"
+        }
+      ],
+      "selectionMode": "manual",
+      "install": true,
+      "tags": [
+        "workflow",
+        "workflow-skill"
+      ],
+      "ecosystem": "superpowers",
+      "tokenEstimate": 2140
+    },
+    {
+      "id": "haus.superpowers-using-superpowers",
+      "type": "skill",
+      "reason": "catalog default baseline",
+      "reasons": [
+        {
+          "code": "default-baseline",
+          "message": "catalog default baseline",
+          "signal": "policy:default"
+        }
+      ],
+      "selectionMode": "baseline",
+      "install": true,
+      "tags": [
+        "workflow",
+        "core-skill"
+      ],
+      "ecosystem": "superpowers",
+      "tokenEstimate": 1362
+    },
+    {
+      "id": "haus.superpowers-verification-before-completion",
+      "type": "skill",
+      "reason": "catalog default baseline",
+      "reasons": [
+        {
+          "code": "default-baseline",
+          "message": "catalog default baseline",
+          "signal": "policy:default"
+        }
+      ],
+      "selectionMode": "baseline",
+      "install": true,
+      "tags": [
+        "quality",
+        "workflow"
+      ],
+      "ecosystem": "superpowers",
+      "tokenEstimate": 1051
+    },
+    {
+      "id": "haus.superpowers-writing-plans",
+      "type": "skill",
+      "reason": "catalog default baseline",
+      "reasons": [
+        {
+          "code": "default-baseline",
+          "message": "catalog default baseline",
+          "signal": "policy:default"
+        }
+      ],
+      "selectionMode": "baseline",
+      "install": true,
+      "tags": [
+        "workflow",
+        "core-skill"
+      ],
+      "ecosystem": "superpowers",
+      "tokenEstimate": 5493
+    },
+    {
+      "id": "haus.typescript-patterns",
+      "type": "skill",
+      "reason": "requires-any signal match",
+      "reasons": [
+        {
+          "code": "requires-any-match",
+          "message": "requires-any signal match",
+          "signal": "stack:typescript5"
+        }
+      ],
+      "selectionMode": "matched",
+      "install": true,
+      "tags": [
+        "typescript",
+        "frontend",
+        "backend"
+      ],
+      "ecosystem": "typescript",
+      "tokenEstimate": 2200
+    },
+    {
+      "id": "haus.writing-documentation",
+      "type": "skill",
+      "reason": "catalog default baseline",
+      "reasons": [
+        {
+          "code": "default-baseline",
+          "message": "catalog default baseline",
+          "signal": "policy:default"
+        }
+      ],
+      "selectionMode": "baseline",
+      "install": true,
+      "tags": [
+        "workflow",
+        "core-skill",
+        "project-instructions"
+      ],
+      "ecosystem": "workflow",
+      "tokenEstimate": 1800
+    },
+    {
+      "id": "haus.wshobson-typescript-advanced-types",
+      "type": "skill",
+      "reason": "requires-any signal match",
+      "reasons": [
+        {
+          "code": "requires-any-match",
+          "message": "requires-any signal match",
+          "signal": "stack:typescript5"
+        }
+      ],
+      "selectionMode": "matched",
+      "install": true,
+      "tags": [
+        "workflow",
+        "typescript",
+        "frontend",
+        "backend"
+      ],
+      "ecosystem": "typescript",
+      "tokenEstimate": 2009
+    }
+  ],
+  "skipped": [
+    {
+      "id": "haus.antfu-vite",
+      "reason": "requiresAny unsatisfied: needs stack=vite8 | dependency=vite",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=vite8 | dependency=vite",
+          "signal": "stack=vite8 | dependency=vite"
+        }
+      ]
+    },
+    {
+      "id": "haus.antfu-vue",
+      "reason": "requiresAny unsatisfied: needs stack=vue | dependency=vue",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=vue | dependency=vue",
+          "signal": "stack=vue | dependency=vue"
+        }
+      ]
+    },
+    {
+      "id": "haus.apollo-apollo-client",
+      "reason": "requiresAny unsatisfied: needs dependency=@apollo/client | stack=graphql | dependency=graphql",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs dependency=@apollo/client | stack=graphql | dependency=graphql",
+          "signal": "dependency=@apollo/client | stack=graphql | dependency=graphql"
+        }
+      ]
+    },
+    {
+      "id": "haus.apollo-apollo-federation",
+      "reason": "requiresAny unsatisfied: needs stack=graphql | dependency=graphql | dependency=@apollo/server | dependency=@nestjs/graphql",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=graphql | dependency=graphql | dependency=@apollo/server | dependency=@nestjs/graphql",
+          "signal": "stack=graphql | dependency=graphql | dependency=@apollo/server | dependency=@nestjs/graphql"
+        }
+      ]
+    },
+    {
+      "id": "haus.apollo-apollo-server",
+      "reason": "requiresAny unsatisfied: needs stack=graphql | dependency=@apollo/server | dependency=@nestjs/graphql",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=graphql | dependency=@apollo/server | dependency=@nestjs/graphql",
+          "signal": "stack=graphql | dependency=@apollo/server | dependency=@nestjs/graphql"
+        }
+      ]
+    },
+    {
+      "id": "haus.apollo-graphql-operations",
+      "reason": "requiresAny unsatisfied: needs stack=graphql | dependency=graphql | dependency=@apollo/server | dependency=@nestjs/graphql",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=graphql | dependency=graphql | dependency=@apollo/server | dependency=@nestjs/graphql",
+          "signal": "stack=graphql | dependency=graphql | dependency=@apollo/server | dependency=@nestjs/graphql"
+        }
+      ]
+    },
+    {
+      "id": "haus.apollo-graphql-schema",
+      "reason": "requiresAny unsatisfied: needs stack=graphql | dependency=graphql",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=graphql | dependency=graphql",
+          "signal": "stack=graphql | dependency=graphql"
+        }
+      ]
+    },
+    {
+      "id": "haus.auth-oidc-azure-bankid-patterns",
+      "reason": "requiresAny unsatisfied: needs stack=oidc | stack=azure-ad | stack=bankid | stack=saml2",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=oidc | stack=azure-ad | stack=bankid | stack=saml2",
+          "signal": "stack=oidc | stack=azure-ad | stack=bankid | stack=saml2"
+        }
+      ]
+    },
+    {
+      "id": "haus.bullmq-patterns",
+      "reason": "requiresAny unsatisfied: needs stack=bullmq | dependency=bullmq",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=bullmq | dependency=bullmq",
+          "signal": "stack=bullmq | dependency=bullmq"
+        }
+      ]
+    },
+    {
+      "id": "haus.callstack-react-native-best-practices",
+      "reason": "requiresAny unsatisfied: needs stack=expo | stack=react-native | role=expo-app | dependency=expo | dependency=react-native",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=expo | stack=react-native | role=expo-app | dependency=expo | dependency=react-native",
+          "signal": "stack=expo | stack=react-native | role=expo-app | dependency=expo | dependency=react-native"
+        }
+      ]
+    },
+    {
+      "id": "haus.currents-dev-playwright-best-practices",
+      "reason": "requiresAny unsatisfied: needs stack=playwright | dependency=@playwright/test",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=playwright | dependency=@playwright/test",
+          "signal": "stack=playwright | dependency=@playwright/test"
+        }
+      ]
+    },
+    {
+      "id": "haus.decision-template",
+      "reason": "No role/stack match",
+      "skipReasons": [
+        {
+          "code": "no-role-stack-match",
+          "message": "No role/stack match"
+        }
+      ]
+    },
+    {
+      "id": "haus.dotnet-analyzing-dotnet-performance",
+      "reason": "requiresAny unsatisfied: needs stack=dotnet | role=dotnet-service",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=dotnet | role=dotnet-service",
+          "signal": "stack=dotnet | role=dotnet-service"
+        }
+      ]
+    },
+    {
+      "id": "haus.dotnet-csharp-coding-standards",
+      "reason": "requiresAny unsatisfied: needs stack=dotnet | role=dotnet-service",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=dotnet | role=dotnet-service",
+          "signal": "stack=dotnet | role=dotnet-service"
+        }
+      ]
+    },
+    {
+      "id": "haus.dotnet-optimizing-ef-core-queries",
+      "reason": "requiresAny unsatisfied: needs stack=dotnet | role=dotnet-service",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=dotnet | role=dotnet-service",
+          "signal": "stack=dotnet | role=dotnet-service"
+        }
+      ]
+    },
+    {
+      "id": "haus.ecc-a11y-architect",
+      "reason": "requiresAny unsatisfied: needs stack=shadcn | stack=radix",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=shadcn | stack=radix",
+          "signal": "stack=shadcn | stack=radix"
+        }
+      ]
+    },
+    {
+      "id": "haus.ecc-csharp-reviewer",
+      "reason": "requiresAny unsatisfied: needs stack=dotnet",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=dotnet",
+          "signal": "stack=dotnet"
+        }
+      ]
+    },
+    {
+      "id": "haus.ecc-csharp-testing",
+      "reason": "requiresAny unsatisfied: needs stack=dotnet | role=dotnet-service",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=dotnet | role=dotnet-service",
+          "signal": "stack=dotnet | role=dotnet-service"
+        }
+      ]
+    },
+    {
+      "id": "haus.ecc-database-reviewer",
+      "reason": "Required role missing: database",
+      "skipReasons": [
+        {
+          "code": "required-role-missing",
+          "message": "Required role missing: database",
+          "signal": "role:database"
+        }
+      ]
+    },
+    {
+      "id": "haus.ecc-docker-patterns",
+      "reason": "requiresAny unsatisfied: needs stack=docker",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=docker",
+          "signal": "stack=docker"
+        }
+      ]
+    },
+    {
+      "id": "haus.ecc-dotnet-patterns",
+      "reason": "requiresAny unsatisfied: needs stack=dotnet | role=dotnet-service",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=dotnet | role=dotnet-service",
+          "signal": "stack=dotnet | role=dotnet-service"
+        }
+      ]
+    },
+    {
+      "id": "haus.ecc-e2e-runner",
+      "reason": "requiresAny unsatisfied: needs stack=playwright | dependency=@playwright/test",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=playwright | dependency=@playwright/test",
+          "signal": "stack=playwright | dependency=@playwright/test"
+        }
+      ]
+    },
+    {
+      "id": "haus.ecc-e2e-testing",
+      "reason": "requiresAny unsatisfied: needs stack=playwright | dependency=@playwright/test",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=playwright | dependency=@playwright/test",
+          "signal": "stack=playwright | dependency=@playwright/test"
+        }
+      ]
+    },
+    {
+      "id": "haus.ecc-frontend-patterns",
+      "reason": "requiresAny unsatisfied: needs stack=nextjs | stack=react19 | dependency=react",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=nextjs | stack=react19 | dependency=react",
+          "signal": "stack=nextjs | stack=react19 | dependency=react"
+        }
+      ]
+    },
+    {
+      "id": "haus.ecc-laravel-patterns",
+      "reason": "requiresAny unsatisfied: needs stack=laravel | dependency=laravel/framework",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=laravel | dependency=laravel/framework",
+          "signal": "stack=laravel | dependency=laravel/framework"
+        }
+      ]
+    },
+    {
+      "id": "haus.ecc-laravel-plugin-discovery",
+      "reason": "requiresAny unsatisfied: needs role=laravel-plugins",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs role=laravel-plugins",
+          "signal": "role=laravel-plugins"
+        }
+      ]
+    },
+    {
+      "id": "haus.ecc-laravel-tdd",
+      "reason": "requiresAny unsatisfied: needs stack=laravel | dependency=laravel/framework | stack=phpunit | dependency=phpunit/phpunit",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=laravel | dependency=laravel/framework | stack=phpunit | dependency=phpunit/phpunit",
+          "signal": "stack=laravel | dependency=laravel/framework | stack=phpunit | dependency=phpunit/phpunit"
+        }
+      ]
+    },
+    {
+      "id": "haus.ecc-laravel-verification",
+      "reason": "requiresAny unsatisfied: needs stack=laravel | dependency=laravel/framework",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=laravel | dependency=laravel/framework",
+          "signal": "stack=laravel | dependency=laravel/framework"
+        }
+      ]
+    },
+    {
+      "id": "haus.ecc-nestjs-patterns",
+      "reason": "requiresAny unsatisfied: needs stack=nestjs | dependency=@nestjs/core",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=nestjs | dependency=@nestjs/core",
+          "signal": "stack=nestjs | dependency=@nestjs/core"
+        }
+      ]
+    },
+    {
+      "id": "haus.ecc-php-reviewer",
+      "reason": "requiresAny unsatisfied: needs stack=php",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=php",
+          "signal": "stack=php"
+        }
+      ]
+    },
+    {
+      "id": "haus.ecc-prisma-patterns",
+      "reason": "requiresAny unsatisfied: needs stack=prisma | dependency=@prisma/client | dependency=prisma",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=prisma | dependency=@prisma/client | dependency=prisma",
+          "signal": "stack=prisma | dependency=@prisma/client | dependency=prisma"
+        }
+      ]
+    },
+    {
+      "id": "haus.ecc-react-build-resolver",
+      "reason": "requiresAny unsatisfied: needs stack=react | dependency=react",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=react | dependency=react",
+          "signal": "stack=react | dependency=react"
+        }
+      ]
+    },
+    {
+      "id": "haus.ecc-react-reviewer",
+      "reason": "requiresAny unsatisfied: needs stack=react | dependency=react",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=react | dependency=react",
+          "signal": "stack=react | dependency=react"
+        }
+      ]
+    },
+    {
+      "id": "haus.ecc-react-testing",
+      "reason": "requiresAny unsatisfied: needs stack=testing-library | dependency=@testing-library/react | dependency=@testing-library/dom",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=testing-library | dependency=@testing-library/react | dependency=@testing-library/dom",
+          "signal": "stack=testing-library | dependency=@testing-library/react | dependency=@testing-library/dom"
+        }
+      ]
+    },
+    {
+      "id": "haus.ecc-redis-patterns",
+      "reason": "requiresAny unsatisfied: needs stack=redis | dependency=redis | dependency=ioredis",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=redis | dependency=redis | dependency=ioredis",
+          "signal": "stack=redis | dependency=redis | dependency=ioredis"
+        }
+      ]
+    },
+    {
+      "id": "haus.ecc-security-reviewer",
+      "reason": "requiresAny unsatisfied: needs role=security-review",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs role=security-review",
+          "signal": "role=security-review"
+        }
+      ]
+    },
+    {
+      "id": "haus.ecc-vite-patterns",
+      "reason": "requiresAny unsatisfied: needs stack=vite8 | dependency=vite",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=vite8 | dependency=vite",
+          "signal": "stack=vite8 | dependency=vite"
+        }
+      ]
+    },
+    {
+      "id": "haus.ecc-vue-patterns",
+      "reason": "requiresAny unsatisfied: needs stack=vue | dependency=vue",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=vue | dependency=vue",
+          "signal": "stack=vue | dependency=vue"
+        }
+      ]
+    },
+    {
+      "id": "haus.ecc-vue-reviewer",
+      "reason": "requiresAny unsatisfied: needs stack=vue | dependency=vue",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=vue | dependency=vue",
+          "signal": "stack=vue | dependency=vue"
+        }
+      ]
+    },
+    {
+      "id": "haus.elasticsearch-elasticsearch-esql",
+      "reason": "requiresAny unsatisfied: needs stack=elasticsearch | dependency=@elastic/elasticsearch",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=elasticsearch | dependency=@elastic/elasticsearch",
+          "signal": "stack=elasticsearch | dependency=@elastic/elasticsearch"
+        }
+      ]
+    },
+    {
+      "id": "haus.elasticsearch-elasticsearch-onboarding",
+      "reason": "requiresAny unsatisfied: needs stack=elasticsearch | dependency=@elastic/elasticsearch",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=elasticsearch | dependency=@elastic/elasticsearch",
+          "signal": "stack=elasticsearch | dependency=@elastic/elasticsearch"
+        }
+      ]
+    },
+    {
+      "id": "haus.eslint-config",
+      "reason": "requiresAny unsatisfied: needs stack=missing-eslint",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=missing-eslint",
+          "signal": "stack=missing-eslint"
+        }
+      ]
+    },
+    {
+      "id": "haus.expo-building-native-ui",
+      "reason": "requiresAny unsatisfied: needs stack=expo | stack=react-native | role=expo-app | dependency=expo | dependency=react-native",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=expo | stack=react-native | role=expo-app | dependency=expo | dependency=react-native",
+          "signal": "stack=expo | stack=react-native | role=expo-app | dependency=expo | dependency=react-native"
+        }
+      ]
+    },
+    {
+      "id": "haus.expo-native-data-fetching",
+      "reason": "requiresAny unsatisfied: needs stack=expo | stack=react-native | role=expo-app | dependency=expo | dependency=react-native",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=expo | stack=react-native | role=expo-app | dependency=expo | dependency=react-native",
+          "signal": "stack=expo | stack=react-native | role=expo-app | dependency=expo | dependency=react-native"
+        }
+      ]
+    },
+    {
+      "id": "haus.expo-upgrading-expo",
+      "reason": "requiresAny unsatisfied: needs stack=expo | stack=react-native | role=expo-app | dependency=expo | dependency=react-native",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=expo | stack=react-native | role=expo-app | dependency=expo | dependency=react-native",
+          "signal": "stack=expo | stack=react-native | role=expo-app | dependency=expo | dependency=react-native"
+        }
+      ]
+    },
+    {
+      "id": "haus.i18next-patterns",
+      "reason": "requiresAny unsatisfied: needs stack=i18next | dependency=i18next | dependency=react-i18next",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=i18next | dependency=i18next | dependency=react-i18next",
+          "signal": "stack=i18next | dependency=i18next | dependency=react-i18next"
+        }
+      ]
+    },
+    {
+      "id": "haus.jeffallan-laravel-specialist",
+      "reason": "requiresAny unsatisfied: needs stack=laravel | dependency=laravel/framework",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=laravel | dependency=laravel/framework",
+          "signal": "stack=laravel | dependency=laravel/framework"
+        }
+      ]
+    },
+    {
+      "id": "haus.jeffallan-php-pro",
+      "reason": "requiresAny unsatisfied: needs stack=php | stack=laravel | dependency=laravel/framework",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=php | stack=laravel | dependency=laravel/framework",
+          "signal": "stack=php | stack=laravel | dependency=laravel/framework"
+        }
+      ]
+    },
+    {
+      "id": "haus.kadajett-nestjs-best-practices",
+      "reason": "requiresAny unsatisfied: needs stack=nestjs | dependency=@nestjs/core",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=nestjs | dependency=@nestjs/core",
+          "signal": "stack=nestjs | dependency=@nestjs/core"
+        }
+      ]
+    },
+    {
+      "id": "haus.laravel-nova-patterns",
+      "reason": "requiresAny unsatisfied: needs dependency=laravel/nova",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs dependency=laravel/nova",
+          "signal": "dependency=laravel/nova"
+        }
+      ]
+    },
+    {
+      "id": "haus.lefthook-security",
+      "reason": "No role/stack match",
+      "skipReasons": [
+        {
+          "code": "no-role-stack-match",
+          "message": "No role/stack match"
+        }
+      ]
+    },
+    {
+      "id": "haus.mariadb-mariadb-features",
+      "reason": "requiresAny unsatisfied: needs stack=mariadb | dependency=mariadb",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=mariadb | dependency=mariadb",
+          "signal": "stack=mariadb | dependency=mariadb"
+        }
+      ]
+    },
+    {
+      "id": "haus.mariadb-mariadb-query-optimization",
+      "reason": "requiresAny unsatisfied: needs stack=mariadb | dependency=mariadb",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=mariadb | dependency=mariadb",
+          "signal": "stack=mariadb | dependency=mariadb"
+        }
+      ]
+    },
+    {
+      "id": "haus.mysql-mysql",
+      "reason": "requiresAny unsatisfied: needs stack=mysql | dependency=mysql2 | dependency=mysql",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=mysql | dependency=mysql2 | dependency=mysql",
+          "signal": "stack=mysql | dependency=mysql2 | dependency=mysql"
+        }
+      ]
+    },
+    {
+      "id": "haus.nextauth-patterns",
+      "reason": "requiresAny unsatisfied: needs stack=next-auth | dependency=next-auth | dependency=@auth/core",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=next-auth | dependency=next-auth | dependency=@auth/core",
+          "signal": "stack=next-auth | dependency=next-auth | dependency=@auth/core"
+        }
+      ]
+    },
+    {
+      "id": "haus.nx-nx-generate",
+      "reason": "requiresAny unsatisfied: needs role=nx-monorepo | dependency=nx",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs role=nx-monorepo | dependency=nx",
+          "signal": "role=nx-monorepo | dependency=nx"
+        }
+      ]
+    },
+    {
+      "id": "haus.nx-nx-workspace",
+      "reason": "requiresAny unsatisfied: needs role=nx-monorepo | dependency=nx",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs role=nx-monorepo | dependency=nx",
+          "signal": "role=nx-monorepo | dependency=nx"
+        }
+      ]
+    },
+    {
+      "id": "haus.nx-tag-conventions",
+      "reason": "requiresAny unsatisfied: needs role=nx-monorepo | dependency=nx",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs role=nx-monorepo | dependency=nx",
+          "signal": "role=nx-monorepo | dependency=nx"
+        }
+      ]
+    },
+    {
+      "id": "haus.oh-my-claudecode-designer",
+      "reason": "requiresAny unsatisfied: needs role=ui-design",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs role=ui-design",
+          "signal": "role=ui-design"
+        }
+      ]
+    },
+    {
+      "id": "haus.oh-my-claudecode-test-engineer",
+      "reason": "requiresAny unsatisfied: needs stack=playwright | dependency=@playwright/test",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=playwright | dependency=@playwright/test",
+          "signal": "stack=playwright | dependency=@playwright/test"
+        }
+      ]
+    },
+    {
+      "id": "haus.prettier-config",
+      "reason": "requiresAny unsatisfied: needs stack=missing-prettier",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=missing-prettier",
+          "signal": "stack=missing-prettier"
+        }
+      ]
+    },
+    {
+      "id": "haus.prisma-prisma-client-api",
+      "reason": "requiresAny unsatisfied: needs stack=prisma | dependency=prisma | dependency=@prisma/client",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=prisma | dependency=prisma | dependency=@prisma/client",
+          "signal": "stack=prisma | dependency=prisma | dependency=@prisma/client"
+        }
+      ]
+    },
+    {
+      "id": "haus.prisma-prisma-database-setup",
+      "reason": "requiresAny unsatisfied: needs stack=prisma | dependency=prisma | dependency=@prisma/client",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=prisma | dependency=prisma | dependency=@prisma/client",
+          "signal": "stack=prisma | dependency=prisma | dependency=@prisma/client"
+        }
+      ]
+    },
+    {
+      "id": "haus.qliro-patterns",
+      "reason": "requiresAny unsatisfied: needs stack=qliro | dependency=@haus-tech/qliro-plugin",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=qliro | dependency=@haus-tech/qliro-plugin",
+          "signal": "stack=qliro | dependency=@haus-tech/qliro-plugin"
+        }
+      ]
+    },
+    {
+      "id": "haus.react-router-v7-patterns",
+      "reason": "requiresAny unsatisfied: needs stack=react-router-v7 | role=react-router-app | dependency=@react-router/node",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=react-router-v7 | role=react-router-app | dependency=@react-router/node",
+          "signal": "stack=react-router-v7 | role=react-router-app | dependency=@react-router/node"
+        }
+      ]
+    },
+    {
+      "id": "haus.redis-redis-connections",
+      "reason": "requiresAny unsatisfied: needs stack=redis | dependency=redis",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=redis | dependency=redis",
+          "signal": "stack=redis | dependency=redis"
+        }
+      ]
+    },
+    {
+      "id": "haus.redis-redis-core",
+      "reason": "requiresAny unsatisfied: needs stack=redis | dependency=redis",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=redis | dependency=redis",
+          "signal": "stack=redis | dependency=redis"
+        }
+      ]
+    },
+    {
+      "id": "haus.redis-redis-observability",
+      "reason": "requiresAny unsatisfied: needs role=redis-ops",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs role=redis-ops",
+          "signal": "role=redis-ops"
+        }
+      ]
+    },
+    {
+      "id": "haus.redis-redis-security",
+      "reason": "requiresAny unsatisfied: needs role=redis-ops",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs role=redis-ops",
+          "signal": "role=redis-ops"
+        }
+      ]
+    },
+    {
+      "id": "haus.sanity-content-modeling-best-practices",
+      "reason": "requiresAny unsatisfied: needs stack=sanity | dependency=sanity",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=sanity | dependency=sanity",
+          "signal": "stack=sanity | dependency=sanity"
+        }
+      ]
+    },
+    {
+      "id": "haus.sentry-sentry-nestjs-sdk",
+      "reason": "requiresAny unsatisfied: needs dependency=@sentry/nestjs | stack=sentry",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs dependency=@sentry/nestjs | stack=sentry",
+          "signal": "dependency=@sentry/nestjs | stack=sentry"
+        }
+      ]
+    },
+    {
+      "id": "haus.sentry-sentry-nextjs-sdk",
+      "reason": "requiresAny unsatisfied: needs dependency=@sentry/nextjs | stack=sentry",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs dependency=@sentry/nextjs | stack=sentry",
+          "signal": "dependency=@sentry/nextjs | stack=sentry"
+        }
+      ]
+    },
+    {
+      "id": "haus.sentry-sentry-node-sdk",
+      "reason": "requiresAny unsatisfied: needs dependency=@sentry/node | stack=sentry",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs dependency=@sentry/node | stack=sentry",
+          "signal": "dependency=@sentry/node | stack=sentry"
+        }
+      ]
+    },
+    {
+      "id": "haus.sentry-sentry-php-sdk",
+      "reason": "requiresAny unsatisfied: needs stack=sentry | dependency=sentry/sentry",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=sentry | dependency=sentry/sentry",
+          "signal": "stack=sentry | dependency=sentry/sentry"
+        }
+      ]
+    },
+    {
+      "id": "haus.sentry-sentry-workflow",
+      "reason": "requiresAny unsatisfied: needs stack=sentry",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=sentry",
+          "signal": "stack=sentry"
+        }
+      ]
+    },
+    {
+      "id": "haus.storybook-patterns",
+      "reason": "requiresAny unsatisfied: needs stack=storybook | dependency=storybook | dependency=@storybook/react",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=storybook | dependency=storybook | dependency=@storybook/react",
+          "signal": "stack=storybook | dependency=storybook | dependency=@storybook/react"
+        }
+      ]
+    },
+    {
+      "id": "haus.storybookjs-storybook-upgrade",
+      "reason": "requiresAny unsatisfied: needs stack=storybook | dependency=storybook",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=storybook | dependency=storybook",
+          "signal": "stack=storybook | dependency=storybook"
+        }
+      ]
+    },
+    {
+      "id": "haus.strapi-patterns",
+      "reason": "requiresAny unsatisfied: needs stack=strapi | role=strapi-app | dependency=@strapi/strapi",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=strapi | role=strapi-app | dependency=@strapi/strapi",
+          "signal": "stack=strapi | role=strapi-app | dependency=@strapi/strapi"
+        }
+      ]
+    },
+    {
+      "id": "haus.stripe-stripe-best-practices",
+      "reason": "requiresAny unsatisfied: needs stack=stripe | dependency=stripe | dependency=@stripe/stripe-js",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=stripe | dependency=stripe | dependency=@stripe/stripe-js",
+          "signal": "stack=stripe | dependency=stripe | dependency=@stripe/stripe-js"
+        }
+      ]
+    },
+    {
+      "id": "haus.supabase-supabase",
+      "reason": "requiresAny unsatisfied: needs stack=supabase | dependency=@supabase/supabase-js",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=supabase | dependency=@supabase/supabase-js",
+          "signal": "stack=supabase | dependency=@supabase/supabase-js"
+        }
+      ]
+    },
+    {
+      "id": "haus.supabase-supabase-postgres-best-practices",
+      "reason": "requiresAny unsatisfied: needs stack=supabase | stack=postgresql | dependency=@supabase/supabase-js",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=supabase | stack=postgresql | dependency=@supabase/supabase-js",
+          "signal": "stack=supabase | stack=postgresql | dependency=@supabase/supabase-js"
+        }
+      ]
+    },
+    {
+      "id": "haus.superpowers-writing-skills",
+      "reason": "requiresAny unsatisfied: needs role=skill-authoring",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs role=skill-authoring",
+          "signal": "role=skill-authoring"
+        }
+      ]
+    },
+    {
+      "id": "haus.tanstack-query-router-patterns",
+      "reason": "requiresAny unsatisfied: needs dependency=@tanstack/react-query | dependency=@tanstack/react-router | dependency=@tanstack/query-core",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs dependency=@tanstack/react-query | dependency=@tanstack/react-router | dependency=@tanstack/query-core",
+          "signal": "dependency=@tanstack/react-query | dependency=@tanstack/react-router | dependency=@tanstack/query-core"
+        }
+      ]
+    },
+    {
+      "id": "haus.turborepo-turborepo",
+      "reason": "Required role missing: turbo-monorepo",
+      "skipReasons": [
+        {
+          "code": "required-role-missing",
+          "message": "Required role missing: turbo-monorepo",
+          "signal": "role:turbo-monorepo"
+        }
+      ]
+    },
+    {
+      "id": "haus.vendure-app-patterns",
+      "reason": "requiresAny unsatisfied: needs stack=vendure3 | dependency=@vendure/core",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=vendure3 | dependency=@vendure/core",
+          "signal": "stack=vendure3 | dependency=@vendure/core"
+        }
+      ]
+    },
+    {
+      "id": "haus.vendure-plugin-patterns",
+      "reason": "requiresAny unsatisfied: needs stack=vendure3 | dependency=@vendure/core | packageNamePattern=@haus/vendure-*",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=vendure3 | dependency=@vendure/core | packageNamePattern=@haus/vendure-*",
+          "signal": "stack=vendure3 | dependency=@vendure/core | packageNamePattern=@haus/vendure-*"
+        }
+      ]
+    },
+    {
+      "id": "haus.vercel-labs-react-best-practices",
+      "reason": "requiresAny unsatisfied: needs stack=react | stack=react19 | dependency=react",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=react | stack=react19 | dependency=react",
+          "signal": "stack=react | stack=react19 | dependency=react"
+        }
+      ]
+    },
+    {
+      "id": "haus.vercel-labs-react-view-transitions",
+      "reason": "requiresAny unsatisfied: needs stack=react | stack=react19 | dependency=react",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=react | stack=react19 | dependency=react",
+          "signal": "stack=react | stack=react19 | dependency=react"
+        }
+      ]
+    },
+    {
+      "id": "haus.wordpress-acf-elementor-jetengine-patterns",
+      "reason": "requiresAny unsatisfied: needs role=wordpress-bedrock-site | role=wordpress-vanilla-site | stack=wordpress | stack=elementor | stack=acf-pro | stack=jetengine",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs role=wordpress-bedrock-site | role=wordpress-vanilla-site | stack=wordpress | stack=elementor | stack=acf-pro | stack=jetengine",
+          "signal": "role=wordpress-bedrock-site | role=wordpress-vanilla-site | stack=wordpress | stack=elementor | stack=acf-pro | stack=jetengine"
+        }
+      ]
+    },
+    {
+      "id": "haus.wordpress-bedrock-patterns",
+      "reason": "requiresAny unsatisfied: needs role=wordpress-bedrock-site | dependency=roots/bedrock",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs role=wordpress-bedrock-site | dependency=roots/bedrock",
+          "signal": "role=wordpress-bedrock-site | dependency=roots/bedrock"
+        }
+      ]
+    },
+    {
+      "id": "haus.wordpress-wordpress-router",
+      "reason": "requiresAny unsatisfied: needs role=wordpress-bedrock-site | role=wordpress-vanilla-site | stack=wordpress | dependency=wp-cli",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs role=wordpress-bedrock-site | role=wordpress-vanilla-site | stack=wordpress | dependency=wp-cli",
+          "signal": "role=wordpress-bedrock-site | role=wordpress-vanilla-site | stack=wordpress | dependency=wp-cli"
+        }
+      ]
+    },
+    {
+      "id": "haus.wordpress-wp-block-development",
+      "reason": "requiresAny unsatisfied: needs role=wordpress-bedrock-site | role=wordpress-vanilla-site | stack=wordpress | dependency=wp-cli",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs role=wordpress-bedrock-site | role=wordpress-vanilla-site | stack=wordpress | dependency=wp-cli",
+          "signal": "role=wordpress-bedrock-site | role=wordpress-vanilla-site | stack=wordpress | dependency=wp-cli"
+        }
+      ]
+    },
+    {
+      "id": "haus.wordpress-wp-plugin-development",
+      "reason": "requiresAny unsatisfied: needs role=wordpress-bedrock-site | role=wordpress-vanilla-site | stack=wordpress | dependency=wp-cli",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs role=wordpress-bedrock-site | role=wordpress-vanilla-site | stack=wordpress | dependency=wp-cli",
+          "signal": "role=wordpress-bedrock-site | role=wordpress-vanilla-site | stack=wordpress | dependency=wp-cli"
+        }
+      ]
+    },
+    {
+      "id": "haus.wshobson-js-testing-patterns",
+      "reason": "requiresAny unsatisfied: needs stack=vitest | dependency=vitest | stack=jest | dependency=jest | dependency=jest-environment-jsdom",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=vitest | dependency=vitest | stack=jest | dependency=jest | dependency=jest-environment-jsdom",
+          "signal": "stack=vitest | dependency=vitest | stack=jest | dependency=jest | dependency=jest-environment-jsdom"
+        }
+      ]
+    },
+    {
+      "id": "haus.wshobson-postgresql-table-design",
+      "reason": "requiresAny unsatisfied: needs stack=postgresql | stack=database",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=postgresql | stack=database",
+          "signal": "stack=postgresql | stack=database"
+        }
+      ]
+    },
+    {
+      "id": "haus.wshobson-tailwind-design-system",
+      "reason": "requiresAny unsatisfied: needs stack=tailwind | stack=shadcn",
+      "skipReasons": [
+        {
+          "code": "requires-any-unsatisfied",
+          "message": "requiresAny unsatisfied: needs stack=tailwind | stack=shadcn",
+          "signal": "stack=tailwind | stack=shadcn"
+        }
+      ]
+    }
+  ],
+  "optInEligible": [
+    {
+      "id": "haus.ecc-laravel-plugin-discovery",
+      "type": "skill",
+      "title": "Ecc Laravel Plugin Discovery",
+      "optInTier": "ops",
+      "optInGroup": "Laravel plugin discovery",
+      "purpose": "Discover and evaluate Laravel packages via LaraPlugins.io MCP. Use when the user wants to find plugins, check package health, or assess Laravel/PHP compatibility.",
+      "tokenEstimate": 1599,
+      "requires": "role=laravel-plugins"
+    },
+    {
+      "id": "haus.redis-redis-observability",
+      "type": "skill",
+      "title": "Redis Redis Observability",
+      "optInTier": "ops",
+      "optInGroup": "Redis security & observability",
+      "purpose": "Redis observability guidance — which metrics to monitor (memory, connections, hit ratio, ops/sec, rejected connections), which built-in commands to reach for during incident triage (SLOWLOG, INFO, MEMORY DOCTOR, CLIENT LIST, FT.PROFILE), and when to use the Redis Insight GUI. Use when setting up monitoring or alerts for a Redis instance, diagnosing a performance regression, profiling a slow FT.SEARCH query, or wiring Redis metrics into Prometheus, Datadog, or similar.",
+      "tokenEstimate": 1546,
+      "requires": "role=redis-ops"
+    },
+    {
+      "id": "haus.redis-redis-security",
+      "type": "skill",
+      "title": "Redis Redis Security",
+      "optInTier": "ops",
+      "optInGroup": "Redis security & observability",
+      "purpose": "Redis security guidance covering authentication (requirepass and ACL users), TLS, ACL-based least-privilege access control, restricting network exposure via bind and protected-mode, firewall rules, and disabling dangerous commands. Use when deploying Redis to production, defining ACL users for an application, configuring TLS connections, locking down a Redis instance behind a firewall, or auditing a Redis deployment for security hardening.",
+      "tokenEstimate": 1887,
+      "requires": "role=redis-ops"
+    },
+    {
+      "id": "haus.ecc-security-reviewer",
+      "type": "agent",
+      "title": "Security Reviewer",
+      "optInTier": "review",
+      "optInGroup": "Security review",
+      "purpose": "Security vulnerability detection and remediation specialist. Use PROACTIVELY after writing code that handles user input, authentication, API endpoints, or sensitive data. Flags secrets, SSRF, injection, unsafe crypto, and OWASP Top 10 vulnerabilities.",
+      "tokenEstimate": 1369,
+      "requires": "role=security-review"
+    },
+    {
+      "id": "haus.superpowers-writing-skills",
+      "type": "skill",
+      "title": "Superpowers Writing Skills",
+      "optInTier": "workflow",
+      "optInGroup": "Skill authoring",
+      "purpose": "Use when creating new skills, editing existing skills, or verifying skills work before deployment",
+      "tokenEstimate": 5669,
+      "requires": "role=skill-authoring"
+    },
+    {
+      "id": "haus.oh-my-claudecode-designer",
+      "type": "agent",
+      "title": "Designer",
+      "optInTier": "design",
+      "optInGroup": "UI design",
+      "purpose": "UI/UX Designer-Developer for stunning interfaces (Sonnet)",
+      "tokenEstimate": 2407,
+      "requires": "role=ui-design"
+    }
+  ],
+  "warnings": [
+    "--include: \"haus.superpowers-receiving-code-review\" added manually though its requiresAny gate is unsatisfied",
+    "--include: \"haus.superpowers-requesting-code-review\" added manually though its requiresAny gate is unsatisfied",
+    "--include: \"haus.superpowers-finishing-a-development-branch\" added manually though its requiresAny gate is unsatisfied",
+    "--include: \"haus.superpowers-using-git-worktrees\" added manually though its requiresAny gate is unsatisfied",
+    "--include: \"haus.superpowers-specifying-gates\" added manually though its requiresAny gate is unsatisfied",
+    "--include: \"haus.superpowers-test-driven-development\" added manually though its requiresAny gate is unsatisfied",
+    "--include: \"haus.ecc-performance-optimizer\" added manually though its requiresAny gate is unsatisfied",
+    "--include: \"haus.ecc-refactor-cleaner\" added manually though its requiresAny gate is unsatisfied",
+    "--include: \"haus.superpowers-subagent-driven-development\" added manually though its requiresAny gate is unsatisfied",
+    "--include: \"haus.oh-my-claudecode-tracer\" added manually though its requiresAny gate is unsatisfied"
+  ],
+  "estimatedContextTokens": 8320,
+  "selectedRules": 26,
+  "skippedRules": 96,
+  "estimatedTokenReductionPct": 79
+}

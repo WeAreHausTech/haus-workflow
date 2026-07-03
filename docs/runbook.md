@@ -157,6 +157,21 @@ regardless of install state (`src/commands/apply.ts`). **Fix:** apply now filter
 entries for items no longer installed. Re-run `haus apply --write` once to clean up an
 already-polluted cache — no manual deletion needed.
 
+## `haus setup-project`/`scan` misdetects this repo as dotnet/vendure
+
+**Symptom:** running the scanner against the haus-workflow repo itself reports
+`repoRoles: ["dotnet-service", "vendure-plugin"]` and `detectedStacks.backend:
+["vendure3", "graphql", "dotnet"]`, even though this repo is a plain TypeScript CLI.
+**Cause:** `listFiles` (`src/utils/fs.ts`) only excluded `node_modules/`, `.git/`, and
+`dist/` from its glob walk. Several `SAFE_FILES` patterns in `src/scanner/scan-project.ts`
+are unanchored (`**/*.sln`, `**/*.csproj`, `**/vendure-config.*`) and matched sample
+files under `tests/fixtures/` (e.g. `tests/fixtures/dotnet-service/App.sln`,
+`tests/fixtures/vendure-plugin/package.json`) as if they were real project signals.
+**Fix:** `listFiles` now also ignores `**/tests/fixtures/**` (fixed in this repo's own
+history; see `tests/scan-project-ignores-fixtures.test.js` for the regression test).
+Re-run `haus setup-project --json` (or `yarn dev setup-project --json` against local
+source) and confirm `repoRoles`/`detectedStacks.backend` no longer list dotnet/vendure.
+
 ## `haus doctor --hooks` fails right after upgrading haus, before touching anything
 
 **Symptom:** `haus doctor --hooks` (or the plain-language `haus doctor` verdict) reports

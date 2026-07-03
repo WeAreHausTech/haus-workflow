@@ -1,9 +1,11 @@
-# Project workflow configuration
+# How this project works (workflow methodology bindings)
 
-> Project-specific values the workflow standard (WORKFLOW.md) binds to.
-> Edit freely — this file is project-owned and will not be overwritten by haus.
+> The few project-specific values the workflow standard (WORKFLOW.md) binds to:
+> where the source-of-truth docs live, the test commands the TDD/verification gate
+> runs, the highest-stakes logic, and the pre-commit tool. This file is yours to
+> edit and haus will not overwrite it.
 >
-> Everyday commands (build, dev, lint, typecheck, format) and project documentation
+> Everyday commands (dev, build, lint, typecheck, format) and project documentation
 > live in `CLAUDE.md` + `docs/` — run **`/docs`** to generate/refresh them.
 
 ## Source-of-truth documents

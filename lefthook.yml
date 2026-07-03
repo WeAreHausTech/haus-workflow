@@ -31,10 +31,17 @@ pre-commit:
       fail_text: 'gitleaks found a likely secret in staged changes. Remove it, re-stage, and commit. Install gitleaks: https://github.com/gitleaks/gitleaks#installing'
     secret-grep:
       # Always-on baseline. Scans ADDED lines only (deleting a leaked secret is never
-      # blocked) for inline credential assignments.
+      # blocked) for inline credential assignments. Requires a quote after the
+      # colon/equals (matching the WORKFLOW.md-documented pattern) so TS type
+      # declarations and field names like `password: string` don't false-positive —
+      # gitleaks (above) is the real secret detector; this is a quoted-literal backstop.
+      # .claude/skills/** is synced catalog reference content (docs/examples, not live
+      # config) and legitimately contains quoted example values shaped like credentials
+      # (e.g. a short literal used to demo a validation error); excluded here the same
+      # way generated .github/workflows is.
       run: |
-        added="$(git diff --cached --no-color -U0 -- ':!.github/workflows' | grep -E '^\+' | grep -vE '^\+\+\+')"
-        if printf '%s\n' "$added" | grep -iqE "(password|secret|token|api_key)[[:space:]]*[:=]"; then
+        added="$(git diff --cached --no-color -U0 -- ':!.github/workflows' ':!.claude/skills' | grep -E '^\+' | grep -vE '^\+\+\+')"
+        if printf '%s\n' "$added" | grep -iqE "(password|secret|token|api_key)[[:space:]]*[:=][[:space:]]*['\"]"; then
           exit 1
         fi
       fail_text: 'A staged line looks like an inline credential (password/secret/token/api_key). Move it to an environment variable or secret manager, then re-stage.'

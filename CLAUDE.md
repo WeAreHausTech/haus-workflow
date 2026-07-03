@@ -1,6 +1,3 @@
-@.claude/WORKFLOW.md
-@.claude/workflow-config.md
-
 # haus — Claude Code context
 
 CLI that scans repos, recommends context assets, and writes controlled outputs into `.claude/` and `.haus-workflow/`.
@@ -49,3 +46,11 @@ Catalog content from [`haus-workflow-catalog`](https://github.com/WeAreHausTech/
 [docs/SUMMARY.md](docs/SUMMARY.md)
 
 > `docs/` contains topic files for architecture, codebase, CLI, dev workflow, security, and runbook. Do not read proactively — route via `docs/SUMMARY.md` or load only the file relevant to the task at hand.
+
+<!-- HAUS:BEGIN haus-imports v=1 -->
+
+@.haus-workflow/WORKFLOW.md
+@.haus-workflow/workflow-config.md
+@docs/decisions/README.md
+
+<!-- HAUS:END haus-imports -->

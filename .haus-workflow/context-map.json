@@ -1,0 +1,50 @@
+{
+  "generatedAt": "2026-07-03T12:51:06.485Z",
+  "root": "/Users/aniisa/Documents/GitHub/haus-workflow",
+  "repoName": "@haus-tech/haus-workflow",
+  "packageManager": "yarn",
+  "repoRoles": [],
+  "detectedStacks": {
+    "backend": [],
+    "frontend": [],
+    "databases": [],
+    "testing": [],
+    "auth": [],
+    "tooling": [
+      "typescript5"
+    ],
+    "packageManagers": [
+      "yarn4"
+    ]
+  },
+  "dependencies": [
+    "@inquirer/checkbox",
+    "@release-it/conventional-changelog",
+    "@types/fs-extra",
+    "@types/node",
+    "@types/semver",
+    "@typescript-eslint/eslint-plugin",
+    "@typescript-eslint/parser",
+    "c8",
+    "commander",
+    "diff",
+    "esbuild",
+    "eslint",
+    "eslint-plugin-import",
+    "execa",
+    "fast-glob",
+    "fs-extra",
+    "lefthook",
+    "prettier",
+    "release-it",
+    "semver",
+    "tsx",
+    "typescript",
+    "yaml"
+  ],
+  "securityRisks": [],
+  "crossRepoHints": [],
+  "warnings": [],
+  "detectionStatus": "supported",
+  "unsupportedSignals": []
+}
