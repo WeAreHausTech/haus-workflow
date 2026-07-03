@@ -1,0 +1,61 @@
+{
+  "_note": "Minimal package.json fixtures for v3.4.0 catalog stack coverage (finding 9). Uses bundled production catalog.",
+  "profiles": {
+    "mariadb-dep": {
+      "packageJson": {
+        "name": "mariadb-dep-fixture",
+        "packageManager": "yarn@4.5.3",
+        "dependencies": { "mariadb": "3.0.0" }
+      },
+      "mustInclude": ["haus.mariadb-mariadb-features", "haus.mariadb-mariadb-query-optimization"]
+    },
+    "elasticsearch-dep": {
+      "packageJson": {
+        "name": "elasticsearch-dep-fixture",
+        "packageManager": "yarn@4.5.3",
+        "dependencies": { "@elastic/elasticsearch": "8.0.0" }
+      },
+      "mustInclude": [
+        "haus.elasticsearch-elasticsearch-onboarding",
+        "haus.elasticsearch-elasticsearch-esql"
+      ]
+    },
+    "mysql2-dep": {
+      "packageJson": {
+        "name": "mysql2-dep-fixture",
+        "packageManager": "yarn@4.5.3",
+        "dependencies": { "mysql2": "3.0.0" }
+      },
+      "mustInclude": ["haus.mysql-mysql", "haus.mariadb-mariadb-features"]
+    },
+    "prisma-dep": {
+      "packageJson": {
+        "name": "prisma-dep-fixture",
+        "packageManager": "yarn@4.5.3",
+        "dependencies": { "@prisma/client": "5.0.0", "prisma": "5.0.0" }
+      },
+      "mustInclude": [
+        "haus.prisma-prisma-client-api",
+        "haus.prisma-prisma-database-setup",
+        "haus.ecc-prisma-patterns"
+      ]
+    },
+    "vite8-dep": {
+      "packageJson": {
+        "name": "vite8-dep-fixture",
+        "packageManager": "yarn@4.5.3",
+        "dependencies": { "react": "19.0.0" },
+        "devDependencies": { "vite": "6.0.0" }
+      },
+      "mustInclude": ["haus.antfu-vite"]
+    },
+    "postgres-pg-dep": {
+      "packageJson": {
+        "name": "postgres-pg-fixture",
+        "packageManager": "yarn@4.5.3",
+        "dependencies": { "pg": "8.0.0" }
+      },
+      "mustInclude": ["haus.supabase-supabase-postgres-best-practices"]
+    }
+  }
+}

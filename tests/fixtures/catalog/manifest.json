@@ -566,11 +566,7 @@
       "tokenBudget": 1200,
       "tags": ["nx", "yarn4"],
       "repoRoles": ["nx-monorepo"],
-      "requiresAny": [
-        { "role": "nx-monorepo" },
-        { "dependency": "nx" },
-        { "packageNamePattern": "@nx/*" }
-      ],
+      "requiresAny": [{ "role": "nx-monorepo" }, { "dependency": "nx" }],
       "ecosystem": "nx",
       "tokenEstimate": 2200,
       "installMode": "copy-selected"
