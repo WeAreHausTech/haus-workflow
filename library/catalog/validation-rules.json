@@ -124,7 +124,11 @@
     "stripe",
     "qliro",
     "supabase",
-    "payments"
+    "payments",
+    "myid",
+    "cgi",
+    "collection2",
+    "deployer-php"
   ],
   "alwaysAllowedTags": [
     "haus",

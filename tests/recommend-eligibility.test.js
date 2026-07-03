@@ -213,16 +213,16 @@ test('source-trust gate: third-party unapproved item skipped via live source tru
   }
 })
 
-test('required-role gate: nx21 skipped when nx-monorepo role absent', async () => {
+test('required-role gate: turborepo-turborepo skipped when turbo-monorepo role absent', async () => {
   setup()
   try {
-    // No nx-monorepo in repoRoles — hardcoded gate in recommend() fires.
+    // No turbo-monorepo in repoRoles — hardcoded gate in recommend() fires.
     const result = await recommend(tmpDir, makeContext(tmpDir, { repoRoles: [] }))
     assert.ok(
-      ids(result.skipped).has('haus.nx21-monorepo-patterns'),
-      'nx21 item should be skipped when nx-monorepo role is absent',
+      ids(result.skipped).has('haus.turborepo-turborepo'),
+      'turborepo item should be skipped when turbo-monorepo role is absent',
     )
-    const entry = findSkipped(result, 'haus.nx21-monorepo-patterns')
+    const entry = findSkipped(result, 'haus.turborepo-turborepo')
     assert.equal(entry.skipReasons[0].code, 'required-role-missing')
   } finally {
     teardown()
@@ -435,7 +435,8 @@ test('A4 regression: live-rejected item blocked even with stale approved sources
     )
     const entry = findSkipped(result, 'test.live-rejected-source')
     assert.ok(
-      entry.skipReasons[0].code === 'source-trust' || entry.skipReasons[0].code === 'source-approval',
+      entry.skipReasons[0].code === 'source-trust' ||
+        entry.skipReasons[0].code === 'source-approval',
       `expected source-trust or source-approval skip code, got: ${entry.skipReasons[0].code}`,
     )
   } finally {
