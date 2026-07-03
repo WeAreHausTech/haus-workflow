@@ -26,6 +26,7 @@ const GOLDEN = JSON.parse(
 const env = {
   ...process.env,
   HAUS_FIXTURE_CATALOG: CATALOG,
+  HAUS_CATALOG_CACHE_DIR_OVERRIDE: path.join(os.tmpdir(), `haus-archetypes-cache-${process.pid}`),
 }
 
 function recommendIdsForRepo(repoRoot) {

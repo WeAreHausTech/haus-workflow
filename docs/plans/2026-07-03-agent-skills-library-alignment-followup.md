@@ -14,10 +14,9 @@ Propagation to this repo is pull-based: per `haus-workflow-catalog`'s `docs/depl
 `sync-catalog-fixture.yml` via `repository_dispatch` on catalog tag push (same PR branch
 `chore/sync-catalog-fixture`).
 
-**Status (2026-07-03):** catalog **`v3.4.0` released**; haus-workflow sync PR
-[#165](https://github.com/WeAreHausTech/haus-workflow/pull/165) open (`chore/sync-catalog-fixture`,
-syncs `manifest.json` + `validation-rules.json` + `decisions-triggers.json` from `v3.4.0`). Local
-`main` still at `v3.3.0` / 94 items until that PR merges.
+**Status (2026-07-03):** catalog **`v3.4.0` released**; fixture sync landed in
+[#165](https://github.com/WeAreHausTech/haus-workflow/pull/165) (merged). Post-merge
+stack regression coverage tracked in finding 9 follow-up PR.
 
 > **Note:** catalog PR
 > [#47](https://github.com/WeAreHausTech/haus-workflow-catalog/pull/47) (upstream curated content
@@ -153,10 +152,10 @@ not the specific old id).
 
 Two hand-maintained catalogs exist besides `library/catalog/manifest.json`:
 
-| File                                                | Used by                                           | Stale content                                                                     |
-| --------------------------------------------------- | ------------------------------------------------- | --------------------------------------------------------------------------------- |
-| `tests/fixtures/catalog/manifest.json`              | Many apply/setup tests via `HAUS_FIXTURE_CATALOG` | `nx21-monorepo-patterns`, `turbo-monorepo-patterns`, `expo-react-native-patterns` |
-| `tests/fixtures/catalog/policy-gates-manifest.json` | `recommend-eligibility.test.js`                   | `nx21-monorepo-patterns` (finding 3)                                              |
+| File                                                | Used by                                           | Stale content                                                                          |
+| --------------------------------------------------- | ------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `tests/fixtures/catalog/manifest.json`              | Many apply/setup tests via `HAUS_FIXTURE_CATALOG` | Retargeted ids/paths in #165; `requiresAny` aligned with prod nx item in post-merge PR |
+| `tests/fixtures/catalog/policy-gates-manifest.json` | `recommend-eligibility.test.js`                   | `nx21-monorepo-patterns` (finding 3)                                                   |
 
 These do **not** auto-sync. Updating them is not blocking for the production-catalog sync PR, but
 should happen when touching the recommend-gate tests (findings 3–4) to avoid two divergent nx
@@ -228,19 +227,10 @@ Task D).
 ## Rollout order
 
 1. ~~`haus-workflow-catalog`: merge alignment plan, cut release.~~ **Done** — `v3.4.0` tagged.
-2. ~~Trigger fixture sync.~~ **In progress** — PR
-   [#165](https://github.com/WeAreHausTech/haus-workflow/pull/165) open on
-   `chore/sync-catalog-fixture`.
-3. **On that PR (before merge):**
-   - Fix `recommend.ts:154-170` (finding 3).
-   - Update `tests/recommend-gate-regression.test.js`, `tests/deep-context-enrichment.test.js`,
-     `tests/recommend-eligibility.test.js`, and `policy-gates-manifest.json` (finding 4).
-   - Satisfy `decisions-gate` (finding 8).
-   - Update doc counts (finding 6).
-   - `yarn test` + `yarn verify` green.
-4. **Optional / when touching nx tests anyway:** clean up `tests/fixtures/catalog/manifest.json`
-   stale ids (finding 5).
-5. **Optional:** smoke-test new stack recommend behavior (finding 9).
+2. ~~Trigger fixture sync + recommender/test fixes.~~ **Done** — [#165](https://github.com/WeAreHausTech/haus-workflow/pull/165) merged.
+3. ~~`yarn test` + `yarn verify` green on sync PR.~~ **Done**
+4. **Post-merge:** stack recommend regression tests (finding 9) + test hardening (cache isolation, skip-reason asserts).
+5. Optional later: nx tailored skip messages in `recommend.ts` (message quality only).
 
 ## Out of scope here
 

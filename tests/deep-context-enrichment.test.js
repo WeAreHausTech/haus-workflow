@@ -8,7 +8,7 @@ import { execaSync } from 'execa'
 
 const CLI = path.resolve('dist/cli.js')
 const CATALOG = path.resolve('library/catalog/manifest.json')
-const env = { ...process.env, HAUS_FIXTURE_CATALOG: CATALOG }
+const env = { ...process.env, HAUS_FIXTURE_CATALOG: CATALOG, HAUS_CATALOG_CACHE_DIR_OVERRIDE: path.join(os.tmpdir(), `haus-deep-cache-${process.pid}`) }
 
 // Sets up a plain React repo (no Nx signal) and returns its temp root.
 function reactRepo() {
@@ -36,10 +36,12 @@ const ids = (list) => new Set(list.map((x) => x.id))
 test('deep-context.json roles make a role-gated skill eligible (pass 2)', () => {
   const temp = reactRepo()
 
-  // Pass 1: no Nx signal → the Nx-gated skill is skipped.
+  // Pass 1: no Nx signal → role-gated nx skills skipped via requiresAny.
   const pass1 = recommend(temp)
   assert.equal(ids(pass1.recommended).has('haus.nx-nx-workspace'), false)
-  assert.equal(ids(pass1.skipped).has('haus.nx-nx-workspace'), true)
+  const nxSkip = pass1.skipped.find((x) => x.id === 'haus.nx-nx-workspace')
+  assert.ok(nxSkip, 'haus.nx-nx-workspace should be skipped without nx-monorepo role')
+  assert.equal(nxSkip.skipReasons[0]?.code, 'requires-any-unsatisfied')
 
   // The docs skill discovers an Nx workspace the shallow scanner missed.
   writeFileSync(

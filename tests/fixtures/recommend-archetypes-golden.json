@@ -26,7 +26,10 @@
     "haus.vitest-patterns",
     "haus.jest-patterns",
     "haus.sickn33-docker-expert",
-    "haus.ecc-build-error-resolver"
+    "haus.ecc-build-error-resolver",
+    "haus.nx-monorepo-patterns",
+    "haus.turbo-monorepo-patterns",
+    "haus.expo-react-native-patterns"
   ],
   "profiles": {
     "nextjs-app": {
@@ -54,7 +57,13 @@
       "mustNotInclude": ["haus.ecc-security-reviewer", "haus.wshobson-js-testing-patterns"]
     },
     "laravel-app": {
-      "mustInclude": ["haus.ecc-laravel-patterns", "haus.ecc-php-reviewer", "haus.ecc-laravel-tdd"],
+      "mustInclude": [
+        "haus.ecc-laravel-patterns",
+        "haus.ecc-php-reviewer",
+        "haus.ecc-laravel-tdd",
+        "haus.jeffallan-laravel-specialist",
+        "haus.jeffallan-php-pro"
+      ],
       "mustNotInclude": ["haus.sentry-sentry-php-sdk", "haus.ecc-laravel-plugin-discovery"]
     },
     "vendure-monorepo": {
@@ -73,6 +82,19 @@
         "haus.stripe-stripe-best-practices",
         "haus.supabase-supabase",
         "haus.supabase-supabase-postgres-best-practices"
+      ]
+    },
+    "nx-workspace": {
+      "mustInclude": ["haus.nx-nx-workspace", "haus.nx-nx-generate", "haus.nx-tag-conventions"]
+    },
+    "turbo-monorepo": {
+      "mustInclude": ["haus.turborepo-turborepo"]
+    },
+    "laravel-with-react-frontend": {
+      "mustInclude": [
+        "haus.ecc-laravel-patterns",
+        "haus.jeffallan-laravel-specialist",
+        "haus.antfu-vite"
       ]
     }
   }
