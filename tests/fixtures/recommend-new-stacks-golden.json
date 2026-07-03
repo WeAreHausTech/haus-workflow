@@ -1,5 +1,5 @@
 {
-  "_note": "Minimal package.json fixtures for v3.4.0 catalog stack coverage (finding 9). Uses bundled production catalog.",
+  "_note": "Minimal package.json fixtures for v3.5.0 catalog stack coverage. Uses bundled production catalog.",
   "profiles": {
     "mariadb-dep": {
       "packageJson": {
@@ -56,6 +56,25 @@
         "dependencies": { "pg": "8.0.0" }
       },
       "mustInclude": ["haus.supabase-supabase-postgres-best-practices"]
+    },
+    "react-dep": {
+      "packageJson": {
+        "name": "react-dep-fixture",
+        "packageManager": "yarn@4.5.3",
+        "dependencies": { "react": "19.0.0" }
+      },
+      "mustInclude": [
+        "haus.vercel-labs-react-best-practices",
+        "haus.vercel-labs-react-view-transitions"
+      ]
+    },
+    "nestjs-core-dep": {
+      "packageJson": {
+        "name": "nestjs-core-fixture",
+        "packageManager": "yarn@4.5.3",
+        "dependencies": { "@nestjs/core": "10.0.0" }
+      },
+      "mustInclude": ["haus.kadajett-nestjs-best-practices"]
     }
   }
 }
