@@ -1,5 +1,5 @@
 /**
- * Regression: v3.5.0 catalog items recommend for newly-covered stacks.
+ * Regression: v3.5.0 catalog items are recommended for newly-covered stacks.
  * Minimal package.json fixtures + bundled production catalog.
  */
 
