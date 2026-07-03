@@ -1,5 +1,5 @@
 {
-  "version": "3.4.0",
+  "version": "3.5.0",
   "items": [
     {
       "id": "haus.agentic-workflow-standard",
@@ -3819,6 +3819,111 @@
         },
         {
           "dependency": "vue"
+        }
+      ]
+    },
+    {
+      "id": "haus.vercel-labs-react-best-practices",
+      "version": "1.0.1",
+      "source": "curated",
+      "type": "skill",
+      "path": "skills/vercel-labs/react-best-practices",
+      "title": "Vercel Labs React Best Practices",
+      "purpose": "React and Next.js performance optimization guidelines from Vercel Engineering. This skill should be used when writing, reviewing, or refactoring React/Next.js code to ensure optimal performance patterns. Triggers on tasks involving React components, Next.js pages, data fetching, bundle optimization, or performance improvements.",
+      "whenToUse": "React and Next.js performance optimization guidelines from Vercel Engineering. This skill should be used when writing, reviewing, or refactoring React/Next.js code to ensure optimal performance patterns. Triggers on tasks involving React components, Next.js pages, data fetching, bundle optimization, or performance improvements.",
+      "whenNotToUse": "Use stack-specific router or review-agent skills when those scopes are narrower and sufficient.",
+      "tags": ["react", "frontend", "workflow"],
+      "repoRoles": [],
+      "tokenEstimate": 1813,
+      "installMode": "copy-selected",
+      "default": true,
+      "reviewStatus": "approved",
+      "riskLevel": "low",
+      "useMode": "copy",
+      "license": "MIT",
+      "licenseConfidence": "medium",
+      "originSourceId": "vercel-labs-agent-skills",
+      "originUrl": "https://github.com/vercel-labs/agent-skills/blob/f8a72b9603728bb92a217a879b7e62e43ad76c81/skills/react-best-practices/SKILL.md",
+      "pinnedRef": "f8a72b9603728bb92a217a879b7e62e43ad76c81",
+      "ecosystem": "react",
+      "requiresAny": [
+        {
+          "stack": "react"
+        },
+        {
+          "stack": "react19"
+        },
+        {
+          "dependency": "react"
+        }
+      ]
+    },
+    {
+      "id": "haus.vercel-labs-react-view-transitions",
+      "version": "1.0.1",
+      "source": "curated",
+      "type": "skill",
+      "path": "skills/vercel-labs/react-view-transitions",
+      "title": "Vercel Labs React View Transitions",
+      "purpose": "Guide for implementing smooth, native-feeling animations using React's View Transition API (`<ViewTransition>` component, `addTransitionType`, and CSS view transition pseudo-elements). Use this skill whenever the user wants to add page transitions, animate route changes, create shared element animations, animate enter/exit of components, animate list reorder, implement directional (forward/back) navigation animations, or integrate view transitions in Next.js. Also use when the user mentions view transitions, `startViewTransition`, `ViewTransition`, transition types, or asks about animating between UI states in React without third-party animation libraries.",
+      "whenToUse": "Guide for implementing smooth, native-feeling animations using React's View Transition API (`<ViewTransition>` component, `addTransitionType`, and CSS view transition pseudo-elements). Use this skill whenever the user wants to add page transitions, animate route changes, create shared element animations, animate enter/exit of components, animate list reorder, implement directional (forward/back) navigation animations, or integrate view transitions in Next.js. Also use when the user mentions view transitions, `startViewTransition`, `ViewTransition`, transition types, or asks about animating between UI states in React without third-party animation libraries.",
+      "whenNotToUse": "Do not use when a more specific skill or command applies.",
+      "tags": ["react", "frontend", "workflow"],
+      "repoRoles": [],
+      "tokenEstimate": 3126,
+      "installMode": "copy-selected",
+      "default": true,
+      "reviewStatus": "approved",
+      "riskLevel": "low",
+      "useMode": "copy",
+      "license": "MIT",
+      "licenseConfidence": "medium",
+      "originSourceId": "vercel-labs-agent-skills",
+      "originUrl": "https://github.com/vercel-labs/agent-skills/blob/f8a72b9603728bb92a217a879b7e62e43ad76c81/skills/react-view-transitions/SKILL.md",
+      "pinnedRef": "f8a72b9603728bb92a217a879b7e62e43ad76c81",
+      "ecosystem": "react",
+      "requiresAny": [
+        {
+          "stack": "react"
+        },
+        {
+          "stack": "react19"
+        },
+        {
+          "dependency": "react"
+        }
+      ]
+    },
+    {
+      "id": "haus.kadajett-nestjs-best-practices",
+      "version": "1.0.2",
+      "source": "curated",
+      "type": "skill",
+      "path": "skills/kadajett/nestjs-best-practices",
+      "title": "Kadajett NestJS Best Practices",
+      "purpose": "NestJS best practices and architecture patterns for building production-ready applications. This skill should be used when writing, reviewing, or refactoring NestJS code to ensure proper patterns for modules, dependency injection, security, and performance.",
+      "whenToUse": "NestJS best practices and architecture patterns for building production-ready applications. This skill should be used when writing, reviewing, or refactoring NestJS code to ensure proper patterns for modules, dependency injection, security, and performance.",
+      "whenNotToUse": "Use haus.ecc-nestjs-patterns for lighter community patterns, or stack-specific NestJS skills (GraphQL, Vendure, Sentry) when those scopes apply.",
+      "tags": ["nestjs", "backend", "workflow"],
+      "repoRoles": [],
+      "tokenEstimate": 1161,
+      "installMode": "copy-selected",
+      "default": true,
+      "reviewStatus": "approved",
+      "riskLevel": "low",
+      "useMode": "copy",
+      "license": "MIT",
+      "licenseConfidence": "medium",
+      "originSourceId": "kadajett-agent-nestjs-skills",
+      "originUrl": "https://github.com/kadajett/agent-nestjs-skills/blob/f9effeccffc3918f51a7d4e912be2873de21d35c/SKILL.md",
+      "pinnedRef": "f9effeccffc3918f51a7d4e912be2873de21d35c",
+      "ecosystem": "nestjs",
+      "requiresAny": [
+        {
+          "stack": "nestjs"
+        },
+        {
+          "dependency": "@nestjs/core"
         }
       ]
     }
