@@ -31,7 +31,7 @@ If you're not sure which category a file falls into, run `haus doctor` — it re
 | `workflow-config.md`          | **you**  | The small set of project-specific values `WORKFLOW.md` binds to: source-of-truth doc paths, test commands, highest-stakes logic, pre-commit tool. haus writes an initial version with `<!-- fill in -->` placeholders and never overwrites your edits (`--refill-config` only fills blanks it finds, never touches a field you've already set) |
 | `adr-gate.json`                | **you**  | Optional. `{ "mode": "off" }` disables the ADR/decisions gate entirely. Absent = gate enabled |
 | `selected-context.json`       | haus     | Written by `apply --write` — the resolved set of items actually installed this run                                              |
-| `workspace.manifest.json`     | haus     | Written by `haus workspace setup` — a derived, advisory record of each repo's last setup outcome in a multi-repo workspace (see [Workspace mode](./workspace)). Not the workspace's own config — that's `haus.workspace.yaml` at the workspace root, written by `haus workspace discover`/`init` |
+| `workspace.manifest.json`     | haus     | Written by `haus workspace setup` — a derived, advisory record of each repo's last setup outcome in a multi-repo workspace (see [Workspace mode](/docs/haus-workflow/workspace)). Not the workspace's own config — that's `haus.workspace.yaml` at the workspace root, written by `haus workspace discover`/`init` |
 | `backups/`                    | haus     | `haus update` backs up the previous lockfile here before refreshing                                                             |
 | `llms-cache/`                 | haus     | Cached `llms.txt`-style reference docs for installed catalog skills/agents, pruned automatically when an item is removed        |
 
@@ -57,7 +57,7 @@ If you're not sure which category a file falls into, run `haus doctor` — it re
 It's easy to confuse these — they solve different problems:
 
 - **`workflow-config.md`** (`.haus-workflow/`) — binds the generic *workflow methodology* (`WORKFLOW.md`) to this specific project's values. About **how you work**.
-- **`haus.workspace.yaml`** and **`repos.manifest.json`** — describe a *multi-repo workspace* (which repos exist, how they relate). About **what repos exist**. See [Workspace mode](./workspace) for the full picture; they are not interchangeable with each other either.
+- **`haus.workspace.yaml`** and **`repos.manifest.json`** — describe a *multi-repo workspace* (which repos exist, how they relate). About **what repos exist**. See [Workspace mode](/docs/haus-workflow/workspace) for the full picture; they are not interchangeable with each other either.
 
 ## Safe to delete / regenerate
 

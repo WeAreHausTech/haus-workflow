@@ -46,7 +46,7 @@ The easiest path is entirely conversational — open Claude Code in your project
 /haus-workflow project:init
 ```
 
-It detects your stack, explains what it found in plain language, applies the matching skills/agents/guardrails, does a deeper read of your code to catch anything a quick scan would miss, and writes your project's `CLAUDE.md` + `docs/`. See [Slash commands](./slash-commands) for the full conversational flow, or [Claude Code in Action](./claude-code-guide) for what the chat actually looks like.
+It detects your stack, explains what it found in plain language, applies the matching skills/agents/guardrails, does a deeper read of your code to catch anything a quick scan would miss, and writes your project's `CLAUDE.md` + `docs/`. See [Slash commands](/docs/haus-workflow/slash-commands) for the full conversational flow, or [Claude Code in Action](/docs/haus-workflow/claude-code-guide) for what the chat actually looks like.
 
 From a terminal, the equivalent is:
 
@@ -61,12 +61,12 @@ haus init
 
 After either path, your project has:
 
-- **`.claude/skills/`, `.claude/agents/`, `.claude/commands/`** — the AI context assets matched to your stack (see [CLI commands](./commands) and the [Haus Workflow Catalog](./catalog) for what's available)
+- **`.claude/skills/`, `.claude/agents/`, `.claude/commands/`** — the AI context assets matched to your stack (see [CLI commands](/docs/haus-workflow/commands) and the [Haus Workflow Catalog](/docs/haus-workflow/catalog) for what's available)
 - **`.claude/settings.json`** — security guardrails (permission deny/ask rules, hooks) merged in alongside anything you already had
 - **`.haus-workflow/WORKFLOW.md` + `workflow-config.md`** — the agentic development workflow standard, plus your project's specific bindings to it (test commands, source-of-truth doc paths, highest-stakes logic)
 - **`CLAUDE.md`** updated with a managed import block pulling in the above
 
-See [Configuration reference](./configuration) for what every file is and which ones are safe to hand-edit.
+See [Configuration reference](/docs/haus-workflow/configuration) for what every file is and which ones are safe to hand-edit.
 
 ## Check on it later
 
@@ -82,11 +82,11 @@ or `/haus-workflow project:doctor` in Claude Code — a one-line plain-language 
 haus update
 ```
 
-or `/haus-workflow update` in Claude Code. Fetches the latest [Haus Workflow Catalog](./catalog), refreshes `~/.claude/`, and — if run inside an already-set-up project — re-applies project context assets too (new catalog items get added, changed ones updated, anything removed upstream gets pruned).
+or `/haus-workflow update` in Claude Code. Fetches the latest [Haus Workflow Catalog](/docs/haus-workflow/catalog), refreshes `~/.claude/`, and — if run inside an already-set-up project — re-applies project context assets too (new catalog items get added, changed ones updated, anything removed upstream gets pruned).
 
 ## Next steps
 
-- [CLI commands](./commands) — the full command reference
-- [Configuration reference](./configuration) — every file haus writes, and what's safe to edit
-- [Workspace mode](./workspace) — working across multiple repos at once
-- [Troubleshooting & FAQ](./troubleshooting) — common issues and their exact fix
+- [CLI commands](/docs/haus-workflow/commands) — the full command reference
+- [Configuration reference](/docs/haus-workflow/configuration) — every file haus writes, and what's safe to edit
+- [Workspace mode](/docs/haus-workflow/workspace) — working across multiple repos at once
+- [Troubleshooting & FAQ](/docs/haus-workflow/troubleshooting) — common issues and their exact fix

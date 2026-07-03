@@ -7,7 +7,7 @@ description: Full haus CLI command reference for day-to-day use.
 # CLI commands
 
 Most people never type these directly — `/haus-workflow` in Claude Code (see
-[Slash commands](./slash-commands)) drives the CLI for you. This page is the full
+[Slash commands](/docs/haus-workflow/slash-commands)) drives the CLI for you. This page is the full
 reference for scripting, CI, or working from a terminal.
 
 ## Core workflow
@@ -64,11 +64,11 @@ Copies config-type catalog items into your project root. One-time, explicit — 
 
 | Command                  | Description                                                                                                                                |
 | :-------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------- |
-| `haus clone <url> [dir]` | Clone a single git repo by URL. A primitive with no workspace knowledge — see [Workspace mode](./workspace) for cloning a whole workspace |
+| `haus clone <url> [dir]` | Clone a single git repo by URL. A primitive with no workspace knowledge — see [Workspace mode](/docs/haus-workflow/workspace) for cloning a whole workspace |
 
 ## Workspace commands
 
-See [Workspace mode](./workspace) for the full picture — these operate across multiple already-cloned repos via `haus.workspace.yaml`, a **different** file from the `repos.manifest.json` that `haus clone`/`/haus-workflow project:clone` reads.
+See [Workspace mode](/docs/haus-workflow/workspace) for the full picture — these operate across multiple already-cloned repos via `haus.workspace.yaml`, a **different** file from the `repos.manifest.json` that `haus clone`/`/haus-workflow project:clone` reads.
 
 | Command                   | Description                                                                    |
 | :---------------------------- | :---------------------------------------------------------------------------- |
@@ -92,11 +92,11 @@ See [Workspace mode](./workspace) for the full picture — these operate across 
 
 ## Guards (hook-driven, not run manually)
 
-`haus guard bash` and `haus guard file-access` back the `PreToolUse` guardrail hooks `apply` installs — Claude Code invokes them automatically before a risky tool call, returning a plain-language deny reason. See [Architecture → Security model](./architecture#security-model) for what they block. You won't normally run these yourself.
+`haus guard bash` and `haus guard file-access` back the `PreToolUse` guardrail hooks `apply` installs — Claude Code invokes them automatically before a risky tool call, returning a plain-language deny reason. See [Architecture → Security model](/docs/haus-workflow/architecture#security-model) for what they block. You won't normally run these yourself.
 
 ## Output files
 
-See [Configuration reference](./configuration) for the full list and what each file means. Quick summary:
+See [Configuration reference](/docs/haus-workflow/configuration) for the full list and what each file means. Quick summary:
 
 | Path                                                     | Description                                                              |
 | :----------------------------------------------------------- | :------------------------------------------------------------------ |
