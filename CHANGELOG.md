@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.2](https://github.com/WeAreHausTech/haus-workflow/compare/v1.1.1...v1.1.2) (2026-07-03)
+
+### Bug Fixes
+
+- **lefthook:** scope secret-grep to skip synced catalog docs ([77e36cc](https://github.com/WeAreHausTech/haus-workflow/commit/77e36cc6d61971787091df7f5ce56f4da17b31f8))
+- **scanner:** exclude tests/fixtures from listFiles glob ([064bc54](https://github.com/WeAreHausTech/haus-workflow/commit/064bc54b633aba37e08f57bcbf610d22a23181fc))
+
 ## [1.1.1](https://github.com/WeAreHausTech/haus-workflow/compare/v1.1.0...v1.1.1) (2026-07-03)
 
 ## [1.1.0](https://github.com/WeAreHausTech/haus-workflow/compare/v1.0.0...v1.1.0) (2026-07-02)
