@@ -53,8 +53,8 @@ because it ships the tags the CLI later rejects.
 
 4. **Two CI backstops** guard against drift the JSON can't prevent on its own:
    the fixture-sync PR flow (CLI fixture follows catalog `main`), and a
-   `validate.mjs` check that `.claude/WORKFLOW.md` stays byte-identical to
-   `templates/agentic-workflow-standard.md`.
+   `haus doctor` hash check that `.haus-workflow/WORKFLOW.md` stays in sync with
+   `templates/agentic-workflow-standard.md` (`src/commands/doctor.ts`).
 
 ## Consequences
 

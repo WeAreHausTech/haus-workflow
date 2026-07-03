@@ -39,11 +39,15 @@ The `project:*` tasks act on the current repo. The unprefixed verbs (`update`,
 ```
 /haus-workflow                              # interactive menu — pick a task
 /haus-workflow project:init                 # [project] add haus to an EXISTING repo — AI skills, commands, workflow + docs
+/haus-workflow project:reinit               # [project] full re-setup from scratch (removes haus-managed files first, backed up)
 /haus-workflow project:clone [name]         # [project] clone a workspace's repos (repos.manifest.json), or find & clone one repo by name from GitHub
 /haus-workflow project:cloneandsetup [name] # [project] like project:clone, then set up each repo locally (node version, deps, .env)
+/haus-workflow project:add-skills           # [project] add optional skills/agents/config to an already-set-up project
 /haus-workflow project:refresh              # [project] refresh .claude/ and regenerate CLAUDE.md imports
 /haus-workflow project:doctor               # [project] health check for drift
+/haus-workflow project:fix                  # [project] diagnose drift and apply the suggested fixes
 /haus-workflow update                       # [global]  update npm package + catalog + ~/.claude/
+/haus-workflow install / uninstall          # [global]  seed or remove haus-owned files under ~/.claude/
 ```
 
 Without an argument, the skill presents a menu so you can pick the task. With an argument, it runs immediately.

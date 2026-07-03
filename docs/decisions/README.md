@@ -1,7 +1,7 @@
 # Architecture Decision Records
 
 Write-once records of significant decisions. To change one, add a new ADR that
-supersedes it. See `.claude/WORKFLOW.md` → "Architecture Decision Records".
+supersedes it. See `.haus-workflow/WORKFLOW.md` → "Architecture Decision Records".
 
 Catalog-specific validation **policy** ADRs (e.g. npx waiver, upstream sync) live in
 [`haus-workflow-catalog/docs/decisions/`](https://github.com/WeAreHausTech/haus-workflow-catalog/tree/main/docs/decisions);

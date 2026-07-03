@@ -14,14 +14,14 @@ Haus Workflow integrates with **Claude Code** through `/haus-workflow`. After `n
 
 ## Interactive menu (`/haus-workflow`)
 
-Run without arguments to open the task picker. Options render as checkboxes; reply with a number or type the subcommand directly.
+Run without arguments and the skill asks a couple of short questions to narrow down the task — reply with a number or type the subcommand directly to skip straight to it.
 
 <ClaudeChatMockup
   title="Claude Code"
   path="~/Projects/legacy-storefront"
   inputPlaceholder="/haus-workflow"
-  ariaLabel="Haus Workflow interactive menu with checkbox options"
-  caption="Checkbox menu matches Claude Code skill UI — select a task or type the subcommand."
+  ariaLabel="Haus Workflow interactive menu with task options"
+  caption="Task picker matches Claude Code skill UI — select a task or type the subcommand."
   messages={[
     { role: 'user', content: '/haus-workflow' },
     {
@@ -36,6 +36,10 @@ Run without arguments to open the task picker. Options render as checkboxes; rep
               description: 'Add Haus Workflow to this repo (scan → recommend → apply)',
             },
             {
+              command: 'project:reinit',
+              description: 'Full re-setup from scratch (backs up haus-managed files first)',
+            },
+            {
               command: 'project:clone [name]',
               description: 'Clone a repo from the workspace manifest',
             },
@@ -44,12 +48,20 @@ Run without arguments to open the task picker. Options render as checkboxes; rep
               description: 'Clone + Node version, deps, and .env setup',
             },
             {
+              command: 'project:add-skills',
+              description: 'Add optional skills, agents, or config not yet installed',
+            },
+            {
               command: 'project:refresh',
               description: 'Refresh .claude/ and regenerate CLAUDE.md imports',
             },
             {
               command: 'project:doctor',
               description: 'Health check for hooks, drift, and catalog cache',
+            },
+            {
+              command: 'project:fix',
+              description: 'Diagnose drift and apply the suggested fixes',
             },
             { command: 'update', description: 'Update npm package, catalog, and ~/.claude/' },
           ],
