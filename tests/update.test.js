@@ -538,6 +538,70 @@ test('update --check --fast skips hashing and marks checkMode: fast', () => {
   assert.equal(full.exitCode, 1, 'full mode fails on real drift the fast mode could not see')
 })
 
+// Regression (Copilot review): --fast previously defaulted a missing catalogRef to
+// 'main' (inherited from the full tier's pre-existing behavior), which could produce
+// a false "behind" reading — the same false-positive runFromHookCheck already avoids
+// for the same reason. --fast must keep an unrecorded ref as null ("unknown") instead.
+test('update --check --fast keeps an unrecorded catalogRef as null instead of defaulting to main', () => {
+  const temp = mkdtempSync(path.join(os.tmpdir(), 'haus-update-fast-noref-'))
+  mkdirSync(path.join(temp, '.haus-workflow'), { recursive: true })
+  writeFileSync(
+    path.join(temp, 'package.json'),
+    JSON.stringify({ name: 'update-fast-noref-temp', packageManager: 'yarn@4.5.3' }, null, 2),
+  )
+  writeFileSync(
+    path.join(temp, '.haus-workflow/haus.lock.json'),
+    JSON.stringify(
+      [
+        {
+          id: 'x',
+          type: 'skill',
+          source: 'haus',
+          version: '0.2.0',
+          // deliberately no catalogRef
+          hash: 'sha256-whatever',
+          installMode: 'copied',
+          paths: [],
+        },
+      ],
+      null,
+      2,
+    ),
+  )
+
+  const env = {
+    HAUS_TEST_MODE: '1',
+    HAUS_SKIP_NPM_CHECK: '1',
+    HAUS_CATALOG_CACHE_DIR_OVERRIDE: path.join(temp, 'cache'),
+    // Short-circuits fetchLatestCatalogTag() to null in test mode — avoids a real,
+    // slow network call for a field this test doesn't assert on.
+    HAUS_CATALOG_REMOTE_BASE: 'http://127.0.0.1:0',
+    HOME: path.join(temp, 'home'),
+    USERPROFILE: path.join(temp, 'home'),
+  }
+
+  const fast = execaSync('node', [path.resolve('dist/cli.js'), 'update', '--check', '--fast'], {
+    cwd: temp,
+    env,
+    reject: false,
+  })
+  const fastParsed = JSON.parse(fast.stdout)
+  assert.equal(fastParsed.installedCatalogRef, null, 'unknown ref must stay null, not "main"')
+  assert.equal(fastParsed.catalogRefBehind, false, 'no comparison without a real recorded ref')
+
+  const full = execaSync('node', [path.resolve('dist/cli.js'), 'update', '--check'], {
+    cwd: temp,
+    env,
+    reject: false,
+  })
+  const fullParsed = JSON.parse(full.stdout)
+  assert.equal(
+    fullParsed.installedCatalogRef,
+    'main',
+    "full mode's pre-existing 'main' default is intentionally left unchanged",
+  )
+})
+
 test('update skips project re-apply when no prior haus setup', () => {
   const temp = mkdtempSync(path.join(os.tmpdir(), 'haus-update-noproj-'))
   const home = path.join(temp, 'home')

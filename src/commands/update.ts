@@ -56,9 +56,15 @@ export async function runUpdate(options: {
         readJson<Array<{ id: string }>>(hausPath(root, 'haus.lock.json')),
       ])
     const formerIdMigrations = findFormerIdMigrations(lockItems ?? [], catalogItems)
-    const installedRef = status.catalogRef ?? 'main'
+    // --fast keeps an unrecorded catalogRef as null ("unknown") rather than defaulting
+    // to 'main' — defaulting would produce a false "behind" reading here for the exact
+    // reason runFromHookCheck already avoids it (a lock with no ref would otherwise
+    // almost always compare as behind any real release tag). The full tier keeps its
+    // existing 'main' default unchanged — it's pre-existing --check output shape this
+    // fix does not touch.
+    const installedRef = options.fast ? status.catalogRef : (status.catalogRef ?? 'main')
     const catalogRefBehind =
-      latestCatalogTag !== null && installedRef !== latestCatalogTag
+      installedRef !== null && latestCatalogTag !== null && installedRef !== latestCatalogTag
         ? `installed from ${installedRef}, latest tag is ${latestCatalogTag}`
         : false
     log(

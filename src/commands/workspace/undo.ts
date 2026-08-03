@@ -5,7 +5,7 @@
  * the workspace manifest. `haus.workspace.yaml` itself is left untouched — it's
  * the user's own config, not haus-owned output.
  */
-import { existsSync } from 'node:fs'
+import { existsSync, statSync } from 'node:fs'
 import path from 'node:path'
 
 import fs from 'fs-extra'
@@ -68,6 +68,12 @@ export async function runWorkspaceUndo(
     const repoRoot = path.resolve(workspaceRoot, repo.path)
     log(`\n→ ${repo.name} (${repo.path})`)
     try {
+      // Same pre-check runWorkspaceSetup already uses: a misconfigured path (missing
+      // dir, or a file) must fail cleanly here, not throw an opaque error deep inside
+      // runUndo's own filesystem calls.
+      if (!existsSync(repoRoot) || !statSync(repoRoot).isDirectory()) {
+        throw new Error(`Repo path is not a directory: ${repo.path}`)
+      }
       await runUndo({ yes: true, root: repoRoot })
     } catch (err) {
       anyRepoFailed = true
