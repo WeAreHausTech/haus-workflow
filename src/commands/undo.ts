@@ -12,27 +12,56 @@ import {
   stripHausDeny,
   stripHausHooks,
 } from '../install/settings-merge.js'
+import { hashInstalledPaths } from '../update/hash-installed.js'
 import { readJson } from '../utils/fs.js'
 import { log } from '../utils/logger.js'
 import { claudePath, hausPath } from '../utils/paths.js'
 import { confirm } from '../utils/prompts.js'
 
-type LockRow = { paths?: string[] }
+type LockRow = { id?: string; paths?: string[]; hash?: string }
 
-/** Collects absolute paths haus may remove: lock entries plus core managed files. */
-async function collectManagedPaths(root: string): Promise<string[]> {
-  const paths = new Set(coreManagedAbsolutePaths(root))
-  const lock = await readJson<LockRow[]>(hausPath(root, 'haus.lock.json'))
-  for (const row of lock ?? []) {
-    for (const rel of row.paths ?? []) {
-      paths.add(path.resolve(root, rel))
-    }
-  }
+/** Absolute paths of core managed files — always safe to remove, no per-file hash to check. */
+async function collectCoreManagedPaths(root: string): Promise<string[]> {
   const existing: string[] = []
-  for (const abs of paths) {
+  for (const abs of coreManagedAbsolutePaths(root)) {
     if (await fs.pathExists(abs)) existing.push(abs)
   }
   return existing
+}
+
+/**
+ * Lock-tracked catalog item paths, split into those safe to remove (content still
+ * matches the recorded hash) and those to leave in place (user-modified since install),
+ * mirroring the hash-gated contract `cleanupStaleCatalogItems` already applies on apply.
+ */
+async function collectLockTrackedPaths(
+  root: string,
+): Promise<{ removable: string[]; preserved: string[] }> {
+  const lock = await readJson<LockRow[]>(hausPath(root, 'haus.lock.json'))
+  const removable: string[] = []
+  const preserved: string[] = []
+  for (const row of lock ?? []) {
+    const relPaths = row.paths ?? []
+    const existingRel: string[] = []
+    for (const rel of relPaths) {
+      if (await fs.pathExists(path.resolve(root, rel))) existingRel.push(rel)
+    }
+    if (existingRel.length === 0) continue
+    if (row.hash === undefined) {
+      // No recorded hash to verify against — treat as removable (matches historical
+      // behavior for entries predating hash tracking; there is nothing to compare).
+      removable.push(...existingRel.map((rel) => path.resolve(root, rel)))
+      continue
+    }
+    const currentHash = await hashInstalledPaths(root, relPaths)
+    if (currentHash === row.hash) {
+      removable.push(...existingRel.map((rel) => path.resolve(root, rel)))
+    } else {
+      preserved.push(...existingRel.map((rel) => path.resolve(root, rel)))
+      log(`Preserving locally-modified ${row.id ?? '(unknown item)'}: ${existingRel.join(', ')}`)
+    }
+  }
+  return { removable, preserved }
 }
 
 async function settingsHasHausContent(root: string): Promise<boolean> {
@@ -122,7 +151,9 @@ async function backupManagedFilesBeforeUndo(
  */
 export async function runUndo(options: { yes?: boolean }): Promise<void> {
   const root = process.cwd()
-  const managed = await collectManagedPaths(root)
+  const coreManaged = await collectCoreManagedPaths(root)
+  const { removable: lockRemovable, preserved: lockPreserved } = await collectLockTrackedPaths(root)
+  const managed = [...new Set([...coreManaged, ...lockRemovable])]
   const stripSettings = await settingsHasHausContent(root)
   const stripClaudeMd = await claudeMdHasHausBlock(root)
 
@@ -135,6 +166,11 @@ export async function runUndo(options: { yes?: boolean }): Promise<void> {
   const summaryParts = [...relTargets]
   if (stripSettings) summaryParts.push('.claude/settings.json (haus rules only)')
   if (stripClaudeMd) summaryParts.push('CLAUDE.md (haus import block only)')
+  if (lockPreserved.length > 0) {
+    summaryParts.push(
+      `(preserving ${lockPreserved.length} locally-modified catalog item file(s) — not shown above)`,
+    )
+  }
 
   if (!options.yes) {
     const ok = await confirm(
