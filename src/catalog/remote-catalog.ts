@@ -21,6 +21,7 @@ import {
 } from './constants.js'
 import { validateCatalogItem } from './ingest-catalog.js'
 import { parseManifest } from './manifest-schema.js'
+import { isSafeCatalogPath } from './path-safety.js'
 
 /** True when running under test mode — only then is HAUS_CATALOG_REMOTE_BASE honoured. */
 function isTestMode(): boolean {
@@ -260,13 +261,6 @@ export type SyncResult = {
   unchanged: number
   /** IDs of items that could not be fetched or had invalid paths. */
   failed: string[]
-}
-
-/** Guards against path traversal: rejects absolute paths, backslashes, and `..` segments. */
-function isSafeCatalogPath(itemPath: string): boolean {
-  if (!itemPath || path.isAbsolute(itemPath) || itemPath.includes('\\')) return false
-  const normalized = path.normalize(itemPath)
-  return !normalized.startsWith('..') && !normalized.includes('/..')
 }
 
 /** Guards relative file paths from tree listings (untrusted) before joining under a dest dir. */
