@@ -117,7 +117,7 @@ export async function listFiles(root: string, patterns: string[]): Promise<strin
 }
 
 /** Return a `sha256-<hex>` content hash, used for lockfile integrity checks. */
-export function hashText(value: string): string {
+export function hashText(value: string | Buffer): string {
   return `sha256-${crypto.createHash('sha256').update(value).digest('hex')}`
 }
 

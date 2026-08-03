@@ -90,3 +90,38 @@ test('backslash paths are normalized to forward slashes', async () => {
   const withBackslash = await hashInstalledPaths(tmpDir, ['foo\\bar.md'])
   assert.equal(withForwardSlash, withBackslash)
 })
+
+// audit L3: binary content must not be lossily transcoded through UTF-8 before hashing
+test('text file hashes identically across LF/CRLF (normalization intact)', async () => {
+  const filePath = path.join(tmpDir, 'a.md')
+  fs.writeFileSync(filePath, 'line one\nline two\n', 'utf8')
+  const hashLF = await hashInstalledPaths(tmpDir, ['a.md'])
+  fs.writeFileSync(filePath, 'line one\r\nline two\r\n', 'utf8')
+  const hashCRLF = await hashInstalledPaths(tmpDir, ['a.md'])
+  assert.equal(hashLF, hashCRLF, 'LF and CRLF text content must hash identically')
+})
+
+test('binary content hashes by raw bytes, not lossy UTF-8 text', async () => {
+  // Bytes that are invalid as UTF-8 (a lone continuation byte, 0xFF, 0xFE) — decoding
+  // and re-encoding these as 'utf8' replaces them with U+FFFD, collapsing distinct
+  // inputs to the same lossy text and therefore the same (wrong) hash.
+  // Both 0xFF and 0xFE are invalid standalone UTF-8 lead bytes — naive decode+hash
+  // collapses both to the same U+FFFD replacement character before the trailing 'A',
+  // so a hasher that hashes the lossy text (not the bytes) sees these as identical.
+  const binaryA = Buffer.from([0xff, 0x41])
+  const binaryB = Buffer.from([0xfe, 0x41])
+  const filePath = path.join(tmpDir, 'a.bin')
+  fs.writeFileSync(filePath, binaryA)
+  const hashA = await hashInstalledPaths(tmpDir, ['a.bin'])
+  fs.writeFileSync(filePath, binaryB)
+  const hashB = await hashInstalledPaths(tmpDir, ['a.bin'])
+  assert.notEqual(hashA, hashB, 'distinct binary content must not collapse to the same hash')
+})
+
+test('directory expansion hashes mixed text and binary files without throwing', async () => {
+  fs.mkdirSync(path.join(tmpDir, 'skill'), { recursive: true })
+  fs.writeFileSync(path.join(tmpDir, 'skill', 'SKILL.md'), '# skill\n', 'utf8')
+  fs.writeFileSync(path.join(tmpDir, 'skill', 'asset.bin'), Buffer.from([0xff, 0xfe, 0x00]))
+  const hash = await hashInstalledPaths(tmpDir, ['skill'])
+  assert.ok(hash.startsWith('sha256-'))
+})
