@@ -61,11 +61,23 @@ function findImportBlockRange(content: string): BlockRange | null {
 /** Removes the managed haus import block from CLAUDE.md, preserving surrounding user content. */
 export function stripHausBlock(existing: string): string {
   const range = findImportBlockRange(existing)
-  if (!range) return existing
-  const before = existing.slice(0, range.beginStart)
-  const after = existing.slice(range.endEnd)
-  const merged = `${before}${after}`.replace(/\n{3,}/g, '\n\n').trimEnd()
-  return merged.length > 0 ? `${merged}\n` : ''
+  if (range) {
+    const before = existing.slice(0, range.beginStart)
+    const after = existing.slice(range.endEnd)
+    const merged = `${before}${after}`.replace(/\n{3,}/g, '\n\n').trimEnd()
+    return merged.length > 0 ? `${merged}\n` : ''
+  }
+
+  // Malformed prior file (BEGIN present but END missing) — mirrors injectHausBlock's
+  // handling of the same case: drop everything from BEGIN onward rather than leaving
+  // a broken half-block in place (which would otherwise make this a silent no-op).
+  const loneBegin = findLineMarker(existing, BLOCK_BEGIN)
+  if (loneBegin) {
+    const before = existing.slice(0, loneBegin.start).trimEnd()
+    return before.length > 0 ? `${before}\n` : ''
+  }
+
+  return existing
 }
 
 export function injectHausBlock(existing: string, block: string): string {

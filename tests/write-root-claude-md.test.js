@@ -13,6 +13,8 @@ import {
 } from 'node:fs'
 import { execaSync } from 'execa'
 
+import { buildImportBlock, injectHausBlock, stripHausBlock } from '../src/claude/write-root-claude-md.js'
+
 process.env.HAUS_FIXTURE_CATALOG = path.resolve('tests/fixtures/catalog/manifest.json')
 
 // Seed a temp catalog cache with the fixture template so writeWorkflow can find it.
@@ -261,4 +263,54 @@ test('apply updates CRLF-delimited haus import block without duplicating it', ()
   const next = readFileSync(path.join(temp, 'CLAUDE.md'), 'utf8')
   assert.equal((next.match(new RegExp(BLOCK_BEGIN, 'g')) ?? []).length, 1)
   assert.equal((next.match(new RegExp(BLOCK_END, 'g')) ?? []).length, 1)
+})
+
+// ---- stripHausBlock (in-process unit tests — haus undo / haus workspace undo) ----
+
+test('stripHausBlock removes a well-formed block, preserving surrounding user content', () => {
+  const block = buildImportBlock()
+  const content = `# My project\n\nSome notes.\n\n${block}\n\nMore notes.\n`
+  const stripped = stripHausBlock(content)
+  assert.equal(stripped.includes(BLOCK_BEGIN), false)
+  assert.equal(stripped.includes(BLOCK_END), false)
+  assert.match(stripped, /Some notes\./)
+  assert.match(stripped, /More notes\./)
+})
+
+test('stripHausBlock removes the whole file when the block was the only content', () => {
+  const block = buildImportBlock()
+  assert.equal(stripHausBlock(`${block}\n`), '')
+})
+
+// Regression (PR #179 review): a malformed file — BEGIN present, END missing — used
+// to make stripHausBlock a silent no-op, so a caller logging "removed" was lying: the
+// file came back byte-for-byte unchanged.
+test('stripHausBlock drops everything from a lone BEGIN onward when END is missing (malformed)', () => {
+  const content = `# My project\n\nSome notes.\n\n${BLOCK_BEGIN}\n@some/broken/import.md\n`
+  const stripped = stripHausBlock(content)
+  assert.notEqual(stripped, content, 'must not be a no-op on malformed input')
+  assert.equal(stripped.includes(BLOCK_BEGIN), false)
+  assert.match(stripped, /Some notes\./)
+})
+
+test('stripHausBlock returns an empty file when a malformed block is the only content', () => {
+  assert.equal(stripHausBlock(`${BLOCK_BEGIN}\n@some/broken/import.md\n`), '')
+})
+
+test('stripHausBlock is a true no-op when there is no BEGIN sentinel at all', () => {
+  const content = '# My project\n\nJust some user content.\n'
+  assert.equal(stripHausBlock(content), content)
+})
+
+// Symmetry check: injectHausBlock already handled the malformed case this way (see
+// 'apply repairs malformed lone BEGIN import block' above) — stripHausBlock's fix
+// mirrors it, so both agree on what "malformed" means.
+test('stripHausBlock and injectHausBlock treat a lone BEGIN the same way', () => {
+  const content = `# My project\n\nSome notes.\n\n${BLOCK_BEGIN}\n@some/broken/import.md\n`
+  const injected = injectHausBlock(content, buildImportBlock())
+  const stripped = stripHausBlock(content)
+  assert.match(injected, /Some notes\./)
+  assert.match(stripped, /Some notes\./)
+  assert.equal(injected.includes('@some/broken/import.md'), false)
+  assert.equal(stripped.includes('@some/broken/import.md'), false)
 })
