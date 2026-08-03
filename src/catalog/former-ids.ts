@@ -5,7 +5,12 @@ export function buildFormerIdMap(
   const map = new Map<string, string>()
   for (const item of items) {
     for (const formerId of item.formerIds ?? []) {
-      if (map.has(formerId)) throw new Error(`duplicate formerId ${formerId}`)
+      const existingOwner = map.get(formerId)
+      if (existingOwner !== undefined) {
+        throw new Error(
+          `duplicate formerId ${formerId} claimed by both ${existingOwner} and ${item.id}`,
+        )
+      }
       map.set(formerId, item.id)
     }
   }

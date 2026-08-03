@@ -121,6 +121,17 @@ test('buildFormerIdMap maps former ids to current ids', () => {
   )
 })
 
+test('buildFormerIdMap names both owners on duplicate formerId', () => {
+  assert.throws(
+    () =>
+      buildFormerIdMap([
+        { id: 'alpha', formerIds: ['shared'] },
+        { id: 'beta', formerIds: ['shared'] },
+      ]),
+    /duplicate formerId shared claimed by both alpha and beta/,
+  )
+})
+
 test('validateFormerIds rejects duplicate claims and current-id collisions', () => {
   assert.deepEqual(
     validateFormerIds([
@@ -206,6 +217,31 @@ test('apply --select migrates when only the current id is selected', () => {
     readFileSync(path.join(root, '.haus-workflow', 'haus.lock.json'), 'utf8'),
   )
   assert.deepEqual(lock.map((entry) => entry.id), ['catalog.new'])
+})
+
+test('apply --select leaves deselected former-id installs untouched', () => {
+  const { root, catalogDir } = makeProject()
+  writeSkill(catalogDir, 'old-name', 'old content')
+  const manifestPath = writeManifest(catalogDir, {
+    id: 'catalog.old',
+    path: 'skills/old-name',
+  })
+  writeRecommendation(root, 'catalog.old')
+  const initial = runApply(root, manifestPath)
+  assert.equal(initial.exitCode, 0, initial.stderr)
+
+  writeSkill(catalogDir, 'new-name', 'new content')
+  writeManifest(catalogDir, {
+    id: 'catalog.new',
+    formerIds: ['catalog.old'],
+    path: 'skills/new-name',
+  })
+
+  const skipped = runWriteSelected(root, manifestPath, ['catalog.unrelated'])
+  assert.equal(skipped.exitCode, 0, skipped.stderr)
+  assert.doesNotMatch(skipped.stderr, /migrated catalog\.old/)
+  assert.equal(existsSync(path.join(root, '.claude', 'skills', 'old-name', 'SKILL.md')), true)
+  assert.equal(existsSync(path.join(root, '.claude', 'skills', 'new-name')), false)
 })
 
 test('update --check reports a pending former-id migration without writing', () => {

@@ -225,6 +225,11 @@ export async function writeClaudeFiles(
   const migrations = findFormerIdMigrations(
     prevLock.filter((entry): entry is PrevLockEntry & { id: string } => Boolean(entry.id)),
     manifestItems,
+  ).filter(
+    (migration) =>
+      selectedIds === undefined ||
+      selectedIds.includes(migration.oldId) ||
+      selectedIds.includes(migration.newId),
   )
   const migrationByOldId = new Map(
     migrations.map((migration) => [migration.oldId, migration.newId]),
@@ -263,13 +268,6 @@ export async function writeClaudeFiles(
     })
   }
   for (const migration of migrations) {
-    if (
-      selectedIds !== undefined &&
-      !selectedIds.includes(migration.oldId) &&
-      !selectedIds.includes(migration.newId)
-    ) {
-      continue
-    }
     if (catalogItemsById.has(migration.newId)) continue
     const lockItem = prevLock.find((entry) => entry.id === migration.oldId)
     const manifestItem = manifestById.get(migration.newId)
@@ -490,7 +488,9 @@ async function cleanupMigratedCatalogItems(
       )
       continue
     }
-    const currentHash = await hashInstalledPaths(root, relPaths)
+    // Hash the same set we intend to remove (existing), not the full recorded
+    // paths list — missing entries would otherwise dilute/alter the digest.
+    const currentHash = await hashInstalledPaths(root, existing)
     if (currentHash !== entry.hash) {
       warn(
         `Former catalog item ${migration.oldId} was modified locally — leaving old paths in place: ${existing.join(', ')}`,
