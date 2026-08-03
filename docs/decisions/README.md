@@ -25,3 +25,4 @@ this index covers CLI/repo decisions. ADR-0001 here links to those where the JSO
 | [0014](0014-cli-audit-remediation-scope-and-approach.md)      | CLI audit remediation — scope, deletion policy, module split        | Accepted |
 | [0015](0015-catalog-former-ids-lock-migrate.md)               | Catalog formerIds → lock migrate on update/apply                    | Accepted |
 | [0016](0016-cli-audit-sections-3-4-scope-and-approach.md)     | CLI audit sections 3 & 4 — workspace undo scope, check-tier honesty | Accepted |
+| [0017](0017-apply-prune-safety-model.md)                      | `haus apply --prune` — opt-in deletion, hash-gated, backed up first | Accepted |
