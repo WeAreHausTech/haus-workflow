@@ -99,3 +99,35 @@ test('syncRemoteCatalog caches full skill trees and superpowers shared', async (
     true,
   )
 })
+
+// audit L8: concurrent callers must share one in-flight GitHub tree fetch, not each
+// independently race to populate the module-level cache.
+test('fetchCatalogBlobPaths de-duplicates concurrent calls into one network fetch', async () => {
+  const prevBase = process.env.HAUS_CATALOG_REMOTE_BASE
+  const prevFetch = globalThis.fetch
+  delete process.env.HAUS_CATALOG_REMOTE_BASE // force the real GitHub-tree code path
+  let callCount = 0
+  globalThis.fetch = async (url) => {
+    if (String(url).includes('/commits/')) {
+      return { ok: true, json: async () => ({ commit: { tree: { sha: 'abc123' } } }) }
+    }
+    if (String(url).includes('/git/trees/')) {
+      callCount++
+      return { ok: true, json: async () => ({ tree: [{ path: 'skills/foo/SKILL.md', type: 'blob' }] }) }
+    }
+    return { ok: false }
+  }
+  try {
+    const { fetchCatalogBlobPaths, _resetRemoteCatalogCachesForTests } = await import(
+      '../src/catalog/remote-catalog.js'
+    )
+    _resetRemoteCatalogCachesForTests()
+    const results = await Promise.all(Array.from({ length: 10 }, () => fetchCatalogBlobPaths('')))
+    assert.equal(callCount, 1, `expected exactly one tree fetch, got ${callCount}`)
+    for (const r of results) assert.deepEqual(r, ['skills/foo/SKILL.md'])
+  } finally {
+    globalThis.fetch = prevFetch
+    if (prevBase === undefined) delete process.env.HAUS_CATALOG_REMOTE_BASE
+    else process.env.HAUS_CATALOG_REMOTE_BASE = prevBase
+  }
+})

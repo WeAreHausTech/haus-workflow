@@ -36,7 +36,17 @@ export function getCacheDir(): string {
 }
 
 let cachedCatalogRef: string | undefined
+let inFlightCatalogRef: Promise<string> | undefined
 let cachedBlobPaths: string[] | undefined
+let inFlightBlobPaths: Promise<string[] | null> | undefined
+
+/** Test-only: clears all module-level catalog caches between isolated test runs. */
+export function _resetRemoteCatalogCachesForTests(): void {
+  cachedCatalogRef = undefined
+  inFlightCatalogRef = undefined
+  cachedBlobPaths = undefined
+  inFlightBlobPaths = undefined
+}
 
 /**
  * Returns the version tag from the bundled catalog snapshot (e.g. "v3.2.0").
@@ -136,7 +146,15 @@ async function remoteBase(): Promise<string> {
     return process.env['HAUS_CATALOG_REMOTE_BASE']
   }
   if (cachedCatalogRef === undefined) {
-    cachedCatalogRef = await resolveCatalogRef({ fallbackRef: getBundledCatalogRef() })
+    if (!inFlightCatalogRef) {
+      inFlightCatalogRef = resolveCatalogRef({ fallbackRef: getBundledCatalogRef() }).then(
+        (ref) => {
+          cachedCatalogRef = ref
+          return ref
+        },
+      )
+    }
+    await inFlightCatalogRef
   }
   return `${CATALOG_REPO_URL}/${cachedCatalogRef}`
 }
@@ -358,10 +376,16 @@ async function fetchGitHubRecursiveBlobPaths(ref: string): Promise<string[] | nu
 export async function fetchCatalogBlobPaths(_base: string): Promise<string[] | null> {
   if (cachedBlobPaths) return cachedBlobPaths
   if (isTestMode() && process.env['HAUS_CATALOG_REMOTE_BASE']) return null
-  const ref = getResolvedCatalogRef()
-  const paths = await fetchGitHubRecursiveBlobPaths(ref)
-  if (paths) cachedBlobPaths = paths
-  return paths
+  if (!inFlightBlobPaths) {
+    inFlightBlobPaths = (async () => {
+      const ref = getResolvedCatalogRef()
+      const paths = await fetchGitHubRecursiveBlobPaths(ref)
+      if (paths) cachedBlobPaths = paths
+      inFlightBlobPaths = undefined
+      return paths
+    })()
+  }
+  return inFlightBlobPaths
 }
 
 /** File paths relative to `prefix` (e.g. SKILL.md, references/foo.md). */
@@ -674,6 +698,7 @@ async function syncOneItem(
  */
 export async function syncRemoteCatalog(): Promise<SyncResult> {
   cachedBlobPaths = undefined
+  inFlightBlobPaths = undefined
 
   const manifest = await fetchRemoteManifest()
   if (!manifest) {
