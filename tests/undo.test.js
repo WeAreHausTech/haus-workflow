@@ -6,6 +6,8 @@ import path from 'node:path'
 import { mkdtempSync, mkdirSync, writeFileSync } from 'node:fs'
 import { execaSync } from 'execa'
 
+import { hashInstalledPaths } from '../src/update/hash-installed.js'
+
 test('undo --yes removes haus-managed files and preserves user-owned .claude content', () => {
   const temp = mkdtempSync(path.join(os.tmpdir(), 'haus-undo-'))
   mkdirSync(path.join(temp, '.claude/skills/user-skill'), { recursive: true })
@@ -121,4 +123,55 @@ test('undo backs up managed directories from lock paths', () => {
     '.claude/skills/haus.sample-skill/SKILL.md',
   )
   assert.equal(fs.existsSync(backedSkill), true)
+})
+
+// audit L5: lock-tracked catalog files must be hash-gated before removal, matching
+// the hash-gated contract cleanupStaleCatalogItems already applies on apply.
+test('undo leaves a locally-modified lock-tracked file in place with a warning', async () => {
+  const temp = mkdtempSync(path.join(os.tmpdir(), 'haus-undo-modified-'))
+  mkdirSync(path.join(temp, '.haus-workflow'), { recursive: true })
+  mkdirSync(path.join(temp, '.claude/skills/kept'), { recursive: true })
+  writeFileSync(path.join(temp, '.claude/skills/kept/SKILL.md'), 'USER EDITED', 'utf8')
+  writeFileSync(
+    path.join(temp, '.haus-workflow/haus.lock.json'),
+    JSON.stringify([
+      {
+        id: 'skill.kept',
+        type: 'skill',
+        paths: ['.claude/skills/kept/SKILL.md'],
+        hash: 'sha256-doesnotmatchcurrentcontent',
+      },
+    ]),
+  )
+
+  const cli = path.resolve('dist/cli.js')
+  const r = execaSync('node', [cli, 'undo', '--yes'], { cwd: temp, reject: false })
+  assert.equal(r.exitCode, 0)
+
+  assert.equal(
+    fs.existsSync(path.join(temp, '.claude/skills/kept/SKILL.md')),
+    true,
+    'modified lock-tracked file must be preserved, not deleted',
+  )
+  assert.match(r.stdout ?? '', /skill\.kept/i)
+})
+
+test('undo removes a lock-tracked file whose content matches its recorded hash', async () => {
+  const temp = mkdtempSync(path.join(os.tmpdir(), 'haus-undo-unmodified-'))
+  mkdirSync(path.join(temp, '.haus-workflow'), { recursive: true })
+  mkdirSync(path.join(temp, '.claude/skills/removable'), { recursive: true })
+  const relPath = '.claude/skills/removable/SKILL.md'
+  writeFileSync(path.join(temp, relPath), '# unmodified\n', 'utf8')
+
+  const hash = await hashInstalledPaths(temp, [relPath])
+
+  writeFileSync(
+    path.join(temp, '.haus-workflow/haus.lock.json'),
+    JSON.stringify([{ id: 'skill.removable', type: 'skill', paths: [relPath], hash }]),
+  )
+
+  const cli = path.resolve('dist/cli.js')
+  const r = execaSync('node', [cli, 'undo', '--yes'], { cwd: temp, reject: false })
+  assert.equal(r.exitCode, 0)
+  assert.equal(fs.existsSync(path.join(temp, relPath)), false, 'unmodified file should be removed')
 })
