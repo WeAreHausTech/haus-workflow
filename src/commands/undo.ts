@@ -153,9 +153,12 @@ async function backupManagedFilesBeforeUndo(
  * Removes haus-managed files from the project: lock-tracked catalog paths, core
  * managed rules/commands, haus workflow artifacts, and haus portions of settings.json.
  * User-added `.claude/` files and editable `.haus-workflow/` docs are preserved.
+ *
+ * @param options.root - Project root to undo. Defaults to `process.cwd()`; an explicit
+ *   root lets `haus workspace undo` reuse this per member repo without a chdir dance.
  */
-export async function runUndo(options: { yes?: boolean }): Promise<void> {
-  const root = process.cwd()
+export async function runUndo(options: { yes?: boolean; root?: string }): Promise<void> {
+  const root = options.root ?? process.cwd()
   const coreManaged = await collectCoreManagedPaths(root)
   const { removable: lockRemovable, preserved: lockPreserved } = await collectLockTrackedPaths(root)
   const managed = [...new Set([...coreManaged, ...lockRemovable])]

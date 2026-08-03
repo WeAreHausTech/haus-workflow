@@ -23,8 +23,9 @@ import { parseWorkspaceConfig, WORKSPACE_FILE } from './workspace/config.js'
 import { runDiscover } from './workspace/discover.js'
 import { runWorkspaceDoctor } from './workspace/doctor.js'
 import { resolveWorkspaceRoot, runWorkspaceSetup } from './workspace/setup.js'
+import { runWorkspaceUndo } from './workspace/undo.js'
 
-export type WorkspaceAction = 'init' | 'discover' | 'scan' | 'setup' | 'doctor'
+export type WorkspaceAction = 'init' | 'discover' | 'scan' | 'setup' | 'doctor' | 'undo'
 
 /** Raw flags from commander (camelCased); normalized per-action before delegating. */
 export type WorkspaceOptions = {
@@ -35,6 +36,7 @@ export type WorkspaceOptions = {
   only?: string | string[]
   maxDepth?: string | number
   client?: string
+  yes?: boolean
 }
 
 /** Normalize a comma-or-space separated `--only` value into a name list. */
@@ -160,6 +162,9 @@ export async function runWorkspace(
       return
     case 'doctor':
       await runWorkspaceDoctor(workspaceRoot, { json: options.json })
+      return
+    case 'undo':
+      await runWorkspaceUndo(workspaceRoot, { yes: options.yes })
       return
   }
 }
