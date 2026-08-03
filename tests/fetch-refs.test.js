@@ -75,6 +75,14 @@ test('urlToSlug converts URL to safe filename stem', async () => {
   assert.equal(urlToSlug('https://tanstack.com/llms.txt'), 'tanstack-com-llms-txt')
 })
 
+// audit §4 item 2: http and https variants of the same host+path must not collide.
+test('urlToSlug does not collide between http and https variants of the same URL', async () => {
+  const { urlToSlug } = await import('../src/refs/fetch-refs.js')
+  const httpsSlug = urlToSlug('https://example.com/llms.txt')
+  const httpSlug = urlToSlug('http://example.com/llms.txt')
+  assert.notEqual(httpSlug, httpsSlug)
+})
+
 test('fetchSingleRef downloads content and stores etag', async (t) => {
   const dir = mkdtempSync(path.join(os.tmpdir(), 'haus-refs-'))
   t.after(async () => fs.rm(dir, { recursive: true }))

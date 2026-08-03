@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-import { mkdtempSync, mkdirSync, writeFileSync, readFileSync } from 'node:fs'
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, utimesSync } from 'node:fs'
 import { execaSync } from 'execa'
 
 process.env.HAUS_FIXTURE_CATALOG = path.resolve('tests/fixtures/catalog/manifest.json')
@@ -351,6 +351,92 @@ function scaffoldApplyProject() {
   execaSync('node', [path.resolve('dist/cli.js'), 'apply', '--write'], { cwd: temp, env })
   return { temp, env }
 }
+
+// audit §4 item 1: a present-but-stale catalog cache previously produced no signal
+// at all (only an empty cache warned) — now surfaced consistently in both modes,
+// matching the same 7-day threshold `haus doctor` already uses.
+async function stalenessTest(mode, { write = false } = {}) {
+  const { runApply } = await import('../src/commands/apply.js')
+
+  const temp = mkdtempSync(path.join(os.tmpdir(), 'haus-apply-staleness-'))
+  const cacheDir = mkdtempSync(path.join(os.tmpdir(), 'haus-apply-staleness-cache-'))
+  mkdirSync(path.join(temp, '.haus-workflow'), { recursive: true })
+  writeFileSync(
+    path.join(temp, '.haus-workflow/recommendation.json'),
+    JSON.stringify({
+      recommended: [{ id: 'haus.fixture-item', type: 'skill', install: true }],
+      warnings: [],
+    }),
+  )
+  const manifestPath = path.join(cacheDir, 'manifest.json')
+  writeFileSync(
+    manifestPath,
+    JSON.stringify({
+      version: '0.1.0',
+      items: [
+        {
+          id: 'haus.fixture-item',
+          source: 'haus',
+          type: 'skill',
+          path: 'skills/fixture-item',
+          title: 'Fixture item',
+          purpose: 'Test fixture.',
+          whenToUse: 'Tests.',
+          whenNotToUse: 'Never in real use.',
+        },
+      ],
+    }),
+  )
+  if (mode === 'stale') {
+    const staleTime = new Date(Date.now() - 10 * 24 * 60 * 60 * 1000)
+    utimesSync(manifestPath, staleTime, staleTime)
+  }
+
+  const prevCwd = process.cwd()
+  const prevCacheOverride = process.env.HAUS_CATALOG_CACHE_DIR_OVERRIDE
+  const prevFixture = process.env.HAUS_FIXTURE_CATALOG
+  const prevRemoteBase = process.env.HAUS_CATALOG_REMOTE_BASE
+  delete process.env.HAUS_FIXTURE_CATALOG
+  process.env.HAUS_CATALOG_CACHE_DIR_OVERRIDE = cacheDir
+  // Fail-fast, no real network: readWorkflowTemplate() otherwise tries to resolve
+  // a live catalog ref/tag over the real network before falling back, which is slow.
+  process.env.HAUS_CATALOG_REMOTE_BASE = 'http://127.0.0.1:0'
+  const lines = []
+  const origWarn = console.warn
+  console.warn = (...args) => {
+    lines.push(args.join(' '))
+    origWarn(...args)
+  }
+  try {
+    process.chdir(temp)
+    await runApply(write ? { write: true } : { dryRun: true })
+    return lines.join('\n')
+  } finally {
+    process.chdir(prevCwd)
+    if (prevCacheOverride === undefined) delete process.env.HAUS_CATALOG_CACHE_DIR_OVERRIDE
+    else process.env.HAUS_CATALOG_CACHE_DIR_OVERRIDE = prevCacheOverride
+    if (prevFixture === undefined) delete process.env.HAUS_FIXTURE_CATALOG
+    else process.env.HAUS_FIXTURE_CATALOG = prevFixture
+    if (prevRemoteBase === undefined) delete process.env.HAUS_CATALOG_REMOTE_BASE
+    else process.env.HAUS_CATALOG_REMOTE_BASE = prevRemoteBase
+    console.warn = origWarn
+  }
+}
+
+test('apply --dry-run warns when the catalog cache is stale (10 days old)', async () => {
+  const output = await stalenessTest('stale')
+  assert.match(output, /cache is 10 days old/)
+})
+
+test('apply --write also warns when the catalog cache is stale (10 days old)', async () => {
+  const output = await stalenessTest('stale', { write: true })
+  assert.match(output, /cache is 10 days old/)
+})
+
+test('apply --dry-run does not warn when the catalog cache is fresh', async () => {
+  const output = await stalenessTest('fresh')
+  assert.doesNotMatch(output, /days old/)
+})
 
 test('apply does not write haus-review or haus-doctor commands (both removed)', () => {
   const { temp } = scaffoldApplyProject()

@@ -117,6 +117,7 @@ program.command('validate-catalog').argument('[manifest]').action(runValidateCat
 program
   .command('update')
   .option('--check')
+  .option('--fast', 'With --check, skip per-item content hashing (cheap count+ref only)')
   .option('--from-hook', 'Emit JSON for the Claude Code SessionStart hook (silent if up to date)')
   .action(runUpdate)
 program
@@ -207,6 +208,11 @@ workspace
   .description('Report workspace drift against the manifest')
   .option('--json', 'Output the manifest and drift array as JSON')
   .action((opts) => runWorkspace('doctor', opts))
+workspace
+  .command('undo')
+  .description('Revert haus setup for every configured repo, plus workspace-root artifacts')
+  .option('-y, --yes', 'Skip confirmation')
+  .action((opts) => runWorkspace('undo', opts))
 
 program.parseAsync(process.argv).catch((err: unknown) => {
   const message = err instanceof Error ? err.message : String(err)

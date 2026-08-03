@@ -4,7 +4,7 @@ import path from 'node:path'
 import checkbox from '@inquirer/checkbox'
 
 import { loadCatalog } from '../catalog/load-catalog.js'
-import { getCacheDir } from '../catalog/remote-catalog.js'
+import { getCacheDir, getCacheManifestAge } from '../catalog/remote-catalog.js'
 import { writeClaudeFiles } from '../claude/write-claude-files.js'
 import { collectLlmsTxtUrls, fetchRefsForItems, pruneOrphanedRefs } from '../refs/fetch-refs.js'
 import type { Recommendation } from '../types.js'
@@ -13,6 +13,9 @@ import { parseIdList } from '../utils/args.js'
 import { readJson } from '../utils/fs.js'
 import { error, log, warn } from '../utils/logger.js'
 import { displayPath, hausPath } from '../utils/paths.js'
+
+/** Matches `haus doctor`'s own catalog-cache staleness threshold. */
+const STALE_CACHE_THRESHOLD_DAYS = 7
 
 async function cacheHasItems(): Promise<boolean> {
   const data = await readJson<{ items?: unknown[] }>(path.join(getCacheDir(), 'manifest.json'))
@@ -117,19 +120,35 @@ export async function runApply(options: {
   // unless the recommendation has no catalog items to install or the user
   // explicitly opts in via --allow-empty-cache. Tests/fixtures set
   // HAUS_FIXTURE_CATALOG and are exempt.
-  if (!options.allowEmptyCache && !process.env['HAUS_FIXTURE_CATALOG']) {
+  if (!process.env['HAUS_FIXTURE_CATALOG']) {
     const rec = await readJson<Recommendation>(hausPath(root, 'recommendation.json'))
     const installableRecommended = installableRecommendedItems(rec?.recommended ?? [])
     const catalogItemCount =
       selectedIds !== undefined ? selectedIds.length : installableRecommended.length
-    if (catalogItemCount > 0 && !(await cacheHasItems())) {
-      const message = 'No catalog content found. Run `haus update` first.'
-      if (isDryRun) {
-        warn(`Catalog cache is empty — dry-run will skip catalog items. ${message}`)
-      } else {
-        error(message)
-        process.exitCode = 1
-        return
+    if (catalogItemCount > 0) {
+      const hasItems = await cacheHasItems()
+      if (!hasItems && !options.allowEmptyCache) {
+        const message = 'No catalog content found. Run `haus update` first.'
+        if (isDryRun) {
+          warn(`Catalog cache is empty — dry-run will skip catalog items. ${message}`)
+        } else {
+          error(message)
+          process.exitCode = 1
+          return
+        }
+      } else if (hasItems) {
+        // Consistent with `haus doctor`'s own staleness threshold: a present-but-old
+        // cache previously used old content silently in both dry-run and write mode —
+        // surfaced here the same way the empty-cache case already was, in both modes.
+        const cacheAgeMs = await getCacheManifestAge()
+        if (cacheAgeMs !== null) {
+          const cacheAgeDays = Math.floor(cacheAgeMs / (1000 * 60 * 60 * 24))
+          if (cacheAgeDays >= STALE_CACHE_THRESHOLD_DAYS) {
+            warn(
+              `Catalog cache is ${cacheAgeDays} days old — run \`haus update\` for the latest content.`,
+            )
+          }
+        }
       }
     }
   }

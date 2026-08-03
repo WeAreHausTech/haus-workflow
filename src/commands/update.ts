@@ -25,7 +25,11 @@ const NPM_PACKAGE_NAME = '@haus-tech/haus-workflow'
  * Updates the lockfile and syncs the remote catalog; with --check, reports drift without writing.
  * Also checks npm for a newer CLI version and reports if one is available.
  */
-export async function runUpdate(options: { check?: boolean; fromHook?: boolean }): Promise<void> {
+export async function runUpdate(options: {
+  check?: boolean
+  fast?: boolean
+  fromHook?: boolean
+}): Promise<void> {
   const root = process.cwd()
   // --from-hook takes precedence over --check (only the SessionStart hook passes
   // --from-hook, and always alone) — its own silent/JSON-on-drift output shape.
@@ -36,25 +40,38 @@ export async function runUpdate(options: { check?: boolean; fromHook?: boolean }
   if (options.check) {
     const pkgJson = await readJson<{ version?: string }>(path.join(packageRoot(), 'package.json'))
     const currentVersion = pkgJson?.version ?? '0.0.0'
+    // --fast skips per-item content hashing (checkLock) and the global-install hash
+    // check, using the cheap count+catalogRef-only readLockSummary instead — the same
+    // tier the SessionStart hook uses. There is a real middle ground now between that
+    // cheap tier and the fully-hashed one, instead of only those two extremes.
+    // formerId migration detection is cheap (structural id lookups, no content hashing)
+    // and runs in both modes.
     const [status, npmVersion, latestCatalogTag, globalInstallDrift, catalogItems, lockItems] =
       await Promise.all([
-        checkLock(root),
+        options.fast ? fastLockStatus(root) : checkLock(root),
         fetchNpmVersionStatus(currentVersion),
         fetchLatestCatalogTag(),
-        detectGlobalInstallDrift(),
+        options.fast ? Promise.resolve(null) : detectGlobalInstallDrift(),
         loadCatalog(root),
         readJson<Array<{ id: string }>>(hausPath(root, 'haus.lock.json')),
       ])
     const formerIdMigrations = findFormerIdMigrations(lockItems ?? [], catalogItems)
-    const installedRef = status.catalogRef ?? 'main'
+    // --fast keeps an unrecorded catalogRef as null ("unknown") rather than defaulting
+    // to 'main' — defaulting would produce a false "behind" reading here for the exact
+    // reason runFromHookCheck already avoids it (a lock with no ref would otherwise
+    // almost always compare as behind any real release tag). The full tier keeps its
+    // existing 'main' default unchanged — it's pre-existing --check output shape this
+    // fix does not touch.
+    const installedRef = options.fast ? status.catalogRef : (status.catalogRef ?? 'main')
     const catalogRefBehind =
-      latestCatalogTag !== null && installedRef !== latestCatalogTag
+      installedRef !== null && latestCatalogTag !== null && installedRef !== latestCatalogTag
         ? `installed from ${installedRef}, latest tag is ${latestCatalogTag}`
         : false
     log(
       JSON.stringify(
         {
           ...status,
+          checkMode: options.fast ? 'fast' : 'full',
           installedCatalogRef: installedRef,
           latestCatalogTag,
           catalogRefBehind,
@@ -68,11 +85,13 @@ export async function runUpdate(options: { check?: boolean; fromHook?: boolean }
         2,
       ),
     )
-    // An empty/missing lockfile means "this project was never set up by haus",
-    // not "drift" — don't fail the check for it. Only fail when an existing
-    // lockfile has real drift or invalid versions (status.ok is false despite
-    // having lock items).
-    if ((status.count > 0 && !status.ok) || formerIdMigrations.length > 0) process.exitCode = 1
+    // Fast mode never had enough information to detect real hash-based drift (no
+    // hashing ran), so it never fails the check purely on that — doing so would imply
+    // content was verified when it wasn't. An empty/missing lockfile also means "this
+    // project was never set up by haus," not "drift". formerId migrations are a
+    // separate, non-hash-based signal and fail the check in both modes.
+    const hasHashDrift = !options.fast && status.count > 0 && 'ok' in status && !status.ok
+    if (hasHashDrift || formerIdMigrations.length > 0) process.exitCode = 1
     return
   }
 
@@ -222,4 +241,18 @@ async function detectGlobalInstallDrift(): Promise<boolean | null> {
   } catch {
     return null
   }
+}
+
+/**
+ * `--check --fast`'s status shape: the cheap count+catalogRef-only read, with no `ok`
+ * field (unlike `checkLock`'s LockCheckResult) because no hashing ran to determine it —
+ * omitting it is more honest than guessing. `drift`/`driftCount` are always empty/zero
+ * for the same reason, kept only so downstream JSON consumers see a consistent shape
+ * across both check modes.
+ */
+async function fastLockStatus(
+  root: string,
+): Promise<{ count: number; catalogRef: string | null; drift: []; driftCount: 0 }> {
+  const summary = await readLockSummary(root)
+  return { count: summary.count, catalogRef: summary.catalogRef, drift: [], driftCount: 0 }
 }

@@ -16,8 +16,7 @@ export type ParsedManifest = {
 }
 
 export type ParseManifestResult =
-  | { ok: true; manifest: ParsedManifest }
-  | { ok: false; error: string }
+  { ok: true; manifest: ParsedManifest } | { ok: false; error: string }
 
 function isNonEmptyString(value: unknown): value is string {
   return typeof value === 'string' && value.length > 0

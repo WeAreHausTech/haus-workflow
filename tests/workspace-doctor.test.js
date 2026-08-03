@@ -207,6 +207,71 @@ test(
 )
 
 test(
+  'workspace doctor flags repos installed from different catalog refs',
+  withExitCode(async () => {
+    const ws = makeWorkspace()
+    await runWorkspaceSetup(ws, { mode: 'fast', write: true })
+
+    const lockPath = (repo) => path.join(ws, repo, '.haus-workflow', 'haus.lock.json')
+    writeFileSync(
+      lockPath('frontend'),
+      JSON.stringify([{ id: 'skill.foo', type: 'skill', catalogRef: 'v1.0.0' }]),
+    )
+    writeFileSync(
+      lockPath('api'),
+      JSON.stringify([{ id: 'skill.bar', type: 'skill', catalogRef: 'v2.0.0' }]),
+    )
+
+    const result = await runWorkspaceDoctor(ws)
+    const mismatch = result.drift.find((d) => d.kind === 'catalog-ref-mismatch')
+    assert.ok(mismatch, 'catalog-ref-mismatch flagged')
+    assert.match(mismatch.detail, /v1\.0\.0/)
+    assert.match(mismatch.detail, /v2\.0\.0/)
+    assert.equal(process.exitCode, 1)
+  }),
+)
+
+test(
+  'workspace doctor does not flag catalog refs when repos agree',
+  withExitCode(async () => {
+    const ws = makeWorkspace()
+    await runWorkspaceSetup(ws, { mode: 'fast', write: true })
+
+    const lockPath = (repo) => path.join(ws, repo, '.haus-workflow', 'haus.lock.json')
+    writeFileSync(
+      lockPath('frontend'),
+      JSON.stringify([{ id: 'skill.foo', type: 'skill', catalogRef: 'v1.0.0' }]),
+    )
+    writeFileSync(
+      lockPath('api'),
+      JSON.stringify([{ id: 'skill.bar', type: 'skill', catalogRef: 'v1.0.0' }]),
+    )
+
+    const result = await runWorkspaceDoctor(ws)
+    assert.equal(result.drift.some((d) => d.kind === 'catalog-ref-mismatch'), false)
+  }),
+)
+
+test(
+  'workspace doctor excludes an unknown (null) catalogRef from the mismatch comparison',
+  withExitCode(async () => {
+    const ws = makeWorkspace()
+    await runWorkspaceSetup(ws, { mode: 'fast', write: true })
+
+    const lockPath = (repo) => path.join(ws, repo, '.haus-workflow', 'haus.lock.json')
+    writeFileSync(
+      lockPath('frontend'),
+      JSON.stringify([{ id: 'skill.foo', type: 'skill', catalogRef: 'v1.0.0' }]),
+    )
+    // api has no catalogRef recorded at all (never synced) — must not count as "different".
+    writeFileSync(lockPath('api'), JSON.stringify([{ id: 'skill.bar', type: 'skill' }]))
+
+    const result = await runWorkspaceDoctor(ws)
+    assert.equal(result.drift.some((d) => d.kind === 'catalog-ref-mismatch'), false)
+  }),
+)
+
+test(
   'workspace doctor flags a repo present in yaml but missing from the manifest',
   withExitCode(async () => {
     const ws = makeWorkspace()
