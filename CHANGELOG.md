@@ -1,5 +1,29 @@
 # Changelog
 
+## [1.2.0](https://github.com/WeAreHausTech/haus-workflow/compare/v1.1.2...v1.2.0) (2026-08-03)
+
+### Features
+
+- CLI audit sections 3 and 4 — workspace undo, catalog-ref check, check-tier, cache staleness ([#179](https://github.com/WeAreHausTech/haus-workflow/issues/179)) ([267c0d3](https://github.com/WeAreHausTech/haus-workflow/commit/267c0d32350f5a8f07c8b4df723b3e7f06e26b76))
+- doctor advises when installed catalog items fall out of eligibility ([0429f35](https://github.com/WeAreHausTech/haus-workflow/commit/0429f35f2fd4d5de46e3ff24bb0c67d67e1cb845))
+- **update:** migrate lock ids via catalog formerIds ([#177](https://github.com/WeAreHausTech/haus-workflow/issues/177)) ([894934d](https://github.com/WeAreHausTech/haus-workflow/commit/894934d6a5e54f379ffd84889000c91ad732b878))
+
+### Bug Fixes
+
+- address PR review feedback ([35f9d54](https://github.com/WeAreHausTech/haus-workflow/commit/35f9d549c1c2b9fc8c9ab375e59cca4e319e85bb))
+- checkLock finds catalogRef on any lock item, not just the first ([68cbd4a](https://github.com/WeAreHausTech/haus-workflow/commit/68cbd4ae60a95251a898ecf894166f85e400e658))
+- doctor detects tamper on legacy-header WORKFLOW.md via shared helper ([fb17cf7](https://github.com/WeAreHausTech/haus-workflow/commit/fb17cf777441027a5e1e729177c8871d145966f8))
+- dry-run readWorkflowTemplate no longer returns a stale cache ([c012ccb](https://github.com/WeAreHausTech/haus-workflow/commit/c012ccb4cbb7ec20658efc9b25bf8c678a9da435))
+- git change-signal includes staged and untracked files ([96bfa59](https://github.com/WeAreHausTech/haus-workflow/commit/96bfa59b6073e0675439f71823fe131f2fe570d6))
+- guardBash strips quote characters before deny-phrase match ([eff75d4](https://github.com/WeAreHausTech/haus-workflow/commit/eff75d4e333029c02aa9c816b22d35327e0f8a2e))
+- hash installed files by raw bytes, not lossy UTF-8 text ([88eefe8](https://github.com/WeAreHausTech/haus-workflow/commit/88eefe84a05a89f003de5705053103962fd701e4))
+- isolate each git-signal subprocess call so one timeout can't drop all three ([2b37cf1](https://github.com/WeAreHausTech/haus-workflow/commit/2b37cf14bd36598cc0eb3a042b82fe9d53db1f0f))
+- memoize in-flight catalog ref/blob-path resolution to stop cache-stampede races ([d3c35b2](https://github.com/WeAreHausTech/haus-workflow/commit/d3c35b2aa3480f174e4f559cabda877333c16e9f))
+- readContextOrScan rescans when package.json is newer than the cache ([d9dd380](https://github.com/WeAreHausTech/haus-workflow/commit/d9dd380f93330cd0c5af41b8e881908b29930673))
+- skip the write, not just the log, on a no-op managed-file save ([#182](https://github.com/WeAreHausTech/haus-workflow/issues/182)) ([a8cd122](https://github.com/WeAreHausTech/haus-workflow/commit/a8cd122781cb4f0d66eacc0b233ba43c5837772a)), closes [#180](https://github.com/WeAreHausTech/haus-workflow/issues/180)
+- undo hash-gates lock-tracked catalog files instead of deleting unconditionally ([889bcd8](https://github.com/WeAreHausTech/haus-workflow/commit/889bcd8d90a9f235bf270254f3ac567394b8ce51))
+- update setup-core.ts's relative imports after the move to src/claude/ ([5c1b131](https://github.com/WeAreHausTech/haus-workflow/commit/5c1b131b7561c9666ad7fa1d270d4f65194b4663))
+
 ## [1.1.2](https://github.com/WeAreHausTech/haus-workflow/compare/v1.1.1...v1.1.2) (2026-07-03)
 
 ### Bug Fixes
