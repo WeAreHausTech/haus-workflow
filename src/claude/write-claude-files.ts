@@ -222,10 +222,11 @@ export async function writeClaudeFiles(
   const { items: manifestItems, contentRoot } = await loadCatalogContext(root)
   const manifestById = new Map((manifestItems as ManifestItem[]).map((item) => [item.id, item]))
   const prevLock = (await readJson<PrevLockEntry[]>(hausPath(root, 'haus.lock.json'))) ?? []
-  const migrations = findFormerIdMigrations(
+  const allMigrations = findFormerIdMigrations(
     prevLock.filter((entry): entry is PrevLockEntry & { id: string } => Boolean(entry.id)),
     manifestItems,
-  ).filter(
+  )
+  const migrations = allMigrations.filter(
     (migration) =>
       selectedIds === undefined ||
       selectedIds.includes(migration.oldId) ||
@@ -235,14 +236,18 @@ export async function writeClaudeFiles(
     migrations.map((migration) => [migration.oldId, migration.newId]),
   )
   const cleanupManifestById = new Map(manifestById)
+  // Map every former id → current item so stale-cleanup does not delete
+  // deselected installs that still alias to a live catalog entry.
+  for (const migration of allMigrations) {
+    const currentItem = manifestById.get(migration.newId)
+    if (currentItem) cleanupManifestById.set(migration.oldId, currentItem)
+  }
   for (const migration of migrations) {
     if (dryRun) {
       say(`[dry-run] would migrate ${migration.oldId} → ${migration.newId} (upstream rename)`)
     } else {
       warn(`migrated ${migration.oldId} → ${migration.newId} (upstream rename)`)
     }
-    const currentItem = manifestById.get(migration.newId)
-    if (currentItem) cleanupManifestById.set(migration.oldId, currentItem)
   }
   await cleanupMigratedCatalogItems(root, prevLock, migrations, dryRun, opts.quiet)
 
