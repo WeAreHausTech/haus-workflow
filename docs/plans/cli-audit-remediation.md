@@ -1,12 +1,13 @@
 # CLI Audit Remediation (sections 1, 2, 5, 6) Implementation Plan
 
-**Goal:** Fix both confirmed bugs, mitigate all eight possible-bug findings, land the three refactor items, and DRY the four duplication findings from the [haus-workflow CLI audit](../../.claude 2>/dev/null || true) — i.e. sections **1 (current bugs)**, **2 (possible bugs)**, **5 (refactor)**, **6 (DRY/optimize)** of the audit — then update the published audit artifact so its status matches reality.
+**Goal:** Fix both confirmed bugs, mitigate all eight possible-bug findings, land the three refactor items, and DRY the four duplication findings from the haus-workflow CLI audit — i.e. sections **1 (current bugs)**, **2 (possible bugs)**, **5 (refactor)**, **6 (DRY/optimize)** of the audit — then update the published audit artifact so its status matches reality.
 
 **Architecture:** One feature branch, tasks executed sequentially where they touch the same file (`remote-catalog.ts` is touched by 5 tasks and must go last-split; `doctor.ts`/`write-workflow.ts` share a new tamper-check helper). Tasks that touch disjoint files (guard-bash, hash-installed, undo, read-context, git-signal, setup-core move, write-claude-files stub dedup) have no ordering dependency on each other and may be done in any order or dispatched to parallel subagents in worktrees if desired — this plan lists them in a safe default order.
 
 **Tech Stack:** TypeScript, Node test runner (`node scripts/run-tests.mjs tests/**/*.test.js`), esbuild build (`yarn build`), existing `fs-extra`/`fast-glob` deps — no new dependencies.
 
 **User decisions (already made):**
+
 - Scope is exactly audit sections 1, 2, 5, 6 (not 3/4/7/8/9 — those are separate future work).
 - The published audit artifact (Artifact URL from this conversation, source file `haus-audit-report.html`) must be updated to reflect fixed/mitigated status once this plan lands, so it doesn't go stale.
 - L4 ("stale items only cleaned up on manifest removal, never on eligibility loss") is mitigated conservatively: `doctor` gains an advisory suggestion, not an automatic deletion — deleting a file just because eligibility rules changed this run is a destructive action with no undo path, which conflicts with this repo's own "no destructive shortcuts" rule. If the user wants outright pruning later, that's audit section 9 item 4, out of scope here.
@@ -33,10 +34,12 @@ All tasks below assume you're inside that worktree.
 **Goal:** `haus apply --dry-run` returns the freshly fetched template text, never a stale cached copy, while still honoring the "no filesystem writes during dry-run" contract.
 
 **Files:**
+
 - Modify: `src/catalog/remote-catalog.ts:219-235`
 - Test: `tests/remote-catalog-utils.test.js`
 
 **Acceptance Criteria:**
+
 - [ ] When `dryRun: true` and a fetch succeeds, `readWorkflowTemplate` returns the freshly fetched text even if a different cached copy exists on disk.
 - [ ] When `dryRun: true`, the cache file on disk is never written or modified.
 - [ ] When the fetch fails (`text === null`) and dry-run is set, the existing cache is still returned as a fallback (unchanged behavior).
@@ -67,7 +70,11 @@ test('readWorkflowTemplate dry-run returns fresh fetch, not a stale cache', asyn
 
     const text = await readWorkflowTemplate({ dryRun: true })
 
-    assert.equal(text, '# NEW REMOTE TEMPLATE\n', 'dry-run must return the fresh fetch, not the stale cache')
+    assert.equal(
+      text,
+      '# NEW REMOTE TEMPLATE\n',
+      'dry-run must return the fresh fetch, not the stale cache',
+    )
     const statAfter = require('node:fs').statSync(cachedPath)
     assert.equal(statAfter.mtimeMs, statBefore.mtimeMs, 'dry-run must not write to the cache file')
     assert.equal(
@@ -85,7 +92,7 @@ test('readWorkflowTemplate dry-run returns fresh fetch, not a stale cache', asyn
 })
 ```
 
-  Add `import { statSync } from 'node:fs'` to the top imports instead of the inline `require` above (this file uses ESM imports elsewhere) — use `statSync` directly, not `require('node:fs')`.
+Add `import { statSync } from 'node:fs'` to the top imports instead of the inline `require` above (this file uses ESM imports elsewhere) — use `statSync` directly, not `require('node:fs')`.
 
 - [ ] **Step 2: Run test to verify it fails**
 
@@ -112,7 +119,7 @@ export async function readWorkflowTemplate(
 }
 ```
 
-  (Removes the `else if (await fs.pathExists(dest))` branch entirely — a successful fresh fetch is always what gets returned; only a *failed* fetch falls back to the cache, which is already handled above.)
+(Removes the `else if (await fs.pathExists(dest))` branch entirely — a successful fresh fetch is always what gets returned; only a _failed_ fetch falls back to the cache, which is already handled above.)
 
 - [ ] **Step 4: Run test to verify it passes**
 
@@ -133,10 +140,12 @@ git commit -m "fix: dry-run readWorkflowTemplate no longer returns a stale cache
 **Goal:** `checkLock` finds `catalogRef` the same way `readLockSummary` does — the first item that actually carries it, not blindly item 0 — so `haus update --check`'s "behind" signal can't go stale from a mixed-shape lock.
 
 **Files:**
+
 - Modify: `src/update/lockfile.ts:67`
 - Test: `tests/lockfile.test.js`
 
 **Acceptance Criteria:**
+
 - [ ] A lock where item 0 has no `catalogRef` but item 1 does returns that later `catalogRef` from `checkLock`, matching `readLockSummary`'s existing behavior.
 - [ ] Existing test `checkLock: catalogRef is taken from first item` still passes (item 0 does carry it there, so behavior is unchanged for that case).
 
@@ -191,10 +200,12 @@ git commit -m "fix: checkLock finds catalogRef on any lock item, not just the fi
 **Goal:** `guardBash` still hard-blocks a deny-tier command when the operator has inserted quote characters inside the dangerous phrase (e.g. `git push --forc"e" origin main`), without changing any existing pass/block behavior.
 
 **Files:**
+
 - Modify: `src/security/guard-bash.ts`
 - Test: `tests/guard.test.js`
 
 **Acceptance Criteria:**
+
 - [ ] `guardBash('git push --forc"e" origin main')` returns a block message.
 - [ ] `guardBash("git push --force origin main")` (no quotes) still blocks, unchanged.
 - [ ] All existing `guard.test.js` assertions still pass unmodified (no false positives introduced on ordinary commands containing quotes, e.g. `git commit -m "fix: sudo-proof retries"`).
@@ -218,7 +229,7 @@ it('does not false-positive on quoted text that merely mentions a safe word', ()
 })
 ```
 
-  Note: the second test intentionally still contains the literal word `sudo` inside quotes — sudo *should* still block per the existing `matchesDenyToken` sudo-specific regex (anchored to command start/separator, not inside a quoted string mid-command it wouldn't match anyway since `sudo` isn't at start/after `[|;&]`). Confirm this reflects real existing behavior before asserting it (run existing suite first) — if it currently blocks, delete this second test rather than assert a not-yet-true behavior change; the goal here is zero regression, not a new sudo carve-out.
+Note: the second test intentionally still contains the literal word `sudo` inside quotes — sudo _should_ still block per the existing `matchesDenyToken` sudo-specific regex (anchored to command start/separator, not inside a quoted string mid-command it wouldn't match anyway since `sudo` isn't at start/after `[|;&]`). Confirm this reflects real existing behavior before asserting it (run existing suite first) — if it currently blocks, delete this second test rather than assert a not-yet-true behavior change; the goal here is zero regression, not a new sudo carve-out.
 
 - [ ] **Step 2: Run test to verify it fails**
 
@@ -236,11 +247,7 @@ function matchesDenyToken(command: string, denyPhrase: string): boolean {
   // quotes (e.g. `--forc"e"`) still resolves to its unquoted form. This closes
   // the literal-quoting gap only — general shell obfuscation via $(...) or
   // variable indirection is a separate, harder problem this guard does not solve.
-  const normalizedCommand = command
-    .replace(/["'`]/g, '')
-    .toLowerCase()
-    .replace(/\s+/g, ' ')
-    .trim()
+  const normalizedCommand = command.replace(/["'`]/g, '').toLowerCase().replace(/\s+/g, ' ').trim()
   return normalizedCommand.includes(denyPhrase.toLowerCase())
 }
 ```
@@ -264,12 +271,14 @@ git commit -m "fix: guardBash strips quote characters before deny-phrase match"
 **Goal:** Extract the "compare on-disk body hash to a template's hash" logic that `write-workflow.ts` and `doctor.ts` each currently reimplement into one shared helper, and use it to make `doctor` correctly flag a genuinely-edited legacy-header (no `hash=` field) WORKFLOW.md instead of unconditionally reporting "OK".
 
 **Files:**
+
 - Create: `src/claude/managed-tamper.ts`
 - Modify: `src/claude/write-workflow.ts:74-115` (use the new helper)
 - Modify: `src/commands/doctor.ts:152-195` (use the new helper, add legacy-header branch)
 - Test: `tests/doctor-tamper.test.js`
 
 **Acceptance Criteria:**
+
 - [ ] A WORKFLOW.md with a legacy header (`id=`/`v=` present, no `hash=` field) whose body no longer matches the current template content is flagged by `doctor` as needing attention (not reported "OK").
 - [ ] A legacy-header WORKFLOW.md whose body still matches the current template is reported OK (just eligible for header migration on next `apply --write`, which is unchanged existing behavior).
 - [ ] A valid-hash WORKFLOW.md whose body was tampered still flags exactly as before (no regression on the existing `doctor-tamper.test.js` test).
@@ -333,73 +342,73 @@ export function checkManagedTamper(
 - [ ] **Step 2: Use the helper in `write-workflow.ts`** — replace the tamper-check block at lines 74-115 of `src/claude/write-workflow.ts`:
 
 ```ts
-    const existingContent = existing.slice(firstLine.length + 1)
-    const verdict = checkManagedTamper(existingContent, parsed.hash, templateContent)
+const existingContent = existing.slice(firstLine.length + 1)
+const verdict = checkManagedTamper(existingContent, parsed.hash, templateContent)
 
-    if (verdict.status === 'tampered' && !force) {
-      warn(`${printable}: content modified by user — skipping. Use --force to overwrite.`)
-      return null
-    }
+if (verdict.status === 'tampered' && !force) {
+  warn(`${printable}: content modified by user — skipping. Use --force to overwrite.`)
+  return null
+}
 
-    if (verdict.status === 'legacy-diverged' && !force) {
-      // Body differs and we can't verify — preserve body, migrate header only.
-      const migratedHeader = makeWorkflowHeader(pkgVersion, hashText(normaliseLF(existingContent)))
-      const migrated = `${migratedHeader}\n${existingContent}`
-      if (hasTextChanged(existing, migrated)) {
-        if (dryRun) {
-          log(`${printable}: migrating legacy hash header (body preserved)`)
-        } else {
-          await writeText(destPath, migrated)
-        }
-      } else if (dryRun) {
-        log(`${printable}: unchanged`)
-      }
-      return destPath
+if (verdict.status === 'legacy-diverged' && !force) {
+  // Body differs and we can't verify — preserve body, migrate header only.
+  const migratedHeader = makeWorkflowHeader(pkgVersion, hashText(normaliseLF(existingContent)))
+  const migrated = `${migratedHeader}\n${existingContent}`
+  if (hasTextChanged(existing, migrated)) {
+    if (dryRun) {
+      log(`${printable}: migrating legacy hash header (body preserved)`)
+    } else {
+      await writeText(destPath, migrated)
     }
+  } else if (dryRun) {
+    log(`${printable}: unchanged`)
+  }
+  return destPath
+}
 
-    if (!hasTextChanged(existing, next)) {
-      if (dryRun) log(`${printable}: unchanged`)
-      return destPath
-    }
+if (!hasTextChanged(existing, next)) {
+  if (dryRun) log(`${printable}: unchanged`)
+  return destPath
+}
 ```
 
-  Add the import: `import { checkManagedTamper } from './managed-tamper.js'` and remove the now-unused inline `bodyMatchesTemplate` local (the helper computes the equivalent internally). Leave everything above (header parsing, id/version checks) and below (dry-run diff printing, final write) unchanged.
+Add the import: `import { checkManagedTamper } from './managed-tamper.js'` and remove the now-unused inline `bodyMatchesTemplate` local (the helper computes the equivalent internally). Leave everything above (header parsing, id/version checks) and below (dry-run diff printing, final write) unchanged.
 
 - [ ] **Step 3: Use the helper in `doctor.ts`** — replace lines 158-193 of `src/commands/doctor.ts`:
 
 ```ts
-      const storedHashMatch = firstLine.match(/hash=(sha256-[a-f0-9]+)/)
-      const bodyContent = workflowContent.slice(firstLine.length + 1)
-      const cachePath = path.join(getCacheDir(), 'templates/agentic-workflow-standard.md')
-      const bundledPath = path.join(
-        packageRoot(),
-        'library',
-        'global',
-        'templates',
-        'agentic-workflow-standard.md',
-      )
-      const templatePath = (await fs.pathExists(cachePath)) ? cachePath : bundledPath
-      const templateContent = await readText(templatePath)
-      const verdict = checkManagedTamper(bodyContent, storedHashMatch?.[1], templateContent ?? null)
+const storedHashMatch = firstLine.match(/hash=(sha256-[a-f0-9]+)/)
+const bodyContent = workflowContent.slice(firstLine.length + 1)
+const cachePath = path.join(getCacheDir(), 'templates/agentic-workflow-standard.md')
+const bundledPath = path.join(
+  packageRoot(),
+  'library',
+  'global',
+  'templates',
+  'agentic-workflow-standard.md',
+)
+const templatePath = (await fs.pathExists(cachePath)) ? cachePath : bundledPath
+const templateContent = await readText(templatePath)
+const verdict = checkManagedTamper(bodyContent, storedHashMatch?.[1], templateContent ?? null)
 
-      if (verdict.status === 'tampered' || verdict.status === 'legacy-diverged') {
-        flag(
-          '- .haus-workflow/WORKFLOW.md: modified locally (run `haus apply --write --force` to restore)',
-          'The workflow standard file was edited after haus wrote it',
-          'haus apply --write --force',
-        )
-      } else if (verdict.status === 'stale') {
-        suggest(
-          '- .haus-workflow/WORKFLOW.md: stale (template updated — run `haus apply --write`)',
-          'The workflow standard is out of date',
-          'haus apply --write',
-        )
-      } else {
-        ok('- .haus-workflow/WORKFLOW.md: OK')
-      }
+if (verdict.status === 'tampered' || verdict.status === 'legacy-diverged') {
+  flag(
+    '- .haus-workflow/WORKFLOW.md: modified locally (run `haus apply --write --force` to restore)',
+    'The workflow standard file was edited after haus wrote it',
+    'haus apply --write --force',
+  )
+} else if (verdict.status === 'stale') {
+  suggest(
+    '- .haus-workflow/WORKFLOW.md: stale (template updated — run `haus apply --write`)',
+    'The workflow standard is out of date',
+    'haus apply --write',
+  )
+} else {
+  ok('- .haus-workflow/WORKFLOW.md: OK')
+}
 ```
 
-  Add the import: `import { checkManagedTamper } from '../claude/managed-tamper.js'`.
+Add the import: `import { checkManagedTamper } from '../claude/managed-tamper.js'`.
 
 - [ ] **Step 4: Add the regression test** — add to `tests/doctor-tamper.test.js` a second test, `doctor flags a legacy-header WORKFLOW.md whose body has diverged from the template`, following the same pattern as the existing test but writing a header with no `hash=` field (e.g. `<!-- HAUS-MANAGED id=template.workflow v=1 source=@haus-tech/haus-workflow@0.18.2 -->\nLOCALLY EDITED\n`), and asserting the output matches `/modified locally|edited after haus wrote it/i` with `process.exitCode === 1` — same assertions as the existing test, new input shape.
 
@@ -422,10 +431,12 @@ git commit -m "fix: doctor detects tamper on legacy-header WORKFLOW.md via share
 **Goal:** `hashInstalledPaths` no longer corrupts binary content before hashing — text files are still normalized (LF, for cross-platform stability); non-UTF-8 files are hashed by raw bytes.
 
 **Files:**
+
 - Modify: `src/update/hash-installed.ts`
 - Test: create `tests/hash-installed.test.js` (no dedicated test file exists today)
 
 **Acceptance Criteria:**
+
 - [ ] A file containing invalid UTF-8 byte sequences (e.g. a raw PNG-like byte pattern) hashes deterministically and differently from a similar-but-different binary file — i.e. the hash reflects actual bytes, not a lossy re-encoding.
 - [ ] A markdown/text file's hash is unaffected by this change (same hash before/after, verified against the current `EMPTY_LOCK_PATHS_TOKEN` and existing lockfile tests which exercise text files).
 - [ ] `node scripts/run-tests.mjs tests/lockfile.test.js` (which exercises `hashInstalledPaths` transitively via `applyLock`/`checkLock`) still passes unmodified.
@@ -568,7 +579,7 @@ export async function hashInstalledPaths(root: string, relPaths: string[]): Prom
 }
 ```
 
-  This assumes `hashText` accepts a `Buffer` in addition to a `string` — check `src/utils/fs.ts`'s `hashText` signature; if it's typed `(text: string) => string` using `crypto.createHash('sha256').update(text)`, `createHash().update()` already accepts a `Buffer` at runtime, so widen the TypeScript signature to `hashText(input: string | Buffer): string` rather than adding a second function.
+This assumes `hashText` accepts a `Buffer` in addition to a `string` — check `src/utils/fs.ts`'s `hashText` signature; if it's typed `(text: string) => string` using `crypto.createHash('sha256').update(text)`, `createHash().update()` already accepts a `Buffer` at runtime, so widen the TypeScript signature to `hashText(input: string | Buffer): string` rather than adding a second function.
 
 - [ ] **Step 4: Run test to verify it passes**
 
@@ -589,10 +600,12 @@ git commit -m "fix: hash installed files by raw bytes, not lossy UTF-8 text"
 **Goal:** `doctor` advises when a lock-tracked item is no longer in the current `recommendation.json`'s recommended list (context changed) even though it's still `approved` in the manifest — today these accumulate on disk with zero detection path. Advisory only, no deletion (see plan header rationale).
 
 **Files:**
+
 - Modify: `src/commands/doctor.ts`
 - Test: `tests/doctor.test.js`
 
 **Acceptance Criteria:**
+
 - [ ] A lock item whose id is absent from `recommendation.json.recommended` triggers a `suggest()` advisory naming the item, when that item is not already covered by the existing stale/deprecated-manifest-removal messaging (which is a `write-claude-files.ts` concern, not doctor's — doctor only reports, it doesn't know why an item became ineligible).
 - [ ] A lock item whose id IS in the current recommendation is not flagged.
 - [ ] Existing `doctor.test.js` assertions are unaffected (no new blocking `flag()`, so exit code behavior is unchanged for existing fixtures).
@@ -611,27 +624,27 @@ git commit -m "fix: hash installed files by raw bytes, not lossy UTF-8 text"
 - [ ] **Step 3: Add the check** — in `src/commands/doctor.ts`, after the existing catalog-cache-age block (after line 258, before the CLI version check), add:
 
 ```ts
-  {
-    const lock = await readJson<Array<{ id?: string }>>(hausPath(root, 'haus.lock.json'))
-    const recommendedIds = new Set(
-      (recommendation?.recommended as Array<{ id?: string }> | undefined)?.map((r) => r.id) ?? [],
+{
+  const lock = await readJson<Array<{ id?: string }>>(hausPath(root, 'haus.lock.json'))
+  const recommendedIds = new Set(
+    (recommendation?.recommended as Array<{ id?: string }> | undefined)?.map((r) => r.id) ?? [],
+  )
+  const orphaned = (lock ?? [])
+    .map((entry) => entry.id)
+    .filter((id): id is string => typeof id === 'string' && !recommendedIds.has(id))
+  if (orphaned.length > 0) {
+    suggest(
+      `- CATALOG ITEMS: ${orphaned.length} installed item(s) no longer in the current recommendation (${orphaned.join(', ')})`,
+      `${orphaned.length} installed item(s) are no longer recommended for this project`,
+      'review whether they are still needed; haus apply --write leaves them in place until removed from the catalog',
     )
-    const orphaned = (lock ?? [])
-      .map((entry) => entry.id)
-      .filter((id): id is string => typeof id === 'string' && !recommendedIds.has(id))
-    if (orphaned.length > 0) {
-      suggest(
-        `- CATALOG ITEMS: ${orphaned.length} installed item(s) no longer in the current recommendation (${orphaned.join(', ')})`,
-        `${orphaned.length} installed item(s) are no longer recommended for this project`,
-        'review whether they are still needed; haus apply --write leaves them in place until removed from the catalog',
-      )
-    }
   }
+}
 ```
 
-  This only fires when `recommendation.json` exists and has a `recommended` array — a project with no recommendation file yet (fresh scan not run) has `recommendedIds` empty, which would falsely flag every lock item as orphaned. Guard against that: skip the check entirely when `recommendation` is null.
+This only fires when `recommendation.json` exists and has a `recommended` array — a project with no recommendation file yet (fresh scan not run) has `recommendedIds` empty, which would falsely flag every lock item as orphaned. Guard against that: skip the check entirely when `recommendation` is null.
 
-  Revise the added block's condition to open with `if (recommendation) { ... }` wrapping the whole thing, so the check is skipped rather than false-flagging on a missing recommendation file.
+Revise the added block's condition to open with `if (recommendation) { ... }` wrapping the whole thing, so the check is skipped rather than false-flagging on a missing recommendation file.
 
 - [ ] **Step 4: Run test to verify it passes**
 
@@ -652,10 +665,12 @@ git commit -m "feat: doctor advises when installed catalog items fall out of eli
 **Goal:** `haus undo` no longer blindly deletes lock-tracked catalog files — it checks each lock entry's own recorded hash against on-disk content first, same as `cleanupStaleCatalogItems` already does, and leaves a modified file in place with a warning instead of destroying it.
 
 **Files:**
+
 - Modify: `src/commands/undo.ts`
 - Test: create `tests/undo.test.js` if it doesn't already cover this, or extend it
 
 **Acceptance Criteria:**
+
 - [ ] A lock-tracked file whose current content hash matches the lock entry's `hash` is removed as before.
 - [ ] A lock-tracked file whose content has diverged from the lock entry's `hash` is left in place, with a warning naming the file.
 - [ ] Core managed files (rules/haus.md, settings.json, WORKFLOW.md, etc. — not lock-tracked catalog items) are still always removed/backed-up as before — this change only affects the lock-tracked catalog item paths, matching the existing hash-gated contract `write-claude-files.ts` already uses for the same category of files.
@@ -697,7 +712,11 @@ afterEach(() => {
 test('undo leaves a locally-modified lock-tracked file in place with a warning', async () => {
   fs.mkdirSync(path.join(tmpDir, '.haus-workflow'), { recursive: true })
   fs.mkdirSync(path.join(tmpDir, '.claude', 'skills', 'kept'), { recursive: true })
-  fs.writeFileSync(path.join(tmpDir, '.claude', 'skills', 'kept', 'SKILL.md'), 'USER EDITED', 'utf8')
+  fs.writeFileSync(
+    path.join(tmpDir, '.claude', 'skills', 'kept', 'SKILL.md'),
+    'USER EDITED',
+    'utf8',
+  )
   fs.writeFileSync(
     path.join(tmpDir, '.haus-workflow', 'haus.lock.json'),
     JSON.stringify([
@@ -713,8 +732,14 @@ test('undo leaves a locally-modified lock-tracked file in place with a warning',
   const lines = []
   const origLog = console.log
   const origWarn = console.warn
-  console.log = (...a) => { lines.push(a.join(' ')); origLog(...a) }
-  console.warn = (...a) => { lines.push(a.join(' ')); origWarn(...a) }
+  console.log = (...a) => {
+    lines.push(a.join(' '))
+    origLog(...a)
+  }
+  console.warn = (...a) => {
+    lines.push(a.join(' '))
+    origWarn(...a)
+  }
   try {
     await runUndo({ yes: true })
   } finally {
@@ -745,7 +770,11 @@ test('undo removes a lock-tracked file whose content matches its recorded hash',
 
   await runUndo({ yes: true })
 
-  assert.equal(fs.existsSync(path.join(tmpDir, relPath)), false, 'unmodified file should be removed')
+  assert.equal(
+    fs.existsSync(path.join(tmpDir, relPath)),
+    false,
+    'unmodified file should be removed',
+  )
 })
 ```
 
@@ -808,34 +837,34 @@ async function collectLockTrackedPaths(
 }
 ```
 
-  Then in `runUndo`, replace the `const managed = await collectManagedPaths(root)` line and everything downstream that assumed one flat list:
+Then in `runUndo`, replace the `const managed = await collectManagedPaths(root)` line and everything downstream that assumed one flat list:
 
 ```ts
-  const coreManaged = await collectCoreManagedPaths(root)
-  const { removable: lockRemovable, preserved: lockPreserved } = await collectLockTrackedPaths(root)
-  const managed = [...new Set([...coreManaged, ...lockRemovable])]
-  const stripSettings = await settingsHasHausContent(root)
-  const stripClaudeMd = await claudeMdHasHausBlock(root)
+const coreManaged = await collectCoreManagedPaths(root)
+const { removable: lockRemovable, preserved: lockPreserved } = await collectLockTrackedPaths(root)
+const managed = [...new Set([...coreManaged, ...lockRemovable])]
+const stripSettings = await settingsHasHausContent(root)
+const stripClaudeMd = await claudeMdHasHausBlock(root)
 
-  if (managed.length === 0 && !stripSettings && !stripClaudeMd) {
-    log('Nothing to remove: no haus-managed files found in this directory.')
-    return
-  }
+if (managed.length === 0 && !stripSettings && !stripClaudeMd) {
+  log('Nothing to remove: no haus-managed files found in this directory.')
+  return
+}
 
-  const relTargets = managed.map((p) => path.relative(root, p))
-  const summaryParts = [...relTargets]
-  if (stripSettings) summaryParts.push('.claude/settings.json (haus rules only)')
-  if (stripClaudeMd) summaryParts.push('CLAUDE.md (haus import block only)')
-  if (lockPreserved.length > 0) {
-    summaryParts.push(
-      `(preserving ${lockPreserved.length} locally-modified catalog item file(s) — not shown above)`,
-    )
-  }
+const relTargets = managed.map((p) => path.relative(root, p))
+const summaryParts = [...relTargets]
+if (stripSettings) summaryParts.push('.claude/settings.json (haus rules only)')
+if (stripClaudeMd) summaryParts.push('CLAUDE.md (haus import block only)')
+if (lockPreserved.length > 0) {
+  summaryParts.push(
+    `(preserving ${lockPreserved.length} locally-modified catalog item file(s) — not shown above)`,
+  )
+}
 ```
 
-  Everything after that (`confirm`, `backupManagedFilesBeforeUndo`, the removal loop, settings/CLAUDE.md stripping, dir pruning) is unchanged — it already operates on `managed`, which now correctly excludes preserved files.
+Everything after that (`confirm`, `backupManagedFilesBeforeUndo`, the removal loop, settings/CLAUDE.md stripping, dir pruning) is unchanged — it already operates on `managed`, which now correctly excludes preserved files.
 
-  Remove the old `collectManagedPaths` function entirely and its now-unused `LockRow` type re-declaration (the new `type LockRow` above replaces it — keep only one).
+Remove the old `collectManagedPaths` function entirely and its now-unused `LockRow` type re-declaration (the new `type LockRow` above replaces it — keep only one).
 
 - [ ] **Step 5: Run test to verify it passes**
 
@@ -861,10 +890,12 @@ git commit -m "fix: undo hash-gates lock-tracked catalog files instead of deleti
 **Goal:** `readContextOrScan` re-scans instead of trusting a cached `context-map.json` when the project's `package.json` has been modified more recently than the cache — closing the "silently stale forever" gap — while still using the cache in the common case (nothing changed).
 
 **Files:**
+
 - Modify: `src/scanner/read-context.ts`
 - Test: create `tests/read-context.test.js`
 
 **Acceptance Criteria:**
+
 - [ ] When `context-map.json`'s mtime is newer than `package.json`'s mtime, the cached context is returned (no rescan) — this is the common, fast path and must stay fast.
 - [ ] When `package.json`'s mtime is newer than the cache (e.g. a dependency was just added), `scanProject` runs and its fresh result is returned, not the stale cache.
 - [ ] When there is no `package.json` at all, the existing cache-preferred behavior is unchanged (nothing to compare against — don't force a rescan on every call for a project with no `package.json`).
@@ -909,7 +940,13 @@ function writeCache(repoName) {
       repoRoles: [],
       confidence: 0.5,
       detectedStacks: {
-        frontend: [], backend: [], databases: [], testing: [], auth: [], tooling: [], packageManagers: [],
+        frontend: [],
+        backend: [],
+        databases: [],
+        testing: [],
+        auth: [],
+        tooling: [],
+        packageManagers: [],
       },
       dependencies: [],
       securityRisks: [],
@@ -1027,10 +1064,12 @@ git commit -m "fix: readContextOrScan rescans when package.json is newer than th
 **Goal:** `readChangedFiles` (the recommender's git signal) reports files that are staged or untracked, not only unstaged diffs — so a newly-added-but-not-yet-committed file registers as an active work area.
 
 **Files:**
+
 - Modify: `src/recommender/git-signal.ts`
 - Test: check for `tests/git-signal.test.js`; extend or create it
 
 **Acceptance Criteria:**
+
 - [ ] A file with unstaged changes is reported (existing behavior, unchanged).
 - [ ] A file that has been `git add`-ed (staged, not yet committed) is reported.
 - [ ] A new file that has never been added or tracked is reported.
@@ -1175,10 +1214,12 @@ git commit -m "fix: git change-signal includes staged and untracked files"
 **Goal:** Concurrent calls to `remoteBase()` (via `cachedCatalogRef`) and `fetchCatalogBlobPaths()` (via `cachedBlobPaths`) share one in-flight resolution instead of each independently racing to populate the cache — closing the redundant-GitHub-API-call stampede under `syncRemoteCatalog`'s 8-way concurrency.
 
 **Files:**
+
 - Modify: `src/catalog/remote-catalog.ts` (lines 38-39, 131-142, 359-367)
 - Test: `tests/remote-catalog-tree.test.js` or `tests/remote-catalog.test.js` (extend whichever already exercises `fetchCatalogBlobPaths`/concurrency — check first)
 
 **Acceptance Criteria:**
+
 - [ ] Ten concurrent calls to `fetchCatalogBlobPaths` before the first resolves result in exactly one underlying `fetchGitHubRecursiveBlobPaths` network call, not ten.
 - [ ] Ten concurrent calls to `remoteBase()` before `resolveCatalogRef` resolves result in exactly one underlying tag-resolution call.
 - [ ] Existing `syncRemoteCatalog` behavior (result shape, per-item outcomes) is unchanged — verified by the existing `remote-catalog.test.js` suite passing unmodified.
@@ -1205,7 +1246,10 @@ test('fetchCatalogBlobPaths de-duplicates concurrent calls into one network fetc
     }
     if (String(url).includes('/git/trees/')) {
       callCount++
-      return { ok: true, json: async () => ({ tree: [{ path: 'skills/foo/SKILL.md', type: 'blob' }] }) }
+      return {
+        ok: true,
+        json: async () => ({ tree: [{ path: 'skills/foo/SKILL.md', type: 'blob' }] }),
+      }
     }
     return { ok: false }
   }
@@ -1222,7 +1266,7 @@ test('fetchCatalogBlobPaths de-duplicates concurrent calls into one network fetc
 })
 ```
 
-  Note: `cachedBlobPaths`/`cachedCatalogRef` are module-level state — this test must run in a context where they start `undefined`. If other tests in the same file already exercise `fetchCatalogBlobPaths` and leave the cache populated, either reset via an exported test-only reset hook (see Step 3) or run this test first/in isolation. Add the reset hook rather than relying on test ordering.
+Note: `cachedBlobPaths`/`cachedCatalogRef` are module-level state — this test must run in a context where they start `undefined`. If other tests in the same file already exercise `fetchCatalogBlobPaths` and leave the cache populated, either reset via an exported test-only reset hook (see Step 3) or run this test first/in isolation. Add the reset hook rather than relying on test ordering.
 
 - [ ] **Step 3: Fix the race in `remote-catalog.ts`** — replace the module-level cache declarations (lines 38-39) and the two consuming functions:
 
@@ -1241,7 +1285,7 @@ export function _resetRemoteCatalogCachesForTests(): void {
 }
 ```
 
-  In `remoteBase()` (lines 131-142), replace the ref-resolution branch:
+In `remoteBase()` (lines 131-142), replace the ref-resolution branch:
 
 ```ts
 async function remoteBase(): Promise<string> {
@@ -1250,10 +1294,12 @@ async function remoteBase(): Promise<string> {
   }
   if (cachedCatalogRef === undefined) {
     if (!inFlightCatalogRef) {
-      inFlightCatalogRef = resolveCatalogRef({ fallbackRef: getBundledCatalogRef() }).then((ref) => {
-        cachedCatalogRef = ref
-        return ref
-      })
+      inFlightCatalogRef = resolveCatalogRef({ fallbackRef: getBundledCatalogRef() }).then(
+        (ref) => {
+          cachedCatalogRef = ref
+          return ref
+        },
+      )
     }
     await inFlightCatalogRef
   }
@@ -1261,7 +1307,7 @@ async function remoteBase(): Promise<string> {
 }
 ```
 
-  In `fetchCatalogBlobPaths` (lines 360-367), replace the body:
+In `fetchCatalogBlobPaths` (lines 360-367), replace the body:
 
 ```ts
 export async function fetchCatalogBlobPaths(_base: string): Promise<string[] | null> {
@@ -1280,9 +1326,9 @@ export async function fetchCatalogBlobPaths(_base: string): Promise<string[] | n
 }
 ```
 
-  Note the `inFlightBlobPaths = undefined` reset inside the resolved promise — this allows a *failed* resolution (returns `null`, doesn't populate `cachedBlobPaths`) to be retried on a subsequent call rather than permanently returning the same failed in-flight promise forever.
+Note the `inFlightBlobPaths = undefined` reset inside the resolved promise — this allows a _failed_ resolution (returns `null`, doesn't populate `cachedBlobPaths`) to be retried on a subsequent call rather than permanently returning the same failed in-flight promise forever.
 
-  In `syncRemoteCatalog` (line 678), `cachedBlobPaths = undefined` already resets the per-sync cache at the start of each sync — also reset `inFlightBlobPaths = undefined` there for the same reason:
+In `syncRemoteCatalog` (line 678), `cachedBlobPaths = undefined` already resets the per-sync cache at the start of each sync — also reset `inFlightBlobPaths = undefined` there for the same reason:
 
 ```ts
 export async function syncRemoteCatalog(): Promise<SyncResult> {
@@ -1315,11 +1361,13 @@ git commit -m "fix: memoize in-flight catalog ref/blob-path resolution to stop c
 **Goal:** `isSafeCatalogPath` exists in exactly one place; both `remote-catalog.ts` and `catalog/validate-core.ts` import it.
 
 **Files:**
+
 - Create: `src/catalog/path-safety.ts`
 - Modify: `src/catalog/remote-catalog.ts:250-254` (remove local def, import instead)
 - Modify: `src/catalog/validate-core.ts:29-33` (remove local def, import instead — keep the existing `export function isSafeCatalogPath` re-export there too, since other files may import it from `validate-core.ts` directly)
 
 **Acceptance Criteria:**
+
 - [ ] Only one implementation of the path-safety check exists in the codebase.
 - [ ] `validate-core.ts` still exports `isSafeCatalogPath` (re-exported from the new module) so nothing importing it from there breaks.
 - [ ] `remote-catalog.ts`'s other path-safety helpers (`isSafeRelativeFilePath`, `safeJoin`) are unaffected.
@@ -1354,7 +1402,7 @@ export function isSafeCatalogPath(itemPath: string): boolean {
 export { isSafeCatalogPath } from './path-safety.js'
 ```
 
-  (Placed where the old function definition was, keeping the same export surface for any existing importer of `isSafeCatalogPath` from `validate-core.ts`.)
+(Placed where the old function definition was, keeping the same export surface for any existing importer of `isSafeCatalogPath` from `validate-core.ts`.)
 
 - [ ] **Step 5: Verify no duplicate remains**
 
@@ -1380,9 +1428,11 @@ git commit -m "refactor: extract isSafeCatalogPath to one shared module"
 **Goal:** The identical fetch/timeout/status-check/error-handling logic in `fetchText` and `fetchBytes` lives in one place; each becomes a thin wrapper choosing `.text()` vs `.arrayBuffer()`.
 
 **Files:**
+
 - Modify: `src/catalog/remote-catalog.ts:144-172`
 
 **Acceptance Criteria:**
+
 - [ ] `fetchText` and `fetchBytes` behave identically to before (same timeout, same warn messages, same null-on-error contract) — verified by existing tests exercising both (`remote-catalog-utils.test.js`, `remote-catalog.test.js`).
 - [ ] Full test suite passes unmodified.
 
@@ -1394,7 +1444,10 @@ git commit -m "refactor: extract isSafeCatalogPath to one shared module"
 
 ```ts
 /** Fetches a URL and hands the response to `extract`; returns null on any network, HTTP, or extraction error. Timeout: 10 s. */
-async function fetchGuarded<T>(url: string, extract: (res: Response) => Promise<T>): Promise<T | null> {
+async function fetchGuarded<T>(
+  url: string,
+  extract: (res: Response) => Promise<T>,
+): Promise<T | null> {
   try {
     const res = await fetch(url, { signal: AbortSignal.timeout(10_000) })
     if (!res.ok) {
@@ -1438,10 +1491,12 @@ git commit -m "refactor: merge fetchText/fetchBytes into one guarded fetch core"
 **Goal:** `mergeDenyRules`/`mergeAllowRules`/`mergeAskRules` and their `stripHausDeny`/`stripHausAllow`/`stripHausAsk` counterparts share one implementation, parametrized by tier — so a future bug fix can't land in one tier's copy and be forgotten in another. Exported function names and signatures stay byte-identical (they're imported by `undo.ts`, `uninstall.ts`, `install/apply.ts`, `merge-project-settings.ts`).
 
 **Files:**
+
 - Modify: `src/install/settings-merge.ts:256-475`
 - Test: `tests/settings-merge-hooks.test.js` (extend if it doesn't already cover deny/allow/ask symmetrically) plus a new `tests/settings-merge-rules.test.js` if no such coverage exists — check first.
 
 **Acceptance Criteria:**
+
 - [ ] `mergeDenyRules`, `mergeAllowRules`, `mergeAskRules`, `stripHausDeny`, `stripHausAllow`, `stripHausAsk` are all still exported with identical signatures and identical behavior.
 - [ ] A single test suite runs the same assertions against all three tiers (deny/allow/ask) via a table, proving they're symmetric — this is the regression guard against exactly the "fixed in one copy, forgotten in the other" failure mode the refactor exists to prevent.
 - [ ] `undo.ts`, `uninstall.ts`, `install/apply.ts` continue to work unmodified (no import changes needed anywhere).
@@ -1462,14 +1517,36 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 
 import {
-  mergeDenyRules, mergeAllowRules, mergeAskRules,
-  stripHausDeny, stripHausAllow, stripHausAsk,
+  mergeDenyRules,
+  mergeAllowRules,
+  mergeAskRules,
+  stripHausDeny,
+  stripHausAllow,
+  stripHausAsk,
 } from '../src/install/settings-merge.js'
 
 const TIERS = [
-  { name: 'deny', merge: mergeDenyRules, strip: stripHausDeny, permKey: 'deny', trackedKey: 'denyRules' },
-  { name: 'allow', merge: mergeAllowRules, strip: stripHausAllow, permKey: 'allow', trackedKey: 'allowRules' },
-  { name: 'ask', merge: mergeAskRules, strip: stripHausAsk, permKey: 'ask', trackedKey: 'askRules' },
+  {
+    name: 'deny',
+    merge: mergeDenyRules,
+    strip: stripHausDeny,
+    permKey: 'deny',
+    trackedKey: 'denyRules',
+  },
+  {
+    name: 'allow',
+    merge: mergeAllowRules,
+    strip: stripHausAllow,
+    permKey: 'allow',
+    trackedKey: 'allowRules',
+  },
+  {
+    name: 'ask',
+    merge: mergeAskRules,
+    strip: stripHausAsk,
+    permKey: 'ask',
+    trackedKey: 'askRules',
+  },
 ]
 
 for (const tier of TIERS) {
@@ -1544,20 +1621,26 @@ function createRuleTier(permKey: PermissionsKey, trackedKey: RuleTierKey) {
   ): { settings: ClaudeSettings; addedRules: string[] } {
     const existing = settings.permissions?.[permKey] ?? []
     const tracked = settings._haus?.[trackedKey] ?? []
-    const { rules: nextRules, tracked: nextTracked, added } = reconcileManagedRules(
-      existing,
-      tracked,
-      rules,
-    )
+    const {
+      rules: nextRules,
+      tracked: nextTracked,
+      added,
+    } = reconcileManagedRules(existing, tracked, rules)
 
     const updated: ClaudeSettings = { ...settings }
     updated.permissions = { ...(settings.permissions ?? {}), [permKey]: nextRules }
     updated._haus = {
       hooks: settings._haus?.hooks ?? [],
       ...(settings._haus?.hookCommands ? { hookCommands: settings._haus.hookCommands } : {}),
-      ...(permKey !== 'deny' && settings._haus?.denyRules ? { denyRules: settings._haus.denyRules } : {}),
-      ...(permKey !== 'allow' && settings._haus?.allowRules ? { allowRules: settings._haus.allowRules } : {}),
-      ...(permKey !== 'ask' && settings._haus?.askRules ? { askRules: settings._haus.askRules } : {}),
+      ...(permKey !== 'deny' && settings._haus?.denyRules
+        ? { denyRules: settings._haus.denyRules }
+        : {}),
+      ...(permKey !== 'allow' && settings._haus?.allowRules
+        ? { allowRules: settings._haus.allowRules }
+        : {}),
+      ...(permKey !== 'ask' && settings._haus?.askRules
+        ? { askRules: settings._haus.askRules }
+        : {}),
       [trackedKey]: nextTracked,
     }
 
@@ -1655,7 +1738,7 @@ export function stripHausAsk(settings: ClaudeSettings): ClaudeSettings {
 }
 ```
 
-  `stripHausHooks` (the eighth function, lines 387-412 in the original) is deliberately left untouched — it deletes the whole `_haus` namespace rather than reconciling one tier, so it isn't part of this tier pattern; forcing it into the factory would be the "similar-looking code, different actual behavior" trap.
+`stripHausHooks` (the eighth function, lines 387-412 in the original) is deliberately left untouched — it deletes the whole `_haus` namespace rather than reconciling one tier, so it isn't part of this tier pattern; forcing it into the factory would be the "similar-looking code, different actual behavior" trap.
 
 - [ ] **Step 4: Run the characterization test again — must still pass unchanged**
 
@@ -1681,12 +1764,14 @@ git commit -m "refactor: collapse deny/allow/ask rule-tier functions into one fa
 **Goal:** `setup-core.ts` is not a registered CLI command — it's shared pipeline logic that command modules import, which violates CLAUDE.md's "command modules must never import each other" rule via the `init.ts → setup-project.ts → setup-core.ts` chain. Move it to `src/claude/`, matching the precedent already set by `refresh-project.ts`.
 
 **Files:**
+
 - Move: `src/commands/setup-core.ts` → `src/claude/setup-core.ts`
 - Modify: `src/commands/setup-project.ts:4` (update import path)
 - Modify: `src/commands/workspace/setup.ts:26` (update import path)
 - Verify: `src/cli.ts` has no `setup-core` registration to worry about (confirmed absent already)
 
 **Acceptance Criteria:**
+
 - [ ] `src/commands/setup-core.ts` no longer exists; its content lives at `src/claude/setup-core.ts` unchanged.
 - [ ] `src/commands/init.ts` no longer transitively imports from another file in `src/commands/` other than `setup-project.ts` itself (which remains a legitimate command→command? — actually check: does `init.ts` importing `setup-project.ts` count as a command-module cross-import too? See note below).
 - [ ] `haus setup-project` and `haus workspace setup` both still work identically (verified by their existing tests).
@@ -1774,9 +1859,11 @@ git commit -m "refactor: move setup-core.ts out of src/commands/ to break cross-
 **Goal:** The three copy-pasted "read → compare against a historical stub → remove if it matches" blocks (haus-review.md, haus-doctor.md, security.md) become one parametrized helper.
 
 **Files:**
+
 - Modify: `src/claude/write-claude-files.ts:100-175`
 
 **Acceptance Criteria:**
+
 - [ ] All three legacy stubs are still removed under exactly the same conditions as before (byte-for-byte match, allowing one optional trailing LF or CRLF).
 - [ ] A user-customized version of any of the three files (content differing from the historical stub) is still preserved, unremoved.
 - [ ] Dry-run still logs `would remove stale ...` instead of actually removing.
@@ -1820,35 +1907,35 @@ async function removeLegacyManagedStub(
 - [ ] **Step 3: Replace the three inline blocks** (lines 100-116, 122-133, 164-175) with calls:
 
 ```ts
-  await removeLegacyManagedStub(
-    root,
-    ['commands', 'haus-review.md'],
-    'Run `haus context --task "code review"` then review diff.',
-    dryRun,
-    say,
-  )
-  await removeLegacyManagedStub(
-    root,
-    ['commands', 'haus-doctor.md'],
-    'Run `haus doctor`.',
-    dryRun,
-    say,
-  )
+await removeLegacyManagedStub(
+  root,
+  ['commands', 'haus-review.md'],
+  'Run `haus context --task "code review"` then review diff.',
+  dryRun,
+  say,
+)
+await removeLegacyManagedStub(
+  root,
+  ['commands', 'haus-doctor.md'],
+  'Run `haus doctor`.',
+  dryRun,
+  say,
+)
 ```
 
-  Leave the `haus.md` rule-writing block (lines 134-160) exactly where it is, between the two calls above and the third — then replace the security.md block (lines 161-175) with:
+Leave the `haus.md` rule-writing block (lines 134-160) exactly where it is, between the two calls above and the third — then replace the security.md block (lines 161-175) with:
 
 ```ts
-  await removeLegacyManagedStub(
-    root,
-    ['rules', 'security.md'],
-    '- Never read secrets.\n- Block dangerous shell commands.',
-    dryRun,
-    say,
-  )
+await removeLegacyManagedStub(
+  root,
+  ['rules', 'security.md'],
+  '- Never read secrets.\n- Block dangerous shell commands.',
+  dryRun,
+  say,
+)
 ```
 
-  Note `claudePath(root, ...relPathSegments)` must accept a variadic segment list — check `src/utils/paths.ts`'s `claudePath` signature; if it's typed as exactly `(root: string, ...segments: string[]) => string` (matching its existing call sites like `claudePath(root, 'commands', 'haus-review.md')`), the spread call above works unchanged.
+Note `claudePath(root, ...relPathSegments)` must accept a variadic segment list — check `src/utils/paths.ts`'s `claudePath` signature; if it's typed as exactly `(root: string, ...segments: string[]) => string` (matching its existing call sites like `claudePath(root, 'commands', 'haus-review.md')`), the spread call above works unchanged.
 
 - [ ] **Step 4: Run the full suite**
 
@@ -1871,6 +1958,7 @@ git commit -m "refactor: extract removeLegacyManagedStub, dedupe three copy-past
 **This task runs LAST among remote-catalog.ts changes** — it depends on Tasks 1, 10, 11, and 12 already having landed in the file, so the split carries their fixes forward instead of needing to redo them.
 
 **Files:**
+
 - Create: `src/catalog/remote-catalog/ref.ts`
 - Create: `src/catalog/remote-catalog/http.ts`
 - Create: `src/catalog/remote-catalog/github-tree.ts`
@@ -1881,6 +1969,7 @@ git commit -m "refactor: extract removeLegacyManagedStub, dedupe three copy-past
 - (Note: `src/catalog/path-safety.ts` already exists from Task 11 — `isSafeRelativeFilePath`/`safeJoin`/`sanitizeRelativeFilePaths` join it there too, since they're the same concern.)
 
 **Acceptance Criteria:**
+
 - [ ] Every name currently exported from `src/catalog/remote-catalog.ts` is still importable from `src/catalog/remote-catalog.js` with an identical signature — zero importer elsewhere in the codebase needs to change.
 - [ ] `grep -c "^export" src/catalog/remote-catalog.ts` before and after matches the barrel's re-export count (nothing silently dropped).
 - [ ] Full test suite passes unmodified — this is a pure structural move.
@@ -1917,7 +2006,7 @@ export function safeJoin(base: string, itemPath: string): string | null {
 }
 ```
 
-  `sanitizeRelativeFilePaths` needs a `warn` import — since `path-safety.ts` should stay dependency-light, keep `sanitizeRelativeFilePaths` in `github-tree.ts` instead (it's only used there) rather than moving it here; only `isSafeRelativeFilePath` and `safeJoin` move to `path-safety.ts`.
+`sanitizeRelativeFilePaths` needs a `warn` import — since `path-safety.ts` should stay dependency-light, keep `sanitizeRelativeFilePaths` in `github-tree.ts` instead (it's only used there) rather than moving it here; only `isSafeRelativeFilePath` and `safeJoin` move to `path-safety.ts`.
 
 - [ ] **Step 3: Create `src/catalog/remote-catalog/ref.ts`** — catalog-ref resolution and semver tag comparison:
 
@@ -2021,7 +2110,9 @@ export async function fetchLatestCatalogTag(): Promise<string | null> {
         const semver = parseSemverTag(name)
         return semver ? { name, semver } : null
       })
-      .filter((entry): entry is { name: string; semver: [number, number, number] } => entry !== null)
+      .filter(
+        (entry): entry is { name: string; semver: [number, number, number] } => entry !== null,
+      )
     if (valid.length === 0) return null
     valid.sort((a, b) => compareSemver(b.semver, a.semver))
     return valid[0]!.name
@@ -2085,10 +2176,12 @@ export async function remoteBase(): Promise<string> {
   }
   if (cachedCatalogRef === undefined) {
     if (!inFlightCatalogRef) {
-      inFlightCatalogRef = resolveCatalogRef({ fallbackRef: getBundledCatalogRef() }).then((ref) => {
-        cachedCatalogRef = ref
-        return ref
-      })
+      inFlightCatalogRef = resolveCatalogRef({ fallbackRef: getBundledCatalogRef() }).then(
+        (ref) => {
+          cachedCatalogRef = ref
+          return ref
+        },
+      )
     }
     await inFlightCatalogRef
   }
@@ -2113,7 +2206,10 @@ import fs from 'fs-extra'
 import { warn } from '../../utils/logger.js'
 
 /** Fetches a URL and hands the response to `extract`; returns null on any network, HTTP, or extraction error. Timeout: 10 s. */
-async function fetchGuarded<T>(url: string, extract: (res: Response) => Promise<T>): Promise<T | null> {
+async function fetchGuarded<T>(
+  url: string,
+  extract: (res: Response) => Promise<T>,
+): Promise<T | null> {
   try {
     const res = await fetch(url, { signal: AbortSignal.timeout(10_000) })
     if (!res.ok) {
@@ -2381,7 +2477,11 @@ import { isSafeCatalogPath, safeJoin } from '../path-safety.js'
 import { SUPERPOWERS_SHARED_CATALOG_REL } from '../constants.js'
 
 import { fetchBytes, fetchText, writeTextIfChanged } from './http.js'
-import { listFilesRecursive, listFilesUnderCatalogPrefix, _resetBlobPathCacheForNewSync } from './github-tree.js'
+import {
+  listFilesRecursive,
+  listFilesUnderCatalogPrefix,
+  _resetBlobPathCacheForNewSync,
+} from './github-tree.js'
 import { fetchRemoteManifest } from './manifest.js'
 import { getCacheDir, remoteBase } from './ref.js'
 
@@ -2393,7 +2493,7 @@ import { getCacheDir, remoteBase } from './ref.js'
 //  a call to `_resetBlobPathCacheForNewSync()` ]
 ```
 
-  This step is a verbatim move, not a rewrite — copy the exact bodies of these functions from the current `remote-catalog.ts` (as read in this plan's research phase) into `sync.ts`, changing only import paths. Do not alter their logic.
+This step is a verbatim move, not a rewrite — copy the exact bodies of these functions from the current `remote-catalog.ts` (as read in this plan's research phase) into `sync.ts`, changing only import paths. Do not alter their logic.
 
 - [ ] **Step 9: Reduce `remote-catalog.ts` to a barrel:**
 
@@ -2419,7 +2519,7 @@ export { fetchCatalogBlobPaths, listFilesUnderCatalogPrefix } from './remote-cat
 export { syncRemoteCatalog, getCacheManifestAge, type SyncResult } from './remote-catalog/sync.js'
 ```
 
-  If Task 10's `_resetRemoteCatalogCachesForTests` needs to reset BOTH the ref cache and the blob-path cache (it did, pre-split), change its barrel export to a small local wrapper instead of a direct re-export:
+If Task 10's `_resetRemoteCatalogCachesForTests` needs to reset BOTH the ref cache and the blob-path cache (it did, pre-split), change its barrel export to a small local wrapper instead of a direct re-export:
 
 ```ts
 import { _resetRefCacheForTests } from './remote-catalog/ref.js'
@@ -2432,7 +2532,7 @@ export function _resetRemoteCatalogCachesForTests(): void {
 }
 ```
 
-  Use this wrapper form, not a direct re-export, since it must reset two now-separate module caches.
+Use this wrapper form, not a direct re-export, since it must reset two now-separate module caches.
 
 - [ ] **Step 10: Verify the export surface is unchanged**
 
@@ -2463,11 +2563,13 @@ git commit -m "refactor: split remote-catalog.ts into focused modules behind a s
 **Goal:** The published audit report (this conversation's artifact, source file `haus-audit-report.html`) shows which of sections 1/2/5/6's findings were fixed by this plan, so the report doesn't silently go stale the moment the code changes.
 
 **Files:**
+
 - Modify: `/private/tmp/claude-501/-Users-aniisa-Documents-GitHub-haus-workflow/7ea5e004-ffa7-4009-b035-fbe3f5677350/scratchpad/haus-audit-report.html`
 
 **Depends on:** All of Tasks 1-16 committed and `yarn verify` green on the branch.
 
 **Acceptance Criteria:**
+
 - [ ] Every finding in sections 1, 2, 5, 6 that this plan addressed has a visible "Fixed" status marker (not silently deleted — the report stays a historical record of what was found, plus current status).
 - [ ] The report's footer notes the date/commit range this remediation pass covered.
 - [ ] The artifact is republished to the SAME URL (same `file_path`, per the Artifact tool's update contract) — not a new one.
@@ -2478,17 +2580,27 @@ git commit -m "refactor: split remote-catalog.ts into focused modules behind a s
 - [ ] **Step 1: Add a `.fixed` status style and a "Fixed" tag class** to the `<style>` block in the HTML, near the existing `.tag` rules:
 
 ```css
-.tag.fixed{ color: var(--green); background: var(--green-soft); text-decoration: none; }
-.finding.is-fixed .lead{ text-decoration: line-through; text-decoration-color: var(--ink-soft); text-decoration-thickness: 1px; }
-.finding.is-fixed p:not(.lead){ opacity: 0.75; }
+.tag.fixed {
+  color: var(--green);
+  background: var(--green-soft);
+  text-decoration: none;
+}
+.finding.is-fixed .lead {
+  text-decoration: line-through;
+  text-decoration-color: var(--ink-soft);
+  text-decoration-thickness: 1px;
+}
+.finding.is-fixed p:not(.lead) {
+  opacity: 0.75;
+}
 ```
 
 - [ ] **Step 2: For each of the two `.finding` blocks in the CLI section (B1, B2)**, add `class="finding is-fixed"` and insert a `<span class="tag fixed">FIXED</span>` alongside the existing `CONFIRMED` tag, e.g.:
 
 ```html
 <div class="finding is-fixed">
-  <span class="tag b1">CONFIRMED</span><span class="tag fixed">FIXED</span>
-  ...
+  <span class="tag b1">CONFIRMED</span><span class="tag fixed">FIXED</span> ...
+</div>
 ```
 
 - [ ] **Step 3: For each `<li>` item in the "Possible bugs" (L1-L8), "Refactor" (R1-R3), and "DRY & optimization" lists in the CLI section**, prepend a bold `[Fixed]` marker to the `<b>` lead text, e.g. `<b>[Fixed] Bash guard is a naive substring match...</b>` — do this for all 8 possible-bug items, both refactor callouts/items, and all four DRY items covered by Tasks 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 (i.e. every item in those three lists — this plan covers all of them).
@@ -2496,10 +2608,14 @@ git commit -m "refactor: split remote-catalog.ts into focused modules behind a s
 - [ ] **Step 4: Update the footer** — append a line to `<footer class="end">`:
 
 ```html
-<p>Remediation pass (2026-08-03): sections 1, 2, 5, and 6 above were addressed — see <code>docs/plans/cli-audit-remediation.md</code> and branch <code>fix/cli-audit-remediation</code> in haus-workflow. Sections 3, 4, 7, 8, and 9 remain open.</p>
+<p>
+  Remediation pass (2026-08-03): sections 1, 2, 5, and 6 above were addressed — see
+  <code>docs/plans/cli-audit-remediation.md</code> and branch
+  <code>fix/cli-audit-remediation</code> in haus-workflow. Sections 3, 4, 7, 8, and 9 remain open.
+</p>
 ```
 
-  Replace the date with the actual date this task is executed, and confirm the branch name matches what was actually used.
+Replace the date with the actual date this task is executed, and confirm the branch name matches what was actually used.
 
 - [ ] **Step 5: Republish** — use the Artifact tool with the SAME `file_path` as the original publish (`/private/tmp/claude-501/-Users-aniisa-Documents-GitHub-haus-workflow/7ea5e004-ffa7-4009-b035-fbe3f5677350/scratchpad/haus-audit-report.html`) and the SAME `favicon` (🔎) — this updates the existing artifact URL rather than minting a new one. If this plan is executed in a different session/conversation where that exact scratchpad path no longer exists, instead pass the artifact's existing URL via the `url` parameter (find it with `action: "list"` if not already known) so the update still lands on the same published page rather than creating a duplicate.
 

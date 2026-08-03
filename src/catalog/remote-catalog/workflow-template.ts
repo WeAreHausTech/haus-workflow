@@ -1,4 +1,4 @@
-/** Resolves the workflow standard template, cache-first with fetch-on-demand fallback. */
+/** Resolves the workflow standard template: fetches from the remote catalog first, falling back to the cache on failure. */
 import path from 'node:path'
 
 import fs from 'fs-extra'
@@ -10,10 +10,11 @@ import { getCacheDir, remoteBase } from './ref.js'
 export const WORKFLOW_TEMPLATE_REL = 'templates/agentic-workflow-standard.md'
 
 /**
- * Resolves the workflow standard template content, using the cache when present and
- * otherwise fetching it from the remote catalog on demand. Returns the content, or null
- * when it cannot be obtained (e.g. offline with no prior cache). Lets `haus init` write
- * WORKFLOW.md on a fresh install without a separate `haus update` step.
+ * Resolves the workflow standard template content by fetching it from the remote
+ * catalog, falling back to the cached copy only when that fetch fails. Returns the
+ * content, or null when it cannot be obtained (e.g. offline with no prior cache).
+ * Lets `haus init` write WORKFLOW.md on a fresh install without a separate
+ * `haus update` step.
  *
  * Distinguishes a failed fetch (null) from a successful empty body (''), and honours the
  * dry-run contract: when `dryRun` is set, a freshly fetched template is NOT written to
