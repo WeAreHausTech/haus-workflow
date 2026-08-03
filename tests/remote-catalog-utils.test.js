@@ -2,7 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import os from 'node:os'
 import path from 'node:path'
-import { existsSync, mkdtempSync, mkdirSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdtempSync, mkdirSync, writeFileSync, readFileSync, statSync } from 'node:fs'
 
 import {
   fetchLatestCatalogTag,
@@ -23,6 +23,41 @@ test('readWorkflowTemplate writes cache on non-dry run', async () => {
     assert.equal(text, '# workflow\n')
     const cached = path.join(cacheDir, 'templates', 'agentic-workflow-standard.md')
     assert.equal(existsSync(cached), true)
+  } finally {
+    globalThis.fetch = prevFetch
+    if (prevCache === undefined) delete process.env.HAUS_CATALOG_CACHE_DIR_OVERRIDE
+    else process.env.HAUS_CATALOG_CACHE_DIR_OVERRIDE = prevCache
+    if (prevBase === undefined) delete process.env.HAUS_CATALOG_REMOTE_BASE
+    else process.env.HAUS_CATALOG_REMOTE_BASE = prevBase
+  }
+})
+
+test('readWorkflowTemplate dry-run returns fresh fetch, not a stale cache', async () => {
+  const cacheDir = mkdtempSync(path.join(os.tmpdir(), 'haus-rc-stale-'))
+  const prevCache = process.env.HAUS_CATALOG_CACHE_DIR_OVERRIDE
+  const prevBase = process.env.HAUS_CATALOG_REMOTE_BASE
+  const prevFetch = globalThis.fetch
+  process.env.HAUS_CATALOG_CACHE_DIR_OVERRIDE = cacheDir
+  process.env.HAUS_CATALOG_REMOTE_BASE = 'https://example.test'
+  try {
+    // Seed a stale cached copy, as if a previous non-dry-run had written it.
+    const cachedPath = path.join(cacheDir, 'templates', 'agentic-workflow-standard.md')
+    mkdirSync(path.dirname(cachedPath), { recursive: true })
+    writeFileSync(cachedPath, '# OLD CACHED TEMPLATE\n', 'utf8')
+    const statBefore = statSync(cachedPath)
+
+    globalThis.fetch = async () => ({ ok: true, text: async () => '# NEW REMOTE TEMPLATE\n' })
+
+    const text = await readWorkflowTemplate({ dryRun: true })
+
+    assert.equal(text, '# NEW REMOTE TEMPLATE\n', 'dry-run must return the fresh fetch, not the stale cache')
+    const statAfter = statSync(cachedPath)
+    assert.equal(statAfter.mtimeMs, statBefore.mtimeMs, 'dry-run must not write to the cache file')
+    assert.equal(
+      readFileSync(cachedPath, 'utf8'),
+      '# OLD CACHED TEMPLATE\n',
+      'cache content on disk must remain untouched during dry-run',
+    )
   } finally {
     globalThis.fetch = prevFetch
     if (prevCache === undefined) delete process.env.HAUS_CATALOG_CACHE_DIR_OVERRIDE

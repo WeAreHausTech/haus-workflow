@@ -228,8 +228,6 @@ export async function readWorkflowTemplate(
   }
   if (!opts.dryRun) {
     await writeTextIfChanged(dest, text)
-  } else if (await fs.pathExists(dest)) {
-    return fs.readFile(dest, 'utf8')
   }
   return text
 }
