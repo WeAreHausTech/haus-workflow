@@ -117,6 +117,7 @@ program.command('validate-catalog').argument('[manifest]').action(runValidateCat
 program
   .command('update')
   .option('--check')
+  .option('--fast', 'With --check, skip per-item content hashing (cheap count+ref only)')
   .option('--from-hook', 'Emit JSON for the Claude Code SessionStart hook (silent if up to date)')
   .action(runUpdate)
 program

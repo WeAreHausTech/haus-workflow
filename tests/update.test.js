@@ -473,6 +473,71 @@ test('runFromHookCheck does not report "behind" when the lock has no catalogRef,
   assert.equal(logs.length, 0, 'no recorded catalogRef means nothing to compare — must stay silent')
 })
 
+// audit §4 item 3: a middle tier between --from-hook's cheap check and --check's
+// fully-hashed one, usable interactively without paying the hashing cost.
+test('update --check --fast skips hashing and marks checkMode: fast', () => {
+  const temp = mkdtempSync(path.join(os.tmpdir(), 'haus-update-fast-'))
+  mkdirSync(path.join(temp, '.haus-workflow'), { recursive: true })
+  mkdirSync(path.join(temp, '.claude'), { recursive: true })
+  writeFileSync(path.join(temp, '.claude/tracked.md'), 'content-v1')
+  writeFileSync(
+    path.join(temp, 'package.json'),
+    JSON.stringify({ name: 'update-fast-temp', packageManager: 'yarn@4.5.3' }, null, 2),
+  )
+  writeFileSync(
+    path.join(temp, '.haus-workflow/haus.lock.json'),
+    JSON.stringify(
+      [
+        {
+          id: 'x',
+          type: 'skill',
+          source: 'haus',
+          version: '0.2.0',
+          catalogRef: 'v1.0.0',
+          // Deliberately wrong hash — the full tier would flag this as drift;
+          // the fast tier must not, since it never hashes anything.
+          hash: 'sha256-deliberately-wrong',
+          installMode: 'copied',
+          paths: ['.claude/tracked.md'],
+        },
+      ],
+      null,
+      2,
+    ),
+  )
+
+  const env = {
+    HAUS_TEST_MODE: '1',
+    HAUS_CATALOG_CACHE_DIR_OVERRIDE: path.join(temp, 'cache'),
+    HAUS_CATALOG_REMOTE_BASE: 'http://127.0.0.1:0',
+    HOME: path.join(temp, 'home'),
+    USERPROFILE: path.join(temp, 'home'),
+  }
+
+  const fast = execaSync('node', [path.resolve('dist/cli.js'), 'update', '--check', '--fast'], {
+    cwd: temp,
+    env,
+    reject: false,
+  })
+  assert.equal(fast.exitCode, 0, 'fast mode never fails purely on its own')
+  const fastParsed = JSON.parse(fast.stdout)
+  assert.equal(fastParsed.checkMode, 'fast')
+  assert.equal(fastParsed.count, 1)
+  assert.equal(fastParsed.catalogRef, 'v1.0.0')
+  assert.deepEqual(fastParsed.drift, [])
+  assert.equal('ok' in fastParsed, false, 'fast mode does not claim to know ok since it never hashed')
+
+  const full = execaSync('node', [path.resolve('dist/cli.js'), 'update', '--check'], {
+    cwd: temp,
+    env,
+    reject: false,
+  })
+  const fullParsed = JSON.parse(full.stdout)
+  assert.equal(fullParsed.checkMode, 'full')
+  assert.equal(fullParsed.ok, false, 'full mode catches the deliberately wrong hash')
+  assert.equal(full.exitCode, 1, 'full mode fails on real drift the fast mode could not see')
+})
+
 test('update skips project re-apply when no prior haus setup', () => {
   const temp = mkdtempSync(path.join(os.tmpdir(), 'haus-update-noproj-'))
   const home = path.join(temp, 'home')
