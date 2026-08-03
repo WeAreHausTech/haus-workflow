@@ -53,6 +53,41 @@ function makeWorkspace() {
   return ws
 }
 
+/**
+ * A workspace where the root itself is also a member repo (`path: .`) — triggers
+ * `writeWorkspaceClaudeMd`'s collision path, which writes the standalone
+ * `.haus-workflow/WORKSPACE.md` instead of injecting a block into the root CLAUDE.md.
+ */
+function makeCollisionWorkspace() {
+  const ws = mkdtempSync(path.join(os.tmpdir(), 'haus-ws-undo-collision-'))
+  writeRepo(ws, {
+    name: 'acme-root',
+    packageManager: 'yarn@4.5.3',
+    dependencies: { react: '19.0.0' },
+  })
+  writeRepo(path.join(ws, 'api'), {
+    name: 'acme-api',
+    packageManager: 'yarn@4.5.3',
+    dependencies: { '@nestjs/core': '10.0.0' },
+  })
+  writeYaml(
+    ws,
+    [
+      'client: acme-corp',
+      'repos:',
+      '  - name: acme-root',
+      '    path: .',
+      '    role: auto',
+      '  - name: acme-api',
+      '    path: api',
+      '    role: backend',
+      'relationships: []',
+      '',
+    ].join('\n'),
+  )
+  return ws
+}
+
 // node:test forwards each test's stdout to the reporter over a V8-serialized worker
 // pipe; large bursts can crash the worker on Linux. Mute console during in-process runs.
 function muted(fn) {
@@ -106,6 +141,24 @@ test(
     // holding all of its content is gone — matches per-repo undo's own contract for
     // a CLAUDE.md that contained nothing else).
     assert.equal(existsSync(path.join(ws, 'CLAUDE.md')), false)
+  }),
+)
+
+test(
+  'workspace undo removes the standalone WORKSPACE.md when the collision path was used',
+  muted(async () => {
+    const ws = makeCollisionWorkspace()
+    await runWorkspaceSetup(ws, { mode: 'fast', write: true })
+
+    const workspaceMdPath = hausPath(ws, 'WORKSPACE.md')
+    assert.ok(existsSync(workspaceMdPath), 'setup used the collision path (WORKSPACE.md written)')
+    assert.ok(existsSync(manifestPath(ws)), 'workspace manifest exists')
+
+    await runWorkspaceUndo(ws, { yes: true })
+
+    assert.equal(existsSync(workspaceMdPath), false, 'WORKSPACE.md removed')
+    assert.equal(existsSync(manifestPath(ws)), false, 'workspace manifest removed')
+    assert.ok(existsSync(path.join(ws, 'haus.workspace.yaml')), 'haus.workspace.yaml preserved')
   }),
 )
 

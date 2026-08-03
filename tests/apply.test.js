@@ -355,7 +355,7 @@ function scaffoldApplyProject() {
 // audit §4 item 1: a present-but-stale catalog cache previously produced no signal
 // at all (only an empty cache warned) — now surfaced consistently in both modes,
 // matching the same 7-day threshold `haus doctor` already uses.
-async function stalenessTest(mode) {
+async function stalenessTest(mode, { write = false } = {}) {
   const { runApply } = await import('../src/commands/apply.js')
 
   const temp = mkdtempSync(path.join(os.tmpdir(), 'haus-apply-staleness-'))
@@ -409,7 +409,7 @@ async function stalenessTest(mode) {
   }
   try {
     process.chdir(temp)
-    await runApply({ dryRun: true })
+    await runApply(write ? { write: true } : { dryRun: true })
     return lines.join('\n')
   } finally {
     process.chdir(prevCwd)
@@ -425,6 +425,11 @@ async function stalenessTest(mode) {
 
 test('apply --dry-run warns when the catalog cache is stale (10 days old)', async () => {
   const output = await stalenessTest('stale')
+  assert.match(output, /cache is 10 days old/)
+})
+
+test('apply --write also warns when the catalog cache is stale (10 days old)', async () => {
+  const output = await stalenessTest('stale', { write: true })
   assert.match(output, /cache is 10 days old/)
 })
 
