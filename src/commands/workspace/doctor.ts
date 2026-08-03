@@ -29,6 +29,7 @@ export type DriftKind =
   | 'missing-lock'
   | 'invalid-lock'
   | 'failed'
+  | 'catalog-ref-mismatch'
 
 export type WorkspaceDriftItem = {
   repo: string
@@ -90,6 +91,7 @@ export async function runWorkspaceDoctor(
   }
 
   const manifestByName = new Map(manifest.repos.map((r) => [r.name, r]))
+  const catalogRefByRepo: Array<{ repo: string; ref: string }> = []
 
   for (const repo of config.repos) {
     const repoRoot = path.resolve(workspaceRoot, repo.path)
@@ -134,6 +136,7 @@ export async function runWorkspaceDoctor(
     }
 
     const lock = await checkLock(repoRoot)
+    if (lock.catalogRef) catalogRefByRepo.push({ repo: repo.name, ref: lock.catalogRef })
     if (!existsSync(hausPath(repoRoot, 'haus.lock.json'))) {
       flag({
         repo: repo.name,
@@ -154,6 +157,19 @@ export async function runWorkspaceDoctor(
     if (drift.length === driftBefore) {
       ok(`- ${repo.name}: OK (${lock.count} lock item(s))`)
     }
+  }
+
+  // Cross-repo check: repos with an unknown ref (catalogRef: null, never synced) are
+  // excluded — "unknown" is not evidence of "different" from the repos that do know theirs.
+  const distinctRefs = new Set(catalogRefByRepo.map((r) => r.ref))
+  if (distinctRefs.size > 1) {
+    flag({
+      repo: '(workspace)',
+      kind: 'catalog-ref-mismatch',
+      detail: `Repos are on different catalog refs — ${catalogRefByRepo
+        .map((r) => `${r.repo}: ${r.ref}`)
+        .join(', ')}. Run \`haus workspace setup --write\` to bring them onto the same ref.`,
+    })
   }
 
   return emit({ workspaceRoot, manifest, drift, detail, json: opts.json })
