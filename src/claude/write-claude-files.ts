@@ -11,6 +11,7 @@ import { findFormerIdMigrations } from '../catalog/former-ids.js'
 import { validateCatalogItem } from '../catalog/ingest-catalog.js'
 import { catalogItemContentPath, loadCatalogContext } from '../catalog/load-catalog.js'
 import { getResolvedCatalogRef, isCatalogRefResolved } from '../catalog/remote-catalog.js'
+import { findOrphanedLockEntries } from '../recommender/orphaned-items.js'
 import type { Recommendation } from '../types.js'
 import { hashInstalledPaths } from '../update/hash-installed.js'
 import { pruneEmptyDir, readJson } from '../utils/fs.js'
@@ -76,7 +77,7 @@ export async function writeClaudeFiles(
   root: string,
   dryRun: boolean,
   selectedIds?: string[],
-  opts: { refillConfig?: boolean; force?: boolean; quiet?: boolean } = {},
+  opts: { refillConfig?: boolean; force?: boolean; quiet?: boolean; prune?: boolean } = {},
 ): Promise<string[]> {
   const say = opts.quiet ? () => {} : log
   const rec = (await readJson<Recommendation>(hausPath(root, 'recommendation.json'))) ?? {
@@ -417,6 +418,27 @@ export async function writeClaudeFiles(
   // unmodified copies are deleted, matching the global-install orphan-cleanup contract.
   await cleanupStaleCatalogItems(root, cleanupManifestById, dryRun, opts.quiet)
 
+  // Opt-in (`--prune`): items that fell out of the current recommendation without
+  // being removed from the manifest are left in place by default (see comment above)
+  // — `--prune` actually removes them, hash-gated the same way. Shares the exact
+  // orphan-detection diff `haus doctor`'s advisory already uses, via findOrphanedLockEntries.
+  //
+  // "Not orphaned" is widened beyond the raw recommendation so this never overlaps
+  // the two cleanups already run above: a former id mid-migration (`allMigrations`)
+  // isn't orphaned, it's renamed — `cleanupMigratedCatalogItems` owns that lifecycle.
+  // An id removed from the manifest or marked deprecated isn't orphaned either —
+  // `cleanupStaleCatalogItems` (just above) already owns and fully handles that case.
+  if (opts.prune) {
+    const notOrphaned = new Set(rec.recommended.map((r) => r.id))
+    for (const migration of allMigrations) notOrphaned.add(migration.oldId)
+    for (const entry of prevLock) {
+      if (!entry.id) continue
+      const manifestItem = manifestById.get(entry.id)
+      if (!manifestItem || manifestItem.reviewStatus === 'deprecated') notOrphaned.add(entry.id)
+    }
+    await pruneOrphanedCatalogItems(root, prevLock, notOrphaned, dryRun, opts.quiet)
+  }
+
   if (dryRun) return [...new Set(files)]
 
   const installedItems = catalogItems.filter((r) => installedIds.has(r.id))
@@ -568,6 +590,91 @@ async function cleanupStaleCatalogItems(
       await fs.remove(abs)
       await pruneEmptyDir(path.dirname(abs))
       say(`Removed ${pruneReason} ${displayPath(root, abs)} (${entry.id})`)
+    }
+  }
+}
+
+/** Backs up files about to be pruned to `.haus-workflow/backups/prune-<timestamp>/`. */
+async function backupBeforePrune(root: string, absPaths: string[]): Promise<void> {
+  if (absPaths.length === 0) return
+  const stamp = new Date().toISOString().replace(/[:.]/g, '-')
+  const backupRoot = hausPath(root, 'backups', `prune-${stamp}`)
+  for (const abs of absPaths) {
+    if (!(await fs.pathExists(abs))) continue
+    const rel = path.relative(root, abs)
+    const backupPath = path.join(backupRoot, rel)
+    await fs.ensureDir(path.dirname(backupPath))
+    await fs.copy(abs, backupPath)
+  }
+  log(`Backed up ${absPaths.length} file(s) to ${path.relative(root, backupRoot)} before pruning.`)
+}
+
+/**
+ * Removes catalog items that are lock-tracked but no longer present in the current
+ * recommendation (fell out of eligibility without being removed from the manifest —
+ * `haus doctor` only advises on these by default). Opt-in via `haus apply --prune`.
+ * Hash-gated exactly like `cleanupStaleCatalogItems`: a locally-modified or
+ * hash-less entry is left in place with a warning, never silently deleted. Unlike
+ * that automatic cleanup, this is an explicit, user-requested deletion, so removed
+ * files are backed up first.
+ */
+async function pruneOrphanedCatalogItems(
+  root: string,
+  prevLock: PrevLockEntry[],
+  recommendedIds: Set<string>,
+  dryRun: boolean,
+  quiet?: boolean,
+): Promise<void> {
+  const say = quiet ? () => {} : log
+  const orphaned = findOrphanedLockEntries(prevLock, recommendedIds)
+  if (orphaned.length === 0) return
+
+  const toRemove: Array<{ id: string; existing: string[] }> = []
+  for (const entry of orphaned) {
+    if (!entry.id) continue
+    const relPaths = entry.paths ?? []
+    if (relPaths.length === 0) continue
+    const existing: string[] = []
+    for (const rel of relPaths) {
+      if (await fs.pathExists(path.join(root, rel))) existing.push(rel)
+    }
+    if (existing.length === 0) continue
+    if (entry.hash === undefined) {
+      warn(
+        `Orphaned catalog item ${entry.id} has no lock hash — leaving in place: ${existing.join(', ')}`,
+      )
+      continue
+    }
+    const currentHash = await hashInstalledPaths(root, relPaths)
+    if (currentHash !== entry.hash) {
+      warn(
+        `Orphaned catalog item ${entry.id} was modified locally — leaving in place: ${existing.join(', ')}`,
+      )
+      continue
+    }
+    toRemove.push({ id: entry.id, existing })
+  }
+  if (toRemove.length === 0) return
+
+  if (dryRun) {
+    for (const { id, existing } of toRemove) {
+      for (const rel of existing) {
+        say(`[dry-run] would prune orphaned ${displayPath(root, path.join(root, rel))} (${id})`)
+      }
+    }
+    return
+  }
+
+  const allAbsPaths = toRemove.flatMap(({ existing }) =>
+    existing.map((rel) => path.join(root, rel)),
+  )
+  await backupBeforePrune(root, allAbsPaths)
+  for (const { id, existing } of toRemove) {
+    for (const rel of existing) {
+      const abs = path.join(root, rel)
+      await fs.remove(abs)
+      await pruneEmptyDir(path.dirname(abs))
+      say(`Pruned orphaned ${displayPath(root, abs)} (${id})`)
     }
   }
 }
