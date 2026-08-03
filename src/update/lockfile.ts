@@ -64,7 +64,8 @@ export async function checkLock(root: string): Promise<LockCheckResult> {
   const hasValidVersions = lock.every(
     (item) => !item.version || normalizeVersion(item.version) !== null,
   )
-  const catalogRef = lock[0]?.catalogRef ?? null
+  // `catalogRef` is optional per item — don't assume item 0 carries it (mirrors readLockSummary).
+  const catalogRef = lock.find((item) => item.catalogRef)?.catalogRef ?? null
 
   const drift: LockCheckResult['drift'] = []
   for (const item of lock) {
