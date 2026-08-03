@@ -28,11 +28,15 @@ export type FetchRefsSummary = {
  * Converts a URL to a safe filename stem.
  * Uses u.host (hostname + port) so URLs on different ports get distinct slugs.
  * e.g. https://www.prisma.io/llms.txt → www-prisma-io-llms-txt
- *      http://127.0.0.1:3000/llms.txt → 127-0-0-1-3000-llms-txt
+ *      http://127.0.0.1:3000/llms.txt → http-127-0-0-1-3000-llms-txt
+ * A non-https protocol is prefixed so an http and https variant of the same
+ * host+path never collide onto the same cache filename (https, the common case,
+ * keeps its existing unprefixed slug for backward compatibility).
  */
 export function urlToSlug(url: string): string {
   const u = new URL(url)
-  return (u.host + u.pathname)
+  const protocolPrefix = u.protocol === 'https:' ? '' : `${u.protocol.replace(':', '')}-`
+  return (protocolPrefix + u.host + u.pathname)
     .replace(/[^a-zA-Z0-9]+/g, '-')
     .replace(/-+/g, '-')
     .replace(/^-|-$/g, '')
