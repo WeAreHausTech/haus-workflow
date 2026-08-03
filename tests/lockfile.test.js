@@ -82,6 +82,15 @@ test('checkLock: catalogRef is taken from first item', async () => {
   assert.equal(result.catalogRef, 'v1.2.3')
 })
 
+test('checkLock: falls back to a later item when the first has no catalogRef', async () => {
+  writeLock([
+    { id: 'skill.a', type: 'skill' },
+    { id: 'skill.b', type: 'skill', catalogRef: 'v2.0.0' },
+  ])
+  const result = await checkLock(tmpDir)
+  assert.equal(result.catalogRef, 'v2.0.0')
+})
+
 test('checkLock: multiple items all sharing catalogRef returns first item catalogRef', async () => {
   writeLock([
     { id: 'skill.a', type: 'skill', catalogRef: 'main' },
