@@ -253,6 +253,84 @@ function reconcileManagedRules(
   return { rules: [...userRules, ...tracked], tracked, added, removed }
 }
 
+type RuleTierKey = 'denyRules' | 'allowRules' | 'askRules'
+type PermissionsKey = 'deny' | 'allow' | 'ask'
+
+/**
+ * Builds a merge/strip pair for one permissions tier (deny/allow/ask). All three tiers
+ * share identical reconcile-then-track-then-strip logic — this factory is the single
+ * place that logic lives, so a fix applies to every tier at once instead of needing to
+ * be repeated (and possibly forgotten) three times.
+ */
+function createRuleTier(permKey: PermissionsKey, trackedKey: RuleTierKey) {
+  function merge(
+    settings: ClaudeSettings,
+    rules: string[],
+  ): { settings: ClaudeSettings; addedRules: string[] } {
+    const existing = settings.permissions?.[permKey] ?? []
+    const tracked = settings._haus?.[trackedKey] ?? []
+    const {
+      rules: nextRules,
+      tracked: nextTracked,
+      added,
+    } = reconcileManagedRules(existing, tracked, rules)
+
+    const updated: ClaudeSettings = { ...settings }
+    updated.permissions = { ...(settings.permissions ?? {}), [permKey]: nextRules }
+    updated._haus = {
+      hooks: settings._haus?.hooks ?? [],
+      ...(settings._haus?.hookCommands ? { hookCommands: settings._haus.hookCommands } : {}),
+      ...(permKey !== 'deny' && settings._haus?.denyRules
+        ? { denyRules: settings._haus.denyRules }
+        : {}),
+      ...(permKey !== 'allow' && settings._haus?.allowRules
+        ? { allowRules: settings._haus.allowRules }
+        : {}),
+      ...(permKey !== 'ask' && settings._haus?.askRules
+        ? { askRules: settings._haus.askRules }
+        : {}),
+      [trackedKey]: nextTracked,
+    }
+
+    return { settings: updated, addedRules: added }
+  }
+
+  function strip(settings: ClaudeSettings): ClaudeSettings {
+    const prevHaus = settings._haus
+    const ownedRules = prevHaus?.[trackedKey]
+    if (!ownedRules || ownedRules.length === 0) return settings
+
+    const ownedSet = new Set(ownedRules)
+    const updated: ClaudeSettings = { ...settings }
+
+    const remaining = (settings.permissions?.[permKey] ?? []).filter((rule) => !ownedSet.has(rule))
+    const permissions: ClaudePermissions = { ...(settings.permissions ?? {}) }
+    if (remaining.length > 0) permissions[permKey] = remaining
+    else delete permissions[permKey]
+    if (Object.keys(permissions).length > 0) updated.permissions = permissions
+    else delete updated.permissions
+
+    const haus = { ...prevHaus }
+    delete haus[trackedKey]
+    const stillTracking =
+      (haus.hooks?.length ?? 0) > 0 ||
+      (haus.hookCommands?.length ?? 0) > 0 ||
+      (haus.denyRules?.length ?? 0) > 0 ||
+      (haus.allowRules?.length ?? 0) > 0 ||
+      (haus.askRules?.length ?? 0) > 0
+    if (stillTracking) updated._haus = haus
+    else delete updated._haus
+
+    return updated
+  }
+
+  return { merge, strip }
+}
+
+const denyTier = createRuleTier('deny', 'denyRules')
+const allowTier = createRuleTier('allow', 'allowRules')
+const askTier = createRuleTier('ask', 'askRules')
+
 /**
  * Reconciles haus-managed `permissions.deny` rules to exactly `rules` (the full
  * current haus deny set), preserving user-defined deny rules. Adds new haus rules,
@@ -263,24 +341,7 @@ export function mergeDenyRules(
   settings: ClaudeSettings,
   rules: string[],
 ): { settings: ClaudeSettings; addedRules: string[] } {
-  const existingDeny = settings.permissions?.deny ?? []
-  const trackedDeny = settings._haus?.denyRules ?? []
-  const { rules: deny, tracked, added } = reconcileManagedRules(existingDeny, trackedDeny, rules)
-
-  const updated: ClaudeSettings = { ...settings }
-  updated.permissions = {
-    ...(settings.permissions ?? {}),
-    deny,
-  }
-  updated._haus = {
-    hooks: settings._haus?.hooks ?? [],
-    ...(settings._haus?.hookCommands ? { hookCommands: settings._haus.hookCommands } : {}),
-    denyRules: tracked,
-    ...(settings._haus?.allowRules ? { allowRules: settings._haus.allowRules } : {}),
-    ...(settings._haus?.askRules ? { askRules: settings._haus.askRules } : {}),
-  }
-
-  return { settings: updated, addedRules: added }
+  return denyTier.merge(settings, rules)
 }
 
 /**
@@ -293,24 +354,7 @@ export function mergeAllowRules(
   settings: ClaudeSettings,
   rules: string[],
 ): { settings: ClaudeSettings; addedRules: string[] } {
-  const existingAllow = settings.permissions?.allow ?? []
-  const trackedAllow = settings._haus?.allowRules ?? []
-  const { rules: allow, tracked, added } = reconcileManagedRules(existingAllow, trackedAllow, rules)
-
-  const updated: ClaudeSettings = { ...settings }
-  updated.permissions = {
-    ...(settings.permissions ?? {}),
-    allow,
-  }
-  updated._haus = {
-    hooks: settings._haus?.hooks ?? [],
-    ...(settings._haus?.hookCommands ? { hookCommands: settings._haus.hookCommands } : {}),
-    ...(settings._haus?.denyRules ? { denyRules: settings._haus.denyRules } : {}),
-    allowRules: tracked,
-    ...(settings._haus?.askRules ? { askRules: settings._haus.askRules } : {}),
-  }
-
-  return { settings: updated, addedRules: added }
+  return allowTier.merge(settings, rules)
 }
 
 /**
@@ -320,30 +364,7 @@ export function mergeAllowRules(
  * is tracked there.
  */
 export function stripHausAllow(settings: ClaudeSettings): ClaudeSettings {
-  const prevHaus = settings._haus
-  if (!prevHaus?.allowRules || prevHaus.allowRules.length === 0) return settings
-
-  const ownedSet = new Set(prevHaus.allowRules)
-  const updated: ClaudeSettings = { ...settings }
-
-  const remainingAllow = (settings.permissions?.allow ?? []).filter((rule) => !ownedSet.has(rule))
-  const permissions: ClaudePermissions = { ...(settings.permissions ?? {}) }
-  if (remainingAllow.length > 0) permissions.allow = remainingAllow
-  else delete permissions.allow
-  if (Object.keys(permissions).length > 0) updated.permissions = permissions
-  else delete updated.permissions
-
-  const haus = { ...prevHaus }
-  delete haus.allowRules
-  const stillTracking =
-    (haus.hooks?.length ?? 0) > 0 ||
-    (haus.hookCommands?.length ?? 0) > 0 ||
-    (haus.denyRules?.length ?? 0) > 0 ||
-    (haus.askRules?.length ?? 0) > 0
-  if (stillTracking) updated._haus = haus
-  else delete updated._haus
-
-  return updated
+  return allowTier.strip(settings)
 }
 
 /**
@@ -353,30 +374,7 @@ export function stripHausAllow(settings: ClaudeSettings): ClaudeSettings {
  * is tracked there.
  */
 export function stripHausDeny(settings: ClaudeSettings): ClaudeSettings {
-  const prevHaus = settings._haus
-  if (!prevHaus?.denyRules || prevHaus.denyRules.length === 0) return settings
-
-  const ownedSet = new Set(prevHaus.denyRules)
-  const updated: ClaudeSettings = { ...settings }
-
-  const remainingDeny = (settings.permissions?.deny ?? []).filter((rule) => !ownedSet.has(rule))
-  const permissions: ClaudePermissions = { ...(settings.permissions ?? {}) }
-  if (remainingDeny.length > 0) permissions.deny = remainingDeny
-  else delete permissions.deny
-  if (Object.keys(permissions).length > 0) updated.permissions = permissions
-  else delete updated.permissions
-
-  const haus = { ...prevHaus }
-  delete haus.denyRules
-  const stillTracking =
-    (haus.hooks?.length ?? 0) > 0 ||
-    (haus.hookCommands?.length ?? 0) > 0 ||
-    (haus.allowRules?.length ?? 0) > 0 ||
-    (haus.askRules?.length ?? 0) > 0
-  if (stillTracking) updated._haus = haus
-  else delete updated._haus
-
-  return updated
+  return denyTier.strip(settings)
 }
 
 /**
@@ -421,24 +419,7 @@ export function mergeAskRules(
   settings: ClaudeSettings,
   rules: string[],
 ): { settings: ClaudeSettings; addedRules: string[] } {
-  const existingAsk = settings.permissions?.ask ?? []
-  const trackedAsk = settings._haus?.askRules ?? []
-  const { rules: ask, tracked, added } = reconcileManagedRules(existingAsk, trackedAsk, rules)
-
-  const updated: ClaudeSettings = { ...settings }
-  updated.permissions = {
-    ...(settings.permissions ?? {}),
-    ask,
-  }
-  updated._haus = {
-    hooks: settings._haus?.hooks ?? [],
-    ...(settings._haus?.hookCommands ? { hookCommands: settings._haus.hookCommands } : {}),
-    ...(settings._haus?.denyRules ? { denyRules: settings._haus.denyRules } : {}),
-    ...(settings._haus?.allowRules ? { allowRules: settings._haus.allowRules } : {}),
-    askRules: tracked,
-  }
-
-  return { settings: updated, addedRules: added }
+  return askTier.merge(settings, rules)
 }
 
 /**
@@ -448,30 +429,7 @@ export function mergeAskRules(
  * is tracked there.
  */
 export function stripHausAsk(settings: ClaudeSettings): ClaudeSettings {
-  const prevHaus = settings._haus
-  if (!prevHaus?.askRules || prevHaus.askRules.length === 0) return settings
-
-  const ownedSet = new Set(prevHaus.askRules)
-  const updated: ClaudeSettings = { ...settings }
-
-  const remainingAsk = (settings.permissions?.ask ?? []).filter((rule) => !ownedSet.has(rule))
-  const permissions: ClaudePermissions = { ...(settings.permissions ?? {}) }
-  if (remainingAsk.length > 0) permissions.ask = remainingAsk
-  else delete permissions.ask
-  if (Object.keys(permissions).length > 0) updated.permissions = permissions
-  else delete updated.permissions
-
-  const haus = { ...prevHaus }
-  delete haus.askRules
-  const stillTracking =
-    (haus.hooks?.length ?? 0) > 0 ||
-    (haus.hookCommands?.length ?? 0) > 0 ||
-    (haus.denyRules?.length ?? 0) > 0 ||
-    (haus.allowRules?.length ?? 0) > 0
-  if (stillTracking) updated._haus = haus
-  else delete updated._haus
-
-  return updated
+  return askTier.strip(settings)
 }
 
 /** Reads and parses the bundled hooks.json fragment file; returns [] if missing or invalid. */
