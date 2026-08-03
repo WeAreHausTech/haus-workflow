@@ -60,12 +60,17 @@ export async function runWorkspaceUndo(
     }
   }
 
+  // One repo's undo failing must not abort the loop — but it also must not report
+  // success. Continue through every repo, then fail the exit code if any repo failed,
+  // so CI/scripts can detect a partial-failure workspace state instead of a false ok.
+  let anyRepoFailed = false
   for (const repo of config.repos) {
     const repoRoot = path.resolve(workspaceRoot, repo.path)
     log(`\n→ ${repo.name} (${repo.path})`)
     try {
       await runUndo({ yes: true, root: repoRoot })
     } catch (err) {
+      anyRepoFailed = true
       warn(`Undo failed for ${repo.name}: ${err instanceof Error ? err.message : String(err)}`)
     }
   }
@@ -113,5 +118,10 @@ export async function runWorkspaceUndo(
   }
 
   log(`${WORKSPACE_FILE} left in place — it's your own config, not haus-owned output.`)
-  log('Workspace undo complete.')
+  if (anyRepoFailed) {
+    process.exitCode = 1
+    warn('Workspace undo finished with at least one repo failure — see above.')
+  } else {
+    log('Workspace undo complete.')
+  }
 }

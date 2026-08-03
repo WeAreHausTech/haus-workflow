@@ -2,7 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import os from 'node:os'
 import path from 'node:path'
-import { mkdtempSync, mkdirSync, writeFileSync, existsSync, readFileSync } from 'node:fs'
+import { mkdtempSync, mkdirSync, writeFileSync, existsSync, readFileSync, rmSync } from 'node:fs'
 
 // Point the recommender/apply at the vendored fixture catalog (no network, deterministic).
 process.env.HAUS_FIXTURE_CATALOG = path.resolve('tests/fixtures/catalog/manifest.json')
@@ -189,5 +189,26 @@ test(
     const ws = mkdtempSync(path.join(os.tmpdir(), 'haus-ws-undo-noconfig-'))
     await runWorkspaceUndo(ws, { yes: true })
     assert.equal(process.exitCode, 1)
+  }),
+)
+
+test(
+  'workspace undo sets a non-zero exit code when one repo fails, but still processes the rest',
+  muted(async () => {
+    const ws = makeWorkspace()
+    await runWorkspaceSetup(ws, { mode: 'fast', write: true })
+
+    // Force runUndo to throw for 'api' only: readJson rethrows non-ENOENT fs errors
+    // (e.g. EISDIR), so replacing its haus.lock.json with a directory of the same
+    // name is a deterministic way to trigger a real failure without mocking.
+    const apiLockPath = path.join(ws, 'api', '.haus-workflow', 'haus.lock.json')
+    rmSync(apiLockPath, { force: true })
+    mkdirSync(apiLockPath)
+
+    await runWorkspaceUndo(ws, { yes: true })
+
+    assert.equal(process.exitCode, 1, 'a per-repo undo failure must fail the exit code')
+    // The other repo's undo still ran to completion despite api's failure.
+    assert.equal(existsSync(path.join(ws, 'frontend', '.claude', 'rules', 'haus.md')), false)
   }),
 )
