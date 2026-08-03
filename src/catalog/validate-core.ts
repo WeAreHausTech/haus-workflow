@@ -5,6 +5,7 @@ import type { CatalogItem } from '../types.js'
 
 import { auditForbiddenTagsInText, extractFrontmatterValue } from './forbidden-content.js'
 import { validateCuratedProvenance, validateReferences } from './manifest-item-fields.js'
+import { isSafeCatalogPath } from './path-safety.js'
 import {
   ALLOWED_NPX_PATTERN,
   ANY_NPX_PATTERN,
@@ -26,11 +27,7 @@ export type ValidateCatalogResult = {
   items: CatalogItem[]
 }
 
-export function isSafeCatalogPath(itemPath: string): boolean {
-  if (!itemPath || path.isAbsolute(itemPath) || itemPath.includes('\\')) return false
-  const normalized = path.normalize(itemPath)
-  return !normalized.startsWith('..') && !normalized.includes('/..')
-}
+export { isSafeCatalogPath }
 
 function auditForbiddenStacks(items: CatalogItem[]): string[] {
   const failures: string[] = []
