@@ -160,34 +160,32 @@ async function remoteBase(): Promise<string> {
   return `${CATALOG_REPO_URL}/${cachedCatalogRef}`
 }
 
-/** Fetches raw text from a URL; returns null on any network or HTTP error. Timeout: 10 s. */
-async function fetchText(url: string): Promise<string | null> {
+/** Fetches a URL and hands the response to `extract`; returns null on any network, HTTP, or extraction error. Timeout: 10 s. */
+async function fetchGuarded<T>(
+  url: string,
+  extract: (res: Response) => Promise<T>,
+): Promise<T | null> {
   try {
     const res = await fetch(url, { signal: AbortSignal.timeout(10_000) })
     if (!res.ok) {
       warn(`Catalog fetch HTTP ${res.status}: ${url}`)
       return null
     }
-    return await res.text()
+    return await extract(res)
   } catch (e) {
     warn(`Catalog fetch failed (${e instanceof Error ? e.constructor.name : String(e)}): ${url}`)
     return null
   }
 }
 
+/** Fetches raw text from a URL; returns null on any network or HTTP error. Timeout: 10 s. */
+async function fetchText(url: string): Promise<string | null> {
+  return fetchGuarded(url, (res) => res.text())
+}
+
 /** Fetches raw bytes from a URL; returns null on any network or HTTP error. Timeout: 10 s. */
 async function fetchBytes(url: string): Promise<Buffer | null> {
-  try {
-    const res = await fetch(url, { signal: AbortSignal.timeout(10_000) })
-    if (!res.ok) {
-      warn(`Catalog fetch HTTP ${res.status}: ${url}`)
-      return null
-    }
-    return Buffer.from(await res.arrayBuffer())
-  } catch (e) {
-    warn(`Catalog fetch failed (${e instanceof Error ? e.constructor.name : String(e)}): ${url}`)
-    return null
-  }
+  return fetchGuarded(url, async (res) => Buffer.from(await res.arrayBuffer()))
 }
 
 /** Downloads and schema-validates the remote manifest; returns null if fetch or validation fails. */
