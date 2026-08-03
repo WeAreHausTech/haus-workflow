@@ -9,6 +9,7 @@ import { buildFormerIdMap } from '../src/catalog/former-ids.js'
 import { validateFormerIds } from '../src/catalog/manifest-item-fields.js'
 
 const cli = path.resolve('dist/cli.js')
+const writeClaudeFilesSource = path.resolve('src/claude/write-claude-files.ts').replace(/\\/g, '/')
 
 function writeSkill(catalogDir, name, body) {
   const skillDir = path.join(catalogDir, 'skills', name)
@@ -90,6 +91,26 @@ function runApply(root, manifestPath) {
   })
 }
 
+function runWriteSelected(root, manifestPath, selectedIds) {
+  const helper = path.join(root, 'run-selected-apply.mts')
+  writeFileSync(
+    helper,
+    [
+      `import { writeClaudeFiles } from "${writeClaudeFilesSource}";`,
+      `await writeClaudeFiles(process.argv[2], false, JSON.parse(process.argv[3]));`,
+    ].join('\n'),
+  )
+  return execaSync(
+    'node',
+    ['--import', 'tsx/esm', helper, root, JSON.stringify(selectedIds)],
+    {
+      cwd: path.resolve('.'),
+      reject: false,
+      env: { ...process.env, HAUS_FIXTURE_CATALOG: manifestPath },
+    },
+  )
+}
+
 test('buildFormerIdMap maps former ids to current ids', () => {
   assert.deepEqual(
     [...buildFormerIdMap([{ id: 'new', formerIds: ['old', 'older'] }])],
@@ -158,6 +179,33 @@ test('apply migrates a former lock id and refreshes installed content without re
   assert.equal(lock[0].id, 'catalog.new')
   assert.deepEqual(lock[0].paths, ['.claude/skills/new-name'])
   assert.match(lock[0].hash, /^sha256-/)
+})
+
+test('apply --select migrates when only the current id is selected', () => {
+  const { root, catalogDir } = makeProject()
+  writeSkill(catalogDir, 'old-name', 'old content')
+  const manifestPath = writeManifest(catalogDir, {
+    id: 'catalog.old',
+    path: 'skills/old-name',
+  })
+  writeRecommendation(root, 'catalog.old')
+  const initial = runApply(root, manifestPath)
+  assert.equal(initial.exitCode, 0, initial.stderr)
+
+  writeSkill(catalogDir, 'new-name', 'new content')
+  writeManifest(catalogDir, {
+    id: 'catalog.new',
+    formerIds: ['catalog.old'],
+    path: 'skills/new-name',
+  })
+
+  const migrated = runWriteSelected(root, manifestPath, ['catalog.new'])
+  assert.equal(migrated.exitCode, 0, migrated.stderr)
+  assert.equal(existsSync(path.join(root, '.claude', 'skills', 'new-name', 'SKILL.md')), true)
+  const lock = JSON.parse(
+    readFileSync(path.join(root, '.haus-workflow', 'haus.lock.json'), 'utf8'),
+  )
+  assert.deepEqual(lock.map((entry) => entry.id), ['catalog.new'])
 })
 
 test('update --check reports a pending former-id migration without writing', () => {

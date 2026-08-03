@@ -263,7 +263,13 @@ export async function writeClaudeFiles(
     })
   }
   for (const migration of migrations) {
-    if (selectedIds !== undefined && !selectedIds.includes(migration.oldId)) continue
+    if (
+      selectedIds !== undefined &&
+      !selectedIds.includes(migration.oldId) &&
+      !selectedIds.includes(migration.newId)
+    ) {
+      continue
+    }
     if (catalogItemsById.has(migration.newId)) continue
     const lockItem = prevLock.find((entry) => entry.id === migration.oldId)
     const manifestItem = manifestById.get(migration.newId)
