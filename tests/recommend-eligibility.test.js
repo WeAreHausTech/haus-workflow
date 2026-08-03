@@ -317,6 +317,56 @@ test('former ids are never recommended while their current item remains eligible
   }
 })
 
+test('malformed formerIds are ignored (treated as none)', async () => {
+  setup()
+  try {
+    const manifestPath = path.join(tmpDir, 'malformed-former-ids-fixture.json')
+    writeFileSync(
+      manifestPath,
+      JSON.stringify({
+        items: [
+          {
+            id: 'test.malformed-former',
+            formerIds: 'not-an-array',
+            type: 'skill',
+            source: 'haus',
+            version: '1.0.0',
+            path: 'skills/malformed-former',
+            title: 'Malformed formerIds item',
+            tags: ['workflow'],
+            repoRoles: [],
+            tokenEstimate: 100,
+            default: true,
+          },
+          {
+            id: 'n',
+            type: 'skill',
+            source: 'haus',
+            version: '1.0.0',
+            path: 'skills/n',
+            title: 'Single-char id must not be skipped',
+            tags: ['workflow'],
+            repoRoles: [],
+            tokenEstimate: 100,
+            default: true,
+          },
+        ],
+      }),
+    )
+    process.env.HAUS_FIXTURE_CATALOG = manifestPath
+
+    const result = await recommend(tmpDir, makeContext(tmpDir))
+    assert.ok(ids(result.recommended).has('test.malformed-former'))
+    assert.ok(
+      ids(result.recommended).has('n'),
+      'string formerIds must not iterate per-character into skip set',
+    )
+    assert.equal(findSkipped(result, 'n'), undefined)
+  } finally {
+    teardown()
+  }
+})
+
 test('tokenEstimate preserved through recommend pipeline (regression: 63e980c)', async () => {
   setup()
   try {

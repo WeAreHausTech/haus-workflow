@@ -132,6 +132,21 @@ test('buildFormerIdMap names both owners on duplicate formerId', () => {
   )
 })
 
+test('buildFormerIdMap rejects non-array formerIds and current-id collisions', () => {
+  assert.throws(
+    () => buildFormerIdMap([{ id: 'current', formerIds: 'not-an-array' }]),
+    /formerIds must be a string array/,
+  )
+  assert.throws(
+    () =>
+      buildFormerIdMap([
+        { id: 'alive' },
+        { id: 'renamed', formerIds: ['alive'] },
+      ]),
+    /conflicts with another item's current id/,
+  )
+})
+
 test('validateFormerIds rejects duplicate claims and current-id collisions', () => {
   assert.deepEqual(
     validateFormerIds([

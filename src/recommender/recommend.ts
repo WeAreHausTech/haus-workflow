@@ -11,6 +11,7 @@
  * become eligible. Absent that file, output is identical to the scanner-only pass.
  */
 
+import { normalizeFormerIds } from '../catalog/former-ids.js'
 import { loadCatalog } from '../catalog/load-catalog.js'
 import { buildSourcesReport } from '../scanner/write-sources-report.js'
 import { SENSITIVE_ITEM_KEYWORDS } from '../security/sensitive-paths.js'
@@ -76,7 +77,7 @@ export async function recommend(
   const recommended: Recommendation['recommended'] = []
   const skipped: Recommendation['skipped'] = []
   const sourceTrust = new Map(sources.items.map((x) => [x.source, x.status]))
-  const formerIds = new Set(items.flatMap((item) => item.formerIds ?? []))
+  const formerIds = new Set(items.flatMap((item) => normalizeFormerIds(item.formerIds)))
   const changedFiles = await readChangedFiles(root)
 
   const skip = (id: string, code: string, message: string, signal?: string) => {
