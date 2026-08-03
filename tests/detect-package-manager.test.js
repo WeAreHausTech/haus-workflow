@@ -2,7 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import path from 'node:path'
 import os from 'node:os'
-import { mkdtempSync, writeFileSync } from 'node:fs'
+import { mkdtempSync, writeFileSync, rmSync } from 'node:fs'
 
 import { detectPackageManager } from '../src/scanner/detect-package-manager.js'
 
@@ -10,33 +10,39 @@ import { detectPackageManager } from '../src/scanner/detect-package-manager.js'
 // untested for corepack build-metadata suffixes and a malformed packageManager
 // field — both silently fall through to lockfile sniffing today).
 
-test('detects yarn from an in-range packageManager field', () => {
+function tempDir(t) {
   const dir = mkdtempSync(path.join(os.tmpdir(), 'haus-detect-pm-'))
+  t.after(() => rmSync(dir, { recursive: true, force: true }))
+  return dir
+}
+
+test('detects yarn from an in-range packageManager field', (t) => {
+  const dir = tempDir(t)
   assert.equal(detectPackageManager(dir, 'yarn@4.1.0'), 'yarn')
 })
 
-test('detects pnpm from an in-range packageManager field', () => {
-  const dir = mkdtempSync(path.join(os.tmpdir(), 'haus-detect-pm-'))
+test('detects pnpm from an in-range packageManager field', (t) => {
+  const dir = tempDir(t)
   assert.equal(detectPackageManager(dir, 'pnpm@8.9.0'), 'pnpm')
 })
 
-test('detects npm from an in-range packageManager field', () => {
-  const dir = mkdtempSync(path.join(os.tmpdir(), 'haus-detect-pm-'))
+test('detects npm from an in-range packageManager field', (t) => {
+  const dir = tempDir(t)
   assert.equal(detectPackageManager(dir, 'npm@9.5.0'), 'npm')
 })
 
-test('rejects an out-of-range yarn version instead of trusting the field', () => {
-  const dir = mkdtempSync(path.join(os.tmpdir(), 'haus-detect-pm-'))
+test('rejects an out-of-range yarn version instead of trusting the field', (t) => {
+  const dir = tempDir(t)
   assert.equal(detectPackageManager(dir, 'yarn@1.22.19'), 'unknown')
 })
 
-test('rejects an out-of-range pnpm version instead of trusting the field', () => {
-  const dir = mkdtempSync(path.join(os.tmpdir(), 'haus-detect-pm-'))
+test('rejects an out-of-range pnpm version instead of trusting the field', (t) => {
+  const dir = tempDir(t)
   assert.equal(detectPackageManager(dir, 'pnpm@10.0.0'), 'unknown')
 })
 
-test('an out-of-range field returns unknown even when a valid lockfile is present', () => {
-  const dir = mkdtempSync(path.join(os.tmpdir(), 'haus-detect-pm-'))
+test('an out-of-range field returns unknown even when a valid lockfile is present', (t) => {
+  const dir = tempDir(t)
   writeFileSync(path.join(dir, 'yarn.lock'), '', 'utf8')
   assert.equal(
     detectPackageManager(dir, 'yarn@1.22.19'),
@@ -45,8 +51,8 @@ test('an out-of-range field returns unknown even when a valid lockfile is presen
   )
 })
 
-test('strips a corepack build-metadata suffix before range-checking (yarn)', () => {
-  const dir = mkdtempSync(path.join(os.tmpdir(), 'haus-detect-pm-'))
+test('strips a corepack build-metadata suffix before range-checking (yarn)', (t) => {
+  const dir = tempDir(t)
   assert.equal(
     detectPackageManager(dir, 'yarn@4.1.0+sha256.abcdef0123456789'),
     'yarn',
@@ -54,18 +60,18 @@ test('strips a corepack build-metadata suffix before range-checking (yarn)', () 
   )
 })
 
-test('strips a corepack build-metadata suffix before range-checking (pnpm)', () => {
-  const dir = mkdtempSync(path.join(os.tmpdir(), 'haus-detect-pm-'))
+test('strips a corepack build-metadata suffix before range-checking (pnpm)', (t) => {
+  const dir = tempDir(t)
   assert.equal(detectPackageManager(dir, 'pnpm@8.9.0+sha1.deadbeef'), 'pnpm')
 })
 
-test('a build-metadata suffix cannot rescue an out-of-range version', () => {
-  const dir = mkdtempSync(path.join(os.tmpdir(), 'haus-detect-pm-'))
+test('a build-metadata suffix cannot rescue an out-of-range version', (t) => {
+  const dir = tempDir(t)
   assert.equal(detectPackageManager(dir, 'yarn@1.22.19+sha256.abcdef'), 'unknown')
 })
 
-test('falls back to lockfile sniffing when the field is malformed', () => {
-  const dir = mkdtempSync(path.join(os.tmpdir(), 'haus-detect-pm-'))
+test('falls back to lockfile sniffing when the field is malformed', (t) => {
+  const dir = tempDir(t)
   writeFileSync(path.join(dir, 'pnpm-lock.yaml'), '', 'utf8')
   assert.equal(
     detectPackageManager(dir, 'not-a-valid-field'),
@@ -74,33 +80,33 @@ test('falls back to lockfile sniffing when the field is malformed', () => {
   )
 })
 
-test('falls back to lockfile sniffing when the field is an empty string', () => {
-  const dir = mkdtempSync(path.join(os.tmpdir(), 'haus-detect-pm-'))
+test('falls back to lockfile sniffing when the field is an empty string', (t) => {
+  const dir = tempDir(t)
   writeFileSync(path.join(dir, 'yarn.lock'), '', 'utf8')
   assert.equal(detectPackageManager(dir, ''), 'yarn')
 })
 
-test('falls back to lockfile sniffing when the field is undefined', () => {
-  const dir = mkdtempSync(path.join(os.tmpdir(), 'haus-detect-pm-'))
+test('falls back to lockfile sniffing when the field is undefined', (t) => {
+  const dir = tempDir(t)
   writeFileSync(path.join(dir, 'package-lock.json'), '{}', 'utf8')
   assert.equal(detectPackageManager(dir), 'npm')
 })
 
-test('lockfile precedence: yarn.lock wins over pnpm-lock.yaml when both present', () => {
-  const dir = mkdtempSync(path.join(os.tmpdir(), 'haus-detect-pm-'))
+test('lockfile precedence: yarn.lock wins over pnpm-lock.yaml when both present', (t) => {
+  const dir = tempDir(t)
   writeFileSync(path.join(dir, 'yarn.lock'), '', 'utf8')
   writeFileSync(path.join(dir, 'pnpm-lock.yaml'), '', 'utf8')
   assert.equal(detectPackageManager(dir), 'yarn')
 })
 
-test('lockfile precedence: pnpm-lock.yaml wins over package-lock.json when both present', () => {
-  const dir = mkdtempSync(path.join(os.tmpdir(), 'haus-detect-pm-'))
+test('lockfile precedence: pnpm-lock.yaml wins over package-lock.json when both present', (t) => {
+  const dir = tempDir(t)
   writeFileSync(path.join(dir, 'pnpm-lock.yaml'), '', 'utf8')
   writeFileSync(path.join(dir, 'package-lock.json'), '{}', 'utf8')
   assert.equal(detectPackageManager(dir), 'pnpm')
 })
 
-test('returns unknown when no field and no lockfile are present', () => {
-  const dir = mkdtempSync(path.join(os.tmpdir(), 'haus-detect-pm-'))
+test('returns unknown when no field and no lockfile are present', (t) => {
+  const dir = tempDir(t)
   assert.equal(detectPackageManager(dir), 'unknown')
 })
