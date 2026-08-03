@@ -34,6 +34,16 @@ describe('guardBash', () => {
     assert.equal(guardBash('git status'), undefined)
   })
 
+  it('blocks deny-tier commands split by quote characters (audit L1)', () => {
+    assert.ok(guardBash('git push --forc"e" origin main'))
+    assert.ok(guardBash("git push --forc'e' origin main"))
+    assert.ok(guardBash('npm  pu"b"lish'))
+  })
+
+  it('does not false-positive on quoted text that merely mentions a safe word', () => {
+    assert.equal(guardBash('git commit -m "note: avoid sudo in scripts"'), undefined)
+  })
+
   it('explains the block in plain language while still naming the command (WS6)', () => {
     const msg = guardBash('sudo rm something')
     assert.match(msg, /didn't run that/i)

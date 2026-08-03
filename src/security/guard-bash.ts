@@ -6,7 +6,15 @@ function matchesDenyToken(command: string, denyPhrase: string): boolean {
   if (denyPhrase === 'sudo') {
     return /(?:^|[|;&]\s*)sudo\b/i.test(command)
   }
-  const normalizedCommand = command.toLowerCase().replace(/\s+/g, ' ').trim()
+  // Strip quote characters before matching so a deny-tier phrase split across
+  // quotes (e.g. `--forc"e"`) still resolves to its unquoted form. This closes
+  // the literal-quoting gap only — general shell obfuscation via $(...) or
+  // variable indirection is a separate, harder problem this guard does not solve.
+  const normalizedCommand = command
+    .replace(/["'`]/g, '')
+    .toLowerCase()
+    .replace(/\s+/g, ' ')
+    .trim()
   return normalizedCommand.includes(denyPhrase.toLowerCase())
 }
 
