@@ -2,7 +2,15 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import path from 'node:path'
 import os from 'node:os'
-import { mkdtempSync, existsSync, readFileSync, writeFileSync, rmSync } from 'node:fs'
+import {
+  mkdtempSync,
+  existsSync,
+  readFileSync,
+  writeFileSync,
+  rmSync,
+  statSync,
+  chmodSync,
+} from 'node:fs'
 
 import { writeManagedText, writeManagedJson } from '../src/claude/managed-write.js'
 
@@ -55,6 +63,33 @@ test('writeManagedText does not log an "Overwriting" line when content is unchan
       'no-op write must not log an Overwriting line',
     )
   })
+})
+
+test('writeManagedText does not rewrite the file (mtime unchanged) on a no-op write', async (t) => {
+  const dir = mkdtempSync(path.join(os.tmpdir(), 'haus-managed-write-'))
+  t.after(() => rmSync(dir, { recursive: true, force: true }))
+  const file = path.join(dir, 'a.txt')
+  await writeManagedText(dir, file, 'same\n', false)
+  const before = statSync(file).mtimeMs
+  await new Promise((r) => setTimeout(r, 20))
+  await writeManagedText(dir, file, 'same\n', false)
+  assert.equal(statSync(file).mtimeMs, before, 'no-op write must not touch the file on disk')
+})
+
+test('writeManagedText makes no write syscall at all on a no-op (file made read-only)', async (t) => {
+  // A stronger, mtime-granularity-independent proof than the test above: if
+  // writeText were ever called on a no-op, this would throw EACCES/EPERM.
+  const dir = mkdtempSync(path.join(os.tmpdir(), 'haus-managed-write-'))
+  t.after(() => rmSync(dir, { recursive: true, force: true }))
+  const file = path.join(dir, 'a.txt')
+  await writeManagedText(dir, file, 'same\n', false)
+  chmodSync(file, 0o444)
+  // rmSync's t.after (registered above, runs first — node:test hooks run in
+  // registration order) removes this fine even read-only; no need to chmod back.
+  await assert.doesNotReject(
+    writeManagedText(dir, file, 'same\n', false),
+    'a no-op write must never attempt to write the file, read-only or not',
+  )
 })
 
 test('writeManagedText dry-run never touches disk, even for a new file', async (t) => {
