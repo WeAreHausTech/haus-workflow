@@ -53,7 +53,12 @@ async function collectLockTrackedPaths(
       removable.push(...existingRel.map((rel) => path.resolve(root, rel)))
       continue
     }
-    const currentHash = await hashInstalledPaths(root, relPaths)
+    // Hash the same set we intend to remove (existingRel), not the full recorded
+    // relPaths — an entry with an empty-directory path that's since gone missing
+    // falls into hashInstalledPaths's empty-digest fallback, which hashes the
+    // input path list itself, so passing the wrong list there could produce a
+    // spurious mismatch even though the remaining files are unmodified.
+    const currentHash = await hashInstalledPaths(root, existingRel)
     if (currentHash === row.hash) {
       removable.push(...existingRel.map((rel) => path.resolve(root, rel)))
     } else {
