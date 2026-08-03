@@ -130,6 +130,54 @@ test('rejects manifest when item tags or repoRoles are not arrays', () => {
   assert.match(badRoles.error, /repoRoles must be a string array/)
 })
 
+test('rejects manifest when formerIds is malformed or collides', () => {
+  const badShape = parseManifest(
+    JSON.stringify({
+      version: '1.0.0',
+      items: [
+        {
+          id: 'a',
+          type: 'skill',
+          path: 'skills/a',
+          tags: [],
+          repoRoles: [],
+          tokenEstimate: 1,
+          formerIds: 'haus.old',
+        },
+      ],
+    }),
+  )
+  assert.equal(badShape.ok, false)
+  assert.match(badShape.error, /formerIds must be a string array/)
+
+  const collision = parseManifest(
+    JSON.stringify({
+      version: '1.0.0',
+      items: [
+        {
+          id: 'alive',
+          type: 'skill',
+          path: 'skills/alive',
+          tags: [],
+          repoRoles: [],
+          tokenEstimate: 1,
+        },
+        {
+          id: 'renamed',
+          type: 'skill',
+          path: 'skills/renamed',
+          tags: [],
+          repoRoles: [],
+          tokenEstimate: 1,
+          formerIds: ['alive'],
+        },
+      ],
+    }),
+  )
+  assert.equal(collision.ok, false)
+  assert.match(collision.error, /conflicts with another item/)
+})
+
 test('accepts curated provenance fields and large mixed references[]', () => {
   const refs = [
     ...Array.from({ length: 18 }, (_, i) => `references/doc-${i}.md`),

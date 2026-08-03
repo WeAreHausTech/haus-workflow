@@ -1,4 +1,4 @@
-# ADR-0015: CLI audit sections 3 & 4 — workspace undo scope and check-tier honesty
+# ADR-0016: CLI audit sections 3 & 4 — workspace undo scope and check-tier honesty
 
 - **Status:** Accepted | **Date:** 2026-08-03
 - **Decided by:** Aniisa Bihi (draft by Claude)

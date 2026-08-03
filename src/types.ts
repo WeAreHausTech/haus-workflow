@@ -31,10 +31,7 @@ export type ContextMap = {
 
 /** A single matching clause in a catalog item's requiresAny constraint. */
 export type RequiresAnyClause =
-  | { stack: string }
-  | { dependency: string }
-  | { packageNamePattern: string }
-  | { role: string }
+  { stack: string } | { dependency: string } | { packageNamePattern: string } | { role: string }
 
 /** Origin of a catalog item: first-party Haus or curated from an external source. */
 export type CatalogItemSource = 'haus' | 'curated'
@@ -44,11 +41,7 @@ export type CatalogItemUseMode = 'copy' | 'adapted' | 'wrapped' | 'rewritten' | 
 
 /** Curation review gate; only "approved" items may be recommended and installed. */
 export type CatalogItemReviewStatus =
-  | 'approved'
-  | 'candidate'
-  | 'needs-review'
-  | 'rejected'
-  | 'deprecated'
+  'approved' | 'candidate' | 'needs-review' | 'rejected' | 'deprecated'
 
 /** Risk level of shipping a curated item; "blocked" items must never be installed. */
 export type CatalogItemRiskLevel = 'low' | 'medium' | 'high' | 'blocked'
@@ -64,6 +57,8 @@ export type CatalogItemOptInTier = 'workflow' | 'ops' | 'review' | 'design'
 /** A single entry in the catalog manifest describing a skill, agent, template, or command. */
 export type CatalogItem = {
   id: string
+  /** Historical ids that should migrate to this item after an upstream rename. */
+  formerIds?: string[]
   type: 'skill' | 'agent' | 'template' | 'command' | 'config'
   source: string
   version?: string
@@ -113,6 +108,7 @@ export type CatalogItem = {
 /** Known catalog item field names — keep in sync with catalog-item.schema.json. */
 export const CATALOG_ITEM_KNOWN_KEYS = [
   'id',
+  'formerIds',
   'type',
   'source',
   'version',

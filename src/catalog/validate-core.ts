@@ -4,7 +4,11 @@ import path from 'node:path'
 import type { CatalogItem } from '../types.js'
 
 import { auditForbiddenTagsInText, extractFrontmatterValue } from './forbidden-content.js'
-import { validateCuratedProvenance, validateReferences } from './manifest-item-fields.js'
+import {
+  validateCuratedProvenance,
+  validateFormerIds,
+  validateReferences,
+} from './manifest-item-fields.js'
 import { isSafeCatalogPath } from './path-safety.js'
 import {
   ALLOWED_NPX_PATTERN,
@@ -320,6 +324,7 @@ export function validateCatalogData(
 ): ValidateCatalogResult {
   const failures = [
     ...auditManifestStructure(manifestVersion, items),
+    ...validateFormerIds(items),
     ...auditOptInMetadata(items),
     ...auditForbiddenStacks(items),
     ...auditShippedFiles(manifestDir, items),

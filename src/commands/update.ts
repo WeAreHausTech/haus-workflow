@@ -1,6 +1,8 @@
 /** `haus update` — refreshes the lockfile, syncs the remote catalog cache, and checks for CLI updates. */
 import path from 'node:path'
 
+import { findFormerIdMigrations } from '../catalog/former-ids.js'
+import { loadCatalog } from '../catalog/load-catalog.js'
 import { fetchLatestCatalogTag, syncRemoteCatalog } from '../catalog/remote-catalog.js'
 import { refreshProjectApply } from '../claude/refresh-project.js'
 import { applyInstall } from '../install/apply.js'
@@ -15,7 +17,7 @@ import {
 import { fetchNpmVersionStatus } from '../update/npm-version.js'
 import { readJson } from '../utils/fs.js'
 import { log, warn } from '../utils/logger.js'
-import { packageRoot } from '../utils/paths.js'
+import { hausPath, packageRoot } from '../utils/paths.js'
 
 const NPM_PACKAGE_NAME = '@haus-tech/haus-workflow'
 
@@ -42,12 +44,18 @@ export async function runUpdate(options: {
     // check, using the cheap count+catalogRef-only readLockSummary instead — the same
     // tier the SessionStart hook uses. There is a real middle ground now between that
     // cheap tier and the fully-hashed one, instead of only those two extremes.
-    const [status, npmVersion, latestCatalogTag, globalInstallDrift] = await Promise.all([
-      options.fast ? fastLockStatus(root) : checkLock(root),
-      fetchNpmVersionStatus(currentVersion),
-      fetchLatestCatalogTag(),
-      options.fast ? Promise.resolve(null) : detectGlobalInstallDrift(),
-    ])
+    // formerId migration detection is cheap (structural id lookups, no content hashing)
+    // and runs in both modes.
+    const [status, npmVersion, latestCatalogTag, globalInstallDrift, catalogItems, lockItems] =
+      await Promise.all([
+        options.fast ? fastLockStatus(root) : checkLock(root),
+        fetchNpmVersionStatus(currentVersion),
+        fetchLatestCatalogTag(),
+        options.fast ? Promise.resolve(null) : detectGlobalInstallDrift(),
+        loadCatalog(root),
+        readJson<Array<{ id: string }>>(hausPath(root, 'haus.lock.json')),
+      ])
+    const formerIdMigrations = findFormerIdMigrations(lockItems ?? [], catalogItems)
     const installedRef = status.catalogRef ?? 'main'
     const catalogRefBehind =
       latestCatalogTag !== null && installedRef !== latestCatalogTag
@@ -61,6 +69,7 @@ export async function runUpdate(options: {
           installedCatalogRef: installedRef,
           latestCatalogTag,
           catalogRefBehind,
+          formerIdMigrations,
           globalInstallDrift,
           localOverrides: await hasLocalOverrides(root),
           summary: diffGeneratedFiles(),
@@ -70,12 +79,13 @@ export async function runUpdate(options: {
         2,
       ),
     )
-    // Fast mode never had enough information to detect real drift (no hashing ran),
-    // so it never fails the check purely on its own — doing so would imply content
-    // was verified when it wasn't. An empty/missing lockfile also means "this project
-    // was never set up by haus," not "drift" — only the full tier's real drift or
-    // invalid versions (status.ok false despite having lock items) fails the check.
-    if (!options.fast && status.count > 0 && 'ok' in status && !status.ok) process.exitCode = 1
+    // Fast mode never had enough information to detect real hash-based drift (no
+    // hashing ran), so it never fails the check purely on that — doing so would imply
+    // content was verified when it wasn't. An empty/missing lockfile also means "this
+    // project was never set up by haus," not "drift". formerId migrations are a
+    // separate, non-hash-based signal and fail the check in both modes.
+    const hasHashDrift = !options.fast && status.count > 0 && 'ok' in status && !status.ok
+    if (hasHashDrift || formerIdMigrations.length > 0) process.exitCode = 1
     return
   }
 

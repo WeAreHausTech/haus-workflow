@@ -2,7 +2,11 @@
 
 import type { CatalogItem } from '../types.js'
 
-import { validateCuratedProvenance, validateReferences } from './manifest-item-fields.js'
+import {
+  validateCuratedProvenance,
+  validateFormerIds,
+  validateReferences,
+} from './manifest-item-fields.js'
 
 const POLLUTION_KEYS = new Set(['__proto__', 'prototype', 'constructor'])
 
@@ -12,8 +16,7 @@ export type ParsedManifest = {
 }
 
 export type ParseManifestResult =
-  | { ok: true; manifest: ParsedManifest }
-  | { ok: false; error: string }
+  { ok: true; manifest: ParsedManifest } | { ok: false; error: string }
 
 function isNonEmptyString(value: unknown): value is string {
   return typeof value === 'string' && value.length > 0
@@ -107,7 +110,19 @@ export function parseManifest(json: string): ParseManifestResult {
     if (typeof item.tokenEstimate !== 'number' || !Number.isFinite(item.tokenEstimate)) {
       return { ok: false, error: `${item.id}: tokenEstimate must be a finite number` }
     }
+    if (item.formerIds !== undefined) {
+      if (Array.isArray(item.formerIds) && item.formerIds.length === 0) {
+        // empty ≡ absent
+      } else if (!isStringArray(item.formerIds)) {
+        return { ok: false, error: `${item.id}: formerIds must be a string array` }
+      }
+    }
     items.push(raw as CatalogItem)
+  }
+
+  const formerIdFailures = validateFormerIds(items)
+  if (formerIdFailures.length > 0) {
+    return { ok: false, error: formerIdFailures[0]! }
   }
 
   return { ok: true, manifest: { version: root.version, items } }
