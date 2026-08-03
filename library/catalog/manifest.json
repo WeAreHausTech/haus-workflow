@@ -1,5 +1,5 @@
 {
-  "version": "3.5.1",
+  "version": "3.6.0",
   "items": [
     {
       "id": "haus.agentic-workflow-standard",
@@ -11,7 +11,11 @@
       "purpose": "General agentic development workflow: feature loop, NEVER rules, testing standards, ADR, subagent patterns, security, accessibility.",
       "whenToUse": "Install in every project using haus-workflow.",
       "whenNotToUse": "Never skip this template.",
-      "tags": ["workflow", "baseline", "project-instructions"],
+      "tags": [
+        "workflow",
+        "baseline",
+        "project-instructions"
+      ],
       "repoRoles": [],
       "installMode": "copy-selected",
       "tokenEstimate": 2200,
@@ -30,7 +34,12 @@
       "purpose": "Guide for building React applications with Apollo Client 4.x. Use this skill when: (1) setting up Apollo Client in a React project, (2) writing GraphQL queries or mutations with hooks, (3) configuring caching or cache policies, (4) managing local state with reactive variables, (5) troubleshooting Apollo Client errors or performance issues.",
       "whenToUse": "Guide for building React applications with Apollo Client 4.x. Use this skill when: (1) setting up Apollo Client in a React project, (2) writing GraphQL queries or mutations with hooks, (3) configuring caching or cache policies, (4) managing local state with reactive variables, (5) troubleshooting Apollo Client errors or performance issues.",
       "whenNotToUse": "Do not use when a more specific skill or command applies.",
-      "tags": ["workflow", "graphql", "react", "nextjs"],
+      "tags": [
+        "workflow",
+        "graphql",
+        "react",
+        "nextjs"
+      ],
       "repoRoles": [],
       "tokenEstimate": 1856,
       "installMode": "copy-selected",
@@ -58,7 +67,7 @@
     },
     {
       "id": "haus.apollo-apollo-federation",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "source": "curated",
       "type": "skill",
       "path": "skills/apollo/apollo-federation",
@@ -66,9 +75,13 @@
       "purpose": "Guide for authoring Apollo Federation subgraph schemas. Use this skill when: (1) creating new subgraph schemas for a federated supergraph, (2) defining or modifying entities with @key, (3) sharing types/fields across subgraphs with @shareable, (4) working with federation directives (@external, @requires, @provides, @override, @inaccessible), (5) troubleshooting composition errors, (6) any task involving federation schema design patterns.",
       "whenToUse": "Guide for authoring Apollo Federation subgraph schemas. Use this skill when: (1) creating new subgraph schemas for a federated supergraph, (2) defining or modifying entities with @key, (3) sharing types/fields across subgraphs with @shareable, (4) working with federation directives (@external, @requires, @provides, @override, @inaccessible), (5) troubleshooting composition errors, (6) any task involving federation schema design patterns.",
       "whenNotToUse": "Do not use when a more specific skill or command applies.",
-      "tags": ["workflow", "graphql", "nestjs"],
+      "tags": [
+        "workflow",
+        "graphql",
+        "nestjs"
+      ],
       "repoRoles": [],
-      "tokenEstimate": 900,
+      "tokenEstimate": 1010,
       "installMode": "copy-selected",
       "default": false,
       "reviewStatus": "approved",
@@ -77,8 +90,8 @@
       "license": "MIT",
       "licenseConfidence": "high",
       "originSourceId": "apollographql-skills",
-      "originUrl": "https://github.com/apollographql/skills/blob/605089108a198e412f7f0c1926c91eb94a6d1727/skills/apollo-federation/SKILL.md",
-      "pinnedRef": "605089108a198e412f7f0c1926c91eb94a6d1727",
+      "originUrl": "https://github.com/apollographql/skills/blob/c288eb80629dd2309eed81f23d693f66a452d043/skills/apollo-federation/SKILL.md",
+      "pinnedRef": "c288eb80629dd2309eed81f23d693f66a452d043",
       "ecosystem": "graphql",
       "requiresAny": [
         {
@@ -105,7 +118,11 @@
       "purpose": "Guide for building GraphQL servers with Apollo Server 5.x. Use this skill when: (1) setting up a new Apollo Server project, (2) writing resolvers or defining GraphQL schemas, (3) implementing authentication or authorization, (4) creating plugins or custom data sources, (5) troubleshooting Apollo Server errors or performance issues.",
       "whenToUse": "Guide for building GraphQL servers with Apollo Server 5.x. Use this skill when: (1) setting up a new Apollo Server project, (2) writing resolvers or defining GraphQL schemas, (3) implementing authentication or authorization, (4) creating plugins or custom data sources, (5) troubleshooting Apollo Server errors or performance issues.",
       "whenNotToUse": "Do not use when a more specific skill or command applies.",
-      "tags": ["workflow", "graphql", "nestjs"],
+      "tags": [
+        "workflow",
+        "graphql",
+        "nestjs"
+      ],
       "repoRoles": [],
       "tokenEstimate": 1803,
       "installMode": "copy-selected",
@@ -141,7 +158,10 @@
       "purpose": "Guide for writing GraphQL operations (queries, mutations, fragments) following best practices. Use this skill when: (1) writing GraphQL queries or mutations, (2) organizing operations with fragments, (3) optimizing data fetching patterns, (4) setting up type generation or linting, (5) reviewing operations for efficiency.",
       "whenToUse": "Guide for writing GraphQL operations (queries, mutations, fragments) following best practices. Use this skill when: (1) writing GraphQL queries or mutations, (2) organizing operations with fragments, (3) optimizing data fetching patterns, (4) setting up type generation or linting, (5) reviewing operations for efficiency.",
       "whenNotToUse": "Do not use when a more specific skill or command applies.",
-      "tags": ["workflow", "graphql"],
+      "tags": [
+        "workflow",
+        "graphql"
+      ],
       "repoRoles": [],
       "tokenEstimate": 1128,
       "installMode": "copy-selected",
@@ -180,7 +200,10 @@
       "purpose": "Guide for designing GraphQL schemas following industry best practices. Use this skill when: (1) designing a new GraphQL schema or API, (2) reviewing existing schema for improvements, (3) deciding on type structures or nullability, (4) implementing pagination or error patterns, (5) ensuring security in schema design.",
       "whenToUse": "Guide for designing GraphQL schemas following industry best practices. Use this skill when: (1) designing a new GraphQL schema or API, (2) reviewing existing schema for improvements, (3) deciding on type structures or nullability, (4) implementing pagination or error patterns, (5) ensuring security in schema design.",
       "whenNotToUse": "Do not use when a more specific skill or command applies.",
-      "tags": ["workflow", "graphql"],
+      "tags": [
+        "workflow",
+        "graphql"
+      ],
       "repoRoles": [],
       "tokenEstimate": 1106,
       "installMode": "copy-selected",
@@ -214,7 +237,12 @@
       "whenToUse": "Use for OIDC/Azure AD/BankID/SAML2 login, callback, token, claim mapping, and SP/IDP metadata updates.",
       "whenNotToUse": "Do not use for profile CRUD without auth protocol change.",
       "tokenBudget": 1200,
-      "tags": ["oidc", "azure-ad", "bankid", "saml2"],
+      "tags": [
+        "oidc",
+        "azure-ad",
+        "bankid",
+        "saml2"
+      ],
       "repoRoles": [],
       "requiresAny": [
         {
@@ -246,10 +274,19 @@
       "purpose": "Guide BullMQ queue, worker, scheduler, and Redis-connection lifecycle changes.",
       "whenToUse": "Use for BullMQ queue definitions, processors, schedulers, and graceful shutdown.",
       "whenNotToUse": "Do not use for non-BullMQ job systems or in-process scheduling without Redis.",
-      "references": ["https://docs.bullmq.io/llms.txt"],
+      "references": [
+        "https://docs.bullmq.io/llms.txt"
+      ],
       "tokenBudget": 1200,
-      "tags": ["bullmq", "queue", "backend"],
-      "repoRoles": ["vendure-app", "nestjs-api"],
+      "tags": [
+        "bullmq",
+        "queue",
+        "backend"
+      ],
+      "repoRoles": [
+        "vendure-app",
+        "nestjs-api"
+      ],
       "requiresAny": [
         {
           "stack": "bullmq"
@@ -265,7 +302,7 @@
       "riskLevel": "low"
     },
     {
-      "version": "1.0.0",
+      "version": "1.0.1",
       "source": "curated",
       "type": "agent",
       "repoRoles": [],
@@ -276,17 +313,22 @@
       "license": "MIT",
       "licenseConfidence": "high",
       "originSourceId": "ecc-affaanm",
-      "pinnedRef": "ec92b528471df708c2384ebbcc82b390b60f535a",
+      "pinnedRef": "0c1d7be9a750627fb2a6534c78a998cc46d03f9c",
       "default": false,
       "id": "haus.ecc-a11y-architect",
       "path": "agents/ecc/a11y-architect.md",
       "title": "A11y Architect",
       "purpose": "Accessibility Architect specializing in WCAG 2.2 compliance for Web and Native platforms. Use PROACTIVELY when designing UI components, establishing design systems, or auditing code for inclusive user experiences.",
       "whenToUse": "Accessibility Architect specializing in WCAG 2.2 compliance for Web and Native platforms. Use PROACTIVELY when designing UI components, establishing design systems, or auditing code for inclusive user experiences.",
-      "tags": ["agent", "review", "shadcn", "radix"],
-      "tokenEstimate": 1838,
+      "tags": [
+        "agent",
+        "review",
+        "shadcn",
+        "radix"
+      ],
+      "tokenEstimate": 1835,
       "ecosystem": "react",
-      "originUrl": "https://github.com/affaan-m/ECC/blob/ec92b528471df708c2384ebbcc82b390b60f535a/agents/a11y-architect.md",
+      "originUrl": "https://github.com/affaan-m/ECC/blob/0c1d7be9a750627fb2a6534c78a998cc46d03f9c/agents/a11y-architect.md",
       "requiresAny": [
         {
           "stack": "shadcn"
@@ -299,7 +341,7 @@
     },
     {
       "id": "haus.ecc-csharp-reviewer",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "source": "curated",
       "type": "agent",
       "path": "agents/ecc/csharp-reviewer.md",
@@ -307,9 +349,14 @@
       "purpose": "Expert C# code reviewer specializing in .NET conventions, async patterns, security, nullable reference types, and performance. Use for all C# code changes. MUST BE USED for C# projects.",
       "whenToUse": "Expert C# code reviewer specializing in .NET conventions, async patterns, security, nullable reference types, and performance. Use for all C# code changes. MUST BE USED for C# projects.",
       "whenNotToUse": "Do not use when a more specific skill or command applies.",
-      "tags": ["agent", "review", "csharp", "dotnet"],
+      "tags": [
+        "agent",
+        "review",
+        "csharp",
+        "dotnet"
+      ],
       "repoRoles": [],
-      "tokenEstimate": 1426,
+      "tokenEstimate": 1423,
       "installMode": "copy-selected",
       "reviewStatus": "approved",
       "riskLevel": "low",
@@ -317,8 +364,8 @@
       "license": "MIT",
       "licenseConfidence": "high",
       "originSourceId": "ecc-affaanm",
-      "originUrl": "https://github.com/affaan-m/ECC/blob/5b173d2e6c11b976a0f13b2f59125e08956c1d47/agents/csharp-reviewer.md",
-      "pinnedRef": "5b173d2e6c11b976a0f13b2f59125e08956c1d47",
+      "originUrl": "https://github.com/affaan-m/ECC/blob/0c1d7be9a750627fb2a6534c78a998cc46d03f9c/agents/csharp-reviewer.md",
+      "pinnedRef": "0c1d7be9a750627fb2a6534c78a998cc46d03f9c",
       "ecosystem": "dotnet",
       "requiresAny": [
         {
@@ -336,7 +383,10 @@
       "purpose": "C# and .NET testing patterns with xUnit, FluentAssertions, mocking, integration tests, and test organization best practices.",
       "whenToUse": "C# and .NET testing patterns with xUnit, FluentAssertions, mocking, integration tests, and test organization best practices.",
       "whenNotToUse": "Do not use when a more specific skill or command applies.",
-      "tags": ["workflow", "testing"],
+      "tags": [
+        "workflow",
+        "testing"
+      ],
       "repoRoles": [],
       "tokenEstimate": 2158,
       "installMode": "copy-selected",
@@ -361,7 +411,7 @@
     },
     {
       "id": "haus.ecc-database-reviewer",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "source": "curated",
       "type": "agent",
       "path": "agents/ecc/database-reviewer.md",
@@ -369,9 +419,13 @@
       "purpose": "PostgreSQL database specialist for query optimization, schema design, security, and performance. Use PROACTIVELY when writing SQL, creating migrations, designing schemas, or troubleshooting database performance. Incorporates Supabase best practices.",
       "whenToUse": "PostgreSQL database specialist for query optimization, schema design, security, and performance. Use PROACTIVELY when writing SQL, creating migrations, designing schemas, or troubleshooting database performance. Incorporates Supabase best practices.",
       "whenNotToUse": "Do not use when a more specific skill or command applies.",
-      "tags": ["agent", "review", "database"],
+      "tags": [
+        "agent",
+        "review",
+        "database"
+      ],
       "repoRoles": [],
-      "tokenEstimate": 1336,
+      "tokenEstimate": 1329,
       "installMode": "copy-selected",
       "reviewStatus": "approved",
       "riskLevel": "low",
@@ -379,8 +433,8 @@
       "license": "MIT",
       "licenseConfidence": "high",
       "originSourceId": "ecc-affaanm",
-      "originUrl": "https://github.com/affaan-m/ECC/blob/5b173d2e6c11b976a0f13b2f59125e08956c1d47/agents/database-reviewer.md",
-      "pinnedRef": "5b173d2e6c11b976a0f13b2f59125e08956c1d47",
+      "originUrl": "https://github.com/affaan-m/ECC/blob/0c1d7be9a750627fb2a6534c78a998cc46d03f9c/agents/database-reviewer.md",
+      "pinnedRef": "0c1d7be9a750627fb2a6534c78a998cc46d03f9c",
       "ecosystem": "database",
       "requiresAny": [
         {
@@ -407,7 +461,10 @@
       "purpose": "Docker and Docker Compose patterns for local development, container security, networking, volume strategies, and multi-service orchestration.",
       "whenToUse": "Docker and Docker Compose patterns for local development, container security, networking, volume strategies, and multi-service orchestration.",
       "whenNotToUse": "Do not use when a more specific skill or command applies.",
-      "tags": ["workflow", "docker"],
+      "tags": [
+        "workflow",
+        "docker"
+      ],
       "repoRoles": [],
       "tokenEstimate": 2066,
       "installMode": "copy-selected",
@@ -437,8 +494,15 @@
       "purpose": "Idiomatic C# and .NET patterns, conventions, dependency injection, async/await, and best practices for building robust, maintainable .NET applications.",
       "whenToUse": "Idiomatic C# and .NET patterns, conventions, dependency injection, async/await, and best practices for building robust, maintainable .NET applications.",
       "whenNotToUse": "Do not use when a more specific skill or command applies.",
-      "tags": ["workflow", "backend", "dotnet", "csharp"],
-      "repoRoles": ["dotnet-service"],
+      "tags": [
+        "workflow",
+        "backend",
+        "dotnet",
+        "csharp"
+      ],
+      "repoRoles": [
+        "dotnet-service"
+      ],
       "tokenEstimate": 2308,
       "installMode": "copy-selected",
       "default": false,
@@ -462,7 +526,7 @@
     },
     {
       "id": "haus.ecc-e2e-runner",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "source": "curated",
       "type": "agent",
       "path": "agents/ecc/e2e-runner.md",
@@ -470,9 +534,12 @@
       "purpose": "End-to-end testing specialist using Vercel Agent Browser (preferred) with Playwright fallback. Use PROACTIVELY for generating, maintaining, and running E2E tests. Manages test journeys, quarantines flaky tests, uploads artifacts (screenshots, videos, traces), and ensures critical user flows work.",
       "whenToUse": "End-to-end testing specialist using Vercel Agent Browser (preferred) with Playwright fallback. Use PROACTIVELY for generating, maintaining, and running E2E tests. Manages test journeys, quarantines flaky tests, uploads artifacts (screenshots, videos, traces), and ensures critical user flows work.",
       "whenNotToUse": "Do not use when a more specific skill or command applies.",
-      "tags": ["agent", "testing"],
+      "tags": [
+        "agent",
+        "testing"
+      ],
       "repoRoles": [],
-      "tokenEstimate": 1274,
+      "tokenEstimate": 1270,
       "installMode": "copy-selected",
       "reviewStatus": "approved",
       "riskLevel": "low",
@@ -480,8 +547,8 @@
       "license": "MIT",
       "licenseConfidence": "high",
       "originSourceId": "ecc-affaanm",
-      "originUrl": "https://github.com/affaan-m/ECC/blob/5b173d2e6c11b976a0f13b2f59125e08956c1d47/agents/e2e-runner.md",
-      "pinnedRef": "5b173d2e6c11b976a0f13b2f59125e08956c1d47",
+      "originUrl": "https://github.com/affaan-m/ECC/blob/0c1d7be9a750627fb2a6534c78a998cc46d03f9c/agents/e2e-runner.md",
+      "pinnedRef": "0c1d7be9a750627fb2a6534c78a998cc46d03f9c",
       "ecosystem": "testing",
       "requiresAny": [
         {
@@ -502,8 +569,17 @@
       "purpose": "Playwright E2E testing patterns, Page Object Model, configuration, CI/CD integration, artifact management, and flaky test strategies.",
       "whenToUse": "Playwright E2E testing patterns, Page Object Model, configuration, CI/CD integration, artifact management, and flaky test strategies.",
       "whenNotToUse": "Do not use when a more specific skill or command applies.",
-      "tags": ["workflow", "testing", "playwright"],
-      "repoRoles": ["next-app", "react-app", "vue-app", "test-suite"],
+      "tags": [
+        "workflow",
+        "testing",
+        "playwright"
+      ],
+      "repoRoles": [
+        "next-app",
+        "react-app",
+        "vue-app",
+        "test-suite"
+      ],
       "tokenEstimate": 2020,
       "installMode": "copy-selected",
       "default": false,
@@ -524,7 +600,9 @@
           "dependency": "@playwright/test"
         }
       ],
-      "references": ["https://playwright.dev/docs/intro"]
+      "references": [
+        "https://playwright.dev/docs/intro"
+      ]
     },
     {
       "id": "haus.ecc-frontend-patterns",
@@ -536,7 +614,10 @@
       "purpose": "Frontend development patterns for React, Next.js, state management, performance optimization, and UI best practices.",
       "whenToUse": "Frontend development patterns for React, Next.js, state management, performance optimization, and UI best practices.",
       "whenNotToUse": "Do not use when a more specific skill or command applies.",
-      "tags": ["workflow", "frontend"],
+      "tags": [
+        "workflow",
+        "frontend"
+      ],
       "repoRoles": [],
       "tokenEstimate": 3836,
       "installMode": "copy-selected",
@@ -572,7 +653,10 @@
       "purpose": "Laravel architecture patterns, routing/controllers, Eloquent ORM, service layers, queues, events, caching, and API resources for production apps.",
       "whenToUse": "Laravel architecture patterns, routing/controllers, Eloquent ORM, service layers, queues, events, caching, and API resources for production apps.",
       "whenNotToUse": "Do not use when a more specific skill or command applies. For deeper Livewire, Horizon queue, or Sanctum-auth-specific guidance with a validation-checkpoint workflow, see haus.jeffallan-laravel-specialist.",
-      "tags": ["workflow", "laravel"],
+      "tags": [
+        "workflow",
+        "laravel"
+      ],
       "repoRoles": [],
       "tokenEstimate": 2638,
       "installMode": "copy-selected",
@@ -605,7 +689,10 @@
       "purpose": "Build and configure Laravel 10+ applications, including creating Eloquent models and relationships, implementing Sanctum authentication, configuring Horizon queues, designing RESTful APIs with API resources, and building reactive interfaces with Livewire. Use when creating Laravel models, setting up queue workers, implementing Sanctum auth flows, building Livewire components, optimising Eloquent queries, or writing Pest/PHPUnit tests for Laravel features.",
       "whenToUse": "Build and configure Laravel 10+ applications, including creating Eloquent models and relationships, implementing Sanctum authentication, configuring Horizon queues, designing RESTful APIs with API resources, and building reactive interfaces with Livewire. Use when creating Laravel models, setting up queue workers, implementing Sanctum auth flows, building Livewire components, optimising Eloquent queries, or writing Pest/PHPUnit tests for Laravel features.",
       "whenNotToUse": "Do not use when a more specific skill or command applies.",
-      "tags": ["workflow", "laravel"],
+      "tags": [
+        "workflow",
+        "laravel"
+      ],
       "repoRoles": [],
       "tokenEstimate": 2087,
       "installMode": "copy-selected",
@@ -638,7 +725,10 @@
       "purpose": "Use when building PHP applications with modern PHP 8.3+ features, Laravel, or Symfony frameworks. Invokes strict typing, PHPStan level 9, async patterns with Swoole, and PSR standards. Creates controllers, configures middleware, generates migrations, writes PHPUnit/Pest tests, defines typed DTOs and value objects, sets up dependency injection, and scaffolds REST/GraphQL APIs. Use when working with Eloquent, Doctrine, Composer, Psalm, ReactPHP, or any PHP API development.",
       "whenToUse": "Use when building PHP applications with modern PHP 8.3+ features, Laravel, or Symfony frameworks. Invokes strict typing, PHPStan level 9, async patterns with Swoole, and PSR standards. Creates controllers, configures middleware, generates migrations, writes PHPUnit/Pest tests, defines typed DTOs and value objects, sets up dependency injection, and scaffolds REST/GraphQL APIs. Use when working with Eloquent, Doctrine, Composer, Psalm, ReactPHP, or any PHP API development.",
       "whenNotToUse": "Do not use for reviewing existing PHP code changes — use haus.ecc-php-reviewer for that. Do not use when a more specific skill or command applies.",
-      "tags": ["workflow", "php"],
+      "tags": [
+        "workflow",
+        "php"
+      ],
       "repoRoles": [],
       "tokenEstimate": 1519,
       "installMode": "copy-selected",
@@ -674,7 +764,10 @@
       "purpose": "Discover and evaluate Laravel packages via LaraPlugins.io MCP. Use when the user wants to find plugins, check package health, or assess Laravel/PHP compatibility.",
       "whenToUse": "Discover and evaluate Laravel packages via LaraPlugins.io MCP. Use when the user wants to find plugins, check package health, or assess Laravel/PHP compatibility.",
       "whenNotToUse": "Do not use when a more specific skill or command applies.",
-      "tags": ["workflow", "laravel"],
+      "tags": [
+        "workflow",
+        "laravel"
+      ],
       "repoRoles": [],
       "tokenEstimate": 1599,
       "installMode": "copy-selected",
@@ -706,8 +799,16 @@
       "purpose": "Laravel testing strategies with PHPUnit, Pest, model factories, HTTP tests, Sanctum authentication testing, mocking, and coverage.",
       "whenToUse": "Laravel testing strategies with PHPUnit, Pest, model factories, HTTP tests, Sanctum authentication testing, mocking, and coverage.",
       "whenNotToUse": "Do not use when a more specific skill or command applies.",
-      "tags": ["workflow", "laravel", "phpunit", "testing"],
-      "repoRoles": ["laravel-app", "laravel-nova-app"],
+      "tags": [
+        "workflow",
+        "laravel",
+        "phpunit",
+        "testing"
+      ],
+      "repoRoles": [
+        "laravel-app",
+        "laravel-nova-app"
+      ],
       "tokenEstimate": 4443,
       "installMode": "copy-selected",
       "default": false,
@@ -745,7 +846,10 @@
       "purpose": "Verification loop for Laravel projects: env checks, linting, static analysis, tests with coverage, security scans, and deployment readiness.",
       "whenToUse": "Verification loop for Laravel projects: env checks, linting, static analysis, tests with coverage, security scans, and deployment readiness.",
       "whenNotToUse": "Do not use when a more specific skill or command applies.",
-      "tags": ["workflow", "laravel"],
+      "tags": [
+        "workflow",
+        "laravel"
+      ],
       "repoRoles": [],
       "tokenEstimate": 1066,
       "installMode": "copy-selected",
@@ -778,7 +882,10 @@
       "purpose": "NestJS architecture patterns for modules, controllers, providers, DTO validation, guards, interceptors, config, and production-grade TypeScript backends.",
       "whenToUse": "NestJS architecture patterns for modules, controllers, providers, DTO validation, guards, interceptors, config, and production-grade TypeScript backends.",
       "whenNotToUse": "Do not use when a more specific skill or command applies.",
-      "tags": ["workflow", "backend"],
+      "tags": [
+        "workflow",
+        "backend"
+      ],
       "repoRoles": [],
       "tokenEstimate": 1605,
       "installMode": "copy-selected",
@@ -803,7 +910,7 @@
     },
     {
       "id": "haus.ecc-performance-optimizer",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "source": "curated",
       "type": "agent",
       "path": "agents/ecc/performance-optimizer.md",
@@ -811,9 +918,12 @@
       "purpose": "Performance analysis and optimization specialist. Use PROACTIVELY for identifying bottlenecks, optimizing slow code, reducing bundle sizes, and improving runtime performance. Profiling, memory leaks, render optimization, and algorithmic improvements.",
       "whenToUse": "Performance analysis and optimization specialist. Use PROACTIVELY for identifying bottlenecks, optimizing slow code, reducing bundle sizes, and improving runtime performance. Profiling, memory leaks, render optimization, and algorithmic improvements.",
       "whenNotToUse": "Do not use when a more specific skill or command applies.",
-      "tags": ["agent", "quality"],
+      "tags": [
+        "agent",
+        "quality"
+      ],
       "repoRoles": [],
-      "tokenEstimate": 3367,
+      "tokenEstimate": 3364,
       "installMode": "copy-selected",
       "reviewStatus": "approved",
       "riskLevel": "low",
@@ -821,8 +931,8 @@
       "license": "MIT",
       "licenseConfidence": "high",
       "originSourceId": "ecc-affaanm",
-      "originUrl": "https://github.com/affaan-m/ECC/blob/5b173d2e6c11b976a0f13b2f59125e08956c1d47/agents/performance-optimizer.md",
-      "pinnedRef": "5b173d2e6c11b976a0f13b2f59125e08956c1d47",
+      "originUrl": "https://github.com/affaan-m/ECC/blob/0c1d7be9a750627fb2a6534c78a998cc46d03f9c/agents/performance-optimizer.md",
+      "pinnedRef": "0c1d7be9a750627fb2a6534c78a998cc46d03f9c",
       "ecosystem": "ecc",
       "optInTier": "review",
       "optInGroup": "Performance review",
@@ -835,7 +945,7 @@
     },
     {
       "id": "haus.ecc-php-reviewer",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "source": "curated",
       "type": "agent",
       "path": "agents/ecc/php-reviewer.md",
@@ -843,9 +953,13 @@
       "purpose": "Expert PHP code reviewer specializing in PSR-12 compliance, PHP type system, Eloquent ORM patterns, security, and performance. Use for all PHP code changes. MUST BE USED for PHP projects.",
       "whenToUse": "Expert PHP code reviewer specializing in PSR-12 compliance, PHP type system, Eloquent ORM patterns, security, and performance. Use for all PHP code changes. MUST BE USED for PHP projects.",
       "whenNotToUse": "Do not use for authoring new PHP code — use haus.jeffallan-php-pro for that. Do not use when a more specific skill or command applies.",
-      "tags": ["agent", "review", "php"],
+      "tags": [
+        "agent",
+        "review",
+        "php"
+      ],
       "repoRoles": [],
-      "tokenEstimate": 1431,
+      "tokenEstimate": 1428,
       "installMode": "copy-selected",
       "reviewStatus": "approved",
       "riskLevel": "low",
@@ -853,8 +967,8 @@
       "license": "MIT",
       "licenseConfidence": "high",
       "originSourceId": "ecc-affaanm",
-      "originUrl": "https://github.com/affaan-m/ECC/blob/5b173d2e6c11b976a0f13b2f59125e08956c1d47/agents/php-reviewer.md",
-      "pinnedRef": "5b173d2e6c11b976a0f13b2f59125e08956c1d47",
+      "originUrl": "https://github.com/affaan-m/ECC/blob/0c1d7be9a750627fb2a6534c78a998cc46d03f9c/agents/php-reviewer.md",
+      "pinnedRef": "0c1d7be9a750627fb2a6534c78a998cc46d03f9c",
       "ecosystem": "php",
       "requiresAny": [
         {
@@ -872,8 +986,16 @@
       "purpose": "Prisma ORM patterns for TypeScript backends — schema design, query optimization, transactions, pagination, and critical traps like updateMany returning count not records, $transaction timeouts, migrate dev resetting the DB, @updatedAt skipped on bulk writes, and serverless connection exhaustion.",
       "whenToUse": "Prisma ORM patterns for TypeScript backends — schema design, query optimization, transactions, pagination, and critical traps like updateMany returning count not records, $transaction timeouts, migrate dev resetting the DB, @updatedAt skipped on bulk writes, and serverless connection exhaustion.",
       "whenNotToUse": "Do not use when a more specific skill or command applies.",
-      "tags": ["workflow", "prisma", "backend", "database"],
-      "repoRoles": ["next-app", "nestjs-api"],
+      "tags": [
+        "workflow",
+        "prisma",
+        "backend",
+        "database"
+      ],
+      "repoRoles": [
+        "next-app",
+        "nestjs-api"
+      ],
       "tokenEstimate": 3792,
       "installMode": "copy-selected",
       "default": false,
@@ -897,11 +1019,13 @@
           "dependency": "prisma"
         }
       ],
-      "references": ["https://www.prisma.io/llms.txt"]
+      "references": [
+        "https://www.prisma.io/llms.txt"
+      ]
     },
     {
       "id": "haus.ecc-react-build-resolver",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "source": "curated",
       "type": "agent",
       "path": "agents/ecc/react-build-resolver.md",
@@ -909,9 +1033,12 @@
       "purpose": "Diagnose and fix React build failures across Vite, webpack, Next.js, CRA, Parcel, esbuild, and Bun. Handles JSX/TSX compile errors, hydration mismatches, server/client component boundary failures, missing types, and bundler-specific configuration issues with minimal, surgical changes. MUST BE USED when a React build fails.",
       "whenToUse": "Diagnose and fix React build failures across Vite, webpack, Next.js, CRA, Parcel, esbuild, and Bun. Handles JSX/TSX compile errors, hydration mismatches, server/client component boundary failures, missing types, and bundler-specific configuration issues with minimal, surgical changes. MUST BE USED when a React build fails.",
       "whenNotToUse": "Do not use when a more specific skill or command applies.",
-      "tags": ["agent", "react"],
+      "tags": [
+        "agent",
+        "react"
+      ],
       "repoRoles": [],
-      "tokenEstimate": 2801,
+      "tokenEstimate": 2797,
       "installMode": "copy-selected",
       "reviewStatus": "approved",
       "riskLevel": "low",
@@ -919,8 +1046,8 @@
       "license": "MIT",
       "licenseConfidence": "high",
       "originSourceId": "ecc-affaanm",
-      "originUrl": "https://github.com/affaan-m/ECC/blob/5b173d2e6c11b976a0f13b2f59125e08956c1d47/agents/react-build-resolver.md",
-      "pinnedRef": "5b173d2e6c11b976a0f13b2f59125e08956c1d47",
+      "originUrl": "https://github.com/affaan-m/ECC/blob/0c1d7be9a750627fb2a6534c78a998cc46d03f9c/agents/react-build-resolver.md",
+      "pinnedRef": "0c1d7be9a750627fb2a6534c78a998cc46d03f9c",
       "ecosystem": "react",
       "requiresAny": [
         {
@@ -933,7 +1060,7 @@
     },
     {
       "id": "haus.ecc-react-reviewer",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "source": "curated",
       "type": "agent",
       "path": "agents/ecc/react-reviewer.md",
@@ -941,9 +1068,13 @@
       "purpose": "Expert React/JSX code reviewer specializing in hook correctness, render performance, server/client component boundaries, accessibility, and React-specific security. Use for any change touching .tsx/.jsx files or React component logic. MUST BE USED for React projects.",
       "whenToUse": "Expert React/JSX code reviewer specializing in hook correctness, render performance, server/client component boundaries, accessibility, and React-specific security. Use for any change touching .tsx/.jsx files or React component logic. MUST BE USED for React projects.",
       "whenNotToUse": "Do not use when a more specific skill or command applies.",
-      "tags": ["agent", "review", "react"],
+      "tags": [
+        "agent",
+        "review",
+        "react"
+      ],
       "repoRoles": [],
-      "tokenEstimate": 2856,
+      "tokenEstimate": 2853,
       "installMode": "copy-selected",
       "reviewStatus": "approved",
       "riskLevel": "low",
@@ -951,8 +1082,8 @@
       "license": "MIT",
       "licenseConfidence": "high",
       "originSourceId": "ecc-affaanm",
-      "originUrl": "https://github.com/affaan-m/ECC/blob/5b173d2e6c11b976a0f13b2f59125e08956c1d47/agents/react-reviewer.md",
-      "pinnedRef": "5b173d2e6c11b976a0f13b2f59125e08956c1d47",
+      "originUrl": "https://github.com/affaan-m/ECC/blob/0c1d7be9a750627fb2a6534c78a998cc46d03f9c/agents/react-reviewer.md",
+      "pinnedRef": "0c1d7be9a750627fb2a6534c78a998cc46d03f9c",
       "ecosystem": "react",
       "requiresAny": [
         {
@@ -973,7 +1104,11 @@
       "purpose": "React component testing with React Testing Library, Vitest/Jest, MSW for network mocking, accessibility assertions with axe, and the decision boundary between component tests and Playwright/Cypress end-to-end runs. Use when writing or fixing tests for React components, hooks, or pages.",
       "whenToUse": "React component testing with React Testing Library, Vitest/Jest, MSW for network mocking, accessibility assertions with axe, and the decision boundary between component tests and Playwright/Cypress end-to-end runs. Use when writing or fixing tests for React components, hooks, or pages.",
       "whenNotToUse": "Do not use when a more specific skill or command applies.",
-      "tags": ["workflow", "testing-library", "testing"],
+      "tags": [
+        "workflow",
+        "testing-library",
+        "testing"
+      ],
       "repoRoles": [],
       "tokenEstimate": 3292,
       "installMode": "copy-selected",
@@ -998,7 +1133,9 @@
           "dependency": "@testing-library/dom"
         }
       ],
-      "references": ["https://vitest.dev/guide"]
+      "references": [
+        "https://vitest.dev/guide"
+      ]
     },
     {
       "id": "haus.ecc-redis-patterns",
@@ -1010,8 +1147,16 @@
       "purpose": "Redis data structure patterns, caching strategies, distributed locks, rate limiting, pub/sub, and connection management for production applications.",
       "whenToUse": "Redis data structure patterns, caching strategies, distributed locks, rate limiting, pub/sub, and connection management for production applications.",
       "whenNotToUse": "Use haus.bullmq-patterns for BullMQ queue-specific work.",
-      "tags": ["workflow", "redis", "backend", "database"],
-      "repoRoles": ["vendure-app", "nestjs-api"],
+      "tags": [
+        "workflow",
+        "redis",
+        "backend",
+        "database"
+      ],
+      "repoRoles": [
+        "vendure-app",
+        "nestjs-api"
+      ],
       "tokenEstimate": 2966,
       "installMode": "copy-selected",
       "default": false,
@@ -1046,7 +1191,10 @@
       "purpose": "Dead code cleanup and consolidation specialist. Use PROACTIVELY for removing unused code, duplicates, and refactoring. Runs analysis tools (knip, depcheck, ts-prune) to identify dead code and safely removes it.",
       "whenToUse": "Dead code cleanup and consolidation specialist. Use PROACTIVELY for removing unused code, duplicates, and refactoring. Runs analysis tools (knip, depcheck, ts-prune) to identify dead code and safely removes it.",
       "whenNotToUse": "Do not use when a more specific skill or command applies.",
-      "tags": ["agent", "quality"],
+      "tags": [
+        "agent",
+        "quality"
+      ],
       "repoRoles": [],
       "tokenEstimate": 670,
       "installMode": "copy-selected",
@@ -1069,6 +1217,42 @@
       ]
     },
     {
+      "version": "1.0.2",
+      "source": "curated",
+      "type": "agent",
+      "repoRoles": [],
+      "installMode": "copy-selected",
+      "reviewStatus": "approved",
+      "riskLevel": "low",
+      "useMode": "copy",
+      "license": "MIT",
+      "licenseConfidence": "high",
+      "originSourceId": "ecc-affaanm",
+      "pinnedRef": "0c1d7be9a750627fb2a6534c78a998cc46d03f9c",
+      "default": false,
+      "id": "haus.ecc-security-reviewer",
+      "path": "agents/ecc/security-reviewer.md",
+      "title": "Security Reviewer",
+      "purpose": "Security vulnerability detection and remediation specialist. Use PROACTIVELY after writing code that handles user input, authentication, API endpoints, or sensitive data. Flags secrets, SSRF, injection, unsafe crypto, and OWASP Top 10 vulnerabilities.",
+      "whenToUse": "Security vulnerability detection and remediation specialist. Use PROACTIVELY after writing code that handles user input, authentication, API endpoints, or sensitive data. Flags secrets, SSRF, injection, unsafe crypto, and OWASP Top 10 vulnerabilities.",
+      "tags": [
+        "agent",
+        "review",
+        "security"
+      ],
+      "tokenEstimate": 1362,
+      "ecosystem": "security",
+      "optInTier": "review",
+      "optInGroup": "Security review",
+      "originUrl": "https://github.com/affaan-m/ECC/blob/0c1d7be9a750627fb2a6534c78a998cc46d03f9c/agents/security-reviewer.md",
+      "requiresAny": [
+        {
+          "role": "security-review"
+        }
+      ],
+      "whenNotToUse": "Do not use when a more specific skill or command applies."
+    },
+    {
       "version": "1.0.1",
       "source": "curated",
       "type": "agent",
@@ -1080,49 +1264,21 @@
       "license": "MIT",
       "licenseConfidence": "high",
       "originSourceId": "ecc-affaanm",
-      "pinnedRef": "ec92b528471df708c2384ebbcc82b390b60f535a",
-      "default": false,
-      "id": "haus.ecc-security-reviewer",
-      "path": "agents/ecc/security-reviewer.md",
-      "title": "Security Reviewer",
-      "purpose": "Security vulnerability detection and remediation specialist. Use PROACTIVELY after writing code that handles user input, authentication, API endpoints, or sensitive data. Flags secrets, SSRF, injection, unsafe crypto, and OWASP Top 10 vulnerabilities.",
-      "whenToUse": "Security vulnerability detection and remediation specialist. Use PROACTIVELY after writing code that handles user input, authentication, API endpoints, or sensitive data. Flags secrets, SSRF, injection, unsafe crypto, and OWASP Top 10 vulnerabilities.",
-      "tags": ["agent", "review", "security"],
-      "tokenEstimate": 1369,
-      "ecosystem": "security",
-      "optInTier": "review",
-      "optInGroup": "Security review",
-      "originUrl": "https://github.com/affaan-m/ECC/blob/ec92b528471df708c2384ebbcc82b390b60f535a/agents/security-reviewer.md",
-      "requiresAny": [
-        {
-          "role": "security-review"
-        }
-      ],
-      "whenNotToUse": "Do not use when a more specific skill or command applies."
-    },
-    {
-      "version": "1.0.0",
-      "source": "curated",
-      "type": "agent",
-      "repoRoles": [],
-      "installMode": "copy-selected",
-      "reviewStatus": "approved",
-      "riskLevel": "low",
-      "useMode": "copy",
-      "license": "MIT",
-      "licenseConfidence": "high",
-      "originSourceId": "ecc-affaanm",
-      "pinnedRef": "ec92b528471df708c2384ebbcc82b390b60f535a",
+      "pinnedRef": "0c1d7be9a750627fb2a6534c78a998cc46d03f9c",
       "default": false,
       "id": "haus.ecc-typescript-reviewer",
       "path": "agents/ecc/typescript-reviewer.md",
       "title": "TypeScript Reviewer",
       "purpose": "Expert TypeScript/JavaScript code reviewer specializing in type safety, async correctness, Node/web security, and idiomatic patterns. Use for all TypeScript and JavaScript code changes. MUST BE USED for TypeScript/JavaScript projects.",
       "whenToUse": "Expert TypeScript/JavaScript code reviewer specializing in type safety, async correctness, Node/web security, and idiomatic patterns. Use for all TypeScript and JavaScript code changes. MUST BE USED for TypeScript/JavaScript projects.",
-      "tags": ["agent", "review", "typescript"],
-      "tokenEstimate": 2270,
+      "tags": [
+        "agent",
+        "review",
+        "typescript"
+      ],
+      "tokenEstimate": 2267,
       "ecosystem": "typescript",
-      "originUrl": "https://github.com/affaan-m/ECC/blob/ec92b528471df708c2384ebbcc82b390b60f535a/agents/typescript-reviewer.md",
+      "originUrl": "https://github.com/affaan-m/ECC/blob/0c1d7be9a750627fb2a6534c78a998cc46d03f9c/agents/typescript-reviewer.md",
       "requiresAny": [
         {
           "stack": "typescript5"
@@ -1143,7 +1299,10 @@
       "purpose": "Vite build tool patterns including config, plugins, HMR, env variables, proxy setup, SSR, library mode, dependency pre-bundling, and build optimization. Activate when working with vite.config.ts, Vite plugins, or Vite-based projects.",
       "whenToUse": "Vite build tool patterns including config, plugins, HMR, env variables, proxy setup, SSR, library mode, dependency pre-bundling, and build optimization. Activate when working with vite.config.ts, Vite plugins, or Vite-based projects.",
       "whenNotToUse": "Do not use when a more specific skill or command applies.",
-      "tags": ["workflow", "frontend"],
+      "tags": [
+        "workflow",
+        "frontend"
+      ],
       "repoRoles": [],
       "tokenEstimate": 4279,
       "installMode": "copy-selected",
@@ -1176,8 +1335,13 @@
       "purpose": "Vue.js 3 Composition API patterns, component architecture, reactivity best practices, Pinia state management, Vue Router navigation, and Nuxt SSR patterns. Activates for Vue, Nuxt, Vite, or Pinia projects.",
       "whenToUse": "Vue.js 3 Composition API patterns, component architecture, reactivity best practices, Pinia state management, Vue Router navigation, and Nuxt SSR patterns. Activates for Vue, Nuxt, Vite, or Pinia projects.",
       "whenNotToUse": "Use haus.antfu-vue for the authoritative, doc-generated core Composition API/reactivity reference.",
-      "tags": ["workflow", "vue"],
-      "repoRoles": ["vue-app"],
+      "tags": [
+        "workflow",
+        "vue"
+      ],
+      "repoRoles": [
+        "vue-app"
+      ],
       "tokenEstimate": 3268,
       "installMode": "copy-selected",
       "default": false,
@@ -1198,10 +1362,12 @@
           "dependency": "vue"
         }
       ],
-      "references": ["https://vuejs.org/llms.txt"]
+      "references": [
+        "https://vuejs.org/llms.txt"
+      ]
     },
     {
-      "version": "1.0.0",
+      "version": "1.0.1",
       "source": "curated",
       "type": "agent",
       "repoRoles": [],
@@ -1212,17 +1378,21 @@
       "license": "MIT",
       "licenseConfidence": "high",
       "originSourceId": "ecc-affaanm",
-      "pinnedRef": "ec92b528471df708c2384ebbcc82b390b60f535a",
+      "pinnedRef": "0c1d7be9a750627fb2a6534c78a998cc46d03f9c",
       "default": false,
       "id": "haus.ecc-vue-reviewer",
       "path": "agents/ecc/vue-reviewer.md",
       "title": "Vue Reviewer",
       "purpose": "Expert Vue.js code reviewer specializing in Composition API correctness, reactivity pitfalls, component architecture, template security, and Vue-specific performance. Use for any change touching .vue, .ts/.js files with Vue imports, or Vue ecosystem code (Pinia, Vue Router, Nuxt). MUST BE USED for Vue projects.",
       "whenToUse": "Expert Vue.js code reviewer specializing in Composition API correctness, reactivity pitfalls, component architecture, template security, and Vue-specific performance. Use for any change touching .vue, .ts/.js files with Vue imports, or Vue ecosystem code (Pinia, Vue Router, Nuxt). MUST BE USED for Vue projects.",
-      "tags": ["agent", "review", "vue"],
-      "tokenEstimate": 3833,
+      "tags": [
+        "agent",
+        "review",
+        "vue"
+      ],
+      "tokenEstimate": 3830,
       "ecosystem": "vue",
-      "originUrl": "https://github.com/affaan-m/ECC/blob/ec92b528471df708c2384ebbcc82b390b60f535a/agents/vue-reviewer.md",
+      "originUrl": "https://github.com/affaan-m/ECC/blob/0c1d7be9a750627fb2a6534c78a998cc46d03f9c/agents/vue-reviewer.md",
       "requiresAny": [
         {
           "stack": "vue"
@@ -1243,7 +1413,11 @@
       "purpose": "ESLint 9.x flat config for Haus Tech TypeScript/React projects.",
       "whenToUse": "Recommended when `eslint` is missing from the repo. Run `haus scaffold haus.eslint-config` to copy the config into the project root.",
       "whenNotToUse": "Do not scaffold if the project already has a custom ESLint config that extends beyond the Haus baseline.",
-      "tags": ["eslint", "tooling", "quality"],
+      "tags": [
+        "eslint",
+        "tooling",
+        "quality"
+      ],
       "repoRoles": [],
       "requiresAny": [
         {
@@ -1266,10 +1440,21 @@
       "purpose": "Guide i18next setup, namespace structure, translation key conventions, and SSR-safe usage.",
       "whenToUse": "Use for adding/changing translations, configuring i18next, or wiring react-i18next / next-i18next.",
       "whenNotToUse": "Do not use for non-i18next translation systems or static-only content with no locale.",
-      "references": ["https://www.i18next.com/llms.txt"],
+      "references": [
+        "https://www.i18next.com/llms.txt"
+      ],
       "tokenBudget": 1200,
-      "tags": ["i18next", "i18n", "frontend"],
-      "repoRoles": ["next-app", "react-app", "vue-app", "vite-app"],
+      "tags": [
+        "i18next",
+        "i18n",
+        "frontend"
+      ],
+      "repoRoles": [
+        "next-app",
+        "react-app",
+        "vue-app",
+        "vite-app"
+      ],
       "requiresAny": [
         {
           "stack": "i18next"
@@ -1297,10 +1482,17 @@
       "purpose": "Guide Nova admin resources, actions, and policy-safe field behavior.",
       "whenToUse": "Use for Laravel Nova resources, actions, filters, and admin UI behavior.",
       "whenNotToUse": "Do not use for customer-facing API/domain-only changes.",
-      "references": ["https://nova.laravel.com/docs/llms.txt"],
+      "references": [
+        "https://nova.laravel.com/docs/llms.txt"
+      ],
       "tokenBudget": 1200,
-      "tags": ["laravel-nova", "laravel"],
-      "repoRoles": ["laravel-nova-app"],
+      "tags": [
+        "laravel-nova",
+        "laravel"
+      ],
+      "repoRoles": [
+        "laravel-nova-app"
+      ],
       "requiresAny": [
         {
           "dependency": "laravel/nova"
@@ -1322,7 +1514,10 @@
       "purpose": "Commit-time secret scanning (gitleaks + grep fallback) wired via Lefthook, complementing haus's runtime guards and settings.json deny rules.",
       "whenToUse": "Projects that want a commit-time secret-detection net alongside haus's real-time PreToolUse guards.",
       "whenNotToUse": "Repos that already run a secret-scanning pre-commit hook, or that cannot install gitleaks.",
-      "tags": ["security", "workflow"],
+      "tags": [
+        "security",
+        "workflow"
+      ],
       "repoRoles": [],
       "ecosystem": "security",
       "installMode": "copy-selected",
@@ -1342,7 +1537,10 @@
       "purpose": "Copy-paste skeleton for Architecture Decision Records under docs/decisions/.",
       "whenToUse": "When drafting a new ADR manually or seeding docs/decisions/ in a new repo.",
       "whenNotToUse": "Prefer `haus decisions suggest` for machine-drafted ADRs during development.",
-      "tags": ["workflow", "project-instructions"],
+      "tags": [
+        "workflow",
+        "project-instructions"
+      ],
       "repoRoles": [],
       "ecosystem": "general",
       "installMode": "copy-selected",
@@ -1361,7 +1559,10 @@
       "purpose": "CI job fragment that runs `haus decisions check` on pull requests.",
       "whenToUse": "Projects using haus ADR enforcement that need a merge-blocking decisions gate.",
       "whenNotToUse": "Repos without haus CLI in CI or that have not adopted docs/decisions/.",
-      "tags": ["workflow", "quality"],
+      "tags": [
+        "workflow",
+        "quality"
+      ],
       "repoRoles": [],
       "ecosystem": "general",
       "installMode": "copy-selected",
@@ -1380,7 +1581,11 @@
       "purpose": "Draft and gate Architecture Decision Records when changes are decision-worthy; machine drafts, human approves.",
       "whenToUse": "When `haus decisions suggest` fires, adding deps/schema/auth/API changes, or answering why a choice was made.",
       "whenNotToUse": "Trivial edits with no architectural consequence.",
-      "tags": ["workflow", "haus", "project-instructions"],
+      "tags": [
+        "workflow",
+        "haus",
+        "project-instructions"
+      ],
       "repoRoles": [],
       "ecosystem": "general",
       "tokenEstimate": 650,
@@ -1399,10 +1604,18 @@
       "purpose": "Guide NextAuth.js / Auth.js provider, session, callback, and middleware changes in Next.js apps.",
       "whenToUse": "Use for `next-auth` / `@auth/core` provider setup, session strategy, callbacks, JWT, and route protection in Next.js.",
       "whenNotToUse": "Do not use for Laravel/PHP auth, OIDC outside Next.js, or session-less API tokens.",
-      "references": ["https://authjs.dev/"],
+      "references": [
+        "https://authjs.dev/"
+      ],
       "tokenBudget": 1200,
-      "tags": ["next-auth", "auth", "nextjs"],
-      "repoRoles": ["next-app"],
+      "tags": [
+        "next-auth",
+        "auth",
+        "nextjs"
+      ],
+      "repoRoles": [
+        "next-app"
+      ],
       "requiresAny": [
         {
           "stack": "next-auth"
@@ -1430,7 +1643,10 @@
       "purpose": "UI/UX Designer-Developer for stunning interfaces (Sonnet)",
       "whenToUse": "UI/UX Designer-Developer for stunning interfaces (Sonnet)",
       "whenNotToUse": "Do not use when a more specific skill or command applies.",
-      "tags": ["agent", "frontend"],
+      "tags": [
+        "agent",
+        "frontend"
+      ],
       "repoRoles": [],
       "tokenEstimate": 2407,
       "installMode": "copy-selected",
@@ -1462,7 +1678,10 @@
       "purpose": "Test strategy, integration/e2e coverage, flaky test hardening, TDD workflows",
       "whenToUse": "Test strategy, integration/e2e coverage, flaky test hardening, TDD workflows",
       "whenNotToUse": "Do not use when a more specific skill or command applies.",
-      "tags": ["agent", "testing"],
+      "tags": [
+        "agent",
+        "testing"
+      ],
       "repoRoles": [],
       "tokenEstimate": 1656,
       "installMode": "copy-selected",
@@ -1495,7 +1714,10 @@
       "purpose": "Evidence-driven causal tracing with competing hypotheses, evidence for/against, uncertainty tracking, and next-probe recommendations",
       "whenToUse": "Evidence-driven causal tracing with competing hypotheses, evidence for/against, uncertainty tracking, and next-probe recommendations",
       "whenNotToUse": "Do not use when a more specific skill or command applies.",
-      "tags": ["agent", "quality"],
+      "tags": [
+        "agent",
+        "quality"
+      ],
       "repoRoles": [],
       "tokenEstimate": 3004,
       "installMode": "copy-selected",
@@ -1528,7 +1750,10 @@
       "whenToUse": "Use for lockfile, workspace, and package manager configuration changes.",
       "whenNotToUse": "Do not use for feature-only code edits with no dependency/workspace impact.",
       "tokenBudget": 1200,
-      "tags": ["yarn4", "pnpm89"],
+      "tags": [
+        "yarn4",
+        "pnpm89"
+      ],
       "repoRoles": [],
       "requiresAny": [
         {
@@ -1554,7 +1779,11 @@
       "purpose": "Prettier config and .prettierignore for Haus Tech projects.",
       "whenToUse": "Recommended when `prettier` is missing from the repo. Run `haus scaffold haus.prettier-config` to copy the config into the project root.",
       "whenNotToUse": "Do not scaffold if the project already has a custom Prettier config.",
-      "tags": ["prettier", "tooling", "quality"],
+      "tags": [
+        "prettier",
+        "tooling",
+        "quality"
+      ],
       "repoRoles": [],
       "requiresAny": [
         {
@@ -1578,8 +1807,16 @@
       "whenToUse": "Use for Qliro Checkout flow, order callbacks, refund handling, and merchant API config.",
       "whenNotToUse": "Do not use for non-Nordic payment providers or Stripe-only flows.",
       "tokenBudget": 1200,
-      "tags": ["qliro", "payments", "tooling"],
-      "repoRoles": ["vendure-app", "vendure-plugin", "next-app"],
+      "tags": [
+        "qliro",
+        "payments",
+        "tooling"
+      ],
+      "repoRoles": [
+        "vendure-app",
+        "vendure-plugin",
+        "next-app"
+      ],
       "requiresAny": [
         {
           "stack": "qliro"
@@ -1604,10 +1841,19 @@
       "purpose": "Guide React Router v7 SSR route, loader, and action boundary changes.",
       "whenToUse": "Use for routes, loaders, actions, and SSR config in React Router v7 apps.",
       "whenNotToUse": "Do not use for Next.js App Router or Remix v1 codebases.",
-      "references": ["https://reactrouter.com/start/framework/installation"],
+      "references": [
+        "https://reactrouter.com/start/framework/installation"
+      ],
       "tokenBudget": 1200,
-      "tags": ["frontend", "react", "typescript"],
-      "repoRoles": ["react-router-app", "react-app"],
+      "tags": [
+        "frontend",
+        "react",
+        "typescript"
+      ],
+      "repoRoles": [
+        "react-router-app",
+        "react-app"
+      ],
       "requiresAny": [
         {
           "stack": "react-router-v7"
@@ -1635,7 +1881,11 @@
       "purpose": "Redis client and connection guidance covering connection pooling, multiplexing, pipelining, client-side caching with RESP3, avoiding slow commands (KEYS, SMEMBERS, HGETALL), and tuning socket timeouts. Use when configuring a Redis client (redis-py, Jedis, Lettuce, NRedisStack), batching commands for throughput, eliminating per-request connection creation, iterating large keyspaces with SCAN, enabling client-side caching for read-heavy workloads, or setting connect and read timeouts.",
       "whenToUse": "Redis client and connection guidance covering connection pooling, multiplexing, pipelining, client-side caching with RESP3, avoiding slow commands (KEYS, SMEMBERS, HGETALL), and tuning socket timeouts. Use when configuring a Redis client (redis-py, Jedis, Lettuce, NRedisStack), batching commands for throughput, eliminating per-request connection creation, iterating large keyspaces with SCAN, enabling client-side caching for read-heavy workloads, or setting connect and read timeouts.",
       "whenNotToUse": "Do not use when a more specific skill or command applies.",
-      "tags": ["workflow", "redis", "database"],
+      "tags": [
+        "workflow",
+        "redis",
+        "database"
+      ],
       "repoRoles": [],
       "tokenEstimate": 3462,
       "installMode": "copy-selected",
@@ -1668,7 +1918,11 @@
       "purpose": "Redis observability guidance — which metrics to monitor (memory, connections, hit ratio, ops/sec, rejected connections), which built-in commands to reach for during incident triage (SLOWLOG, INFO, MEMORY DOCTOR, CLIENT LIST, FT.PROFILE), and when to use the Redis Insight GUI. Use when setting up monitoring or alerts for a Redis instance, diagnosing a performance regression, profiling a slow FT.SEARCH query, or wiring Redis metrics into Prometheus, Datadog, or similar.",
       "whenToUse": "Redis observability guidance — which metrics to monitor (memory, connections, hit ratio, ops/sec, rejected connections), which built-in commands to reach for during incident triage (SLOWLOG, INFO, MEMORY DOCTOR, CLIENT LIST, FT.PROFILE), and when to use the Redis Insight GUI. Use when setting up monitoring or alerts for a Redis instance, diagnosing a performance regression, profiling a slow FT.SEARCH query, or wiring Redis metrics into Prometheus, Datadog, or similar.",
       "whenNotToUse": "Everyday Redis usage is covered by redis-redis-connections. Install only for monitoring, triage, and observability setup (role:redis-ops).",
-      "tags": ["workflow", "redis", "observability"],
+      "tags": [
+        "workflow",
+        "redis",
+        "observability"
+      ],
       "repoRoles": [],
       "tokenEstimate": 1546,
       "installMode": "copy-selected",
@@ -1700,7 +1954,11 @@
       "purpose": "Redis security guidance covering authentication (requirepass and ACL users), TLS, ACL-based least-privilege access control, restricting network exposure via bind and protected-mode, firewall rules, and disabling dangerous commands. Use when deploying Redis to production, defining ACL users for an application, configuring TLS connections, locking down a Redis instance behind a firewall, or auditing a Redis deployment for security hardening.",
       "whenToUse": "Redis security guidance covering authentication (requirepass and ACL users), TLS, ACL-based least-privilege access control, restricting network exposure via bind and protected-mode, firewall rules, and disabling dangerous commands. Use when deploying Redis to production, defining ACL users for an application, configuring TLS connections, locking down a Redis instance behind a firewall, or auditing a Redis deployment for security hardening.",
       "whenNotToUse": "Everyday Redis usage is covered by redis-redis-connections. Install only for production hardening / ACL / TLS workflows (role:redis-ops).",
-      "tags": ["workflow", "redis", "security"],
+      "tags": [
+        "workflow",
+        "redis",
+        "security"
+      ],
       "repoRoles": [],
       "tokenEstimate": 1887,
       "installMode": "copy-selected",
@@ -1732,8 +1990,14 @@
       "purpose": "Structured content modeling guidance for schema design, content architecture, content reuse, references versus embedded objects, separation of concerns, and taxonomies across Sanity and other headless CMSes. Use this skill when designing or refactoring content types, deciding field shapes, debating reusable versus nested content, planning omnichannel content models, or reviewing whether a schema is too page-shaped or presentation-driven.",
       "whenToUse": "Structured content modeling guidance for schema design, content architecture, content reuse, references versus embedded objects, separation of concerns, and taxonomies across Sanity and other headless CMSes. Use this skill when designing or refactoring content types, deciding field shapes, debating reusable versus nested content, planning omnichannel content models, or reviewing whether a schema is too page-shaped or presentation-driven.",
       "whenNotToUse": "Do not use when a more specific skill or command applies.",
-      "references": ["https://docs.sanity.io/llms.txt"],
-      "tags": ["workflow", "sanity", "cms"],
+      "references": [
+        "https://docs.sanity.io/llms.txt"
+      ],
+      "tags": [
+        "workflow",
+        "sanity",
+        "cms"
+      ],
       "repoRoles": [],
       "tokenEstimate": 3195,
       "installMode": "copy-selected",
@@ -1758,7 +2022,7 @@
     },
     {
       "id": "haus.sentry-sentry-nestjs-sdk",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "source": "curated",
       "type": "skill",
       "path": "skills/sentry/sentry-nestjs-sdk",
@@ -1766,7 +2030,12 @@
       "purpose": "Full Sentry SDK setup for NestJS. Use when asked to \"add Sentry to NestJS\", \"install @sentry/nestjs\", \"setup Sentry in NestJS\", or configure error monitoring, tracing, profiling, logging, metrics, crons, or AI monitoring for NestJS applications. Supports Express and Fastify adapters, GraphQL, microservices, WebSockets, and background jobs.",
       "whenToUse": "Full Sentry SDK setup for NestJS. Use when asked to \"add Sentry to NestJS\", \"install @sentry/nestjs\", \"setup Sentry in NestJS\", or configure error monitoring, tracing, profiling, logging, metrics, crons, or AI monitoring for NestJS applications. Supports Express and Fastify adapters, GraphQL, microservices, WebSockets, and background jobs.",
       "whenNotToUse": "Do not use when a more specific skill or command applies.",
-      "tags": ["workflow", "sentry", "nestjs", "observability"],
+      "tags": [
+        "workflow",
+        "sentry",
+        "nestjs",
+        "observability"
+      ],
       "repoRoles": [],
       "tokenEstimate": 8787,
       "installMode": "copy-selected",
@@ -1777,8 +2046,8 @@
       "license": "MIT",
       "licenseConfidence": "high",
       "originSourceId": "getsentry-sentry-for-ai",
-      "originUrl": "https://github.com/getsentry/sentry-for-ai/blob/bef529f88175f0f9bbce6d203f93383e394d1467/skills/sentry-nestjs-sdk/SKILL.md",
-      "pinnedRef": "bef529f88175f0f9bbce6d203f93383e394d1467",
+      "originUrl": "https://github.com/getsentry/sentry-for-ai/blob/d33bb6d87734316d7561be0f9b78bec795ecd795/skills-legacy/sentry-nestjs-sdk/SKILL.md",
+      "pinnedRef": "d33bb6d87734316d7561be0f9b78bec795ecd795",
       "ecosystem": "sentry",
       "requiresAny": [
         {
@@ -1791,7 +2060,7 @@
     },
     {
       "id": "haus.sentry-sentry-nextjs-sdk",
-      "version": "1.0.3",
+      "version": "1.0.4",
       "source": "curated",
       "type": "skill",
       "path": "skills/sentry/sentry-nextjs-sdk",
@@ -1799,7 +2068,12 @@
       "purpose": "Full Sentry SDK setup for Next.js. Use when asked to \"add Sentry to Next.js\", \"install @sentry/nextjs\", or configure error monitoring, tracing, session replay, logging, profiling, AI monitoring, or crons for Next.js applications. Supports Next.js 13+ with App Router and Pages Router.",
       "whenToUse": "Full Sentry SDK setup for Next.js. Use when asked to \"add Sentry to Next.js\", \"install @sentry/nextjs\", or configure error monitoring, tracing, session replay, logging, profiling, AI monitoring, or crons for Next.js applications. Supports Next.js 13+ with App Router and Pages Router.",
       "whenNotToUse": "Do not use when a more specific skill or command applies.",
-      "tags": ["workflow", "sentry", "nextjs", "observability"],
+      "tags": [
+        "workflow",
+        "sentry",
+        "nextjs",
+        "observability"
+      ],
       "repoRoles": [],
       "tokenEstimate": 4731,
       "installMode": "copy-selected",
@@ -1810,8 +2084,8 @@
       "license": "MIT",
       "licenseConfidence": "high",
       "originSourceId": "getsentry-sentry-for-ai",
-      "originUrl": "https://github.com/getsentry/sentry-for-ai/blob/bef529f88175f0f9bbce6d203f93383e394d1467/skills/sentry-nextjs-sdk/SKILL.md",
-      "pinnedRef": "bef529f88175f0f9bbce6d203f93383e394d1467",
+      "originUrl": "https://github.com/getsentry/sentry-for-ai/blob/d33bb6d87734316d7561be0f9b78bec795ecd795/skills-legacy/sentry-nextjs-sdk/SKILL.md",
+      "pinnedRef": "d33bb6d87734316d7561be0f9b78bec795ecd795",
       "ecosystem": "sentry",
       "requiresAny": [
         {
@@ -1824,7 +2098,7 @@
     },
     {
       "id": "haus.sentry-sentry-node-sdk",
-      "version": "1.0.3",
+      "version": "1.0.4",
       "source": "curated",
       "type": "skill",
       "path": "skills/sentry/sentry-node-sdk",
@@ -1832,7 +2106,12 @@
       "purpose": "Full Sentry SDK setup for Node.js, Bun, and Deno. Use when asked to \"add Sentry to Node.js\", \"add Sentry to Bun\", \"add Sentry to Deno\", \"install @sentry/node\", \"@sentry/bun\", or \"@sentry/deno\", or configure error monitoring, tracing, logging, profiling, metrics, crons, or AI monitoring for server-side JavaScript/TypeScript runtimes.",
       "whenToUse": "Full Sentry SDK setup for Node.js, Bun, and Deno. Use when asked to \"add Sentry to Node.js\", \"add Sentry to Bun\", \"add Sentry to Deno\", \"install @sentry/node\", \"@sentry/bun\", or \"@sentry/deno\", or configure error monitoring, tracing, logging, profiling, metrics, crons, or AI monitoring for server-side JavaScript/TypeScript runtimes.",
       "whenNotToUse": "Prefer sentry-nestjs-sdk for NestJS apps using @sentry/nestjs.",
-      "tags": ["workflow", "sentry", "backend", "observability"],
+      "tags": [
+        "workflow",
+        "sentry",
+        "backend",
+        "observability"
+      ],
       "repoRoles": [],
       "tokenEstimate": 8466,
       "installMode": "copy-selected",
@@ -1843,8 +2122,8 @@
       "license": "MIT",
       "licenseConfidence": "high",
       "originSourceId": "getsentry-sentry-for-ai",
-      "originUrl": "https://github.com/getsentry/sentry-for-ai/blob/bef529f88175f0f9bbce6d203f93383e394d1467/skills/sentry-node-sdk/SKILL.md",
-      "pinnedRef": "bef529f88175f0f9bbce6d203f93383e394d1467",
+      "originUrl": "https://github.com/getsentry/sentry-for-ai/blob/d33bb6d87734316d7561be0f9b78bec795ecd795/skills-legacy/sentry-node-sdk/SKILL.md",
+      "pinnedRef": "d33bb6d87734316d7561be0f9b78bec795ecd795",
       "ecosystem": "sentry",
       "requiresAny": [
         {
@@ -1857,17 +2136,22 @@
     },
     {
       "id": "haus.sentry-sentry-php-sdk",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "source": "curated",
       "type": "skill",
       "path": "skills/sentry/sentry-php-sdk",
       "title": "Sentry Sentry Php Sdk",
-      "purpose": "Full Sentry SDK setup for PHP. Use when asked to \"add Sentry to PHP\", \"install sentry/sentry\", \"setup Sentry in PHP\", or configure error monitoring, tracing, profiling, logging, metrics, or crons for PHP applications. Supports plain PHP, Laravel, and Symfony.",
-      "whenToUse": "Full Sentry SDK setup for PHP. Use when asked to \"add Sentry to PHP\", \"install sentry/sentry\", \"setup Sentry in PHP\", or configure error monitoring, tracing, profiling, logging, metrics, or crons for PHP applications. Supports plain PHP, Laravel, and Symfony.",
+      "purpose": "Full Sentry SDK setup for PHP. Use when asked to \"add Sentry to PHP\", \"install sentry/sentry\", \"setup Sentry in PHP\", or configure error monitoring, tracing, profiling, logging, metrics, crons, or AI monitoring for PHP applications. Supports plain PHP, Laravel, and Symfony.",
+      "whenToUse": "Full Sentry SDK setup for PHP. Use when asked to \"add Sentry to PHP\", \"install sentry/sentry\", \"setup Sentry in PHP\", or configure error monitoring, tracing, profiling, logging, metrics, crons, or AI monitoring for PHP applications. Supports plain PHP, Laravel, and Symfony.",
       "whenNotToUse": "Do not use when a more specific skill or command applies.",
-      "tags": ["workflow", "sentry", "laravel", "observability"],
+      "tags": [
+        "workflow",
+        "sentry",
+        "laravel",
+        "observability"
+      ],
       "repoRoles": [],
-      "tokenEstimate": 3588,
+      "tokenEstimate": 3735,
       "installMode": "copy-selected",
       "default": false,
       "reviewStatus": "approved",
@@ -1876,8 +2160,8 @@
       "license": "MIT",
       "licenseConfidence": "high",
       "originSourceId": "getsentry-sentry-for-ai",
-      "originUrl": "https://github.com/getsentry/sentry-for-ai/blob/34da65c94c93aed40a20ae85d9e1d1935591ad39/skills/sentry-php-sdk/SKILL.md",
-      "pinnedRef": "34da65c94c93aed40a20ae85d9e1d1935591ad39",
+      "originUrl": "https://github.com/getsentry/sentry-for-ai/blob/d33bb6d87734316d7561be0f9b78bec795ecd795/skills-legacy/sentry-php-sdk/SKILL.md",
+      "pinnedRef": "d33bb6d87734316d7561be0f9b78bec795ecd795",
       "ecosystem": "sentry",
       "requiresAny": [
         {
@@ -1885,36 +2169,6 @@
         },
         {
           "dependency": "sentry/sentry"
-        }
-      ]
-    },
-    {
-      "id": "haus.sentry-sentry-workflow",
-      "version": "1.0.1",
-      "source": "curated",
-      "type": "skill",
-      "path": "skills/sentry/sentry-workflow",
-      "title": "Sentry Sentry Workflow",
-      "purpose": "Fix production issues and review code with Sentry context. Use when asked to fix Sentry errors, debug issues, triage exceptions, review PR comments from Sentry, or resolve bugs.",
-      "whenToUse": "Fix production issues and review code with Sentry context. Use when asked to fix Sentry errors, debug issues, triage exceptions, review PR comments from Sentry, or resolve bugs.",
-      "whenNotToUse": "Do not use when a more specific skill or command applies.",
-      "tags": ["workflow", "sentry", "observability"],
-      "repoRoles": [],
-      "tokenEstimate": 633,
-      "installMode": "copy-selected",
-      "default": false,
-      "reviewStatus": "approved",
-      "riskLevel": "low",
-      "useMode": "copy",
-      "license": "MIT",
-      "licenseConfidence": "high",
-      "originSourceId": "getsentry-sentry-for-ai",
-      "originUrl": "https://github.com/getsentry/sentry-for-ai/blob/34da65c94c93aed40a20ae85d9e1d1935591ad39/skills/sentry-workflow/SKILL.md",
-      "pinnedRef": "34da65c94c93aed40a20ae85d9e1d1935591ad39",
-      "ecosystem": "sentry",
-      "requiresAny": [
-        {
-          "stack": "sentry"
         }
       ]
     },
@@ -1928,10 +2182,18 @@
       "purpose": "Guide story coverage and component API documentation updates.",
       "whenToUse": "Use for component stories, args/controls, and Storybook config changes.",
       "whenNotToUse": "Do not use for backend/service-only development tasks.",
-      "references": ["https://storybook.js.org/llms.txt"],
+      "references": [
+        "https://storybook.js.org/llms.txt"
+      ],
       "tokenBudget": 1200,
-      "tags": ["storybook"],
-      "repoRoles": ["react-app", "next-app", "vite-app"],
+      "tags": [
+        "storybook"
+      ],
+      "repoRoles": [
+        "react-app",
+        "next-app",
+        "vite-app"
+      ],
       "requiresAny": [
         {
           "stack": "storybook"
@@ -1959,10 +2221,18 @@
       "purpose": "Guide Strapi v5 content type, controller, service, and policy changes.",
       "whenToUse": "Use for Strapi content type schemas, controllers, services, and policies in v5.",
       "whenNotToUse": "Do not use for Sanity, WordPress, or other CMS work.",
-      "references": ["https://docs.strapi.io/llms.txt"],
+      "references": [
+        "https://docs.strapi.io/llms.txt"
+      ],
       "tokenBudget": 1200,
-      "tags": ["strapi", "backend", "cms"],
-      "repoRoles": ["strapi-app"],
+      "tags": [
+        "strapi",
+        "backend",
+        "cms"
+      ],
+      "repoRoles": [
+        "strapi-app"
+      ],
       "requiresAny": [
         {
           "stack": "strapi"
@@ -1982,17 +2252,21 @@
     },
     {
       "id": "haus.stripe-stripe-best-practices",
-      "version": "1.0.4",
+      "version": "1.0.5",
       "source": "curated",
       "type": "skill",
       "path": "skills/stripe/stripe-best-practices",
       "title": "Stripe Stripe Best Practices",
-      "purpose": "Guides Stripe integration decisions — API selection (Checkout Sessions vs PaymentIntents), Connect platform setup (Accounts v2, controller properties), billing/subscriptions, Treasury financial accounts, integration surfaces (Checkout, Payment Element), migrating from deprecated Stripe APIs, and security best practices (API key management, restricted keys, webhooks, OAuth). Use when building, modifying, or reviewing any Stripe integration — including accepting payments, building marketplaces, integrating Stripe, processing payments, setting up subscriptions, creating connected accounts, or implementing secure key handling.",
-      "whenToUse": "Guides Stripe integration decisions — API selection (Checkout Sessions vs PaymentIntents), Connect platform setup (Accounts v2, controller properties), billing/subscriptions, Treasury financial accounts, integration surfaces (Checkout, Payment Element), migrating from deprecated Stripe APIs, and security best practices (API key management, restricted keys, webhooks, OAuth). Use when building, modifying, or reviewing any Stripe integration — including accepting payments, building marketplaces, integrating Stripe, processing payments, setting up subscriptions, creating connected accounts, or implementing secure key handling.",
+      "purpose": "Guides Stripe integration decisions across API selection (Checkout Sessions vs PaymentIntents), Connect platform setup (Accounts v2, controller properties), billing/subscriptions, tax and registrations (Stripe Tax, automatic_tax, product tax codes), Treasury financial accounts, integration options (Checkout, Payment Element), migrating from deprecated Stripe APIs, and security best practices (API key management, restricted keys, webhooks, OAuth). Use when building, modifying, or reviewing any Stripe integration, including accepting payments, building marketplaces, integrating Stripe, processing payments, setting up subscriptions, collecting sales tax, VAT, or GST, creating connected accounts, or implementing secure key handling.",
+      "whenToUse": "Guides Stripe integration decisions across API selection (Checkout Sessions vs PaymentIntents), Connect platform setup (Accounts v2, controller properties), billing/subscriptions, tax and registrations (Stripe Tax, automatic_tax, product tax codes), Treasury financial accounts, integration options (Checkout, Payment Element), migrating from deprecated Stripe APIs, and security best practices (API key management, restricted keys, webhooks, OAuth). Use when building, modifying, or reviewing any Stripe integration, including accepting payments, building marketplaces, integrating Stripe, processing payments, setting up subscriptions, collecting sales tax, VAT, or GST, creating connected accounts, or implementing secure key handling.",
       "whenNotToUse": "Do not use when a more specific skill or command applies.",
-      "tags": ["workflow", "stripe", "payments"],
+      "tags": [
+        "workflow",
+        "stripe",
+        "payments"
+      ],
       "repoRoles": [],
-      "tokenEstimate": 862,
+      "tokenEstimate": 1147,
       "installMode": "copy-selected",
       "default": false,
       "reviewStatus": "approved",
@@ -2001,8 +2275,8 @@
       "license": "MIT",
       "licenseConfidence": "medium",
       "originSourceId": "stripe-ai",
-      "originUrl": "https://github.com/stripe/ai/blob/b8d7e28d0cc5690fb0c0be54c84cbfdd7df6e4cd/skills/stripe-best-practices/SKILL.md",
-      "pinnedRef": "b8d7e28d0cc5690fb0c0be54c84cbfdd7df6e4cd",
+      "originUrl": "https://github.com/stripe/ai/blob/2ecd560bd426075690686536200174785c94f2b5/skills/stripe-best-practices/SKILL.md",
+      "pinnedRef": "2ecd560bd426075690686536200174785c94f2b5",
       "ecosystem": "stripe",
       "requiresAny": [
         {
@@ -2018,17 +2292,21 @@
     },
     {
       "id": "haus.supabase-supabase",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "source": "curated",
       "type": "skill",
       "path": "skills/supabase/supabase",
       "title": "Supabase Supabase",
-      "purpose": "Use when doing ANY task involving Supabase. Triggers: Supabase products (Database, Auth, Edge Functions, Realtime, Storage, Vectors, Cron, Queues); client libraries and SSR integrations (supabase-js, @supabase/ssr) in Next.js, React, SvelteKit, Astro, Remix; auth issues (login, logout, sessions, JWT, cookies, getSession, getUser, getClaims, RLS); Supabase CLI or MCP server; schema changes, migrations, security audits, Postgres extensions (pg_graphql, pg_cron, pg_vector).",
-      "whenToUse": "Use when doing ANY task involving Supabase. Triggers: Supabase products (Database, Auth, Edge Functions, Realtime, Storage, Vectors, Cron, Queues); client libraries and SSR integrations (supabase-js, @supabase/ssr) in Next.js, React, SvelteKit, Astro, Remix; auth issues (login, logout, sessions, JWT, cookies, getSession, getUser, getClaims, RLS); Supabase CLI or MCP server; schema changes, migrations, security audits, Postgres extensions (pg_graphql, pg_cron, pg_vector).",
+      "purpose": "Use when doing ANY task involving Supabase. Triggers: Supabase products (Database, Auth, Edge Functions, Realtime, Storage, Vectors, Cron, Queues); client libraries and SSR integrations (supabase-js, @supabase/ssr) in Next.js, React, SvelteKit, Astro, Remix; auth issues (login, logout, sessions, JWT, cookies, getSession, getUser, getClaims, RLS); Supabase CLI or MCP server; schema changes, migrations, declarative schemas, security audits, Postgres extensions (pg_graphql, pg_cron, pg_vector).",
+      "whenToUse": "Use when doing ANY task involving Supabase. Triggers: Supabase products (Database, Auth, Edge Functions, Realtime, Storage, Vectors, Cron, Queues); client libraries and SSR integrations (supabase-js, @supabase/ssr) in Next.js, React, SvelteKit, Astro, Remix; auth issues (login, logout, sessions, JWT, cookies, getSession, getUser, getClaims, RLS); Supabase CLI or MCP server; schema changes, migrations, declarative schemas, security audits, Postgres extensions (pg_graphql, pg_cron, pg_vector).",
       "whenNotToUse": "Do not use when a more specific skill or command applies.",
-      "tags": ["workflow", "supabase", "backend"],
+      "tags": [
+        "workflow",
+        "supabase",
+        "backend"
+      ],
       "repoRoles": [],
-      "tokenEstimate": 4012,
+      "tokenEstimate": 2987,
       "installMode": "copy-selected",
       "default": false,
       "reviewStatus": "approved",
@@ -2037,8 +2315,8 @@
       "license": "MIT",
       "licenseConfidence": "medium",
       "originSourceId": "supabase-agent-skills",
-      "originUrl": "https://github.com/supabase/agent-skills/blob/1356046015476711a769601079262b5635929427/skills/supabase/SKILL.md",
-      "pinnedRef": "1356046015476711a769601079262b5635929427",
+      "originUrl": "https://github.com/supabase/agent-skills/blob/1207767388a0ffb55f21fb4e6988fee96942431d/skills/supabase/SKILL.md",
+      "pinnedRef": "1207767388a0ffb55f21fb4e6988fee96942431d",
       "ecosystem": "supabase",
       "requiresAny": [
         {
@@ -2051,17 +2329,23 @@
     },
     {
       "id": "haus.supabase-supabase-postgres-best-practices",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "source": "curated",
       "type": "skill",
       "path": "skills/supabase/supabase-postgres-best-practices",
       "title": "Supabase Supabase Postgres Best Practices",
-      "purpose": "Postgres performance optimization and best practices from Supabase. Use this skill when writing, reviewing, or optimizing Postgres queries, schema designs, or database configurations.",
-      "whenToUse": "Postgres performance optimization and best practices from Supabase. Use this skill when writing, reviewing, or optimizing Postgres queries, schema designs, or database configurations.",
+      "purpose": "Postgres best practices maintained by Supabase, for Postgres running anywhere. Load this skill BEFORE writing or changing anything that lives in a Postgres database: creating or altering tables and columns (including choosing column types), schema design, migrations and declarative schema files, RLS policies and the tests that verify them, indexes, triggers, database functions, queues and scheduled jobs (pg_cron, pgmq), vector/semantic search (pgvector), and restoring dumps (pg_restore) or importing data. Also load it when diagnosing slow queries, high CPU, timeouts, EXPLAIN plans, connection exhaustion, locking, bloat, or rows visible to the wrong user or tenant. This is not just a performance guide — schema, migration, security, and SQL authoring tasks need these rules too, even for a one-column change or a single query.",
+      "whenToUse": "Postgres best practices maintained by Supabase, for Postgres running anywhere. Load this skill BEFORE writing or changing anything that lives in a Postgres database: creating or altering tables and columns (including choosing column types), schema design, migrations and declarative schema files, RLS policies and the tests that verify them, indexes, triggers, database functions, queues and scheduled jobs (pg_cron, pgmq), vector/semantic search (pgvector), and restoring dumps (pg_restore) or importing data. Also load it when diagnosing slow queries, high CPU, timeouts, EXPLAIN plans, connection exhaustion, locking, bloat, or rows visible to the wrong user or tenant. This is not just a performance guide — schema, migration, security, and SQL authoring tasks need these rules too, even for a one-column change or a single query.",
       "whenNotToUse": "Use haus.supabase-supabase for product workflow, auth, and client integration.",
-      "tags": ["workflow", "supabase", "postgresql", "backend", "database"],
+      "tags": [
+        "workflow",
+        "supabase",
+        "postgresql",
+        "backend",
+        "database"
+      ],
       "repoRoles": [],
-      "tokenEstimate": 644,
+      "tokenEstimate": 808,
       "installMode": "copy-selected",
       "default": false,
       "reviewStatus": "approved",
@@ -2070,8 +2354,8 @@
       "license": "MIT",
       "licenseConfidence": "medium",
       "originSourceId": "supabase-agent-skills",
-      "originUrl": "https://github.com/supabase/agent-skills/blob/1356046015476711a769601079262b5635929427/skills/supabase-postgres-best-practices/SKILL.md",
-      "pinnedRef": "1356046015476711a769601079262b5635929427",
+      "originUrl": "https://github.com/supabase/agent-skills/blob/1207767388a0ffb55f21fb4e6988fee96942431d/skills/supabase-postgres-best-practices/SKILL.md",
+      "pinnedRef": "1207767388a0ffb55f21fb4e6988fee96942431d",
       "ecosystem": "supabase",
       "requiresAny": [
         {
@@ -2087,7 +2371,7 @@
     },
     {
       "id": "haus.superpowers-brainstorming",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "source": "curated",
       "type": "skill",
       "path": "skills/superpowers/brainstorming",
@@ -2095,9 +2379,12 @@
       "purpose": "You MUST use this before any creative work - creating features, building components, adding functionality, or modifying behavior. Explores user intent, requirements and design before implementation.",
       "whenToUse": "You MUST use this before any creative work - creating features, building components, adding functionality, or modifying behavior. Explores user intent, requirements and design before implementation.",
       "whenNotToUse": "Do not use for mechanical edits, bug fixes with known cause, or read-only questions.",
-      "tags": ["workflow", "core-skill"],
+      "tags": [
+        "workflow",
+        "core-skill"
+      ],
       "repoRoles": [],
-      "tokenEstimate": 3023,
+      "tokenEstimate": 2887,
       "installMode": "copy-selected",
       "default": true,
       "reviewStatus": "approved",
@@ -2106,12 +2393,13 @@
       "license": "MIT",
       "licenseConfidence": "high",
       "originSourceId": "superpowers-pcvelz",
-      "originUrl": "https://github.com/pcvelz/superpowers/tree/bd000c6ec1df53449a74397f55305b22802b9a2b/skills/brainstorming",
-      "ecosystem": "superpowers"
+      "originUrl": "https://github.com/pcvelz/superpowers/tree/e748382ff059bcc0219dae8cc1059ef7f3a938d5/skills/brainstorming",
+      "ecosystem": "superpowers",
+      "pinnedRef": "e748382ff059bcc0219dae8cc1059ef7f3a938d5"
     },
     {
       "id": "haus.superpowers-checking-gates",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "source": "curated",
       "type": "skill",
       "path": "skills/superpowers/checking-gates",
@@ -2119,9 +2407,12 @@
       "purpose": "Use when picking up a user-gate task OR when a hook demands re-validation. Runs the \"do I know HOW?\" self-check; if the HOW is clear, executes the verification and posts evidence; if not, hands off to specifying-gates. Kept deliberately separate from executing-plans so that without the opt-in hook, the main flow stays untouched.",
       "whenToUse": "Use when picking up a user-gate task OR when a hook demands re-validation. Runs the \"do I know HOW?\" self-check; if the HOW is clear, executes the verification and posts evidence; if not, hands off to specifying-gates. Kept deliberately separate from executing-plans so that without the opt-in hook, the main flow stays untouched.",
       "whenNotToUse": "Do not use when the user-gate hook is not registered or the task is not user-gated.",
-      "tags": ["workflow", "workflow-skill"],
+      "tags": [
+        "workflow",
+        "workflow-skill"
+      ],
       "repoRoles": [],
-      "tokenEstimate": 1142,
+      "tokenEstimate": 1228,
       "installMode": "copy-selected",
       "default": true,
       "reviewStatus": "approved",
@@ -2130,12 +2421,13 @@
       "license": "MIT",
       "licenseConfidence": "high",
       "originSourceId": "superpowers-pcvelz",
-      "originUrl": "https://github.com/pcvelz/superpowers/tree/bd000c6ec1df53449a74397f55305b22802b9a2b/skills/checking-gates",
-      "ecosystem": "superpowers"
+      "originUrl": "https://github.com/pcvelz/superpowers/tree/e748382ff059bcc0219dae8cc1059ef7f3a938d5/skills/checking-gates",
+      "ecosystem": "superpowers",
+      "pinnedRef": "e748382ff059bcc0219dae8cc1059ef7f3a938d5"
     },
     {
       "id": "haus.superpowers-dispatching-parallel-agents",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "source": "curated",
       "type": "skill",
       "path": "skills/superpowers/dispatching-parallel-agents",
@@ -2143,9 +2435,12 @@
       "purpose": "Use when facing 2+ independent tasks that can be worked on without shared state or sequential dependencies",
       "whenToUse": "Use when facing 2+ independent tasks that can be worked on without shared state or sequential dependencies",
       "whenNotToUse": "Do not use when tasks share state or must run sequentially.",
-      "tags": ["workflow", "workflow-skill"],
+      "tags": [
+        "workflow",
+        "workflow-skill"
+      ],
       "repoRoles": [],
-      "tokenEstimate": 1884,
+      "tokenEstimate": 1793,
       "installMode": "copy-selected",
       "default": true,
       "reviewStatus": "approved",
@@ -2154,12 +2449,13 @@
       "license": "MIT",
       "licenseConfidence": "high",
       "originSourceId": "superpowers-pcvelz",
-      "originUrl": "https://github.com/pcvelz/superpowers/tree/bd000c6ec1df53449a74397f55305b22802b9a2b/skills/dispatching-parallel-agents",
-      "ecosystem": "superpowers"
+      "originUrl": "https://github.com/pcvelz/superpowers/tree/e748382ff059bcc0219dae8cc1059ef7f3a938d5/skills/dispatching-parallel-agents",
+      "ecosystem": "superpowers",
+      "pinnedRef": "e748382ff059bcc0219dae8cc1059ef7f3a938d5"
     },
     {
       "id": "haus.superpowers-executing-plans",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "source": "curated",
       "type": "skill",
       "path": "skills/superpowers/executing-plans",
@@ -2167,9 +2463,12 @@
       "purpose": "Use when you have a written implementation plan to execute in a separate session with review checkpoints",
       "whenToUse": "Use when you have a written implementation plan to execute in a separate session with review checkpoints",
       "whenNotToUse": "Do not use before a written plan exists or for single-step trivial changes.",
-      "tags": ["workflow", "core-skill"],
+      "tags": [
+        "workflow",
+        "core-skill"
+      ],
       "repoRoles": [],
-      "tokenEstimate": 1433,
+      "tokenEstimate": 1546,
       "installMode": "copy-selected",
       "default": true,
       "reviewStatus": "approved",
@@ -2178,22 +2477,26 @@
       "license": "MIT",
       "licenseConfidence": "high",
       "originSourceId": "superpowers-pcvelz",
-      "originUrl": "https://github.com/pcvelz/superpowers/tree/bd000c6ec1df53449a74397f55305b22802b9a2b/skills/executing-plans",
-      "ecosystem": "superpowers"
+      "originUrl": "https://github.com/pcvelz/superpowers/tree/e748382ff059bcc0219dae8cc1059ef7f3a938d5/skills/executing-plans",
+      "ecosystem": "superpowers",
+      "pinnedRef": "e748382ff059bcc0219dae8cc1059ef7f3a938d5"
     },
     {
       "id": "haus.superpowers-finishing-a-development-branch",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "source": "curated",
       "type": "skill",
       "path": "skills/superpowers/finishing-a-development-branch",
       "title": "Superpowers Finishing A Development Branch",
-      "purpose": "Use when implementation is complete, all tests pass, and you need to decide how to integrate the work - guides completion of development work by presenting structured options for merge, PR, or cleanup",
-      "whenToUse": "Use when implementation is complete, all tests pass, and you need to decide how to integrate the work - guides completion of development work by presenting structured options for merge, PR, or cleanup",
+      "purpose": "Use when implementation is complete, all tests pass, and you need to decide how to integrate the work",
+      "whenToUse": "Use when implementation is complete, all tests pass, and you need to decide how to integrate the work",
       "whenNotToUse": "Do not use while implementation or verification is still incomplete.",
-      "tags": ["workflow", "quality"],
+      "tags": [
+        "workflow",
+        "quality"
+      ],
       "repoRoles": [],
-      "tokenEstimate": 1766,
+      "tokenEstimate": 1756,
       "installMode": "copy-selected",
       "default": false,
       "reviewStatus": "approved",
@@ -2202,7 +2505,7 @@
       "license": "MIT",
       "licenseConfidence": "high",
       "originSourceId": "superpowers-pcvelz",
-      "originUrl": "https://github.com/pcvelz/superpowers/tree/bd000c6ec1df53449a74397f55305b22802b9a2b/skills/finishing-a-development-branch",
+      "originUrl": "https://github.com/pcvelz/superpowers/tree/e748382ff059bcc0219dae8cc1059ef7f3a938d5/skills/finishing-a-development-branch",
       "ecosystem": "superpowers",
       "optInTier": "workflow",
       "optInGroup": "Git worktrees & branch finishing",
@@ -2210,11 +2513,12 @@
         {
           "role": "branch-completion"
         }
-      ]
+      ],
+      "pinnedRef": "e748382ff059bcc0219dae8cc1059ef7f3a938d5"
     },
     {
       "id": "haus.superpowers-receiving-code-review",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "source": "curated",
       "type": "skill",
       "path": "skills/superpowers/receiving-code-review",
@@ -2222,9 +2526,12 @@
       "purpose": "Use when receiving code review feedback, before implementing suggestions, especially if feedback seems unclear or technically questionable - requires technical rigor and verification, not performative agreement or blind implementation",
       "whenToUse": "Use when receiving code review feedback, before implementing suggestions, especially if feedback seems unclear or technically questionable - requires technical rigor and verification, not performative agreement or blind implementation",
       "whenNotToUse": "Do not use to blindly apply feedback without technical verification.",
-      "tags": ["review", "review-skill"],
+      "tags": [
+        "review",
+        "review-skill"
+      ],
       "repoRoles": [],
-      "tokenEstimate": 1579,
+      "tokenEstimate": 1551,
       "installMode": "copy-selected",
       "default": false,
       "reviewStatus": "approved",
@@ -2233,7 +2540,7 @@
       "license": "MIT",
       "licenseConfidence": "high",
       "originSourceId": "superpowers-pcvelz",
-      "originUrl": "https://github.com/pcvelz/superpowers/tree/bd000c6ec1df53449a74397f55305b22802b9a2b/skills/receiving-code-review",
+      "originUrl": "https://github.com/pcvelz/superpowers/tree/e748382ff059bcc0219dae8cc1059ef7f3a938d5/skills/receiving-code-review",
       "ecosystem": "superpowers",
       "optInTier": "workflow",
       "optInGroup": "Code review workflow",
@@ -2241,11 +2548,12 @@
         {
           "role": "code-review"
         }
-      ]
+      ],
+      "pinnedRef": "e748382ff059bcc0219dae8cc1059ef7f3a938d5"
     },
     {
       "id": "haus.superpowers-requesting-code-review",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "source": "curated",
       "type": "skill",
       "path": "skills/superpowers/requesting-code-review",
@@ -2253,9 +2561,12 @@
       "purpose": "Use when completing tasks, implementing major features, or before merging to verify work meets requirements",
       "whenToUse": "Use when completing tasks, implementing major features, or before merging to verify work meets requirements",
       "whenNotToUse": "Do not use for trivial one-line fixes with no review surface.",
-      "tags": ["review", "review-skill"],
+      "tags": [
+        "review",
+        "review-skill"
+      ],
       "repoRoles": [],
-      "tokenEstimate": 702,
+      "tokenEstimate": 739,
       "installMode": "copy-selected",
       "default": false,
       "reviewStatus": "approved",
@@ -2264,7 +2575,7 @@
       "license": "MIT",
       "licenseConfidence": "high",
       "originSourceId": "superpowers-pcvelz",
-      "originUrl": "https://github.com/pcvelz/superpowers/tree/bd000c6ec1df53449a74397f55305b22802b9a2b/skills/requesting-code-review",
+      "originUrl": "https://github.com/pcvelz/superpowers/tree/e748382ff059bcc0219dae8cc1059ef7f3a938d5/skills/requesting-code-review",
       "ecosystem": "superpowers",
       "optInTier": "workflow",
       "optInGroup": "Code review workflow",
@@ -2272,11 +2583,12 @@
         {
           "role": "code-review"
         }
-      ]
+      ],
+      "pinnedRef": "e748382ff059bcc0219dae8cc1059ef7f3a938d5"
     },
     {
       "id": "haus.superpowers-specifying-gates",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "source": "curated",
       "type": "skill",
       "path": "skills/superpowers/specifying-gates",
@@ -2284,9 +2596,12 @@
       "purpose": "Use when a user-gate task has requiresUserSpecification=true OR the agent's \"do I know HOW?\" self-check returns no. Locks down verification mechanics through a short AskUserQuestion sequence and writes the answers back into the task's metadata. Does NOT run the verification itself.",
       "whenToUse": "Use when a user-gate task has requiresUserSpecification=true OR the agent's \"do I know HOW?\" self-check returns no. Locks down verification mechanics through a short AskUserQuestion sequence and writes the answers back into the task's metadata. Does NOT run the verification itself.",
       "whenNotToUse": "Do not use when verification mechanics are already specified or hook is off.",
-      "tags": ["workflow", "workflow-skill"],
+      "tags": [
+        "workflow",
+        "workflow-skill"
+      ],
       "repoRoles": [],
-      "tokenEstimate": 1724,
+      "tokenEstimate": 1785,
       "installMode": "copy-selected",
       "default": false,
       "reviewStatus": "approved",
@@ -2295,7 +2610,7 @@
       "license": "MIT",
       "licenseConfidence": "high",
       "originSourceId": "superpowers-pcvelz",
-      "originUrl": "https://github.com/pcvelz/superpowers/tree/bd000c6ec1df53449a74397f55305b22802b9a2b/skills/specifying-gates",
+      "originUrl": "https://github.com/pcvelz/superpowers/tree/e748382ff059bcc0219dae8cc1059ef7f3a938d5/skills/specifying-gates",
       "ecosystem": "superpowers",
       "optInTier": "workflow",
       "optInGroup": "Quality gates",
@@ -2303,11 +2618,12 @@
         {
           "role": "user-gate"
         }
-      ]
+      ],
+      "pinnedRef": "e748382ff059bcc0219dae8cc1059ef7f3a938d5"
     },
     {
       "id": "haus.superpowers-subagent-driven-development",
-      "version": "1.0.3",
+      "version": "1.0.4",
       "source": "curated",
       "type": "skill",
       "path": "skills/superpowers/subagent-driven-development",
@@ -2315,9 +2631,12 @@
       "purpose": "Use when executing implementation plans with independent tasks in the current session",
       "whenToUse": "Use when executing implementation plans with independent tasks in the current session",
       "whenNotToUse": "Do not use for tightly coupled sequential work or when subagents are unavailable.",
-      "tags": ["workflow", "workflow-skill"],
+      "tags": [
+        "workflow",
+        "workflow-skill"
+      ],
       "repoRoles": [],
-      "tokenEstimate": 3948,
+      "tokenEstimate": 8024,
       "installMode": "copy-selected",
       "default": false,
       "reviewStatus": "approved",
@@ -2326,11 +2645,11 @@
       "license": "MIT",
       "licenseConfidence": "high",
       "originSourceId": "superpowers-pcvelz",
-      "originUrl": "https://github.com/pcvelz/superpowers/tree/48f5123e18a1a92dfba962da8dc2509391c821ee/skills/subagent-driven-development",
+      "originUrl": "https://github.com/pcvelz/superpowers/tree/e748382ff059bcc0219dae8cc1059ef7f3a938d5/skills/subagent-driven-development",
       "ecosystem": "superpowers",
       "optInTier": "workflow",
       "optInGroup": "Subagent-driven development",
-      "pinnedRef": "48f5123e18a1a92dfba962da8dc2509391c821ee",
+      "pinnedRef": "e748382ff059bcc0219dae8cc1059ef7f3a938d5",
       "requiresAny": [
         {
           "role": "subagent-workflow"
@@ -2339,7 +2658,7 @@
     },
     {
       "id": "haus.superpowers-systematic-debugging",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "source": "curated",
       "type": "skill",
       "path": "skills/superpowers/systematic-debugging",
@@ -2347,9 +2666,12 @@
       "purpose": "Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes",
       "whenToUse": "Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes",
       "whenNotToUse": "Do not use to guess fixes without reproducing or investigating the failure.",
-      "tags": ["workflow", "quality"],
+      "tags": [
+        "workflow",
+        "quality"
+      ],
       "repoRoles": [],
-      "tokenEstimate": 2480,
+      "tokenEstimate": 2373,
       "installMode": "copy-selected",
       "default": true,
       "reviewStatus": "approved",
@@ -2358,12 +2680,13 @@
       "license": "MIT",
       "licenseConfidence": "high",
       "originSourceId": "superpowers-pcvelz",
-      "originUrl": "https://github.com/pcvelz/superpowers/tree/bd000c6ec1df53449a74397f55305b22802b9a2b/skills/systematic-debugging",
-      "ecosystem": "superpowers"
+      "originUrl": "https://github.com/pcvelz/superpowers/tree/e748382ff059bcc0219dae8cc1059ef7f3a938d5/skills/systematic-debugging",
+      "ecosystem": "superpowers",
+      "pinnedRef": "e748382ff059bcc0219dae8cc1059ef7f3a938d5"
     },
     {
       "id": "haus.superpowers-test-driven-development",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "source": "curated",
       "type": "skill",
       "path": "skills/superpowers/test-driven-development",
@@ -2371,9 +2694,12 @@
       "purpose": "Use when implementing any feature or bugfix, before writing implementation code",
       "whenToUse": "Use when implementing any feature or bugfix, before writing implementation code",
       "whenNotToUse": "Do not use for exploratory spikes, docs-only changes, or throwaway prototypes.",
-      "tags": ["testing", "workflow"],
+      "tags": [
+        "testing",
+        "workflow"
+      ],
       "repoRoles": [],
-      "tokenEstimate": 2467,
+      "tokenEstimate": 2254,
       "installMode": "copy-selected",
       "default": false,
       "reviewStatus": "approved",
@@ -2382,7 +2708,7 @@
       "license": "MIT",
       "licenseConfidence": "high",
       "originSourceId": "superpowers-pcvelz",
-      "originUrl": "https://github.com/pcvelz/superpowers/tree/bd000c6ec1df53449a74397f55305b22802b9a2b/skills/test-driven-development",
+      "originUrl": "https://github.com/pcvelz/superpowers/tree/e748382ff059bcc0219dae8cc1059ef7f3a938d5/skills/test-driven-development",
       "ecosystem": "superpowers",
       "optInTier": "workflow",
       "optInGroup": "TDD workflow",
@@ -2390,11 +2716,12 @@
         {
           "role": "tdd-workflow"
         }
-      ]
+      ],
+      "pinnedRef": "e748382ff059bcc0219dae8cc1059ef7f3a938d5"
     },
     {
       "id": "haus.superpowers-using-git-worktrees",
-      "version": "1.0.3",
+      "version": "1.0.4",
       "source": "curated",
       "type": "skill",
       "path": "skills/superpowers/using-git-worktrees",
@@ -2402,9 +2729,12 @@
       "purpose": "Use when starting feature work that needs isolation from current workspace or before executing implementation plans - ensures an isolated workspace exists via native tools or git worktree fallback",
       "whenToUse": "Use when starting feature work that needs isolation from current workspace or before executing implementation plans - ensures an isolated workspace exists via native tools or git worktree fallback",
       "whenNotToUse": "Do not use when current workspace isolation is already sufficient.",
-      "tags": ["workflow", "workflow-skill"],
+      "tags": [
+        "workflow",
+        "workflow-skill"
+      ],
       "repoRoles": [],
-      "tokenEstimate": 2140,
+      "tokenEstimate": 1848,
       "installMode": "copy-selected",
       "default": false,
       "reviewStatus": "approved",
@@ -2413,11 +2743,11 @@
       "license": "MIT",
       "licenseConfidence": "high",
       "originSourceId": "superpowers-pcvelz",
-      "originUrl": "https://github.com/pcvelz/superpowers/tree/20c0b1ed71cb073c847432fe01379f48c5278a5f/skills/using-git-worktrees",
+      "originUrl": "https://github.com/pcvelz/superpowers/tree/e748382ff059bcc0219dae8cc1059ef7f3a938d5/skills/using-git-worktrees",
       "ecosystem": "superpowers",
       "optInTier": "workflow",
       "optInGroup": "Git worktrees & branch finishing",
-      "pinnedRef": "20c0b1ed71cb073c847432fe01379f48c5278a5f",
+      "pinnedRef": "e748382ff059bcc0219dae8cc1059ef7f3a938d5",
       "requiresAny": [
         {
           "role": "isolated-branch"
@@ -2426,7 +2756,7 @@
     },
     {
       "id": "haus.superpowers-using-superpowers",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "source": "curated",
       "type": "skill",
       "path": "skills/superpowers/using-superpowers",
@@ -2434,9 +2764,12 @@
       "purpose": "Use when starting any conversation - establishes how to find and use skills, requiring Skill tool invocation before ANY response including clarifying questions",
       "whenToUse": "Use when starting any conversation - establishes how to find and use skills, requiring Skill tool invocation before ANY response including clarifying questions",
       "whenNotToUse": "Do not skip when any skill might apply — this establishes the skill workflow.",
-      "tags": ["workflow", "core-skill"],
+      "tags": [
+        "workflow",
+        "core-skill"
+      ],
       "repoRoles": [],
-      "tokenEstimate": 1362,
+      "tokenEstimate": 1185,
       "installMode": "copy-selected",
       "default": true,
       "reviewStatus": "approved",
@@ -2445,13 +2778,13 @@
       "license": "MIT",
       "licenseConfidence": "high",
       "originSourceId": "superpowers-pcvelz",
-      "originUrl": "https://github.com/pcvelz/superpowers/tree/2a392d4b1ec35440116477528f7ff91772cda7a3/skills/using-superpowers",
+      "originUrl": "https://github.com/pcvelz/superpowers/tree/e748382ff059bcc0219dae8cc1059ef7f3a938d5/skills/using-superpowers",
       "ecosystem": "superpowers",
-      "pinnedRef": "2a392d4b1ec35440116477528f7ff91772cda7a3"
+      "pinnedRef": "e748382ff059bcc0219dae8cc1059ef7f3a938d5"
     },
     {
       "id": "haus.superpowers-verification-before-completion",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "source": "curated",
       "type": "skill",
       "path": "skills/superpowers/verification-before-completion",
@@ -2459,9 +2792,12 @@
       "purpose": "Use when about to claim work is complete, fixed, or passing, before committing or creating PRs - requires running verification commands and confirming output before making any success claims; evidence before assertions always",
       "whenToUse": "Use when about to claim work is complete, fixed, or passing, before committing or creating PRs - requires running verification commands and confirming output before making any success claims; evidence before assertions always",
       "whenNotToUse": "Do not use to claim success before running the relevant verification commands.",
-      "tags": ["quality", "workflow"],
+      "tags": [
+        "quality",
+        "workflow"
+      ],
       "repoRoles": [],
-      "tokenEstimate": 1051,
+      "tokenEstimate": 912,
       "installMode": "copy-selected",
       "default": true,
       "reviewStatus": "approved",
@@ -2470,12 +2806,13 @@
       "license": "MIT",
       "licenseConfidence": "high",
       "originSourceId": "superpowers-pcvelz",
-      "originUrl": "https://github.com/pcvelz/superpowers/tree/bd000c6ec1df53449a74397f55305b22802b9a2b/skills/verification-before-completion",
-      "ecosystem": "superpowers"
+      "originUrl": "https://github.com/pcvelz/superpowers/tree/e748382ff059bcc0219dae8cc1059ef7f3a938d5/skills/verification-before-completion",
+      "ecosystem": "superpowers",
+      "pinnedRef": "e748382ff059bcc0219dae8cc1059ef7f3a938d5"
     },
     {
       "id": "haus.superpowers-writing-plans",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "source": "curated",
       "type": "skill",
       "path": "skills/superpowers/writing-plans",
@@ -2483,9 +2820,12 @@
       "purpose": "Use when you have a spec or requirements for a multi-step task, before touching code",
       "whenToUse": "Use when you have a spec or requirements for a multi-step task, before touching code",
       "whenNotToUse": "Do not use for single-step tasks that need no multi-step plan.",
-      "tags": ["workflow", "core-skill"],
+      "tags": [
+        "workflow",
+        "core-skill"
+      ],
       "repoRoles": [],
-      "tokenEstimate": 5493,
+      "tokenEstimate": 5808,
       "installMode": "copy-selected",
       "default": true,
       "reviewStatus": "approved",
@@ -2494,13 +2834,13 @@
       "license": "MIT",
       "licenseConfidence": "high",
       "originSourceId": "superpowers-pcvelz",
-      "originUrl": "https://github.com/pcvelz/superpowers/tree/48f5123e18a1a92dfba962da8dc2509391c821ee/skills/writing-plans",
+      "originUrl": "https://github.com/pcvelz/superpowers/tree/e748382ff059bcc0219dae8cc1059ef7f3a938d5/skills/writing-plans",
       "ecosystem": "superpowers",
-      "pinnedRef": "48f5123e18a1a92dfba962da8dc2509391c821ee"
+      "pinnedRef": "e748382ff059bcc0219dae8cc1059ef7f3a938d5"
     },
     {
       "id": "haus.superpowers-writing-skills",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "source": "curated",
       "type": "skill",
       "path": "skills/superpowers/writing-skills",
@@ -2508,9 +2848,12 @@
       "purpose": "Use when creating new skills, editing existing skills, or verifying skills work before deployment",
       "whenToUse": "Use when creating new skills, editing existing skills, or verifying skills work before deployment",
       "whenNotToUse": "Do not use for routine code changes unrelated to skill authoring.",
-      "tags": ["workflow", "workflow-skill"],
+      "tags": [
+        "workflow",
+        "workflow-skill"
+      ],
       "repoRoles": [],
-      "tokenEstimate": 5669,
+      "tokenEstimate": 5555,
       "installMode": "copy-selected",
       "default": false,
       "reviewStatus": "approved",
@@ -2519,7 +2862,7 @@
       "license": "MIT",
       "licenseConfidence": "high",
       "originSourceId": "superpowers-pcvelz",
-      "originUrl": "https://github.com/pcvelz/superpowers/tree/bd000c6ec1df53449a74397f55305b22802b9a2b/skills/writing-skills",
+      "originUrl": "https://github.com/pcvelz/superpowers/tree/e748382ff059bcc0219dae8cc1059ef7f3a938d5/skills/writing-skills",
       "ecosystem": "superpowers",
       "optInTier": "workflow",
       "optInGroup": "Skill authoring",
@@ -2527,7 +2870,8 @@
         {
           "role": "skill-authoring"
         }
-      ]
+      ],
+      "pinnedRef": "e748382ff059bcc0219dae8cc1059ef7f3a938d5"
     },
     {
       "id": "haus.tanstack-query-router-patterns",
@@ -2539,10 +2883,18 @@
       "purpose": "Guide query key, invalidation, and route loader/data-flow changes.",
       "whenToUse": "Use for TanStack query cache behavior and TanStack router flow updates.",
       "whenNotToUse": "Do not use for styling-only component changes.",
-      "references": ["https://tanstack.com/llms.txt"],
+      "references": [
+        "https://tanstack.com/llms.txt"
+      ],
       "tokenBudget": 1200,
-      "tags": ["tanstack-query", "tanstack-router"],
-      "repoRoles": ["next-app", "react-app"],
+      "tags": [
+        "tanstack-query",
+        "tanstack-router"
+      ],
+      "repoRoles": [
+        "next-app",
+        "react-app"
+      ],
       "requiresAny": [
         {
           "dependency": "@tanstack/react-query"
@@ -2562,7 +2914,7 @@
     },
     {
       "id": "haus.turborepo-turborepo",
-      "version": "1.0.1",
+      "version": "1.0.3",
       "source": "curated",
       "type": "skill",
       "path": "skills/turborepo/turborepo",
@@ -2570,9 +2922,14 @@
       "purpose": "Turborepo monorepo build system guidance. Triggers on: turbo.json, task pipelines, dependsOn, caching, remote cache, the \"turbo\" CLI, --filter, --affected, CI optimization, environment variables, internal packages, monorepo structure/best practices, and boundaries. Use when user: configures tasks/workflows/pipelines, creates packages, sets up monorepo, shares code between apps, runs changed/affected packages, debugs cache, or has apps/packages directories.",
       "whenToUse": "Turborepo monorepo build system guidance. Triggers on: turbo.json, task pipelines, dependsOn, caching, remote cache, the \"turbo\" CLI, --filter, --affected, CI optimization, environment variables, internal packages, monorepo structure/best practices, and boundaries. Use when user: configures tasks/workflows/pipelines, creates packages, sets up monorepo, shares code between apps, runs changed/affected packages, debugs cache, or has apps/packages directories.",
       "whenNotToUse": "Do not use when a more specific skill or command applies.",
-      "tags": ["turbo", "workflow"],
-      "repoRoles": ["turbo-monorepo"],
-      "tokenEstimate": 7118,
+      "tags": [
+        "turbo",
+        "workflow"
+      ],
+      "repoRoles": [
+        "turbo-monorepo"
+      ],
+      "tokenEstimate": 7114,
       "installMode": "copy-selected",
       "default": true,
       "reviewStatus": "approved",
@@ -2581,8 +2938,8 @@
       "license": "MIT",
       "licenseConfidence": "high",
       "originSourceId": "vercel-turborepo",
-      "originUrl": "https://github.com/vercel/turborepo/blob/abd84cf51f95e4cc539cda4fdd7e8d7dddcac11c/skills/turborepo/SKILL.md",
-      "pinnedRef": "abd84cf51f95e4cc539cda4fdd7e8d7dddcac11c",
+      "originUrl": "https://github.com/vercel/turborepo/blob/c6fbc97bb8841f9c87d106af2d89ce11e97ea56c/skills/turborepo/SKILL.md",
+      "pinnedRef": "c6fbc97bb8841f9c87d106af2d89ce11e97ea56c",
       "ecosystem": "turbo",
       "requiresAny": [
         {
@@ -2603,9 +2960,15 @@
       "purpose": "Guide TypeScript contract and migration-safe typing changes.",
       "whenToUse": "Use for shared types, DTOs, interface boundaries, and type-safe refactors.",
       "whenNotToUse": "Do not use for runtime-only changes without type-contract impact.",
-      "references": ["https://www.typescriptlang.org/docs/handbook/"],
+      "references": [
+        "https://www.typescriptlang.org/docs/handbook/"
+      ],
       "tokenBudget": 1200,
-      "tags": ["typescript", "frontend", "backend"],
+      "tags": [
+        "typescript",
+        "frontend",
+        "backend"
+      ],
       "repoRoles": [
         "next-app",
         "react-app",
@@ -2641,10 +3004,18 @@
       "purpose": "Guide Vendure app-level config, worker, bootstrap, and plugin wiring changes.",
       "whenToUse": "Use for Vendure app config, worker, bootstrap, and system wiring updates.",
       "whenNotToUse": "Do not use for isolated shared plugin package tasks.",
-      "references": ["https://docs.vendure.io/llms.txt"],
+      "references": [
+        "https://docs.vendure.io/llms.txt"
+      ],
       "tokenBudget": 1200,
-      "tags": ["vendure3", "nestjs", "graphql"],
-      "repoRoles": ["vendure-app"],
+      "tags": [
+        "vendure3",
+        "nestjs",
+        "graphql"
+      ],
+      "repoRoles": [
+        "vendure-app"
+      ],
       "requiresAny": [
         {
           "stack": "vendure3"
@@ -2669,10 +3040,21 @@
       "purpose": "Guide Vendure plugin boundary, schema, and migration-safe development.",
       "whenToUse": "Use for Vendure plugin resolvers, services, entities, and plugin migrations.",
       "whenNotToUse": "Do not use for storefront-only UI changes or non-Vendure APIs.",
-      "references": ["https://docs.vendure.io/llms.txt"],
+      "references": [
+        "https://docs.vendure.io/llms.txt"
+      ],
       "tokenBudget": 1200,
-      "tags": ["backend", "vendure", "nestjs", "graphql", "typescript"],
-      "repoRoles": ["vendure-plugin", "vendure-app"],
+      "tags": [
+        "backend",
+        "vendure",
+        "nestjs",
+        "graphql",
+        "typescript"
+      ],
+      "repoRoles": [
+        "vendure-plugin",
+        "vendure-app"
+      ],
       "requiresAny": [
         {
           "stack": "vendure3"
@@ -2700,10 +3082,17 @@
       "purpose": "Guide builder-field/meta-template wiring for ACF, Elementor Pro, and JetEngine.",
       "whenToUse": "Use for ACF field groups and Elementor/JetEngine-driven dynamic template behavior.",
       "whenNotToUse": "Do not use for generic WordPress hooks with no builder/meta impact.",
-      "references": ["https://developer.wordpress.org/"],
+      "references": [
+        "https://developer.wordpress.org/"
+      ],
       "tokenBudget": 1200,
-      "tags": ["wordpress"],
-      "repoRoles": ["wordpress-bedrock-site", "wordpress-vanilla-site"],
+      "tags": [
+        "wordpress"
+      ],
+      "repoRoles": [
+        "wordpress-bedrock-site",
+        "wordpress-vanilla-site"
+      ],
       "requiresAny": [
         {
           "role": "wordpress-bedrock-site"
@@ -2740,10 +3129,17 @@
       "purpose": "Guide Bedrock config/bootstrap and environment-aware WP deployment layout.",
       "whenToUse": "Use for Bedrock config, env loading, and boot path behavior updates.",
       "whenNotToUse": "Do not use for hook/template-only WordPress runtime changes.",
-      "references": ["https://developer.wordpress.org/"],
+      "references": [
+        "https://developer.wordpress.org/"
+      ],
       "tokenBudget": 1200,
-      "tags": ["wordpress", "bedrock"],
-      "repoRoles": ["wordpress-bedrock-site"],
+      "tags": [
+        "wordpress",
+        "bedrock"
+      ],
+      "repoRoles": [
+        "wordpress-bedrock-site"
+      ],
       "requiresAny": [
         {
           "role": "wordpress-bedrock-site"
@@ -2760,7 +3156,7 @@
     },
     {
       "id": "haus.wordpress-wordpress-router",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "source": "curated",
       "type": "skill",
       "path": "skills/wordpress/wordpress-router",
@@ -2768,8 +3164,13 @@
       "purpose": "Use when the user asks about WordPress codebases (plugins, themes, block themes, Gutenberg blocks, WP core checkouts) and you need to quickly classify the repo and route to the correct workflow/skill (blocks, theme.json, REST API, WP-CLI, performance, security, testing, release packaging).",
       "whenToUse": "Use when the user asks about WordPress codebases (plugins, themes, block themes, Gutenberg blocks, WP core checkouts) and you need to quickly classify the repo and route to the correct workflow/skill (blocks, theme.json, REST API, WP-CLI, performance, security, testing, release packaging).",
       "whenNotToUse": "Do not use for non-WordPress PHP projects or when the target skill is already known.",
-      "tags": ["wordpress"],
-      "repoRoles": ["wordpress-bedrock-site", "wordpress-vanilla-site"],
+      "tags": [
+        "wordpress"
+      ],
+      "repoRoles": [
+        "wordpress-bedrock-site",
+        "wordpress-vanilla-site"
+      ],
       "tokenEstimate": 557,
       "installMode": "copy-selected",
       "default": true,
@@ -2779,8 +3180,8 @@
       "license": "GPL-2.0-or-later",
       "licenseConfidence": "high",
       "originSourceId": "wordpress-agent-skills",
-      "originUrl": "https://github.com/WordPress/agent-skills/blob/9de2279ae789ee5e5f27f65d714867769283dabf/skills/wordpress-router/SKILL.md",
-      "pinnedRef": "9de2279ae789ee5e5f27f65d714867769283dabf",
+      "originUrl": "https://github.com/WordPress/agent-skills/blob/120d3093b2f85f615deee53f23d3dbd0af7796ce/skills/wordpress-router/SKILL.md",
+      "pinnedRef": "120d3093b2f85f615deee53f23d3dbd0af7796ce",
       "ecosystem": "wordpress",
       "requiresAny": [
         {
@@ -2799,7 +3200,7 @@
     },
     {
       "id": "haus.wordpress-wp-plugin-development",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "source": "curated",
       "type": "skill",
       "path": "skills/wordpress/wp-plugin-development",
@@ -2807,9 +3208,14 @@
       "purpose": "Use when developing WordPress plugins: architecture and hooks, activation/deactivation/uninstall, admin UI and Settings API, data storage, cron/tasks, security (nonces/capabilities/sanitization/escaping), and release packaging.",
       "whenToUse": "Use when developing WordPress plugins: architecture and hooks, activation/deactivation/uninstall, admin UI and Settings API, data storage, cron/tasks, security (nonces/capabilities/sanitization/escaping), and release packaging.",
       "whenNotToUse": "Do not use for theme-only or block-only work with no plugin code involved.",
-      "tags": ["wordpress"],
-      "repoRoles": ["wordpress-bedrock-site", "wordpress-vanilla-site"],
-      "tokenEstimate": 1000,
+      "tags": [
+        "wordpress"
+      ],
+      "repoRoles": [
+        "wordpress-bedrock-site",
+        "wordpress-vanilla-site"
+      ],
+      "tokenEstimate": 999,
       "installMode": "copy-selected",
       "default": true,
       "reviewStatus": "approved",
@@ -2818,8 +3224,8 @@
       "license": "GPL-2.0-or-later",
       "licenseConfidence": "high",
       "originSourceId": "wordpress-agent-skills",
-      "originUrl": "https://github.com/WordPress/agent-skills/blob/9de2279ae789ee5e5f27f65d714867769283dabf/skills/wp-plugin-development/SKILL.md",
-      "pinnedRef": "9de2279ae789ee5e5f27f65d714867769283dabf",
+      "originUrl": "https://github.com/WordPress/agent-skills/blob/120d3093b2f85f615deee53f23d3dbd0af7796ce/skills/wp-plugin-development/SKILL.md",
+      "pinnedRef": "120d3093b2f85f615deee53f23d3dbd0af7796ce",
       "ecosystem": "wordpress",
       "requiresAny": [
         {
@@ -2838,7 +3244,7 @@
     },
     {
       "id": "haus.wordpress-wp-block-development",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "source": "curated",
       "type": "skill",
       "path": "skills/wordpress/wp-block-development",
@@ -2846,8 +3252,13 @@
       "purpose": "Use when developing WordPress (Gutenberg) blocks: block.json metadata, register_block_type(_from_metadata), attributes/serialization, supports, dynamic rendering (render.php/render_callback), deprecations/migrations, viewScript vs viewScriptModule, and @wordpress/scripts/@wordpress/create-block build and test workflows.",
       "whenToUse": "Use when developing WordPress (Gutenberg) blocks: block.json metadata, register_block_type(_from_metadata), attributes/serialization, supports, dynamic rendering (render.php/render_callback), deprecations/migrations, viewScript vs viewScriptModule, and @wordpress/scripts/@wordpress/create-block build and test workflows.",
       "whenNotToUse": "Do not use for classic (non-block) widget or shortcode-only development.",
-      "tags": ["wordpress"],
-      "repoRoles": ["wordpress-bedrock-site", "wordpress-vanilla-site"],
+      "tags": [
+        "wordpress"
+      ],
+      "repoRoles": [
+        "wordpress-bedrock-site",
+        "wordpress-vanilla-site"
+      ],
       "tokenEstimate": 1623,
       "installMode": "copy-selected",
       "default": true,
@@ -2857,8 +3268,8 @@
       "license": "GPL-2.0-or-later",
       "licenseConfidence": "high",
       "originSourceId": "wordpress-agent-skills",
-      "originUrl": "https://github.com/WordPress/agent-skills/blob/9de2279ae789ee5e5f27f65d714867769283dabf/skills/wp-block-development/SKILL.md",
-      "pinnedRef": "9de2279ae789ee5e5f27f65d714867769283dabf",
+      "originUrl": "https://github.com/WordPress/agent-skills/blob/120d3093b2f85f615deee53f23d3dbd0af7796ce/skills/wp-block-development/SKILL.md",
+      "pinnedRef": "120d3093b2f85f615deee53f23d3dbd0af7796ce",
       "ecosystem": "wordpress",
       "requiresAny": [
         {
@@ -2886,7 +3297,11 @@
       "whenToUse": "Use when the user runs the docs sync or asks to init/refresh project documentation for agent context, or after setup/commands/env/deploy/integration changes.",
       "whenNotToUse": "Do not use for code changes with no documentation impact, or where facts would have to be invented.",
       "tokenBudget": 1200,
-      "tags": ["workflow", "core-skill", "project-instructions"],
+      "tags": [
+        "workflow",
+        "core-skill",
+        "project-instructions"
+      ],
       "repoRoles": [],
       "requiresAny": [],
       "tokenEstimate": 1800,
@@ -2906,7 +3321,13 @@
       "purpose": "Implement comprehensive testing strategies using Jest, Vitest, and Testing Library for unit tests, integration tests, and end-to-end testing with mocking, fixtures, and test-driven development. Use when writing JavaScript/TypeScript tests, setting up test infrastructure, or implementing TDD/BDD workflows.",
       "whenToUse": "Implement comprehensive testing strategies using Jest, Vitest, and Testing Library for unit tests, integration tests, and end-to-end testing with mocking, fixtures, and test-driven development. Use when writing JavaScript/TypeScript tests, setting up test infrastructure, or implementing TDD/BDD workflows.",
       "whenNotToUse": "Prefer ecc-react-testing for React component tests with Testing Library.",
-      "tags": ["workflow", "testing", "vitest", "jest", "typescript"],
+      "tags": [
+        "workflow",
+        "testing",
+        "vitest",
+        "jest",
+        "typescript"
+      ],
       "repoRoles": [
         "next-app",
         "react-app",
@@ -2957,7 +3378,11 @@
       "purpose": "Use this skill when designing or reviewing a PostgreSQL-specific schema. Covers best-practices, data types, indexing, constraints, performance patterns, and advanced features",
       "whenToUse": "Use this skill when designing or reviewing a PostgreSQL-specific schema. Covers best-practices, data types, indexing, constraints, performance patterns, and advanced features",
       "whenNotToUse": "Do not use when a more specific skill or command applies.",
-      "tags": ["workflow", "postgresql", "database"],
+      "tags": [
+        "workflow",
+        "postgresql",
+        "database"
+      ],
       "repoRoles": [],
       "tokenEstimate": 4021,
       "installMode": "copy-selected",
@@ -2990,7 +3415,11 @@
       "purpose": "Build scalable design systems with Tailwind CSS v4, design tokens, component libraries, and responsive patterns. Use when creating component libraries, implementing design systems, or standardizing UI patterns.",
       "whenToUse": "Build scalable design systems with Tailwind CSS v4, design tokens, component libraries, and responsive patterns. Use when creating component libraries, implementing design systems, or standardizing UI patterns.",
       "whenNotToUse": "Do not use when a more specific skill or command applies.",
-      "tags": ["workflow", "tailwind", "shadcn"],
+      "tags": [
+        "workflow",
+        "tailwind",
+        "shadcn"
+      ],
       "repoRoles": [],
       "tokenEstimate": 6019,
       "installMode": "copy-selected",
@@ -3023,7 +3452,12 @@
       "purpose": "Master TypeScript's advanced type system including generics, conditional types, mapped types, template literals, and utility types for building type-safe applications. Use when implementing complex type logic, creating reusable type utilities, or ensuring compile-time type safety in TypeScript projects.",
       "whenToUse": "Master TypeScript's advanced type system including generics, conditional types, mapped types, template literals, and utility types for building type-safe applications. Use when implementing complex type logic, creating reusable type utilities, or ensuring compile-time type safety in TypeScript projects.",
       "whenNotToUse": "Use haus.typescript-patterns for contract boundaries and migration-safe typing.",
-      "tags": ["workflow", "typescript", "frontend", "backend"],
+      "tags": [
+        "workflow",
+        "typescript",
+        "frontend",
+        "backend"
+      ],
       "repoRoles": [
         "next-app",
         "react-app",
@@ -3066,7 +3500,10 @@
       "purpose": "MariaDB-specific features and capabilities that go beyond standard MySQL. Use when evaluating MariaDB, optimizing an existing MariaDB application, reviewing code or schema for MariaDB improvements, asking what MariaDB can do that other databases cannot, or migrating from Oracle to MariaDB. Also use when the user asks what could be improved in how a codebase uses MariaDB, or asks about MariaDB advantages over MySQL or PostgreSQL.",
       "whenToUse": "MariaDB-specific features and capabilities that go beyond standard MySQL. Use when evaluating MariaDB, optimizing an existing MariaDB application, reviewing code or schema for MariaDB improvements, asking what MariaDB can do that other databases cannot, or migrating from Oracle to MariaDB. Also use when the user asks what could be improved in how a codebase uses MariaDB, or asks about MariaDB advantages over MySQL or PostgreSQL.",
       "whenNotToUse": "Do not use when a more specific skill or command applies.",
-      "tags": ["mariadb", "database"],
+      "tags": [
+        "mariadb",
+        "database"
+      ],
       "repoRoles": [],
       "tokenEstimate": 6480,
       "installMode": "copy-selected",
@@ -3099,7 +3536,10 @@
       "purpose": "Best practices for query optimization in MariaDB — indexing strategies, EXPLAIN analysis, pagination, histogram statistics, and MariaDB-specific optimizer settings. Use when diagnosing slow queries, designing indexes, reviewing schema or query performance, or when queries involve large tables, pagination, GROUP BY, or ORDER BY. Also use when the user asks about MariaDB query performance, EXPLAIN output, or optimizer behavior.",
       "whenToUse": "Best practices for query optimization in MariaDB — indexing strategies, EXPLAIN analysis, pagination, histogram statistics, and MariaDB-specific optimizer settings. Use when diagnosing slow queries, designing indexes, reviewing schema or query performance, or when queries involve large tables, pagination, GROUP BY, or ORDER BY. Also use when the user asks about MariaDB query performance, EXPLAIN output, or optimizer behavior.",
       "whenNotToUse": "Do not use when a more specific skill or command applies.",
-      "tags": ["mariadb", "database"],
+      "tags": [
+        "mariadb",
+        "database"
+      ],
       "repoRoles": [],
       "tokenEstimate": 5786,
       "installMode": "copy-selected",
@@ -3132,7 +3572,10 @@
       "purpose": "Help developers new to Elasticsearch get from zero to a working search experience. Guide them through understanding their intent, mapping their data, and building a search experience with best practices baked in. Use this when the user shows intent to build search-related functionality, asks about Elasticsearch-related concepts for their use case, or expresses the need for help getting started with Elasticsearch.",
       "whenToUse": "Help developers new to Elasticsearch get from zero to a working search experience. Guide them through understanding their intent, mapping their data, and building a search experience with best practices baked in. Use this when the user shows intent to build search-related functionality, asks about Elasticsearch-related concepts for their use case, or expresses the need for help getting started with Elasticsearch.",
       "whenNotToUse": "Do not use when a more specific skill or command applies.",
-      "tags": ["elasticsearch", "database"],
+      "tags": [
+        "elasticsearch",
+        "database"
+      ],
       "repoRoles": [],
       "tokenEstimate": 666,
       "installMode": "copy-selected",
@@ -3165,7 +3608,10 @@
       "purpose": "Execute ES|QL (Elasticsearch Query Language) queries, use when the user wants to query Elasticsearch data, analyze logs, aggregate metrics, explore data, or create charts and dashboards from ES|QL results.",
       "whenToUse": "Execute ES|QL (Elasticsearch Query Language) queries, use when the user wants to query Elasticsearch data, analyze logs, aggregate metrics, explore data, or create charts and dashboards from ES|QL results.",
       "whenNotToUse": "Do not use when a more specific skill or command applies.",
-      "tags": ["elasticsearch", "database"],
+      "tags": [
+        "elasticsearch",
+        "database"
+      ],
       "repoRoles": [],
       "tokenEstimate": 4851,
       "installMode": "copy-selected",
@@ -3198,7 +3644,10 @@
       "purpose": "Plan and review MySQL/InnoDB schema, indexing, query tuning, transactions, and operations. Use when creating or modifying MySQL tables, indexes, or queries; diagnosing slow/locking behavior; planning migrations; or troubleshooting replication and connection issues. Load when using a MySQL database.",
       "whenToUse": "Plan and review MySQL/InnoDB schema, indexing, query tuning, transactions, and operations. Use when creating or modifying MySQL tables, indexes, or queries; diagnosing slow/locking behavior; planning migrations; or troubleshooting replication and connection issues. Load when using a MySQL database.",
       "whenNotToUse": "Do not use when a more specific skill or command applies.",
-      "tags": ["mysql", "database"],
+      "tags": [
+        "mysql",
+        "database"
+      ],
       "repoRoles": [],
       "tokenEstimate": 1408,
       "installMode": "copy-selected",
@@ -3234,7 +3683,11 @@
       "purpose": "Prisma Client API reference covering model queries, filters, operators, and client methods. Use when writing database queries, using CRUD operations, filtering data, or configuring Prisma Client. Triggers on \"prisma query\", \"findMany\", \"create\", \"update\", \"delete\", \"$transaction\".",
       "whenToUse": "Prisma Client API reference covering model queries, filters, operators, and client methods. Use when writing database queries, using CRUD operations, filtering data, or configuring Prisma Client. Triggers on \"prisma query\", \"findMany\", \"create\", \"update\", \"delete\", \"$transaction\".",
       "whenNotToUse": "Do not use when a more specific skill or command applies.",
-      "tags": ["prisma", "database", "backend"],
+      "tags": [
+        "prisma",
+        "database",
+        "backend"
+      ],
       "repoRoles": [],
       "tokenEstimate": 1587,
       "installMode": "copy-selected",
@@ -3262,7 +3715,7 @@
     },
     {
       "id": "haus.prisma-prisma-database-setup",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "source": "curated",
       "type": "skill",
       "path": "skills/prisma/prisma-database-setup",
@@ -3270,9 +3723,13 @@
       "purpose": "Guides for configuring Prisma with different database providers (PostgreSQL, MySQL, SQLite, MongoDB, etc.). Use when setting up a new project, changing databases, or troubleshooting connection issues. Triggers on \"configure postgres\", \"connect to mysql\", \"setup mongodb\", \"sqlite setup\".",
       "whenToUse": "Guides for configuring Prisma with different database providers (PostgreSQL, MySQL, SQLite, MongoDB, etc.). Use when setting up a new project, changing databases, or troubleshooting connection issues. Triggers on \"configure postgres\", \"connect to mysql\", \"setup mongodb\", \"sqlite setup\".",
       "whenNotToUse": "Do not use when a more specific skill or command applies.",
-      "tags": ["prisma", "database", "backend"],
+      "tags": [
+        "prisma",
+        "database",
+        "backend"
+      ],
       "repoRoles": [],
-      "tokenEstimate": 1414,
+      "tokenEstimate": 1459,
       "installMode": "copy-selected",
       "default": true,
       "reviewStatus": "approved",
@@ -3281,8 +3738,8 @@
       "license": "MIT",
       "licenseConfidence": "high",
       "originSourceId": "prisma-skills",
-      "originUrl": "https://github.com/prisma/skills/blob/dc08577cacd642af075e1017f0f7fe93177b06b4/prisma-database-setup/SKILL.md",
-      "pinnedRef": "dc08577cacd642af075e1017f0f7fe93177b06b4",
+      "originUrl": "https://github.com/prisma/skills/blob/1a9f427e9fe2137298abbcc1a6f372db92e8c40d/prisma-database-setup/SKILL.md",
+      "pinnedRef": "1a9f427e9fe2137298abbcc1a6f372db92e8c40d",
       "ecosystem": "database",
       "requiresAny": [
         {
@@ -3306,7 +3763,11 @@
       "purpose": "Scans .NET code for ~50 performance anti-patterns across async, memory, strings, collections, LINQ, regex, serialization, and I/O with tiered severity classification. Use when analyzing .NET code for optimization opportunities, reviewing hot paths, or auditing allocation-heavy patterns.",
       "whenToUse": "Scans .NET code for ~50 performance anti-patterns across async, memory, strings, collections, LINQ, regex, serialization, and I/O with tiered severity classification. Use when analyzing .NET code for optimization opportunities, reviewing hot paths, or auditing allocation-heavy patterns.",
       "whenNotToUse": "Do not use when a more specific skill or command applies.",
-      "tags": ["dotnet", "csharp", "backend"],
+      "tags": [
+        "dotnet",
+        "csharp",
+        "backend"
+      ],
       "repoRoles": [],
       "tokenEstimate": 2852,
       "installMode": "copy-selected",
@@ -3339,7 +3800,11 @@
       "purpose": "Optimize Entity Framework Core queries by fixing N+1 problems, choosing correct tracking modes, using compiled queries, and avoiding common performance traps. Use when EF Core queries are slow, generating excessive SQL, or causing high database load.",
       "whenToUse": "Optimize Entity Framework Core queries by fixing N+1 problems, choosing correct tracking modes, using compiled queries, and avoiding common performance traps. Use when EF Core queries are slow, generating excessive SQL, or causing high database load.",
       "whenNotToUse": "Do not use when a more specific skill or command applies.",
-      "tags": ["dotnet", "csharp", "backend"],
+      "tags": [
+        "dotnet",
+        "csharp",
+        "backend"
+      ],
       "repoRoles": [],
       "tokenEstimate": 1442,
       "installMode": "copy-selected",
@@ -3372,7 +3837,11 @@
       "purpose": "Write modern, high-performance C# code using records, pattern matching, value objects, async/await, Span<T>/Memory<T>, and best-practice API design patterns. Emphasizes functional-style programming with C# 12+ features.",
       "whenToUse": "Write modern, high-performance C# code using records, pattern matching, value objects, async/await, Span<T>/Memory<T>, and best-practice API design patterns. Emphasizes functional-style programming with C# 12+ features.",
       "whenNotToUse": "Do not use when a more specific skill or command applies.",
-      "tags": ["dotnet", "csharp", "backend"],
+      "tags": [
+        "dotnet",
+        "csharp",
+        "backend"
+      ],
       "repoRoles": [],
       "tokenEstimate": 2664,
       "installMode": "copy-selected",
@@ -3405,7 +3874,10 @@
       "purpose": "Core Redis modeling guidance — choose the right data structure (String, Hash, List, Set, Sorted Set, JSON, Stream, Vector Set) and use consistent colon-separated key names. Use when designing a Redis data model, caching objects, deciding between Hash and JSON, building counters, leaderboards, membership sets, or session stores, or when reviewing/cleaning up Redis key naming.",
       "whenToUse": "Core Redis modeling guidance — choose the right data structure (String, Hash, List, Set, Sorted Set, JSON, Stream, Vector Set) and use consistent colon-separated key names. Use when designing a Redis data model, caching objects, deciding between Hash and JSON, building counters, leaderboards, membership sets, or session stores, or when reviewing/cleaning up Redis key naming.",
       "whenNotToUse": "Use haus.redis-redis-connections for client/connection-pooling guidance, haus.redis-redis-security for security hardening, or haus.redis-redis-observability for monitoring.",
-      "tags": ["redis", "database"],
+      "tags": [
+        "redis",
+        "database"
+      ],
       "repoRoles": [],
       "tokenEstimate": 760,
       "installMode": "copy-selected",
@@ -3438,7 +3910,10 @@
       "purpose": "Vite build tool configuration, plugin API, SSR, and Vite 8 Rolldown migration. Use when working with Vite projects, vite.config.ts, Vite plugins, or building libraries/SSR apps with Vite.",
       "whenToUse": "Vite build tool configuration, plugin API, SSR, and Vite 8 Rolldown migration. Use when working with Vite projects, vite.config.ts, Vite plugins, or building libraries/SSR apps with Vite.",
       "whenNotToUse": "Do not use when a more specific skill or command applies.",
-      "tags": ["vite8", "frontend"],
+      "tags": [
+        "vite8",
+        "frontend"
+      ],
       "repoRoles": [],
       "tokenEstimate": 616,
       "installMode": "copy-selected",
@@ -3471,7 +3946,10 @@
       "purpose": "Upgrade Storybook to a specific version (canary or release). Use this when upgrading Storybook packages in an external app, reproduction, or test project.",
       "whenToUse": "Upgrade Storybook to a specific version (canary or release). Use this when upgrading Storybook packages in an external app, reproduction, or test project.",
       "whenNotToUse": "Use haus.storybook-patterns for general story coverage and component API documentation, not version upgrades.",
-      "tags": ["storybook", "workflow"],
+      "tags": [
+        "storybook",
+        "workflow"
+      ],
       "repoRoles": [],
       "tokenEstimate": 372,
       "installMode": "copy-selected",
@@ -3496,7 +3974,7 @@
     },
     {
       "id": "haus.currents-dev-playwright-best-practices",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "source": "curated",
       "type": "skill",
       "path": "skills/currents-dev/playwright-best-practices",
@@ -3504,7 +3982,10 @@
       "purpose": "Use when writing Playwright tests, fixing flaky tests, debugging failures, implementing Page Object Model, configuring CI/CD, optimizing performance, mocking APIs, handling authentication or OAuth, testing accessibility (axe-core), file uploads/downloads, date/time mocking, WebSockets, geolocation, permissions, multi-tab/popup flows, mobile/responsive layouts, touch gestures, GraphQL, error handling, offline mode, multi-user collaboration, third-party services (payments, email verification), console error monitoring, global setup/teardown, test annotations (skip, fixme, slow), test tags (@smoke, @fast, @critical, filtering with --grep), project dependencies, security testing (XSS, CSRF, auth), performance budgets (Web Vitals, Lighthouse), iframes, component testing, canvas/WebGL, service workers/PWA, test coverage, i18n/localization, Electron apps, or browser extension testing. Covers E2E, component, API, visual, accessibility, security, Electron, and extension testing.",
       "whenToUse": "Use when writing Playwright tests, fixing flaky tests, debugging failures, implementing Page Object Model, configuring CI/CD, optimizing performance, mocking APIs, handling authentication or OAuth, testing accessibility (axe-core), file uploads/downloads, date/time mocking, WebSockets, geolocation, permissions, multi-tab/popup flows, mobile/responsive layouts, touch gestures, GraphQL, error handling, offline mode, multi-user collaboration, third-party services (payments, email verification), console error monitoring, global setup/teardown, test annotations (skip, fixme, slow), test tags (@smoke, @fast, @critical, filtering with --grep), project dependencies, security testing (XSS, CSRF, auth), performance budgets (Web Vitals, Lighthouse), iframes, component testing, canvas/WebGL, service workers/PWA, test coverage, i18n/localization, Electron apps, or browser extension testing. Covers E2E, component, API, visual, accessibility, security, Electron, and extension testing.",
       "whenNotToUse": "Use haus.ecc-e2e-testing for Page-Object-Model, CI/CD integration, and flaky-test strategy guidance.",
-      "tags": ["playwright", "testing"],
+      "tags": [
+        "playwright",
+        "testing"
+      ],
       "repoRoles": [],
       "tokenEstimate": 6577,
       "installMode": "copy-selected",
@@ -3515,8 +3996,8 @@
       "license": "MIT",
       "licenseConfidence": "high",
       "originSourceId": "currents-dev-playwright-best-practices-skill",
-      "originUrl": "https://github.com/currents-dev/playwright-best-practices-skill/blob/ef329e7e65149918e1ff0eed2cf7d2e6e6f9eb5b/SKILL.md",
-      "pinnedRef": "ef329e7e65149918e1ff0eed2cf7d2e6e6f9eb5b",
+      "originUrl": "https://github.com/currents-dev/playwright-best-practices-skill/blob/283d5cbc5d11aac1abda058b16ad22c317d54dc0/playwright-best-practices/SKILL.md",
+      "pinnedRef": "283d5cbc5d11aac1abda058b16ad22c317d54dc0",
       "ecosystem": "playwright",
       "requiresAny": [
         {
@@ -3537,8 +4018,13 @@
       "purpose": "Explore and understand Nx workspaces. USE WHEN answering questions about the workspace, projects, or tasks. ALSO USE WHEN an nx command fails or you need to check available targets/configuration before running a task. EXAMPLES: 'What projects are in this workspace?', 'How is project X configured?', 'What depends on library Y?', 'What targets can I run?', 'Cannot find configuration for task', 'debug nx task failure'.",
       "whenToUse": "Explore and understand Nx workspaces. USE WHEN answering questions about the workspace, projects, or tasks. ALSO USE WHEN an nx command fails or you need to check available targets/configuration before running a task. EXAMPLES: 'What projects are in this workspace?', 'How is project X configured?', 'What depends on library Y?', 'What targets can I run?', 'Cannot find configuration for task', 'debug nx task failure'.",
       "whenNotToUse": "Do not use when a more specific skill or command applies.",
-      "tags": ["nx", "workflow"],
-      "repoRoles": ["nx-monorepo"],
+      "tags": [
+        "nx",
+        "workflow"
+      ],
+      "repoRoles": [
+        "nx-monorepo"
+      ],
       "tokenEstimate": 1918,
       "installMode": "copy-selected",
       "default": true,
@@ -3570,8 +4056,13 @@
       "purpose": "Generate code using nx generators. INVOKE IMMEDIATELY when user mentions scaffolding, setup, structure, creating apps/libs, or setting up project structure. Trigger words - scaffold, setup, create a new app, create a new lib, project structure, generate, add a new project. ALWAYS use this BEFORE calling nx_docs or exploring - this skill handles discovery internally.",
       "whenToUse": "Generate code using nx generators. INVOKE IMMEDIATELY when user mentions scaffolding, setup, structure, creating apps/libs, or setting up project structure. Trigger words - scaffold, setup, create a new app, create a new lib, project structure, generate, add a new project. ALWAYS use this BEFORE calling nx_docs or exploring - this skill handles discovery internally.",
       "whenNotToUse": "Do not use when a more specific skill or command applies.",
-      "tags": ["nx", "workflow"],
-      "repoRoles": ["nx-monorepo"],
+      "tags": [
+        "nx",
+        "workflow"
+      ],
+      "repoRoles": [
+        "nx-monorepo"
+      ],
       "tokenEstimate": 1952,
       "installMode": "copy-selected",
       "default": true,
@@ -3603,10 +4094,17 @@
       "purpose": "Haus-specific Nx project tag, module-boundary, and generator-placement conventions not covered by the official nx-workspace/nx-generate skills.",
       "whenToUse": "Use alongside haus.nx-nx-workspace / haus.nx-nx-generate when naming tags, placing generators/executors, or enforcing module boundaries.",
       "whenNotToUse": "Use haus.nx-nx-workspace or haus.nx-nx-generate for general Nx exploration/generation.",
-      "references": ["https://nx.dev/llms.txt"],
+      "references": [
+        "https://nx.dev/llms.txt"
+      ],
       "tokenBudget": 800,
-      "tags": ["nx", "workflow"],
-      "repoRoles": ["nx-monorepo"],
+      "tags": [
+        "nx",
+        "workflow"
+      ],
+      "repoRoles": [
+        "nx-monorepo"
+      ],
       "requiresAny": [
         {
           "role": "nx-monorepo"
@@ -3622,134 +4120,8 @@
       "riskLevel": "low"
     },
     {
-      "id": "haus.expo-building-native-ui",
-      "version": "1.0.1",
-      "source": "curated",
-      "type": "skill",
-      "path": "skills/expo/building-native-ui",
-      "title": "Expo Building Native UI",
-      "purpose": "Complete guide for building beautiful apps with Expo Router. Covers fundamentals, styling, components, navigation, animations, patterns, and native tabs.",
-      "whenToUse": "Complete guide for building beautiful apps with Expo Router. Covers fundamentals, styling, components, navigation, animations, patterns, and native tabs.",
-      "whenNotToUse": "Do not use when a more specific skill or command applies.",
-      "tags": ["expo", "react-native", "mobile"],
-      "repoRoles": ["expo-app"],
-      "tokenEstimate": 3344,
-      "installMode": "copy-selected",
-      "default": true,
-      "reviewStatus": "approved",
-      "riskLevel": "low",
-      "useMode": "copy",
-      "license": "MIT",
-      "licenseConfidence": "high",
-      "originSourceId": "expo-skills",
-      "originUrl": "https://github.com/expo/skills/blob/1f9951197dc6acff61c4f0f19521fa0e62c33e51/plugins/expo/skills/building-native-ui/SKILL.md",
-      "pinnedRef": "1f9951197dc6acff61c4f0f19521fa0e62c33e51",
-      "ecosystem": "expo",
-      "requiresAny": [
-        {
-          "stack": "expo"
-        },
-        {
-          "stack": "react-native"
-        },
-        {
-          "role": "expo-app"
-        },
-        {
-          "dependency": "expo"
-        },
-        {
-          "dependency": "react-native"
-        }
-      ]
-    },
-    {
-      "id": "haus.expo-native-data-fetching",
-      "version": "1.0.1",
-      "source": "curated",
-      "type": "skill",
-      "path": "skills/expo/native-data-fetching",
-      "title": "Expo Native Data Fetching",
-      "purpose": "Use when implementing or debugging ANY network request, API call, or data fetching. Covers fetch API, React Query, SWR, error handling, caching, offline support, and Expo Router data loaders (`useLoaderData`).",
-      "whenToUse": "Use when implementing or debugging ANY network request, API call, or data fetching. Covers fetch API, React Query, SWR, error handling, caching, offline support, and Expo Router data loaders (`useLoaderData`).",
-      "whenNotToUse": "Do not use when a more specific skill or command applies.",
-      "tags": ["expo", "react-native", "mobile"],
-      "repoRoles": ["expo-app"],
-      "tokenEstimate": 2911,
-      "installMode": "copy-selected",
-      "default": true,
-      "reviewStatus": "approved",
-      "riskLevel": "low",
-      "useMode": "copy",
-      "license": "MIT",
-      "licenseConfidence": "high",
-      "originSourceId": "expo-skills",
-      "originUrl": "https://github.com/expo/skills/blob/1f9951197dc6acff61c4f0f19521fa0e62c33e51/plugins/expo/skills/native-data-fetching/SKILL.md",
-      "pinnedRef": "1f9951197dc6acff61c4f0f19521fa0e62c33e51",
-      "ecosystem": "expo",
-      "requiresAny": [
-        {
-          "stack": "expo"
-        },
-        {
-          "stack": "react-native"
-        },
-        {
-          "role": "expo-app"
-        },
-        {
-          "dependency": "expo"
-        },
-        {
-          "dependency": "react-native"
-        }
-      ]
-    },
-    {
-      "id": "haus.expo-upgrading-expo",
-      "version": "1.0.1",
-      "source": "curated",
-      "type": "skill",
-      "path": "skills/expo/upgrading-expo",
-      "title": "Expo Upgrading Expo",
-      "purpose": "Guidelines for upgrading Expo SDK versions and fixing dependency issues",
-      "whenToUse": "Guidelines for upgrading Expo SDK versions and fixing dependency issues",
-      "whenNotToUse": "Do not use when a more specific skill or command applies.",
-      "tags": ["expo", "react-native", "mobile"],
-      "repoRoles": ["expo-app"],
-      "tokenEstimate": 1452,
-      "installMode": "copy-selected",
-      "default": true,
-      "reviewStatus": "approved",
-      "riskLevel": "low",
-      "useMode": "copy",
-      "license": "MIT",
-      "licenseConfidence": "high",
-      "originSourceId": "expo-skills",
-      "originUrl": "https://github.com/expo/skills/blob/1f9951197dc6acff61c4f0f19521fa0e62c33e51/plugins/expo/skills/upgrading-expo/SKILL.md",
-      "pinnedRef": "1f9951197dc6acff61c4f0f19521fa0e62c33e51",
-      "ecosystem": "expo",
-      "requiresAny": [
-        {
-          "stack": "expo"
-        },
-        {
-          "stack": "react-native"
-        },
-        {
-          "role": "expo-app"
-        },
-        {
-          "dependency": "expo"
-        },
-        {
-          "dependency": "react-native"
-        }
-      ]
-    },
-    {
       "id": "haus.callstack-react-native-best-practices",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "source": "curated",
       "type": "skill",
       "path": "skills/callstack/react-native-best-practices",
@@ -3757,9 +4129,15 @@
       "purpose": "Provides React Native performance optimization guidelines for FPS, TTI, bundle size, memory leaks, re-renders, and animations. Applies to tasks involving Hermes optimization, JS thread blocking, bridge overhead, FlashList, native modules, or debugging jank and frame drops.",
       "whenToUse": "Provides React Native performance optimization guidelines for FPS, TTI, bundle size, memory leaks, re-renders, and animations. Applies to tasks involving Hermes optimization, JS thread blocking, bridge overhead, FlashList, native modules, or debugging jank and frame drops.",
       "whenNotToUse": "Do not use when a more specific skill or command applies.",
-      "tags": ["expo", "react-native", "mobile"],
-      "repoRoles": ["expo-app"],
-      "tokenEstimate": 3081,
+      "tags": [
+        "expo",
+        "react-native",
+        "mobile"
+      ],
+      "repoRoles": [
+        "expo-app"
+      ],
+      "tokenEstimate": 3111,
       "installMode": "copy-selected",
       "default": true,
       "reviewStatus": "approved",
@@ -3768,8 +4146,8 @@
       "license": "MIT",
       "licenseConfidence": "high",
       "originSourceId": "callstackincubator-agent-skills",
-      "originUrl": "https://github.com/callstackincubator/agent-skills/blob/553dccbe87ba678b14e33aedd4dc274f5b92c85a/skills/react-native-best-practices/SKILL.md",
-      "pinnedRef": "553dccbe87ba678b14e33aedd4dc274f5b92c85a",
+      "originUrl": "https://github.com/callstackincubator/agent-skills/blob/f6b87e35a35cc300c71331b89af2ac3d9b48a193/skills/react-native-best-practices/SKILL.md",
+      "pinnedRef": "f6b87e35a35cc300c71331b89af2ac3d9b48a193",
       "ecosystem": "react-native",
       "requiresAny": [
         {
@@ -3799,8 +4177,13 @@
       "purpose": "Vue 3 Composition API, script setup macros, reactivity system, and built-in components. Use when writing Vue SFCs, defineProps/defineEmits/defineModel, watchers, or using Transition/Teleport/Suspense/KeepAlive.",
       "whenToUse": "Vue 3 Composition API, script setup macros, reactivity system, and built-in components. Use when writing Vue SFCs, defineProps/defineEmits/defineModel, watchers, or using Transition/Teleport/Suspense/KeepAlive.",
       "whenNotToUse": "Use haus.ecc-vue-patterns for project structure, Pinia, Vue Router, Nuxt SSR, and testing guidance — this skill covers only core Composition API/reactivity/built-ins.",
-      "tags": ["vue", "workflow"],
-      "repoRoles": ["vue-app"],
+      "tags": [
+        "vue",
+        "workflow"
+      ],
+      "repoRoles": [
+        "vue-app"
+      ],
       "tokenEstimate": 612,
       "installMode": "copy-selected",
       "default": true,
@@ -3832,7 +4215,11 @@
       "purpose": "React and Next.js performance optimization guidelines from Vercel Engineering. This skill should be used when writing, reviewing, or refactoring React/Next.js code to ensure optimal performance patterns. Triggers on tasks involving React components, Next.js pages, data fetching, bundle optimization, or performance improvements.",
       "whenToUse": "React and Next.js performance optimization guidelines from Vercel Engineering. This skill should be used when writing, reviewing, or refactoring React/Next.js code to ensure optimal performance patterns. Triggers on tasks involving React components, Next.js pages, data fetching, bundle optimization, or performance improvements.",
       "whenNotToUse": "Use stack-specific router or review-agent skills when those scopes are narrower and sufficient.",
-      "tags": ["react", "frontend", "workflow"],
+      "tags": [
+        "react",
+        "frontend",
+        "workflow"
+      ],
       "repoRoles": [],
       "tokenEstimate": 1813,
       "installMode": "copy-selected",
@@ -3860,7 +4247,7 @@
     },
     {
       "id": "haus.vercel-labs-react-view-transitions",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "source": "curated",
       "type": "skill",
       "path": "skills/vercel-labs/react-view-transitions",
@@ -3868,9 +4255,13 @@
       "purpose": "Guide for implementing smooth, native-feeling animations using React's View Transition API (`<ViewTransition>` component, `addTransitionType`, and CSS view transition pseudo-elements). Use this skill whenever the user wants to add page transitions, animate route changes, create shared element animations, animate enter/exit of components, animate list reorder, implement directional (forward/back) navigation animations, or integrate view transitions in Next.js. Also use when the user mentions view transitions, `startViewTransition`, `ViewTransition`, transition types, or asks about animating between UI states in React without third-party animation libraries.",
       "whenToUse": "Guide for implementing smooth, native-feeling animations using React's View Transition API (`<ViewTransition>` component, `addTransitionType`, and CSS view transition pseudo-elements). Use this skill whenever the user wants to add page transitions, animate route changes, create shared element animations, animate enter/exit of components, animate list reorder, implement directional (forward/back) navigation animations, or integrate view transitions in Next.js. Also use when the user mentions view transitions, `startViewTransition`, `ViewTransition`, transition types, or asks about animating between UI states in React without third-party animation libraries.",
       "whenNotToUse": "Do not use when a more specific skill or command applies.",
-      "tags": ["react", "frontend", "workflow"],
+      "tags": [
+        "react",
+        "frontend",
+        "workflow"
+      ],
       "repoRoles": [],
-      "tokenEstimate": 3126,
+      "tokenEstimate": 3523,
       "installMode": "copy-selected",
       "default": true,
       "reviewStatus": "approved",
@@ -3879,8 +4270,8 @@
       "license": "MIT",
       "licenseConfidence": "medium",
       "originSourceId": "vercel-labs-agent-skills",
-      "originUrl": "https://github.com/vercel-labs/agent-skills/blob/f8a72b9603728bb92a217a879b7e62e43ad76c81/skills/react-view-transitions/SKILL.md",
-      "pinnedRef": "f8a72b9603728bb92a217a879b7e62e43ad76c81",
+      "originUrl": "https://github.com/vercel-labs/agent-skills/blob/7c180d9044c9ae2b442b567aad4e42a28dd5ed62/skills/react-view-transitions/SKILL.md",
+      "pinnedRef": "7c180d9044c9ae2b442b567aad4e42a28dd5ed62",
       "ecosystem": "react",
       "requiresAny": [
         {
@@ -3896,7 +4287,7 @@
     },
     {
       "id": "haus.kadajett-nestjs-best-practices",
-      "version": "1.0.2",
+      "version": "1.0.4",
       "source": "curated",
       "type": "skill",
       "path": "skills/kadajett/nestjs-best-practices",
@@ -3904,9 +4295,13 @@
       "purpose": "NestJS best practices and architecture patterns for building production-ready applications. This skill should be used when writing, reviewing, or refactoring NestJS code to ensure proper patterns for modules, dependency injection, security, and performance.",
       "whenToUse": "NestJS best practices and architecture patterns for building production-ready applications. This skill should be used when writing, reviewing, or refactoring NestJS code to ensure proper patterns for modules, dependency injection, security, and performance.",
       "whenNotToUse": "Use haus.ecc-nestjs-patterns for lighter community patterns, or stack-specific NestJS skills (GraphQL, Vendure, Sentry) when those scopes apply.",
-      "tags": ["nestjs", "backend", "workflow"],
+      "tags": [
+        "nestjs",
+        "backend",
+        "workflow"
+      ],
       "repoRoles": [],
-      "tokenEstimate": 1161,
+      "tokenEstimate": 1189,
       "installMode": "copy-selected",
       "default": true,
       "reviewStatus": "approved",
@@ -3915,8 +4310,8 @@
       "license": "MIT",
       "licenseConfidence": "medium",
       "originSourceId": "kadajett-agent-nestjs-skills",
-      "originUrl": "https://github.com/kadajett/agent-nestjs-skills/blob/f9effeccffc3918f51a7d4e912be2873de21d35c/SKILL.md",
-      "pinnedRef": "f9effeccffc3918f51a7d4e912be2873de21d35c",
+      "originUrl": "https://github.com/kadajett/agent-nestjs-skills/blob/3986e0cede33958e000f959031cbee0cd83c2941/skills/nestjs-best-practices/SKILL.md",
+      "pinnedRef": "3986e0cede33958e000f959031cbee0cd83c2941",
       "ecosystem": "nestjs",
       "requiresAny": [
         {
