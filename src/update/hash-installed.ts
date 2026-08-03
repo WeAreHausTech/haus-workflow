@@ -14,6 +14,22 @@ import { hashText } from '../utils/fs.js'
 export const EMPTY_LOCK_PATHS_TOKEN = 'haus-lock:empty-paths'
 
 /**
+ * Digests one file's content. Text (valid UTF-8, matching JS's lossless decode/encode
+ * round-trip) is LF-normalized first so line-ending changes alone don't register as
+ * drift. Anything that doesn't round-trip losslessly (binary content) is hashed by its
+ * raw bytes instead — decoding it as UTF-8 first would replace invalid byte sequences
+ * with U+FFFD, silently collapsing distinct binary content to the same hash.
+ */
+function digestFileContent(buf: Buffer): string {
+  const asText = buf.toString('utf8')
+  const roundTrip = Buffer.from(asText, 'utf8')
+  if (roundTrip.equals(buf)) {
+    return hashText(normaliseLF(asText))
+  }
+  return hashText(buf)
+}
+
+/**
  * Content-addressed hash for paths under `root` (files or directories).
  * Directories are expanded to all nested files. Missing paths are skipped.
  */
@@ -29,8 +45,8 @@ export async function hashInstalledPaths(root: string, relPaths: string[]): Prom
     if (!(await fs.pathExists(abs))) continue
     const stat = await fs.stat(abs)
     if (stat.isFile()) {
-      const body = await fs.readFile(abs, 'utf8')
-      fileDigests.push({ rel, digest: hashText(normaliseLF(body)) })
+      const body = await fs.readFile(abs)
+      fileDigests.push({ rel, digest: digestFileContent(body) })
       continue
     }
     if (!stat.isDirectory()) continue
@@ -38,8 +54,8 @@ export async function hashInstalledPaths(root: string, relPaths: string[]): Prom
     for (const sub of inner.sort()) {
       const relFile = path.join(rel, sub).replace(/\\/g, '/')
       const absFile = path.join(abs, sub)
-      const body = await fs.readFile(absFile, 'utf8')
-      fileDigests.push({ rel: relFile, digest: hashText(normaliseLF(body)) })
+      const body = await fs.readFile(absFile)
+      fileDigests.push({ rel: relFile, digest: digestFileContent(body) })
     }
   }
 
