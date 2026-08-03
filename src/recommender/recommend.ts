@@ -76,6 +76,7 @@ export async function recommend(
   const recommended: Recommendation['recommended'] = []
   const skipped: Recommendation['skipped'] = []
   const sourceTrust = new Map(sources.items.map((x) => [x.source, x.status]))
+  const formerIds = new Set(items.flatMap((item) => item.formerIds ?? []))
   const changedFiles = await readChangedFiles(root)
 
   const skip = (id: string, code: string, message: string, signal?: string) => {
@@ -87,6 +88,11 @@ export async function recommend(
     scannerStacks.has(name.toLowerCase()) ? `tag:${name}` : `deep:tag:${name}`
 
   for (const item of items) {
+    if (formerIds.has(item.id)) {
+      skip(item.id, 'former-id', 'Catalog id was renamed and cannot be newly recommended')
+      continue
+    }
+
     // Fail-closed: items with a missing or whitespace-only source field cannot be
     // trust-checked, so block them unconditionally before any policy gate runs.
     const normSource = typeof item.source === 'string' ? item.source.trim() : ''
@@ -385,6 +391,7 @@ function applyCoInstallSuppression(recommended: RecommendedEntry[], skipped: Ski
  * must NOT be force-installed via `--include` (they are correctness/security gates).
  */
 const HARD_SKIP_CODES = new Set([
+  'former-id',
   'unsupported-policy',
   'deprecated',
   'curated-not-approved',
