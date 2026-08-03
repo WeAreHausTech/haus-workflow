@@ -7,6 +7,7 @@ import path from 'node:path'
 
 import fs from 'fs-extra'
 
+import { findFormerIdMigrations } from '../catalog/former-ids.js'
 import { validateCatalogItem } from '../catalog/ingest-catalog.js'
 import { catalogItemContentPath, loadCatalogContext } from '../catalog/load-catalog.js'
 import { getResolvedCatalogRef, isCatalogRefResolved } from '../catalog/remote-catalog.js'
@@ -207,6 +208,7 @@ export async function writeClaudeFiles(
 
   type ManifestItem = {
     id: string
+    formerIds?: string[]
     path: string
     type: string
     source?: string
@@ -219,6 +221,26 @@ export async function writeClaudeFiles(
   }
   const { items: manifestItems, contentRoot } = await loadCatalogContext(root)
   const manifestById = new Map((manifestItems as ManifestItem[]).map((item) => [item.id, item]))
+  const prevLock = (await readJson<PrevLockEntry[]>(hausPath(root, 'haus.lock.json'))) ?? []
+  const migrations = findFormerIdMigrations(
+    prevLock.filter((entry): entry is PrevLockEntry & { id: string } => Boolean(entry.id)),
+    manifestItems,
+  )
+  const migrationByOldId = new Map(
+    migrations.map((migration) => [migration.oldId, migration.newId]),
+  )
+  const cleanupManifestById = new Map(manifestById)
+  for (const migration of migrations) {
+    if (dryRun) {
+      say(`[dry-run] would migrate ${migration.oldId} → ${migration.newId} (upstream rename)`)
+    } else {
+      warn(`migrated ${migration.oldId} → ${migration.newId} (upstream rename)`)
+    }
+    const currentItem = manifestById.get(migration.newId)
+    if (currentItem) cleanupManifestById.set(migration.oldId, currentItem)
+  }
+  await cleanupMigratedCatalogItems(root, prevLock, migrations, dryRun, opts.quiet)
+
   const installedPathsByItem = new Map<string, string[]>()
   // Track which recommended items were actually installed so that skipped
   // curated items (unapproved or blocked) are excluded from the lock — a stale
@@ -226,10 +248,36 @@ export async function writeClaudeFiles(
   // written state.
   const installedIds = new Set<string>()
 
-  const catalogItems =
+  const selectedCatalogItems =
     selectedIds !== undefined
       ? rec.recommended.filter((r) => selectedIds.includes(r.id))
       : rec.recommended
+  const catalogItemsById = new Map<string, Recommendation['recommended'][number]>()
+  for (const recommended of selectedCatalogItems) {
+    const id = migrationByOldId.get(recommended.id) ?? recommended.id
+    const manifestItem = manifestById.get(id)
+    catalogItemsById.set(id, {
+      ...recommended,
+      id,
+      type: manifestItem?.type ?? recommended.type,
+    })
+  }
+  for (const migration of migrations) {
+    if (selectedIds !== undefined && !selectedIds.includes(migration.oldId)) continue
+    if (catalogItemsById.has(migration.newId)) continue
+    const lockItem = prevLock.find((entry) => entry.id === migration.oldId)
+    const manifestItem = manifestById.get(migration.newId)
+    if (!lockItem || !manifestItem) continue
+    catalogItemsById.set(migration.newId, {
+      id: migration.newId,
+      type: manifestItem.type,
+      reason: 'migrated from former catalog id',
+      reasons: [{ code: 'former-id', message: `Renamed from ${migration.oldId}` }],
+      selectionMode: 'manual',
+      install: true,
+    })
+  }
+  const catalogItems = [...catalogItemsById.values()]
 
   let curatedReviewStatusSkips = 0
   let superpowersSharedInstalled = false
@@ -358,14 +406,15 @@ export async function writeClaudeFiles(
   // Items that merely fall out of the current selection (e.g. `apply --select`) yet
   // still exist in the catalog as approved are left untouched. Hash-gated: only
   // unmodified copies are deleted, matching the global-install orphan-cleanup contract.
-  await cleanupStaleCatalogItems(root, manifestById, dryRun, opts.quiet)
+  await cleanupStaleCatalogItems(root, cleanupManifestById, dryRun, opts.quiet)
 
   if (dryRun) return [...new Set(files)]
 
   const installedItems = catalogItems.filter((r) => installedIds.has(r.id))
-  const prevLock = await readJson<PrevLockEntry[]>(hausPath(root, 'haus.lock.json'))
   const prevRefById = new Map(
-    (prevLock ?? []).filter((e) => e.id && e.catalogRef).map((e) => [e.id!, e.catalogRef!]),
+    prevLock
+      .filter((e) => e.id && e.catalogRef)
+      .map((e) => [migrationByOldId.get(e.id!) ?? e.id!, e.catalogRef!]),
   )
   const lockCatalogRef = (itemId: string): string =>
     isCatalogRefResolved()
@@ -406,6 +455,55 @@ export async function writeClaudeFiles(
 type PrevLockEntry = { id?: string; paths?: string[]; hash?: string; catalogRef?: string }
 
 type CleanupManifestItem = { reviewStatus?: string }
+
+/**
+ * Removes an unmodified former-id install before the current item is copied. This
+ * prevents a renamed path from lingering and lets same-path renames refresh cleanly.
+ * Locally edited former files remain untouched.
+ */
+async function cleanupMigratedCatalogItems(
+  root: string,
+  prevLock: PrevLockEntry[],
+  migrations: Array<{ oldId: string; newId: string }>,
+  dryRun: boolean,
+  quiet?: boolean,
+): Promise<void> {
+  const say = quiet ? () => {} : log
+  for (const migration of migrations) {
+    const entry = prevLock.find((candidate) => candidate.id === migration.oldId)
+    if (!entry) continue
+    const relPaths = entry.paths ?? []
+    const existing: string[] = []
+    for (const rel of relPaths) {
+      if (await fs.pathExists(path.join(root, rel))) existing.push(rel)
+    }
+    if (existing.length === 0) continue
+    if (entry.hash === undefined) {
+      warn(
+        `Former catalog item ${migration.oldId} has no lock hash — leaving old paths in place: ${existing.join(', ')}`,
+      )
+      continue
+    }
+    const currentHash = await hashInstalledPaths(root, relPaths)
+    if (currentHash !== entry.hash) {
+      warn(
+        `Former catalog item ${migration.oldId} was modified locally — leaving old paths in place: ${existing.join(', ')}`,
+      )
+      continue
+    }
+    for (const rel of existing) {
+      const abs = path.join(root, rel)
+      if (dryRun) {
+        say(
+          `[dry-run] would remove renamed ${displayPath(root, abs)} (${migration.oldId} → ${migration.newId})`,
+        )
+        continue
+      }
+      await fs.remove(abs)
+      await pruneEmptyDir(path.dirname(abs))
+    }
+  }
+}
 
 /**
  * Deletes catalog items installed on a previous run (per the existing lock) that are no

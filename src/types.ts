@@ -64,6 +64,8 @@ export type CatalogItemOptInTier = 'workflow' | 'ops' | 'review' | 'design'
 /** A single entry in the catalog manifest describing a skill, agent, template, or command. */
 export type CatalogItem = {
   id: string
+  /** Historical ids that should migrate to this item after an upstream rename. */
+  formerIds?: string[]
   type: 'skill' | 'agent' | 'template' | 'command' | 'config'
   source: string
   version?: string
@@ -113,6 +115,7 @@ export type CatalogItem = {
 /** Known catalog item field names — keep in sync with catalog-item.schema.json. */
 export const CATALOG_ITEM_KNOWN_KEYS = [
   'id',
+  'formerIds',
   'type',
   'source',
   'version',

@@ -1,6 +1,8 @@
 /** `haus update` — refreshes the lockfile, syncs the remote catalog cache, and checks for CLI updates. */
 import path from 'node:path'
 
+import { findFormerIdMigrations } from '../catalog/former-ids.js'
+import { loadCatalog } from '../catalog/load-catalog.js'
 import { fetchLatestCatalogTag, syncRemoteCatalog } from '../catalog/remote-catalog.js'
 import { refreshProjectApply } from '../claude/refresh-project.js'
 import { applyInstall } from '../install/apply.js'
@@ -15,7 +17,7 @@ import {
 import { fetchNpmVersionStatus } from '../update/npm-version.js'
 import { readJson } from '../utils/fs.js'
 import { log, warn } from '../utils/logger.js'
-import { packageRoot } from '../utils/paths.js'
+import { hausPath, packageRoot } from '../utils/paths.js'
 
 const NPM_PACKAGE_NAME = '@haus-tech/haus-workflow'
 
@@ -34,12 +36,16 @@ export async function runUpdate(options: { check?: boolean; fromHook?: boolean }
   if (options.check) {
     const pkgJson = await readJson<{ version?: string }>(path.join(packageRoot(), 'package.json'))
     const currentVersion = pkgJson?.version ?? '0.0.0'
-    const [status, npmVersion, latestCatalogTag, globalInstallDrift] = await Promise.all([
-      checkLock(root),
-      fetchNpmVersionStatus(currentVersion),
-      fetchLatestCatalogTag(),
-      detectGlobalInstallDrift(),
-    ])
+    const [status, npmVersion, latestCatalogTag, globalInstallDrift, catalogItems, lockItems] =
+      await Promise.all([
+        checkLock(root),
+        fetchNpmVersionStatus(currentVersion),
+        fetchLatestCatalogTag(),
+        detectGlobalInstallDrift(),
+        loadCatalog(root),
+        readJson<Array<{ id: string }>>(hausPath(root, 'haus.lock.json')),
+      ])
+    const formerIdMigrations = findFormerIdMigrations(lockItems ?? [], catalogItems)
     const installedRef = status.catalogRef ?? 'main'
     const catalogRefBehind =
       latestCatalogTag !== null && installedRef !== latestCatalogTag
@@ -52,6 +58,7 @@ export async function runUpdate(options: { check?: boolean; fromHook?: boolean }
           installedCatalogRef: installedRef,
           latestCatalogTag,
           catalogRefBehind,
+          formerIdMigrations,
           globalInstallDrift,
           localOverrides: await hasLocalOverrides(root),
           summary: diffGeneratedFiles(),
@@ -65,7 +72,7 @@ export async function runUpdate(options: { check?: boolean; fromHook?: boolean }
     // not "drift" — don't fail the check for it. Only fail when an existing
     // lockfile has real drift or invalid versions (status.ok is false despite
     // having lock items).
-    if (status.count > 0 && !status.ok) process.exitCode = 1
+    if ((status.count > 0 && !status.ok) || formerIdMigrations.length > 0) process.exitCode = 1
     return
   }
 
