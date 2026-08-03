@@ -71,12 +71,13 @@ export async function writeWorkspaceClaudeMd(
 
   // The standalone WORKSPACE.md is haus-owned, so it is written verbatim. The shared
   // CLAUDE.md is injected so any user content outside the sentinels is preserved.
-  const prev = (await fs.pathExists(filePath)) ? await fs.readFile(filePath, 'utf8') : ''
+  const existed = await fs.pathExists(filePath)
+  const prev = existed ? await fs.readFile(filePath, 'utf8') : ''
   const next = opts.collision ? `${block}\n` : injectHausBlock(prev, block)
   const printable = displayPath(workspaceRoot, filePath)
 
   if (dryRun) {
-    if (!prev) {
+    if (!existed) {
       say(createUnifiedDiff(printable, '', next))
     } else if (hasTextChanged(prev, next)) {
       say(createUnifiedDiff(printable, prev, next))
@@ -86,12 +87,13 @@ export async function writeWorkspaceClaudeMd(
     return filePath
   }
 
-  if (hasTextChanged(prev, next) && prev.length > 0) {
-    const diffText = createUnifiedDiff(printable, prev, next)
-    const summary = summarizeDiff(diffText)
-    say(`Overwriting ${printable} (diff +${summary.additions} -${summary.deletions})`)
+  if (!existed || hasTextChanged(prev, next)) {
+    if (existed) {
+      const diffText = createUnifiedDiff(printable, prev, next)
+      const summary = summarizeDiff(diffText)
+      say(`Overwriting ${printable} (diff +${summary.additions} -${summary.deletions})`)
+    }
+    await writeText(filePath, next)
   }
-
-  await writeText(filePath, next)
   return filePath
 }

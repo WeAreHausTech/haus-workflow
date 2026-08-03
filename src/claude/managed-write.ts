@@ -11,17 +11,22 @@ import { writeText } from '../utils/fs.js'
 import { log } from '../utils/logger.js'
 import { displayPath } from '../utils/paths.js'
 
-/** Write a text file only when content has changed; in dry-run mode, log the diff instead. */
+/**
+ * Write a text file, but skip the actual write when it already exists with identical
+ * content — avoids unnecessary mtime churn for anything watching these files. In
+ * dry-run mode, nothing is written; a diff (or an "unchanged" note) is logged instead.
+ */
 export async function writeManagedText(
   root: string,
   filePath: string,
   nextText: string,
   dryRun: boolean,
 ): Promise<void> {
-  const prev = (await fs.pathExists(filePath)) ? await fs.readFile(filePath, 'utf8') : ''
+  const existed = await fs.pathExists(filePath)
+  const prev = existed ? await fs.readFile(filePath, 'utf8') : ''
   const printable = displayPath(root, filePath)
   if (dryRun) {
-    if (!prev) {
+    if (!existed) {
       log(createUnifiedDiff(printable, '', nextText))
     } else if (hasTextChanged(prev, nextText)) {
       log(createUnifiedDiff(printable, prev, nextText))
@@ -30,12 +35,14 @@ export async function writeManagedText(
     }
     return
   }
-  if (hasTextChanged(prev, nextText) && prev.length > 0) {
-    const diffText = createUnifiedDiff(printable, prev, nextText)
-    const summary = summarizeDiff(diffText)
-    log(`Overwriting ${printable} (diff +${summary.additions} -${summary.deletions})`)
+  if (!existed || hasTextChanged(prev, nextText)) {
+    if (existed) {
+      const diffText = createUnifiedDiff(printable, prev, nextText)
+      const summary = summarizeDiff(diffText)
+      log(`Overwriting ${printable} (diff +${summary.additions} -${summary.deletions})`)
+    }
+    await writeText(filePath, nextText)
   }
-  await writeText(filePath, nextText)
 }
 
 /** Serialize `value` to pretty-printed JSON then delegate to `writeManagedText`. */
