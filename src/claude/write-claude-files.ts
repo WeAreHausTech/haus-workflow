@@ -44,6 +44,29 @@ export function targetDirForType(type: string): string | null {
 }
 
 /**
+ * Removes a legacy managed stub file at `relPathSegments` if — and only if — its
+ * content is a byte-for-byte match (allowing one optional trailing LF or CRLF) for
+ * `stub`. A file that differs at all is treated as user-customized and left untouched.
+ */
+async function removeLegacyManagedStub(
+  root: string,
+  relPathSegments: string[],
+  stub: string,
+  dryRun: boolean,
+  say: (text: string) => void,
+): Promise<void> {
+  const target = claudePath(root, ...relPathSegments)
+  if (!(await fs.pathExists(target))) return
+  const content = await fs.readFile(target, 'utf8')
+  if (content !== stub && content !== `${stub}\n` && content !== `${stub}\r\n`) return
+  if (dryRun) {
+    say(`[dry-run] would remove stale ${displayPath(root, target)}`)
+  } else {
+    await fs.remove(target)
+  }
+}
+
+/**
  * Write all managed .claude/ files for the project at `root`.
  * In dry-run mode, logs diffs but does not write anything to disk.
  * Returns the full set of file paths that were written (or would be written).
@@ -102,35 +125,25 @@ export async function writeClaudeFiles(
   // when its content byte-for-byte matches the historical stub so a user-customised
   // file is never destroyed. Match exactly (allowing one optional trailing newline,
   // LF or CRLF) — any other whitespace edit counts as a user change and is preserved.
-  const legacyReviewPath = claudePath(root, 'commands', 'haus-review.md')
-  if (await fs.pathExists(legacyReviewPath)) {
-    const content = await fs.readFile(legacyReviewPath, 'utf8')
-    const stub = 'Run `haus context --task "code review"` then review diff.'
-    if (content === stub || content === `${stub}\n` || content === `${stub}\r\n`) {
-      if (dryRun) {
-        say(`[dry-run] would remove stale ${displayPath(root, legacyReviewPath)}`)
-      } else {
-        await fs.remove(legacyReviewPath)
-      }
-    }
-  }
+  await removeLegacyManagedStub(
+    root,
+    ['commands', 'haus-review.md'],
+    'Run `haus context --task "code review"` then review diff.',
+    dryRun,
+    say,
+  )
   // Legacy: haus-doctor.md was a managed core command stub (a bare, description-less
   // one-liner), removed in favour of routing everything through the /haus-workflow
   // skill. Delete the stale stub from projects that installed it earlier, but only
   // when its content byte-for-byte matches the historical stub so a user-customised
   // file is never destroyed.
-  const legacyDoctorPath = claudePath(root, 'commands', 'haus-doctor.md')
-  if (await fs.pathExists(legacyDoctorPath)) {
-    const content = await fs.readFile(legacyDoctorPath, 'utf8')
-    const stub = 'Run `haus doctor`.'
-    if (content === stub || content === `${stub}\n` || content === `${stub}\r\n`) {
-      if (dryRun) {
-        say(`[dry-run] would remove stale ${displayPath(root, legacyDoctorPath)}`)
-      } else {
-        await fs.remove(legacyDoctorPath)
-      }
-    }
-  }
+  await removeLegacyManagedStub(
+    root,
+    ['commands', 'haus-doctor.md'],
+    'Run `haus doctor`.',
+    dryRun,
+    say,
+  )
   // The haus rule now also carries the two security lines that previously lived in a
   // separate security.md (the advisory mirror of settings.json deny/ask), plus a guard
   // against hand-editing haus-managed files. settings.json + the guard hooks remain the
@@ -161,18 +174,13 @@ export async function writeClaudeFiles(
   // Legacy: the two security lines moved into haus.md (above). Remove the standalone
   // security.md from projects that installed it earlier, but only when its content
   // byte-for-byte matches the historical stub so a user-customised file is preserved.
-  const legacySecurityPath = claudePath(root, 'rules', 'security.md')
-  if (await fs.pathExists(legacySecurityPath)) {
-    const content = await fs.readFile(legacySecurityPath, 'utf8')
-    const stub = '- Never read secrets.\n- Block dangerous shell commands.'
-    if (content === stub || content === `${stub}\n` || content === `${stub}\r\n`) {
-      if (dryRun) {
-        say(`[dry-run] would remove stale ${displayPath(root, legacySecurityPath)}`)
-      } else {
-        await fs.remove(legacySecurityPath)
-      }
-    }
-  }
+  await removeLegacyManagedStub(
+    root,
+    ['rules', 'security.md'],
+    '- Never read secrets.\n- Block dangerous shell commands.',
+    dryRun,
+    say,
+  )
   // Legacy: these `.haus-workflow/` artifacts were readerless, fully machine-generated
   // outputs that are no longer written. They were never user-authored, so remove them
   // unconditionally from projects that installed them earlier — otherwise an upgrade via
