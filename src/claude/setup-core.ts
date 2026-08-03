@@ -7,14 +7,15 @@
  * repo gets byte-identical output to `haus setup-project`.
  */
 import { syncRemoteCatalog } from '../catalog/remote-catalog.js'
-import { verifyProjectSettingsHooksContract } from '../claude/verify-hooks-contract.js'
-import { writeClaudeFiles } from '../claude/write-claude-files.js'
 import { recommend } from '../recommender/recommend.js'
 import { readContextOrScan } from '../scanner/read-context.js'
 import { scanProject } from '../scanner/scan-project.js'
 import { writeJson } from '../utils/fs.js'
 import { log } from '../utils/logger.js'
 import { displayPath, hausPath } from '../utils/paths.js'
+
+import { verifyProjectSettingsHooksContract } from './verify-hooks-contract.js'
+import { writeClaudeFiles } from './write-claude-files.js'
 
 export type SetupCoreResult = {
   root: string

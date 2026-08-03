@@ -1,7 +1,6 @@
 /** `haus setup-project` — fast full setup: scan, recommend, and optionally apply Claude files. */
+import { runSetupCore } from '../claude/setup-core.js'
 import { confirm } from '../utils/prompts.js'
-
-import { runSetupCore } from './setup-core.js'
 
 /**
  * Runs full project setup: scan, recommend, doctor summary, and apply.

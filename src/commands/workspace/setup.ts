@@ -17,13 +17,13 @@
 import { existsSync, statSync } from 'node:fs'
 import path from 'node:path'
 
+import { runSetupCore } from '../../claude/setup-core.js'
 import { writeWorkspaceClaudeMd } from '../../claude/write-workspace-claude-md.js'
 import { readContextOrScan } from '../../scanner/read-context.js'
 import type { ContextMap } from '../../types.js'
 import { checkLock } from '../../update/lockfile.js'
 import { readText } from '../../utils/fs.js'
 import { error, log, warn } from '../../utils/logger.js'
-import { runSetupCore } from '../setup-core.js'
 
 import { writeWorkspaceArtifacts, type WorkspaceRepoInput } from './aggregate.js'
 import { parseWorkspaceConfig, WORKSPACE_FILE } from './config.js'
