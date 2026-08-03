@@ -53,6 +53,12 @@ the recorded lock hash; user-modified copies are left in place with a warning. I
 still in the manifest as approved but deselected this run (e.g. via `--select`) are not
 pruned. Empty parent dirs are pruned.
 
+**Upstream rename migration:** when a current manifest item lists a locked id in
+`formerIds`, apply migrates the lock to the current id and refreshes the installed
+content, paths, and hash without requiring a new scan. Unmodified old paths are removed;
+locally edited old paths are preserved. Dry-run reports the pending migration without
+writing.
+
 After writing `.claude/settings.json`, apply runs a self-check that it matches `CANONICAL_HOOKS` in `src/claude/load-hooks.ts`. Throws on drift.
 
 > `config`-type catalog items (ESLint, Prettier) are **not** written by apply — they
@@ -82,7 +88,8 @@ Single-file items copy the file to the root (`configs/eslint/eslint.config.mjs` 
 
 Sync remote catalog, refresh global install (`~/.claude/`), and re-apply project files.
 
-- `--check` — validate lock presence and version fields; exit non-zero if stale
+- `--check` — validate lock presence and version fields and report pending `formerIds`
+  migrations; exit non-zero if stale or migration is pending
 - `--from-hook` — SessionStart hook mode (installed per-project as `haus.update-check`,
   see `src/claude/merge-project-settings.ts`). Silently checks whether the installed npm
   package version or catalog ref is behind the latest available. The lockfile is only
@@ -199,7 +206,8 @@ Validate a catalog manifest and on-disk content. Used by catalog repo CI.
 Checks include: manifest structure, file existence, skill/agent/command frontmatter
 `description:`, safety scans (forbidden stack tags, risky install patterns, `npx tsx`
 allowlist with `source: curated` waiver per catalog ADR-0005, tag allowlist), and
-`source: curated` + `reviewStatus: approved` gate. Rules load from bundled
+`source: curated` + `reviewStatus: approved` gate. `formerIds` must be string arrays,
+globally unique, and must not collide with current ids. Rules load from bundled
 `library/catalog/validation-rules.json` (synced from catalog — ADR-0001).
 
 ### `haus decisions` / `haus adr`
