@@ -251,6 +251,25 @@ export async function runDoctor(options?: { hooks?: boolean }): Promise<void> {
     }
   }
 
+  // Only checked when a recommendation exists — an empty/missing recommendation.json
+  // (fresh scan not run yet) would otherwise make every lock item look "orphaned".
+  if (recommendation) {
+    const lock = await readJson<Array<{ id?: string }>>(hausPath(root, 'haus.lock.json'))
+    const recommendedIds = new Set(
+      (recommendation.recommended as Array<{ id?: string }>).map((r) => r.id),
+    )
+    const orphaned = (lock ?? [])
+      .map((entry) => entry.id)
+      .filter((id): id is string => typeof id === 'string' && !recommendedIds.has(id))
+    if (orphaned.length > 0) {
+      suggest(
+        `- CATALOG ITEMS: ${orphaned.length} installed item(s) no longer in the current recommendation (${orphaned.join(', ')})`,
+        `${orphaned.length} installed item(s) are no longer recommended for this project`,
+        'review whether they are still needed; haus apply --write leaves them in place until removed from the catalog',
+      )
+    }
+  }
+
   const pkgJson = await readJson<{ version?: string }>(path.join(packageRoot(), 'package.json'))
   const currentVersion = pkgJson?.version ?? '0.0.0'
   const npmStatus = await fetchNpmVersionStatus(currentVersion)
