@@ -226,7 +226,7 @@ export async function runDoctor(options?: { hooks?: boolean }): Promise<void> {
         'haus apply --write',
       )
     } else {
-      ok('- .prettierignore: protects .haus-workflow/ and .claude/')
+      ok(`- .prettierignore: protects ${IGNORED_PATHS.join(' and ')}`)
     }
   }
 
