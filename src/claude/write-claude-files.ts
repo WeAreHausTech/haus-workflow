@@ -594,7 +594,7 @@ async function cleanupStaleCatalogItems(
   }
 }
 
-/** Backs up files about to be pruned to `.haus-workflow/backups/prune-<timestamp>/`. */
+/** Backs up paths about to be pruned to `.haus-workflow/backups/prune-<timestamp>/` (a path may be a single file or a directory — e.g. a skill install). */
 async function backupBeforePrune(
   root: string,
   absPaths: string[],
@@ -610,7 +610,7 @@ async function backupBeforePrune(
     await fs.ensureDir(path.dirname(backupPath))
     await fs.copy(abs, backupPath)
   }
-  say(`Backed up ${absPaths.length} file(s) to ${path.relative(root, backupRoot)} before pruning.`)
+  say(`Backed up ${absPaths.length} path(s) to ${path.relative(root, backupRoot)} before pruning.`)
 }
 
 /**
