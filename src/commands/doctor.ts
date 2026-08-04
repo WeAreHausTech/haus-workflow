@@ -6,6 +6,7 @@ import fs from 'fs-extra'
 import { getCacheDir, getCacheManifestAge } from '../catalog/remote-catalog.js'
 import { checkManagedTamper } from '../claude/managed-tamper.js'
 import { verifyProjectSettingsHooksContract } from '../claude/verify-hooks-contract.js'
+import { IGNORED_PATHS, prettierIgnoreProtects } from '../claude/write-prettierignore.js'
 import { BLOCK_BEGIN, BLOCK_END } from '../claude/write-root-claude-md.js'
 import { auditDecisionsLayout } from '../decisions/doctor.js'
 import { findOrphanedLockEntries } from '../recommender/orphaned-items.js'
@@ -212,18 +213,20 @@ export async function runDoctor(options?: { hooks?: boolean }): Promise<void> {
   }
 
   // Guard against the formatter mutating managed files: prettier reformatting
-  // .haus-workflow/WORKFLOW.md breaks the hash in its managed header and makes the
-  // check above report a phantom edit. .prettierignore must cover .haus-workflow/.
+  // .haus-workflow/WORKFLOW.md or lock-tracked .claude/ items breaks hashes and
+  // makes checks above report a phantom edit. .prettierignore must cover both.
   if (workflowExists) {
     const prettierIgnore = (await readText(path.join(root, '.prettierignore'))) ?? ''
-    if (!prettierIgnore.split('\n').some((l) => l.trim() === '.haus-workflow/')) {
+    const lines = prettierIgnore.split('\n')
+    const missing = IGNORED_PATHS.filter((p) => !prettierIgnoreProtects(lines, p))
+    if (missing.length > 0) {
       flag(
-        '- .prettierignore: not protecting .haus-workflow/ (run `haus apply --write`)',
+        `- .prettierignore: not protecting ${missing.join(', ')} (run \`haus apply --write\`)`,
         'The formatter may reformat managed files and trigger false "modified locally" reports',
         'haus apply --write',
       )
     } else {
-      ok('- .prettierignore: protects .haus-workflow/')
+      ok(`- .prettierignore: protects ${IGNORED_PATHS.join(' and ')}`)
     }
   }
 

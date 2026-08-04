@@ -10,19 +10,41 @@ import {
   PRETTIERIGNORE_END,
   buildPrettierIgnoreBlock,
   injectPrettierIgnoreBlock,
+  prettierIgnoreProtects,
   stripPrettierIgnoreBlock,
   writePrettierIgnore,
 } from '../src/claude/write-prettierignore.js'
 
 describe('write-prettierignore: block content', () => {
-  it('ignores the fully haus-owned .haus-workflow/ directory', () => {
-    // Root cause: prettier reformats the managed WORKFLOW.md body on commit, breaking
-    // the content hash embedded in its HAUS-MANAGED header so doctor reports a phantom
-    // user edit. Excluding .haus-workflow/ from the formatter keeps the hash stable.
+  it('ignores haus-owned .haus-workflow/ and .claude/ directories', () => {
+    // Root cause: prettier reformats managed WORKFLOW.md (embedded HAUS-MANAGED hash)
+    // and lock-tracked .claude/ skills/agents → phantom "modified locally" on doctor/update.
     const block = buildPrettierIgnoreBlock()
     assert.ok(block.startsWith(PRETTIERIGNORE_BEGIN), 'block opens with the begin sentinel')
     assert.ok(block.trimEnd().endsWith(PRETTIERIGNORE_END), 'block closes with the end sentinel')
-    assert.match(block, /^\.haus-workflow\/$/m, 'block lists the managed output dir')
+    assert.match(block, /^\.haus-workflow\/$/m, 'block lists the managed workflow dir')
+    assert.match(block, /^\.claude\/$/m, 'block lists the project .claude install dir')
+  })
+})
+
+describe('prettierIgnoreProtects', () => {
+  it('accepts haus canonical trailing-slash entries', () => {
+    assert.equal(prettierIgnoreProtects(['.claude/'], '.claude/'), true)
+    assert.equal(prettierIgnoreProtects(['.haus-workflow/'], '.haus-workflow/'), true)
+  })
+
+  it('accepts common equivalent patterns', () => {
+    for (const dir of ['.claude/', '.haus-workflow/']) {
+      const bare = dir.replace(/\/$/, '')
+      for (const line of [bare, `/${bare}/`, `/${bare}`, `${bare}/**`, `/${bare}/**`]) {
+        assert.equal(prettierIgnoreProtects([line], dir), true, `${dir} ← ${line}`)
+      }
+    }
+  })
+
+  it('rejects unrelated entries', () => {
+    assert.equal(prettierIgnoreProtects(['dist/', 'coverage/'], '.claude/'), false)
+    assert.equal(prettierIgnoreProtects(['.claudette/'], '.claude/'), false)
   })
 })
 
@@ -105,11 +127,12 @@ describe('write-prettierignore: writePrettierIgnore', () => {
     fs.rmSync(tmpDir, { recursive: true, force: true })
   })
 
-  it('writes .prettierignore covering .haus-workflow/', async () => {
+  it('writes .prettierignore covering .haus-workflow/ and .claude/', async () => {
     const out = await writePrettierIgnore(tmpDir, false)
     assert.equal(out, path.join(tmpDir, '.prettierignore'))
     const content = fs.readFileSync(out, 'utf8')
     assert.match(content, /^\.haus-workflow\/$/m)
+    assert.match(content, /^\.claude\/$/m)
   })
 
   it('dry-run writes nothing to disk', async () => {
@@ -124,5 +147,6 @@ describe('write-prettierignore: writePrettierIgnore', () => {
     const content = fs.readFileSync(file, 'utf8')
     assert.ok(content.includes('build/'), 'pre-existing entry preserved')
     assert.match(content, /^\.haus-workflow\/$/m)
+    assert.match(content, /^\.claude\/$/m)
   })
 })

@@ -3,13 +3,15 @@
  * project formatter.
  *
  * Why this exists: `.haus-workflow/WORKFLOW.md` carries a content hash inside its
- * HAUS-MANAGED header for tamper detection. If the project's prettier (run by the
- * shipped lefthook `format` step, an editor's format-on-save, or a manual CLI run)
- * reformats that file, the body no longer matches the embedded hash and `haus doctor`
- * reports a phantom "modified locally" edit the user never made. prettier honours
- * `.prettierignore` on every invocation route, so excluding `.haus-workflow/` keeps
- * the managed files byte-stable. The block is sentinel-delimited so user entries are
- * never clobbered (mirrors the CLAUDE.md import block, ADR-0006 style).
+ * HAUS-MANAGED header for tamper detection. Installed `.claude/` skills/agents are
+ * lock-hashed the same way. If the project's prettier (run by the shipped lefthook
+ * `format` step, an editor's format-on-save, or a manual CLI run) reformats those
+ * files, content no longer matches the embedded/lock hash and `haus doctor` /
+ * `haus update` report a phantom "modified locally" edit the user never made.
+ * prettier honours `.prettierignore` on every invocation route, so excluding
+ * `.haus-workflow/` and `.claude/` keeps the managed files byte-stable. The block is
+ * sentinel-delimited so user entries are never clobbered (mirrors the CLAUDE.md
+ * import block, ADR-0006 style).
  */
 
 import path from 'node:path'
@@ -23,14 +25,32 @@ export const PRETTIERIGNORE_BEGIN = '# HAUS:BEGIN haus-managed v=1'
 /** Closing sentinel for the managed block. */
 export const PRETTIERIGNORE_END = '# HAUS:END haus-managed'
 
-/** Paths haus owns and the formatter must leave untouched (keeps tamper hashes stable). */
-const IGNORED_PATHS = ['.haus-workflow/']
+/** Paths haus owns and the formatter must leave untouched (keeps tamper/lock hashes stable). */
+export const IGNORED_PATHS = ['.haus-workflow/', '.claude/'] as const
+
+/**
+ * True when `.prettierignore` lines already protect `dir` (haus form with trailing `/`).
+ * Accepts common equivalents so doctor doesn't false-flag user/scaffold patterns
+ * like `.claude`, `/.claude/`, or `.claude/**`.
+ */
+export function prettierIgnoreProtects(lines: readonly string[], dir: string): boolean {
+  const bare = dir.replace(/\/+$/, '')
+  const equivalents = new Set([
+    bare,
+    `${bare}/`,
+    `/${bare}`,
+    `/${bare}/`,
+    `${bare}/**`,
+    `/${bare}/**`,
+  ])
+  return lines.some((line) => equivalents.has(line.trim()))
+}
 
 /** Build the full managed block (sentinels + explanatory comment + ignored paths). */
 export function buildPrettierIgnoreBlock(): string {
   return [
     PRETTIERIGNORE_BEGIN,
-    '# haus-owned files — do not reformat (keeps tamper-detection hashes stable)',
+    '# haus-owned files — do not reformat (keeps tamper/lock hashes stable)',
     ...IGNORED_PATHS,
     PRETTIERIGNORE_END,
   ].join('\n')
