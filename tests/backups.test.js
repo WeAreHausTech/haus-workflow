@@ -4,6 +4,7 @@ import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { mkdtempSync, mkdirSync, writeFileSync, utimesSync, symlinkSync } from 'node:fs'
+import { execFileSync } from 'node:child_process'
 import { execaSync } from 'execa'
 
 import { listBackups, runBackups } from '../src/commands/backups.js'
@@ -98,17 +99,25 @@ test('runBackups restore for a dir backup copies files back to their original re
 
 test('runBackups restore fails cleanly for an unknown id', async () => {
   const temp = makeTemp('haus-backups-restore-missing-')
-  await runBackups('restore', { id: 'nope', yes: true, root: temp })
-  assert.equal(process.exitCode, 1)
-  process.exitCode = 0
+  const prevExit = process.exitCode
+  try {
+    await runBackups('restore', { id: 'nope', yes: true, root: temp })
+    assert.equal(process.exitCode, 1)
+  } finally {
+    process.exitCode = prevExit
+  }
 })
 
 test('runBackups prune refuses with no bound given', async () => {
   const temp = makeTemp('haus-backups-prune-nobound-')
   makeLockBackup(temp, 1000000)
-  await runBackups('prune', { yes: true, root: temp })
-  assert.equal(process.exitCode, 1)
-  process.exitCode = 0
+  const prevExit = process.exitCode
+  try {
+    await runBackups('prune', { yes: true, root: temp })
+    assert.equal(process.exitCode, 1)
+  } finally {
+    process.exitCode = prevExit
+  }
   const entries = await listBackups(temp)
   assert.equal(entries.length, 1, 'nothing should be removed without a bound')
 })
@@ -189,9 +198,12 @@ test('restore warns based on each backed-up file\'s own mtime, not the backup di
     runBackups('restore', { id: 'undo-2026-01-01T00-00-00-000Z', yes: true, root: temp }),
   )
 
+  const warning = messages.find((m) => m.includes('newer than backup') && m.includes('haus.md'))
+  assert.ok(warning, `expected a staleness warning naming haus.md; got: ${JSON.stringify(messages)}`)
   assert.ok(
-    messages.some((m) => m.includes('newer than backup') && m.includes('haus.md')),
-    `expected a staleness warning naming haus.md (comparing against the file's own mtime, not the directory's); got: ${JSON.stringify(messages)}`,
+    warning.includes(new Date(5000000000).toISOString()) &&
+      warning.includes(new Date(1000000).toISOString()),
+    `expected the warning to name both the destination's and the backup's own ISO timestamps (comparing against the file's own mtime, not the directory's); got: ${warning}`,
   )
 })
 
@@ -222,15 +234,49 @@ test('restore never follows a symlink planted inside a backup dir', async () => 
   )
 })
 
+test('restore skips a FIFO inside a backup dir instead of handing it to fs.copy', async () => {
+  const temp = makeTemp('haus-backups-restore-fifo-')
+  const backupDir = path.join(temp, '.haus-workflow/backups/undo-2026-01-01T00-00-00-000Z')
+  mkdirSync(backupDir, { recursive: true })
+  writeFileSync(path.join(backupDir, 'real-file.txt'), 'legit backed-up content')
+  const fifoPath = path.join(backupDir, 'a-fifo')
+  try {
+    execFileSync('mkfifo', [fifoPath])
+  } catch {
+    return // mkfifo unavailable on this platform — nothing to assert
+  }
+  const mtimeSeconds = 2000000
+  utimesSync(path.join(backupDir, 'real-file.txt'), mtimeSeconds, mtimeSeconds)
+  utimesSync(backupDir, mtimeSeconds, mtimeSeconds)
+
+  const messages = await withCapturedWarnings(() =>
+    runBackups('restore', { id: 'undo-2026-01-01T00-00-00-000Z', yes: true, root: temp }),
+  )
+
+  assert.equal(
+    fs.readFileSync(path.join(temp, 'real-file.txt'), 'utf8'),
+    'legit backed-up content',
+    'real backed-up files still restore normally',
+  )
+  assert.equal(fs.existsSync(path.join(temp, 'a-fifo')), false, 'the FIFO must never be restored')
+  assert.ok(
+    messages.some((m) => m.includes('non-regular file') && m.includes('a-fifo')),
+    `expected a warning naming the skipped FIFO; got: ${JSON.stringify(messages)}`,
+  )
+})
+
 test('runBackups prune rejects a negative --keep instead of wiping everything', async () => {
   const temp = makeTemp('haus-backups-prune-negkeep-')
   makeLockBackup(temp, 1000000)
   makeLockBackup(temp, 2000000)
 
-  await runBackups('prune', { keep: -1, yes: true, root: temp })
-
-  assert.equal(process.exitCode, 1)
-  process.exitCode = 0
+  const prevExit = process.exitCode
+  try {
+    await runBackups('prune', { keep: -1, yes: true, root: temp })
+    assert.equal(process.exitCode, 1)
+  } finally {
+    process.exitCode = prevExit
+  }
   const entries = await listBackups(temp)
   assert.equal(entries.length, 2, 'a negative --keep must not delete anything')
 })
@@ -239,10 +285,13 @@ test('runBackups prune rejects a non-numeric --older-than instead of silently no
   const temp = makeTemp('haus-backups-prune-nan-')
   makeLockBackup(temp, 1000000)
 
-  await runBackups('prune', { olderThan: 'not-a-number', yes: true, root: temp })
-
-  assert.equal(process.exitCode, 1)
-  process.exitCode = 0
+  const prevExit = process.exitCode
+  try {
+    await runBackups('prune', { olderThan: 'not-a-number', yes: true, root: temp })
+    assert.equal(process.exitCode, 1)
+  } finally {
+    process.exitCode = prevExit
+  }
 })
 
 test('CLI: haus backups list / restore / prune wire through commander end-to-end', () => {

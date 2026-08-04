@@ -111,13 +111,17 @@ async function restoreLockBackup(root: string, entry: BackupEntry, yes: boolean)
  * symlink is never followed — a symlink planted inside a backup dir (e.g. checked into
  * a branch, since `.haus-workflow/backups/` is not gitignored) could otherwise point
  * outside the project root and have its target's content copied into tracked files on
- * restore. Symlinks are skipped and reported, never dereferenced.
+ * restore. Symlinks are skipped and reported, never dereferenced. Only regular files
+ * (`isFile()`) are restored — a FIFO, socket, or device node landing in a backup dir
+ * would otherwise be handed to `fs.copy`, which can fail or behave unexpectedly on
+ * special files; those are skipped and reported too, alongside symlinks.
  */
 async function collectFilesRecursive(
   dir: string,
-): Promise<{ files: string[]; skippedLinks: string[] }> {
+): Promise<{ files: string[]; skippedLinks: string[]; skippedOther: string[] }> {
   const files: string[] = []
   const skippedLinks: string[] = []
+  const skippedOther: string[] = []
   const names = await fs.readdir(dir)
   for (const name of names) {
     const abs = path.join(dir, name)
@@ -130,36 +134,56 @@ async function collectFilesRecursive(
       const nested = await collectFilesRecursive(abs)
       files.push(...nested.files)
       skippedLinks.push(...nested.skippedLinks)
-    } else {
+      skippedOther.push(...nested.skippedOther)
+    } else if (stat.isFile()) {
       files.push(abs)
+    } else {
+      skippedOther.push(abs)
     }
   }
-  return { files, skippedLinks }
+  return { files, skippedLinks, skippedOther }
 }
 
 async function restoreDirBackup(root: string, entry: BackupEntry, yes: boolean): Promise<boolean> {
-  const { files, skippedLinks } = await collectFilesRecursive(entry.absPath)
+  const { files, skippedLinks, skippedOther } = await collectFilesRecursive(entry.absPath)
   if (skippedLinks.length > 0) {
     warn(
       `Skipped ${skippedLinks.length} symlink(s) inside backup ${entry.id} — never followed: ${skippedLinks.map((abs) => path.relative(entry.absPath, abs)).join(', ')}`,
+    )
+  }
+  if (skippedOther.length > 0) {
+    warn(
+      `Skipped ${skippedOther.length} non-regular file(s) inside backup ${entry.id} (not restorable): ${skippedOther.map((abs) => path.relative(entry.absPath, abs)).join(', ')}`,
     )
   }
   if (files.length === 0) {
     log(`Backup ${entry.id} contains no files.`)
     return false
   }
-  const stale: string[] = []
+  const stale: Array<{ rel: string; targetMtimeMs: number; backupMtimeMs: number }> = []
   for (const abs of files) {
     const rel = path.relative(entry.absPath, abs)
     const target = path.join(root, rel)
     if (await fs.pathExists(target)) {
       const [targetStat, backupFileStat] = await Promise.all([fs.stat(target), fs.stat(abs)])
-      if (targetStat.mtimeMs > backupFileStat.mtimeMs) stale.push(rel)
+      if (targetStat.mtimeMs > backupFileStat.mtimeMs) {
+        stale.push({
+          rel,
+          targetMtimeMs: targetStat.mtimeMs,
+          backupMtimeMs: backupFileStat.mtimeMs,
+        })
+      }
     }
   }
   if (stale.length > 0) {
+    const detail = stale
+      .map(
+        (s) =>
+          `${s.rel} (destination: ${new Date(s.targetMtimeMs).toISOString()}, backup: ${new Date(s.backupMtimeMs).toISOString()})`,
+      )
+      .join('; ')
     warn(
-      `${stale.length} file(s) at the restore destination are newer than backup ${entry.id} and will be overwritten: ${stale.join(', ')}`,
+      `${stale.length} file(s) at the restore destination are newer than backup ${entry.id} and will be overwritten: ${detail}`,
     )
   }
   if (!yes) {
