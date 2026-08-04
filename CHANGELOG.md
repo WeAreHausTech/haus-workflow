@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.3.0](https://github.com/WeAreHausTech/haus-workflow/compare/v1.2.0...v1.3.0) (2026-08-04)
+
+### Features
+
+- **apply:** add haus apply --prune (CLI audit §9 item 4) ([#183](https://github.com/WeAreHausTech/haus-workflow/issues/183)) ([6eb32ce](https://github.com/WeAreHausTech/haus-workflow/commit/6eb32cec8063a8daa0b257e2a3984619c7445ac9))
+- **backups:** add haus backups list/restore/prune (CLI audit §8 item 2) ([#185](https://github.com/WeAreHausTech/haus-workflow/issues/185)) ([5f1a06f](https://github.com/WeAreHausTech/haus-workflow/commit/5f1a06f8c8a6a84a2866116ee86baf776a9aace4))
+- **skill:** paginate haus-workflow menu, ask clone mode, fix clone conflicts ([#186](https://github.com/WeAreHausTech/haus-workflow/issues/186)) ([fbea452](https://github.com/WeAreHausTech/haus-workflow/commit/fbea4521f2e161a488c9241571765d0876e7d00d))
+
+### Bug Fixes
+
+- **prettierignore:** also ignore .claude/ ([#189](https://github.com/WeAreHausTech/haus-workflow/issues/189)) ([5127055](https://github.com/WeAreHausTech/haus-workflow/commit/5127055727ad5849ad87b4c5fe83ed062467b681))
+
 ## [1.2.0](https://github.com/WeAreHausTech/haus-workflow/compare/v1.1.2...v1.2.0) (2026-08-03)
 
 ### Features
