@@ -5,7 +5,7 @@ import path from 'node:path'
 import { execFileSync } from 'node:child_process'
 import { mkdtempSync, mkdirSync, writeFileSync, existsSync } from 'node:fs'
 
-import { repoNameFromUrl, runClone } from '../src/commands/clone.ts'
+import { normalizeGitUrl, repoNameFromUrl, runClone } from '../src/commands/clone.ts'
 
 function git(args, cwd) {
   execFileSync('git', args, { cwd, stdio: 'ignore' })
@@ -44,6 +44,25 @@ function quiet(channel, fn) {
   return Promise.resolve(fn()).finally(() => {
     console[channel] = orig
   })
+}
+
+/** Runs `fn`, capturing everything written to console.log/warn/error, and returns it. */
+async function capture(fn) {
+  const lines = []
+  const origLog = console.log
+  const origWarn = console.warn
+  const origError = console.error
+  console.log = (...args) => lines.push(args.join(' '))
+  console.warn = (...args) => lines.push(args.join(' '))
+  console.error = (...args) => lines.push(args.join(' '))
+  try {
+    await fn()
+  } finally {
+    console.log = origLog
+    console.warn = origWarn
+    console.error = origError
+  }
+  return lines.join('\n')
 }
 
 test('repoNameFromUrl derives the folder name from https and ssh URLs', () => {
@@ -131,4 +150,93 @@ test('runClone reports a failed clone with a non-zero exit', async () => {
   assert.equal(process.exitCode, 1, 'a failed clone sets non-zero exit')
   assert.ok(!existsSync(path.join(dest, '.git')), 'no repo left behind on failure')
   process.exitCode = prev
+})
+
+test('normalizeGitUrl treats ssh and https forms of the same repo as equal', () => {
+  assert.equal(
+    normalizeGitUrl('git@github.com:WeAreHausTech/ecom-demo.git'),
+    normalizeGitUrl('https://github.com/WeAreHausTech/ecom-demo'),
+  )
+  assert.notEqual(
+    normalizeGitUrl('https://github.com/WeAreHausTech/ecom-demo'),
+    normalizeGitUrl('https://github.com/WeAreHausTech/other-repo'),
+  )
+})
+
+// The test suite's own makeRemote() helper clones from a bare local filesystem
+// path (no scheme, no host) rather than a real URL — confirm that shape still
+// compares equal to itself and unequal to a different path.
+test('normalizeGitUrl compares bare local filesystem paths (used in this test file)', () => {
+  assert.equal(normalizeGitUrl('/tmp/haus-clone-remote-abc123'), normalizeGitUrl('/tmp/haus-clone-remote-abc123'))
+  assert.notEqual(normalizeGitUrl('/tmp/haus-clone-remote-abc123'), normalizeGitUrl('/tmp/haus-clone-remote-xyz789'))
+})
+
+// Regression (fr-3): an existing target dir must not be treated as "already cloned"
+// on name alone — only a git repo whose origin actually matches the requested URL.
+test('runClone reports a clear match (not just existence) when re-run against the same repo', async () => {
+  const remote = makeRemote()
+  const dest = path.join(mkdtempSync(path.join(os.tmpdir(), 'haus-clone-match-')), 'app')
+  await quiet('log', () => runClone(remote, { dir: dest }))
+
+  const output = await capture(() => runClone(remote, { dir: dest }))
+  assert.match(output, /already cloned here, matches/)
+  assert.ok(existsSync(path.join(dest, '.git')), 'clone left in place')
+})
+
+test('runClone refuses a target that is a different git repo, non-zero exit', async () => {
+  const remoteA = makeRemote({ 'a.txt': 'a' })
+  const remoteB = makeRemote({ 'b.txt': 'b' })
+  const dest = path.join(mkdtempSync(path.join(os.tmpdir(), 'haus-clone-conflict-')), 'app')
+  await quiet('log', () => runClone(remoteA, { dir: dest }))
+
+  const prev = process.exitCode
+  process.exitCode = 0
+  const output = await capture(() => runClone(remoteB, { dir: dest }))
+  assert.equal(process.exitCode, 1, 'a mismatched existing repo sets non-zero exit')
+  assert.match(output, /already exists as a different repository/)
+  assert.ok(existsSync(path.join(dest, 'a.txt')), 'original clone is left untouched, not overwritten')
+  process.exitCode = prev
+})
+
+test('runClone refuses a target that exists but is not a git repository, non-zero exit', async () => {
+  const remote = makeRemote()
+  const parent = mkdtempSync(path.join(os.tmpdir(), 'haus-clone-notgit-'))
+  const dest = path.join(parent, 'app')
+  mkdirSync(dest)
+  writeFileSync(path.join(dest, 'unrelated.txt'), 'hi')
+
+  const prev = process.exitCode
+  process.exitCode = 0
+  const output = await capture(() => runClone(remote, { dir: dest }))
+  assert.equal(process.exitCode, 1, 'a non-git existing dir sets non-zero exit')
+  assert.match(output, /already exists and is not a git repository/)
+  assert.ok(existsSync(path.join(dest, 'unrelated.txt')), 'unrelated dir left untouched')
+  process.exitCode = prev
+})
+
+test('runClone --dry-run against a name conflict reports it without failing the dry run', async () => {
+  const remoteA = makeRemote({ 'a.txt': 'a' })
+  const remoteB = makeRemote({ 'b.txt': 'b' })
+  const dest = path.join(mkdtempSync(path.join(os.tmpdir(), 'haus-clone-conflict-dry-')), 'app')
+  await quiet('log', () => runClone(remoteA, { dir: dest }))
+
+  const prev = process.exitCode
+  process.exitCode = 0
+  const output = await capture(() => runClone(remoteB, { dir: dest, dryRun: true }))
+  // Matches this codebase's dry-run convention (apply.ts): dry-run reports a real
+  // problem but does not fail the run — only a real (non-dry-run) attempt does.
+  assert.equal(process.exitCode, 0, 'dry-run must not set a non-zero exit, even on a real conflict')
+  assert.match(output, /already exists as a different repository/)
+  assert.ok(existsSync(path.join(dest, 'a.txt')), 'original clone untouched by dry-run conflict check')
+  process.exitCode = prev
+})
+
+test('runClone --dry-run against an already-matching clone is a silent no-op', async () => {
+  const remote = makeRemote()
+  const dest = path.join(mkdtempSync(path.join(os.tmpdir(), 'haus-clone-match-dry-')), 'app')
+  await quiet('log', () => runClone(remote, { dir: dest }))
+
+  const output = await capture(() => runClone(remote, { dir: dest, dryRun: true }))
+  assert.match(output, /already cloned here, matches/)
+  assert.ok(existsSync(path.join(dest, '.git')), 'clone left in place')
 })

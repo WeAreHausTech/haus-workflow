@@ -98,3 +98,41 @@ test('Step 1 menu is split into questions of at most 4 options each (AskUserQues
     assert.ok(optionCount <= 4, `each question must have at most 4 options, got ${optionCount}`)
   }
 })
+
+// Regression: an earlier draft's "and N more" count on a non-final page's "More
+// options" line was arithmetically wrong (named 3 preview items but undercounted
+// how many were left beyond them). Every alias-table task must be reachable
+// exactly once across all pages, and each page's declared "and N more" (if any)
+// must match how many tasks are genuinely left after that page's named preview.
+test('Step 1 menu pages cover all 12 alias-table tasks exactly once, "and N more" counts are correct', () => {
+  const TOTAL_TASKS = 12
+  const menuBlock = SKILL.slice(
+    SKILL.indexOf('```\nQuestion 1:'),
+    SKILL.indexOf("Map the user's selection"),
+  )
+  const questionBlocks = menuBlock.split(/Question \d:/).slice(1)
+
+  const realOptionCounts = questionBlocks.map(
+    (block) => (block.match(/^\s*\d+\.\s*\[(?:project|global|—)\]\s+(?!More options)/gm) ?? [])
+      .length,
+  )
+  const totalRealShown = realOptionCounts.reduce((a, b) => a + b, 0)
+  assert.equal(totalRealShown, TOTAL_TASKS, 'every page\'s real options must sum to all 12 tasks')
+
+  let cumulativeShown = 0
+  questionBlocks.forEach((block, i) => {
+    cumulativeShown += realOptionCounts[i]
+    const moreLineMatch = block.match(/More options — see: ([^\n]+)/)
+    if (!moreLineMatch) return // last page has no continuation line
+    const items = moreLineMatch[1].split(',').map((s) => s.trim())
+    const andMoreMatch = items[items.length - 1].match(/^and (\d+) more$/)
+    const namedCount = andMoreMatch ? items.length - 1 : items.length
+    const declaredMore = andMoreMatch ? Number(andMoreMatch[1]) : 0
+    const actualRemaining = TOTAL_TASKS - cumulativeShown - namedCount
+    assert.equal(
+      declaredMore,
+      actualRemaining,
+      `page ${i + 1}'s "and N more" must equal tasks left after its named preview (named ${namedCount}, expected "and ${actualRemaining} more", got ${declaredMore})`,
+    )
+  })
+})
