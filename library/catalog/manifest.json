@@ -1,5 +1,5 @@
 {
-  "version": "3.6.0",
+  "version": "4.0.0",
   "items": [
     {
       "id": "haus.agentic-workflow-standard",
@@ -236,6 +236,20 @@
       "purpose": "Guide identity-provider auth flow and claim/session lifecycle changes across OIDC, Azure AD, BankID, and SAML2.",
       "whenToUse": "Use for OIDC/Azure AD/BankID/SAML2 login, callback, token, claim mapping, and SP/IDP metadata updates.",
       "whenNotToUse": "Do not use for profile CRUD without auth protocol change.",
+      "intents": [
+        "set up OIDC login",
+        "add Azure AD authentication",
+        "integrate BankID",
+        "configure SAML2 single sign-on",
+        "validate SAML assertions",
+        "add enterprise single sign-on"
+      ],
+      "safetyNotes": [
+        "Never accept a SAML assertion without validating its signature, audience, and issuer.",
+        "Never accept identity tokens or claims from the client without validation.",
+        "Never commit SAML SP private keys or IDP shared secrets to the repo.",
+        "Do not change redirect/callback URLs without aligning environment/config on both sides."
+      ],
       "tokenBudget": 1200,
       "tags": [
         "oidc",
@@ -1588,6 +1602,7 @@
       ],
       "repoRoles": [],
       "ecosystem": "general",
+      "installMode": "copy-selected",
       "tokenEstimate": 650,
       "tokenBudget": 900,
       "default": true,
@@ -1806,6 +1821,19 @@
       "purpose": "Guide Qliro Checkout integration via @haus-tech/qliro-plugin in Vendure storefronts.",
       "whenToUse": "Use for Qliro Checkout flow, order callbacks, refund handling, and merchant API config.",
       "whenNotToUse": "Do not use for non-Nordic payment providers or Stripe-only flows.",
+      "intents": [
+        "integrate Qliro checkout",
+        "add Qliro as a payment provider",
+        "handle Qliro order callbacks",
+        "set up Nordic payment checkout",
+        "process Qliro refunds"
+      ],
+      "safetyNotes": [
+        "Never expose QLIRO_MERCHANT_API_KEY to client-side code — full merchant compromise.",
+        "Never mix sandbox and production Qliro credentials — causes order corruption.",
+        "Treat Qliro push notifications as the source of truth, not the checkout redirect; push handlers must be idempotent since Qliro retries on 5xx.",
+        "Always validate the signature on incoming Qliro push payloads before trusting them."
+      ],
       "tokenBudget": 1200,
       "tags": [
         "qliro",
@@ -2260,6 +2288,20 @@
       "purpose": "Guides Stripe integration decisions across API selection (Checkout Sessions vs PaymentIntents), Connect platform setup (Accounts v2, controller properties), billing/subscriptions, tax and registrations (Stripe Tax, automatic_tax, product tax codes), Treasury financial accounts, integration options (Checkout, Payment Element), migrating from deprecated Stripe APIs, and security best practices (API key management, restricted keys, webhooks, OAuth). Use when building, modifying, or reviewing any Stripe integration, including accepting payments, building marketplaces, integrating Stripe, processing payments, setting up subscriptions, collecting sales tax, VAT, or GST, creating connected accounts, or implementing secure key handling.",
       "whenToUse": "Guides Stripe integration decisions across API selection (Checkout Sessions vs PaymentIntents), Connect platform setup (Accounts v2, controller properties), billing/subscriptions, tax and registrations (Stripe Tax, automatic_tax, product tax codes), Treasury financial accounts, integration options (Checkout, Payment Element), migrating from deprecated Stripe APIs, and security best practices (API key management, restricted keys, webhooks, OAuth). Use when building, modifying, or reviewing any Stripe integration, including accepting payments, building marketplaces, integrating Stripe, processing payments, setting up subscriptions, collecting sales tax, VAT, or GST, creating connected accounts, or implementing secure key handling.",
       "whenNotToUse": "Do not use when a more specific skill or command applies.",
+      "intents": [
+        "integrate Stripe payments",
+        "accept payments with Stripe",
+        "set up Stripe subscriptions",
+        "add a Stripe Connect marketplace",
+        "collect sales tax with Stripe Tax",
+        "handle Stripe webhooks securely"
+      ],
+      "safetyNotes": [
+        "Default to a restricted API key (rk_) over a secret key (sk_) unless full account access is explicitly required.",
+        "Never expose a Stripe secret key (sk_) to client-side code.",
+        "Always verify webhook signatures before trusting event payloads.",
+        "Use OAuth for Connect platform integrations rather than sharing raw API keys between platform and connected accounts."
+      ],
       "tags": [
         "workflow",
         "stripe",

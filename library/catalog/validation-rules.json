@@ -130,6 +130,26 @@
     "collection2",
     "deployer-php"
   ],
+  "safetyNotesRequiredTags": [
+    "stripe",
+    "qliro",
+    "payments",
+    "bankid",
+    "myid",
+    "oidc",
+    "azure-ad",
+    "saml2"
+  ],
+  "intentsRequiredTags": [
+    "stripe",
+    "qliro",
+    "payments",
+    "bankid",
+    "myid",
+    "oidc",
+    "azure-ad",
+    "saml2"
+  ],
   "alwaysAllowedTags": [
     "haus",
     "security",
