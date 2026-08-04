@@ -7,6 +7,7 @@ import { Command } from 'commander'
 import { runApply } from './commands/apply.js'
 import { runBackups } from './commands/backups.js'
 import { runCatalogAudit } from './commands/catalog-audit.js'
+import { runCiGate } from './commands/ci-gate.js'
 import { runClone } from './commands/clone.js'
 import { runDecisionsGuard } from './commands/decisions-guard.js'
 import { runDecisions } from './commands/decisions.js'
@@ -144,6 +145,16 @@ program
   .option('--fast', 'With --check, skip per-item content hashing (cheap count+ref only)')
   .option('--from-hook', 'Emit JSON for the Claude Code SessionStart hook (silent if up to date)')
   .action(runUpdate)
+program
+  .command('ci-gate')
+  .description(
+    'Aggregate `doctor` + `decisions check` + `update --check --fast` into one pass/fail gate for CI. ' +
+      'Uses the fast/cheap update-check tier (no per-item content hashing) to keep CI runs quick — ' +
+      'run `haus update --check` directly for the fully-hashed tier. Each constituent command remains ' +
+      'independently runnable with its own unchanged exit-code contract.',
+  )
+  .option('--json', 'Emit machine-readable {doctor, decisions, update, ok}')
+  .action((opts) => runCiGate(opts))
 program
   .command('install')
   .option('--dry-run')

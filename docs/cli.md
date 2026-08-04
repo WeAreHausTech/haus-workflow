@@ -101,6 +101,21 @@ Sync remote catalog, refresh global install (`~/.claude/`), and re-apply project
   Never fails the session on a network error — fails silent instead.
 - (no flag) — back up lockfile to `.haus-workflow/backups/`, fetch latest catalog into cache, refresh global `haus install`, re-run project apply (including stale-item cleanup), recompute per-item hashes, print unified lock diff
 
+### `haus ci-gate [--json]`
+
+Aggregates `doctor`, `decisions check`, and `update --check --fast` into one
+documented pass/fail contract for CI — instead of a pipeline needing three
+separate commands, each independently setting `process.exitCode`. Uses the
+fast/cheap `update --check` tier (no per-item content hashing) since this is
+meant to run on every push; run `haus update --check` directly for the
+fully-hashed tier. Exits non-zero if any of the three checks fails.
+
+- `--json` — emit `{ doctor: {ok, output}, decisions: {ok, output}, update: {ok, output}, ok }`
+  instead of the human-readable summary
+- `haus doctor`, `haus decisions check`, and `haus update --check` remain fully
+  independently runnable — `ci-gate` isolates each call's `process.exitCode` and
+  captured output rather than modifying their own contracts
+
 ---
 
 ## Diagnostics
