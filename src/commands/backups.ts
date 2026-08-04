@@ -82,8 +82,53 @@ async function runList(root: string): Promise<void> {
   }
 }
 
+/**
+ * True when writing to `target` would go through a symlink — either `target` itself
+ * already existing as a symlink or other non-regular file, or an ancestor directory
+ * between it and `root` being a symlink (e.g. `.claude/` or `.haus-workflow/` swapped
+ * for one). `fs.ensureDir`/`fs.copy` follow symlinks by design; without this check, a
+ * symlink planted anywhere in the live project tree — not just inside a backup — could
+ * redirect a restore's write outside the project root.
+ *
+ * Walks from `root` DOWN to `target`, one path segment at a time, checking each newly
+ * added segment with `lstat` before extending further. This is deliberate: `lstat` only
+ * ever declines to dereference the *final* component of the path it's given — every
+ * component before that is resolved transparently by the OS, including through a
+ * symlink. Checking `lstat(root/.claude/rules)` in one call would silently resolve a
+ * symlinked `.claude` before ever inspecting it. Building the path incrementally from
+ * an already-verified-safe prefix means each `lstat` call's only unverified component is
+ * exactly the one segment being tested. Missing segments are safe (nothing exists yet
+ * to follow); real errors other than "doesn't exist" propagate.
+ */
+async function isUnsafeWriteTarget(root: string, target: string): Promise<boolean> {
+  const segments = path.relative(root, target).split(path.sep).filter(Boolean)
+  let current = root
+  for (let i = 0; i < segments.length; i++) {
+    current = path.join(current, segments[i])
+    const isLastSegment = i === segments.length - 1
+    try {
+      const stat = await fs.lstat(current)
+      if (isLastSegment) {
+        if (!stat.isFile()) return true
+      } else if (!stat.isDirectory()) {
+        return true
+      }
+    } catch (err) {
+      if ((err as NodeJS.ErrnoException).code === 'ENOENT') return false
+      throw err
+    }
+  }
+  return false
+}
+
 async function restoreLockBackup(root: string, entry: BackupEntry, yes: boolean): Promise<boolean> {
   const target = hausPath(root, 'haus.lock.json')
+  if (await isUnsafeWriteTarget(root, target)) {
+    error(
+      `Refusing to restore: ${target} (or a parent directory) is a symlink or other non-regular file — never written through.`,
+    )
+    return false
+  }
   if (await fs.pathExists(target)) {
     const targetStat = await fs.stat(target)
     if (targetStat.mtimeMs > entry.mtimeMs) {
@@ -160,8 +205,25 @@ async function restoreDirBackup(root: string, entry: BackupEntry, yes: boolean):
     log(`Backup ${entry.id} contains no files.`)
     return false
   }
-  const stale: Array<{ rel: string; targetMtimeMs: number; backupMtimeMs: number }> = []
+  const safeFiles: string[] = []
+  const unsafeTargets: string[] = []
   for (const abs of files) {
+    const rel = path.relative(entry.absPath, abs)
+    const target = path.join(root, rel)
+    if (await isUnsafeWriteTarget(root, target)) unsafeTargets.push(rel)
+    else safeFiles.push(abs)
+  }
+  if (unsafeTargets.length > 0) {
+    warn(
+      `Skipped ${unsafeTargets.length} restore target(s) that are a symlink (or under one) rather than a plain path — never written through: ${unsafeTargets.join(', ')}`,
+    )
+  }
+  if (safeFiles.length === 0) {
+    log(`Backup ${entry.id} has no restorable targets.`)
+    return false
+  }
+  const stale: Array<{ rel: string; targetMtimeMs: number; backupMtimeMs: number }> = []
+  for (const abs of safeFiles) {
     const rel = path.relative(entry.absPath, abs)
     const target = path.join(root, rel)
     if (await fs.pathExists(target)) {
@@ -188,20 +250,20 @@ async function restoreDirBackup(root: string, entry: BackupEntry, yes: boolean):
   }
   if (!yes) {
     const ok = await confirm(
-      `Restore ${files.length} file(s) from backup ${entry.id} to their original paths?`,
+      `Restore ${safeFiles.length} file(s) from backup ${entry.id} to their original paths?`,
     )
     if (!ok) {
       log('Cancelled.')
       return false
     }
   }
-  for (const abs of files) {
+  for (const abs of safeFiles) {
     const rel = path.relative(entry.absPath, abs)
     const target = path.join(root, rel)
     await fs.ensureDir(path.dirname(target))
     await fs.copy(abs, target, { overwrite: true })
   }
-  log(`Restored ${files.length} file(s) from ${entry.id}.`)
+  log(`Restored ${safeFiles.length} file(s) from ${entry.id}.`)
   return true
 }
 

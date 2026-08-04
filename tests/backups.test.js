@@ -265,6 +265,97 @@ test('restore skips a FIFO inside a backup dir instead of handing it to fs.copy'
   )
 })
 
+test('restore refuses to write through a symlinked lockfile destination', async () => {
+  const temp = makeTemp('haus-backups-restore-lock-symlink-')
+  makeLockBackup(temp, 1000000)
+  mkdirSync(path.join(temp, '.haus-workflow'), { recursive: true })
+  const secretDir = makeTemp('haus-backups-secret-lock-')
+  const secretFile = path.join(secretDir, 'secret-lock.json')
+  writeFileSync(secretFile, 'original secret content')
+  symlinkSync(secretFile, path.join(temp, '.haus-workflow/haus.lock.json'))
+
+  const prevExit = process.exitCode
+  try {
+    await runBackups('restore', { id: 'haus.lock.1000000.json', yes: true, root: temp })
+    assert.equal(process.exitCode, 1)
+  } finally {
+    process.exitCode = prevExit
+  }
+
+  assert.equal(
+    fs.readFileSync(secretFile, 'utf8'),
+    'original secret content',
+    'the symlink target must never be overwritten',
+  )
+})
+
+test('restore skips a target whose destination path is a symlink, but restores the rest', async () => {
+  const temp = makeTemp('haus-backups-restore-dest-symlink-')
+  makeDirBackup(
+    temp,
+    'undo-2026-05-01T00-00-00-000Z',
+    {
+      '.claude/rules/haus.md': 'legit rules content',
+      '.claude/rules/other.md': 'other legit content',
+    },
+    2000000,
+  )
+
+  const secretDir = makeTemp('haus-backups-secret-dest-')
+  const secretFile = path.join(secretDir, 'secret.md')
+  writeFileSync(secretFile, 'original secret content')
+  mkdirSync(path.join(temp, '.claude/rules'), { recursive: true })
+  symlinkSync(secretFile, path.join(temp, '.claude/rules/haus.md'))
+
+  const messages = await withCapturedWarnings(() =>
+    runBackups('restore', { id: 'undo-2026-05-01T00-00-00-000Z', yes: true, root: temp }),
+  )
+
+  assert.equal(
+    fs.readFileSync(secretFile, 'utf8'),
+    'original secret content',
+    'the symlinked destination must never be written through',
+  )
+  assert.equal(
+    fs.readFileSync(path.join(temp, '.claude/rules/other.md'), 'utf8'),
+    'other legit content',
+    'files whose destination is not a symlink still restore normally',
+  )
+  assert.ok(
+    messages.some((m) => m.includes('restore target') && m.includes('haus.md')),
+    `expected a warning naming the skipped symlinked target; got: ${JSON.stringify(messages)}`,
+  )
+})
+
+test('restore skips a target whose ancestor directory is a symlink', async () => {
+  const temp = makeTemp('haus-backups-restore-ancestor-symlink-')
+  makeDirBackup(
+    temp,
+    'undo-2026-06-01T00-00-00-000Z',
+    { '.claude/rules/haus.md': 'legit content' },
+    2000000,
+  )
+
+  const secretDir = makeTemp('haus-backups-secret-ancestor-')
+  symlinkSync(secretDir, path.join(temp, '.claude'), 'dir')
+
+  const prevExit = process.exitCode
+  const messages = await withCapturedWarnings(() =>
+    runBackups('restore', { id: 'undo-2026-06-01T00-00-00-000Z', yes: true, root: temp }),
+  )
+  process.exitCode = prevExit
+
+  assert.equal(
+    fs.existsSync(path.join(secretDir, 'rules')),
+    false,
+    'must never write through the symlinked ancestor directory',
+  )
+  assert.ok(
+    messages.some((m) => m.includes('restore target') && m.includes('haus.md')),
+    `expected a warning naming the skipped target under the symlinked ancestor; got: ${JSON.stringify(messages)}`,
+  )
+})
+
 test('runBackups prune rejects a negative --keep instead of wiping everything', async () => {
   const temp = makeTemp('haus-backups-prune-negkeep-')
   makeLockBackup(temp, 1000000)
