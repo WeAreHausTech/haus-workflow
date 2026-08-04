@@ -1,4 +1,4 @@
-# ADR-0018: `haus backups` restore safety model — never follow symlinks, always require an explicit prune bound
+# ADR-0019: `haus backups` restore safety model — never follow symlinks, always require an explicit prune bound
 
 - **Status:** Accepted | **Date:** 2026-08-04
 - **Decided by:** Aniisa Bihi (draft by Claude)

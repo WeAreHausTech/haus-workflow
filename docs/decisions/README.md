@@ -26,4 +26,5 @@ this index covers CLI/repo decisions. ADR-0001 here links to those where the JSO
 | [0015](0015-catalog-former-ids-lock-migrate.md)               | Catalog formerIds → lock migrate on update/apply                      | Accepted |
 | [0016](0016-cli-audit-sections-3-4-scope-and-approach.md)     | CLI audit sections 3 & 4 — workspace undo scope, check-tier honesty   | Accepted |
 | [0017](0017-apply-prune-safety-model.md)                      | `haus apply --prune` — opt-in deletion, hash-gated, backed up first   | Accepted |
-| [0018](0018-haus-backups-restore-safety-model.md)             | `haus backups` restore safety — no symlink-follow, no unbounded prune | Accepted |
+| [0018](0018-clone-conflict-and-menu-pagination.md)            | Clone conflict detection, menu pagination, clone mode prompt          | Accepted |
+| [0019](0019-haus-backups-restore-safety-model.md)             | `haus backups` restore safety — no symlink-follow, no unbounded prune | Accepted |

@@ -40,7 +40,7 @@ function classify(name: string): BackupKind | undefined {
  * snapshots are files; undo/prune snapshots are directories) — a symlink or a
  * type-mismatched entry is excluded rather than treated as a valid backup, since
  * `restore` would otherwise dereference it despite the restore path's own
- * never-follow-symlinks rule (see ADR-0018).
+ * never-follow-symlinks rule (see ADR-0019).
  */
 export async function listBackups(root: string): Promise<BackupEntry[]> {
   const dir = hausPath(root, 'backups')

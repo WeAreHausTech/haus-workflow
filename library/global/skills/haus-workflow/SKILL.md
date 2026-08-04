@@ -27,7 +27,7 @@ repo's files. The short legacy aliases still work but the names below are canoni
 | ----------------------------------------------------------------- | ------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `project:init` (`setup`, `init`)                                  | _Setup procedure below_         | project | First-time setup of an **existing** repo: adds AI skills, commands, workflow + project docs                                                                                                                                                                                               |
 | `project:reinit` (`reinit`, `re-init`)                            | _Reinit procedure below_        | project | **Full re-setup.** Removes all haus-managed project files (backed up first, user content preserved), then re-runs `project:init` from scratch                                                                                                                                             |
-| `project:clone [name]` (`clone`)                                  | _Clone procedure below_         | project | No name: clone a **workspace**'s repos from `repos.manifest.json`. With a `name`: find & clone one repo by name from GitHub                                                                                                                                                               |
+| `project:clone [name]` (`clone`)                                  | _Clone procedure below_         | project | With a `name`: find & clone one repo by name from GitHub. No name: asks single-repo-vs-workspace first, then either mode — workspace mode clones from `repos.manifest.json`                                                                                                               |
 | `project:cloneandsetup [name]` (`cloneandsetup`)                  | _Clone & setup procedure below_ | project | Run `project:clone`, then set up each repo for local dev — deps, databases, cross-repo links, and env — via each repo's `.haus-workflow/localdev.yml` (+ the workspace's order/links/env)                                                                                                 |
 | `project:add-skills` (`add-skills`, `opt-in`)                     | _Add-skills procedure below_    | project | Add optional skills, agents, or config (ESLint/Prettier) to an already-set-up project without re-running full setup                                                                                                                                                                       |
 | `project:refresh` (`apply`, `refresh`, `claude-md`, `regenerate`) | _Refresh procedure below_       | project | **Full non-destructive sync.** Updates the haus package + catalog first, then re-runs `project:init`'s pipeline in place — nothing is removed up front; new catalog items get added, changed ones updated, and anything removed upstream gets pruned by `apply`'s existing orphan-pruning |
@@ -43,9 +43,13 @@ repo's files. The short legacy aliases still work but the names below are canoni
 **If a task argument was passed:** look it up in the alias table above. If no match, tell the user and list valid options. If matched, skip to Step 2.
 
 **If no task was passed:** the menu has more options than one `AskUserQuestion` question can
-hold (max 4 options per question). Ask two separate questions, one after another — first
-Question 1, read the answer, then ask Question 2 (a second, sequential `AskUserQuestion`
-call; do not try to cram both into a single question):
+hold (max 4 options per question). Page through all 12 tasks in batches: each page shows the
+next 3 tasks plus a 4th "More options" choice, except the last page, which shows whatever
+tasks remain (≤4) with no continuation choice — nothing is dropped, and this pattern
+generalizes automatically if a task is ever added to or removed from the alias table above
+(just re-batch in the same 3-per-page-plus-continuation shape; don't hand-tune page counts).
+Ask each question only after the previous one is answered — never try to cram multiple pages
+into a single `AskUserQuestion` call:
 
 ```
 Question 1: "What would you like to do?"
@@ -55,19 +59,36 @@ Options:
   2. [project] project:refresh — full non-destructive sync with the latest haus
      (updates the haus package + catalog, then re-runs setup in place — nothing removed first)
   3. [project] project:clone [name] — clone repos
-     (no name: clone a workspace from repos.manifest.json; with a name: find & clone one repo by name from GitHub)
-  4. [project] project:cloneandsetup [name] — clone repos, then set them up for local dev
-     (project:clone, then per-repo deps + databases + cross-repo links + env from localdev.yml)
+     (picked from here with no name yet — clone.md will ask whether it's a single repo or a whole workspace next)
+  4. [—] More options — see: project:cloneandsetup, project:add-skills, project:reinit, and 6 more
 
-Question 2: "Anything else?"
+Question 2: "What would you like to do?" (only shown if "More options" was picked)
 Options:
-  1. [project] project:add-skills — add optional skills, agents, or config to this project
+  1. [project] project:cloneandsetup [name] — clone repos, then set them up for local dev
+     (project:clone — asking single-repo-vs-workspace since no name is known yet — then per-repo deps + databases + cross-repo links + env from localdev.yml)
+  2. [project] project:add-skills — add optional skills, agents, or config to this project
      (offers opt-in helpers matching your stack that aren't installed yet — no full re-setup)
-  2. [project] project:reinit — full re-setup from scratch
+  3. [project] project:reinit — full re-setup from scratch
      (removes all haus-managed project files, backed up first, then re-runs project:init)
-  3. [global] update — update haus package + catalog + global files
+  4. [—] More options — see: update, project:doctor, project:fix, and 3 more
+
+Question 3: "What would you like to do?" (only shown if "More options" was picked again)
+Options:
+  1. [global] update — update haus package + catalog + global files
      (haus update — checks npm for new version, fetches catalog, refreshes ~/.claude/)
-  4. [—] help — explain what haus-workflow is and list all available tasks
+  2. [project] project:doctor — check for install drift
+     (haus doctor — a one-line plain-language verdict, healthy or a list of what needs attention)
+  3. [project] project:fix — diagnose and fix install drift
+     (runs doctor, applies the suggested fixes, confirms green)
+  4. [—] More options — see: install, uninstall, help
+
+Question 4: "What would you like to do?" (only shown if "More options" was picked a third time — last page, no further continuation)
+Options:
+  1. [global] install — seed ~/.claude/ with haus-owned files
+     (haus install)
+  2. [global] uninstall — remove all haus global files from ~/.claude/
+     (haus uninstall)
+  3. [—] help — explain what haus-workflow is and list all available tasks
      (touches no files — points to docs/cli.md and docs/runbook.md for depth)
 ```
 
@@ -137,11 +158,11 @@ upstream gets pruned automatically by `apply`'s existing orphan-pruning.
 
 ### Clone (`project:clone`)
 
-1. Open and follow `references/clone.md` in this skill's directory. With a `name` argument it finds and clones one matching repo from GitHub; with no argument it clones a workspace's repos from `repos.manifest.json`. This task only clones — to also install dependencies, use `project:cloneandsetup`.
+1. Open and follow `references/clone.md` in this skill's directory. With a `name` argument it finds and clones one matching repo from GitHub; with no argument (e.g. reached via the no-arg menu) it starts with clone.md's Step 0, which asks whether this is a single repo or a whole workspace before picking a mode. This task only clones — to also install dependencies, use `project:cloneandsetup`.
 
 ### Clone & setup (`project:cloneandsetup`)
 
-1. Open and follow `references/cloneandsetup.md` in this skill's directory — it runs the full `project:clone` flow, then sets up each cloned repo locally: selects the node version (`nvm install` from `.nvmrc`), enables corepack, installs JS/PHP dependencies, and seeds `.env`, confirming before each phase. It does not start servers.
+1. Open and follow `references/cloneandsetup.md` in this skill's directory — it runs the full `project:clone` flow (including clone.md's Step 0 when no name is already known), then sets up each cloned repo locally: selects the node version (`nvm install` from `.nvmrc`), enables corepack, installs JS/PHP dependencies, and seeds `.env`, confirming before each phase. It does not start servers.
 
 ### Add optional skills (`project:add-skills`)
 
