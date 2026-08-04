@@ -15,8 +15,9 @@ export type LockEntryLike = { id?: string }
 export function findOrphanedLockEntries<T extends LockEntryLike>(
   lock: T[],
   recommendedIds: Set<string>,
-): T[] {
+): Array<T & { id: string }> {
   return lock.filter(
-    (entry): entry is T => typeof entry.id === 'string' && !recommendedIds.has(entry.id),
+    (entry): entry is T & { id: string } =>
+      typeof entry.id === 'string' && !recommendedIds.has(entry.id),
   )
 }

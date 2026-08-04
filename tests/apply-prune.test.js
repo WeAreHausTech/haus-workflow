@@ -96,7 +96,7 @@ function writeRecommendation(root, items) {
 
 /** Invokes writeClaudeFiles from source via tsx, against a chosen manifest fixture. */
 function runWrite(root, manifestPath, selectedIds, opts = {}) {
-  const { dryRun = false, prune = false } = opts
+  const { dryRun = false, prune = false, quiet = false } = opts
   const helper = path.join(root, `run-write-${Math.random().toString(36).slice(2)}.mts`)
   writeFileSync(
     helper,
@@ -104,7 +104,7 @@ function runWrite(root, manifestPath, selectedIds, opts = {}) {
       `import { writeClaudeFiles } from "${writeSrc}";`,
       `const root = process.argv[2];`,
       `const sel = process.argv[3] === "undefined" ? undefined : JSON.parse(process.argv[3]);`,
-      `await writeClaudeFiles(root, ${JSON.stringify(dryRun)}, sel, { prune: ${JSON.stringify(prune)} });`,
+      `await writeClaudeFiles(root, ${JSON.stringify(dryRun)}, sel, { prune: ${JSON.stringify(prune)}, quiet: ${JSON.stringify(quiet)} });`,
     ].join('\n'),
   )
   const result = execaSync(
@@ -178,6 +178,23 @@ test('orphaned item, unmodified on disk, is removed with --prune', () => {
   const backedUp = path.join(root, '.haus-workflow/backups', dirs[0], b.dest, 'SKILL.md')
   assert.equal(existsSync(backedUp), true, 'pruned file was backed up before deletion')
   assert.match(readFileSync(backedUp, 'utf8'), /demo-b/)
+})
+
+test('--prune respects --quiet: no backup/pruned messages printed, but pruning still happens', () => {
+  const { root, catalogDir } = makeProject('prune-quiet')
+  const a = skillItem('demo.a')
+  const b = skillItem('demo.b')
+  writeCatalogContent(catalogDir, [a, b])
+  const manifest = writeManifest(catalogDir, 'manifest.json', [a, b])
+
+  writeRecommendation(root, [a, b])
+  runWrite(root, manifest, undefined)
+
+  writeRecommendation(root, [a])
+  const output = runWrite(root, manifest, undefined, { prune: true, quiet: true })
+  assert.doesNotMatch(output, /Backed up|Pruned orphaned/, 'quiet must suppress prune messages too')
+  assert.equal(existsSync(path.join(root, b.dest)), false, 'pruning itself still happens under quiet')
+  assert.equal(backupDirs(root).length, 1, 'backup file still written under quiet, just not logged')
 })
 
 test('orphaned item that was locally modified is preserved even with --prune', () => {

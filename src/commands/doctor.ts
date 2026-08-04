@@ -261,9 +261,7 @@ export async function runDoctor(options?: { hooks?: boolean }): Promise<void> {
         .map((r) => r.id)
         .filter((id): id is string => typeof id === 'string'),
     )
-    const orphaned = findOrphanedLockEntries(lock ?? [], recommendedIds).map(
-      (entry) => entry.id as string,
-    )
+    const orphaned = findOrphanedLockEntries(lock ?? [], recommendedIds).map((entry) => entry.id)
     if (orphaned.length > 0) {
       suggest(
         `- CATALOG ITEMS: ${orphaned.length} installed item(s) no longer in the current recommendation (${orphaned.join(', ')})`,

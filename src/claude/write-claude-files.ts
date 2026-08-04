@@ -595,7 +595,11 @@ async function cleanupStaleCatalogItems(
 }
 
 /** Backs up files about to be pruned to `.haus-workflow/backups/prune-<timestamp>/`. */
-async function backupBeforePrune(root: string, absPaths: string[]): Promise<void> {
+async function backupBeforePrune(
+  root: string,
+  absPaths: string[],
+  say: (text: string) => void,
+): Promise<void> {
   if (absPaths.length === 0) return
   const stamp = new Date().toISOString().replace(/[:.]/g, '-')
   const backupRoot = hausPath(root, 'backups', `prune-${stamp}`)
@@ -606,7 +610,7 @@ async function backupBeforePrune(root: string, absPaths: string[]): Promise<void
     await fs.ensureDir(path.dirname(backupPath))
     await fs.copy(abs, backupPath)
   }
-  log(`Backed up ${absPaths.length} file(s) to ${path.relative(root, backupRoot)} before pruning.`)
+  say(`Backed up ${absPaths.length} file(s) to ${path.relative(root, backupRoot)} before pruning.`)
 }
 
 /**
@@ -621,12 +625,12 @@ async function backupBeforePrune(root: string, absPaths: string[]): Promise<void
 async function pruneOrphanedCatalogItems(
   root: string,
   prevLock: PrevLockEntry[],
-  recommendedIds: Set<string>,
+  notOrphanedIds: Set<string>,
   dryRun: boolean,
   quiet?: boolean,
 ): Promise<void> {
   const say = quiet ? () => {} : log
-  const orphaned = findOrphanedLockEntries(prevLock, recommendedIds)
+  const orphaned = findOrphanedLockEntries(prevLock, notOrphanedIds)
   if (orphaned.length === 0) return
 
   const toRemove: Array<{ id: string; existing: string[] }> = []
@@ -668,7 +672,7 @@ async function pruneOrphanedCatalogItems(
   const allAbsPaths = toRemove.flatMap(({ existing }) =>
     existing.map((rel) => path.join(root, rel)),
   )
-  await backupBeforePrune(root, allAbsPaths)
+  await backupBeforePrune(root, allAbsPaths, say)
   for (const { id, existing } of toRemove) {
     for (const rel of existing) {
       const abs = path.join(root, rel)
