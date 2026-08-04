@@ -525,7 +525,11 @@ test('update --check --fast skips hashing and marks checkMode: fast', () => {
   assert.equal(fastParsed.count, 1)
   assert.equal(fastParsed.catalogRef, 'v1.0.0')
   assert.deepEqual(fastParsed.drift, [])
-  assert.equal('ok' in fastParsed, false, 'fast mode does not claim to know ok since it never hashed')
+  assert.equal(
+    'ok' in fastParsed,
+    false,
+    'fast mode does not claim to know ok since it never hashed',
+  )
 
   const full = execaSync('node', [path.resolve('dist/cli.js'), 'update', '--check'], {
     cwd: temp,

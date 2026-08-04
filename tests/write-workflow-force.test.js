@@ -102,7 +102,11 @@ test('writeWorkflow migrates legacy hash header and preserves user body (no --fo
     assert.match(after, /USER BODY/, 'user body must be preserved after header migration')
     // Header must now include a hash (migrated to current format)
     const newFirstLine = after.split('\n')[0]
-    assert.match(newFirstLine, /hash=sha256-[a-f0-9]{64}/, 'migrated header must contain a sha256 hash')
+    assert.match(
+      newFirstLine,
+      /hash=sha256-[a-f0-9]{64}/,
+      'migrated header must contain a sha256 hash',
+    )
   } finally {
     fs.rmSync(root, { recursive: true, force: true })
   }
@@ -114,8 +118,7 @@ test('writeWorkflow with legacy hash header and matching body rewrites to curren
   try {
     fs.mkdirSync(path.join(root, '.haus-workflow'), { recursive: true })
     // Header without hash, body is the current template content
-    const legacyHeader =
-      `<!-- HAUS-MANAGED id=template.workflow v=1 source=@haus-tech/haus-workflow@0.18.2 -->\n${TEMPLATE_BODY}`
+    const legacyHeader = `<!-- HAUS-MANAGED id=template.workflow v=1 source=@haus-tech/haus-workflow@0.18.2 -->\n${TEMPLATE_BODY}`
     const workflowPath = path.join(root, '.haus-workflow', 'WORKFLOW.md')
     fs.writeFileSync(workflowPath, legacyHeader, 'utf8')
 
@@ -124,7 +127,11 @@ test('writeWorkflow with legacy hash header and matching body rewrites to curren
 
     const after = fs.readFileSync(workflowPath, 'utf8')
     const newFirstLine = after.split('\n')[0]
-    assert.match(newFirstLine, /hash=sha256-[a-f0-9]{64}/, 'header must be updated with sha256 hash')
+    assert.match(
+      newFirstLine,
+      /hash=sha256-[a-f0-9]{64}/,
+      'header must be updated with sha256 hash',
+    )
     assert.match(after, /Methodology body\./, 'template body must be present')
   } finally {
     fs.rmSync(root, { recursive: true, force: true })

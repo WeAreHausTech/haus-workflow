@@ -8,9 +8,7 @@ import fs from 'fs-extra'
 
 /** Parse a JSON file, returning `undefined` instead of throwing on missing or malformed files. */
 export type ReadJsonDetailedResult<T> =
-  | { status: 'ok'; value: T }
-  | { status: 'missing' }
-  | { status: 'invalid'; error: unknown }
+  { status: 'ok'; value: T } | { status: 'missing' } | { status: 'invalid'; error: unknown }
 
 /** Thrown when a JSON settings file exists but cannot be parsed; merge/write is refused. */
 export class MalformedJsonFileError extends Error {

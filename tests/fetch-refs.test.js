@@ -59,12 +59,14 @@ test('writeCacheMeta + readCacheMeta round-trips', async (t) => {
   await writeCacheMeta(dir, meta)
   const result = await readCacheMeta(dir)
   // JSON.stringify drops undefined values, so after round-trip the lastModified key is absent
-  const expected = { 'https://www.prisma.io/llms.txt': {
-    url: 'https://www.prisma.io/llms.txt',
-    etag: '"abc123"',
-    fetchedAt: '2026-06-24T00:00:00.000Z',
-    file: 'www-prisma-io-llms-txt.md',
-  } }
+  const expected = {
+    'https://www.prisma.io/llms.txt': {
+      url: 'https://www.prisma.io/llms.txt',
+      etag: '"abc123"',
+      fetchedAt: '2026-06-24T00:00:00.000Z',
+      file: 'www-prisma-io-llms-txt.md',
+    },
+  }
   assert.deepEqual(result, expected)
 })
 
@@ -230,12 +232,14 @@ test('pruneOrphanedRefs removes cache entries not in keepUrls', async (t) => {
 
   const meta = await readCacheMeta(dir)
   assert.deepEqual(Object.keys(meta), ['https://keep.example/llms.txt'])
-  const dropExists = await fs
-    .access(path.join(dir, 'drop.md'))
-    .then(() => true, () => false)
-  const keepExists = await fs
-    .access(path.join(dir, 'keep.md'))
-    .then(() => true, () => false)
+  const dropExists = await fs.access(path.join(dir, 'drop.md')).then(
+    () => true,
+    () => false,
+  )
+  const keepExists = await fs.access(path.join(dir, 'keep.md')).then(
+    () => true,
+    () => false,
+  )
   assert.equal(dropExists, false)
   assert.equal(keepExists, true)
 })
@@ -264,9 +268,10 @@ test('pruneOrphanedRefs rejects a non-basename file path (path traversal)', asyn
 
   const meta = await readCacheMeta(dir)
   assert.deepEqual(meta, {})
-  const outsideFileStillExists = await fs
-    .access(outsideFile)
-    .then(() => true, () => false)
+  const outsideFileStillExists = await fs.access(outsideFile).then(
+    () => true,
+    () => false,
+  )
   assert.equal(outsideFileStillExists, true)
 })
 
@@ -319,7 +324,21 @@ test('haus fetch-refs --id unknown exits 1', async (t) => {
   const manifestPath = path.join(dir, 'manifest.json')
   await fs.writeFile(
     manifestPath,
-    JSON.stringify({ version: '0.0.1', items: [{ id: 'haus.known-item', source: 'haus', type: 'skill', path: 'skills/test', title: 'Test', purpose: 'test', whenToUse: 'test', whenNotToUse: 'test' }] }),
+    JSON.stringify({
+      version: '0.0.1',
+      items: [
+        {
+          id: 'haus.known-item',
+          source: 'haus',
+          type: 'skill',
+          path: 'skills/test',
+          title: 'Test',
+          purpose: 'test',
+          whenToUse: 'test',
+          whenNotToUse: 'test',
+        },
+      ],
+    }),
   )
   t.after(async () => fs.rm(dir, { recursive: true }))
   const result = await execa('node', [DIST_CLI, 'fetch-refs', '--id', 'haus.does-not-exist'], {
@@ -335,7 +354,21 @@ test('haus fetch-refs --json emits valid JSON', async (t) => {
   const manifestPath = path.join(dir, 'manifest.json')
   await fs.writeFile(
     manifestPath,
-    JSON.stringify({ version: '0.0.1', items: [{ id: 'haus.test-item', source: 'haus', type: 'skill', path: 'skills/test', title: 'Test', purpose: 'test', whenToUse: 'test', whenNotToUse: 'test' }] }),
+    JSON.stringify({
+      version: '0.0.1',
+      items: [
+        {
+          id: 'haus.test-item',
+          source: 'haus',
+          type: 'skill',
+          path: 'skills/test',
+          title: 'Test',
+          purpose: 'test',
+          whenToUse: 'test',
+          whenNotToUse: 'test',
+        },
+      ],
+    }),
   )
   t.after(async () => fs.rm(dir, { recursive: true }))
   const result = await execa('node', [DIST_CLI, 'fetch-refs', '--all', '--json'], {
@@ -363,7 +396,21 @@ test('haus apply --write exits 0 after refs integration', async (t) => {
   const manifestPath = path.join(dir, 'manifest.json')
   await fs.writeFile(
     manifestPath,
-    JSON.stringify({ version: '0.0.1', items: [{ id: 'haus.test-item', source: 'haus', type: 'skill', path: 'skills/test', title: 'Test', purpose: 'test', whenToUse: 'test', whenNotToUse: 'test' }] }),
+    JSON.stringify({
+      version: '0.0.1',
+      items: [
+        {
+          id: 'haus.test-item',
+          source: 'haus',
+          type: 'skill',
+          path: 'skills/test',
+          title: 'Test',
+          purpose: 'test',
+          whenToUse: 'test',
+          whenNotToUse: 'test',
+        },
+      ],
+    }),
   )
   const result = await execa('node', [DIST_CLI, 'apply', '--write'], {
     cwd: dir,
@@ -390,10 +437,7 @@ test('haus apply --write only caches llms.txt refs for installed items', async (
   const skillMd = (name) =>
     `---\nname: ${name}\ndescription: Fixture stub for CLI tests.\n---\n\n# ${name}\n`
   await fs.mkdir(path.join(dir, 'skills/installed-skill'), { recursive: true })
-  await fs.writeFile(
-    path.join(dir, 'skills/installed-skill/SKILL.md'),
-    skillMd('installed-skill'),
-  )
+  await fs.writeFile(path.join(dir, 'skills/installed-skill/SKILL.md'), skillMd('installed-skill'))
   await fs.mkdir(path.join(dir, 'skills/uninstalled-skill'), { recursive: true })
   await fs.writeFile(
     path.join(dir, 'skills/uninstalled-skill/SKILL.md'),
@@ -459,7 +503,10 @@ test('haus apply --write only caches llms.txt refs for installed items', async (
   assert.equal(result.exitCode, 0, `apply failed: ${result.stderr}`)
 
   const lock = JSON.parse(await fs.readFile(path.join(hausDir, 'haus.lock.json'), 'utf8'))
-  assert.deepEqual(lock.map((e) => e.id), ['haus.installed-skill'])
+  assert.deepEqual(
+    lock.map((e) => e.id),
+    ['haus.installed-skill'],
+  )
 
   const { readCacheMeta } = await import('../src/refs/cache-meta.js')
   const meta = await readCacheMeta(path.join(hausDir, 'llms-cache'))

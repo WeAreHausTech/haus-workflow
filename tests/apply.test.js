@@ -107,7 +107,11 @@ test('apply writes a SessionStart hook that checks for project staleness', () =>
   writeFileSync(
     path.join(temp, 'package.json'),
     JSON.stringify(
-      { name: 'session-start-hook', packageManager: 'yarn@4.5.3', dependencies: { react: '19.0.0' } },
+      {
+        name: 'session-start-hook',
+        packageManager: 'yarn@4.5.3',
+        dependencies: { react: '19.0.0' },
+      },
       null,
       2,
     ),

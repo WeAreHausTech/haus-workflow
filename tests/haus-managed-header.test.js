@@ -9,7 +9,8 @@ import { parseHausManagedAttrs } from '../src/claude/haus-managed-header.js'
 // paths). Every tamper check downstream reads through this one regex.
 
 test('parses id, v, source, hash attrs from a full marker line', () => {
-  const line = '<!-- HAUS-MANAGED id=template.workflow v=3 source=@haus-tech/haus-workflow@0.16.2 hash=sha256-abc123 -->'
+  const line =
+    '<!-- HAUS-MANAGED id=template.workflow v=3 source=@haus-tech/haus-workflow@0.16.2 hash=sha256-abc123 -->'
   assert.deepEqual(parseHausManagedAttrs(line), {
     id: 'template.workflow',
     v: '3',

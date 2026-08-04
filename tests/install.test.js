@@ -326,7 +326,7 @@ describe('applyInstall dry-run (real invocation, stubbed HOME)', () => {
     }
   })
 
-  it('installs a skill\'s references/ folder alongside SKILL.md, not just the entry file', async () => {
+  it("installs a skill's references/ folder alongside SKILL.md, not just the entry file", async () => {
     // applyInstall stamps/copies files individually rather than fs.copy-ing whole skill
     // directories — the haus-workflow skill's SKILL.md points at `references/init.md`
     // etc, so those files must be seeded too or the skill breaks at runtime.

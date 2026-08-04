@@ -14,20 +14,20 @@ See **[Claude Code in Action](/docs/haus-workflow/claude-code-guide)** for a cha
 
 ## Command reference
 
-| Command                                       | Description                                          |
-| :-------------------------------------------- | :---------------------------------------------------- |
-| `/haus-workflow`                              | Interactive menu — pick a task                        |
-| `/haus-workflow project:init`                 | Add Haus Workflow to this repo                        |
-| `/haus-workflow project:reinit`               | Full re-setup from scratch (backs up first)           |
-| `/haus-workflow project:clone [name]`         | Clone from workspace manifest                         |
-| `/haus-workflow project:cloneandsetup [name]` | Clone + Node, deps, `.env`                            |
-| `/haus-workflow project:add-skills`           | Add optional skills/agents/config not yet installed   |
-| `/haus-workflow project:refresh`              | Refresh `.claude/` + CLAUDE.md imports                |
-| `/haus-workflow project:doctor`               | Health check for drift                                |
-| `/haus-workflow project:fix`                  | Diagnose drift and apply the suggested fixes          |
-| `/haus-workflow update`                       | Update package + catalog + `~/.claude/`               |
-| `/haus-workflow install` / `uninstall`        | Seed or remove haus-owned files under `~/.claude/`    |
-| `/haus-workflow help`                         | Explain tasks, no files touched                       |
+| Command                                       | Description                                         |
+| :-------------------------------------------- | :-------------------------------------------------- |
+| `/haus-workflow`                              | Interactive menu — pick a task                      |
+| `/haus-workflow project:init`                 | Add Haus Workflow to this repo                      |
+| `/haus-workflow project:reinit`               | Full re-setup from scratch (backs up first)         |
+| `/haus-workflow project:clone [name]`         | Clone from workspace manifest                       |
+| `/haus-workflow project:cloneandsetup [name]` | Clone + Node, deps, `.env`                          |
+| `/haus-workflow project:add-skills`           | Add optional skills/agents/config not yet installed |
+| `/haus-workflow project:refresh`              | Refresh `.claude/` + CLAUDE.md imports              |
+| `/haus-workflow project:doctor`               | Health check for drift                              |
+| `/haus-workflow project:fix`                  | Diagnose drift and apply the suggested fixes        |
+| `/haus-workflow update`                       | Update package + catalog + `~/.claude/`             |
+| `/haus-workflow install` / `uninstall`        | Seed or remove haus-owned files under `~/.claude/`  |
+| `/haus-workflow help`                         | Explain tasks, no files touched                     |
 
 Without an argument, the skill asks a couple of short questions to narrow down which task you want, then runs it.
 

@@ -113,11 +113,11 @@ test('Step 1 menu pages cover all 12 alias-table tasks exactly once, "and N more
   const questionBlocks = menuBlock.split(/Question \d:/).slice(1)
 
   const realOptionCounts = questionBlocks.map(
-    (block) => (block.match(/^\s*\d+\.\s*\[(?:project|global|—)\]\s+(?!More options)/gm) ?? [])
-      .length,
+    (block) =>
+      (block.match(/^\s*\d+\.\s*\[(?:project|global|—)\]\s+(?!More options)/gm) ?? []).length,
   )
   const totalRealShown = realOptionCounts.reduce((a, b) => a + b, 0)
-  assert.equal(totalRealShown, TOTAL_TASKS, 'every page\'s real options must sum to all 12 tasks')
+  assert.equal(totalRealShown, TOTAL_TASKS, "every page's real options must sum to all 12 tasks")
 
   let cumulativeShown = 0
   questionBlocks.forEach((block, i) => {

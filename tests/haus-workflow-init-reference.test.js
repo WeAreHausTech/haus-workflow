@@ -4,10 +4,7 @@ import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import path from 'node:path'
 
-const CMD = fs.readFileSync(
-  'library/global/skills/haus-workflow/references/init.md',
-  'utf8',
-)
+const CMD = fs.readFileSync('library/global/skills/haus-workflow/references/init.md', 'utf8')
 const MANIFEST = JSON.parse(fs.readFileSync('library/catalog/manifest.json', 'utf8'))
 
 function docsSkillBasename() {

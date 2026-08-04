@@ -42,7 +42,10 @@ test('buildSourcesReport entries use field name "source" not "id"', () => {
   const entry = report.items[0]
   // The serialised entry must have the key "source", not "id".
   assert.ok('source' in entry, 'entry must have a "source" field')
-  assert.ok(!('id' in entry), 'entry must NOT have an "id" field — use "source" to prevent naming landmine')
+  assert.ok(
+    !('id' in entry),
+    'entry must NOT have an "id" field — use "source" to prevent naming landmine',
+  )
   assert.equal(entry.source, 'curated')
 })
 

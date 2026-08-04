@@ -8,11 +8,11 @@ description: Working across multiple repos — cloning a workspace, local dev or
 
 Workspace mode is for when your work spans several repos that belong together (a storefront + a headless CMS + a shared design system, say). It's built from three independent pieces — knowing which one you want avoids a lot of confusion, since two of them use similarly-named files for different jobs.
 
-| Piece                    | Driven by                                  | File it reads                        | What it does                                                   |
-| :--------------------------- | :-------------------------------------------- | :--------------------------------------- | :-------------------------------------------------------------- |
-| Cloning a workspace's repos | `/haus-workflow project:clone` (Claude Code) | `repos.manifest.json`, `repos.local.json` | Gets repos onto disk                                            |
-| Local dev orchestration    | `/haus-workflow project:cloneandsetup` (Claude Code) | `.haus-workflow/localdev.yml` (per repo + workspace) | Node version, deps, Docker services, cross-repo links, `.env`, seeding |
-| Cross-repo CLI ops         | `haus workspace <subcommand>`              | `haus.workspace.yaml`                | Scan, setup, and doctor across repos you've already cloned      |
+| Piece                       | Driven by                                            | File it reads                                        | What it does                                                           |
+| :-------------------------- | :--------------------------------------------------- | :--------------------------------------------------- | :--------------------------------------------------------------------- |
+| Cloning a workspace's repos | `/haus-workflow project:clone` (Claude Code)         | `repos.manifest.json`, `repos.local.json`            | Gets repos onto disk                                                   |
+| Local dev orchestration     | `/haus-workflow project:cloneandsetup` (Claude Code) | `.haus-workflow/localdev.yml` (per repo + workspace) | Node version, deps, Docker services, cross-repo links, `.env`, seeding |
+| Cross-repo CLI ops          | `haus workspace <subcommand>`                        | `haus.workspace.yaml`                                | Scan, setup, and doctor across repos you've already cloned             |
 
 The first two are **Claude Code skill procedures** — there's no raw CLI flag that replicates the whole flow, because they involve judgment calls (asking before cloning, checking auth/Docker/data-access up front, confirming destructive steps). The third, `haus workspace`, is a real CLI command you can script or run in CI.
 
@@ -57,7 +57,7 @@ serve:
   start: 'yarn dev'
 ```
 
-**Workspace-level** `<workspace>/.haus-workflow/localdev.yml` is the glue *between* repos — setup order, symlinks/path deps between sibling repos, and the single source of truth for cross-repo env values (DB names, ports, shared URLs) so a value chosen once gets written consistently into every repo's `.env`:
+**Workspace-level** `<workspace>/.haus-workflow/localdev.yml` is the glue _between_ repos — setup order, symlinks/path deps between sibling repos, and the single source of truth for cross-repo env values (DB names, ports, shared URLs) so a value chosen once gets written consistently into every repo's `.env`:
 
 ```yaml
 order: [cms, storefront]
@@ -71,7 +71,7 @@ env:
 
 The orchestration pass:
 
-1. Runs one consolidated **prerequisite check** up front — auth tokens, Docker daemon, PHP environment, WP-CLI, Node versions, and (importantly) whether you can actually reach every data source a `seed:` step will need. This catches "can't pull the DB" *before* the expensive install work, not after — the single most common way a setup run leaves you half-configured.
+1. Runs one consolidated **prerequisite check** up front — auth tokens, Docker daemon, PHP environment, WP-CLI, Node versions, and (importantly) whether you can actually reach every data source a `seed:` step will need. This catches "can't pull the DB" _before_ the expensive install work, not after — the single most common way a setup run leaves you half-configured.
 2. Installs dependencies per repo (Node version from `.nvmrc`, package manager from the lockfile).
 3. Brings up `needs:` services in a shared, workspace-owned Docker Compose project — namespaced so multiple workspace instances don't collide.
 4. Wires `links` (symlinks, `yarn link`, Composer path repos) between sibling repos.
@@ -93,13 +93,13 @@ repos:
 relationships: []
 ```
 
-| Command                   | What it does                                                      |
-| :---------------------------- | :---------------------------------------------------------------- |
-| `haus workspace init`     | Create an empty `haus.workspace.yaml` in the current directory    |
+| Command                   | What it does                                                                                                     |
+| :------------------------ | :--------------------------------------------------------------------------------------------------------------- |
+| `haus workspace init`     | Create an empty `haus.workspace.yaml` in the current directory                                                   |
 | `haus workspace discover` | Auto-detect member repos on disk and write the config for you (`--write` to persist, otherwise prints a preview) |
-| `haus workspace scan`     | Run `haus scan` in every configured repo                          |
-| `haus workspace setup`    | Run the setup flow in every configured repo                       |
-| `haus workspace doctor`   | Run `haus doctor` in every configured repo, one health verdict per repo |
+| `haus workspace scan`     | Run `haus scan` in every configured repo                                                                         |
+| `haus workspace setup`    | Run the setup flow in every configured repo                                                                      |
+| `haus workspace doctor`   | Run `haus doctor` in every configured repo, one health verdict per repo                                          |
 
 This is a real CLI surface (unlike clone/cloneandsetup) — safe to script or wire into CI for a periodic "are all our repos still healthy" check.
 

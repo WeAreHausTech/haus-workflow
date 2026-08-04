@@ -99,7 +99,10 @@ test('writeManagedText dry-run never touches disk, even for a new file', async (
   await withCapturedLog(async (lines) => {
     await writeManagedText(dir, file, 'hello\n', true)
     assert.equal(existsSync(file), false, 'dry-run must not create the file')
-    assert.ok(lines.some((l) => l.includes(path.basename(file))), 'dry-run logs the file path')
+    assert.ok(
+      lines.some((l) => l.includes(path.basename(file))),
+      'dry-run logs the file path',
+    )
   })
 })
 
@@ -122,7 +125,10 @@ test('writeManagedText dry-run reports unchanged when content matches', async (t
   writeFileSync(file, 'same\n', 'utf8')
   await withCapturedLog(async (lines) => {
     await writeManagedText(dir, file, 'same\n', true)
-    assert.ok(lines.some((l) => l.includes('unchanged')), 'dry-run reports unchanged content')
+    assert.ok(
+      lines.some((l) => l.includes('unchanged')),
+      'dry-run reports unchanged content',
+    )
   })
 })
 

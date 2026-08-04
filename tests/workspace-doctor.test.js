@@ -248,7 +248,10 @@ test(
     )
 
     const result = await runWorkspaceDoctor(ws)
-    assert.equal(result.drift.some((d) => d.kind === 'catalog-ref-mismatch'), false)
+    assert.equal(
+      result.drift.some((d) => d.kind === 'catalog-ref-mismatch'),
+      false,
+    )
   }),
 )
 
@@ -267,7 +270,10 @@ test(
     writeFileSync(lockPath('api'), JSON.stringify([{ id: 'skill.bar', type: 'skill' }]))
 
     const result = await runWorkspaceDoctor(ws)
-    assert.equal(result.drift.some((d) => d.kind === 'catalog-ref-mismatch'), false)
+    assert.equal(
+      result.drift.some((d) => d.kind === 'catalog-ref-mismatch'),
+      false,
+    )
   }),
 )
 

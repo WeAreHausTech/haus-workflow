@@ -177,8 +177,14 @@ test('normalizeGitUrl treats a trailing slash after .git the same as no .git at 
 // path (no scheme, no host) rather than a real URL — confirm that shape still
 // compares equal to itself and unequal to a different path.
 test('normalizeGitUrl compares bare local filesystem paths (used in this test file)', () => {
-  assert.equal(normalizeGitUrl('/tmp/haus-clone-remote-abc123'), normalizeGitUrl('/tmp/haus-clone-remote-abc123'))
-  assert.notEqual(normalizeGitUrl('/tmp/haus-clone-remote-abc123'), normalizeGitUrl('/tmp/haus-clone-remote-xyz789'))
+  assert.equal(
+    normalizeGitUrl('/tmp/haus-clone-remote-abc123'),
+    normalizeGitUrl('/tmp/haus-clone-remote-abc123'),
+  )
+  assert.notEqual(
+    normalizeGitUrl('/tmp/haus-clone-remote-abc123'),
+    normalizeGitUrl('/tmp/haus-clone-remote-xyz789'),
+  )
 })
 
 // Regression (fr-3): an existing target dir must not be treated as "already cloned"
@@ -204,7 +210,10 @@ test('runClone refuses a target that is a different git repo, non-zero exit', as
   const output = await capture(() => runClone(remoteB, { dir: dest }))
   assert.equal(process.exitCode, 1, 'a mismatched existing repo sets non-zero exit')
   assert.match(output, /already exists as a different repository/)
-  assert.ok(existsSync(path.join(dest, 'a.txt')), 'original clone is left untouched, not overwritten')
+  assert.ok(
+    existsSync(path.join(dest, 'a.txt')),
+    'original clone is left untouched, not overwritten',
+  )
   process.exitCode = prev
 })
 
@@ -237,7 +246,10 @@ test('runClone --dry-run against a name conflict reports it without failing the 
   // problem but does not fail the run — only a real (non-dry-run) attempt does.
   assert.equal(process.exitCode, 0, 'dry-run must not set a non-zero exit, even on a real conflict')
   assert.match(output, /already exists as a different repository/)
-  assert.ok(existsSync(path.join(dest, 'a.txt')), 'original clone untouched by dry-run conflict check')
+  assert.ok(
+    existsSync(path.join(dest, 'a.txt')),
+    'original clone untouched by dry-run conflict check',
+  )
   process.exitCode = prev
 })
 

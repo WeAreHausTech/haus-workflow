@@ -113,7 +113,13 @@ test('readLockSummary: does not hash any file content (cheap by design)', async 
   // A hash mismatch here would fail checkLock() but must not affect readLockSummary(),
   // which only reads the lockfile's own JSON — never the installed files it references.
   writeLock([
-    { id: 'skill.a', type: 'skill', catalogRef: 'v1.0.0', hash: 'sha256-wrong', paths: ['nope.md'] },
+    {
+      id: 'skill.a',
+      type: 'skill',
+      catalogRef: 'v1.0.0',
+      hash: 'sha256-wrong',
+      paths: ['nope.md'],
+    },
   ])
   const result = await readLockSummary(tmpDir)
   assert.deepEqual(result, { count: 1, catalogRef: 'v1.0.0' })

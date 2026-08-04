@@ -13,7 +13,11 @@ import {
 } from 'node:fs'
 import { execaSync } from 'execa'
 
-import { buildImportBlock, injectHausBlock, stripHausBlock } from '../src/claude/write-root-claude-md.js'
+import {
+  buildImportBlock,
+  injectHausBlock,
+  stripHausBlock,
+} from '../src/claude/write-root-claude-md.js'
 
 process.env.HAUS_FIXTURE_CATALOG = path.resolve('tests/fixtures/catalog/manifest.json')
 

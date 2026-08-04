@@ -178,7 +178,10 @@ test(
 
     await runWorkspaceUndo(ws, { yes: true })
 
-    assert.ok(existsSync(trackedAbsPath), 'locally-modified tracked file must survive workspace undo')
+    assert.ok(
+      existsSync(trackedAbsPath),
+      'locally-modified tracked file must survive workspace undo',
+    )
     assert.equal(readFileSync(trackedAbsPath, 'utf8'), 'USER EDITED AFTER SETUP')
   }),
 )

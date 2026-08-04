@@ -8,9 +8,7 @@ import {
 
 test('normalizeRecommendation drops legacy score/confidence fields without throwing', () => {
   const legacy = {
-    recommended: [
-      { id: 'skill.foo', score: 0.87, confidence: 'high', reason: 'matched signal' },
-    ],
+    recommended: [{ id: 'skill.foo', score: 0.87, confidence: 'high', reason: 'matched signal' }],
     skipped: [],
   }
   const normalized = normalizeRecommendation(legacy)
@@ -52,7 +50,9 @@ test('normalizeRecommendation preserves current-shape reasons and selectionMode 
   assert.equal(item.type, 'agent')
   assert.equal(item.selectionMode, 'baseline')
   assert.equal(item.install, false)
-  assert.deepEqual(item.reasons, [{ code: 'file-touch', message: 'touched files', signal: 'src/**' }])
+  assert.deepEqual(item.reasons, [
+    { code: 'file-touch', message: 'touched files', signal: 'src/**' },
+  ])
   assert.deepEqual(item.tags, ['workflow'])
   assert.equal(item.tokenEstimate, 500)
 })
@@ -102,7 +102,9 @@ test('buildRecommendationExplanation maps a normalized Recommendation into selec
         reasons: [{ code: 'file-touch', message: 'touched files', signal: 'src/**' }],
       },
     ],
-    skipped: [{ id: 'skill.bar', skipReasons: [{ code: 'no-signal', message: 'no signal matched' }] }],
+    skipped: [
+      { id: 'skill.bar', skipReasons: [{ code: 'no-signal', message: 'no signal matched' }] },
+    ],
   })
   const explanation = buildRecommendationExplanation(normalized)
   assert.deepEqual(explanation.selected, [

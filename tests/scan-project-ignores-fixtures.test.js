@@ -27,10 +27,19 @@ test('scanProject ignores tests/fixtures content when detecting roles and stacks
 
   const result = await scanProject(tmp)
 
-  assert.ok(!result.repoRoles.includes('dotnet-service'), 'fixture .sln must not set dotnet-service role')
-  assert.ok(!result.repoRoles.includes('vendure-plugin'), 'fixture package.json must not set vendure-plugin role')
+  assert.ok(
+    !result.repoRoles.includes('dotnet-service'),
+    'fixture .sln must not set dotnet-service role',
+  )
+  assert.ok(
+    !result.repoRoles.includes('vendure-plugin'),
+    'fixture package.json must not set vendure-plugin role',
+  )
   assert.ok(!result.detectedStacks.backend.includes('dotnet'), 'fixture must not leak dotnet stack')
-  assert.ok(!result.detectedStacks.backend.includes('vendure3'), 'fixture must not leak vendure3 stack')
+  assert.ok(
+    !result.detectedStacks.backend.includes('vendure3'),
+    'fixture must not leak vendure3 stack',
+  )
 
   fs.rmSync(tmp, { recursive: true, force: true })
 })

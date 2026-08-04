@@ -50,7 +50,11 @@ test('readWorkflowTemplate dry-run returns fresh fetch, not a stale cache', asyn
 
     const text = await readWorkflowTemplate({ dryRun: true })
 
-    assert.equal(text, '# NEW REMOTE TEMPLATE\n', 'dry-run must return the fresh fetch, not the stale cache')
+    assert.equal(
+      text,
+      '# NEW REMOTE TEMPLATE\n',
+      'dry-run must return the fresh fetch, not the stale cache',
+    )
     const statAfter = statSync(cachedPath)
     assert.equal(statAfter.mtimeMs, statBefore.mtimeMs, 'dry-run must not write to the cache file')
     assert.equal(

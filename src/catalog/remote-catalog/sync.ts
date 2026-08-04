@@ -38,8 +38,7 @@ function isMarkdownPath(rel: string): boolean {
 }
 
 type FetchedFile =
-  | { rel: string; kind: 'text'; body: string }
-  | { rel: string; kind: 'binary'; body: Buffer }
+  { rel: string; kind: 'text'; body: string } | { rel: string; kind: 'binary'; body: Buffer }
 
 async function fetchPrefixFiles(
   catalogPrefix: string,

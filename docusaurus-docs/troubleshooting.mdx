@@ -6,7 +6,7 @@ description: Common problems, what causes them, and the exact command that fixes
 
 # Troubleshooting & FAQ
 
-Run `haus doctor` (or `/haus-workflow project:doctor` in Claude Code) first — it names the exact issue and the fix command for most of what's below. This page explains the *why* behind the most common ones.
+Run `haus doctor` (or `/haus-workflow project:doctor` in Claude Code) first — it names the exact issue and the fix command for most of what's below. This page explains the _why_ behind the most common ones.
 
 ## "`/haus-workflow` doesn't show up in Claude Code, or shows a weird description"
 
@@ -35,7 +35,7 @@ Run `haus doctor` (or `/haus-workflow project:doctor` in Claude Code) first — 
 
 ## "`.haus-workflow/llms-cache/` has files for skills I don't have installed"
 
-**Cause:** a stale cache from an older CLI version that fetched reference docs for the *entire* catalog instead of just what got installed.
+**Cause:** a stale cache from an older CLI version that fetched reference docs for the _entire_ catalog instead of just what got installed.
 **Fix:** run `haus apply --write` once on a current CLI version — it now scopes the fetch to what's actually in `haus.lock.json` and prunes cache entries for anything no longer installed.
 
 ## "`haus doctor --hooks` fails right after I upgraded haus, before I touched anything"

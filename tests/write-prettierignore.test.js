@@ -60,7 +60,8 @@ describe('write-prettierignore: injectPrettierIgnoreBlock', () => {
   })
 
   it('preserves user blank lines outside the managed block on refresh', () => {
-    const withGaps = 'dist/\n\n\n\ncoverage/\n# HAUS:BEGIN haus-managed v=1\nold/\n# HAUS:END haus-managed\n'
+    const withGaps =
+      'dist/\n\n\n\ncoverage/\n# HAUS:BEGIN haus-managed v=1\nold/\n# HAUS:END haus-managed\n'
     const out = injectPrettierIgnoreBlock(withGaps, block)
     assert.ok(out.startsWith('dist/\n\n\n\ncoverage/'), 'user blank lines kept')
   })

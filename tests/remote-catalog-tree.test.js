@@ -113,14 +113,16 @@ test('fetchCatalogBlobPaths de-duplicates concurrent calls into one network fetc
     }
     if (String(url).includes('/git/trees/')) {
       callCount++
-      return { ok: true, json: async () => ({ tree: [{ path: 'skills/foo/SKILL.md', type: 'blob' }] }) }
+      return {
+        ok: true,
+        json: async () => ({ tree: [{ path: 'skills/foo/SKILL.md', type: 'blob' }] }),
+      }
     }
     return { ok: false }
   }
   try {
-    const { fetchCatalogBlobPaths, _resetRemoteCatalogCachesForTests } = await import(
-      '../src/catalog/remote-catalog.js'
-    )
+    const { fetchCatalogBlobPaths, _resetRemoteCatalogCachesForTests } =
+      await import('../src/catalog/remote-catalog.js')
     _resetRemoteCatalogCachesForTests()
     const results = await Promise.all(Array.from({ length: 10 }, () => fetchCatalogBlobPaths('')))
     assert.equal(callCount, 1, `expected exactly one tree fetch, got ${callCount}`)

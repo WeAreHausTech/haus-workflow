@@ -100,15 +100,11 @@ function runWriteSelected(root, manifestPath, selectedIds) {
       `await writeClaudeFiles(process.argv[2], false, JSON.parse(process.argv[3]));`,
     ].join('\n'),
   )
-  return execaSync(
-    'node',
-    ['--import', 'tsx/esm', helper, root, JSON.stringify(selectedIds)],
-    {
-      cwd: path.resolve('.'),
-      reject: false,
-      env: { ...process.env, HAUS_FIXTURE_CATALOG: manifestPath },
-    },
-  )
+  return execaSync('node', ['--import', 'tsx/esm', helper, root, JSON.stringify(selectedIds)], {
+    cwd: path.resolve('.'),
+    reject: false,
+    env: { ...process.env, HAUS_FIXTURE_CATALOG: manifestPath },
+  })
 }
 
 test('buildFormerIdMap maps former ids to current ids', () => {
@@ -138,11 +134,7 @@ test('buildFormerIdMap rejects non-array formerIds and current-id collisions', (
     /formerIds must be a string array/,
   )
   assert.throws(
-    () =>
-      buildFormerIdMap([
-        { id: 'alive' },
-        { id: 'renamed', formerIds: ['alive'] },
-      ]),
+    () => buildFormerIdMap([{ id: 'alive' }, { id: 'renamed', formerIds: ['alive'] }]),
     /conflicts with another item's current id/,
   )
 })
@@ -198,9 +190,7 @@ test('apply migrates a former lock id and refreshes installed content without re
     /new content/,
   )
 
-  const lock = JSON.parse(
-    readFileSync(path.join(root, '.haus-workflow', 'haus.lock.json'), 'utf8'),
-  )
+  const lock = JSON.parse(readFileSync(path.join(root, '.haus-workflow', 'haus.lock.json'), 'utf8'))
   assert.equal(lock.length, 1)
   assert.equal(lock[0].id, 'catalog.new')
   assert.deepEqual(lock[0].paths, ['.claude/skills/new-name'])
@@ -228,10 +218,11 @@ test('apply --select migrates when only the current id is selected', () => {
   const migrated = runWriteSelected(root, manifestPath, ['catalog.new'])
   assert.equal(migrated.exitCode, 0, migrated.stderr)
   assert.equal(existsSync(path.join(root, '.claude', 'skills', 'new-name', 'SKILL.md')), true)
-  const lock = JSON.parse(
-    readFileSync(path.join(root, '.haus-workflow', 'haus.lock.json'), 'utf8'),
+  const lock = JSON.parse(readFileSync(path.join(root, '.haus-workflow', 'haus.lock.json'), 'utf8'))
+  assert.deepEqual(
+    lock.map((entry) => entry.id),
+    ['catalog.new'],
   )
-  assert.deepEqual(lock.map((entry) => entry.id), ['catalog.new'])
 })
 
 test('apply --select leaves deselected former-id installs untouched', () => {
@@ -295,9 +286,7 @@ test('update --check reports a pending former-id migration without writing', () 
 
   assert.equal(checked.exitCode, 1)
   const result = JSON.parse(checked.stdout)
-  assert.deepEqual(result.formerIdMigrations, [
-    { oldId: 'catalog.old', newId: 'catalog.new' },
-  ])
+  assert.deepEqual(result.formerIdMigrations, [{ oldId: 'catalog.old', newId: 'catalog.new' }])
   assert.equal(readFileSync(lockPath, 'utf8'), lockBefore)
   assert.equal(existsSync(path.join(root, '.claude', 'skills', 'new-name')), false)
 })

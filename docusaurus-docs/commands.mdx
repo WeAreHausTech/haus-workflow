@@ -12,15 +12,15 @@ reference for scripting, CI, or working from a terminal.
 
 ## Core workflow
 
-| Command                                                                                                          | Description                                                                                                                                |
-| :---------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------- |
-| `haus init [--json]`                                                                                             | First-run setup in one step: scan → recommend → apply                                                                                     |
-| `haus setup-project [--json]`                                                                                    | Re-run setup on an already-initialized project; prompts to confirm unless `--json` (preview only, writes nothing)                          |
-| `haus scan [--json]`                                                                                             | Scan the repo and write `context-map.json`, `dependency-map.json`, `scan-hashes.json`, `repo-summary.md`                                   |
-| `haus recommend [--json] [--include <ids...>]`                                                                  | Recommend catalog items for the detected stack. `--include` force-adds opt-in items (space/comma-separated) as `manual` selections          |
-| `haus apply [--dry-run] [--write] [--select] [--ids <ids...>] [--allow-empty-cache] [--refill-config] [--force]` | Materialize recommended catalog assets into `.claude/`                                                                                     |
-| `haus scaffold [ids...] [--force] [--dry-run] [--root <path>]`                                                   | Copy `config`-type items (ESLint, Prettier baselines) into the project root — never run automatically by `apply`                          |
-| `haus update [--check] [--from-hook]`                                                                            | Sync the latest catalog, refresh `~/.claude/`, and re-apply project files                                                                  |
+| Command                                                                                                          | Description                                                                                                                        |
+| :--------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------- |
+| `haus init [--json]`                                                                                             | First-run setup in one step: scan → recommend → apply                                                                              |
+| `haus setup-project [--json]`                                                                                    | Re-run setup on an already-initialized project; prompts to confirm unless `--json` (preview only, writes nothing)                  |
+| `haus scan [--json]`                                                                                             | Scan the repo and write `context-map.json`, `dependency-map.json`, `scan-hashes.json`, `repo-summary.md`                           |
+| `haus recommend [--json] [--include <ids...>]`                                                                   | Recommend catalog items for the detected stack. `--include` force-adds opt-in items (space/comma-separated) as `manual` selections |
+| `haus apply [--dry-run] [--write] [--select] [--ids <ids...>] [--allow-empty-cache] [--refill-config] [--force]` | Materialize recommended catalog assets into `.claude/`                                                                             |
+| `haus scaffold [ids...] [--force] [--dry-run] [--root <path>]`                                                   | Copy `config`-type items (ESLint, Prettier baselines) into the project root — never run automatically by `apply`                   |
+| `haus update [--check] [--from-hook]`                                                                            | Sync the latest catalog, refresh `~/.claude/`, and re-apply project files                                                          |
 
 ### `haus apply` flags in depth
 
@@ -42,51 +42,51 @@ Copies config-type catalog items into your project root. One-time, explicit — 
 
 ## Diagnostics
 
-| Command                                | Description                                                                                                                                          |
-| :---------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `haus doctor [--hooks]`                | Health check: hooks, `CLAUDE.md` import block, managed files, catalog cache, CLI version. Prints one plain-language verdict first, detail below it |
-| `haus explain-recommendation [--json]` | Renders the reasoning behind the current `recommendation.json` — why each item was included or skipped                                              |
-| `haus refresh`                         | Fast re-scan + regenerate `recommendation.json` without a full `apply` — cheaper than `init` when you just want an updated picture                 |
+| Command                                | Description                                                                                                                                                                                                                                       |
+| :------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `haus doctor [--hooks]`                | Health check: hooks, `CLAUDE.md` import block, managed files, catalog cache, CLI version. Prints one plain-language verdict first, detail below it                                                                                                |
+| `haus explain-recommendation [--json]` | Renders the reasoning behind the current `recommendation.json` — why each item was included or skipped                                                                                                                                            |
+| `haus refresh`                         | Fast re-scan + regenerate `recommendation.json` without a full `apply` — cheaper than `init` when you just want an updated picture                                                                                                                |
 | `haus undo [-y \| --yes]`              | Remove haus-managed project files (lock-tracked catalog items, core rules/commands, haus's parts of `settings.json`/`CLAUDE.md`). User-owned `.claude/` content and `.haus-workflow/` scan artifacts are kept. `-y` skips the confirmation prompt |
 
 `haus doctor --hooks` additionally verifies `.claude/settings.json` matches the canonical hook contract and exits non-zero on drift — useful in CI.
 
 ## Global install
 
-| Command                                                         | Description                                                                                                                             |
-| :----------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------ |
+| Command                                                        | Description                                                                                                                           |
+| :------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------ |
 | `haus install [--dry-run] [--force] [--check] [--postinstall]` | Seed `~/.claude/` with the haus-workflow skill, global slash commands, and hooks; merge security rules into `~/.claude/settings.json` |
-| `haus uninstall [--force]`                                      | Remove haus-managed files from `~/.claude/` and strip haus-added hooks + permission rules                                              |
+| `haus uninstall [--force]`                                     | Remove haus-managed files from `~/.claude/` and strip haus-added hooks + permission rules                                             |
 
 `haus install` runs automatically on a global `npm i -g @haus-tech/haus-workflow` — global-only, skipped in CI, non-fatal, idempotent. Disable with `HAUS_NO_POSTINSTALL=1`.
 
 ## Cloning repos
 
-| Command                  | Description                                                                                                                                |
-| :-------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------- |
+| Command                  | Description                                                                                                                                                 |
+| :----------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `haus clone <url> [dir]` | Clone a single git repo by URL. A primitive with no workspace knowledge — see [Workspace mode](/docs/haus-workflow/workspace) for cloning a whole workspace |
 
 ## Workspace commands
 
 See [Workspace mode](/docs/haus-workflow/workspace) for the full picture — these operate across multiple already-cloned repos via `haus.workspace.yaml`, a **different** file from the `repos.manifest.json` that `haus clone`/`/haus-workflow project:clone` reads.
 
-| Command                   | Description                                                                    |
-| :---------------------------- | :---------------------------------------------------------------------------- |
-| `haus workspace init`     | Initialize `haus.workspace.yaml` in the current directory                     |
-| `haus workspace discover` | Auto-discover member repos and write `haus.workspace.yaml`                    |
-| `haus workspace scan`     | Run `haus scan` across every discovered/configured workspace repo             |
+| Command                   | Description                                                                                             |
+| :------------------------ | :------------------------------------------------------------------------------------------------------ |
+| `haus workspace init`     | Initialize `haus.workspace.yaml` in the current directory                                               |
+| `haus workspace discover` | Auto-discover member repos and write `haus.workspace.yaml`                                              |
+| `haus workspace scan`     | Run `haus scan` across every discovered/configured workspace repo                                       |
 | `haus workspace setup`    | Run the setup flow across workspace repos; records outcomes to `.haus-workflow/workspace.manifest.json` |
-| `haus workspace doctor`   | Run `haus doctor` across workspace repos                                      |
+| `haus workspace doctor`   | Run `haus doctor` across workspace repos                                                                |
 
 ## ADR / decisions gate
 
-| Command                                           | Description                                                                                |
-| :---------------------------------------------------- | :------------------------------------------------------------------------------------- |
-| `haus decisions check [--staged \| --range A..B]` | Fail when a decision-worthy diff lacks a matching `docs/decisions/NNNN-*.md` + README row |
-| `haus decisions suggest [--from-hook] [--title]`  | Draft an ADR from the current diff                                                        |
-| `haus decisions next-number`                      | Print the next four-digit decision number                                                 |
-| `haus decisions validate <path>`                  | Validate an ADR file's structure                                                           |
-| `haus decisions guard [--from-hook]`               | The `PreToolUse` hook backing the gate below — denies `gh pr create` when the diff needs an ADR it doesn't have |
+| Command                                           | Description                                                                                                     |
+| :------------------------------------------------ | :-------------------------------------------------------------------------------------------------------------- |
+| `haus decisions check [--staged \| --range A..B]` | Fail when a decision-worthy diff lacks a matching `docs/decisions/NNNN-*.md` + README row                       |
+| `haus decisions suggest [--from-hook] [--title]`  | Draft an ADR from the current diff                                                                              |
+| `haus decisions next-number`                      | Print the next four-digit decision number                                                                       |
+| `haus decisions validate <path>`                  | Validate an ADR file's structure                                                                                |
+| `haus decisions guard [--from-hook]`              | The `PreToolUse` hook backing the gate below — denies `gh pr create` when the diff needs an ADR it doesn't have |
 
 `haus adr` is an alias for `haus decisions`. `haus apply --write` seeds `docs/decisions/README.md` the first time it's needed and wires it into the `CLAUDE.md` import block. Escape hatch: put `[adr-skip]` in a PR body (ignored for security/auth-path changes). Disable entirely with `.haus-workflow/adr-gate.json` containing `{ "mode": "off" }` — `haus doctor` will tell you if this is set.
 
@@ -98,11 +98,11 @@ See [Workspace mode](/docs/haus-workflow/workspace) for the full picture — the
 
 See [Configuration reference](/docs/haus-workflow/configuration) for the full list and what each file means. Quick summary:
 
-| Path                                                     | Description                                                              |
-| :----------------------------------------------------------- | :------------------------------------------------------------------ |
-| `.haus-workflow/context-map.json`                       | Repo scan output — detected stacks, roles, dependencies              |
-| `.haus-workflow/recommendation.json`                    | Which catalog items were recommended for this project, and why       |
-| `.haus-workflow/haus.lock.json`                         | Per-item content hashes — tracks what was applied and at what version |
-| `.haus-workflow/WORKFLOW.md` + `workflow-config.md`     | The agentic development workflow standard + your project's bindings to it |
-| `.claude/skills/`, `.claude/agents/`, `.claude/commands/` | Applied catalog content                                              |
-| `.claude/settings.json`                                 | Permissions (deny/ask/allow) and hooks haus manages                  |
+| Path                                                      | Description                                                               |
+| :-------------------------------------------------------- | :------------------------------------------------------------------------ |
+| `.haus-workflow/context-map.json`                         | Repo scan output — detected stacks, roles, dependencies                   |
+| `.haus-workflow/recommendation.json`                      | Which catalog items were recommended for this project, and why            |
+| `.haus-workflow/haus.lock.json`                           | Per-item content hashes — tracks what was applied and at what version     |
+| `.haus-workflow/WORKFLOW.md` + `workflow-config.md`       | The agentic development workflow standard + your project's bindings to it |
+| `.claude/skills/`, `.claude/agents/`, `.claude/commands/` | Applied catalog content                                                   |
+| `.claude/settings.json`                                   | Permissions (deny/ask/allow) and hooks haus manages                       |

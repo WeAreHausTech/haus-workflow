@@ -87,7 +87,10 @@ test('doctor advises when an installed item is no longer in the current recommen
     const output = await runInDir(dir, () => runDoctor())
     assert.match(output, /skill\.orphaned/)
     assert.match(output, /no longer.*recommendation|no longer recommended/i)
-    assert.doesNotMatch(output.split('\n').find((l) => l.includes('CATALOG ITEMS')) ?? '', /skill\.still-needed/)
+    assert.doesNotMatch(
+      output.split('\n').find((l) => l.includes('CATALOG ITEMS')) ?? '',
+      /skill\.still-needed/,
+    )
   } finally {
     rmSync(dir, { recursive: true, force: true })
   }

@@ -257,8 +257,11 @@ test('syncRemoteCatalog rejects config-dir .md files containing a forbidden tag 
   process.env.HAUS_CATALOG_CACHE_DIR_OVERRIDE = configDirCache
   try {
     const result = await syncRemoteCatalog()
-    assert.equal(result.failed.includes('haus.bad-config-dir'), true,
-      'expected haus.bad-config-dir to be in failed list')
+    assert.equal(
+      result.failed.includes('haus.bad-config-dir'),
+      true,
+      'expected haus.bad-config-dir to be in failed list',
+    )
     assert.equal(
       fs.existsSync(path.join(configDirCache, 'configs/bad-config-dir')),
       false,

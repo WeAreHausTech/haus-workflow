@@ -15,7 +15,11 @@ const CATALOG = path.resolve('library/catalog/manifest.json')
 const CLI = path.resolve('dist/cli.js')
 const REPOS = path.resolve(path.dirname(fileURLToPath(import.meta.url)), 'fixtures/repos')
 
-const env = { ...process.env, HAUS_FIXTURE_CATALOG: CATALOG, HAUS_CATALOG_CACHE_DIR_OVERRIDE: path.join(os.tmpdir(), `haus-gate-cache-${process.pid}`) }
+const env = {
+  ...process.env,
+  HAUS_FIXTURE_CATALOG: CATALOG,
+  HAUS_CATALOG_CACHE_DIR_OVERRIDE: path.join(os.tmpdir(), `haus-gate-cache-${process.pid}`),
+}
 
 function recommendIds(root) {
   execaSync('node', [CLI, 'scan', '--json'], { cwd: root, env })

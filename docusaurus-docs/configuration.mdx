@@ -10,54 +10,54 @@ haus-workflow writes exclusively to two directories: `.claude/` and `.haus-workf
 
 ## The core rule: managed vs. owned
 
-| Marker                                                    | Meaning                                                                                                  |
-| :----------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------- |
-| `<!-- HAUS:BEGIN … -->` … `<!-- HAUS:END … -->`           | A managed block inside an otherwise user-owned file. Hand-edits inside it are silently overwritten on the next `haus apply` — edit outside the block instead |
-| `HAUS-MANAGED` header (first line of a whole file)        | The entire file is managed. `haus doctor` flags it as "modified locally" if you edit it, and `apply --write --force` restores it |
-| No marker, explicit "project-owned" comment               | Yours. haus writes an initial version once and never touches it again unless you ask (e.g. `--force`, `--refill-config`) |
+| Marker                                             | Meaning                                                                                                                                                      |
+| :------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `<!-- HAUS:BEGIN … -->` … `<!-- HAUS:END … -->`    | A managed block inside an otherwise user-owned file. Hand-edits inside it are silently overwritten on the next `haus apply` — edit outside the block instead |
+| `HAUS-MANAGED` header (first line of a whole file) | The entire file is managed. `haus doctor` flags it as "modified locally" if you edit it, and `apply --write --force` restores it                             |
+| No marker, explicit "project-owned" comment        | Yours. haus writes an initial version once and never touches it again unless you ask (e.g. `--force`, `--refill-config`)                                     |
 
 If you're not sure which category a file falls into, run `haus doctor` — it reports drift per managed file by name.
 
 ## `.haus-workflow/` — state, scan output, and the workflow standard
 
-| File                          | Owner    | Purpose                                                                                                                          |
-| :-------------------------------- | :--------- | :----------------------------------------------------------------------------------------------------------------------------- |
-| `context-map.json`            | haus     | Output of `haus scan` — detected stacks, roles, package manager, dependencies. Regenerated every scan; don't hand-edit          |
-| `recommendation.json`         | haus     | Output of `haus recommend` — which catalog items were recommended, `skipped[]` with reasons, and `optInEligible[]` for opt-in items |
-| `deep-context.json`           | Claude Code | Written by the `writing-documentation` skill after a deep code read; feeds a second recommendation pass so `haus recommend` can surface skills the shallow scan alone would miss |
-| `haus.lock.json`               | haus     | Per-item content hash + which paths it wrote + which catalog ref it came from. This is how `apply` knows whether your copy of a file was hand-edited (hash mismatch) before deciding to update or leave it alone |
-| `sources-report.json`         | haus     | Per-catalog-source trust gating — which sources are trusted for this project                                                    |
-| `WORKFLOW.md`                 | haus (managed) | The agentic development workflow standard itself (explore → plan → code → commit, testing rules, ADR process, etc.) — carries a `HAUS-MANAGED` header with a content hash. Edit `workflow-config.md` instead of this file |
-| `workflow-config.md`          | **you**  | The small set of project-specific values `WORKFLOW.md` binds to: source-of-truth doc paths, test commands, highest-stakes logic, pre-commit tool. haus writes an initial version with `<!-- fill in -->` placeholders and never overwrites your edits (`--refill-config` only fills blanks it finds, never touches a field you've already set) |
-| `adr-gate.json`                | **you**  | Optional. `{ "mode": "off" }` disables the ADR/decisions gate entirely. Absent = gate enabled |
-| `selected-context.json`       | haus     | Written by `apply --write` — the resolved set of items actually installed this run                                              |
-| `workspace.manifest.json`     | haus     | Written by `haus workspace setup` — a derived, advisory record of each repo's last setup outcome in a multi-repo workspace (see [Workspace mode](/docs/haus-workflow/workspace)). Not the workspace's own config — that's `haus.workspace.yaml` at the workspace root, written by `haus workspace discover`/`init` |
-| `backups/`                    | haus     | `haus update` backs up the previous lockfile here before refreshing                                                             |
-| `llms-cache/`                 | haus     | Cached `llms.txt`-style reference docs for installed catalog skills/agents, pruned automatically when an item is removed        |
+| File                      | Owner          | Purpose                                                                                                                                                                                                                                                                                                                                        |
+| :------------------------ | :------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `context-map.json`        | haus           | Output of `haus scan` — detected stacks, roles, package manager, dependencies. Regenerated every scan; don't hand-edit                                                                                                                                                                                                                         |
+| `recommendation.json`     | haus           | Output of `haus recommend` — which catalog items were recommended, `skipped[]` with reasons, and `optInEligible[]` for opt-in items                                                                                                                                                                                                            |
+| `deep-context.json`       | Claude Code    | Written by the `writing-documentation` skill after a deep code read; feeds a second recommendation pass so `haus recommend` can surface skills the shallow scan alone would miss                                                                                                                                                               |
+| `haus.lock.json`          | haus           | Per-item content hash + which paths it wrote + which catalog ref it came from. This is how `apply` knows whether your copy of a file was hand-edited (hash mismatch) before deciding to update or leave it alone                                                                                                                               |
+| `sources-report.json`     | haus           | Per-catalog-source trust gating — which sources are trusted for this project                                                                                                                                                                                                                                                                   |
+| `WORKFLOW.md`             | haus (managed) | The agentic development workflow standard itself (explore → plan → code → commit, testing rules, ADR process, etc.) — carries a `HAUS-MANAGED` header with a content hash. Edit `workflow-config.md` instead of this file                                                                                                                      |
+| `workflow-config.md`      | **you**        | The small set of project-specific values `WORKFLOW.md` binds to: source-of-truth doc paths, test commands, highest-stakes logic, pre-commit tool. haus writes an initial version with `<!-- fill in -->` placeholders and never overwrites your edits (`--refill-config` only fills blanks it finds, never touches a field you've already set) |
+| `adr-gate.json`           | **you**        | Optional. `{ "mode": "off" }` disables the ADR/decisions gate entirely. Absent = gate enabled                                                                                                                                                                                                                                                  |
+| `selected-context.json`   | haus           | Written by `apply --write` — the resolved set of items actually installed this run                                                                                                                                                                                                                                                             |
+| `workspace.manifest.json` | haus           | Written by `haus workspace setup` — a derived, advisory record of each repo's last setup outcome in a multi-repo workspace (see [Workspace mode](/docs/haus-workflow/workspace)). Not the workspace's own config — that's `haus.workspace.yaml` at the workspace root, written by `haus workspace discover`/`init`                             |
+| `backups/`                | haus           | `haus update` backs up the previous lockfile here before refreshing                                                                                                                                                                                                                                                                            |
+| `llms-cache/`             | haus           | Cached `llms.txt`-style reference docs for installed catalog skills/agents, pruned automatically when an item is removed                                                                                                                                                                                                                       |
 
 ## `.claude/` — what Claude Code actually loads
 
-| Path                                       | Owner    | Purpose                                                                                                    |
-| :---------------------------------------------- | :--------- | :---------------------------------------------------------------------------------------------------------- |
-| `skills/`, `agents/`, `commands/`, `templates/` | haus (per-item managed) | Applied catalog content. Each file/directory tracked in `haus.lock.json`; your local edits are preserved and skipped on cleanup, but you won't get upstream fixes to an item you've edited |
-| `rules/haus.md`                            | haus (managed) | Baseline agent behavior rules (keep context minimal, follow conventions, block dangerous shell commands, never hand-edit managed blocks) |
-| `settings.json`                            | haus (managed sections) | Permissions (`deny`/`ask`/scoped `allow`) and hooks. haus tracks its own additions under `_haus.denyRules` / `_haus.askRules` internally so uninstall can cleanly remove only what it added, leaving your own rules intact |
+| Path                                            | Owner                   | Purpose                                                                                                                                                                                                                    |
+| :---------------------------------------------- | :---------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `skills/`, `agents/`, `commands/`, `templates/` | haus (per-item managed) | Applied catalog content. Each file/directory tracked in `haus.lock.json`; your local edits are preserved and skipped on cleanup, but you won't get upstream fixes to an item you've edited                                 |
+| `rules/haus.md`                                 | haus (managed)          | Baseline agent behavior rules (keep context minimal, follow conventions, block dangerous shell commands, never hand-edit managed blocks)                                                                                   |
+| `settings.json`                                 | haus (managed sections) | Permissions (`deny`/`ask`/scoped `allow`) and hooks. haus tracks its own additions under `_haus.denyRules` / `_haus.askRules` internally so uninstall can cleanly remove only what it added, leaving your own rules intact |
 
 ## Root-level files
 
-| Path                                                | Owner            | Purpose                                                                                                             |
-| :------------------------------------------------------ | :------------------ | :-------------------------------------------------------------------------------------------------------------- |
-| `CLAUDE.md` — everything outside the `HAUS:BEGIN`/`HAUS:END` block | **you**          | Your project's own instructions/context. Write freely; haus never touches this part                              |
-| `CLAUDE.md` — the `<!-- HAUS:BEGIN haus-imports -->` block | haus (managed)   | Three `@`-imports: `.haus-workflow/WORKFLOW.md`, `.haus-workflow/workflow-config.md`, `docs/decisions/README.md`. Regenerated by `apply`; don't hand-edit |
-| `docs/decisions/README.md` + `docs/decisions/NNNN-*.md`  | **you** (seeded by haus) | ADR index + records. haus seeds the index once when the decisions gate first needs it; you write the actual decision content |
-| `.prettierignore` — the block haus adds                 | haus (managed)   | Excludes `.haus-workflow/` from formatters, so a formatter running on save can't reformat `WORKFLOW.md`'s body and trip the tamper-detection hash check |
+| Path                                                               | Owner                    | Purpose                                                                                                                                                   |
+| :----------------------------------------------------------------- | :----------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `CLAUDE.md` — everything outside the `HAUS:BEGIN`/`HAUS:END` block | **you**                  | Your project's own instructions/context. Write freely; haus never touches this part                                                                       |
+| `CLAUDE.md` — the `<!-- HAUS:BEGIN haus-imports -->` block         | haus (managed)           | Three `@`-imports: `.haus-workflow/WORKFLOW.md`, `.haus-workflow/workflow-config.md`, `docs/decisions/README.md`. Regenerated by `apply`; don't hand-edit |
+| `docs/decisions/README.md` + `docs/decisions/NNNN-*.md`            | **you** (seeded by haus) | ADR index + records. haus seeds the index once when the decisions gate first needs it; you write the actual decision content                              |
+| `.prettierignore` — the block haus adds                            | haus (managed)           | Excludes `.haus-workflow/` from formatters, so a formatter running on save can't reformat `WORKFLOW.md`'s body and trip the tamper-detection hash check   |
 
 ## Two config-selection files that look similar but aren't
 
 It's easy to confuse these — they solve different problems:
 
-- **`workflow-config.md`** (`.haus-workflow/`) — binds the generic *workflow methodology* (`WORKFLOW.md`) to this specific project's values. About **how you work**.
-- **`haus.workspace.yaml`** and **`repos.manifest.json`** — describe a *multi-repo workspace* (which repos exist, how they relate). About **what repos exist**. See [Workspace mode](/docs/haus-workflow/workspace) for the full picture; they are not interchangeable with each other either.
+- **`workflow-config.md`** (`.haus-workflow/`) — binds the generic _workflow methodology_ (`WORKFLOW.md`) to this specific project's values. About **how you work**.
+- **`haus.workspace.yaml`** and **`repos.manifest.json`** — describe a _multi-repo workspace_ (which repos exist, how they relate). About **what repos exist**. See [Workspace mode](/docs/haus-workflow/workspace) for the full picture; they are not interchangeable with each other either.
 
 ## Safe to delete / regenerate
 

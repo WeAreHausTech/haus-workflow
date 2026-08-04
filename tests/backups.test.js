@@ -51,7 +51,12 @@ test('listBackups classifies lock, undo, and prune entries and ignores unknown o
   const temp = makeTemp('haus-backups-list-')
   makeLockBackup(temp, 1000000)
   makeDirBackup(temp, 'undo-2026-01-01T00-00-00-000Z', { '.claude/rules/haus.md': 'x' }, 2000000)
-  makeDirBackup(temp, 'prune-2026-02-01T00-00-00-000Z', { '.claude/skills/foo/SKILL.md': 'x' }, 3000000)
+  makeDirBackup(
+    temp,
+    'prune-2026-02-01T00-00-00-000Z',
+    { '.claude/skills/foo/SKILL.md': 'x' },
+    3000000,
+  )
   mkdirSync(path.join(temp, '.haus-workflow/backups/not-a-backup'), { recursive: true })
 
   const entries = await listBackups(temp)
@@ -131,7 +136,10 @@ test('runBackups prune --keep removes the oldest entries beyond the keep count',
   await runBackups('prune', { keep: 1, yes: true, root: temp })
 
   const entries = await listBackups(temp)
-  assert.deepEqual(entries.map((e) => e.id), ['haus.lock.3000000.json'])
+  assert.deepEqual(
+    entries.map((e) => e.id),
+    ['haus.lock.3000000.json'],
+  )
 })
 
 test('runBackups prune --older-than removes entries past the age threshold', async () => {
@@ -144,7 +152,10 @@ test('runBackups prune --older-than removes entries past the age threshold', asy
   await runBackups('prune', { olderThan: 30, yes: true, root: temp })
 
   const entries = await listBackups(temp)
-  assert.deepEqual(entries.map((e) => e.id), [`haus.lock.${recentEpochMs}.json`])
+  assert.deepEqual(
+    entries.map((e) => e.id),
+    [`haus.lock.${recentEpochMs}.json`],
+  )
 })
 
 test('runBackups restore for a prune-kind backup copies files back to their original relative paths', async () => {
@@ -177,10 +188,13 @@ test('listBackups excludes a top-level symlink and type-mismatched entries, even
   mkdirSync(path.join(backupsDir, 'haus.lock.9999999.json'), { recursive: true })
 
   const entries = await listBackups(temp)
-  assert.deepEqual(entries.map((e) => e.id), ['haus.lock.1000000.json'])
+  assert.deepEqual(
+    entries.map((e) => e.id),
+    ['haus.lock.1000000.json'],
+  )
 })
 
-test('restore warns based on each backed-up file\'s own mtime, not the backup directory\'s mtime', async () => {
+test("restore warns based on each backed-up file's own mtime, not the backup directory's mtime", async () => {
   const temp = makeTemp('haus-backups-stale-mtime-')
   const backupDir = path.join(temp, '.haus-workflow/backups/undo-2026-01-01T00-00-00-000Z')
   const backupFile = path.join(backupDir, '.claude/rules/haus.md')
@@ -199,7 +213,10 @@ test('restore warns based on each backed-up file\'s own mtime, not the backup di
   )
 
   const warning = messages.find((m) => m.includes('newer than backup') && m.includes('haus.md'))
-  assert.ok(warning, `expected a staleness warning naming haus.md; got: ${JSON.stringify(messages)}`)
+  assert.ok(
+    warning,
+    `expected a staleness warning naming haus.md; got: ${JSON.stringify(messages)}`,
+  )
   assert.ok(
     warning.includes(new Date(5000000000).toISOString()) &&
       warning.includes(new Date(1000000).toISOString()),

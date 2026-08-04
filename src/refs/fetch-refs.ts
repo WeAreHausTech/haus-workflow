@@ -11,9 +11,7 @@ import { readCacheMeta, writeCacheMeta } from './cache-meta.js'
 export type FetchRefResult = 'fetched' | 'unchanged' | 'failed'
 
 export type FetchSingleRefOutcome =
-  | { result: 'fetched'; file: string }
-  | { result: 'unchanged' }
-  | { result: 'failed' }
+  { result: 'fetched'; file: string } | { result: 'unchanged' } | { result: 'failed' }
 
 export type FetchRefsSummary = {
   fetched: number

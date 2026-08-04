@@ -109,7 +109,11 @@ test('apply skips catalog agent whose cached content contains a risky install pa
 
   execaSync('node', [cli(), 'scan', '--json'], { cwd: projectDir, env })
   execaSync('node', [cli(), 'recommend', '--json'], { cwd: projectDir, env })
-  const result = execaSync('node', [cli(), 'apply', '--write'], { cwd: projectDir, env, reject: false })
+  const result = execaSync('node', [cli(), 'apply', '--write'], {
+    cwd: projectDir,
+    env,
+    reject: false,
+  })
 
   // Apply should succeed overall (other items still apply)
   assert.equal(result.exitCode, 0, `apply exited with ${result.exitCode}: ${result.stderr}`)
@@ -163,7 +167,11 @@ test('apply skips catalog agent whose cached content contains a forbidden tag', 
 
   execaSync('node', [cli(), 'scan', '--json'], { cwd: projectDir, env })
   execaSync('node', [cli(), 'recommend', '--json'], { cwd: projectDir, env })
-  const result = execaSync('node', [cli(), 'apply', '--write'], { cwd: projectDir, env, reject: false })
+  const result = execaSync('node', [cli(), 'apply', '--write'], {
+    cwd: projectDir,
+    env,
+    reject: false,
+  })
 
   assert.equal(result.exitCode, 0, `apply exited with ${result.exitCode}: ${result.stderr}`)
 
@@ -207,7 +215,11 @@ test('apply copies clean catalog agent correctly (validation does not block vali
 
   execaSync('node', [cli(), 'scan', '--json'], { cwd: projectDir, env })
   execaSync('node', [cli(), 'recommend', '--json'], { cwd: projectDir, env })
-  const result = execaSync('node', [cli(), 'apply', '--write'], { cwd: projectDir, env, reject: false })
+  const result = execaSync('node', [cli(), 'apply', '--write'], {
+    cwd: projectDir,
+    env,
+    reject: false,
+  })
 
   assert.equal(result.exitCode, 0, `apply exited with ${result.exitCode}: ${result.stderr}`)
 
@@ -260,7 +272,11 @@ test('apply skips catalog skill (type: skill) whose SKILL.md contains a risky in
 
   execaSync('node', [cli(), 'scan', '--json'], { cwd: projectDir, env })
   execaSync('node', [cli(), 'recommend', '--json'], { cwd: projectDir, env })
-  const result = execaSync('node', [cli(), 'apply', '--write'], { cwd: projectDir, env, reject: false })
+  const result = execaSync('node', [cli(), 'apply', '--write'], {
+    cwd: projectDir,
+    env,
+    reject: false,
+  })
 
   // Apply should succeed overall (warn-and-continue, not fatal)
   assert.equal(result.exitCode, 0, `apply exited with ${result.exitCode}: ${result.stderr}`)

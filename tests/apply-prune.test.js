@@ -2,7 +2,14 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import os from 'node:os'
 import path from 'node:path'
-import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, existsSync, readdirSync } from 'node:fs'
+import {
+  mkdtempSync,
+  mkdirSync,
+  writeFileSync,
+  readFileSync,
+  existsSync,
+  readdirSync,
+} from 'node:fs'
 import { execaSync } from 'execa'
 
 // haus apply --prune: removes lock-tracked items that fell out of the current
@@ -193,7 +200,11 @@ test('--prune respects --quiet: no backup/pruned messages printed, but pruning s
   writeRecommendation(root, [a])
   const output = runWrite(root, manifest, undefined, { prune: true, quiet: true })
   assert.doesNotMatch(output, /Backed up|Pruned orphaned/, 'quiet must suppress prune messages too')
-  assert.equal(existsSync(path.join(root, b.dest)), false, 'pruning itself still happens under quiet')
+  assert.equal(
+    existsSync(path.join(root, b.dest)),
+    false,
+    'pruning itself still happens under quiet',
+  )
   assert.equal(backupDirs(root).length, 1, 'backup file still written under quiet, just not logged')
 })
 
@@ -301,10 +312,7 @@ test('a former id mid-rename migration is never treated as orphaned by --prune',
     'a mid-rename former id must not also be reported as orphaned',
   )
   assert.equal(existsSync(path.join(root, bOld.dest)), true, 'modified former-id install kept')
-  assert.equal(
-    readFileSync(path.join(root, bOld.dest, 'SKILL.md'), 'utf8'),
-    '# locally edited\n',
-  )
+  assert.equal(readFileSync(path.join(root, bOld.dest, 'SKILL.md'), 'utf8'), '# locally edited\n')
 })
 
 test('a deprecated, locally-modified item is warned about once, not double-processed by --prune', () => {
