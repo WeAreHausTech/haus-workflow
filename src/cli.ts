@@ -5,6 +5,7 @@ import path from 'node:path'
 import { Command } from 'commander'
 
 import { runApply } from './commands/apply.js'
+import { runBackups } from './commands/backups.js'
 import { runCatalogAudit } from './commands/catalog-audit.js'
 import { runClone } from './commands/clone.js'
 import { runDecisionsGuard } from './commands/decisions-guard.js'
@@ -104,6 +105,25 @@ program
   )
   .action(runApply)
 program.command('undo').option('-y, --yes', 'Skip confirmation').action(runUndo)
+const backups = program.command('backups')
+backups
+  .command('list')
+  .description('List backups under .haus-workflow/backups/')
+  .action(() => runBackups('list'))
+backups
+  .command('restore <id>')
+  .description('Restore a specific backup by id (see `haus backups list`)')
+  .option('-y, --yes', 'Skip confirmation')
+  .action((id, opts) => runBackups('restore', { id, yes: opts.yes }))
+backups
+  .command('prune')
+  .description('Delete old backups by age and/or count (requires --older-than or --keep)')
+  .option('--older-than <days>', 'Remove backups older than N days')
+  .option('--keep <n>', 'Keep only the N most recent backups')
+  .option('-y, --yes', 'Skip confirmation')
+  .action((opts) =>
+    runBackups('prune', { olderThan: opts.olderThan, keep: opts.keep, yes: opts.yes }),
+  )
 program.command('explain-recommendation').option('--json').action(runExplainRecommendation)
 program.command('init').option('--json').action(runInit)
 program

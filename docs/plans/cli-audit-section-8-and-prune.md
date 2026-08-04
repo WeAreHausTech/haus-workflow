@@ -69,11 +69,11 @@
 
 **Acceptance Criteria:**
 
-- [ ] `haus backups list` enumerates `.haus-workflow/backups/`, distinguishing the two existing naming schemes (`haus.lock.<timestamp>.json` lock-snapshots vs. `undo-<iso-timestamp>/<relative-path>` per-file snapshots), printing an id, its kind, and its age.
-- [ ] `haus backups restore <id>` for a lock-snapshot overwrites the current `haus.lock.json` with that snapshot's content, after an interactive confirm (or `--yes`), warning if the current lock is newer than the one being restored.
-- [ ] `haus backups restore <id>` for an undo-snapshot copies the backed-up files back to their original relative paths, after confirm (or `--yes`).
-- [ ] `haus backups prune [--older-than <days>] [--keep <n>]` deletes backup entries past the age threshold or beyond the keep-count (oldest first), printing what was removed and what was kept.
-- [ ] Restoring never silently overwrites something newer without a warning naming both timestamps.
+- [x] `haus backups list` enumerates `.haus-workflow/backups/`, distinguishing the two existing naming schemes (`haus.lock.<timestamp>.json` lock-snapshots vs. `undo-<iso-timestamp>/<relative-path>` per-file snapshots), printing an id, its kind, and its age. (Also distinguishes `prune-<iso-timestamp>/` as its own kind, a third scheme this task found already in use.)
+- [x] `haus backups restore <id>` for a lock-snapshot overwrites the current `haus.lock.json` with that snapshot's content, after an interactive confirm (or `--yes`), warning if the current lock is newer than the one being restored.
+- [x] `haus backups restore <id>` for an undo-snapshot copies the backed-up files back to their original relative paths, after confirm (or `--yes`). (Same restore path also handles `prune-` snapshots.)
+- [x] `haus backups prune [--older-than <days>] [--keep <n>]` deletes backup entries past the age threshold or beyond the keep-count (oldest first), printing what was removed and what was kept. (Refuses to run with neither flag given, rather than defaulting to an unbounded wipe.)
+- [x] Restoring never silently overwrites something newer without a warning naming both timestamps.
 
 **Verify:** `node scripts/run-tests.mjs tests/backups.test.js` → all pass.
 
