@@ -34,8 +34,11 @@ describe('prettierIgnoreProtects', () => {
   })
 
   it('accepts common equivalent patterns', () => {
-    for (const line of ['.claude', '/.claude/', '/.claude', '.claude/**', '/.claude/**']) {
-      assert.equal(prettierIgnoreProtects([line], '.claude/'), true, line)
+    for (const dir of ['.claude/', '.haus-workflow/']) {
+      const bare = dir.replace(/\/$/, '')
+      for (const line of [bare, `/${bare}/`, `/${bare}`, `${bare}/**`, `/${bare}/**`]) {
+        assert.equal(prettierIgnoreProtects([line], dir), true, `${dir} ← ${line}`)
+      }
     }
   })
 
