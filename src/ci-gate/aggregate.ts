@@ -72,8 +72,13 @@ async function captureCheck(fn: () => Promise<void>): Promise<CheckOutcome> {
 /**
  * `decisions check`'s underlying implementation already returns a structured result
  * (`../decisions/check.js`'s `runDecisionsCheck`), unlike `doctor`/`update` — so this
- * check needs neither console capture nor `process.exitCode` isolation, and can't
- * silently swallow a thrown error the way the console-capture path could.
+ * check needs neither console capture nor `process.exitCode` isolation. It still needs
+ * the same thrown-error handling `captureCheck` has, though: `runDecisionsCheck` does
+ * real filesystem reads and git diff collection (e.g. a malformed
+ * `.haus-workflow/adr-gate.json`, or a git failure) and can throw, which — left
+ * uncaught — would abort `runCiGate` before the other checks run and, in `--json`
+ * mode, break the documented always-emit-parseable-JSON contract exactly the way an
+ * uncaught throw from `doctor`/`update` would.
  *
  * Reads `PR_BODY` the same way the `decisions check` CLI command itself defaults to
  * (`src/commands/decisions.ts`'s `options.prBody ?? process.env.PR_BODY`) — an
@@ -81,8 +86,12 @@ async function captureCheck(fn: () => Promise<void>): Promise<CheckOutcome> {
  * `haus decisions check` standalone in the same CI environment would do.
  */
 async function checkDecisions(root: string): Promise<CheckOutcome> {
-  const result = await runDecisionsCheck(root, { prBody: process.env['PR_BODY'] })
-  return { ok: result.satisfied, output: result.reasons }
+  try {
+    const result = await runDecisionsCheck(root, { prBody: process.env['PR_BODY'] })
+    return { ok: result.satisfied, output: result.reasons }
+  } catch (err) {
+    return { ok: false, output: [err instanceof Error ? err.message : String(err)] }
+  }
 }
 
 export async function runCiGate(options: { json?: boolean } = {}): Promise<void> {

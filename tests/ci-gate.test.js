@@ -199,6 +199,32 @@ test('ci-gate captures a thrown error into a structured failure instead of crash
   )
 })
 
+// Regression: `checkDecisions` calls `runDecisionsCheck` directly (not through the
+// console-capture path `doctor`/`update` use), so it needs its own try/catch around a
+// thrown error — this failed the same way as the lockfile case above until fixed.
+test('ci-gate captures a thrown error from decisions check into a structured failure, without crashing or discarding other results', () => {
+  const temp = mkdtempSync(path.join(os.tmpdir(), 'haus-ci-gate-decisions-throw-'))
+  const env = setUpHealthyProject(temp)
+
+  // runDecisionsCheck's first step reads .haus-workflow/adr-gate.json via readJson,
+  // which rethrows any fs error other than ENOENT — same EISDIR mechanism as above,
+  // scoped to decisions specifically since doctor/update never read this file.
+  mkdirSync(path.join(temp, '.haus-workflow/adr-gate.json'))
+
+  const r = execaSync('node', [cli, 'ci-gate', '--json'], { cwd: temp, env, reject: false })
+  assert.equal(r.exitCode, 1)
+  assert.equal(r.stdout.trim().startsWith('{'), true, `expected valid JSON on stdout; got: ${r.stdout.slice(0, 200)}\nstderr: ${r.stderr.slice(0, 200)}`)
+  const parsed = JSON.parse(r.stdout)
+  assert.equal(parsed.ok, false)
+  assert.equal(parsed.decisions.ok, false, `expected decisions.ok === false; got ${JSON.stringify(parsed.decisions)}`)
+  assert.equal(parsed.doctor.ok, true, `expected doctor.ok === true; got ${JSON.stringify(parsed.doctor)}`)
+  assert.equal(parsed.update.ok, true, `expected update.ok === true; got ${JSON.stringify(parsed.update)}`)
+  assert.ok(
+    parsed.decisions.output.some((line) => /EISDIR|illegal operation|directory/i.test(line)),
+    `expected decisions' captured output to include the thrown error's message; got ${JSON.stringify(parsed.decisions.output)}`,
+  )
+})
+
 // Regression: aggregating the three checks into one command must not change any of
 // their own independent behavior — each remains runnable standalone with its
 // pre-existing exit-code contract, before and after a ci-gate run in the same project.
