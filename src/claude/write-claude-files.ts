@@ -102,8 +102,8 @@ export async function writeClaudeFiles(
     refill: opts.refillConfig,
   })
   // Keep the project formatter off haus-owned output: prettier reformatting
-  // .haus-workflow/WORKFLOW.md breaks the hash embedded in its managed header and
-  // makes doctor report a phantom user edit. See write-prettierignore.ts.
+  // .haus-workflow/WORKFLOW.md or lock-tracked .claude/ items breaks hashes and
+  // makes doctor/update report a phantom user edit. See write-prettierignore.ts.
   const prettierIgnorePath = await writePrettierIgnore(root, dryRun)
   const p6Files = [
     rootClaudeMdPath,

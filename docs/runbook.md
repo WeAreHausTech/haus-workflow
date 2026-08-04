@@ -140,7 +140,7 @@ reformats the managed file. `WORKFLOW.md` carries a content hash in its HAUS-MAN
 header; when prettier rewrites the body (via the lefthook `format` step, editor
 format-on-save, or a manual run) the body no longer matches the embedded hash, so
 detection reports a phantom edit. **Fix:** `haus apply --write` now writes a
-`.prettierignore` block covering `.haus-workflow/` (see
+`.prettierignore` block covering `.haus-workflow/` and `.claude/` (see
 `src/claude/write-prettierignore.ts`) so the formatter leaves managed files alone.
 On an already-mutated file, restore it once with `haus apply --write --force`; the
 ignore prevents recurrence.
