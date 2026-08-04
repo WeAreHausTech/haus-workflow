@@ -6,6 +6,30 @@ Cloning a single repo is always `haus clone <url> [dir]`. This procedure picks _
 
 **Always ask before cloning — never assume.** The user may already have the repos on disk. Do not start cloning until they have confirmed. A missing `repos.local.json` does **not** mean they want a fresh clone; it just means nothing is recorded yet — you must still ask.
 
+## Step 0 — determine the mode, if not already known
+
+`project:clone <name>` typed directly already tells you the mode (name given → Mode A). But
+whenever this procedure is reached with **no name** — whether from the no-arg menu
+(`SKILL.md` Step 1, where the option is just a label) or a bare `project:clone`/`clone` with
+no argument — do **not** silently fall through to Mode B (workspace); ask first, via
+`AskUserQuestion`:
+
+```
+"Clone a single repo, or a whole workspace?"
+Options:
+  1. A single repo — I'll tell you its name
+  2. A whole workspace — clone everything in repos.manifest.json
+```
+
+- **Single repo** — ask for the name/identifier as a follow-up (plain text is fine; it feeds
+  straight into Mode A's GitHub search below, which already handles 0/1/2+ matches), then
+  continue with Mode A.
+- **Whole workspace** — continue with Mode B, unchanged.
+
+Skip this step entirely when a name is already known (typed as an argument, or already
+established earlier in the conversation) — go straight to Mode A in that case, exactly as
+before this step existed.
+
 ## Mode A — a project name was given (`project:clone <name>`)
 
 Find one repo by name on GitHub and clone it. Does **not** require a workspace or `repos.manifest.json`.
