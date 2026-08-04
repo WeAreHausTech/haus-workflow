@@ -197,6 +197,22 @@ Remove haus-managed project files: lock-tracked catalog paths, core rules/comman
 and haus portions of `settings.json` / root `CLAUDE.md`. User-owned `.claude/` content
 and scan artifacts under `.haus-workflow/` are preserved. Use `-y` / `--yes` to skip confirmation.
 
+### `haus backups`
+
+List, restore, and prune snapshots under `.haus-workflow/backups/` — three kinds
+accumulate there: `haus.lock.<epoch-ms>.json` (lockfile snapshots from `haus update`),
+and `undo-<timestamp>/` / `prune-<timestamp>/` (per-file snapshots from `haus undo`
+and `haus apply --prune`).
+
+| Subcommand                                               | Purpose                                                                                   |
+| -------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `list`                                                   | Enumerate backups, newest first, with kind and age                                        |
+| `restore <id> [-y \| --yes]`                             | Restore a backup by id (lockfile overwrite or per-file copy-back)                         |
+| `prune [--older-than <days>] [--keep <n>] [-y \| --yes]` | Delete backups past an age threshold or beyond a keep-count (requires at least one bound) |
+
+`restore` warns (but does not refuse) when the current file(s) are newer than the
+backup being restored, naming both timestamps.
+
 ### `haus catalog-audit`
 
 Audit local catalog manifest for issues.
