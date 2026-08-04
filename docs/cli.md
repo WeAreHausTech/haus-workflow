@@ -34,7 +34,7 @@ Recommend catalog items for the detected stack via binary eligibility (policy ga
 
 Output: `.haus-workflow/recommendation.json`
 
-### `haus apply [--dry-run] [--write] [--select] [--ids <ids...>] [--allow-empty-cache] [--refill-config] [--force]`
+### `haus apply [--dry-run] [--write] [--select] [--ids <ids...>] [--allow-empty-cache] [--refill-config] [--force] [--prune]`
 
 Materialize catalog assets into `.claude/` (skills, agents, commands, templates).
 
@@ -45,13 +45,15 @@ Materialize catalog assets into `.claude/` (skills, agents, commands, templates)
 - `--allow-empty-cache` — apply core files only when catalog cache is empty (skip catalog items without error)
 - `--refill-config` — fill still-blank `<!-- fill in -->` fields in `workflow-config.md` from auto-detected values, without touching fields you've edited
 - `--force` — overwrite managed workflow template even when local tamper detection sees edits
+- `--prune` — remove lock-tracked items that fell out of the current recommendation (project no longer matches their eligibility signals) even though they're still in the catalog manifest — the case `haus doctor` only advises on by default (see below). Hash-gated the same way as stale cleanup; removed files are backed up to `.haus-workflow/backups/prune-<timestamp>/` first. `--dry-run --prune` reports what would be pruned without touching disk.
 
 **Stale cleanup:** before rewriting the lock, apply compares the previous
 `haus.lock.json` against the current catalog manifest. Items removed upstream or marked
 `reviewStatus: deprecated` are deleted from `.claude/` when their content still matches
 the recorded lock hash; user-modified copies are left in place with a warning. Items
-still in the manifest as approved but deselected this run (e.g. via `--select`) are not
-pruned. Empty parent dirs are pruned.
+still in the manifest as approved but deselected this run (e.g. via `--select`), or that
+simply fell out of the current recommendation, are left in place unless `--prune` is
+passed. Empty parent dirs are pruned.
 
 **Upstream rename migration:** when a current manifest item lists a locked id in
 `formerIds`, apply migrates the lock to the current id and refreshes the installed

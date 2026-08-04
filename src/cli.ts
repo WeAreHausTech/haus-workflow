@@ -98,6 +98,10 @@ program
     'Fill still-blank fields in an existing workflow-config.md without touching edited ones',
   )
   .option('--force', 'Overwrite user-modified managed workflow files')
+  .option(
+    '--prune',
+    'Remove lock-tracked catalog items no longer in the current recommendation (hash-gated, backed up first)',
+  )
   .action(runApply)
 program.command('undo').option('-y, --yes', 'Skip confirmation').action(runUndo)
 program.command('explain-recommendation').option('--json').action(runExplainRecommendation)

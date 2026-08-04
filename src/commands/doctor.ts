@@ -8,6 +8,7 @@ import { checkManagedTamper } from '../claude/managed-tamper.js'
 import { verifyProjectSettingsHooksContract } from '../claude/verify-hooks-contract.js'
 import { BLOCK_BEGIN, BLOCK_END } from '../claude/write-root-claude-md.js'
 import { auditDecisionsLayout } from '../decisions/doctor.js'
+import { findOrphanedLockEntries } from '../recommender/orphaned-items.js'
 import { readContextOrScan } from '../scanner/read-context.js'
 import { fetchNpmVersionStatus, NPM_PACKAGE_NAME } from '../update/npm-version.js'
 import { readJson, readText } from '../utils/fs.js'
@@ -256,11 +257,11 @@ export async function runDoctor(options?: { hooks?: boolean }): Promise<void> {
   if (recommendation) {
     const lock = await readJson<Array<{ id?: string }>>(hausPath(root, 'haus.lock.json'))
     const recommendedIds = new Set(
-      (recommendation.recommended as Array<{ id?: string }>).map((r) => r.id),
+      (recommendation.recommended as Array<{ id?: string }>)
+        .map((r) => r.id)
+        .filter((id): id is string => typeof id === 'string'),
     )
-    const orphaned = (lock ?? [])
-      .map((entry) => entry.id)
-      .filter((id): id is string => typeof id === 'string' && !recommendedIds.has(id))
+    const orphaned = findOrphanedLockEntries(lock ?? [], recommendedIds).map((entry) => entry.id)
     if (orphaned.length > 0) {
       suggest(
         `- CATALOG ITEMS: ${orphaned.length} installed item(s) no longer in the current recommendation (${orphaned.join(', ')})`,
