@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, utimesSync } from 'node:fs'
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, utimesSync, symlinkSync } from 'node:fs'
 import { execaSync } from 'execa'
 
 process.env.HAUS_FIXTURE_CATALOG = path.resolve('tests/fixtures/catalog/manifest.json')
@@ -323,6 +323,249 @@ test('apply --dry-run shows diffs and does not write files', () => {
   // Root CLAUDE.md and .claude/CLAUDE.md should not be written in dry-run
   assert.equal(fs.existsSync(path.join(temp, 'CLAUDE.md')), false)
   assert.equal(fs.existsSync(path.join(temp, '.claude', 'CLAUDE.md')), false)
+})
+
+function setUpReactProjectAndScanRecommend(temp) {
+  writeFileSync(
+    path.join(temp, 'package.json'),
+    JSON.stringify(
+      { name: 'dry-run-diff-test', packageManager: 'yarn@4.5.3', dependencies: { react: '19.0.0' } },
+      null,
+      2,
+    ),
+  )
+  writeFileSync(path.join(temp, 'yarn.lock'), '# lock')
+  execaSync('node', [path.resolve('dist/cli.js'), 'scan', '--json'], { cwd: temp })
+  execaSync('node', [path.resolve('dist/cli.js'), 'recommend', '--json'], { cwd: temp })
+}
+
+// This fixture project always recommends haus.code-reviewer-agent (single-file .claude/agents/
+// code-reviewer.md) and haus.react19-patterns (a skill directory with one SKILL.md), giving one
+// non-skill and one skill item to exercise both dry-run diff code paths against.
+const AGENT_REL = path.join('.claude', 'agents', 'code-reviewer.md')
+const SKILL_REL = path.join('.claude', 'skills', 'react19-patterns', 'SKILL.md')
+
+test('apply --dry-run reports "would create" plus a diff-from-empty for a brand-new item', () => {
+  const temp = mkdtempSync(path.join(os.tmpdir(), 'haus-dry-run-new-'))
+  setUpReactProjectAndScanRecommend(temp)
+
+  const result = execaSync('node', [path.resolve('dist/cli.js'), 'apply', '--dry-run'], {
+    cwd: temp,
+    reject: false,
+  })
+  assert.equal(result.exitCode, 0)
+  assert.match(result.stdout, /agents\/code-reviewer\.md: would create \(haus\.code-reviewer-agent\)/)
+  // A diff-from-empty is every line of the new content prefixed with "+" (matching
+  // writeManagedText's !existed branch, which this reuses for consistency).
+  assert.match(result.stdout, /\n\+.*\S/)
+  assert.equal(fs.existsSync(path.join(temp, AGENT_REL)), false, 'dry-run must not write')
+})
+
+test('apply --dry-run reports "unchanged" for an already-installed, untouched item (single file and skill)', () => {
+  const temp = mkdtempSync(path.join(os.tmpdir(), 'haus-dry-run-unchanged-'))
+  setUpReactProjectAndScanRecommend(temp)
+  execaSync('node', [path.resolve('dist/cli.js'), 'apply', '--write'], { cwd: temp })
+
+  const result = execaSync('node', [path.resolve('dist/cli.js'), 'apply', '--dry-run'], {
+    cwd: temp,
+    reject: false,
+  })
+  assert.equal(result.exitCode, 0)
+  assert.match(result.stdout, /agents\/code-reviewer\.md: unchanged \(haus\.code-reviewer-agent\)/)
+  assert.match(
+    result.stdout,
+    /skills\/react19-patterns\/SKILL\.md: unchanged \(haus\.react19-patterns\)/,
+  )
+  assert.equal(
+    result.stdout.includes('would overwrite'),
+    false,
+    'an unchanged item must not be reported as "would overwrite"',
+  )
+})
+
+test('apply --dry-run shows a real unified diff for a changed single-file item', () => {
+  const temp = mkdtempSync(path.join(os.tmpdir(), 'haus-dry-run-changed-agent-'))
+  setUpReactProjectAndScanRecommend(temp)
+  execaSync('node', [path.resolve('dist/cli.js'), 'apply', '--write'], { cwd: temp })
+
+  const agentPath = path.join(temp, AGENT_REL)
+  const original = readFileSync(agentPath, 'utf8')
+  writeFileSync(agentPath, `${original}\n\nLOCAL EDIT MARKER\n`)
+
+  const result = execaSync('node', [path.resolve('dist/cli.js'), 'apply', '--dry-run'], {
+    cwd: temp,
+    reject: false,
+  })
+  assert.equal(result.exitCode, 0)
+  assert.match(result.stdout, /agents\/code-reviewer\.md: would overwrite \(haus\.code-reviewer-agent\)/)
+  // A real diff names both sides and shows the actual local content being removed —
+  // not just a bare "would overwrite" label with no comparison.
+  assert.match(result.stdout, /^--- .*code-reviewer\.md/m)
+  assert.match(result.stdout, /^\+\+\+ .*code-reviewer\.md/m)
+  assert.match(result.stdout, /^-.*LOCAL EDIT MARKER/m)
+  assert.equal(readFileSync(agentPath, 'utf8'), `${original}\n\nLOCAL EDIT MARKER\n`, 'dry-run must not overwrite')
+})
+
+test('apply --dry-run gives a skill item a per-file diff loop, not one message for the whole directory', () => {
+  const temp = mkdtempSync(path.join(os.tmpdir(), 'haus-dry-run-changed-skill-'))
+  setUpReactProjectAndScanRecommend(temp)
+  execaSync('node', [path.resolve('dist/cli.js'), 'apply', '--write'], { cwd: temp })
+
+  const skillFilePath = path.join(temp, SKILL_REL)
+  const original = readFileSync(skillFilePath, 'utf8')
+  writeFileSync(skillFilePath, `${original}\n\nLOCAL SKILL EDIT MARKER\n`)
+
+  const result = execaSync('node', [path.resolve('dist/cli.js'), 'apply', '--dry-run'], {
+    cwd: temp,
+    reject: false,
+  })
+  assert.equal(result.exitCode, 0)
+  // The diff is reported against the specific file inside the skill, not the bare
+  // skill directory path.
+  assert.match(
+    result.stdout,
+    /skills\/react19-patterns\/SKILL\.md: would overwrite \(haus\.react19-patterns\)/,
+  )
+  assert.equal(
+    /skills\/react19-patterns: would overwrite/.test(result.stdout),
+    false,
+    'a skill item must not be reported as one bare directory-level message',
+  )
+  // The diff shows the local marker being removed (destination → source direction),
+  // same as the single-file case above.
+  assert.match(result.stdout, /^-.*LOCAL SKILL EDIT MARKER/m)
+})
+
+test('apply --dry-run reports "would remove" for a destination-only file the new source no longer has', () => {
+  const temp = mkdtempSync(path.join(os.tmpdir(), 'haus-dry-run-would-remove-'))
+  setUpReactProjectAndScanRecommend(temp)
+  execaSync('node', [path.resolve('dist/cli.js'), 'apply', '--write'], { cwd: temp })
+
+  // Simulate a file that used to be part of this skill but the catalog source no
+  // longer has. installCatalogSkill's real write removes the whole destination
+  // directory then copies the new source in (not an incremental merge), so this file
+  // would actually be deleted on a real (non-dry-run) apply.
+  const skillDir = path.join(temp, '.claude', 'skills', 'react19-patterns')
+  writeFileSync(path.join(skillDir, 'stale-reference.md'), 'leftover content')
+
+  const result = execaSync('node', [path.resolve('dist/cli.js'), 'apply', '--dry-run'], {
+    cwd: temp,
+    reject: false,
+  })
+  assert.equal(result.exitCode, 0)
+  assert.match(
+    result.stdout,
+    /skills\/react19-patterns\/stale-reference\.md: would remove \(haus\.react19-patterns\)/,
+  )
+  assert.equal(
+    fs.existsSync(path.join(skillDir, 'stale-reference.md')),
+    true,
+    'dry-run must not actually remove anything',
+  )
+})
+
+test('apply --dry-run reports "would overwrite" without a garbled diff when one side is binary', () => {
+  const temp = mkdtempSync(path.join(os.tmpdir(), 'haus-dry-run-binary-'))
+  setUpReactProjectAndScanRecommend(temp)
+  execaSync('node', [path.resolve('dist/cli.js'), 'apply', '--write'], { cwd: temp })
+
+  const agentPath = path.join(temp, AGENT_REL)
+  // A byte sequence that fails a lossless UTF-8 round-trip — decodeIfText must treat
+  // this as binary, not coerce it into garbled "text" for the diff.
+  writeFileSync(agentPath, Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0xff, 0xd8]))
+
+  const result = execaSync('node', [path.resolve('dist/cli.js'), 'apply', '--dry-run'], {
+    cwd: temp,
+    reject: false,
+  })
+  assert.equal(result.exitCode, 0)
+  assert.match(result.stdout, /agents\/code-reviewer\.md: would overwrite \(haus\.code-reviewer-agent\)/)
+  // No unified-diff header should appear — createUnifiedDiff must not run when either
+  // side fails to decode as text.
+  assert.equal(result.stdout.includes('--- ./.claude/agents/code-reviewer.md'), false)
+})
+
+test('apply --dry-run never reads through a symlink inside a catalog skill directory', () => {
+  const root = mkdtempSync(path.join(os.tmpdir(), 'haus-dry-run-symlink-'))
+  const catalogDir = path.join(root, 'catalog')
+  mkdirSync(catalogDir, { recursive: true })
+  writeFileSync(path.join(root, 'package.json'), JSON.stringify({ name: 'symlink-fixture' }))
+
+  const skillDir = path.join(catalogDir, 'skills', 'symlink-fixture-skill')
+  mkdirSync(skillDir, { recursive: true })
+  writeFileSync(path.join(skillDir, 'SKILL.md'), '---\ndescription: fixture\n---\n\nbody\n')
+
+  const secretDir = mkdtempSync(path.join(os.tmpdir(), 'haus-dry-run-secret-'))
+  const secretFile = path.join(secretDir, 'secret.md')
+  writeFileSync(secretFile, 'TOP SECRET HOST CONTENT')
+  symlinkSync(secretFile, path.join(skillDir, 'leaked.md'))
+
+  const manifestPath = path.join(catalogDir, 'manifest.json')
+  writeFileSync(
+    manifestPath,
+    JSON.stringify(
+      {
+        version: '1.0.0',
+        items: [
+          {
+            id: 'haus.symlink-fixture-skill',
+            type: 'skill',
+            source: 'haus',
+            path: 'skills/symlink-fixture-skill',
+            title: 'symlink fixture skill',
+            tags: [],
+            repoRoles: [],
+            tokenEstimate: 10,
+          },
+        ],
+      },
+      null,
+      2,
+    ),
+  )
+  mkdirSync(path.join(root, '.haus-workflow'), { recursive: true })
+  writeFileSync(
+    path.join(root, '.haus-workflow', 'recommendation.json'),
+    JSON.stringify(
+      {
+        recommended: [
+          {
+            id: 'haus.symlink-fixture-skill',
+            type: 'skill',
+            reason: 'fixture',
+            reasons: [],
+            selectionMode: 'manual',
+            install: true,
+          },
+        ],
+        skipped: [],
+        warnings: [],
+        estimatedContextTokens: 0,
+        selectedRules: 1,
+        skippedRules: 0,
+        estimatedTokenReductionPct: 0,
+      },
+      null,
+      2,
+    ),
+  )
+
+  const result = execaSync(
+    'node',
+    [path.resolve('dist/cli.js'), 'apply', '--dry-run', '--allow-empty-cache'],
+    {
+      cwd: root,
+      reject: false,
+      env: { ...process.env, HAUS_FIXTURE_CATALOG: manifestPath },
+    },
+  )
+  assert.equal(result.exitCode, 0)
+  assert.equal(
+    (result.stdout + result.stderr).includes('TOP SECRET HOST CONTENT'),
+    false,
+    'the symlink target content must never be read or printed',
+  )
+  assert.match(result.stdout + result.stderr, /Skipping symlink in dry-run diff preview/)
 })
 
 const LEGACY_REVIEW_STUB = 'Run `haus context --task "code review"` then review diff.'

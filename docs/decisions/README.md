@@ -29,3 +29,4 @@ this index covers CLI/repo decisions. ADR-0001 here links to those where the JSO
 | [0018](0018-clone-conflict-and-menu-pagination.md)            | Clone conflict detection, menu pagination, clone mode prompt          | Accepted |
 | [0019](0019-haus-backups-restore-safety-model.md)             | `haus backups` restore safety — no symlink-follow, no unbounded prune | Accepted |
 | [0020](0020-ci-gate-aggregation-model.md)                     | `haus ci-gate` — aggregate three commands without changing contracts  | Accepted |
+| [0021](0021-dry-run-diff-symlink-refusal.md)                  | Dry-run diff for catalog items — never follow a symlink into preview  | Accepted |

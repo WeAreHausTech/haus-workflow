@@ -14,6 +14,7 @@ import { getResolvedCatalogRef, isCatalogRefResolved } from '../catalog/remote-c
 import { findOrphanedLockEntries } from '../recommender/orphaned-items.js'
 import type { Recommendation } from '../types.js'
 import { hashInstalledPaths } from '../update/hash-installed.js'
+import { createUnifiedDiff } from '../utils/diff.js'
 import { pruneEmptyDir, readJson } from '../utils/fs.js'
 import { log, warn } from '../utils/logger.js'
 import { claudePath, displayPath, hausPath, packageRoot } from '../utils/paths.js'
@@ -43,6 +44,119 @@ export function targetDirForType(type: string): string | null {
   if (type === 'skill') return 'skills'
   // 'config' items are distributed via `haus scaffold`, not `haus apply`
   return null
+}
+
+/**
+ * Decodes `buf` as UTF-8 text only if the decode round-trips losslessly (matching the
+ * same binary-detection technique `hash-installed.ts`'s `digestFileContent` uses) —
+ * otherwise this is binary content, and returns null rather than a diff full of
+ * replacement-character noise.
+ */
+function decodeIfText(buf: Buffer): string | null {
+  const asText = buf.toString('utf8')
+  return Buffer.from(asText, 'utf8').equals(buf) ? asText : null
+}
+
+/**
+ * All file paths (not directories) under `dir`, relative to `dir`. Empty if `dir`
+ * doesn't exist. Walks with `lstat` (not `stat`) and refuses symlinks — files and
+ * directories alike — rather than following them, the same refusal
+ * `src/install/scaffold.ts` already applies to catalog content ("Refuse symlinked
+ * catalog content: a malicious link could point outside the catalog root"). This
+ * function's only caller reads whatever it returns and prints the content directly in
+ * the dry-run diff, so following a symlink here would turn a read-only preview into a
+ * way to read (and display) an arbitrary host file's content.
+ */
+async function listFilesRecursive(dir: string): Promise<string[]> {
+  if (!(await fs.pathExists(dir))) return []
+  const files: string[] = []
+  const walk = async (current: string, relPrefix: string): Promise<void> => {
+    const names = await fs.readdir(current)
+    for (const name of names) {
+      const abs = path.join(current, name)
+      const rel = relPrefix ? `${relPrefix}/${name}` : name
+      const stat = await fs.lstat(abs)
+      if (stat.isSymbolicLink()) {
+        warn(`Skipping symlink in dry-run diff preview: ${rel}`)
+        continue
+      }
+      if (stat.isDirectory()) {
+        await walk(abs, rel)
+      } else if (stat.isFile()) {
+        files.push(rel)
+      }
+    }
+  }
+  await walk(dir, '')
+  return files.sort()
+}
+
+/**
+ * Logs a real unified diff (or "unchanged") for one catalog-item file in `--dry-run`,
+ * matching the standard already set for WORKFLOW.md/settings.json by `writeManagedText`
+ * — reusing the exact same `createUnifiedDiff` helper. Buffer equality (not decoded-text
+ * equality) is the source of truth for changed-vs-unchanged, so this is accurate for
+ * binary content too; the diff itself is only shown when both sides decode as text.
+ */
+async function logFileDryRunDiff(
+  root: string,
+  srcFile: string,
+  destFile: string,
+  itemId: string,
+  say: (text: string) => void,
+): Promise<void> {
+  const printable = displayPath(root, destFile)
+  const nextBuf = await fs.readFile(srcFile)
+  if (!(await fs.pathExists(destFile))) {
+    say(`${printable}: would create (${itemId})`)
+    const nextText = decodeIfText(nextBuf)
+    if (nextText !== null) say(createUnifiedDiff(printable, '', nextText))
+    return
+  }
+  const prevBuf = await fs.readFile(destFile)
+  if (prevBuf.equals(nextBuf)) {
+    say(`${printable}: unchanged (${itemId})`)
+    return
+  }
+  say(`${printable}: would overwrite (${itemId})`)
+  const nextText = decodeIfText(nextBuf)
+  const prevText = decodeIfText(prevBuf)
+  if (nextText !== null && prevText !== null) {
+    say(createUnifiedDiff(printable, prevText, nextText))
+  }
+}
+
+/**
+ * Per-file dry-run diff for a skill (directory) item — one diff per changed file, not
+ * one diff for the whole directory tree. `installCatalogSkill`'s real write removes the
+ * destination directory entirely before copying the new source in (not an incremental
+ * merge), so a destination file with no counterpart in the new source would actually be
+ * deleted; this reports that as "would remove" rather than silently omitting it.
+ */
+async function logSkillDryRunDiff(
+  root: string,
+  sourcePath: string,
+  destination: string,
+  itemId: string,
+  say: (text: string) => void,
+): Promise<void> {
+  const sourceFiles = await listFilesRecursive(sourcePath)
+  const destFiles = await listFilesRecursive(destination)
+  for (const rel of sourceFiles) {
+    await logFileDryRunDiff(
+      root,
+      path.join(sourcePath, rel),
+      path.join(destination, rel),
+      itemId,
+      say,
+    )
+  }
+  const sourceFileSet = new Set(sourceFiles)
+  for (const rel of destFiles) {
+    if (!sourceFileSet.has(rel)) {
+      say(`${displayPath(root, path.join(destination, rel))}: would remove (${itemId})`)
+    }
+  }
 }
 
 /**
@@ -329,10 +443,11 @@ export async function writeClaudeFiles(
     const destination = claudePath(root, target, path.basename(sourcePath))
     if (await fs.pathExists(sourcePath)) {
       if (dryRun) {
-        const exists = await fs.pathExists(destination)
-        say(
-          `${displayPath(root, destination)}: ${exists ? 'would overwrite' : 'would create'} (${item.id})`,
-        )
+        if (item.type === 'skill') {
+          await logSkillDryRunDiff(root, sourcePath, destination, item.id, say)
+        } else {
+          await logFileDryRunDiff(root, sourcePath, destination, item.id, say)
+        }
       } else if (item.type === 'skill') {
         const skillFiles = (await fs.readdir(sourcePath, { recursive: true })).filter(
           (f): f is string => typeof f === 'string' && f.endsWith('.md'),

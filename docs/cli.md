@@ -38,7 +38,7 @@ Output: `.haus-workflow/recommendation.json`
 
 Materialize catalog assets into `.claude/` (skills, agents, commands, templates).
 
-- `--dry-run` — preview what would be written without writing
+- `--dry-run` — preview what would be written without writing. Catalog items get a real unified diff (same helpers WORKFLOW.md/settings.json already use): a single-file item (agent/template/command) reports `create`/`overwrite` with the diff, or `unchanged`; a skill (directory) item gets one diff per changed file, plus `would remove` for any destination file the new source no longer has. Binary content compares by raw bytes (no diff text shown). Never follows a symlink inside a catalog item's content — refused and warned about instead.
 - `--write` — write `.claude/` files, `.haus-workflow/selected-context.json`, and `.haus-workflow/haus.lock.json`
 - `--select` — interactively select catalog items before applying (deselected items that remain in the catalog are **not** removed from disk)
 - `--ids <ids...>` — install exactly these recommended item ids non-interactively (skill backend; no TTY needed). Ids absent from `recommendation.json` warn and are ignored. Mutually exclusive with `--select`.

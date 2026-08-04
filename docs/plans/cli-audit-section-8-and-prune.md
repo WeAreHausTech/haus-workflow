@@ -47,11 +47,13 @@
 
 **Acceptance Criteria:**
 
-- [ ] A catalog item whose destination file exists and differs from the source content logs a real unified diff in `--dry-run`, using the same `createUnifiedDiff`/`summarizeDiff` helpers `writeManagedText` already uses.
-- [ ] A brand-new item (destination doesn't exist) still clearly reports "would create" — decide during implementation whether it also shows a diff-from-empty (matching `writeManagedText`'s `!prev` branch) for consistency, and pin that decision down in the test.
-- [ ] An unchanged existing item reports something like `"<path>: unchanged"` instead of unconditionally saying "would overwrite" regardless of actual content difference.
-- [ ] Skill items (directories, multiple files) get a per-file diff loop — one diff per changed file inside the skill, not one diff for the whole directory tree.
-- [ ] The non-dry-run write path is completely unchanged — this task only touches the dry-run branch.
+- [x] A catalog item whose destination file exists and differs from the source content logs a real unified diff in `--dry-run`, using the same `createUnifiedDiff`/`summarizeDiff` helpers `writeManagedText` already uses.
+- [x] A brand-new item (destination doesn't exist) still clearly reports "would create" — decided to also show a diff-from-empty (matching `writeManagedText`'s `!prev` branch), pinned in the test.
+- [x] An unchanged existing item reports something like `"<path>: unchanged"` instead of unconditionally saying "would overwrite" regardless of actual content difference.
+- [x] Skill items (directories, multiple files) get a per-file diff loop — one diff per changed file inside the skill, not one diff for the whole directory tree. Additionally reports `would remove` for a destination file the new source no longer has, matching `installCatalogSkill`'s real remove-then-copy write.
+- [x] The non-dry-run write path is completely unchanged — this task only touches the dry-run branch.
+- [x] (found in review, not in the original AC) Binary content compares by raw bytes, never coercing one side into garbled "text" for the diff.
+- [x] (found in review, not in the original AC) Never follows a symlink inside a catalog item's source content when building the diff preview — refused via `lstat` and warned about, matching `src/install/scaffold.ts`'s existing symlink refusal for catalog content. A read-only dry-run preview that follows a symlink can still disclose an arbitrary host file's content by printing it, even though nothing is written to disk.
 
 **Verify:** `node scripts/run-tests.mjs tests/apply.test.js` → all pass. Manual check: locally edit a file inside an already-installed skill, run `yarn dev apply --dry-run`, confirm the diff shows the actual local edit instead of a bare "would overwrite".
 
