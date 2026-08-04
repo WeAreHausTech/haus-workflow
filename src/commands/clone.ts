@@ -86,8 +86,11 @@ export function normalizeGitUrl(url: string): string {
   s = s.replace(/^[a-z][a-z0-9+.-]*:\/\//i, '') // strip scheme://
   s = s.replace(/^[^/@]+@/, '') // strip user@ (both ssh:// form and scp-like)
   s = s.replace(/:(?=[^/])/, '/') // scp-like host:path → host/path (not a port)
-  s = s.replace(/\.git$/i, '')
+  // Trailing slash(es) stripped BEFORE the .git suffix check — "repo.git/" ends in
+  // "/", not ".git", so checking .git first would miss it and leave ".git" behind,
+  // comparing unequal to the same repo's slash-less/no-.git form.
   s = s.replace(/\/+$/, '')
+  s = s.replace(/\.git$/i, '')
   return s.toLowerCase()
 }
 

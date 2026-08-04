@@ -163,6 +163,16 @@ test('normalizeGitUrl treats ssh and https forms of the same repo as equal', () 
   )
 })
 
+// Regression: a trailing slash after ".git" (a common copy-paste shape) must not
+// survive as a literal ".git" once the slash is stripped — order of operations
+// matters here (strip the slash before checking for ".git", not after).
+test('normalizeGitUrl treats a trailing slash after .git the same as no .git at all', () => {
+  assert.equal(
+    normalizeGitUrl('https://github.com/WeAreHausTech/ecom-demo.git/'),
+    normalizeGitUrl('https://github.com/WeAreHausTech/ecom-demo'),
+  )
+})
+
 // The test suite's own makeRemote() helper clones from a bare local filesystem
 // path (no scheme, no host) rather than a real URL — confirm that shape still
 // compares equal to itself and unequal to a different path.
