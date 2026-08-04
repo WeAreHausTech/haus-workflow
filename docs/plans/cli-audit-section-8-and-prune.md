@@ -92,7 +92,7 @@
 
 **Acceptance Criteria:**
 
-- [x] `haus ci-gate` invokes `runDoctor()`, `runDecisions({ mode: 'check' })`, and `runUpdate({ check: true, fast: true })` — fast tier, not full-hash, since a full-hash pass on every CI run is expensive; this tradeoff is documented in the command's own `--help` text — and captures each one's own pass/fail into a local result instead of letting each set `process.exitCode` independently mid-run.
+- [x] `haus ci-gate` invokes `runDoctor()`, `runUpdate({ check: true, fast: true })`, and `decisions check`'s own underlying `runDecisionsCheck(root, {})` (`src/decisions/check.ts` — used directly rather than via the `decisions` command's `runDecisions()` entry point, since that entry point lives in `src/commands/` and importing it from another command file would violate this repo's own "commands never import each other" rule; `runDecisionsCheck` already returns a structured result, so it needed no console-capture wrapper either) — fast tier, not full-hash, since a full-hash pass on every CI run is expensive; this tradeoff is documented in the command's own `--help` text — and captures each check's own pass/fail into a local result instead of letting each set `process.exitCode` independently mid-run.
 - [x] Prints one aggregated human-readable summary (per-check pass/fail) and sets `process.exitCode = 1` if any constituent check failed, `0` otherwise.
 - [x] `--json` emits one machine-readable object `{ doctor: {...}, decisions: {...}, update: {...}, ok: boolean }`.
 - [x] `haus doctor`, `haus decisions check`, and `haus update --check` remain independently runnable, with their own existing exit-code contracts completely unchanged.
