@@ -6,6 +6,7 @@ import fs from 'fs-extra'
 import { getCacheDir, getCacheManifestAge } from '../catalog/remote-catalog.js'
 import { checkManagedTamper } from '../claude/managed-tamper.js'
 import { verifyProjectSettingsHooksContract } from '../claude/verify-hooks-contract.js'
+import { IGNORED_PATHS, prettierIgnoreProtects } from '../claude/write-prettierignore.js'
 import { BLOCK_BEGIN, BLOCK_END } from '../claude/write-root-claude-md.js'
 import { auditDecisionsLayout } from '../decisions/doctor.js'
 import { findOrphanedLockEntries } from '../recommender/orphaned-items.js'
@@ -216,8 +217,8 @@ export async function runDoctor(options?: { hooks?: boolean }): Promise<void> {
   // makes checks above report a phantom edit. .prettierignore must cover both.
   if (workflowExists) {
     const prettierIgnore = (await readText(path.join(root, '.prettierignore'))) ?? ''
-    const lines = prettierIgnore.split('\n').map((l) => l.trim())
-    const missing = ['.haus-workflow/', '.claude/'].filter((p) => !lines.includes(p))
+    const lines = prettierIgnore.split('\n')
+    const missing = IGNORED_PATHS.filter((p) => !prettierIgnoreProtects(lines, p))
     if (missing.length > 0) {
       flag(
         `- .prettierignore: not protecting ${missing.join(', ')} (run \`haus apply --write\`)`,

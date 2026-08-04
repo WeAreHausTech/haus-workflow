@@ -26,7 +26,25 @@ export const PRETTIERIGNORE_BEGIN = '# HAUS:BEGIN haus-managed v=1'
 export const PRETTIERIGNORE_END = '# HAUS:END haus-managed'
 
 /** Paths haus owns and the formatter must leave untouched (keeps tamper/lock hashes stable). */
-const IGNORED_PATHS = ['.haus-workflow/', '.claude/']
+export const IGNORED_PATHS = ['.haus-workflow/', '.claude/'] as const
+
+/**
+ * True when `.prettierignore` lines already protect `dir` (haus form with trailing `/`).
+ * Accepts common equivalents so doctor doesn't false-flag user/scaffold patterns
+ * like `.claude`, `/.claude/`, or `.claude/**`.
+ */
+export function prettierIgnoreProtects(lines: readonly string[], dir: string): boolean {
+  const bare = dir.replace(/\/+$/, '')
+  const equivalents = new Set([
+    bare,
+    `${bare}/`,
+    `/${bare}`,
+    `/${bare}/`,
+    `${bare}/**`,
+    `/${bare}/**`,
+  ])
+  return lines.some((line) => equivalents.has(line.trim()))
+}
 
 /** Build the full managed block (sentinels + explanatory comment + ignored paths). */
 export function buildPrettierIgnoreBlock(): string {

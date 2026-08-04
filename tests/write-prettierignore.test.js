@@ -10,6 +10,7 @@ import {
   PRETTIERIGNORE_END,
   buildPrettierIgnoreBlock,
   injectPrettierIgnoreBlock,
+  prettierIgnoreProtects,
   stripPrettierIgnoreBlock,
   writePrettierIgnore,
 } from '../src/claude/write-prettierignore.js'
@@ -23,6 +24,24 @@ describe('write-prettierignore: block content', () => {
     assert.ok(block.trimEnd().endsWith(PRETTIERIGNORE_END), 'block closes with the end sentinel')
     assert.match(block, /^\.haus-workflow\/$/m, 'block lists the managed workflow dir')
     assert.match(block, /^\.claude\/$/m, 'block lists the project .claude install dir')
+  })
+})
+
+describe('prettierIgnoreProtects', () => {
+  it('accepts haus canonical trailing-slash entries', () => {
+    assert.equal(prettierIgnoreProtects(['.claude/'], '.claude/'), true)
+    assert.equal(prettierIgnoreProtects(['.haus-workflow/'], '.haus-workflow/'), true)
+  })
+
+  it('accepts common equivalent patterns', () => {
+    for (const line of ['.claude', '/.claude/', '/.claude', '.claude/**', '/.claude/**']) {
+      assert.equal(prettierIgnoreProtects([line], '.claude/'), true, line)
+    }
+  })
+
+  it('rejects unrelated entries', () => {
+    assert.equal(prettierIgnoreProtects(['dist/', 'coverage/'], '.claude/'), false)
+    assert.equal(prettierIgnoreProtects(['.claudette/'], '.claude/'), false)
   })
 })
 
