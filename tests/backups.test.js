@@ -34,6 +34,18 @@ function makeDirBackup(root, name, relFiles, mtimeSeconds) {
   return backupDir
 }
 
+async function withCapturedWarnings(fn) {
+  const original = console.warn
+  const messages = []
+  console.warn = (...args) => messages.push(args.map(String).join(' '))
+  try {
+    await fn()
+  } finally {
+    console.warn = original
+  }
+  return messages
+}
+
 test('listBackups classifies lock, undo, and prune entries and ignores unknown ones, oldest first', async () => {
   const temp = makeTemp('haus-backups-list-')
   makeLockBackup(temp, 1000000)
@@ -139,6 +151,48 @@ test('runBackups restore for a prune-kind backup copies files back to their orig
 
   const restored = fs.readFileSync(path.join(temp, '.claude/skills/foo/SKILL.md'), 'utf8')
   assert.equal(restored, 'pruned skill content')
+})
+
+test('listBackups excludes a top-level symlink and type-mismatched entries, even when named like a valid backup', async () => {
+  const temp = makeTemp('haus-backups-toplevel-symlink-')
+  const backupsDir = path.join(temp, '.haus-workflow/backups')
+  mkdirSync(backupsDir, { recursive: true })
+
+  makeLockBackup(temp, 1000000)
+
+  const secretDir = makeTemp('haus-backups-secret2-')
+  writeFileSync(path.join(secretDir, 'secret.txt'), 'top secret')
+  symlinkSync(secretDir, path.join(backupsDir, 'undo-2026-03-01T00-00-00-000Z'), 'dir')
+
+  writeFileSync(path.join(backupsDir, 'undo-2026-04-01T00-00-00-000Z'), 'a file, not a directory')
+  mkdirSync(path.join(backupsDir, 'haus.lock.9999999.json'), { recursive: true })
+
+  const entries = await listBackups(temp)
+  assert.deepEqual(entries.map((e) => e.id), ['haus.lock.1000000.json'])
+})
+
+test('restore warns based on each backed-up file\'s own mtime, not the backup directory\'s mtime', async () => {
+  const temp = makeTemp('haus-backups-stale-mtime-')
+  const backupDir = path.join(temp, '.haus-workflow/backups/undo-2026-01-01T00-00-00-000Z')
+  const backupFile = path.join(backupDir, '.claude/rules/haus.md')
+  mkdirSync(path.dirname(backupFile), { recursive: true })
+  writeFileSync(backupFile, 'old backup content')
+  utimesSync(backupFile, 1000, 1000) // file itself: very old
+  utimesSync(backupDir, 9000000, 9000000) // directory: deliberately much newer than its own file
+
+  const targetFile = path.join(temp, '.claude/rules/haus.md')
+  mkdirSync(path.dirname(targetFile), { recursive: true })
+  writeFileSync(targetFile, 'current content')
+  utimesSync(targetFile, 5000000, 5000000) // between the file's mtime and the directory's
+
+  const messages = await withCapturedWarnings(() =>
+    runBackups('restore', { id: 'undo-2026-01-01T00-00-00-000Z', yes: true, root: temp }),
+  )
+
+  assert.ok(
+    messages.some((m) => m.includes('newer than backup') && m.includes('haus.md')),
+    `expected a staleness warning naming haus.md (comparing against the file's own mtime, not the directory's); got: ${JSON.stringify(messages)}`,
+  )
 })
 
 test('restore never follows a symlink planted inside a backup dir', async () => {

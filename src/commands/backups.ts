@@ -33,7 +33,15 @@ function classify(name: string): BackupKind | undefined {
   return undefined
 }
 
-/** Enumerate recognized backup entries under `.haus-workflow/backups/`, oldest first. */
+/**
+ * Enumerate recognized backup entries under `.haus-workflow/backups/`, oldest first.
+ * Uses `lstat` (not `stat`) so a symlink at the top level is never followed, and
+ * requires each entry to match the on-disk shape its naming scheme implies (lock
+ * snapshots are files; undo/prune snapshots are directories) — a symlink or a
+ * type-mismatched entry is excluded rather than treated as a valid backup, since
+ * `restore` would otherwise dereference it despite the restore path's own
+ * never-follow-symlinks rule (see ADR-0018).
+ */
 export async function listBackups(root: string): Promise<BackupEntry[]> {
   const dir = hausPath(root, 'backups')
   if (!(await fs.pathExists(dir))) return []
@@ -43,7 +51,10 @@ export async function listBackups(root: string): Promise<BackupEntry[]> {
     const kind = classify(name)
     if (!kind) continue
     const absPath = path.join(dir, name)
-    const stat = await fs.stat(absPath)
+    const stat = await fs.lstat(absPath)
+    if (stat.isSymbolicLink()) continue
+    const expectDirectory = kind !== 'lock'
+    if (stat.isDirectory() !== expectDirectory) continue
     entries.push({ id: name, kind, absPath, mtimeMs: stat.mtimeMs })
   }
   entries.sort((a, b) => a.mtimeMs - b.mtimeMs)
@@ -142,8 +153,8 @@ async function restoreDirBackup(root: string, entry: BackupEntry, yes: boolean):
     const rel = path.relative(entry.absPath, abs)
     const target = path.join(root, rel)
     if (await fs.pathExists(target)) {
-      const targetStat = await fs.stat(target)
-      if (targetStat.mtimeMs > entry.mtimeMs) stale.push(rel)
+      const [targetStat, backupFileStat] = await Promise.all([fs.stat(target), fs.stat(abs)])
+      if (targetStat.mtimeMs > backupFileStat.mtimeMs) stale.push(rel)
     }
   }
   if (stale.length > 0) {
