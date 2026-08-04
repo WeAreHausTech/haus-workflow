@@ -7,6 +7,7 @@
  * - `undo-<iso-stamp>/<relative-path>` — per-file snapshot before `haus undo` deletes
  * - `prune-<iso-stamp>/<relative-path>` — per-file snapshot before `apply --prune` deletes
  */
+import type { Stats } from 'node:fs'
 import path from 'node:path'
 
 import fs from 'fs-extra'
@@ -121,6 +122,25 @@ async function isUnsafeWriteTarget(root: string, target: string): Promise<boolea
   return false
 }
 
+/**
+ * Re-`lstat`s `abs` immediately before it's read or copied — returns its `Stats` if
+ * it's still a plain file, or `null` if it vanished or was swapped for a symlink/other
+ * special file since `collectFilesRecursive` classified it. `collectFilesRecursive`
+ * runs once at the top of `restoreDirBackup`; every subsequent pass over the same paths
+ * (the stale-check, then the actual copy) re-validates right before use instead of
+ * trusting that earlier classification, narrowing the time-of-check-to-time-of-use gap
+ * as close to zero as a single extra syscall per use allows.
+ */
+async function lstatIfRegularFile(abs: string): Promise<Stats | null> {
+  try {
+    const stat = await fs.lstat(abs)
+    return stat.isFile() ? stat : null
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException).code === 'ENOENT') return null
+    throw err
+  }
+}
+
 async function restoreLockBackup(root: string, entry: BackupEntry, yes: boolean): Promise<boolean> {
   const target = hausPath(root, 'haus.lock.json')
   if (await isUnsafeWriteTarget(root, target)) {
@@ -145,6 +165,12 @@ async function restoreLockBackup(root: string, entry: BackupEntry, yes: boolean)
       log('Cancelled.')
       return false
     }
+  }
+  // Re-validate both sides one last time, right before the write itself — the
+  // narrowest possible gap between check and use.
+  if (!(await lstatIfRegularFile(entry.absPath)) || (await isUnsafeWriteTarget(root, target))) {
+    error(`Refusing to restore: ${entry.id} or ${target} changed since being checked.`)
+    return false
   }
   await fs.copy(entry.absPath, target, { overwrite: true })
   log(`Restored .haus-workflow/haus.lock.json from ${entry.id}.`)
@@ -223,11 +249,19 @@ async function restoreDirBackup(root: string, entry: BackupEntry, yes: boolean):
     return false
   }
   const stale: Array<{ rel: string; targetMtimeMs: number; backupMtimeMs: number }> = []
+  const vanished: string[] = []
+  const toRestore: string[] = []
   for (const abs of safeFiles) {
     const rel = path.relative(entry.absPath, abs)
+    const backupFileStat = await lstatIfRegularFile(abs)
+    if (!backupFileStat) {
+      vanished.push(rel)
+      continue
+    }
+    toRestore.push(abs)
     const target = path.join(root, rel)
     if (await fs.pathExists(target)) {
-      const [targetStat, backupFileStat] = await Promise.all([fs.stat(target), fs.stat(abs)])
+      const targetStat = await fs.stat(target)
       if (targetStat.mtimeMs > backupFileStat.mtimeMs) {
         stale.push({
           rel,
@@ -236,6 +270,15 @@ async function restoreDirBackup(root: string, entry: BackupEntry, yes: boolean):
         })
       }
     }
+  }
+  if (vanished.length > 0) {
+    warn(
+      `Skipped ${vanished.length} backup file(s) that changed (no longer a plain file) since being listed: ${vanished.join(', ')}`,
+    )
+  }
+  if (toRestore.length === 0) {
+    log(`Backup ${entry.id} has no restorable files left after re-validation.`)
+    return false
   }
   if (stale.length > 0) {
     const detail = stale
@@ -250,21 +293,35 @@ async function restoreDirBackup(root: string, entry: BackupEntry, yes: boolean):
   }
   if (!yes) {
     const ok = await confirm(
-      `Restore ${safeFiles.length} file(s) from backup ${entry.id} to their original paths?`,
+      `Restore ${toRestore.length} file(s) from backup ${entry.id} to their original paths?`,
     )
     if (!ok) {
       log('Cancelled.')
       return false
     }
   }
-  for (const abs of safeFiles) {
+  let restoredCount = 0
+  const skippedAtWrite: string[] = []
+  for (const abs of toRestore) {
     const rel = path.relative(entry.absPath, abs)
     const target = path.join(root, rel)
+    // Re-validate both sides one last time, right before the write itself — the
+    // narrowest possible gap between check and use.
+    if (!(await lstatIfRegularFile(abs)) || (await isUnsafeWriteTarget(root, target))) {
+      skippedAtWrite.push(rel)
+      continue
+    }
     await fs.ensureDir(path.dirname(target))
     await fs.copy(abs, target, { overwrite: true })
+    restoredCount++
   }
-  log(`Restored ${safeFiles.length} file(s) from ${entry.id}.`)
-  return true
+  if (skippedAtWrite.length > 0) {
+    warn(
+      `Skipped ${skippedAtWrite.length} file(s) that changed since being checked, right before restoring: ${skippedAtWrite.join(', ')}`,
+    )
+  }
+  log(`Restored ${restoredCount} file(s) from ${entry.id}.`)
+  return restoredCount > 0
 }
 
 async function runRestore(root: string, id: string, yes: boolean): Promise<boolean> {
