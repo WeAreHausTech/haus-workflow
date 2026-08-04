@@ -2,3 +2,4 @@
 # haus-owned files — do not reformat (keeps tamper-detection hashes stable)
 .haus-workflow/
 # HAUS:END haus-managed
+.claude/
