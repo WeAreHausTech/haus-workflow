@@ -60,6 +60,36 @@ test('noteGithubRateLimit captures resetAt and authenticated', () => {
   assert.equal(getGithubRateLimitHit(), undefined)
 })
 
+test('noteGithubRateLimit keeps earliest resetAt across hits', () => {
+  clearGithubRateLimitHit()
+  const later = {
+    status: 403,
+    headers: {
+      get: (k) => {
+        const key = k.toLowerCase()
+        if (key === 'x-ratelimit-remaining') return '0'
+        if (key === 'x-ratelimit-reset') return '1785909000'
+        return null
+      },
+    },
+  }
+  const earlier = {
+    status: 429,
+    headers: {
+      get: (k) => {
+        const key = k.toLowerCase()
+        if (key === 'retry-after') return '30'
+        if (key === 'x-ratelimit-reset') return '1785908000'
+        return null
+      },
+    },
+  }
+  noteGithubRateLimit(later, false)
+  noteGithubRateLimit(earlier, true)
+  assert.deepEqual(getGithubRateLimitHit(), { resetAt: 1785908000, authenticated: true })
+  clearGithubRateLimitHit()
+})
+
 test('formatGithubRateLimitMessage unauthenticated includes token fix', () => {
   const msg = formatGithubRateLimitMessage({ resetAt: null, authenticated: false })
   assert.match(msg, /rate limit exceeded/i)

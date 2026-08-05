@@ -30,7 +30,7 @@ export function readRateLimitResetAt(res: RateLimitResponseLike): number | null 
   return Number.isFinite(n) ? n : null
 }
 
-/** Record a rate-limit hit for this process/sync (keeps first resetAt; upgrades authenticated). */
+/** Record a rate-limit hit for this process/sync (keeps earliest resetAt; upgrades authenticated). */
 export function noteGithubRateLimit(res: RateLimitResponseLike, authenticated: boolean): void {
   if (!isGithubRateLimitedResponse(res)) return
   const resetAt = readRateLimitResetAt(res)
@@ -38,9 +38,11 @@ export function noteGithubRateLimit(res: RateLimitResponseLike, authenticated: b
     hit = { resetAt, authenticated }
     return
   }
-  // Prefer authenticated=true if any call used a token; keep earliest known reset.
+  // Prefer authenticated=true if any call used a token; keep the earliest known reset.
+  const earliestReset =
+    hit.resetAt === null ? resetAt : resetAt === null ? hit.resetAt : Math.min(hit.resetAt, resetAt)
   hit = {
-    resetAt: hit.resetAt ?? resetAt,
+    resetAt: earliestReset,
     authenticated: hit.authenticated || authenticated,
   }
 }

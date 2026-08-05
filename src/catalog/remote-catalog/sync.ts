@@ -380,9 +380,6 @@ export async function syncRemoteCatalog(): Promise<SyncResult> {
   }
 
   const rateLimit = getGithubRateLimitHit()
-  if (rateLimit) {
-    warn('Catalog tree listing blocked by GitHub API rate limit')
-  }
 
   return {
     newItems,
