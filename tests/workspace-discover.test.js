@@ -71,6 +71,63 @@ function makeWorkspace() {
   return ws
 }
 
+/**
+ * Build a multi-stack workspace fixture to exercise the non-JS/PHP REPO_MARKERS
+ * (.NET, Java, Ruby):
+ *  ws/js-app                package.json                                    → repo (JS)
+ *  ws/php-app                composer.json                                  → repo (PHP)
+ *  ws/dotnet-app             App.csproj + App.sln                           → repo (.NET)
+ *  ws/dotnet-app/src/Lib     Lib.csproj                                     → collapsed into dotnet-app
+ *  ws/java-app               pom.xml                                       → repo (Java, Maven)
+ *  ws/gradle-app             build.gradle.kts                               → repo (Java, Gradle)
+ *  ws/ruby-app               Gemfile                                       → repo (Ruby)
+ */
+function makeMultiStackWorkspace() {
+  const ws = mkdtempSync(path.join(os.tmpdir(), 'haus-ws-multistack-'))
+  writePkg(path.join(ws, 'js-app'), { name: 'js-app' })
+  writeComposer(path.join(ws, 'php-app'), { name: 'php-app' })
+
+  mkdirSync(path.join(ws, 'dotnet-app'), { recursive: true })
+  writeFileSync(path.join(ws, 'dotnet-app', 'App.csproj'), '<Project Sdk="Microsoft.NET.Sdk" />')
+  writeFileSync(path.join(ws, 'dotnet-app', 'App.sln'), '')
+  mkdirSync(path.join(ws, 'dotnet-app', 'src', 'Lib'), { recursive: true })
+  writeFileSync(
+    path.join(ws, 'dotnet-app', 'src', 'Lib', 'Lib.csproj'),
+    '<Project Sdk="Microsoft.NET.Sdk" />',
+  )
+
+  mkdirSync(path.join(ws, 'java-app'), { recursive: true })
+  writeFileSync(path.join(ws, 'java-app', 'pom.xml'), '<project></project>')
+
+  mkdirSync(path.join(ws, 'gradle-app'), { recursive: true })
+  writeFileSync(path.join(ws, 'gradle-app', 'build.gradle.kts'), '')
+
+  mkdirSync(path.join(ws, 'ruby-app'), { recursive: true })
+  writeFileSync(path.join(ws, 'ruby-app', 'Gemfile'), 'source "https://rubygems.org"')
+
+  return ws
+}
+
+test('discoverRepos recognises .NET/Java/Ruby markers alongside JS/PHP, with no phantom nested repos', async () => {
+  const ws = makeMultiStackWorkspace()
+  const repos = await discoverRepos(ws)
+  const paths = repos.map((r) => r.path).sort()
+
+  assert.ok(paths.includes('js-app'), `expected js-app, got ${paths.join(',')}`)
+  assert.ok(paths.includes('php-app'), `expected php-app, got ${paths.join(',')}`)
+  assert.ok(paths.includes('dotnet-app'), `expected dotnet-app (.csproj/.sln), got ${paths.join(',')}`)
+  assert.ok(paths.includes('java-app'), `expected java-app (pom.xml), got ${paths.join(',')}`)
+  assert.ok(paths.includes('gradle-app'), `expected gradle-app (build.gradle*), got ${paths.join(',')}`)
+  assert.ok(paths.includes('ruby-app'), `expected ruby-app (Gemfile), got ${paths.join(',')}`)
+
+  // Exactly these 6 repos — no phantom extra repo spawned by the nested Lib.csproj.
+  assert.equal(repos.length, 6, `expected 6 repos, got ${repos.length}: ${paths.join(',')}`)
+  assert.ok(
+    !paths.some((p) => p.includes(path.join('dotnet-app', 'src'))),
+    'nested .csproj under an existing repo root must collapse, not spawn a phantom repo',
+  )
+})
+
 test('discoverRepos finds nested repos, excludes decoys, collapses monorepo packages', async () => {
   const ws = makeWorkspace()
   const repos = await discoverRepos(ws)
