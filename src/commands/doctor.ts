@@ -13,9 +13,65 @@ import { auditDecisionsLayout } from '../decisions/doctor.js'
 import { findOrphanedLockEntries } from '../recommender/orphaned-items.js'
 import { readContextOrScan } from '../scanner/read-context.js'
 import { fetchNpmVersionStatus, NPM_PACKAGE_NAME } from '../update/npm-version.js'
+import { runGit } from '../utils/exec.js'
 import { readJson, readText } from '../utils/fs.js'
 import { error, log, warn } from '../utils/logger.js'
 import { hausPath, packageRoot } from '../utils/paths.js'
+
+/**
+ * Repo-relative paths of haus-owned, git-*tracked* content (skills/agents under
+ * `.claude/`, plus `.haus-workflow/` itself — WORKFLOW.md, workflow-config.md, etc.)
+ * that must never be gitignored. This is the opposite concern from
+ * `write-gitignore.ts`'s `GITIGNORED_ARTIFACT_PATHS` (machine-local *scan artifacts*
+ * that must stay untracked): if any of these come back ignored instead, an entire
+ * catalog install becomes invisible to anything relying on git-tracked state — the
+ * reporter's actual failure mode (80 skills written, none visible). See Task 1.3 (D5)
+ * in docs/plans/workspace-detection-and-permissions-fixes.md.
+ */
+export const HAUS_OWNED_TRACKED_PATHS = [
+  '.claude',
+  '.claude/skills',
+  '.claude/agents',
+  '.haus-workflow',
+] as const
+
+/**
+ * Repo-relative paths (among `HAUS_OWNED_TRACKED_PATHS`) currently covered by a
+ * `.gitignore` rule at `root`, via `git check-ignore`. Returns an empty array — never
+ * throws — when `root` isn't a git repository, git is unavailable, or the check
+ * errors/times out; callers treat that the same as "nothing ignored" rather than
+ * surfacing a spurious failure for an orthogonal git problem.
+ */
+export async function findGitignoredHausPaths(root: string): Promise<string[]> {
+  try {
+    const result = await runGit(['check-ignore', '--', ...HAUS_OWNED_TRACKED_PATHS], {
+      cwd: root,
+      timeout: 5000,
+    })
+    // check-ignore exits 0 when at least one of the given paths is ignored, 1 when
+    // none are — both are normal outcomes. Anything else (128 = not a repo/fatal
+    // error) means the check didn't run meaningfully; treat as "nothing ignored".
+    if (result.exitCode !== 0 && result.exitCode !== 1) return []
+    return [
+      ...new Set(
+        result.stdout
+          .split('\n')
+          .map((line) => line.trim())
+          .filter(Boolean),
+      ),
+    ]
+  } catch {
+    return []
+  }
+}
+
+/** Collapse raw ignored `HAUS_OWNED_TRACKED_PATHS` matches into their top-level dirs
+ * (`.claude/` and/or `.haus-workflow/`) for a readable warning. */
+function summarizeGitignoredHausDirs(paths: string[]): string[] {
+  const dirs = new Set<string>()
+  for (const p of paths) dirs.add(p === '.haus-workflow' ? '.haus-workflow/' : '.claude/')
+  return [...dirs]
+}
 
 /**
  * Runs a health check on the current project's Haus AI setup.
@@ -244,6 +300,24 @@ export async function runDoctor(options?: { hooks?: boolean }): Promise<void> {
     )
   } else {
     ok('- GITIGNORE: OK (no machine-local scan artifacts tracked in git)')
+  }
+
+  // The inverse concern: .claude/ and .haus-workflow/ hold haus-installed, git-tracked
+  // content (skills, agents, commands, WORKFLOW.md, etc.) that must NOT be gitignored.
+  // A broad rule meant to cover only settings.json (e.g. a plain `.claude/` line)
+  // silently hides everything installed underneath from git-tracked state.
+  const gitignoredHausPaths = await findGitignoredHausPaths(root)
+  if (gitignoredHausPaths.length > 0) {
+    const dirs = summarizeGitignoredHausDirs(gitignoredHausPaths)
+    const dirList = dirs.join(' and ')
+    const verb = dirs.length === 1 ? 'is' : 'are'
+    flag(
+      `- GITIGNORE (haus content): ${dirList} ${verb} gitignored — installed skills/agents/commands will not be visible to anything relying on git-tracked state`,
+      `${dirList} ${verb} gitignored, so haus-installed content isn't visible to git-tracked state`,
+      'remove the covering .gitignore rule (only settings.json, settings.local.json, and worktrees/ under .claude/ should ever be ignored)',
+    )
+  } else {
+    ok('- GITIGNORE (haus content): OK (.claude/ and .haus-workflow/ are tracked)')
   }
 
   for (const finding of await auditDecisionsLayout(root)) {
