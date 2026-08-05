@@ -17,15 +17,23 @@ import { PROJECT_HOOK_FRAGMENTS } from '../src/claude/merge-project-settings.js'
  *
  * (3) is deliberately a SUBSET, not a mirror: it also gets the global hooks.json
  * `haus decisions guard` / `hook.decisions.guard` id-naming path exercised by
- * load-hooks.test.js's "no memory hook" check, but it excludes `haus update
- * --from-hook` (SessionStart) on purpose. That hook's own docs (src/commands/
- * update.ts, docs/cli.md) state it "confirms this is a haus project" via the
- * per-project lockfile before doing anything — a global SessionStart hook would
- * fire on every Claude Code session on the machine, including non-haus
- * projects, which contradicts its own scoping. See commit 5dce24c, which added
- * the hook to CANONICAL_HOOKS and PROJECT_HOOK_FRAGMENTS only, and explicitly
- * checked "matcher parity between the two hardcoded hook-fragment lists" —
- * i.e. only those two, not the global JSON fragment.
+ * load-hooks.test.js's "no memory hook" check, but it excludes two project-only
+ * SessionStart hooks on purpose:
+ *
+ *   - `haus update --from-hook`. That hook's own docs (src/commands/
+ *     update.ts, docs/cli.md) state it "confirms this is a haus project" via the
+ *     per-project lockfile before doing anything — a global SessionStart hook would
+ *     fire on every Claude Code session on the machine, including non-haus
+ *     projects, which contradicts its own scoping. See commit 5dce24c, which added
+ *     the hook to CANONICAL_HOOKS and PROJECT_HOOK_FRAGMENTS only, and explicitly
+ *     checked "matcher parity between the two hardcoded hook-fragment lists" —
+ *     i.e. only those two, not the global JSON fragment.
+ *   - `haus workspace worktree doctor --from-hook` (`hook.workspace.worktree-check`,
+ *     fragment id in PROJECT_HOOK_FRAGMENTS). Same reasoning: this hook only means
+ *     something in a haus workspace repo (checks for `haus.workspace.yaml` /
+ *     `repos.manifest.json`) — a global install would run it, harmlessly but
+ *     pointlessly, on every non-workspace project too. Added per
+ *     docs/plans/workspace-worktree-materialization.md, Task 5.
  *
  * If a future PR adds/removes a hook in only one or two of these three lists,
  * these tests fail with a diagnostic naming the missing/extra command(s).
@@ -98,18 +106,26 @@ describe('hook list cross-source parity', () => {
         'a subset, not diverge with its own commands.',
     )
 
-    // Known, deliberate gap: `haus update --from-hook` (SessionStart) is project-only.
-    // It reads the project lockfile to confirm "this is a haus project" before doing
-    // anything (see src/commands/update.ts) — a global SessionStart hook would fire on
-    // every Claude Code session on the machine, not just haus-managed projects, which
-    // contradicts that scoping. If this ever needs to become a three-way exact match,
-    // update this test deliberately rather than deleting the assertion above.
+    // Known, deliberate gap: two SessionStart hooks are project-only.
+    //   - `haus update --from-hook`. It reads the project lockfile to confirm "this is
+    //     a haus project" before doing anything (see src/commands/update.ts) — a global
+    //     SessionStart hook would fire on every Claude Code session on the machine, not
+    //     just haus-managed projects, which contradicts that scoping.
+    //   - `haus workspace worktree doctor --from-hook`. It only means something in a
+    //     haus workspace repo (checks for haus.workspace.yaml/repos.manifest.json) — a
+    //     global install would fire it pointlessly in every non-workspace project too.
+    //     Added per docs/plans/workspace-worktree-materialization.md, Task 5.
+    // If this ever needs to become a three-way exact match, update this test
+    // deliberately rather than deleting the assertion above.
     const missingFromGlobal = [...canonicalSet].filter((x) => !globalSet.has(x))
     assert.deepEqual(
       missingFromGlobal,
-      ['SessionStart::*::haus update --from-hook'],
+      [
+        'SessionStart::*::haus update --from-hook',
+        'SessionStart::*::haus workspace worktree doctor --from-hook',
+      ],
       'Expected the global hooks.json fragment to omit exactly the project-scoped ' +
-        `SessionStart update-check hook. Actual gap vs. CANONICAL_HOOKS: ${missingFromGlobal.join(', ')}. ` +
+        `SessionStart hooks. Actual gap vs. CANONICAL_HOOKS: ${missingFromGlobal.join(', ')}. ` +
         'If this list changed, either sync hooks.json to close an unintended gap, or update this ' +
         'assertion if the gap is now intentionally different.',
     )

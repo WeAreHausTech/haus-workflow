@@ -110,7 +110,8 @@ export async function runDoctor(): Promise<DoctorReport> {
         problems.push(`${member.id}: on branch "${actualBranch}", expected "${expectedBranch}".`)
       } else if (!hydrated) {
         problems.push(
-          `${member.id}: materialized but not hydrated (no node_modules/vendor/obj/bin).`,
+          `${member.id}: materialized but not hydrated (no node_modules/vendor/obj/bin). ` +
+            'Run `haus workspace worktree hydrate` to fix.',
         )
       }
     }
