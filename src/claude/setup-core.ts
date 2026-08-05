@@ -45,6 +45,13 @@ export type SetupCoreOptions = {
    * Omitted by the non-interactive workspace loop, which writes when `apply` is set.
    */
   confirm?: () => Promise<boolean>
+  /**
+   * Explicit opt-in to write recommendation.json/haus.lock.json even when literally
+   * zero catalog items matched (not even a stack-agnostic default). Without this,
+   * a true zero-match run refuses the write instead of silently installing nothing.
+   * See docs/decisions/ — the zero-signal setup guard ADR.
+   */
+  force?: boolean
 }
 
 /**
@@ -56,7 +63,7 @@ export type SetupCoreOptions = {
  * prior behaviour.
  */
 export async function runSetupCore(root: string, opts: SetupCoreOptions): Promise<SetupCoreResult> {
-  const { json, apply, dryRun, quiet, confirm } = opts
+  const { json, apply, dryRun, quiet, confirm, force } = opts
   // `say` is the stdout channel; muted under `quiet` so a caller (workspace --json)
   // can own the machine-readable output. warn/error still go to stderr.
   const say = quiet ? () => {} : log
@@ -74,6 +81,41 @@ export async function runSetupCore(root: string, opts: SetupCoreOptions): Promis
   // Recommend
   const context = await readContextOrScan(root)
   const recommendation = await recommend(root, context)
+
+  // Zero-signal guard (D1): refuse to write recommendation.json/haus.lock.json when
+  // literally nothing in the catalog matched — not even a stack-agnostic default —
+  // unless the caller explicitly passes --force. A stack-agnostic-only match
+  // (recommended.length >= 1, e.g. a default-baseline reviewer agent) is NOT gated:
+  // only a true zero match is, so a legitimate stack-agnostic-only project still
+  // writes normally with no --force needed. See docs/decisions/ zero-signal setup
+  // guard ADR for the reasoning and alternatives considered.
+  if (recommendation.recommended.length === 0 && !force) {
+    const warningLines = [...new Set([...context.warnings, ...(recommendation.warnings ?? [])])]
+    if (json) {
+      say(JSON.stringify(recommendation, null, 2))
+    } else {
+      say('Haus recommendation ready')
+      say('Recommended: 0')
+      say(`Skipped: ${recommendation.skipped.length}`)
+      say(`Repo: ${context.repoName}`)
+      for (const warning of warningLines) say(`- WARN: ${warning}`)
+    }
+    const message =
+      'No catalog items matched this project at all (zero signal) — refusing to write ' +
+      'recommendation.json/haus.lock.json. Re-run with `haus setup-project --force` to write anyway.'
+    warn(message)
+    process.exitCode = 1
+    return {
+      root,
+      repoName: context.repoName,
+      roles: scanResult.repoRoles,
+      recommendedCount: 0,
+      warnings: [...warningLines, message],
+      hooksOk: false,
+      written: [],
+    }
+  }
+
   await writeJson(hausPath(root, 'recommendation.json'), recommendation)
   if (json) {
     say(JSON.stringify(recommendation, null, 2))
