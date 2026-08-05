@@ -316,11 +316,20 @@ const DIR_ITEM_TYPE: Record<string, string> = {
 
 const CONTENT_ROOTS = ['skills', 'agents', 'templates', 'commands', 'configs']
 
-function walkAllFiles(dir: string, fn: (file: string) => void): void {
-  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+function walkAllFiles(dir: string, fn: (file: string) => void, failures: string[]): void {
+  let entries: fs.Dirent[]
+  try {
+    entries = fs.readdirSync(dir, { withFileTypes: true })
+  } catch (err) {
+    failures.push(
+      `${dir}: unreadable subtree (${err instanceof Error ? err.message : String(err)})`,
+    )
+    return
+  }
+  for (const entry of entries) {
     if (entry.name === '.DS_Store') continue
     const full = path.join(dir, entry.name)
-    if (entry.isDirectory()) walkAllFiles(full, fn)
+    if (entry.isDirectory()) walkAllFiles(full, fn, failures)
     else fn(full)
   }
 }
@@ -362,12 +371,16 @@ function auditDiskOrphans(manifestDir: string, items: CatalogItem[]): string[] {
   for (const dir of CONTENT_ROOTS) {
     const abs = path.join(manifestDir, dir)
     if (!fs.existsSync(abs)) continue
-    walkAllFiles(abs, (file) => {
-      const relPath = path.relative(manifestDir, file).replace(/\\/g, '/')
-      if (!isPathClaimed(relPath, claimedPaths)) {
-        failures.push(`orphaned on disk, claimed by no manifest item: ${relPath}`)
-      }
-    })
+    walkAllFiles(
+      abs,
+      (file) => {
+        const relPath = path.relative(manifestDir, file).replace(/\\/g, '/')
+        if (!isPathClaimed(relPath, claimedPaths)) {
+          failures.push(`orphaned on disk, claimed by no manifest item: ${relPath}`)
+        }
+      },
+      failures,
+    )
   }
   return failures
 }

@@ -29,6 +29,14 @@ export const FIXTURE_ROOT = path.join(repoRoot, 'tests', 'fixtures', 'contract-b
 export const FIXTURE_SETS = [
   { name: 'clean', expectOk: true },
   { name: 'bad', expectOk: false },
+  // Zero manifest items, one file on disk — a disk-orphan failure is the ONLY
+  // possible signal here. perItemVerdicts() only compares item-scoped failures
+  // (those starting with "${item.id}:"), so with no items at all, disk-orphan
+  // parity would otherwise be invisible to the per-item comparison and could
+  // only be masked by other items' failures in the "bad" set coincidentally
+  // matching overall ok=false on both sides. This set isolates it: the overall
+  // ok comparison below is what actually catches a regression here.
+  { name: 'orphan-only', expectOk: false },
 ]
 
 // The default guess assumes `repoRoot` is this repo's real checkout root

@@ -10,7 +10,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import os from 'node:os'
 import path from 'node:path'
-import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs'
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync, chmodSync } from 'node:fs'
 
 import { auditSafetyNotes, auditIntents, auditDiskOrphans } from '../src/catalog/validate-core.ts'
 
@@ -112,6 +112,24 @@ test('auditDiskOrphans: content root absent on disk is not an error', () => {
     const failures = auditDiskOrphans(root, [])
     assert.deepEqual(failures, [])
   } finally {
+    rmSync(root, { recursive: true, force: true })
+  }
+})
+
+test('auditDiskOrphans: an unreadable subtree is reported as a failure, not thrown', () => {
+  if (process.getuid && process.getuid() === 0) return // root bypasses permission bits
+  const root = tempManifestDir()
+  const unreadableDir = path.join(root, 'skills', 'unreadable-dir')
+  mkdirSync(unreadableDir, { recursive: true })
+  try {
+    chmodSync(unreadableDir, 0o000)
+    const failures = auditDiskOrphans(root, [])
+    assert.ok(
+      failures.some((f) => f.includes(unreadableDir) && f.includes('unreadable subtree')),
+      `expected an "unreadable subtree" failure, got: ${JSON.stringify(failures)}`,
+    )
+  } finally {
+    chmodSync(unreadableDir, 0o755)
     rmSync(root, { recursive: true, force: true })
   }
 })
