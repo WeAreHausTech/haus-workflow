@@ -10,6 +10,7 @@ import { SUPERPOWERS_SHARED_CATALOG_REL } from '../constants.js'
 import { validateCatalogItem } from '../ingest-catalog.js'
 import { isSafeCatalogPath, safeJoin } from '../path-safety.js'
 
+import { clearGithubRateLimitHit, getGithubRateLimitHit } from './github-rate-limit.js'
 import {
   _resetBlobPathCacheForNewSync,
   listFilesRecursive,
@@ -29,6 +30,11 @@ export type SyncResult = {
   unchanged: number
   /** IDs of items that could not be fetched or had invalid paths. */
   failed: string[]
+  /** Set when any GitHub API call in this sync hit rate limit. */
+  rateLimit?: {
+    resetAt: number | null
+    authenticated: boolean
+  }
 }
 
 const KNOWN_ITEM_TYPES = new Set(['skill', 'agent', 'template', 'command', 'config'])
@@ -128,7 +134,9 @@ async function syncDirectoryFromPrefix(
   // Callers that already listed the prefix can pass relFiles to avoid a second lookup.
   const relFiles = opts.relFiles ?? (await listFilesUnderCatalogPrefix(catalogPrefix, base))
   if (!relFiles) {
-    warn(`Failed to list files for ${item.id}`)
+    if (!getGithubRateLimitHit()) {
+      warn(`Failed to list files for ${item.id}`)
+    }
     return 'failed'
   }
   const requireSkillMd = opts.requireSkillMd ?? true
@@ -214,6 +222,9 @@ async function syncConfigItem(
 
   // Directory config item: listing the prefix returns its files.
   const relFiles = await listFilesUnderCatalogPrefix(item.path, base)
+  if (!relFiles && getGithubRateLimitHit()) {
+    return 'failed'
+  }
   if (relFiles && relFiles.length > 0) {
     try {
       return await syncDirectoryFromPrefix(item, item.path, dest, base, {
@@ -323,6 +334,7 @@ async function syncOneItem(
  */
 export async function syncRemoteCatalog(): Promise<SyncResult> {
   _resetBlobPathCacheForNewSync()
+  clearGithubRateLimitHit()
 
   const manifest = await fetchRemoteManifest()
   if (!manifest) {
@@ -354,7 +366,7 @@ export async function syncRemoteCatalog(): Promise<SyncResult> {
 
   const outcomes = await mapWithConcurrency(items, (item) => syncOneItem(item, base), 8)
   const sharedOutcome = await syncSuperpowersShared(base)
-  if (sharedOutcome === 'failed') {
+  if (sharedOutcome === 'failed' && !getGithubRateLimitHit()) {
     warn('Failed to cache superpowers shared support files')
   }
 
@@ -367,7 +379,18 @@ export async function syncRemoteCatalog(): Promise<SyncResult> {
     else if (outcome === 'failed') failed.push(item.id)
   }
 
-  return { newItems, refreshed, unchanged, failed }
+  const rateLimit = getGithubRateLimitHit()
+  if (rateLimit) {
+    warn('Catalog tree listing blocked by GitHub API rate limit')
+  }
+
+  return {
+    newItems,
+    refreshed,
+    unchanged,
+    failed,
+    ...(rateLimit ? { rateLimit } : {}),
+  }
 }
 
 /** Returns milliseconds since the cache manifest was last written, or null if absent. */

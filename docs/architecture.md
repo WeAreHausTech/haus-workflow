@@ -117,7 +117,7 @@ scan; a second `recommend` pass picks up skills the shallow scanner missed.
 6. Recomputes per-item hashes from lockfile `paths`.
 7. Prints unified lock diff and summary.
 
-The catalog is maintained in a separate repository ([`haus-workflow-catalog`](https://github.com/WeAreHausTech/haus-workflow-catalog)). `haus update` resolves the latest release tag by default (override with `HAUS_CATALOG_REF`; fallback `main` when no tag can be resolved).
+The catalog is maintained in a separate repository ([`haus-workflow-catalog`](https://github.com/WeAreHausTech/haus-workflow-catalog)). `haus update` resolves the latest release tag by default (override with `HAUS_CATALOG_REF`; fallback `main` when no tag can be resolved). Catalog GitHub API calls authenticate via `HAUS_GITHUB_TOKEN` → `GITHUB_TOKEN` → `gh auth token` (unauthenticated falls back to 60 req/hr; rate-limit hits print a fix at end of sync).
 
 ---
 

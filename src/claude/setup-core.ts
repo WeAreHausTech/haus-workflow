@@ -6,12 +6,13 @@
  * The upcoming workspace setup loop will call it once per member repo so every
  * repo gets byte-identical output to `haus setup-project`.
  */
+import { formatGithubRateLimitMessage } from '../catalog/remote-catalog/github-rate-limit.js'
 import { syncRemoteCatalog } from '../catalog/remote-catalog.js'
 import { recommend } from '../recommender/recommend.js'
 import { readContextOrScan } from '../scanner/read-context.js'
 import { scanProject } from '../scanner/scan-project.js'
 import { writeJson } from '../utils/fs.js'
-import { log } from '../utils/logger.js'
+import { log, warn } from '../utils/logger.js'
 import { displayPath, hausPath } from '../utils/paths.js'
 
 import { verifyProjectSettingsHooksContract } from './verify-hooks-contract.js'
@@ -132,6 +133,9 @@ export async function runSetupCore(root: string, opts: SetupCoreOptions): Promis
       say(`Catalog cache populated: ${sync.newItems.length} new item(s).`)
     } else if (sync.refreshed.length > 0) {
       say(`Catalog cache refreshed: ${sync.refreshed.length} updated item(s).`)
+    }
+    if (sync.rateLimit) {
+      warn(formatGithubRateLimitMessage(sync.rateLimit))
     }
   }
 
