@@ -45,6 +45,33 @@ export function computeDetectionStatus(
   return unsupportedSignals.length > 0 ? 'partial' : 'supported'
 }
 
+/**
+ * Builds the human-facing warning for `detectionStatus === 'unknown'`, shared by
+ * `haus scan` (src/commands/scan.ts) and the recommender's warning merge
+ * (src/recommender/policies.ts) so both surfaces say the same thing.
+ *
+ * When `isLinkedWorktree` is true, the message explicitly names the worktree
+ * condition — a zero-signal read from inside a linked `git worktree` checkout can
+ * mean "sibling repos genuinely aren't on disk here" rather than "no stack at
+ * all", and silently treating the two the same misleads the user. See
+ * docs/decisions/ ADR for the zero-signal setup guard this feeds into.
+ */
+export function describeUnknownDetection(
+  unsupportedSignals: string[],
+  isLinkedWorktree: boolean,
+): string {
+  const markers = unsupportedSignals.join(', ')
+  const base = markers
+    ? `Stack not recognised — detected ${markers}, which haus does not support.`
+    : 'Stack not recognised — no supported framework detected.'
+  const worktreeNote = isLinkedWorktree
+    ? "You're running from inside a git worktree — sibling repos may not be on disk here, so this could be a false zero-signal reading rather than truly no stack."
+    : ''
+  return [base, worktreeNote, 'Only stack-agnostic workflow and security guidance is applied.']
+    .filter(Boolean)
+    .join(' ')
+}
+
 /** Returns true when a relative file path matches any sensitive-path regex. */
 export function blocked(rel: string): boolean {
   return SENSITIVE_PATH_REGEXES.some((x) => x.test(rel))

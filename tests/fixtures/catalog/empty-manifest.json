@@ -1,0 +1,5 @@
+{
+  "version": "1.0.0",
+  "_note": "Deliberately empty catalog — used to test the zero-signal setup guard (D1): literally zero catalog items can match, as opposed to zero detected stacks with a stack-agnostic default still matching.",
+  "items": []
+}

@@ -70,7 +70,14 @@ program
     'Force opt-in catalog items into the recommendation as manual selections (space- or comma-separated ids)',
   )
   .action(runRecommend)
-program.command('setup-project').option('--json').action(runSetupProject)
+program
+  .command('setup-project')
+  .option('--json')
+  .option(
+    '--force',
+    'Write recommendation.json/haus.lock.json even when zero catalog items matched at all',
+  )
+  .action(runSetupProject)
 program
   .command('doctor')
   .option('--hooks', 'Verify .claude/settings.json matches the hook contract')

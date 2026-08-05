@@ -1,6 +1,7 @@
 /** Policy filters for the recommender: unsupported stacks, requiresAny gating, warning merge. */
 
 import { FORBIDDEN_TAGS } from '../catalog/validation-rules.js'
+import { describeUnknownDetection } from '../scanner/detection.js'
 import type { ContextMap, RequiresAnyClause } from '../types.js'
 
 /** Stack tokens that trigger an immediate skip — driven by validation-rules.json. */
@@ -53,19 +54,26 @@ export function describeRequiresAny(clauses: RequiresAnyClause[]): string {
     .join(' | ')
 }
 
-/** Combine context scan warnings with any active security-risk signals into the final warnings list. */
-export function mergeRecommendationWarnings(context: ContextMap): string[] {
+/**
+ * Combine context scan warnings with any active security-risk signals into the final
+ * warnings list.
+ *
+ * @param isLinkedWorktree - When true, the `detectionStatus === 'unknown'` message
+ * explicitly names the worktree condition (resolveRoots() in src/utils/git-root.ts).
+ * Defaults to false so callers that haven't resolved worktree state (e.g. tests
+ * constructing a ContextMap directly) keep the plain message.
+ */
+export function mergeRecommendationWarnings(
+  context: ContextMap,
+  isLinkedWorktree = false,
+): string[] {
   // Surface detectionStatus as a clear, leading message. Baseline (stack-agnostic
   // workflow + security) guidance still applies to unknown/partial repos, so this
   // informs rather than drops recommendations.
   const markers = context.unsupportedSignals?.join(', ')
   const statusLines =
     context.detectionStatus === 'unknown'
-      ? [
-          markers
-            ? `Stack not recognised — detected ${markers}, which haus does not support. Only stack-agnostic workflow and security guidance is applied.`
-            : 'Stack not recognised — no supported framework detected. Only stack-agnostic workflow and security guidance is applied.',
-        ]
+      ? [describeUnknownDetection(context.unsupportedSignals ?? [], isLinkedWorktree)]
       : context.detectionStatus === 'partial' && markers
         ? [
             `Partially supported — found unsupported ${markers} alongside recognised stacks; guidance covers the supported parts only.`,
