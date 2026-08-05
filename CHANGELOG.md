@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.4.0](https://github.com/WeAreHausTech/haus-workflow/compare/v1.3.0...v1.4.0) (2026-08-05)
+
+### Features
+
+- **catalog:** gh auth + rate-limit UX on sync ([#193](https://github.com/WeAreHausTech/haus-workflow/issues/193)) ([1192709](https://github.com/WeAreHausTech/haus-workflow/commit/119270944f13a6247909710a8085350a97db264a))
+- **ci-gate:** add haus ci-gate command (CLI audit §8 item 5) ([#191](https://github.com/WeAreHausTech/haus-workflow/issues/191)) ([ce1b5f1](https://github.com/WeAreHausTech/haus-workflow/commit/ce1b5f1d77e8225d7ce4fe3534ba12b944453487))
+- **cli:** enhance `--dry-run` functionality to provide detailed diffs for catalog items ([51eefa6](https://github.com/WeAreHausTech/haus-workflow/commit/51eefa658fefcce17af1b4801298aa9bdd822f51))
+- **recommender:** add near-miss reporting (CLI audit §8 item 4) ([#192](https://github.com/WeAreHausTech/haus-workflow/issues/192)) ([e5274d7](https://github.com/WeAreHausTech/haus-workflow/commit/e5274d7630e9ba9108a0073189a6af2f23d0397f))
+
 ## [1.3.0](https://github.com/WeAreHausTech/haus-workflow/compare/v1.2.0...v1.3.0) (2026-08-04)
 
 ### Features
