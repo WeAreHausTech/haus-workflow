@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 
+import { formatRecommendationHuman } from '../src/recommender/explain-formatters.js'
 import {
   buildRecommendationExplanation,
   normalizeRecommendation,
@@ -119,6 +120,86 @@ test('buildRecommendationExplanation maps a normalized Recommendation into selec
   assert.equal(explanation.stats.selectedRules, normalized.selectedRules)
   assert.equal(explanation.stats.skippedRules, normalized.skippedRules)
   assert.equal(explanation.stats.estimatedTokenReductionPct, normalized.estimatedTokenReductionPct)
+})
+
+test('buildRecommendationExplanation surfaces a near-miss item failing exactly one gate', () => {
+  const normalized = normalizeRecommendation({
+    recommended: [],
+    skipped: [
+      {
+        id: 'skill.one-gate-away',
+        reason: 'requiresAny unsatisfied: needs svelte',
+        skipReasons: [{ code: 'requires-any-unsatisfied', message: 'requiresAny unsatisfied: needs svelte' }],
+        gates: [
+          { name: 'former-id', passed: true },
+          { name: 'invalid-source', passed: true },
+          { name: 'requires-any-unsatisfied', passed: false },
+        ],
+      },
+    ],
+  })
+  const explanation = buildRecommendationExplanation(normalized)
+  assert.equal(explanation.nearMiss.length, 1)
+  assert.equal(explanation.nearMiss[0].id, 'skill.one-gate-away')
+  assert.equal(explanation.nearMiss[0].missingGate, 'requires-any-unsatisfied')
+})
+
+test('buildRecommendationExplanation excludes items failing two or more gates from near-miss', () => {
+  const normalized = normalizeRecommendation({
+    recommended: [],
+    skipped: [
+      {
+        id: 'skill.two-gates-away',
+        reason: 'Catalog item is deprecated',
+        skipReasons: [{ code: 'deprecated', message: 'Catalog item is deprecated' }],
+        gates: [
+          { name: 'deprecated', passed: false },
+          { name: 'curated-not-approved', passed: false },
+        ],
+      },
+    ],
+  })
+  const explanation = buildRecommendationExplanation(normalized)
+  assert.equal(explanation.nearMiss.length, 0)
+})
+
+test('buildRecommendationExplanation returns an empty near-miss list for legacy recommendation.json without gates', () => {
+  const normalized = normalizeRecommendation({
+    recommended: [],
+    skipped: [{ id: 'skill.legacy', reason: 'no matching signal' }],
+  })
+  const explanation = buildRecommendationExplanation(normalized)
+  assert.deepEqual(explanation.nearMiss, [])
+})
+
+test('formatRecommendationHuman prints a near-miss section in non-JSON output', () => {
+  const normalized = normalizeRecommendation({
+    recommended: [],
+    skipped: [
+      {
+        id: 'skill.one-gate-away',
+        reason: 'requiresAny unsatisfied: needs svelte',
+        skipReasons: [
+          { code: 'requires-any-unsatisfied', message: 'requiresAny unsatisfied: needs svelte' },
+        ],
+        gates: [
+          { name: 'former-id', passed: true },
+          { name: 'requires-any-unsatisfied', passed: false },
+        ],
+      },
+    ],
+  })
+  const explanation = buildRecommendationExplanation(normalized)
+  const output = formatRecommendationHuman(normalized, explanation.nearMiss)
+  assert.match(output, /Near misses \(one gate away\)/)
+  assert.match(output, /skill\.one-gate-away/)
+  assert.match(output, /missing gate: requires-any-unsatisfied/)
+})
+
+test('formatRecommendationHuman omits the near-miss section when there is none', () => {
+  const normalized = normalizeRecommendation({ recommended: [], skipped: [] })
+  const output = formatRecommendationHuman(normalized, [])
+  assert.doesNotMatch(output, /Near misses/)
 })
 
 test('buildRecommendationExplanation preserves a signal in reasonDetails when present', () => {

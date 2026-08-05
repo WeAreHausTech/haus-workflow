@@ -117,11 +117,11 @@
 
 **Acceptance Criteria:**
 
-- [ ] Every gate is evaluated for every item (no early `continue`), producing a `gates: { name: string, passed: boolean }[]` array per item.
-- [ ] `recommendation.json`'s schema gains this additively (new optional field) — no existing consumer breaks.
-- [ ] `explain-recommendation`'s output includes a near-miss list: items one gate away from qualifying, each naming that one missing signal.
-- [ ] **Zero eligibility-outcome diffs**: for the full existing fixture set, which items are recommended vs. skipped is identical before and after this change — verified by running the existing eligibility/gate-regression suites unmodified in their pass/fail assertions.
-- [ ] Test cases for near-miss detection are written and confirmed failing _before_ the loop restructure lands (TDD requirement above).
+- [x] Every gate is evaluated for every item (no early `continue`), producing a `gates: { name: string, passed: boolean }[]` array per item.
+- [x] `recommendation.json`'s schema gains this additively (new optional field) — no existing consumer breaks.
+- [x] `explain-recommendation`'s output includes a near-miss list: items one gate away from qualifying, each naming that one missing signal.
+- [x] **Zero eligibility-outcome diffs**: for the full existing fixture set, which items are recommended vs. skipped is identical before and after this change — verified by running the existing eligibility/gate-regression suites unmodified in their pass/fail assertions.
+- [x] Test cases for near-miss detection are written and confirmed failing _before_ the loop restructure lands (TDD requirement above).
 
 **Verify:** `node scripts/run-tests.mjs tests/recommend-eligibility.test.js tests/recommend-gate-regression.test.js tests/explain-recommendation.test.js` → all pass, with no change to any existing test's expected recommend/skip outcome.
 

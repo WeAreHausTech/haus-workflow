@@ -205,6 +205,32 @@
       "requiresAny": [{ "dependency": "turbo" }],
       "default": false,
       "tokenEstimate": 100
+    },
+    {
+      "id": "haus.ecc-e2e-testing",
+      "source": "haus",
+      "type": "skill",
+      "path": "skills/ecc-e2e-testing",
+      "title": "Test: ECC E2E Testing (co-install suppression trigger)",
+      "purpose": "Recommended when co-install-test-e2e stack tag present; recommending it should suppress haus.ecc-e2e-runner.",
+      "tags": ["co-install-test-e2e"],
+      "repoRoles": [],
+      "requiresAny": [{ "stack": "co-install-test-e2e" }],
+      "default": false,
+      "tokenEstimate": 100
+    },
+    {
+      "id": "haus.ecc-e2e-runner",
+      "source": "haus",
+      "type": "skill",
+      "path": "skills/ecc-e2e-runner",
+      "title": "Test: ECC E2E Runner (co-install suppression target)",
+      "purpose": "Recommended alongside haus.ecc-e2e-testing, then suppressed by applyCoInstallSuppression().",
+      "tags": ["co-install-test-e2e"],
+      "repoRoles": [],
+      "requiresAny": [{ "stack": "co-install-test-e2e" }],
+      "default": false,
+      "tokenEstimate": 100
     }
   ]
 }
