@@ -1,6 +1,7 @@
 /** Async file I/O helpers used throughout src/ — thin wrappers over fs-extra and fast-glob. */
 
 import crypto from 'node:crypto'
+import type { Dirent } from 'node:fs'
 import path from 'node:path'
 
 import fg from 'fast-glob'
@@ -97,19 +98,72 @@ export async function exists(file: string): Promise<boolean> {
 }
 
 /**
+ * Walks `root` looking for subdirectories that contain their own `.git` entry (file or
+ * directory — linked worktrees use a `.git` *file*, normal checkouts a directory), at
+ * any depth below `root`, excluding `root`'s own `.git`. Each match marks the root of a
+ * nested/sibling repo; the walk does not descend past a match, since everything below
+ * it belongs to that other repo.
+ *
+ * Directory entries are never resolved through symlinks (`Dirent.isDirectory()` reflects
+ * the entry itself, not its target), so a symlink cannot be used to route the walk
+ * outside `root` — consistent with this codebase's no-symlink-follow posture (ADR-0010).
+ *
+ * @param root - Absolute scan root.
+ * @returns Relative (POSIX-style) paths of directories that are nested repo roots.
+ */
+async function findNestedRepoDirs(root: string): Promise<string[]> {
+  const nested: string[] = []
+
+  async function walk(dir: string, relDir: string): Promise<void> {
+    let entries: Dirent[]
+    try {
+      entries = await fs.readdir(dir, { withFileTypes: true })
+    } catch {
+      return
+    }
+    // Root's own .git does not count as "nested" — only check at deeper levels.
+    if (relDir !== '' && entries.some((e) => e.name === '.git')) {
+      nested.push(relDir)
+      return // whole subtree belongs to the other repo; nothing below it to walk.
+    }
+    for (const entry of entries) {
+      if (!entry.isDirectory()) continue
+      if (entry.name === '.git' || entry.name === 'node_modules' || entry.name === 'dist') continue
+      const childRel = relDir ? `${relDir}/${entry.name}` : entry.name
+      await walk(path.join(dir, entry.name), childRel)
+    }
+  }
+
+  await walk(root, '')
+  return nested
+}
+
+/**
  * Glob for files matching `patterns` under `root`, excluding node_modules, .git, dist,
- * and test fixtures. tests/fixtures/** holds sample repos used by the scanner's own
- * test suite (e.g. a fake .csproj or vendure-config.ts) — without this exclusion,
- * unanchored SAFE_FILES globs match them as if they were real project signals.
+ * test fixtures, and any subtree that is itself the root of a nested/sibling repo (its
+ * own `.git`, file or directory). tests/fixtures/** holds sample repos used by the
+ * scanner's own test suite (e.g. a fake .csproj or vendure-config.ts) — without this
+ * exclusion, unanchored SAFE_FILES globs match them as if they were real project
+ * signals. The nested-repo exclusion prevents the same failure mode for a *real*
+ * sibling repo living under the scan root (e.g. a meta-repo containing an independent
+ * checkout one level down) — its files must never leak into the parent scan.
  * Results are sorted for stable ordering across platforms.
  */
 export async function listFiles(root: string, patterns: string[]): Promise<string[]> {
+  const nestedRepoDirs = await findNestedRepoDirs(root)
+  const ignore = [
+    '**/node_modules/**',
+    '**/.git/**',
+    '**/dist/**',
+    '**/tests/fixtures/**',
+    ...nestedRepoDirs.map((d) => `${d}/**`),
+  ]
   const files = await fg(patterns, {
     cwd: root,
     dot: true,
     onlyFiles: true,
     suppressErrors: true,
-    ignore: ['**/node_modules/**', '**/.git/**', '**/dist/**', '**/tests/fixtures/**'],
+    ignore,
   })
   return files.sort((a, b) => a.localeCompare(b))
 }
