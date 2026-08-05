@@ -36,6 +36,7 @@
     "prepack": "yarn build",
     "verify": "node scripts/verify.mjs",
     "verify:full": "node scripts/verify.mjs --coverage",
+    "check:contract-behavior": "node --import tsx scripts/contract-behavior-check.mjs",
     "postinstall": "node ./scripts/postinstall.mjs || true",
     "prepare": "lefthook install || true",
     "security:audit": "yarn npm audit -A -R --severity high --environment production"

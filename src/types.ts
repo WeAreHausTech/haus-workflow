@@ -72,7 +72,6 @@ export type CatalogItem = {
   whenNotToUse?: string
   references?: string[]
   safetyNotes?: string[]
-  sourceInfluences?: Array<{ source: string; idea: string }>
   intents?: string[]
   tokenBudget?: number
   tokenEstimate: number
@@ -122,7 +121,6 @@ export const CATALOG_ITEM_KNOWN_KEYS = [
   'installMode',
   'references',
   'safetyNotes',
-  'sourceInfluences',
   'intents',
   'tokenBudget',
   'tokenEstimate',

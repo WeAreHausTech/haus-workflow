@@ -42,3 +42,46 @@ jobs:
         run: node scripts/contract-check.mjs
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Validator behavior-parity check (ADR-0024). Distinct from the drift check
+  # above: that one compares DATA (validation-rules.json, schema shape); this one
+  # runs both repos' actual validator LOGIC against a shared fixture set and
+  # asserts they agree on every item's pass/fail verdict. Runs on every trigger
+  # (unlike contract-check.mjs, which is deliberately network-only to stay fast
+  # on PRs) since it needs a real second checkout either way — see ADR-0024.
+  contract-behavior-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout haus-workflow
+        uses: actions/checkout@v7
+        with:
+          path: haus-workflow
+
+      - name: Checkout haus-workflow-catalog
+        uses: actions/checkout@v7
+        with:
+          repository: WeAreHausTech/haus-workflow-catalog
+          path: haus-workflow-catalog
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+
+      - name: Install haus-workflow-catalog deps
+        working-directory: haus-workflow-catalog
+        run: corepack enable && yarn install --immutable
+
+      - name: Install haus-workflow deps
+        working-directory: haus-workflow
+        run: corepack enable && yarn install --immutable
+
+      - name: Contract behavior check (validator logic parity)
+        working-directory: haus-workflow
+        run: yarn check:contract-behavior
+        env:
+          HAUS_CATALOG_REPO_PATH: ${{ github.workspace }}/haus-workflow-catalog
+          # Fail hard on push to main / scheduled cron; WARN on PR (same tiering
+          # as contract-check.mjs above, derived here since this script reads an
+          # env var rather than GITHUB_EVENT_NAME directly).
+          CONTRACT_STRICT: ${{ (github.event_name == 'push' || github.event_name == 'schedule') && '1' || '0' }}
