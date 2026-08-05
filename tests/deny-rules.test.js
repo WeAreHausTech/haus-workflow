@@ -42,6 +42,25 @@ describe('deny-rules: buildDenyRules', () => {
     const rules = buildDenyRules()
     assert.equal(rules.length, new Set(rules).size)
   })
+
+  // D7 regression: bug report claimed Write(pattern) rules exist without a
+  // paired Edit(pattern) rule. False — buildDenyRules always emits all of
+  // Read/Edit/Write together per DENY_PATHS entry — but lock the invariant so
+  // a future edit to DENY_PATHS/FILE_TOOLS can't silently break it. See
+  // docs/plans/workspace-detection-and-permissions-fixes.md Task 2.1 (D7).
+  it('never emits Write(pattern) without a matching Edit(pattern), or vice versa', () => {
+    const rules = buildDenyRules()
+    const writes = rules.filter((r) => r.startsWith('Write(')).map((r) => r.slice(6, -1))
+    const edits = rules.filter((r) => r.startsWith('Edit(')).map((r) => r.slice(5, -1))
+    const editSet = new Set(edits)
+    const writeSet = new Set(writes)
+    for (const pattern of writes) {
+      assert.ok(editSet.has(pattern), `Write(${pattern}) has no matching Edit(${pattern})`)
+    }
+    for (const pattern of edits) {
+      assert.ok(writeSet.has(pattern), `Edit(${pattern}) has no matching Write(${pattern})`)
+    }
+  })
 })
 
 describe('settings-merge: mergeDenyRules', () => {
