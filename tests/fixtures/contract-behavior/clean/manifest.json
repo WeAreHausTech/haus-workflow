@@ -1,0 +1,17 @@
+{
+  "version": "1.0.0",
+  "items": [
+    {
+      "id": "haus.fixture-clean-skill",
+      "source": "haus",
+      "type": "skill",
+      "version": "1.0.0",
+      "path": "skills/clean-skill",
+      "title": "Fixture clean skill",
+      "tags": ["security"],
+      "repoRoles": [],
+      "tokenEstimate": 100,
+      "installMode": "copy-selected"
+    }
+  ]
+}

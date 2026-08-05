@@ -1,0 +1,40 @@
+{
+  "version": "1.0.0",
+  "items": [
+    {
+      "id": "haus.fixture-missing-title",
+      "source": "haus",
+      "type": "skill",
+      "version": "1.0.0",
+      "path": "skills/missing-title",
+      "tags": ["security"],
+      "repoRoles": [],
+      "tokenEstimate": 100,
+      "installMode": "copy-selected"
+    },
+    {
+      "id": "haus.fixture-forbidden-tag-item",
+      "source": "haus",
+      "type": "skill",
+      "version": "1.0.0",
+      "path": "skills/forbidden-tag-item",
+      "title": "Fixture forbidden-tag item",
+      "tags": ["security", "python"],
+      "repoRoles": [],
+      "tokenEstimate": 100,
+      "installMode": "copy-selected"
+    },
+    {
+      "id": "haus.fixture-sensitive-item",
+      "source": "haus",
+      "type": "skill",
+      "version": "1.0.0",
+      "path": "skills/sensitive-item",
+      "title": "Fixture sensitive item",
+      "tags": ["security", "stripe"],
+      "repoRoles": [],
+      "tokenEstimate": 100,
+      "installMode": "copy-selected"
+    }
+  ]
+}
