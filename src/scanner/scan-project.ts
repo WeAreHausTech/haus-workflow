@@ -130,7 +130,6 @@ export async function scanProject(root: string): Promise<ScanResult> {
 
   const context: ContextMap = {
     generatedAt: new Date().toISOString(),
-    root,
     repoName: repoNameFallback,
     packageManager,
     repoRoles: roles,

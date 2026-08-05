@@ -6,6 +6,7 @@ import fs from 'fs-extra'
 import { getCacheDir, getCacheManifestAge } from '../catalog/remote-catalog.js'
 import { checkManagedTamper } from '../claude/managed-tamper.js'
 import { verifyProjectSettingsHooksContract } from '../claude/verify-hooks-contract.js'
+import { listTrackedArtifactPaths } from '../claude/write-gitignore.js'
 import { IGNORED_PATHS, prettierIgnoreProtects } from '../claude/write-prettierignore.js'
 import { BLOCK_BEGIN, BLOCK_END } from '../claude/write-root-claude-md.js'
 import { auditDecisionsLayout } from '../decisions/doctor.js'
@@ -228,6 +229,21 @@ export async function runDoctor(options?: { hooks?: boolean }): Promise<void> {
     } else {
       ok(`- .prettierignore: protects ${IGNORED_PATHS.join(' and ')}`)
     }
+  }
+
+  // Machine-local scan artifacts (context-map.json, recommendation.json,
+  // sources-report.json, deep-context.json) must never be tracked in git — they carry
+  // per-machine absolute paths and scan output. See ADR-0025 and `apply.ts`'s own
+  // untrack-on-write migration (this is the read-only detection half of the same fix).
+  const trackedArtifacts = await listTrackedArtifactPaths(root)
+  if (trackedArtifacts.length > 0) {
+    flag(
+      `- GITIGNORE: ${trackedArtifacts.length} machine-local scan artifact(s) still tracked in git (${trackedArtifacts.join(', ')})`,
+      `${trackedArtifacts.length} machine-local scan artifact(s) are still tracked in git`,
+      `git rm --cached ${trackedArtifacts.join(' ')} (or run \`haus apply --write\` to do this and update .gitignore for you)`,
+    )
+  } else {
+    ok('- GITIGNORE: OK (no machine-local scan artifacts tracked in git)')
   }
 
   for (const finding of await auditDecisionsLayout(root)) {
