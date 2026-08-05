@@ -53,6 +53,10 @@ export const CANONICAL_HOOKS: ClaudeHooksSettings = {
         matcher: '*',
         hooks: [{ type: 'command', command: 'haus update --from-hook' }],
       },
+      {
+        matcher: '*',
+        hooks: [{ type: 'command', command: 'haus workspace worktree doctor --from-hook' }],
+      },
     ],
   },
 }
