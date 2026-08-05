@@ -168,11 +168,19 @@ export type Recommendation = {
     ecosystem?: string
     /** Catalog token estimate echoed from the manifest entry. Additive optional field. */
     tokenEstimate?: number
+    /**
+     * Per-gate pass/fail breakdown across every named policy/eligibility gate
+     * (not just the first one checked). Additive optional field — absent on
+     * recommendation.json files written before this field existed.
+     */
+    gates?: Array<{ name: string; passed: boolean }>
   }>
   skipped: Array<{
     id: string
     reason: string
     skipReasons: Array<{ code: string; message: string; signal?: string }>
+    /** See `recommended[].gates` — same per-gate breakdown, additive optional field. */
+    gates?: Array<{ name: string; passed: boolean }>
   }>
   /**
    * Opt-in tier items the user could add but which were skipped because their

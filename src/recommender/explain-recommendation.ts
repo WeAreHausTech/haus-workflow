@@ -19,11 +19,13 @@ type RecommendationLike = Partial<Recommendation> & {
     tags?: string[]
     ecosystem?: string
     tokenEstimate?: number
+    gates?: Array<{ name: string; passed: boolean }>
   }>
   skipped?: Array<{
     id: string
     reason?: string
     skipReasons?: Array<{ message?: string; code?: string; signal?: string }>
+    gates?: Array<{ name: string; passed: boolean }>
   }>
 }
 
@@ -39,6 +41,11 @@ type ExplainRecommendation = {
     reasons: string[]
     reasonDetails?: Array<{ code: string; message: string; signal?: string }>
   }>
+  /**
+   * Items skipped for exactly one failing gate — one signal away from qualifying.
+   * Items failing two or more gates are excluded (they need more than one fix).
+   */
+  nearMiss: Array<{ id: string; missingGate: string; message: string }>
   stats: {
     selectedRules: number
     skippedRules: number
@@ -67,6 +74,7 @@ export function normalizeRecommendation(input: RecommendationLike): Recommendati
       tags: item.tags,
       ecosystem: item.ecosystem,
       tokenEstimate: item.tokenEstimate,
+      ...(item.gates ? { gates: item.gates } : {}),
     }
   })
 
@@ -78,6 +86,7 @@ export function normalizeRecommendation(input: RecommendationLike): Recommendati
       message: reason.message ?? item.reason ?? 'legacy skipped reason',
       ...(reason.signal ? { signal: reason.signal } : {}),
     })) ?? [{ code: 'legacy-skip-reason', message: item.reason ?? 'legacy skipped reason' }],
+    ...(item.gates ? { gates: item.gates } : {}),
   }))
 
   return {
@@ -91,6 +100,27 @@ export function normalizeRecommendation(input: RecommendationLike): Recommendati
     estimatedTokenReductionPct:
       input.estimatedTokenReductionPct ?? tokenReductionPct(recommended.length, skipped.length),
   }
+}
+
+/**
+ * Items skipped for exactly one failing gate — one signal away from qualifying.
+ * Legacy recommendation.json files without a `gates` breakdown never surface here
+ * (no per-gate data to determine "exactly one"), so the list is empty, not wrong.
+ */
+function buildNearMiss(skipped: Recommendation['skipped']): ExplainRecommendation['nearMiss'] {
+  const nearMiss: ExplainRecommendation['nearMiss'] = []
+  for (const item of skipped) {
+    const gates = item.gates
+    if (!gates) continue
+    const failing = gates.filter((g) => !g.passed)
+    if (failing.length !== 1) continue
+    nearMiss.push({
+      id: item.id,
+      missingGate: failing[0]!.name,
+      message: item.skipReasons[0]?.message ?? item.reason,
+    })
+  }
+  return nearMiss
 }
 
 /** Build a structured explain output from a normalized Recommendation. */
@@ -112,6 +142,7 @@ export function buildRecommendationExplanation(
         ...(reason.signal ? { signal: reason.signal } : {}),
       })),
     })),
+    nearMiss: buildNearMiss(recommendation.skipped),
     stats: {
       selectedRules: recommendation.selectedRules,
       skippedRules: recommendation.skippedRules,

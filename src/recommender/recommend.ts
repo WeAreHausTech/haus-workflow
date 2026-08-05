@@ -31,6 +31,9 @@ import { estimateContextTokens, tokenReductionPct } from './token-estimate.js'
 /** A positive eligibility signal: why an item matched the project context. */
 type ReasonHit = { code: string; message: string; signal?: string }
 
+/** One named policy/eligibility gate's outcome for a single item. */
+type GateCheck = { name: string; passed: boolean; code: string; message: string; signal?: string }
+
 /**
  * Run the full recommendation pipeline for a project.
  * Loads catalog items, gates and matches each against the ContextMap (plus any
@@ -80,97 +83,159 @@ export async function recommend(
   const formerIds = new Set(items.flatMap((item) => normalizeFormerIds(item.formerIds)))
   const changedFiles = await readChangedFiles(root)
 
-  const skip = (id: string, code: string, message: string, signal?: string) => {
-    skipped.push({ id, reason: message, skipReasons: [{ code, message, signal }] })
+  const skip = (
+    id: string,
+    code: string,
+    message: string,
+    signal?: string,
+    gates?: GateCheck[],
+  ) => {
+    skipped.push({
+      id,
+      reason: message,
+      skipReasons: [{ code, message, signal }],
+      ...(gates ? { gates: gates.map(({ name, passed }) => ({ name, passed })) } : {}),
+    })
   }
   const roleSignal = (name: string) =>
     scannerRoles.has(name.toLowerCase()) ? `role:${name}` : `deep:role:${name}`
   const stackSignal = (name: string) =>
     scannerStacks.has(name.toLowerCase()) ? `tag:${name}` : `deep:tag:${name}`
 
-  for (const item of items) {
-    if (formerIds.has(item.id)) {
-      skip(item.id, 'former-id', 'Catalog id was renamed and cannot be newly recommended')
-      continue
+  /**
+   * Evaluate every named policy/eligibility gate for one item — no early exit.
+   * Order matches the original sequential gate list exactly, so `gates.find(g => !g.passed)`
+   * reproduces the legacy first-failure skip reason for backward compatibility.
+   * A gate is included only when structurally applicable to the item (e.g. curated-only
+   * gates are omitted for non-curated items) — omitted gates never count as a "failure"
+   * for near-miss purposes, matching their original conditional-only evaluation.
+   */
+  const buildGateChecks = (
+    item: CatalogItem,
+    itemTags: string[],
+    normSource: string,
+  ): { gates: GateCheck[]; requiresAnySatisfied?: { matched: boolean; signal?: string } } => {
+    const gates: GateCheck[] = []
+    const add = (name: string, passed: boolean, code: string, message: string, signal?: string) => {
+      gates.push({ name, passed, code, message, signal })
     }
 
-    // Fail-closed: items with a missing or whitespace-only source field cannot be
-    // trust-checked, so block them unconditionally before any policy gate runs.
-    const normSource = typeof item.source === 'string' ? item.source.trim() : ''
-    if (!normSource) {
-      skip(item.id, 'invalid-source', 'Item source is missing or empty')
-      continue
-    }
-
-    // Normalised tag array — used for exact-tag gates to prevent substring false positives
-    // (e.g. "javascript" tag must not match the "java" forbidden gate).
-    const itemTags = item.tags.map((t) => t.toLowerCase())
-
-    // ---- Policy gates (hard include/exclude — correctness & security) ----
-    // Use exact tag-array membership so "javascript" never fires the "java" gate,
-    // "mongodb" never fires the "go" gate, etc.
-    if (UNSUPPORTED.some((x) => itemTags.includes(x))) {
-      skip(item.id, 'unsupported-policy', 'Unsupported stack policy')
-      continue
-    }
-    if (item.reviewStatus === 'deprecated') {
-      skip(item.id, 'deprecated', 'Catalog item is deprecated', 'reviewStatus:deprecated')
-      continue
-    }
+    add(
+      'former-id',
+      !formerIds.has(item.id),
+      'former-id',
+      'Catalog id was renamed and cannot be newly recommended',
+    )
+    add('invalid-source', normSource !== '', 'invalid-source', 'Item source is missing or empty')
+    add(
+      'unsupported-policy',
+      !UNSUPPORTED.some((x) => itemTags.includes(x)),
+      'unsupported-policy',
+      'Unsupported stack policy',
+    )
+    add(
+      'deprecated',
+      item.reviewStatus !== 'deprecated',
+      'deprecated',
+      'Catalog item is deprecated',
+      'reviewStatus:deprecated',
+    )
     if (normSource === 'curated') {
       const rs = item.reviewStatus
-      if (!rs || rs !== 'approved') {
-        skip(
-          item.id,
-          'curated-not-approved',
-          `Curated item requires reviewStatus:approved (got ${rs ?? 'unset'})`,
-          `reviewStatus:${rs ?? 'unset'}`,
-        )
-        continue
-      }
-      if (item.riskLevel === 'blocked') {
-        skip(
-          item.id,
-          'curated-risk-blocked',
-          'Curated item riskLevel is blocked',
-          'riskLevel:blocked',
-        )
-        continue
-      }
+      add(
+        'curated-not-approved',
+        !!rs && rs === 'approved',
+        'curated-not-approved',
+        `Curated item requires reviewStatus:approved (got ${rs ?? 'unset'})`,
+        `reviewStatus:${rs ?? 'unset'}`,
+      )
+      add(
+        'curated-risk-blocked',
+        item.riskLevel !== 'blocked',
+        'curated-risk-blocked',
+        'Curated item riskLevel is blocked',
+        'riskLevel:blocked',
+      )
     }
-    // Sensitive-keyword check: match against id (for path-like keywords such as ".env", ".pem")
-    // AND exact tag membership (for keyword-tags such as "secrets", "exports").
-    // Splitting the two avoids "exports" in an item id like "haus.exports-handler" being
-    // blocked by the plain-English "exports" tag keyword — but also ensures an id that
-    // literally contains ".env" is still caught.
     const sensitiveInId = SENSITIVE_ITEM_KEYWORDS.some((x) => item.id.toLowerCase().includes(x))
     const sensitiveInTags = SENSITIVE_ITEM_KEYWORDS.some((x) => itemTags.includes(x))
-    if (sensitiveInId || sensitiveInTags) {
-      skip(item.id, 'sensitive-policy', 'Sensitive content policy block')
-      continue
+    add(
+      'sensitive-policy',
+      !(sensitiveInId || sensitiveInTags),
+      'sensitive-policy',
+      'Sensitive content policy block',
+    )
+    // source-trust/source-approval require a valid source string to mean anything —
+    // an item already failing invalid-source never reached these in the original code.
+    if (normSource !== '') {
+      const trust = sourceTrust.get(normSource)
+      add(
+        'source-trust',
+        trust !== 'candidate' && trust !== 'rejected',
+        'source-trust',
+        'Source trust policy block',
+        trust ? `trust:${trust}` : undefined,
+      )
+      add(
+        'source-approval',
+        normSource === 'haus' || trust === 'approved',
+        'source-approval',
+        'Source not approved',
+        `source:${normSource}`,
+      )
     }
-    const trust = sourceTrust.get(normSource)
-    if (trust === 'candidate' || trust === 'rejected') {
-      skip(item.id, 'source-trust', 'Source trust policy block', `trust:${trust}`)
-      continue
-    }
-    if (normSource !== 'haus' && trust !== 'approved') {
-      skip(item.id, 'source-approval', 'Source not approved', `source:${normSource}`)
-      continue
-    }
-    if (item.id === 'haus.turborepo-turborepo' && !roleSet.has('turbo-monorepo')) {
-      skip(
-        item.id,
+    if (item.id === 'haus.turborepo-turborepo') {
+      add(
+        'required-role-missing:turbo-monorepo',
+        roleSet.has('turbo-monorepo'),
         'required-role-missing',
         'Required role missing: turbo-monorepo',
         'role:turbo-monorepo',
       )
+    }
+    if (item.id === 'haus.ecc-database-reviewer') {
+      add(
+        'required-role-missing:database',
+        roleSet.has('database'),
+        'required-role-missing',
+        'Required role missing: database',
+        'role:database',
+      )
+    }
+
+    let requiresAnySatisfied: { matched: boolean; signal?: string } | undefined
+    const requiresAny = item.requiresAny ?? []
+    if (requiresAny.length > 0) {
+      const satisfied = matchRequiresAny(requiresAny, { stackSet, depSet, roleSet })
+      requiresAnySatisfied = satisfied
+      const description = describeRequiresAny(requiresAny)
+      add(
+        'requires-any-unsatisfied',
+        satisfied.matched,
+        'requires-any-unsatisfied',
+        `requiresAny unsatisfied: needs ${description}`,
+        description,
+      )
+    }
+
+    return { gates, requiresAnySatisfied }
+  }
+
+  for (const item of items) {
+    // Fail-closed: items with a missing or whitespace-only source field cannot be
+    // trust-checked, so block them unconditionally before any policy gate runs.
+    const normSource = typeof item.source === 'string' ? item.source.trim() : ''
+    // Normalised tag array — used for exact-tag gates to prevent substring false positives
+    // (e.g. "javascript" tag must not match the "java" forbidden gate).
+    const itemTags = item.tags.map((t) => t.toLowerCase())
+
+    const { gates, requiresAnySatisfied } = buildGateChecks(item, itemTags, normSource)
+    const firstFailure = gates.find((g) => !g.passed)
+    if (firstFailure) {
+      skip(item.id, firstFailure.code, firstFailure.message, firstFailure.signal, gates)
       continue
     }
-    if (item.id === 'haus.ecc-database-reviewer' && !roleSet.has('database')) {
-      skip(item.id, 'required-role-missing', 'Required role missing: database', 'role:database')
-      continue
-    }
+
     // ---- Eligibility signals ----
     const isDefaultBaseline = item.default === true
     const reasons: ReasonHit[] = []
@@ -210,24 +275,14 @@ export async function recommend(
     if (changedMatch)
       push('changed-file-match', 'changed file match', `changedFile:${changedMatch}`)
 
-    // ---- requiresAny gate (eligibility constraint) ----
-    const requiresAny = item.requiresAny ?? []
-    if (requiresAny.length > 0) {
-      const satisfied = matchRequiresAny(requiresAny, { stackSet, depSet, roleSet })
-      if (!satisfied.matched) {
-        const description = describeRequiresAny(requiresAny)
-        skip(
-          item.id,
-          'requires-any-unsatisfied',
-          `requiresAny unsatisfied: needs ${description}`,
-          description,
-        )
-        continue
-      }
-      if (!reasons.some((r) => r.code === 'stack-match')) {
-        push('requires-any-match', 'requires-any signal match', satisfied.signal)
-      }
+    // ---- requiresAny signal (eligibility constraint already gated above) ----
+    // Reaching here means every named gate passed, including requires-any-unsatisfied
+    // if applicable — so requiresAnySatisfied.matched is guaranteed true when present.
+    if (requiresAnySatisfied && !reasons.some((r) => r.code === 'stack-match')) {
+      push('requires-any-match', 'requires-any signal match', requiresAnySatisfied.signal)
     }
+
+    const gateSummary = gates.map(({ name, passed }) => ({ name, passed }))
 
     // ---- Binary decision: default OR any positive evidence ----
     const hasEvidence = reasons.some((r) => r.code !== 'default-baseline')
@@ -253,9 +308,10 @@ export async function recommend(
         tags: item.tags,
         ecosystem: item.ecosystem,
         tokenEstimate: item.tokenEstimate,
+        gates: gateSummary,
       })
     } else {
-      skip(item.id, 'no-role-stack-match', 'No role/stack match')
+      skip(item.id, 'no-role-stack-match', 'No role/stack match', undefined, gates)
     }
   }
 

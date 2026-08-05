@@ -262,6 +262,67 @@ test('default baseline: always recommended regardless of context', async () => {
   }
 })
 
+test('gates: every applicable gate is evaluated per item, not just the first failure', async () => {
+  setup()
+  try {
+    // test.requires-svelte only fails the requiresAny gate — every other applicable
+    // gate (former-id, invalid-source, unsupported-policy, deprecated, sensitive-policy,
+    // source-trust, source-approval) must still show up as passed:true, not be omitted
+    // because the loop used to stop at the first failure.
+    const result = await recommend(
+      tmpDir,
+      makeContext(tmpDir, { dependencies: [], detectedStacks: {} }),
+    )
+    const entry = findSkipped(result, 'test.requires-svelte')
+    assert.ok(Array.isArray(entry.gates), 'skipped entry should carry a gates array')
+    const failing = entry.gates.filter((g) => !g.passed)
+    assert.equal(failing.length, 1, 'exactly one gate should fail for a near-miss item')
+    assert.equal(failing[0].name, 'requires-any-unsatisfied')
+    assert.ok(
+      entry.gates.some((g) => g.name === 'source-approval' && g.passed === true),
+      'gates evaluated after the failing one must still be recorded as passed',
+    )
+  } finally {
+    teardown()
+  }
+})
+
+test('gates: an item failing multiple gates records all of them as failed', async () => {
+  setup()
+  try {
+    // test.curated-deprecated fails 'deprecated', 'curated-not-approved', and (since no
+    // curated fixture item is approved+unblocked) the catalog-wide 'curated' source trust
+    // never reaches 'approved' either, so 'source-trust'/'source-approval' fail too — all
+    // now visible since the loop no longer stops at the first failure. The legacy
+    // first-failure skipReasons must still report 'deprecated' (order-preserving backward
+    // compat), but the gates array must show every one of them as failed.
+    const result = await recommend(tmpDir, makeContext(tmpDir))
+    const entry = findSkipped(result, 'test.curated-deprecated')
+    assert.equal(entry.skipReasons[0].code, 'deprecated', 'legacy first-failure code unchanged')
+    const failingNames = entry.gates.filter((g) => !g.passed).map((g) => g.name)
+    assert.deepEqual(
+      failingNames.sort(),
+      ['curated-not-approved', 'deprecated', 'source-approval', 'source-trust'],
+      'every failing gate should be recorded, not just the first',
+    )
+  } finally {
+    teardown()
+  }
+})
+
+test('gates: a recommended item carries an all-passed gates array', async () => {
+  setup()
+  try {
+    const result = await recommend(tmpDir, makeContext(tmpDir))
+    const entry = findRecommended(result, 'test.default-baseline')
+    assert.ok(Array.isArray(entry.gates))
+    assert.ok(entry.gates.length > 0)
+    assert.ok(entry.gates.every((g) => g.passed === true))
+  } finally {
+    teardown()
+  }
+})
+
 test('former ids are never recommended while their current item remains eligible', async () => {
   setup()
   try {
