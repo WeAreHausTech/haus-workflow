@@ -6,6 +6,7 @@ import checkbox from '@inquirer/checkbox'
 import { loadCatalog } from '../catalog/load-catalog.js'
 import { getCacheDir, getCacheManifestAge } from '../catalog/remote-catalog.js'
 import { writeClaudeFiles } from '../claude/write-claude-files.js'
+import { untrackMachineLocalArtifacts, writeGitignore } from '../claude/write-gitignore.js'
 import { collectLlmsTxtUrls, fetchRefsForItems, pruneOrphanedRefs } from '../refs/fetch-refs.js'
 import type { Recommendation } from '../types.js'
 import type { LockItem } from '../update/lockfile.js'
@@ -159,6 +160,14 @@ export async function runApply(options: {
     force: options.force,
     prune: options.prune,
   })
+
+  // Machine-local scan artifacts (context-map.json, recommendation.json,
+  // sources-report.json, deep-context.json) must never be tracked in git — see
+  // ADR-0025. Ensure .gitignore covers them, then migrate any project that already
+  // has them tracked by untracking (never deleting) the files, with a clear,
+  // non-silent explanation per file. Idempotent: a second run finds nothing tracked.
+  await writeGitignore(root, isDryRun)
+  await untrackMachineLocalArtifacts(root, isDryRun, warn)
 
   if (!isDryRun) {
     // Best-effort: fetch llms.txt refs only for items this run actually installed

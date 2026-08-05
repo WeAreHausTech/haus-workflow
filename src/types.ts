@@ -11,10 +11,19 @@ export type PackageManager = 'yarn' | 'pnpm' | 'npm' | 'unknown'
  */
 export type DetectionStatus = 'supported' | 'partial' | 'unknown'
 
-/** Scanned repository context written to .haus-workflow/context-map.json. */
+/**
+ * Scanned repository context written to .haus-workflow/context-map.json.
+ *
+ * Deliberately has no `root` (or any other absolute-path) field: context-map.json is
+ * gitignored (ADR-0025) but that's defense in *depth* — if it leaks into git anyway
+ * (a stale commit, a misconfigured gitignore, a fork that never ran `haus apply`), it
+ * must never carry a machine-local absolute path like `/Users/<name>/...` or
+ * `/home/<name>/...`. Nothing in src/ reads a `root`/`context.root` field back off a
+ * scanned ContextMap (confirmed by repo-wide grep before removing it) — repoName
+ * already carries what little root-derived signal downstream code needs.
+ */
 export type ContextMap = {
   generatedAt: string
-  root: string
   repoName: string
   packageManager: PackageManager
   repoRoles: string[]
