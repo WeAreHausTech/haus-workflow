@@ -6,10 +6,16 @@ import {
   GITIGNORE_BEGIN,
   GITIGNORE_END,
   GITIGNORED_ARTIFACT_PATHS,
+  LINK_CONTEXT_GITIGNORE_BEGIN,
+  LINK_CONTEXT_GITIGNORE_END,
+  LINKED_CONTEXT_GITIGNORE_PATTERNS,
   buildGitignoreBlock,
+  buildLinkContextGitignoreBlock,
   gitignoreCovers,
   injectGitignoreBlock,
+  injectLinkContextGitignoreBlock,
   stripGitignoreBlock,
+  stripLinkContextGitignoreBlock,
 } from '../src/claude/write-gitignore.js'
 
 describe('write-gitignore: block content', () => {
@@ -150,5 +156,45 @@ describe('write-gitignore: stripGitignoreBlock', () => {
 
   it('is a no-op when no managed block is present', () => {
     assert.equal(stripGitignoreBlock('dist/\n'), 'dist/\n')
+  })
+})
+
+describe('write-gitignore: link-context block (separate sentinel pair)', () => {
+  it('covers the three link-context glob patterns', () => {
+    const block = buildLinkContextGitignoreBlock()
+    assert.ok(block.startsWith(LINK_CONTEXT_GITIGNORE_BEGIN))
+    assert.ok(block.trimEnd().endsWith(LINK_CONTEXT_GITIGNORE_END))
+    for (const p of LINKED_CONTEXT_GITIGNORE_PATTERNS) {
+      assert.ok(block.includes(p), p)
+    }
+  })
+
+  it('uses a distinct sentinel pair from the scan-artifacts block', () => {
+    assert.notEqual(LINK_CONTEXT_GITIGNORE_BEGIN, GITIGNORE_BEGIN)
+    assert.notEqual(LINK_CONTEXT_GITIGNORE_END, GITIGNORE_END)
+  })
+
+  it('coexists with the scan-artifacts block in the same file without collision', () => {
+    let out = injectGitignoreBlock('')
+    out = injectLinkContextGitignoreBlock(out)
+    assert.equal(out.match(/HAUS:BEGIN haus-managed v=1/g)?.length, 1)
+    assert.equal(out.match(/HAUS:BEGIN haus-managed-link-context v=1/g)?.length, 1)
+    assert.ok(out.includes('.haus-workflow/context-map.json'))
+    assert.ok(out.includes('.claude/skills/*--*/'))
+
+    // Stripping one block leaves the other fully intact.
+    const strippedArtifacts = stripGitignoreBlock(out)
+    assert.equal(strippedArtifacts.includes(GITIGNORE_BEGIN), false)
+    assert.ok(strippedArtifacts.includes(LINK_CONTEXT_GITIGNORE_BEGIN))
+
+    const strippedBoth = stripLinkContextGitignoreBlock(strippedArtifacts)
+    assert.equal(strippedBoth.trim(), '')
+  })
+
+  it('is idempotent — re-injecting never duplicates the block', () => {
+    const once = injectLinkContextGitignoreBlock('dist/\n')
+    const twice = injectLinkContextGitignoreBlock(once)
+    assert.equal(twice, once)
+    assert.equal(twice.match(/HAUS:BEGIN haus-managed-link-context/g)?.length, 1)
   })
 })

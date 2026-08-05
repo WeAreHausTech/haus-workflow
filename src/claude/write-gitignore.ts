@@ -66,11 +66,18 @@ function findLineMarker(
   return null
 }
 
-/** Char range of the full managed block (BEGIN..END), or null if absent/unterminated. */
-function findBlockRange(content: string): { start: number; end: number } | null {
-  const begin = findLineMarker(content, GITIGNORE_BEGIN)
+/** Char range of a managed block bounded by `beginMarker`/`endMarker`, or null if
+ * absent/unterminated. Generic over the marker pair so a second, independent managed
+ * block (see `LINK_CONTEXT_GITIGNORE_BEGIN`/`_END` below) can coexist in the same file
+ * without either block's finder tripping over the other's sentinel lines. */
+function findBlockRangeFor(
+  content: string,
+  beginMarker: string,
+  endMarker: string,
+): { start: number; end: number } | null {
+  const begin = findLineMarker(content, beginMarker)
   if (!begin) return null
-  const end = findLineMarker(content, GITIGNORE_END, begin.end)
+  const end = findLineMarker(content, endMarker, begin.end)
   if (!end) return null
   return { start: begin.start, end: end.end }
 }
@@ -109,55 +116,68 @@ export function gitignoreCovers(lines: readonly string[], entry: string): boolea
   return false
 }
 
-/** Lines of `content` with the managed block's own lines excluded (if present). */
-function linesOutsideBlock(content: string): string[] {
-  const range = findBlockRange(content)
+/** Lines of `content` with the given managed block's own lines excluded (if present). */
+function linesOutsideBlockFor(content: string, beginMarker: string, endMarker: string): string[] {
+  const range = findBlockRangeFor(content, beginMarker, endMarker)
   const outside = range ? content.slice(0, range.start) + content.slice(range.end) : content
   return outside.split('\n')
 }
 
 /**
- * Build the managed block for the artifact paths not already covered by the user's
- * existing (non-managed) `.gitignore` lines. Returns null when every artifact path
- * is already covered — nothing to add.
+ * Build a managed block bounded by `beginMarker`/`endMarker` for the `patterns` not
+ * already covered by the user's existing (non-managed) `.gitignore` lines. Returns
+ * null when every pattern is already covered — nothing to add. Shared by both the
+ * scan-artifacts block and the link-context block below.
  */
-function buildBlockForUncovered(existing: string): string | null {
-  const outside = linesOutsideBlock(existing)
-  const needed = GITIGNORED_ARTIFACT_PATHS.filter((p) => !gitignoreCovers(outside, p))
+function buildBlockFor(
+  existing: string,
+  beginMarker: string,
+  endMarker: string,
+  comment: string,
+  patterns: readonly string[],
+): string | null {
+  const outside = linesOutsideBlockFor(existing, beginMarker, endMarker)
+  const needed = patterns.filter((p) => !gitignoreCovers(outside, p))
   if (needed.length === 0) return null
-  return [
-    GITIGNORE_BEGIN,
-    '# haus scan artifacts — machine-local, must never be committed (see ADR-0025)',
-    ...needed,
-    GITIGNORE_END,
-  ].join('\n')
+  return [beginMarker, comment, ...needed, endMarker].join('\n')
 }
+
+const ARTIFACT_BLOCK_COMMENT =
+  '# haus scan artifacts — machine-local, must never be committed (see ADR-0025)'
 
 /** Build the full managed block listing every covered artifact path, regardless of
  * what else is in the file. Exposed for tests that want the canonical full block. */
 export function buildGitignoreBlock(): string {
   return [
     GITIGNORE_BEGIN,
-    '# haus scan artifacts — machine-local, must never be committed (see ADR-0025)',
+    ARTIFACT_BLOCK_COMMENT,
     ...GITIGNORED_ARTIFACT_PATHS,
     GITIGNORE_END,
   ].join('\n')
 }
 
 /**
- * Replace the existing managed block in `existing` with a freshly computed one (only
- * listing artifact paths not already covered by the user's own entries), or append it
- * when none is present. When nothing needs to be added, an existing managed block is
- * stripped (nothing left for it to responsibly own); a file with no managed block and
- * nothing to add is returned unchanged. User content outside the sentinels is always
- * preserved. The result ends with a single trailing newline whenever a block exists.
+ * Replace an existing managed block (bounded by `beginMarker`/`endMarker`) in
+ * `existing` with a freshly computed one (only listing patterns not already covered
+ * by the user's own entries), or append it when none is present. When nothing needs
+ * to be added, an existing managed block is stripped (nothing left for it to
+ * responsibly own); a file with no managed block and nothing to add is returned
+ * unchanged. User content outside the sentinels — including any OTHER managed block
+ * using a different marker pair — is always preserved. The result ends with a single
+ * trailing newline whenever a block exists.
  */
-export function injectGitignoreBlock(existing: string): string {
-  const block = buildBlockForUncovered(existing)
-  const range = findBlockRange(existing)
+function injectBlockFor(
+  existing: string,
+  beginMarker: string,
+  endMarker: string,
+  comment: string,
+  patterns: readonly string[],
+): string {
+  const block = buildBlockFor(existing, beginMarker, endMarker, comment, patterns)
+  const range = findBlockRangeFor(existing, beginMarker, endMarker)
 
   if (block === null) {
-    // Nothing needs haus's block anymore (every artifact already covered by the
+    // Nothing needs haus's block anymore (every pattern already covered by the
     // user's own entries) — strip a stale managed block if one exists; otherwise
     // leave the file untouched.
     if (!range) return existing
@@ -174,7 +194,7 @@ export function injectGitignoreBlock(existing: string): string {
   }
 
   // Malformed prior file (BEGIN present but END missing): replace trailing broken block.
-  const loneBegin = findLineMarker(existing, GITIGNORE_BEGIN)
+  const loneBegin = findLineMarker(existing, beginMarker)
   if (loneBegin) {
     const before = existing.slice(0, loneBegin.start).trimEnd()
     if (before.length === 0) return `${block}\n`
@@ -186,14 +206,96 @@ export function injectGitignoreBlock(existing: string): string {
   return `${trimmed}\n\n${block}\n`
 }
 
-/** Remove the managed block from `existing`, preserving surrounding user content. */
-export function stripGitignoreBlock(existing: string): string {
-  const range = findBlockRange(existing)
+/**
+ * Replace the existing scan-artifacts managed block in `existing` with a freshly
+ * computed one (only listing artifact paths not already covered by the user's own
+ * entries), or append it when none is present. See {@link injectBlockFor} for the
+ * shared mechanics; this is a fixed application of it to `GITIGNORED_ARTIFACT_PATHS`.
+ */
+export function injectGitignoreBlock(existing: string): string {
+  return injectBlockFor(
+    existing,
+    GITIGNORE_BEGIN,
+    GITIGNORE_END,
+    ARTIFACT_BLOCK_COMMENT,
+    GITIGNORED_ARTIFACT_PATHS,
+  )
+}
+
+/** Remove a managed block (bounded by `beginMarker`/`endMarker`) from `existing`,
+ * preserving surrounding user content (including any other managed block). */
+function stripBlockFor(existing: string, beginMarker: string, endMarker: string): string {
+  const range = findBlockRangeFor(existing, beginMarker, endMarker)
   if (!range) return existing
   const before = existing.slice(0, range.start)
   const after = existing.slice(range.end)
   const merged = `${before}${after}`.replace(/\n{3,}/g, '\n\n').trimEnd()
   return merged.length > 0 ? `${merged}\n` : ''
+}
+
+/** Remove the scan-artifacts managed block from `existing`, preserving surrounding
+ * user content (and any other managed block, e.g. the link-context one). */
+export function stripGitignoreBlock(existing: string): string {
+  return stripBlockFor(existing, GITIGNORE_BEGIN, GITIGNORE_END)
+}
+
+/**
+ * Opening/closing sentinels for a second, independent managed block that keeps
+ * `haus workspace link-context` copies out of version control. A distinct marker
+ * pair (not a shared list appended to `GITIGNORED_ARTIFACT_PATHS`) is deliberate:
+ * these patterns are glob-based (`*--*`) rather than literal paths, they apply at a
+ * workspace root rather than a per-repo checkout, and `listTrackedArtifactPaths`/
+ * `untrackMachineLocalArtifacts` (below) are scan-artifact-specific — mixing the two
+ * lists would make that untrack flow silently start acting on link-context copies
+ * too, and its user-facing messages ("machine-local scan output") would be wrong
+ * for them. Same sentinel *style* (`# HAUS:BEGIN … v=1` / `# HAUS:END …`) as the
+ * scan-artifacts block, just namespaced so both can coexist in one `.gitignore`
+ * without either's line-scanner mistaking the other's sentinel for its own.
+ */
+export const LINK_CONTEXT_GITIGNORE_BEGIN = '# HAUS:BEGIN haus-managed-link-context v=1'
+export const LINK_CONTEXT_GITIGNORE_END = '# HAUS:END haus-managed-link-context'
+
+/**
+ * Glob patterns covering every copy `haus workspace link-context` writes at a
+ * workspace root — `.claude/{skills,agents,commands}/<repo-folder>--<name>`. The
+ * `<repo-folder>--` prefix (never omitted — see `src/workspace/link-context/plan.ts`)
+ * is exactly what makes a single glob per asset type sufficient instead of one
+ * `.gitignore` line per copied entry.
+ */
+export const LINKED_CONTEXT_GITIGNORE_PATTERNS = [
+  '.claude/skills/*--*/',
+  '.claude/agents/*--*.md',
+  '.claude/commands/*--*.md',
+] as const
+
+const LINK_CONTEXT_BLOCK_COMMENT =
+  '# haus workspace link-context copies — derived cross-repo skill/agent/command copies, never committed'
+
+/** Build the full link-context managed block, regardless of what else is in the file.
+ * Exposed for tests that want the canonical full block. */
+export function buildLinkContextGitignoreBlock(): string {
+  return [
+    LINK_CONTEXT_GITIGNORE_BEGIN,
+    LINK_CONTEXT_BLOCK_COMMENT,
+    ...LINKED_CONTEXT_GITIGNORE_PATTERNS,
+    LINK_CONTEXT_GITIGNORE_END,
+  ].join('\n')
+}
+
+/** Same contract as {@link injectGitignoreBlock}, for the link-context block. */
+export function injectLinkContextGitignoreBlock(existing: string): string {
+  return injectBlockFor(
+    existing,
+    LINK_CONTEXT_GITIGNORE_BEGIN,
+    LINK_CONTEXT_GITIGNORE_END,
+    LINK_CONTEXT_BLOCK_COMMENT,
+    LINKED_CONTEXT_GITIGNORE_PATTERNS,
+  )
+}
+
+/** Same contract as {@link stripGitignoreBlock}, for the link-context block. */
+export function stripLinkContextGitignoreBlock(existing: string): string {
+  return stripBlockFor(existing, LINK_CONTEXT_GITIGNORE_BEGIN, LINK_CONTEXT_GITIGNORE_END)
 }
 
 /**
@@ -207,6 +309,22 @@ export async function writeGitignore(root: string, dryRun: boolean): Promise<str
   const filePath = path.join(root, '.gitignore')
   const prev = (await fs.pathExists(filePath)) ? await fs.readFile(filePath, 'utf8') : ''
   const next = injectGitignoreBlock(prev)
+  await writeManagedText(root, filePath, next, dryRun)
+  return filePath
+}
+
+/**
+ * Write `.gitignore` at `root` (a workspace root), injecting (or refreshing) the
+ * link-context managed block so `haus workspace link-context` copies are never
+ * tracked. Nothing else in this module writes to a workspace root's own
+ * `.gitignore` today — `writeGitignore` above is only ever called per member repo
+ * (`commands/apply.ts`), never at the workspace root itself. Same additive/
+ * idempotent contract as `writeGitignore`. Returns the absolute path of the file.
+ */
+export async function writeLinkContextGitignore(root: string, dryRun: boolean): Promise<string> {
+  const filePath = path.join(root, '.gitignore')
+  const prev = (await fs.pathExists(filePath)) ? await fs.readFile(filePath, 'utf8') : ''
+  const next = injectLinkContextGitignoreBlock(prev)
   await writeManagedText(root, filePath, next, dryRun)
   return filePath
 }
