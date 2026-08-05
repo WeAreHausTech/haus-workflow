@@ -5,9 +5,12 @@
  * `*.csproj`/`*.sln`/`*.fsproj`, `pom.xml`/`build.gradle*`, `Gemfile`),
  * collapses them to their owning directory, drops monorepo sub-packages (a manifest
  * dir nested under another repo root is part of that repo, not its own repo), and
- * resolves a best-effort role via a `fast` scan. Results merge into an existing
- * `haus.workspace.yaml` by `path` — user-edited `name`/`role` and top-level
- * `relationships`/`client` are preserved, new repos are appended, nothing is deleted.
+ * resolves a best-effort role via a `fast` scan (advisory/display-only — when the scan
+ * detects multiple roles, e.g. a fullstack repo with both `express-service` and
+ * `react-app` signals, they are joined with `+` rather than keeping only the first
+ * alphabetically-sorted one). Results merge into an existing `haus.workspace.yaml` by
+ * `path` — user-edited `name`/`role` and top-level `relationships`/`client` are
+ * preserved, new repos are appended, nothing is deleted.
  *
  * Risk guards: `followSymbolicLinks:false` (symlink cycles), `deep:maxDepth`
  * (deep monorepos), and `node_modules`/`.git`/`vendor`/`dist`/`.haus-workflow` ignores.
@@ -29,6 +32,13 @@ export type DiscoveredRepo = {
   name: string
   /** Path relative to the workspace root, posix-separated (derived from fast-glob / path.posix). */
   path: string
+  /**
+   * Best-effort role label, advisory/display-only (not consumed by `workspace setup`'s
+   * per-repo `runSetupCore`, which re-scans each repo independently for the real
+   * role-set). When the scan detects more than one role — e.g. a fullstack repo with
+   * both `express-service` and `react-app` signals — every detected role is joined
+   * with `+` rather than silently keeping only the first alphabetically-sorted one.
+   */
   role: string
 }
 
@@ -121,7 +131,11 @@ export async function discoverRepos(
     let role = 'auto'
     try {
       const scan = await scanProject(absDir)
-      if (scan.repoRoles[0]) role = scan.repoRoles[0]
+      // scan.repoRoles is alphabetically sorted (finalizeRoles(), detection.ts) — taking
+      // only [0] silently picked "express-service" over "react-app" for a fullstack repo
+      // just because "e" < "r". This field is advisory/display-only, so join every
+      // detected role instead of dropping all but the first.
+      if (scan.repoRoles.length > 0) role = scan.repoRoles.join('+')
     } catch {
       // Best-effort: an unscannable repo still counts as a member, role stays 'auto'.
     }
