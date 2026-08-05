@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.4.1](https://github.com/WeAreHausTech/haus-workflow/compare/v1.4.0...v1.4.1) (2026-08-05)
+
+### Bug Fixes
+
+- **catalog:** close Combined/seam remaining items (audit §B, §D3, §E1-3) ([#196](https://github.com/WeAreHausTech/haus-workflow/issues/196)) ([7d6407e](https://github.com/WeAreHausTech/haus-workflow/commit/7d6407eb08baf7cccc418ad3015fe26e39ccfd61))
+
 ## [1.4.0](https://github.com/WeAreHausTech/haus-workflow/compare/v1.3.0...v1.4.0) (2026-08-05)
 
 ### Features
