@@ -133,3 +133,71 @@ test('fetchCatalogBlobPaths de-duplicates concurrent calls into one network fetc
     else process.env.HAUS_CATALOG_REMOTE_BASE = prevBase
   }
 })
+
+test('fetchCatalogBlobPaths stops retrying after GitHub rate limit', async () => {
+  const prevBase = process.env.HAUS_CATALOG_REMOTE_BASE
+  const prevFetch = globalThis.fetch
+  const prevHaus = process.env.HAUS_GITHUB_TOKEN
+  const prevGithub = process.env.GITHUB_TOKEN
+  delete process.env.HAUS_CATALOG_REMOTE_BASE
+  delete process.env.HAUS_GITHUB_TOKEN
+  delete process.env.GITHUB_TOKEN
+  let commitCalls = 0
+  globalThis.fetch = async (url) => {
+    if (String(url).includes('/commits/')) {
+      commitCalls++
+      return {
+        ok: false,
+        status: 403,
+        headers: {
+          get: (k) => {
+            const key = String(k).toLowerCase()
+            if (key === 'x-ratelimit-remaining') return '0'
+            if (key === 'x-ratelimit-reset') return '1785908480'
+            return null
+          },
+        },
+      }
+    }
+    return { ok: false, status: 500, headers: { get: () => null } }
+  }
+  try {
+    const { fetchCatalogBlobPaths, _resetRemoteCatalogCachesForTests } =
+      await import('../src/catalog/remote-catalog.js')
+    const { getGithubRateLimitHit, clearGithubRateLimitHit } =
+      await import('../src/catalog/remote-catalog/github-rate-limit.js')
+    const { _setGhTokenResolverForTests, _resetGithubAuthCacheForTests } =
+      await import('../src/catalog/remote-catalog/github-auth.js')
+    _resetRemoteCatalogCachesForTests()
+    _resetGithubAuthCacheForTests()
+    _setGhTokenResolverForTests(async () => null)
+    clearGithubRateLimitHit()
+
+    const first = await fetchCatalogBlobPaths('')
+    const second = await fetchCatalogBlobPaths('')
+    assert.equal(first, null)
+    assert.equal(second, null)
+    assert.equal(commitCalls, 1, `expected one commit fetch after rate limit, got ${commitCalls}`)
+    assert.deepEqual(getGithubRateLimitHit(), {
+      resetAt: 1785908480,
+      authenticated: false,
+    })
+  } finally {
+    globalThis.fetch = prevFetch
+    if (prevBase === undefined) delete process.env.HAUS_CATALOG_REMOTE_BASE
+    else process.env.HAUS_CATALOG_REMOTE_BASE = prevBase
+    if (prevHaus === undefined) delete process.env.HAUS_GITHUB_TOKEN
+    else process.env.HAUS_GITHUB_TOKEN = prevHaus
+    if (prevGithub === undefined) delete process.env.GITHUB_TOKEN
+    else process.env.GITHUB_TOKEN = prevGithub
+    const { _resetRemoteCatalogCachesForTests } = await import('../src/catalog/remote-catalog.js')
+    const { clearGithubRateLimitHit } =
+      await import('../src/catalog/remote-catalog/github-rate-limit.js')
+    const { _setGhTokenResolverForTests, _resetGithubAuthCacheForTests } =
+      await import('../src/catalog/remote-catalog/github-auth.js')
+    _setGhTokenResolverForTests(undefined)
+    _resetGithubAuthCacheForTests()
+    _resetRemoteCatalogCachesForTests()
+    clearGithubRateLimitHit()
+  }
+})

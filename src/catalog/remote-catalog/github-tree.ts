@@ -7,11 +7,15 @@ import { warn } from '../../utils/logger.js'
 import { CATALOG_GITHUB_API_URL } from '../constants.js'
 import { isSafeRelativeFilePath } from '../path-safety.js'
 
+import { getGithubApiHeaders } from './github-auth.js'
+import { isGithubRateLimitedResponse, noteGithubRateLimit } from './github-rate-limit.js'
 import { fetchText } from './http.js'
-import { getResolvedCatalogRef, githubApiHeaders, isTestMode } from './ref.js'
+import { getResolvedCatalogRef, isTestMode } from './ref.js'
 
 let cachedBlobPaths: string[] | undefined
 let inFlightBlobPaths: Promise<string[] | null> | undefined
+/** When true, further tree fetches are skipped for this sync (rate-limit negative cache). */
+let treeListingBlocked = false
 
 /** Drop unsafe entries; returns null when any path in the listing is rejected. */
 function sanitizeRelativeFilePaths(files: string[], label: string): string[] | null {
@@ -61,19 +65,32 @@ async function listMockPrefixFiles(base: string, prefix: string): Promise<string
 
 async function fetchGitHubRecursiveBlobPaths(ref: string): Promise<string[] | null> {
   try {
-    const headers = githubApiHeaders()
+    const headers = await getGithubApiHeaders()
+    const authenticated = Boolean(headers['Authorization'])
     const commitRes = await fetch(`${CATALOG_GITHUB_API_URL}/commits/${encodeURIComponent(ref)}`, {
       signal: AbortSignal.timeout(15_000),
       headers,
     })
-    if (!commitRes.ok) return null
+    if (!commitRes.ok) {
+      if (isGithubRateLimitedResponse(commitRes)) {
+        noteGithubRateLimit(commitRes, authenticated)
+        treeListingBlocked = true
+      }
+      return null
+    }
     const commit = (await commitRes.json()) as { commit: { tree: { sha: string } } }
     const treeSha = commit.commit.tree.sha
     const treeRes = await fetch(`${CATALOG_GITHUB_API_URL}/git/trees/${treeSha}?recursive=1`, {
       signal: AbortSignal.timeout(30_000),
       headers,
     })
-    if (!treeRes.ok) return null
+    if (!treeRes.ok) {
+      if (isGithubRateLimitedResponse(treeRes)) {
+        noteGithubRateLimit(treeRes, authenticated)
+        treeListingBlocked = true
+      }
+      return null
+    }
     const tree = (await treeRes.json()) as {
       tree: Array<{ path: string; type: string }>
       truncated?: boolean
@@ -90,6 +107,7 @@ async function fetchGitHubRecursiveBlobPaths(ref: string): Promise<string[] | nu
 
 /** All blob paths in the catalog repo at the resolved ref (cached per sync). */
 export async function fetchCatalogBlobPaths(_base: string): Promise<string[] | null> {
+  if (treeListingBlocked) return null
   if (cachedBlobPaths) return cachedBlobPaths
   if (isTestMode() && process.env['HAUS_CATALOG_REMOTE_BASE']) return null
   if (!inFlightBlobPaths) {
@@ -131,12 +149,14 @@ export async function listFilesUnderCatalogPrefix(
 export function _resetBlobPathCacheForTests(): void {
   cachedBlobPaths = undefined
   inFlightBlobPaths = undefined
+  treeListingBlocked = false
 }
 
 /** Resets the per-sync blob-path cache at the start of a fresh `syncRemoteCatalog` run. */
 export function _resetBlobPathCacheForNewSync(): void {
   cachedBlobPaths = undefined
   inFlightBlobPaths = undefined
+  treeListingBlocked = false
 }
 
 export { listFilesRecursive }

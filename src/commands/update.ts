@@ -3,6 +3,7 @@ import path from 'node:path'
 
 import { findFormerIdMigrations } from '../catalog/former-ids.js'
 import { loadCatalog } from '../catalog/load-catalog.js'
+import { formatGithubRateLimitMessage } from '../catalog/remote-catalog/github-rate-limit.js'
 import { fetchLatestCatalogTag, syncRemoteCatalog } from '../catalog/remote-catalog.js'
 import { refreshProjectApply } from '../claude/refresh-project.js'
 import { applyInstall } from '../install/apply.js'
@@ -127,6 +128,9 @@ export async function runUpdate(options: {
   }
   if (sync.failed.length > 0) {
     warn(`Failed to fetch ${sync.failed.length} item(s): ${sync.failed.join(', ')}`)
+  }
+  if (sync.rateLimit) {
+    warn(formatGithubRateLimitMessage(sync.rateLimit))
   }
 
   await refreshGlobalInstall()

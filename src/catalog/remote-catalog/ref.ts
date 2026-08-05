@@ -8,6 +8,13 @@ import { warn } from '../../utils/logger.js'
 import { packageRoot } from '../../utils/paths.js'
 import { CATALOG_CACHE_SUBDIR, CATALOG_REPO_URL } from '../constants.js'
 
+import { getGithubApiHeaders, _resetGithubAuthCacheForTests } from './github-auth.js'
+import {
+  clearGithubRateLimitHit,
+  isGithubRateLimitedResponse,
+  noteGithubRateLimit,
+} from './github-rate-limit.js'
+
 /** True when running under test mode — only then is HAUS_CATALOG_REMOTE_BASE honoured. */
 export function isTestMode(): boolean {
   return process.env['HAUS_TEST_MODE'] === '1' || process.env['NODE_ENV'] === 'test'
@@ -28,6 +35,8 @@ let inFlightCatalogRef: Promise<string> | undefined
 export function _resetRefCacheForTests(): void {
   cachedCatalogRef = undefined
   inFlightCatalogRef = undefined
+  _resetGithubAuthCacheForTests()
+  clearGithubRateLimitHit()
 }
 
 /**
@@ -82,14 +91,6 @@ function compareSemver(a: [number, number, number], b: [number, number, number])
   return 0
 }
 
-/** Returns auth headers for the GitHub API, if a token is configured. */
-export function githubApiHeaders(): Record<string, string> {
-  const headers: Record<string, string> = { Accept: 'application/vnd.github+json' }
-  const auth = process.env['HAUS_GITHUB_TOKEN'] ?? process.env['GITHUB_TOKEN']
-  if (auth) headers['Authorization'] = `Bearer ${auth}`
-  return headers
-}
-
 /**
  * Fetches the latest release tag from the catalog GitHub repo.
  * Returns null if the request fails or no tags exist.
@@ -99,11 +100,16 @@ export async function fetchLatestCatalogTag(): Promise<string | null> {
   // Skip in test environments to avoid network calls.
   if (isTestMode() && process.env['HAUS_CATALOG_REMOTE_BASE']) return null
   try {
+    const headers = await getGithubApiHeaders()
+    const authenticated = Boolean(headers['Authorization'])
     const res = await fetch(CATALOG_TAGS_API_URL, {
       signal: AbortSignal.timeout(5_000),
-      headers: githubApiHeaders(),
+      headers,
     })
-    if (!res.ok) return null
+    if (!res.ok) {
+      if (isGithubRateLimitedResponse(res)) noteGithubRateLimit(res, authenticated)
+      return null
+    }
     const tags = (await res.json()) as Array<{ name?: string }>
     const valid = tags
       .map((tag) => {
