@@ -1,7 +1,8 @@
 /**
  * Auto-discovery of member repos under a workspace root.
  *
- * One `fast-glob` pass finds repo markers (`.git`, `package.json`, `composer.json`),
+ * One `fast-glob` pass finds repo markers (`.git`, `package.json`, `composer.json`,
+ * `*.csproj`/`*.sln`/`*.fsproj`, `pom.xml`/`build.gradle*`, `Gemfile`),
  * collapses them to their owning directory, drops monorepo sub-packages (a manifest
  * dir nested under another repo root is part of that repo, not its own repo), and
  * resolves a best-effort role via a `fast` scan. Results merge into an existing
@@ -39,7 +40,17 @@ export type DiscoverOptions = {
 }
 
 const DEFAULT_MAX_DEPTH = 3
-const REPO_MARKERS = ['**/.git', '**/package.json', '**/composer.json']
+const REPO_MARKERS = [
+  '**/.git',
+  '**/package.json',
+  '**/composer.json',
+  '**/*.csproj',
+  '**/*.sln',
+  '**/*.fsproj', // .NET
+  '**/pom.xml',
+  '**/build.gradle*', // Java
+  '**/Gemfile', // Ruby
+]
 const IGNORE = [
   '**/node_modules/**',
   '**/.git/**',
