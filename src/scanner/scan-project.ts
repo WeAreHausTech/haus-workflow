@@ -7,6 +7,7 @@ import path from 'node:path'
 import type { ContextMap } from '../types.js'
 import { isRecord } from '../utils/audit-checks.js'
 import { listFiles, readJson, writeJson } from '../utils/fs.js'
+import { resolveRoots } from '../utils/git-root.js'
 import { hausPath } from '../utils/paths.js'
 import { satisfiesVersion } from '../utils/versions.js'
 
@@ -118,10 +119,19 @@ export async function scanProject(root: string): Promise<ScanResult> {
   // doctor render the human-facing message from them, so no prose warning is pushed here.
   const detectionStatus = computeDetectionStatus(roles, stacks, unsupportedSignals)
 
+  // `pkg?.name` is the source of truth; only fall back to a directory name when
+  // absent. That fallback must never be a linked worktree's slug (e.g.
+  // `.claude/worktrees/<slug>`) — resolveRoots() finds the main checkout's
+  // root so the fallback names the real repo. Skipped when pkg.name exists to
+  // avoid an extra git invocation on every scan.
+  const repoNameFallback = pkg?.name
+    ? String(pkg.name)
+    : path.basename((await resolveRoots(root)).mainRoot)
+
   const context: ContextMap = {
     generatedAt: new Date().toISOString(),
     root,
-    repoName: String(pkg?.name ?? path.basename(root)),
+    repoName: repoNameFallback,
     packageManager,
     repoRoles: roles,
     detectedStacks: stacks,
