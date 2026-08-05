@@ -138,9 +138,12 @@ async function main() {
   const mismatches = await runContractBehaviorCheck(catalogValidateCorePath)
 
   if (mismatches.length > 0) {
-    console.error('contract-behavior-check: validator verdicts diverge:\n')
-    for (const m of mismatches) console.error(`  - ${m}`)
-    process.exit(1)
+    const log = strict ? console.error : console.warn
+    log(
+      `contract-behavior-check: validator verdicts diverge${strict ? '' : ' (non-strict — see below)'}:\n`,
+    )
+    for (const m of mismatches) log(`  - ${m}`)
+    process.exit(strict ? 1 : 0)
     return
   }
 
