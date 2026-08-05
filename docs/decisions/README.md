@@ -31,3 +31,4 @@ this index covers CLI/repo decisions. ADR-0001 here links to those where the JSO
 | [0020](0020-ci-gate-aggregation-model.md)                     | `haus ci-gate` — aggregate three commands without changing contracts  | Accepted |
 | [0021](0021-dry-run-diff-symlink-refusal.md)                  | Dry-run diff for catalog items — never follow a symlink into preview  | Accepted |
 | [0022](0022-recommender-gate-breakdown-near-miss.md)          | Recommender gate-breakdown schema and near-miss semantics             | Accepted |
+| [0023](0023-catalog-github-api-auth-rate-limit-ux.md)         | Catalog GitHub API auth resolution and rate-limit UX                  | Accepted |
