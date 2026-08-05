@@ -223,7 +223,10 @@ export async function recommend(
 
   for (const item of items) {
     // Fail-closed: items with a missing or whitespace-only source field cannot be
-    // trust-checked, so block them unconditionally before any policy gate runs.
+    // trust-checked. `buildGateChecks` below still evaluates every other gate (to
+    // populate the per-item `gates` breakdown), but `invalid-source` is first in gate
+    // order, so such an item is always blocked via that first-failure regardless of
+    // what else does or doesn't pass.
     const normSource = typeof item.source === 'string' ? item.source.trim() : ''
     // Normalised tag array — used for exact-tag gates to prevent substring false positives
     // (e.g. "javascript" tag must not match the "java" forbidden gate).
