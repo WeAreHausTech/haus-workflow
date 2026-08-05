@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 
+import { formatRecommendationHuman } from '../src/recommender/explain-formatters.js'
 import {
   buildRecommendationExplanation,
   normalizeRecommendation,
@@ -169,6 +170,36 @@ test('buildRecommendationExplanation returns an empty near-miss list for legacy 
   })
   const explanation = buildRecommendationExplanation(normalized)
   assert.deepEqual(explanation.nearMiss, [])
+})
+
+test('formatRecommendationHuman prints a near-miss section in non-JSON output', () => {
+  const normalized = normalizeRecommendation({
+    recommended: [],
+    skipped: [
+      {
+        id: 'skill.one-gate-away',
+        reason: 'requiresAny unsatisfied: needs svelte',
+        skipReasons: [
+          { code: 'requires-any-unsatisfied', message: 'requiresAny unsatisfied: needs svelte' },
+        ],
+        gates: [
+          { name: 'former-id', passed: true },
+          { name: 'requires-any-unsatisfied', passed: false },
+        ],
+      },
+    ],
+  })
+  const explanation = buildRecommendationExplanation(normalized)
+  const output = formatRecommendationHuman(normalized, explanation.nearMiss)
+  assert.match(output, /Near misses \(one gate away\)/)
+  assert.match(output, /skill\.one-gate-away/)
+  assert.match(output, /missing gate: requires-any-unsatisfied/)
+})
+
+test('formatRecommendationHuman omits the near-miss section when there is none', () => {
+  const normalized = normalizeRecommendation({ recommended: [], skipped: [] })
+  const output = formatRecommendationHuman(normalized, [])
+  assert.doesNotMatch(output, /Near misses/)
 })
 
 test('buildRecommendationExplanation preserves a signal in reasonDetails when present', () => {

@@ -323,6 +323,55 @@ test('gates: a recommended item carries an all-passed gates array', async () => 
   }
 })
 
+test('gates: co-install suppression preserves the removed item\'s gate breakdown', async () => {
+  setup()
+  try {
+    // Both haus.ecc-e2e-testing and haus.ecc-e2e-runner become eligible together (same
+    // requiresAny stack tag), then applyCoInstallSuppression() moves the runner from
+    // recommended into skipped. Its gates array (all-passed, since it was never blocked
+    // by a named gate) must survive that move, not be dropped.
+    const result = await recommend(
+      tmpDir,
+      makeContext(tmpDir, { detectedStacks: { tooling: ['co-install-test-e2e'] } }),
+    )
+    assert.ok(ids(result.recommended).has('haus.ecc-e2e-testing'))
+    const entry = findSkipped(result, 'haus.ecc-e2e-runner')
+    assert.ok(entry, 'ecc-e2e-runner should be suppressed into skipped')
+    assert.equal(entry.skipReasons[0].code, 'co-install-e2e-skill')
+    assert.ok(Array.isArray(entry.gates), 'suppressed entry must keep its gates breakdown')
+    assert.ok(entry.gates.length > 0)
+    assert.ok(entry.gates.every((g) => g.passed === true), 'it passed every named gate')
+  } finally {
+    teardown()
+  }
+})
+
+test('gates: manual --include preserves the previously-skipped gate breakdown', async () => {
+  setup()
+  try {
+    // test.requires-svelte fails only requires-any-unsatisfied. Force-include it, then
+    // confirm the promoted recommended entry still carries that gate breakdown instead
+    // of losing it in the skipped -> recommended splice.
+    const result = await recommend(
+      tmpDir,
+      makeContext(tmpDir, { dependencies: [], detectedStacks: {} }),
+      { include: ['test.requires-svelte'] },
+    )
+    const entry = findRecommended(result, 'test.requires-svelte')
+    assert.ok(entry, 'manually included item should be recommended')
+    assert.equal(entry.selectionMode, 'manual')
+    assert.ok(Array.isArray(entry.gates), 'promoted entry must keep its gates breakdown')
+    const failing = entry.gates.filter((g) => !g.passed)
+    assert.deepEqual(
+      failing.map((g) => g.name),
+      ['requires-any-unsatisfied'],
+      'the gate that was force-overridden should still show as failed',
+    )
+  } finally {
+    teardown()
+  }
+})
+
 test('former ids are never recommended while their current item remains eligible', async () => {
   setup()
   try {

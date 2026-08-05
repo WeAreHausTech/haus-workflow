@@ -17,10 +17,10 @@ export async function runExplainRecommendation(options: { json?: boolean }): Pro
     throw new Error('No recommendation found. Run `haus recommend` first.')
   }
   const normalized = normalizeRecommendation(rec)
+  const explanation = buildRecommendationExplanation(normalized)
   if (options.json) {
-    const explanation = buildRecommendationExplanation(normalized)
     log(JSON.stringify(explanation, null, 2))
     return
   }
-  log(formatRecommendationHuman(normalized))
+  log(formatRecommendationHuman(normalized, explanation.nearMiss))
 }

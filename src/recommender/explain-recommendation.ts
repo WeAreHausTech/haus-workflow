@@ -30,7 +30,7 @@ type RecommendationLike = Partial<Recommendation> & {
 }
 
 /** Output shape for the `haus explain` command. */
-type ExplainRecommendation = {
+export type ExplainRecommendation = {
   selected: Array<{
     id: string
     selectionMode: 'baseline' | 'matched' | 'manual'

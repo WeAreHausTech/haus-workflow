@@ -442,6 +442,10 @@ function applyCoInstallSuppression(recommended: RecommendedEntry[], skipped: Ski
       id: removed.id,
       reason: rule.message,
       skipReasons: [{ code: rule.code, message: rule.message, signal: rule.signal }],
+      // Carry over the gate breakdown from the removed recommended entry — this item
+      // passed every named gate, it was only suppressed by co-install logic, and that
+      // distinction (0 failing gates) matters for near-miss diagnostics.
+      ...(removed.gates ? { gates: removed.gates } : {}),
     })
   }
 }
@@ -494,6 +498,7 @@ function applyManualIncludes(
     if (skipCode === 'requires-any-unsatisfied') {
       warnings.push(`--include: "${id}" added manually though its requiresAny gate is unsatisfied`)
     }
+    const previouslySkipped = skipIdx >= 0 ? skipped[skipIdx] : undefined
     if (skipIdx >= 0) skipped.splice(skipIdx, 1)
 
     const isConfig = item.type === 'config'
@@ -513,6 +518,9 @@ function applyManualIncludes(
       tags: item.tags,
       ecosystem: item.ecosystem,
       tokenEstimate: item.tokenEstimate,
+      // Carry over the gate breakdown from the skipped entry being promoted — a manual
+      // include can force past a failing gate, and that gate is still worth showing.
+      ...(previouslySkipped?.gates ? { gates: previouslySkipped.gates } : {}),
     })
     recommendedIds.add(id)
   }
