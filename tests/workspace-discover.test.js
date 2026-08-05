@@ -146,6 +146,28 @@ test('discoverRepos finds nested repos, excludes decoys, collapses monorepo pack
   assert.ok(!paths.some((p) => p.includes('vendor')), 'vendor excluded')
 })
 
+test('discoverRepos reflects mixed frontend+backend signals in role instead of picking the first alphabetical one', async () => {
+  const ws = mkdtempSync(path.join(os.tmpdir(), 'haus-ws-fullstack-'))
+  // Both `express-service` (dep: express) and `react-app` (dep: react) signals present.
+  // finalizeRoles() sorts alphabetically, so repoRoles[0] would silently be
+  // "express-service" ("e" < "r") if the first-alphabetical bug were still present.
+  writePkg(path.join(ws, 'app'), {
+    name: 'fullstack-app',
+    dependencies: { express: '4.19.0', react: '19.0.0' },
+  })
+
+  const repos = await discoverRepos(ws)
+  const app = repos.find((r) => r.name === 'fullstack-app')
+  assert.ok(app, 'fullstack-app repo present')
+  assert.ok(app.role.includes('express-service'), `expected express-service in role, got ${app.role}`)
+  assert.ok(app.role.includes('react-app'), `expected react-app in role, got ${app.role}`)
+  assert.notEqual(
+    app.role,
+    'express-service',
+    'role must not silently collapse to only the first-alphabetical signal',
+  )
+})
+
 test('discoverRepos resolves paths relative to workspace root and detects a role string', async () => {
   const ws = makeWorkspace()
   const repos = await discoverRepos(ws)
