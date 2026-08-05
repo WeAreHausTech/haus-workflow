@@ -186,15 +186,63 @@ const REPO_MARKERS = [
 
 ---
 
-### Task 3.4 — D6: aggregate per-repo `.claude/agents/` at the workspace root
+### Task 3.4 — D6 (revised): cross-repo skill/agent/command visibility at the workspace root
 
-**Do:** Extend `writeWorkspaceArtifacts` (`src/commands/workspace/aggregate.ts`) to walk each member repo's `.claude/agents/` (and optionally `commands/`, `skills/`) and emit an index/manifest at the workspace root (`.haus-workflow/workspace-agents-index.json` or similar) that `write-workspace-claude-md.ts`'s import block can reference, so agents scoped to a sibling repo remain discoverable when Claude Code is invoked from the meta-repo root. Prefer an index file over copying/symlinking agent files themselves (avoids drift between the copy and the source-of-truth per-repo file).
+**Superseded design note:** the original D6 design (index/manifest file only, no copy/symlink) is dropped. An index is inert JSON — it does not make a sibling repo's skill invocable via Claude Code's own Skill tool/discovery, so it doesn't actually close the gap. Revised per external ticket (vafab-workspace brainstorm, 2026-08-05): Claude Code's directory-scoped skill discovery appears to stop recursing at a nested `.git` boundary, so a member repo's `.claude/skills/`, `.claude/agents/`, `.claude/commands/` never surface when a session starts at the workspace root, even though the files are physically present under the tree.
 
-**Acceptance criteria:** workspace with 2 member repos, each with distinct `.claude/agents/*.md` — after `haus workspace setup`, the workspace-root `CLAUDE.md` import block references both sets, and a generated index lists agent name → owning repo path.
+**Do, in order:**
 
-**Verification:** `yarn test`; manual `haus workspace setup` against a 2-repo fixture, inspect generated `CLAUDE.md`.
+**3.4a — Verify the hypothesis before building anything.** Test three things, not one:
 
-**Dependencies:** none, but logically follows Task 3.1-3.3 (same `workspace` command family) — fine to parallelize across separate branches/worktrees since no shared state.
+1. Symlink discovery: from workspace root's own `.claude/skills/`, symlink to a member repo's `.claude/skills/<name>`; fresh Claude Code session at workspace root; does it appear in the skill list?
+2. Symlink + nested-`.git` re-check: same as (1), but confirm the target isn't excluded because its _resolved_ (realpath) location is still inside a nested `.git` tree — some discovery implementations resolve-then-boundary-check, which would silently defeat the symlink for the same root cause, one hop later.
+3. Copy control: plain copy of the same skill directory into workspace root's `.claude/skills/` (no symlink, no nested `.git` anywhere in the path) — confirm this trivially works. This is the fallback if (1)/(2) fail, and should be built regardless as the safer default (see below).
+
+**Do not build 3.4b onward until this is run and results recorded here.**
+
+**3.4b — Default implementation: copy-with-provenance, not symlink.** New `haus workspace link-context` subcommand (or a phase inside `haus workspace setup`). For each already-haus-initialized member repo (has `.claude/skills|agents|commands`):
+
+- Copy (not symlink) each skill/agent/command into `.claude/{skills,agents,commands}/<repo-folder>--<name>/` at the workspace root, prefixed to avoid collisions (multiple member repos commonly ship `security-review`, `writing-documentation`, etc.).
+- Stamp each copy with provenance metadata (source repo, source relative path, content hash) — reuse the existing managed-file hash/tamper pattern (`checkManagedTamper`, already used for `WORKFLOW.md` staleness in `doctor.ts`) rather than inventing a new mechanism. Mark the copy clearly as "source of truth lives in `<repo>`, do not edit here."
+- **Why copy over symlink, even if 3.4a's hypothesis clears:** matches this codebase's existing "never create/follow symlinks" security posture (ADR-0010; enforced in `scaffold.ts`, `write-claude-files.ts`, `backups.ts`), avoids Windows symlink-permission issues, and doesn't depend on an external tool's undocumented discovery behavior continuing to work across Claude Code versions. Only revisit symlinking if the team explicitly wants live-edit convenience over that safety margin — write it as an ADR either way (see 3.4e).
+- Not committed — these are derived from local `repos.local.json` path overrides and which member repos are actually cloned. Add a `.gitignore` pattern (parallel to the existing `.claude/worktrees/` entry).
+- Track linked/copied entries in a new `.haus-workflow/workspace.manifest.json` section, e.g. `linkedContext: [{ repo, type: 'skill'|'agent'|'command', name, path, sourceHash }]`, so `doctor`/`apply --write` know these are generated and don't double-manage or misreport them as drift.
+- Run automatically as the last step of `haus workspace setup`; also expose standalone so it can re-run after `project:clone`/`project:cloneandsetup` without a full re-setup.
+- Removal: if a member repo drops out of `haus.workspace.yaml` or is no longer cloned locally, remove its copied entries (scoped equivalent of `haus undo`).
+
+**3.4c — `doctor` staleness check.** Extend `workspace/doctor.ts` (or `commands/doctor.ts` when run at a workspace root) to compare each `linkedContext` entry's stored `sourceHash` against the live source file in the member repo; flag `stale — re-run haus workspace link-context` the same way template staleness is reported today. A copied entry with a hash mismatch is staleness, not local tampering — don't route it through the same "modified locally" tamper flag used for catalog-managed files.
+
+**3.4d — Edge cases (from ticket, carry into acceptance criteria):**
+
+- Member repo not cloned locally yet → skip, log clearly, no error.
+- Name collision surviving the repo-folder prefix (two repos with the same folder name) → fail loudly with a clear message; never silently overwrite.
+- Member repo has a locally-edited (non-catalog) skill → copy it same as any other; the member repo remains the owner of the original.
+- Windows symlink note is moot under copy-default, but document it in `docs/architecture.md` if symlink is ever revisited.
+
+**3.4e — ADR required.** Per `WORKFLOW.md` → "Architecture Decision Records" (security model choice), write `docs/decisions/NNNN-workspace-cross-repo-context-copy-vs-symlink.md` before implementing 3.4b, documenting: the verified 3.4a results, why copy-with-provenance was chosen over symlink, and the staleness tradeoff accepted.
+
+**Acceptance criteria (ticket-sourced):**
+
+- Workspace with ≥2 haus-initialized member repos: after `haus workspace setup` (or standalone `link-context`) and a **new** Claude Code session at the workspace root, member repos' skills/agents appear in the skill list with no name collisions.
+- `haus doctor` at the workspace root does not flag the copied entries as drift or "modified locally" — only as `stale` when the source has changed.
+- Removing/unlinking a member repo cleans up its copied entries fully (no orphans).
+- Generic — works against any multi-repo workspace (not hardcoded to vafab-workspace); test against at least one other workspace besides the one that surfaced the bug.
+
+**Verification:** `yarn test` (fixture-based: 2 synthetic member repos with distinct skills, run `link-context`, assert copies + manifest section + collision-fail case); manual repro against `vafab-workspace` — real Claude Code session, confirm skill list.
+
+**Dependencies:** 3.4a gates 3.4b-3.4e. Independent of Tasks 3.1-3.3 (different subsystem — `aggregate.ts`/new `link-context` vs `discover.ts`), can run in a separate worktree in parallel.
+
+---
+
+### Task 3.5 — new: `workspace`/`meta-repo` role so `doctor` stops flagging noise at workspace roots
+
+**Do:** Add a `workspace` role to `src/scanner/detection-registry.ts`, detected via presence of `repos.manifest.json` and/or `haus.workspace.yaml` at the scan root (same signal `workspace/discover.ts` already uses). When this role is present, suppress or reword the generic "Stack not recognised" message from `src/recommender/policies.ts:66-67` and the "no framework / no `.env.example` / no test script" warnings in plain `commands/doctor.ts` — a workspace root legitimately has none of these. Also stop carrying forward a stale per-app role (e.g. `dotnet-service`) into a workspace root's own `context-map.json` if one was scanned before the meta-repo pattern existed.
+
+**Acceptance criteria:** `haus doctor` run at a workspace root (has `repos.manifest.json`, no runnable stack of its own) reports something like `Roles: workspace` and does not emit "Stack not recognised" / missing-`.env.example` / missing-test-script warnings.
+
+**Verification:** `yarn test` with a fixture workspace root; `yarn test` regression on existing non-workspace fixtures (role detection must not fire for a normal single-repo project).
+
+**Dependencies:** none, independent of 3.4.
 
 ---
 
@@ -222,11 +270,18 @@ git worktree add .claude/worktrees/settings-prune-diff -b fix/d10-settings-prune
 git worktree add .claude/worktrees/workspace-cross-reference -b fix/d2-workspace-cross-reference  # Task 3.1
 git worktree add .claude/worktrees/repo-markers -b fix/d3-repo-markers-dotnet-java-ruby            # Task 3.2
 git worktree add .claude/worktrees/discover-role-fix -b fix/d4-discover-role-selection             # Task 3.3
-git worktree add .claude/worktrees/workspace-agents-aggregate -b fix/d6-workspace-agents-aggregate # Task 3.4
+git worktree add .claude/worktrees/cross-repo-context-verify -b spike/d6-symlink-hypothesis-verify   # Task 3.4a, do first, blocks 3.4b-e
+git worktree add .claude/worktrees/cross-repo-context-link -b feat/d6-workspace-link-context          # Task 3.4b-3.4d, after 3.4a
+git worktree add .claude/worktrees/workspace-role-detection -b fix/d6-workspace-meta-repo-role         # Task 3.5, parallel to 3.4
 ```
 
 Each branch: `yarn verify` before opening a PR, per `CLAUDE.md` → "Before opening a PR". `fix:` commits need a regression test (CI `fix-needs-test` gate) — every task above already specifies one.
 
 ## Stop conditions
 
-Per `WORKFLOW.md` → "Stop conditions": stop and ask if Task 1.2's `--force` gate design (warn-only vs hard-block) needs a product decision before the ADR is written, or if any fixture repro in Phase 1 can't be reproduced against current `main` (re-verify before building on a stale finding).
+Per `WORKFLOW.md` → "Stop conditions": stop and ask if Task 1.2's `--force` gate design (warn-only vs hard-block) needs a product decision before the ADR is written, or if any fixture repro in Phase 1 can't be reproduced against current `main` (re-verify before building on a stale finding). Additionally: stop after Task 3.4a — do not proceed to 3.4b-3.4e until the symlink-discovery hypothesis (both the plain case and the nested-`.git` re-check case) is verified and recorded, since the entire mechanism design depends on that result.
+
+## Revision log
+
+- 2026-08-05: Task 3.4 (D6) rewritten per external ticket (vafab-workspace brainstorm) — index-only design dropped as insufficient (inert JSON doesn't make a skill Skill-tool-invocable); replaced with verify-first, copy-with-provenance-by-default design, plus new Task 3.5 for the workspace/meta-repo `doctor` role. Ticket confirmed factual against this repo's source: no cross-repo skill/agent/command aggregation exists anywhere in `src/` (only JSON summaries in `workspace/aggregate.ts`); `policies.ts:66-67`'s "Stack not recognised" message and the stale-role display in `doctor.ts:71` are exact matches for the reported noise; no `workspace`/`meta-repo` role exists in `detection-registry.ts`.
+- 2026-08-05: separate ticket ("worktree-safe root + member materialization") landed as its own plan — [workspace-worktree-materialization.md](workspace-worktree-materialization.md). Two integration points with this plan: (1) that plan's Task 1 (`resolveRoots()`, worktree-vs-main-checkout detection) is complementary to this plan's Task 1.1/D9 (nested-`.git` boundary in the scanner) — same git-boundary-awareness theme, opposite directions (scanning into a sibling repo vs. running from inside a worktree); land independently but check for overlap. (2) that plan's Task 3 (`readMembers()`, unifying `haus.workspace.yaml`/`repos.manifest.json`) should be the single source Task 3.4's copy-with-provenance step uses for member-repo enumeration — don't build a second member-resolution path here.
