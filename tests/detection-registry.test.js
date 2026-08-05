@@ -60,3 +60,20 @@ test('empty context still returns all buckets in canonical order', () => {
   assert.deepEqual(Object.keys(out.stacks), [...STACK_BUCKETS])
   assert.deepEqual(out.roles, [])
 })
+
+test('workspace role fires on repos.manifest.json or haus.workspace.yaml at the scan root', () => {
+  assert.ok(runDetection(ctx({ files: ['repos.manifest.json'] })).roles.includes('workspace'))
+  assert.ok(runDetection(ctx({ files: ['haus.workspace.yaml'] })).roles.includes('workspace'))
+})
+
+test('workspace role does NOT fire for a nested (non-root) occurrence of the marker file', () => {
+  // fileEquals matches the exact relative path only — a marker file that isn't at
+  // the scan root (e.g. inside a sub-directory) must not trigger the workspace role.
+  const out = runDetection(ctx({ files: ['sub/repos.manifest.json', 'nested/haus.workspace.yaml'] }))
+  assert.equal(out.roles.includes('workspace'), false)
+})
+
+test('workspace role does NOT fire for an ordinary single-repo project with no workspace marker', () => {
+  const out = runDetection(ctx({ deps: ['next', 'react'], files: ['next.config.ts'] }))
+  assert.equal(out.roles.includes('workspace'), false)
+})

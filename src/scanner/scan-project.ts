@@ -4,12 +4,14 @@
  */
 import path from 'node:path'
 
+import { WORKSPACE_FILE } from '../commands/workspace/config.js'
 import type { ContextMap } from '../types.js'
 import { isRecord } from '../utils/audit-checks.js'
 import { listFiles, readJson, writeJson } from '../utils/fs.js'
 import { resolveRoots } from '../utils/git-root.js'
 import { hausPath } from '../utils/paths.js'
 import { satisfiesVersion } from '../utils/versions.js'
+import { REPOS_MANIFEST_FILE } from '../workspace/members.js'
 
 import { detectPackageManager } from './detect-package-manager.js'
 import { runDetection } from './detection-registry.js'
@@ -36,6 +38,11 @@ const SAFE_FILES = [
   'pnpm-lock.yaml',
   'composer.json',
   'composer.lock',
+  // Workspace/meta-repo root markers — presence only, drives the 'workspace' role
+  // (src/scanner/detection-registry.ts). Same files resolveWorkspaceForWorktree()
+  // and readMembers() already treat as the workspace-root signal.
+  WORKSPACE_FILE,
+  REPOS_MANIFEST_FILE,
   'nx.json',
   'turbo.json',
   'tsconfig.json',
