@@ -26,6 +26,7 @@ import { runUndo } from './commands/undo.js'
 import { runUninstallCommand } from './commands/uninstall.js'
 import { runUpdate } from './commands/update.js'
 import { runValidateCatalog } from './commands/validate-catalog.js'
+import { runWorktree } from './commands/workspace/worktree.js'
 import { runWorkspace } from './commands/workspace.js'
 import { error } from './utils/logger.js'
 import { packageRoot } from './utils/paths.js'
@@ -255,6 +256,57 @@ workspace
   .description('Revert haus setup for every configured repo, plus workspace-root artifacts')
   .option('-y, --yes', 'Skip confirmation')
   .action((opts) => runWorkspace('undo', opts))
+
+const worktree = workspace
+  .command('worktree')
+  .description(
+    'Materialize workspace member repos as real git worktrees (per docs/plans/workspace-worktree-materialization.md, Task 4)',
+  )
+worktree
+  .command('add <slug>')
+  .description(
+    'Create a workspace worktree plus one member worktree per repo, on a mirrored branch',
+  )
+  .option('--branch <name>', 'Branch to create/checkout (default: the slug)')
+  .option('--only <repos>', 'Restrict to comma- or space-separated member ids/folders')
+  .option('--no-hydrate', 'Skip hydration (CoW clone + install-reconciliation)')
+  .option('--dry-run', 'Preview without writing or running anything')
+  .action(
+    (slug: string, opts: { branch?: string; only?: string; hydrate?: boolean; dryRun?: boolean }) =>
+      runWorktree('add', {
+        slug,
+        branch: opts.branch,
+        only: opts.only,
+        hydrate: opts.hydrate,
+        dryRun: opts.dryRun,
+      }),
+  )
+worktree
+  .command('hydrate')
+  .description('Re-run CoW clone + install-reconciliation for the current workspace worktree')
+  .option('--only <repos>', 'Restrict to comma- or space-separated member ids/folders')
+  .option('--force', 'Re-clone hydration targets even if already present')
+  .option('--dry-run', 'Preview without writing or running anything')
+  .action((opts: { only?: string; force?: boolean; dryRun?: boolean }) =>
+    runWorktree('hydrate', { only: opts.only, force: opts.force, dryRun: opts.dryRun }),
+  )
+worktree
+  .command('list')
+  .description('List materialized workspace worktrees and their member status')
+  .action(() => runWorktree('list'))
+worktree
+  .command('remove <slug>')
+  .description('Remove a workspace worktree and its member worktrees')
+  .option('--force', 'Bypass the uncommitted/unpushed-work refusal')
+  .option('--dry-run', 'Preview without removing anything')
+  .action((slug: string, opts: { force?: boolean; dryRun?: boolean }) =>
+    runWorktree('remove', { slug, force: opts.force, dryRun: opts.dryRun }),
+  )
+worktree
+  .command('doctor')
+  .description('Fast, side-effect-free health check for the current workspace worktree')
+  .option('--from-hook', 'Emit for the SessionStart hook — always exits 0')
+  .action((opts: { fromHook?: boolean }) => runWorktree('doctor', { fromHook: opts.fromHook }))
 
 program.parseAsync(process.argv).catch((err: unknown) => {
   const message = err instanceof Error ? err.message : String(err)
