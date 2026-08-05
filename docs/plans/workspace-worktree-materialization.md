@@ -41,6 +41,15 @@
 | Trigger                  | `haus workspace worktree add` as the correct path; `SessionStart` hook as the safety net                                                                                                                                                                                                                                         |
 | **Task 3 config source** | **Bridge now**: teach the CLI to also read `repos.manifest.json` via a shared `readMembers()`. No migration for existing workspaces. The 3-file trap stays as a documented known wart; consolidation to one file is deferred to its own future ADR. (Decided 2026-08-05, superseding the ticket's "open, needs Aniisa" framing.) |
 
+## Combined sequencing (with [workspace-detection-and-permissions-fixes.md](workspace-detection-and-permissions-fixes.md))
+
+This plan's Task 1 and Task 2 come **first**, ahead of most of the other plan's tasks — decided 2026-08-05. Rationale: the other plan's Task 1.2 has a throwaway worktree-detection stand-in (`fs.lstatSync('.git')`) that this plan's `resolveRoots()` replaces properly — sequencing the other plan first would mean reworking that check once this lands. This plan also fixes an already-landed data-corruption incident (poisoned `context-map.json` committed to vafab-workspace `main`), higher severity than the other plan's bug-report backlog.
+
+- **Wave 1 (parallel):** this plan's Task 1 (`resolveRoots`) + this plan's Task 2 (untrack machine-local state) + other-plan Task 1.1 (D9 scanner boundary) — mutually independent.
+- **Wave 2:** other-plan Task 1.2 (D1 zero-signal guard — reworked to consume this plan's `resolveRoots()`/`isLinkedWorktree`, depends on Wave 1's both halves) + this plan's Task 3 (`readMembers()`, depends on this plan's Task 1).
+- **Wave 3:** other-plan Task 1.3 (D5 gitignore-awareness — sequence after this plan's Task 2 gitignore-writer, same code area) + this plan's Task 4 (worktree command, depends on Task 1+3) + other-plan Task 3.4/3.5 (Task 3.4 depends on this plan's Task 3).
+- **Last:** this plan's Task 5/6 + other-plan's remaining Phase 2/3 tasks + all ADRs from both plans.
+
 ---
 
 ## Task 1 — Worktree-safe root resolution

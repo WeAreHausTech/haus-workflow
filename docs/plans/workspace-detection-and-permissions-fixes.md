@@ -14,7 +14,6 @@
 | D9  | Still present                           | nested `.git` boundary never enforced — sibling repo's stack signals leak into a meta-repo scan                                                                                      |
 | D5  | Still present                           | zero `.gitignore` awareness anywhere in `src/`                                                                                                                                       |
 | D7  | **False** — closing, no fix             | reporter's own evidence (`tools: ["Edit","Write"]`) disproves the claim; every `Write(...)` rule already has a paired `Edit(...)` rule                                               |
-| D10 | Partially true                          | user-authored deny/ask rules are provably preserved (tested); but rules _haus itself_ previously tracked get silently pruned on `update` with no diff/backup                         |
 | D2  | Still present                           | `setup-project`/`scan` never reference `workspace discover`                                                                                                                          |
 | D3  | Partially true                          | `.NET`/Java/Ruby markers genuinely missing; the report's PHP claim is false (`composer.json` has always been a marker)                                                               |
 | D4  | Partially fixed                         | catalog recommendation already uses an inclusive role-set (fixed); `workspace discover`'s per-repo `role` label still picks `repoRoles[0]` (first-alphabetical, advisory field only) |
@@ -23,7 +22,16 @@
 
 ## Phasing
 
-Ordered by the priority the reporter and you agreed on (D1+D5 first, then D7+D10), with one dependency inserted: **D9 must land with D1**, because D9 is what silently defeats D1's one existing safety net (a leaked sibling stack flips `detectionStatus` from `"unknown"` to `"supported"`, which deletes the warning D1 is supposed to strengthen). Shipping D1 without D9 ships a guard that doesn't actually guard the reporter's own scenario.
+Ordered by the priority the reporter and you agreed on (D1+D5 first, then D7), with one dependency inserted: **D9 must land with D1**, because D9 is what silently defeats D1's one existing safety net (a leaked sibling stack flips `detectionStatus` from `"unknown"` to `"supported"`, which deletes the warning D1 is supposed to strengthen). Shipping D1 without D9 ships a guard that doesn't actually guard the reporter's own scenario.
+
+## Combined sequencing (with [workspace-worktree-materialization.md](workspace-worktree-materialization.md))
+
+The two plans share dependencies — do not execute either in isolation without checking this order. Rationale: Task 1.2 below has a throwaway worktree-detection stand-in (`fs.lstatSync('.git')`) that the other plan's Task 1 (`resolveRoots()`) replaces properly — building Task 1.2 before that lands means reworking it later. The other plan also fixes an already-landed data-corruption incident (higher severity than this backlog).
+
+- **Wave 1 (parallel):** other-plan Task 1 (`resolveRoots`) + other-plan Task 2 (untrack machine-local state) + this plan's Task 1.1 (D9 scanner boundary) — mutually independent.
+- **Wave 2:** this plan's Task 1.2 (D1 zero-signal guard — rework to consume `resolveRoots()`/`isLinkedWorktree` instead of its own lstat check, depends on Wave 1's both halves) + other-plan Task 3 (`readMembers()`, depends on other-plan Task 1).
+- **Wave 3:** this plan's Task 1.3 (D5 gitignore-awareness — sequence after other-plan Task 2's new gitignore-writer, same code area) + other-plan Task 4 (worktree command, depends on other-plan Task 1+3) + this plan's Task 3.4/3.5 (Task 3.4 depends on other-plan Task 3).
+- **Last:** other-plan Task 5/6 + this plan's remaining Phase 2/3 tasks + all ADRs.
 
 ---
 
@@ -87,7 +95,7 @@ Ordered by the priority the reporter and you agreed on (D1+D5 first, then D7+D10
 
 ---
 
-## Phase 2 — D7 (no-op) + D10
+## Phase 2 — D7 (no-op)
 
 ### Task 2.1 — D7: close as invalid, add regression test only
 
@@ -111,26 +119,6 @@ it('never emits Write(pattern) without a matching Edit(pattern), or vice versa',
 **Verification:** `yarn test`.
 
 **Dependencies:** none. **Risk:** none — test-only, no behavior change.
-
----
-
-### Task 2.2 — D10: diff + backup before pruning haus-tracked permission rules
-
-**Do:** In `src/install/settings-merge.ts` (`reconcileManagedRules`, lines ~223-254), when a rule present in `_haus.denyRules`/`_haus.askRules` from a prior run is _not_ in the new build list (i.e., it's about to be pruned):
-
-1. Log an explicit line per pruned rule: `"deny: removed Read(.env) (no longer haus-managed as of vX.Y.Z)"` — via the same output channel `update.ts:110`/`135` already use.
-2. Back up the pre-update `.claude/settings.json` before writing, the same way `applyLock()` backs up `haus.lock.json` (`.haus-workflow/backups/`) — currently `writeProjectSettings()` (`src/claude/merge-project-settings.ts:80-82`) writes via plain `writeJson`, bypassing the managed-file backup path (`writeManagedJson`) that `WORKFLOW.md`/`CLAUDE.md` already use.
-
-**Acceptance criteria:**
-
-- Fixture: settings.json with `_haus.denyRules` containing `Read(.env)`, current `buildDenyRules()` no longer includes it → `update` run prints the removal line and a pre-update backup of `settings.json` exists in `.haus-workflow/backups/`.
-- User-authored rules (never in `_haus.*` ledger) remain untouched and unlogged (already covered by existing `tests/deny-rules.test.js:62-68` — don't regress it).
-
-**Verification:** extend `tests/deny-rules.test.js` with the pruning-with-backup case; `yarn test`.
-
-**Dependencies:** none, independent of Phase 1.
-
-**⚠️ Decision-worthy (optional):** if this pattern (silent-prune-of-previously-managed-rules) is judged a broader trust issue, consider an ADR on "managed settings.json change visibility" — logging alone (this task) may be sufficient without one; use judgment, don't force an ADR for a logging-only fix.
 
 ---
 
@@ -250,6 +238,7 @@ const REPO_MARKERS = [
 
 - **D8** — reporter's own retraction confirmed correct (`doctor` does surface `--include` warnings via `recommendation.json`). No code change. Optional: document the ordering dependency (must run `recommend --include` before `doctor` will show it) in `docs/cli.md`, but not fix-worthy.
 - **D7** — false claim, closing per Task 2.1 (test-only).
+- **D10** — removed from this plan's scope per explicit decision (2026-08-05). Was: diff + backup before pruning haus-tracked permission rules on `update`. If picked up later, needs its own task write-up.
 - Broader ajv/schema adoption, catalog-side changes — none of these findings touch the catalog repo.
 
 ## Suggested execution order & worktrees
@@ -262,9 +251,8 @@ git worktree add .claude/worktrees/scanner-repo-boundary -b fix/d9-nested-repo-b
 git worktree add .claude/worktrees/zero-signal-guard -b fix/d1-worktree-zero-signal-guard  # Task 1.2, after 1.1 merges
 git worktree add .claude/worktrees/gitignore-awareness -b fix/d5-gitignore-awareness       # Task 1.3, parallel
 
-# Phase 2 — fully parallel
+# Phase 2
 git worktree add .claude/worktrees/write-edit-regression -b test/d7-write-edit-pairing     # Task 2.1
-git worktree add .claude/worktrees/settings-prune-diff -b fix/d10-settings-prune-diff      # Task 2.2
 
 # Phase 3 — fully parallel (independent modules)
 git worktree add .claude/worktrees/workspace-cross-reference -b fix/d2-workspace-cross-reference  # Task 3.1
@@ -284,4 +272,5 @@ Per `WORKFLOW.md` → "Stop conditions": stop and ask if Task 1.2's `--force` ga
 ## Revision log
 
 - 2026-08-05: Task 3.4 (D6) rewritten per external ticket (vafab-workspace brainstorm) — index-only design dropped as insufficient (inert JSON doesn't make a skill Skill-tool-invocable); replaced with verify-first, copy-with-provenance-by-default design, plus new Task 3.5 for the workspace/meta-repo `doctor` role. Ticket confirmed factual against this repo's source: no cross-repo skill/agent/command aggregation exists anywhere in `src/` (only JSON summaries in `workspace/aggregate.ts`); `policies.ts:66-67`'s "Stack not recognised" message and the stale-role display in `doctor.ts:71` are exact matches for the reported noise; no `workspace`/`meta-repo` role exists in `detection-registry.ts`.
-- 2026-08-05: separate ticket ("worktree-safe root + member materialization") landed as its own plan — [workspace-worktree-materialization.md](workspace-worktree-materialization.md). Two integration points with this plan: (1) that plan's Task 1 (`resolveRoots()`, worktree-vs-main-checkout detection) is complementary to this plan's Task 1.1/D9 (nested-`.git` boundary in the scanner) — same git-boundary-awareness theme, opposite directions (scanning into a sibling repo vs. running from inside a worktree); land independently but check for overlap. (2) that plan's Task 3 (`readMembers()`, unifying `haus.workspace.yaml`/`repos.manifest.json`) should be the single source Task 3.4's copy-with-provenance step uses for member-repo enumeration — don't build a second member-resolution path here.
+- 2026-08-05: separate ticket ("worktree-safe root + member materialization") landed as its own plan — [workspace-worktree-materialization.md](workspace-worktree-materialization.md). Two integration points with this plan: (1) that plan's Task 1 (`resolveRoots()`, worktree-vs-main-checkout detection) is complementary to this plan's Task 1.1/D9 (nested-`.git` boundary in the scanner) — same git-boundary-awareness theme, opposite directions (scanning into a sibling repo vs. running from inside a worktree); land independently but check for overlap. (2) that plan's Task 3 (`readMembers()`, unifying `haus.workspace.yaml`/`repos.manifest.json`) should be the single source Task 3.4's copy-with-provenance step uses for member-repo enumeration — don't build a second member-resolution path here. See "Combined sequencing" section above for the merged execution order across both plans.
+- 2026-08-05: D10 (Task 2.2, diff+backup before pruning haus-tracked permission rules) removed from scope per explicit decision — see "Out of scope."
