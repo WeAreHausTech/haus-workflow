@@ -24,6 +24,7 @@ import type { ContextMap } from '../../types.js'
 import { checkLock } from '../../update/lockfile.js'
 import { readText } from '../../utils/fs.js'
 import { error, log, warn } from '../../utils/logger.js'
+import { runLinkContext } from '../../workspace/link-context/link.js'
 
 import { writeWorkspaceArtifacts, type WorkspaceRepoInput } from './aggregate.js'
 import { parseWorkspaceConfig, WORKSPACE_FILE } from './config.js'
@@ -264,9 +265,43 @@ export async function runWorkspaceSetup(
         )
       }
     }
-    const manifest = buildManifest({ client: config.client, repos: manifestRepos })
+    const manifest = buildManifest({
+      client: config.client,
+      repos: manifestRepos,
+      // buildManifest rebuilds the manifest from scratch each run — carry the prior
+      // `linkedContext` section forward so a plain `setup --write` never silently
+      // drops entries `link-context` wrote on an earlier run.
+      linkedContext: prior?.linkedContext,
+    })
     const manifestFile = await writeWorkspaceManifest(workspaceRoot, manifest)
     written.push(manifestFile)
+
+    // Last step, additive: refresh cross-repo skill/agent/command copies at the
+    // workspace root (Task 3.4b-e, D6). Never lets a link-context problem (a member
+    // not cloned, a name collision, an unexpected error) fail `setup` itself — this
+    // is a supplementary convenience layer on top of the per-repo setup this loop
+    // already completed successfully; run `haus workspace link-context` directly to
+    // see/fix the underlying issue.
+    try {
+      const linkResult = await runLinkContext(workspaceRoot, { write: true, json: options.json })
+      if (linkResult.ok) {
+        written.push(...linkResult.added.map((rel) => path.join(workspaceRoot, rel)))
+        if (!options.json) {
+          say(
+            `Linked ${linkResult.linked.length} cross-repo skill/agent/command copy(ies) into ` +
+              `.claude/ (${linkResult.added.length} new, ${linkResult.removed.length} removed)` +
+              `${linkResult.skipped.length > 0 ? ` — ${linkResult.skipped.length} member(s) skipped, see above` : ''}.`,
+          )
+        }
+      } else {
+        warn(`Skipping workspace link-context: ${linkResult.error}`)
+      }
+    } catch (err) {
+      warn(
+        `Workspace link-context failed: ${err instanceof Error ? err.message : String(err)} — ` +
+          'run `haus workspace link-context` directly to retry.',
+      )
+    }
   }
 
   const ok = statuses.filter((s) => s.status === 'ok').length

@@ -256,6 +256,14 @@ workspace
   .description('Revert haus setup for every configured repo, plus workspace-root artifacts')
   .option('-y, --yes', 'Skip confirmation')
   .action((opts) => runWorkspace('undo', opts))
+workspace
+  .command('link-context')
+  .description(
+    "Copy each member repo's skill/agent/command into the workspace root's .claude/, prefixed to avoid collisions",
+  )
+  .option('--write', 'Persist copies + manifest + gitignore (default previews only)')
+  .option('--json', 'Output the link result as JSON')
+  .action((opts) => runWorkspace('link-context', opts))
 
 const worktree = workspace
   .command('worktree')
