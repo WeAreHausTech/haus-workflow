@@ -11,6 +11,7 @@ import { syncRemoteCatalog } from '../catalog/remote-catalog.js'
 import { recommend } from '../recommender/recommend.js'
 import { readContextOrScan } from '../scanner/read-context.js'
 import { scanProject } from '../scanner/scan-project.js'
+import { hasMultipleSiblingRepos, SIBLING_REPO_WARNING } from '../scanner/sibling-repos.js'
 import { writeJson } from '../utils/fs.js'
 import { log, warn } from '../utils/logger.js'
 import { displayPath, hausPath } from '../utils/paths.js'
@@ -78,6 +79,12 @@ export async function runSetupCore(root: string, opts: SetupCoreOptions): Promis
     say(`Package manager: ${scanResult.packageManager}`)
   }
 
+  // D2 (Task 3.1): does this root sit on top of 2+ independent sibling repos? If so,
+  // point at `haus workspace discover` as the better entry point instead of running
+  // setup-project per repo, blind to the workspace pattern. Best-effort — never
+  // blocks the run either way.
+  const siblingWarning = (await hasMultipleSiblingRepos(root)) ? [SIBLING_REPO_WARNING] : []
+
   // Recommend
   const context = await readContextOrScan(root)
   const recommendation = await recommend(root, context)
@@ -90,7 +97,9 @@ export async function runSetupCore(root: string, opts: SetupCoreOptions): Promis
   // writes normally with no --force needed. See docs/decisions/ zero-signal setup
   // guard ADR for the reasoning and alternatives considered.
   if (recommendation.recommended.length === 0 && !force) {
-    const warningLines = [...new Set([...context.warnings, ...(recommendation.warnings ?? [])])]
+    const warningLines = [
+      ...new Set([...context.warnings, ...(recommendation.warnings ?? []), ...siblingWarning]),
+    ]
     if (json) {
       say(JSON.stringify(recommendation, null, 2))
     } else {
@@ -127,7 +136,9 @@ export async function runSetupCore(root: string, opts: SetupCoreOptions): Promis
 
   // Doctor summary
   const hooks = await verifyProjectSettingsHooksContract(root)
-  const warningLines = [...new Set([...context.warnings, ...(recommendation.warnings ?? [])])]
+  const warningLines = [
+    ...new Set([...context.warnings, ...(recommendation.warnings ?? []), ...siblingWarning]),
+  ]
   say(`Repo: ${context.repoName}`)
   for (const warning of warningLines) say(`- WARN: ${warning}`)
   // `skipped` implies ok:true (no settings.json to check) — report the doctor's
