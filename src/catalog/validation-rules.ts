@@ -92,6 +92,12 @@ export const ALLOWED_STACKS: readonly string[] = rules.allowedStacks
 /** Category/meta tags always permitted regardless of the stack allowlist. */
 export const ALWAYS_ALLOWED_TAGS: readonly string[] = rules.alwaysAllowedTags
 
+/** Tags that require a non-empty `safetyNotes` on the item (auth/payments — see ADR-0017, catalog repo). */
+export const SAFETY_NOTES_REQUIRED_TAGS: readonly string[] = rules.safetyNotesRequiredTags ?? []
+
+/** Tags that require a non-empty `intents` on the item (auth/payments — see ADR-0018, catalog repo). */
+export const INTENTS_REQUIRED_TAGS: readonly string[] = rules.intentsRequiredTags ?? []
+
 /** Tag suffixes treated as conventions, not stack names (e.g. "react-patterns"). */
 export const PATTERN_TAG_SUFFIXES: readonly string[] = rules.patternTagSuffixes
 

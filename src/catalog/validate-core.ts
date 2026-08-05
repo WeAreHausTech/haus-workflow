@@ -16,11 +16,13 @@ import {
   auditDisallowedTags,
   buildItemPathSourceMap,
   FORBIDDEN_TAGS,
+  INTENTS_REQUIRED_TAGS,
   isNpxTsxOnlyExempt,
   PLACEHOLDER_PATTERN,
   REQUIRED_SKILL_FRONTMATTER,
   resolveMarkdownItemSource,
   RISKY_INSTALL_PATTERNS,
+  SAFETY_NOTES_REQUIRED_TAGS,
 } from './validation-rules.js'
 
 const ITEM_SEMVER_RE = /^\d+\.\d+\.\d+$/
@@ -32,6 +34,7 @@ export type ValidateCatalogResult = {
 }
 
 export { isSafeCatalogPath }
+export { auditSafetyNotes, auditIntents, auditDiskOrphans }
 
 function auditForbiddenStacks(items: CatalogItem[]): string[] {
   const failures: string[] = []
@@ -40,6 +43,50 @@ function auditForbiddenStacks(items: CatalogItem[]): string[] {
     const text = `${item.id} ${tags.join(' ')}`.toLowerCase()
     for (const word of FORBIDDEN_TAGS) {
       if (text.includes(word)) failures.push(`${item.id}: unsupported stack/tag "${word}"`)
+    }
+  }
+  return failures
+}
+
+const SAFETY_NOTES_REQUIRED_SET = new Set(SAFETY_NOTES_REQUIRED_TAGS.map((t) => t.toLowerCase()))
+
+/**
+ * Auth/payments items carry AI-facing guardrails (safetyNotes) — exactly where a
+ * missing warning has the highest blast radius. Gated by tag, not item type, since
+ * both haus-owned and curated skills can touch this surface. Mirrors
+ * haus-workflow-catalog/scripts/validate-core.mjs's auditSafetyNotes (audit §E1).
+ */
+function auditSafetyNotes(items: CatalogItem[]): string[] {
+  const failures: string[] = []
+  for (const item of items) {
+    const tags = Array.isArray(item.tags) ? item.tags : []
+    const isSensitive = tags.some((t) => SAFETY_NOTES_REQUIRED_SET.has(String(t).toLowerCase()))
+    if (!isSensitive) continue
+    const notes = item.safetyNotes
+    if (!Array.isArray(notes) || notes.length === 0) {
+      failures.push(`${item.id}: auth/payments item missing non-empty safetyNotes`)
+    }
+  }
+  return failures
+}
+
+const INTENTS_REQUIRED_SET = new Set(INTENTS_REQUIRED_TAGS.map((t) => t.toLowerCase()))
+
+/**
+ * Auth/payments items must feed the CLI's fuzzy-intent-matching recommender —
+ * same rationale as auditSafetyNotes: this is exactly where a discovery miss
+ * (recommender can't surface the right skill) is costliest. Mirrors
+ * haus-workflow-catalog/scripts/validate-core.mjs's auditIntents (audit §E1).
+ */
+function auditIntents(items: CatalogItem[]): string[] {
+  const failures: string[] = []
+  for (const item of items) {
+    const tags = Array.isArray(item.tags) ? item.tags : []
+    const isSensitive = tags.some((t) => INTENTS_REQUIRED_SET.has(String(t).toLowerCase()))
+    if (!isSensitive) continue
+    const intents = item.intents
+    if (!Array.isArray(intents) || intents.length === 0) {
+      failures.push(`${item.id}: auth/payments item missing non-empty intents`)
     }
   }
   return failures
@@ -267,6 +314,77 @@ const DIR_ITEM_TYPE: Record<string, string> = {
   commands: 'command',
 }
 
+const CONTENT_ROOTS = ['skills', 'agents', 'templates', 'commands', 'configs']
+
+function walkAllFiles(dir: string, fn: (file: string) => void, failures: string[]): void {
+  let entries: fs.Dirent[]
+  try {
+    entries = fs.readdirSync(dir, { withFileTypes: true })
+  } catch (err) {
+    failures.push(
+      `${dir}: unreadable subtree (${err instanceof Error ? err.message : String(err)})`,
+    )
+    return
+  }
+  for (const entry of entries) {
+    if (entry.name === '.DS_Store') continue
+    const full = path.join(dir, entry.name)
+    if (entry.isDirectory()) walkAllFiles(full, fn, failures)
+    else fn(full)
+  }
+}
+
+/**
+ * Paths intentionally unclaimed by any manifest item because the CLI delivers them
+ * through a hardcoded mechanism keyed on `originSourceId`, not per-item `path` sync —
+ * see `SUPERPOWERS_SHARED_CATALOG_REL` (src/catalog/constants.ts) and
+ * `syncSuperpowersShared`/`installSuperpowersShared`. Mirrors
+ * haus-workflow-catalog's DISK_ORPHAN_EXEMPT_PREFIXES (ADR-0020, that repo).
+ */
+const DISK_ORPHAN_EXEMPT_PREFIXES = ['skills/superpowers/shared']
+
+function isPathClaimed(relPath: string, claimedPaths: string[]): boolean {
+  if (claimedPaths.some((claimed) => relPath === claimed || relPath.startsWith(`${claimed}/`))) {
+    return true
+  }
+  return DISK_ORPHAN_EXEMPT_PREFIXES.some(
+    (exempt) => relPath === exempt || relPath.startsWith(`${exempt}/`),
+  )
+}
+
+/**
+ * Every file under skills/, agents/, templates/, commands/, configs/ must fall under
+ * some manifest item's `path` (exact match, or a nested file under a directory-shaped
+ * path) — otherwise it's shipped on disk but never installed by anything, invisible
+ * to `haus apply`. The reverse direction (a manifest path with no file on disk) is
+ * already covered by auditShippedFiles; this only catches the direction that wasn't
+ * codified anywhere before on the CLI side (audit §E2 — catalog repo's cat-7 closed
+ * this already via its own auditDiskOrphans; this mirrors it here for the CLI's own
+ * ingest-time validator, e.g. `haus validate-catalog <path>` against a real checkout).
+ */
+function auditDiskOrphans(manifestDir: string, items: CatalogItem[]): string[] {
+  const failures: string[] = []
+  const claimedPaths = items
+    .filter((item) => item.path && isSafeCatalogPath(item.path))
+    .map((item) => item.path!.replace(/\\/g, '/'))
+
+  for (const dir of CONTENT_ROOTS) {
+    const abs = path.join(manifestDir, dir)
+    if (!fs.existsSync(abs)) continue
+    walkAllFiles(
+      abs,
+      (file) => {
+        const relPath = path.relative(manifestDir, file).replace(/\\/g, '/')
+        if (!isPathClaimed(relPath, claimedPaths)) {
+          failures.push(`orphaned on disk, claimed by no manifest item: ${relPath}`)
+        }
+      },
+      failures,
+    )
+  }
+  return failures
+}
+
 function walkMd(dir: string, fn: (file: string) => void, failures: string[]): void {
   let entries: fs.Dirent[]
   try {
@@ -330,6 +448,9 @@ export function validateCatalogData(
     ...auditShippedFiles(manifestDir, items),
     ...auditMarkdownContent(manifestDir, items),
     ...auditDisallowedTags(items),
+    ...auditSafetyNotes(items),
+    ...auditIntents(items),
+    ...auditDiskOrphans(manifestDir, items),
   ]
   return { ok: failures.length === 0, failures, items }
 }
