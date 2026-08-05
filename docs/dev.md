@@ -35,17 +35,22 @@ is fail-open (always exits 0). Not a manual QA script — documented here as the
 
 ## Git hooks (Lefthook)
 
-`lefthook.yml` defines pre-commit (lint, format, typecheck, gitleaks + secret-grep) and
+`lefthook.yml` defines pre-commit (lint, format, typecheck on `*.{ts,tsx}`, gitleaks + secret-grep) and
 pre-push (`yarn build && yarn test:fast`). Installed by the `prepare` script (`lefthook install`).
 Replaces the former Husky setup; dogfoods the standard haus ships.
 
 ### Test tiers
 
-| Command              | When                  | What                                                     |
-| -------------------- | --------------------- | -------------------------------------------------------- |
-| `yarn test:fast`     | pre-push hook         | Unit tests only (~30 files); see `scripts/test-fast.mjs` |
-| `yarn test`          | local / `yarn verify` | Full suite (unit + integration)                          |
-| `yarn test:coverage` | CI                    | Full suite with coverage                                 |
+| Command              | When                  | What                                                                       |
+| -------------------- | --------------------- | -------------------------------------------------------------------------- |
+| `yarn test:fast`     | pre-push hook         | Unit tests only (excludes `SLOW_INTEGRATION`); see `scripts/test-fast.mjs` |
+| `yarn test`          | local / `yarn verify` | Full suite (unit + integration)                                            |
+| `yarn test:coverage` | CI                    | Full suite with coverage                                                   |
+
+`yarn verify` runs typecheck ∥ lint ∥ build in parallel, then the full test suite
+(`scripts/verify.mjs`). `yarn verify:full` is the same first wave, then one
+`coverage:check` run (suite under c8 — not a second bare `yarn test`). Lint and
+Prettier use on-disk caches (`.eslintcache` / `.prettiercache`, gitignored).
 
 Add new CLI/integration/git tests to `SLOW_INTEGRATION` in `scripts/test-fast.mjs` so they
 stay out of the pre-push gate.

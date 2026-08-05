@@ -5,6 +5,10 @@ dist
 tmp
 out-tsc
 .tsbuildinfo
+.eslintcache
+.prettiercache
+coverage/
+package.tgz
 
 # RTK (personal token-proxy tooling) — not a project dependency
 .rtk/

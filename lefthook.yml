@@ -12,7 +12,7 @@ pre-commit:
   commands:
     lint:
       glob: '*.{ts,mjs}'
-      run: yarn eslint {staged_files}
+      run: yarn eslint --cache --cache-location .eslintcache {staged_files}
       fail_text: 'Lint failed. Run `yarn lint` to see details (or `yarn eslint --fix <file>`), re-stage, then commit.'
     format:
       glob: '*.{ts,mjs,json,md,yml,yaml}'
@@ -20,6 +20,7 @@ pre-commit:
       stage_fixed: true
       fail_text: 'Prettier could not format a staged file. Fix the syntax error it reports, re-stage, then commit.'
     typecheck:
+      glob: '*.{ts,tsx}'
       run: yarn typecheck
       fail_text: 'Type errors found. Fix all type errors (`yarn typecheck` to list them) before committing.'
     gitleaks:

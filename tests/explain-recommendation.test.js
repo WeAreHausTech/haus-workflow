@@ -129,7 +129,9 @@ test('buildRecommendationExplanation surfaces a near-miss item failing exactly o
       {
         id: 'skill.one-gate-away',
         reason: 'requiresAny unsatisfied: needs svelte',
-        skipReasons: [{ code: 'requires-any-unsatisfied', message: 'requiresAny unsatisfied: needs svelte' }],
+        skipReasons: [
+          { code: 'requires-any-unsatisfied', message: 'requiresAny unsatisfied: needs svelte' },
+        ],
         gates: [
           { name: 'former-id', passed: true },
           { name: 'invalid-source', passed: true },

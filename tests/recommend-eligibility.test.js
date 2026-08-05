@@ -323,7 +323,7 @@ test('gates: a recommended item carries an all-passed gates array', async () => 
   }
 })
 
-test('gates: co-install suppression preserves the removed item\'s gate breakdown', async () => {
+test("gates: co-install suppression preserves the removed item's gate breakdown", async () => {
   setup()
   try {
     // Both haus.ecc-e2e-testing and haus.ecc-e2e-runner become eligible together (same
@@ -340,7 +340,10 @@ test('gates: co-install suppression preserves the removed item\'s gate breakdown
     assert.equal(entry.skipReasons[0].code, 'co-install-e2e-skill')
     assert.ok(Array.isArray(entry.gates), 'suppressed entry must keep its gates breakdown')
     assert.ok(entry.gates.length > 0)
-    assert.ok(entry.gates.every((g) => g.passed === true), 'it passed every named gate')
+    assert.ok(
+      entry.gates.every((g) => g.passed === true),
+      'it passed every named gate',
+    )
   } finally {
     teardown()
   }

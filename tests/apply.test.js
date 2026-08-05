@@ -3,7 +3,14 @@ import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, utimesSync, symlinkSync } from 'node:fs'
+import {
+  mkdtempSync,
+  mkdirSync,
+  writeFileSync,
+  readFileSync,
+  utimesSync,
+  symlinkSync,
+} from 'node:fs'
 import { execaSync } from 'execa'
 
 process.env.HAUS_FIXTURE_CATALOG = path.resolve('tests/fixtures/catalog/manifest.json')
@@ -329,7 +336,11 @@ function setUpReactProjectAndScanRecommend(temp) {
   writeFileSync(
     path.join(temp, 'package.json'),
     JSON.stringify(
-      { name: 'dry-run-diff-test', packageManager: 'yarn@4.5.3', dependencies: { react: '19.0.0' } },
+      {
+        name: 'dry-run-diff-test',
+        packageManager: 'yarn@4.5.3',
+        dependencies: { react: '19.0.0' },
+      },
       null,
       2,
     ),
@@ -354,7 +365,10 @@ test('apply --dry-run reports "would create" plus a diff-from-empty for a brand-
     reject: false,
   })
   assert.equal(result.exitCode, 0)
-  assert.match(result.stdout, /agents\/code-reviewer\.md: would create \(haus\.code-reviewer-agent\)/)
+  assert.match(
+    result.stdout,
+    /agents\/code-reviewer\.md: would create \(haus\.code-reviewer-agent\)/,
+  )
   // A diff-from-empty is every line of the new content prefixed with "+" (matching
   // writeManagedText's !existed branch, which this reuses for consistency).
   assert.match(result.stdout, /\n\+.*\S/)
@@ -397,13 +411,20 @@ test('apply --dry-run shows a real unified diff for a changed single-file item',
     reject: false,
   })
   assert.equal(result.exitCode, 0)
-  assert.match(result.stdout, /agents\/code-reviewer\.md: would overwrite \(haus\.code-reviewer-agent\)/)
+  assert.match(
+    result.stdout,
+    /agents\/code-reviewer\.md: would overwrite \(haus\.code-reviewer-agent\)/,
+  )
   // A real diff names both sides and shows the actual local content being removed —
   // not just a bare "would overwrite" label with no comparison.
   assert.match(result.stdout, /^--- .*code-reviewer\.md/m)
   assert.match(result.stdout, /^\+\+\+ .*code-reviewer\.md/m)
   assert.match(result.stdout, /^-.*LOCAL EDIT MARKER/m)
-  assert.equal(readFileSync(agentPath, 'utf8'), `${original}\n\nLOCAL EDIT MARKER\n`, 'dry-run must not overwrite')
+  assert.equal(
+    readFileSync(agentPath, 'utf8'),
+    `${original}\n\nLOCAL EDIT MARKER\n`,
+    'dry-run must not overwrite',
+  )
 })
 
 test('apply --dry-run gives a skill item a per-file diff loop, not one message for the whole directory', () => {
@@ -472,14 +493,20 @@ test('apply --dry-run reports "would overwrite" without a garbled diff when one 
   const agentPath = path.join(temp, AGENT_REL)
   // A byte sequence that fails a lossless UTF-8 round-trip — decodeIfText must treat
   // this as binary, not coerce it into garbled "text" for the diff.
-  writeFileSync(agentPath, Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0xff, 0xd8]))
+  writeFileSync(
+    agentPath,
+    Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0xff, 0xd8]),
+  )
 
   const result = execaSync('node', [path.resolve('dist/cli.js'), 'apply', '--dry-run'], {
     cwd: temp,
     reject: false,
   })
   assert.equal(result.exitCode, 0)
-  assert.match(result.stdout, /agents\/code-reviewer\.md: would overwrite \(haus\.code-reviewer-agent\)/)
+  assert.match(
+    result.stdout,
+    /agents\/code-reviewer\.md: would overwrite \(haus\.code-reviewer-agent\)/,
+  )
   // No unified-diff header should appear — createUnifiedDiff must not run when either
   // side fails to decode as text.
   assert.equal(result.stdout.includes('--- ./.claude/agents/code-reviewer.md'), false)

@@ -69,11 +69,19 @@ test('ci-gate --json emits {doctor, decisions, update, ok} with ok:true on a hea
   // the single aggregate JSON.stringify call — if console-swapping ever failed to
   // take effect, a check's raw print (e.g. doctor's own title line) would land in
   // stdout before the JSON blob and this would fail before JSON.parse even runs.
-  assert.equal(r.stdout.trim().startsWith('{'), true, `expected stdout to start with '{'; got: ${r.stdout.slice(0, 200)}`)
+  assert.equal(
+    r.stdout.trim().startsWith('{'),
+    true,
+    `expected stdout to start with '{'; got: ${r.stdout.slice(0, 200)}`,
+  )
   const parsed = JSON.parse(r.stdout)
   assert.equal(parsed.ok, true)
   for (const key of ['doctor', 'decisions', 'update']) {
-    assert.equal(parsed[key].ok, true, `expected ${key}.ok === true; got ${JSON.stringify(parsed[key])}`)
+    assert.equal(
+      parsed[key].ok,
+      true,
+      `expected ${key}.ok === true; got ${JSON.stringify(parsed[key])}`,
+    )
     assert.equal(Array.isArray(parsed[key].output), true)
   }
 })
@@ -130,9 +138,21 @@ test('ci-gate fails and names decisions when a decision-worthy change lacks an A
   const r = execaSync('node', [cli, 'ci-gate', '--json'], { cwd: temp, env, reject: false })
   assert.equal(r.exitCode, 1)
   const parsed = JSON.parse(r.stdout)
-  assert.equal(parsed.decisions.ok, false, `expected decisions.ok === false; got ${JSON.stringify(parsed.decisions)}`)
-  assert.equal(parsed.doctor.ok, true, `expected doctor.ok === true; got ${JSON.stringify(parsed.doctor)}`)
-  assert.equal(parsed.update.ok, true, `expected update.ok === true; got ${JSON.stringify(parsed.update)}`)
+  assert.equal(
+    parsed.decisions.ok,
+    false,
+    `expected decisions.ok === false; got ${JSON.stringify(parsed.decisions)}`,
+  )
+  assert.equal(
+    parsed.doctor.ok,
+    true,
+    `expected doctor.ok === true; got ${JSON.stringify(parsed.doctor)}`,
+  )
+  assert.equal(
+    parsed.update.ok,
+    true,
+    `expected update.ok === true; got ${JSON.stringify(parsed.update)}`,
+  )
   assert.equal(parsed.ok, false)
 })
 
@@ -159,9 +179,21 @@ test('ci-gate fails and names update when a formerIds migration is pending, whil
   })
   assert.equal(r.exitCode, 1)
   const parsed = JSON.parse(r.stdout)
-  assert.equal(parsed.update.ok, false, `expected update.ok === false; got ${JSON.stringify(parsed.update)}`)
-  assert.equal(parsed.doctor.ok, true, `expected doctor.ok === true; got ${JSON.stringify(parsed.doctor)}`)
-  assert.equal(parsed.decisions.ok, true, `expected decisions.ok === true; got ${JSON.stringify(parsed.decisions)}`)
+  assert.equal(
+    parsed.update.ok,
+    false,
+    `expected update.ok === false; got ${JSON.stringify(parsed.update)}`,
+  )
+  assert.equal(
+    parsed.doctor.ok,
+    true,
+    `expected doctor.ok === true; got ${JSON.stringify(parsed.doctor)}`,
+  )
+  assert.equal(
+    parsed.decisions.ok,
+    true,
+    `expected decisions.ok === true; got ${JSON.stringify(parsed.decisions)}`,
+  )
   assert.equal(parsed.ok, false)
 })
 
@@ -183,11 +215,23 @@ test('ci-gate captures a thrown error into a structured failure instead of crash
 
   const r = execaSync('node', [cli, 'ci-gate', '--json'], { cwd: temp, env, reject: false })
   assert.equal(r.exitCode, 1)
-  assert.equal(r.stdout.trim().startsWith('{'), true, `expected valid JSON on stdout; got: ${r.stdout.slice(0, 200)}\nstderr: ${r.stderr.slice(0, 200)}`)
+  assert.equal(
+    r.stdout.trim().startsWith('{'),
+    true,
+    `expected valid JSON on stdout; got: ${r.stdout.slice(0, 200)}\nstderr: ${r.stderr.slice(0, 200)}`,
+  )
   const parsed = JSON.parse(r.stdout)
   assert.equal(parsed.ok, false)
-  assert.equal(parsed.doctor.ok, false, `expected doctor.ok === false; got ${JSON.stringify(parsed.doctor)}`)
-  assert.equal(parsed.update.ok, false, `expected update.ok === false; got ${JSON.stringify(parsed.update)}`)
+  assert.equal(
+    parsed.doctor.ok,
+    false,
+    `expected doctor.ok === false; got ${JSON.stringify(parsed.doctor)}`,
+  )
+  assert.equal(
+    parsed.update.ok,
+    false,
+    `expected update.ok === false; got ${JSON.stringify(parsed.update)}`,
+  )
   assert.equal(
     parsed.decisions.ok,
     true,
@@ -213,12 +257,28 @@ test('ci-gate captures a thrown error from decisions check into a structured fai
 
   const r = execaSync('node', [cli, 'ci-gate', '--json'], { cwd: temp, env, reject: false })
   assert.equal(r.exitCode, 1)
-  assert.equal(r.stdout.trim().startsWith('{'), true, `expected valid JSON on stdout; got: ${r.stdout.slice(0, 200)}\nstderr: ${r.stderr.slice(0, 200)}`)
+  assert.equal(
+    r.stdout.trim().startsWith('{'),
+    true,
+    `expected valid JSON on stdout; got: ${r.stdout.slice(0, 200)}\nstderr: ${r.stderr.slice(0, 200)}`,
+  )
   const parsed = JSON.parse(r.stdout)
   assert.equal(parsed.ok, false)
-  assert.equal(parsed.decisions.ok, false, `expected decisions.ok === false; got ${JSON.stringify(parsed.decisions)}`)
-  assert.equal(parsed.doctor.ok, true, `expected doctor.ok === true; got ${JSON.stringify(parsed.doctor)}`)
-  assert.equal(parsed.update.ok, true, `expected update.ok === true; got ${JSON.stringify(parsed.update)}`)
+  assert.equal(
+    parsed.decisions.ok,
+    false,
+    `expected decisions.ok === false; got ${JSON.stringify(parsed.decisions)}`,
+  )
+  assert.equal(
+    parsed.doctor.ok,
+    true,
+    `expected doctor.ok === true; got ${JSON.stringify(parsed.doctor)}`,
+  )
+  assert.equal(
+    parsed.update.ok,
+    true,
+    `expected update.ok === true; got ${JSON.stringify(parsed.update)}`,
+  )
   assert.ok(
     parsed.decisions.output.some((line) => /EISDIR|illegal operation|directory/i.test(line)),
     `expected decisions' captured output to include the thrown error's message; got ${JSON.stringify(parsed.decisions.output)}`,
