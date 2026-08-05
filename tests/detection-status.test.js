@@ -41,3 +41,15 @@ test('a recognised repo with an unsupported marker is detectionStatus=partial', 
   assert.deepEqual(r.unsupportedSignals, ['rust'])
   fs.rmSync(tmp, { recursive: true, force: true })
 })
+
+test('a workspace root (repos.manifest.json, no runnable stack) is detectionStatus=supported, not unknown', async () => {
+  // Regression guard for Task 3.5: a meta-repo root with only repos.manifest.json
+  // (no package.json, no framework signal) must not be misread as "stack not
+  // recognised" — it legitimately has no runnable stack of its own.
+  const tmp = tmpFrom('workspace-root')
+  const r = await scanProject(tmp)
+  assert.equal(r.detectionStatus, 'supported')
+  assert.deepEqual(r.repoRoles, ['workspace'])
+  assert.deepEqual(r.unsupportedSignals, [])
+  fs.rmSync(tmp, { recursive: true, force: true })
+})
