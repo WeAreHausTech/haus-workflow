@@ -223,6 +223,11 @@
       "tokenBudget": 1200,
       "tags": ["stripe", "payments", "tooling"],
       "repoRoles": ["next-app", "react-app", "vendure-plugin"],
+      "safetyNotes": [
+        "Never expose a Stripe secret key (sk_) to client-side code.",
+        "Always verify webhook signatures before trusting event payloads."
+      ],
+      "intents": ["integrate Stripe payments", "handle Stripe webhooks securely"],
       "requiresAny": [
         { "stack": "stripe" },
         { "dependency": "@stripe/stripe-js" },
@@ -245,6 +250,11 @@
       "tokenBudget": 1200,
       "tags": ["qliro", "payments", "tooling"],
       "repoRoles": ["vendure-app", "vendure-plugin", "next-app"],
+      "safetyNotes": [
+        "Never expose QLIRO_MERCHANT_API_KEY to client-side code — full merchant compromise.",
+        "Always validate the signature on incoming Qliro push payloads before trusting them."
+      ],
+      "intents": ["integrate Qliro checkout", "process Qliro refunds"],
       "requiresAny": [{ "stack": "qliro" }, { "dependency": "@haus-tech/qliro-plugin" }],
       "ecosystem": "payments",
       "tokenEstimate": 1800,
@@ -795,6 +805,11 @@
       "tokenBudget": 1200,
       "tags": ["oidc", "azure-ad", "bankid", "saml2"],
       "repoRoles": [],
+      "safetyNotes": [
+        "Never accept identity tokens or claims from the client without validation.",
+        "Never accept a SAML assertion without validating its signature, audience, and issuer."
+      ],
+      "intents": ["set up OIDC login", "integrate BankID", "configure SAML2 single sign-on"],
       "requiresAny": [
         { "stack": "oidc" },
         { "stack": "azure-ad" },
