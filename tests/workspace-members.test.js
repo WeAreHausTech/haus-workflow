@@ -144,6 +144,31 @@ test('readMembers honors repos.local.json pathOverrides against a haus.workspace
   }
 })
 
+test('readMembers normalizes a relative pathOverrides entry against the workspace root, not returned verbatim', async () => {
+  const ws = tmpDir()
+  try {
+    fs.writeFileSync(
+      path.join(ws, 'haus.workspace.yaml'),
+      ['client: acme', 'repos:', '  - name: storefront', '    path: storefront', ''].join('\n'),
+    )
+    // A relative override — an easy mistake to make by hand in repos.local.json.
+    // Member.absPath promises an absolute path; a relative value returned verbatim
+    // would silently break any downstream git -C/worktree call not run from the
+    // exact directory the relative path was written against.
+    fs.writeFileSync(
+      path.join(ws, REPOS_LOCAL_FILE),
+      JSON.stringify({ pathOverrides: { storefront: '../elsewhere-relative' } }),
+    )
+
+    const members = await readMembers(fakeRootInfo(ws))
+    assert.equal(members.length, 1)
+    assert.ok(path.isAbsolute(members[0].absPath), 'a relative override must be resolved to absolute')
+    assert.equal(members[0].absPath, path.resolve(ws, '../elsewhere-relative'))
+  } finally {
+    fs.rmSync(ws, { recursive: true, force: true })
+  }
+})
+
 test('readMembers honors repos.local.json pathOverrides against a repos.manifest.json source', async () => {
   const ws = tmpDir()
   const elsewhere = tmpDir()
