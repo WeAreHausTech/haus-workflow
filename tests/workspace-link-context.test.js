@@ -9,6 +9,7 @@ import {
   existsSync,
   readFileSync,
   rmSync,
+  symlinkSync,
 } from 'node:fs'
 
 import { runLinkContext } from '../src/workspace/link-context/link.ts'
@@ -350,6 +351,40 @@ test(
     )
   }),
 )
+
+test('collectSourceAssets ignores a symlinked skill directory and a symlinked flat .md file', async () => {
+  const { ws, repoA } = makeWorkspace()
+  const outsideDir = mkdtempSync(path.join(os.tmpdir(), 'haus-outside-skill-'))
+  const outsideFile = path.join(outsideDir, 'outside-agent.md')
+  try {
+    // Symlinked skill directory — must never be treated as a real skill source
+    // (lstat, not stat, at enumeration time — consistent with link.ts's copy
+    // step, which already skips symlinks via the same posture).
+    writeFileSync(path.join(outsideDir, 'SKILL.md'), '# outside skill\n')
+    symlinkSync(outsideDir, path.join(repoA, '.claude', 'skills', 'symlinked-skill'))
+
+    // Symlinked flat agent .md file — must also never be treated as a real source.
+    writeFileSync(outsideFile, '# outside agent\n')
+    symlinkSync(outsideFile, path.join(repoA, '.claude', 'agents', 'symlinked-agent.md'))
+
+    const linkResult = await runLinkContext(ws, { write: true })
+    assert.equal(linkResult.ok, true)
+    assert.ok(
+      !linkResult.linked.some((e) => e.name === 'symlinked-skill'),
+      'symlinked skill directory must be excluded',
+    )
+    assert.ok(
+      !linkResult.linked.some((e) => e.name === 'symlinked-agent'),
+      'symlinked flat .md file must be excluded',
+    )
+    // The real (non-symlinked) assets from the same repo are unaffected.
+    assert.ok(linkResult.linked.some((e) => e.name === 'react19-patterns'))
+    assert.ok(linkResult.linked.some((e) => e.name === 'frontend-reviewer'))
+  } finally {
+    rmSync(ws, { recursive: true, force: true })
+    rmSync(outsideDir, { recursive: true, force: true })
+  }
+})
 
 test('runLinkContext removes copies for a member that drops out of the workspace config', async () => {
   const { ws } = makeWorkspace()

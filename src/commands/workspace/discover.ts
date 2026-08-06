@@ -76,15 +76,21 @@ function isDescendant(child: string, ancestor: string): boolean {
 }
 
 /**
- * Discover member repos under `workspaceRoot`.
+ * Finds independent repo roots under `workspaceRoot` — the cheap glob-and-collapse
+ * step of discovery, with no per-repo `scanProject()` call. Split out from
+ * `discoverRepos()` specifically so `hasMultipleSiblingRepos()`
+ * (`src/scanner/sibling-repos.ts`) — a supplementary hint checked on every plain
+ * `haus scan`/`setup-project` run — never pays for a role scan of every discovered
+ * repo just to decide whether to print a one-line suggestion.
  *
  * @param workspaceRoot - Absolute path to the workspace root.
  * @param maxDepth - Max directory depth to traverse (default 3).
+ * @returns Repo-relative posix paths (`.` for the workspace root itself, if it has its own marker).
  */
-export async function discoverRepos(
+export async function findRepoRoots(
   workspaceRoot: string,
   maxDepth: number = DEFAULT_MAX_DEPTH,
-): Promise<DiscoveredRepo[]> {
+): Promise<string[]> {
   const matches = await fg(REPO_MARKERS, {
     cwd: workspaceRoot,
     dot: true,
@@ -120,6 +126,21 @@ export async function discoverRepos(
     repoRoots.push(dir)
   }
   repoRoots.sort((a, b) => a.localeCompare(b))
+  return repoRoots
+}
+
+/**
+ * Discover member repos under `workspaceRoot`, with a best-effort advisory role
+ * scan per repo (see `findRepoRoots()` if you only need the count/paths, not roles).
+ *
+ * @param workspaceRoot - Absolute path to the workspace root.
+ * @param maxDepth - Max directory depth to traverse (default 3).
+ */
+export async function discoverRepos(
+  workspaceRoot: string,
+  maxDepth: number = DEFAULT_MAX_DEPTH,
+): Promise<DiscoveredRepo[]> {
+  const repoRoots = await findRepoRoots(workspaceRoot, maxDepth)
 
   return mapWithConcurrency(repoRoots, async (relDir) => {
     const absDir = path.resolve(workspaceRoot, relDir)

@@ -4,18 +4,21 @@
  * suggest `haus workspace discover` as the better entry point instead of running
  * `setup-project`/`scan` per repo, blind to the workspace pattern.
  *
- * Reuses `discoverRepos`'s existing marker/glob logic
+ * Reuses `findRepoRoots`'s existing marker/glob/collapse logic
  * (`src/commands/workspace/discover.ts`) rather than re-implementing repo-root
- * detection.
+ * detection — deliberately NOT `discoverRepos`, which additionally runs a full
+ * `scanProject()` per discovered repo to compute an advisory role string this
+ * supplementary hint doesn't need. `haus scan`/`setup-project` (human mode) call
+ * this on every run, so paying for N extra scans just to decide whether to print
+ * a one-line suggestion would be wasteful on a workspace with many sibling repos.
  *
  * IMPORTANT: this must be called from the command layer (`scan.ts` / `setup-core.ts`),
- * never from inside `scanProject` itself. `discoverRepos` calls `scanProject` once per
- * discovered repo root — including the passed-in root itself when it has its own
- * `.git` (fast-glob's `**\/.git` matches the root's own `.git` too, dirname `.`).
- * Calling this helper from within `scanProject` would recurse into `scanProject`
- * calling itself for the same root.
+ * never from inside `scanProject` itself. `findRepoRoots` includes the passed-in root
+ * itself when it has its own `.git` (fast-glob's `**\/.git` matches the root's own
+ * `.git` too, dirname `.`) — filtered out below, but if this helper's caller changes,
+ * keep the "call from the command layer, not scanProject" invariant in mind.
  */
-import { discoverRepos } from '../commands/workspace/discover.js'
+import { findRepoRoots } from '../commands/workspace/discover.js'
 
 export const SIBLING_REPO_WARNING =
   'Multiple sibling repos detected under this root — consider "haus workspace discover" ' +
@@ -30,8 +33,8 @@ export const SIBLING_REPO_WARNING =
  */
 export async function hasMultipleSiblingRepos(root: string): Promise<boolean> {
   try {
-    const discovered = await discoverRepos(root)
-    return discovered.filter((repo) => repo.path !== '.').length >= 2
+    const repoRoots = await findRepoRoots(root)
+    return repoRoots.filter((relDir) => relDir !== '.').length >= 2
   } catch {
     return false
   }
