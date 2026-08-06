@@ -12,6 +12,8 @@
  * priority logic stay in scan-project.ts because they depend on inputs the registry
  * does not model (resolved package manager; ordered bedrock-vs-vanilla precedence).
  */
+import { WORKSPACE_FILE } from '../commands/workspace/config.js'
+import { REPOS_MANIFEST_FILE } from '../workspace/members.js'
 
 /** A single detection signal. Constructed via the helpers below for readable rules. */
 export type DetectionSignal =
@@ -121,6 +123,14 @@ function matchRule(rule: DetectionRule, ctx: DetectionContext): boolean {
  * bedrock-vs-vanilla precedence is resolved in scan-project.ts.
  */
 export const ROLE_RULES: DetectionRule[] = [
+  // Workspace/meta-repo root — same bridge signal `readMembers()`/
+  // `resolveWorkspaceForWorktree()` already use (src/workspace/members.ts,
+  // src/workspace/worktree/root.ts): presence of either config file marks this
+  // root as a workspace aggregating sibling repos, not a runnable app of its own.
+  // `fileEquals` only matches the file at the scan root (not nested under a
+  // sub-repo, which the nested-`.git` boundary excludes from `files` anyway) —
+  // see Task 3.5, docs/plans/workspace-detection-and-permissions-fixes.md.
+  { role: 'workspace', any: [fileEquals(WORKSPACE_FILE), fileEquals(REPOS_MANIFEST_FILE)] },
   { role: 'next-app', any: [dep('next'), fileIncludes('next.config.')] },
   { role: 'react-app', any: [dep('react')] },
   { role: 'vite-app', any: [dep('vite'), fileIncludes('vite.config.')] },

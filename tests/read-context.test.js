@@ -78,3 +78,44 @@ test('falls back to the cache when there is no package.json to compare against',
   const result = await readContextOrScan(tmpDir)
   assert.equal(result.repoName, 'cached-repo-name')
 })
+
+// Task 3.5 regression: a pure workspace/meta-repo root has no package.json of its
+// own, so the pre-fix isCacheFresh() short-circuited "fresh" forever once a stale
+// context-map.json existed — a workspace marker added later (or present all along)
+// never invalidated it. These two lock in the fix for both marker files.
+
+test('rescans when haus.workspace.yaml is newer than the cache, even with no package.json', async () => {
+  const cachePath = writeCache('stale-cached-name')
+  const cacheTime = new Date(Date.now() - 60_000)
+  fs.utimesSync(cachePath, cacheTime, cacheTime)
+
+  // No package.json anywhere in this fixture — haus.workspace.yaml is the only
+  // marker, and its mtime defaults to "now" (after cacheTime).
+  fs.writeFileSync(path.join(tmpDir, 'haus.workspace.yaml'), 'client: unknown\nrepos: []\n')
+
+  const result = await readContextOrScan(tmpDir)
+  assert.notEqual(result.repoName, 'stale-cached-name', 'must rescan, not return the stale cache')
+})
+
+test('rescans when repos.manifest.json is newer than the cache, even with no package.json', async () => {
+  const cachePath = writeCache('stale-cached-name')
+  const cacheTime = new Date(Date.now() - 60_000)
+  fs.utimesSync(cachePath, cacheTime, cacheTime)
+
+  fs.writeFileSync(path.join(tmpDir, 'repos.manifest.json'), JSON.stringify({ repos: [] }))
+
+  const result = await readContextOrScan(tmpDir)
+  assert.notEqual(result.repoName, 'stale-cached-name', 'must rescan, not return the stale cache')
+})
+
+test('falls back to the cache when workspace markers exist but are older than the cache', async () => {
+  fs.writeFileSync(path.join(tmpDir, 'haus.workspace.yaml'), 'client: unknown\nrepos: []\n')
+  const markerTime = new Date(Date.now() - 60_000)
+  fs.utimesSync(path.join(tmpDir, 'haus.workspace.yaml'), markerTime, markerTime)
+
+  const cachePath = writeCache('cached-repo-name')
+  fs.utimesSync(cachePath, new Date(), new Date())
+
+  const result = await readContextOrScan(tmpDir)
+  assert.equal(result.repoName, 'cached-repo-name')
+})

@@ -1,15 +1,21 @@
 /**
  * Auto-discovery of member repos under a workspace root.
  *
- * One `fast-glob` pass finds repo markers (`.git`, `package.json`, `composer.json`),
+ * One `fast-glob` pass finds repo markers (`.git`, `package.json`, `composer.json`,
+ * `*.csproj`/`*.sln`/`*.fsproj`, `pom.xml`/`build.gradle*`, `Gemfile`),
  * collapses them to their owning directory, drops monorepo sub-packages (a manifest
  * dir nested under another repo root is part of that repo, not its own repo), and
- * resolves a best-effort role via a `fast` scan. Results merge into an existing
- * `haus.workspace.yaml` by `path` — user-edited `name`/`role` and top-level
- * `relationships`/`client` are preserved, new repos are appended, nothing is deleted.
+ * resolves a best-effort role via a `fast` scan (advisory/display-only — when the scan
+ * detects multiple roles, e.g. a fullstack repo with both `express-service` and
+ * `react-app` signals, they are joined with `+` rather than keeping only the first
+ * alphabetically-sorted one). Results merge into an existing `haus.workspace.yaml` by
+ * `path` — user-edited `name`/`role` and top-level `relationships`/`client` are
+ * preserved, new repos are appended, nothing is deleted.
  *
  * Risk guards: `followSymbolicLinks:false` (symlink cycles), `deep:maxDepth`
- * (deep monorepos), and `node_modules`/`.git`/`vendor`/`dist`/`.haus-workflow` ignores.
+ * (deep monorepos), and `node_modules`/`vendor`/`dist`/`.haus-workflow` ignores for
+ * the manifest-marker glob (the `.git`-marker glob deliberately has no `.git/**`
+ * ignore of its own — see the comment above `GIT_MARKER`/`MANIFEST_MARKERS`).
  */
 import path from 'node:path'
 
@@ -28,6 +34,13 @@ export type DiscoveredRepo = {
   name: string
   /** Path relative to the workspace root, posix-separated (derived from fast-glob / path.posix). */
   path: string
+  /**
+   * Best-effort role label, advisory/display-only (not consumed by `workspace setup`'s
+   * per-repo `runSetupCore`, which re-scans each repo independently for the real
+   * role-set). When the scan detects more than one role — e.g. a fullstack repo with
+   * both `express-service` and `react-app` signals — every detected role is joined
+   * with `+` rather than silently keeping only the first alphabetically-sorted one.
+   */
   role: string
 }
 
@@ -39,14 +52,29 @@ export type DiscoverOptions = {
 }
 
 const DEFAULT_MAX_DEPTH = 3
-const REPO_MARKERS = ['**/.git', '**/package.json', '**/composer.json']
-const IGNORE = [
-  '**/node_modules/**',
-  '**/.git/**',
-  '**/vendor/**',
-  '**/dist/**',
-  '**/.haus-workflow/**',
+// Split into two glob passes (not one combined REPO_MARKERS list) specifically so
+// each pass can use the ignore list that's actually safe for it:
+// - GIT_MARKER alone, with NO '**/.git/**' ignore — that pattern also excludes the
+//   bare '**/.git' match itself (fast-glob/micromatch treats `dir` and `dir/**` as
+//   overlapping for ignore purposes), silently undercounting `.git`-only repos.
+//   Same pitfall, same fix as src/utils/fs.ts's findNestedRepoDirs().
+// - MANIFEST_MARKERS, WITH a '**/.git/**' ignore — these patterns (package.json,
+//   *.csproj, etc.) can never legitimately match inside a repo's own `.git`
+//   object store, so excluding it here is pure win: no ignore-vs-match ambiguity
+//   (nothing we want lives at exactly path `.git`), and it stops fast-glob from
+//   walking `.git/objects/**` hunting for a match that will never be found there.
+const GIT_MARKER = ['**/.git']
+const MANIFEST_MARKERS = [
+  '**/package.json',
+  '**/composer.json',
+  '**/*.csproj',
+  '**/*.sln',
+  '**/*.fsproj', // .NET
+  '**/pom.xml',
+  '**/build.gradle*', // Java
+  '**/Gemfile', // Ruby
 ]
+const IGNORE = ['**/node_modules/**', '**/vendor/**', '**/dist/**', '**/.haus-workflow/**']
 
 /** True when `child` is a strict descendant of `ancestor` (both repo-relative posix paths). */
 function isDescendant(child: string, ancestor: string): boolean {
@@ -55,16 +83,22 @@ function isDescendant(child: string, ancestor: string): boolean {
 }
 
 /**
- * Discover member repos under `workspaceRoot`.
+ * Finds independent repo roots under `workspaceRoot` — the cheap glob-and-collapse
+ * step of discovery, with no per-repo `scanProject()` call. Split out from
+ * `discoverRepos()` specifically so `hasMultipleSiblingRepos()`
+ * (`src/scanner/sibling-repos.ts`) — a supplementary hint checked on every plain
+ * `haus scan`/`setup-project` run — never pays for a role scan of every discovered
+ * repo just to decide whether to print a one-line suggestion.
  *
  * @param workspaceRoot - Absolute path to the workspace root.
  * @param maxDepth - Max directory depth to traverse (default 3).
+ * @returns Repo-relative posix paths (`.` for the workspace root itself, if it has its own marker).
  */
-export async function discoverRepos(
+export async function findRepoRoots(
   workspaceRoot: string,
   maxDepth: number = DEFAULT_MAX_DEPTH,
-): Promise<DiscoveredRepo[]> {
-  const matches = await fg(REPO_MARKERS, {
+): Promise<string[]> {
+  const commonOpts = {
     cwd: workspaceRoot,
     dot: true,
     onlyFiles: false,
@@ -73,18 +107,20 @@ export async function discoverRepos(
     // Discovery walks arbitrary directories under the workspace root; an
     // unreadable subtree (EPERM/EACCES) must be skipped, not abort the whole scan.
     suppressErrors: true,
-    ignore: IGNORE,
-  })
+  } as const
+  const [gitMatches, manifestMatches] = await Promise.all([
+    fg(GIT_MARKER, { ...commonOpts, ignore: IGNORE }),
+    fg(MANIFEST_MARKERS, { ...commonOpts, ignore: [...IGNORE, '**/.git/**'] }),
+  ])
 
   // Collapse each marker to its owning directory (posix-relative to the workspace root).
   const gitDirs = new Set<string>()
   const manifestDirs = new Set<string>()
-  for (const match of matches) {
-    const base = path.posix.basename(match)
-    const dir = path.posix.dirname(match)
-    const owner = dir === '.' ? '.' : dir
-    if (base === '.git') gitDirs.add(owner)
-    else manifestDirs.add(owner)
+  for (const match of gitMatches) {
+    gitDirs.add(path.posix.dirname(match))
+  }
+  for (const match of manifestMatches) {
+    manifestDirs.add(path.posix.dirname(match))
   }
 
   // A git dir is always a repo root. A manifest-only dir is a repo root only when no
@@ -99,6 +135,21 @@ export async function discoverRepos(
     repoRoots.push(dir)
   }
   repoRoots.sort((a, b) => a.localeCompare(b))
+  return repoRoots
+}
+
+/**
+ * Discover member repos under `workspaceRoot`, with a best-effort advisory role
+ * scan per repo (see `findRepoRoots()` if you only need the count/paths, not roles).
+ *
+ * @param workspaceRoot - Absolute path to the workspace root.
+ * @param maxDepth - Max directory depth to traverse (default 3).
+ */
+export async function discoverRepos(
+  workspaceRoot: string,
+  maxDepth: number = DEFAULT_MAX_DEPTH,
+): Promise<DiscoveredRepo[]> {
+  const repoRoots = await findRepoRoots(workspaceRoot, maxDepth)
 
   return mapWithConcurrency(repoRoots, async (relDir) => {
     const absDir = path.resolve(workspaceRoot, relDir)
@@ -110,7 +161,11 @@ export async function discoverRepos(
     let role = 'auto'
     try {
       const scan = await scanProject(absDir)
-      if (scan.repoRoles[0]) role = scan.repoRoles[0]
+      // scan.repoRoles is alphabetically sorted (finalizeRoles(), detection.ts) — taking
+      // only [0] silently picked "express-service" over "react-app" for a fullstack repo
+      // just because "e" < "r". This field is advisory/display-only, so join every
+      // detected role instead of dropping all but the first.
+      if (scan.repoRoles.length > 0) role = scan.repoRoles.join('+')
     } catch {
       // Best-effort: an unscannable repo still counts as a member, role stays 'auto'.
     }

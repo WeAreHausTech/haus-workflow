@@ -13,9 +13,12 @@
 import { existsSync } from 'node:fs'
 import path from 'node:path'
 
+import { hashInstalledPaths } from '../../update/hash-installed.js'
 import { checkLock } from '../../update/lockfile.js'
+import { resolveRoots } from '../../utils/git-root.js'
 import { log, warn } from '../../utils/logger.js'
 import { claudePath, hausPath } from '../../utils/paths.js'
+import { readMembers } from '../../workspace/members.js'
 
 import { readWorkspaceConfig } from './config.js'
 import { hausVersion, readManifest, type WorkspaceManifest } from './manifest.js'
@@ -30,6 +33,16 @@ export type DriftKind =
   | 'invalid-lock'
   | 'failed'
   | 'catalog-ref-mismatch'
+  // `linkedContext` entries (from `haus workspace link-context`) get their own
+  // kinds, deliberately distinct from the catalog-item tamper flags above: a copied
+  // entry's hash mismatch means its SOURCE moved on, not that the copy was locally
+  // edited — see docs/decisions/0028-workspace-cross-repo-context-copy-vs-symlink.md.
+  | 'stale-linked-context'
+  | 'missing-linked-context-source'
+  // The destination copy itself vanished from the workspace root (deleted, cleaned,
+  // never actually copied) — distinct from the source-side kinds above: this is
+  // "nothing here to serve a session," not "the thing here is out of date."
+  | 'missing-linked-context-copy'
 
 export type WorkspaceDriftItem = {
   repo: string
@@ -170,6 +183,61 @@ export async function runWorkspaceDoctor(
         .map((r) => `${r.repo}: ${r.ref}`)
         .join(', ')}. Run \`haus workspace setup --write\` to bring them onto the same ref.`,
     })
+  }
+
+  // `haus workspace link-context` copies — optional, only present once that command
+  // has run at least once. A copy's recorded sourceHash vs a fresh re-hash of the
+  // live source tells us the source moved on since the copy was made; this is
+  // reported as `stale-linked-context`, never through the same path as `invalid-lock`/
+  // `missing-claude` above, so it never reads as "you tampered with this file".
+  if (manifest.linkedContext && manifest.linkedContext.length > 0) {
+    const rootInfo = await resolveRoots(workspaceRoot)
+    const members = await readMembers(rootInfo)
+    const memberById = new Map(members.map((m) => [m.id, m]))
+
+    for (const entry of manifest.linkedContext) {
+      const member = memberById.get(entry.repo)
+      if (!member || !existsSync(member.absPath)) {
+        flag({
+          repo: entry.repo,
+          kind: 'missing-linked-context-source',
+          detail:
+            `Linked ${entry.type} "${entry.name}" (${entry.path}) — source repo no longer ` +
+            'configured or cloned. Re-run `haus workspace link-context` to clean up.',
+        })
+        continue
+      }
+      // The copy itself (not just its source) can vanish — deleted by hand, cleaned,
+      // or never actually materialized. Flag this distinctly from staleness: a
+      // missing copy means there's nothing here to serve a session at all, not that
+      // what's here is merely out of date.
+      if (!existsSync(path.join(workspaceRoot, entry.path))) {
+        flag({
+          repo: entry.repo,
+          kind: 'missing-linked-context-copy',
+          detail:
+            `Linked ${entry.type} "${entry.name}" is recorded in the manifest but ${entry.path} ` +
+            'no longer exists at the workspace root. Re-run `haus workspace link-context` to restore it.',
+        })
+        continue
+      }
+      // followSymlinks: false — must match the hashing mode plan.ts used when it
+      // recorded entry.sourceHash, or a repo with a symlink in its skill/agent/
+      // command source would report permanently stale (or permanently fresh)
+      // depending on which side happened to follow it.
+      const liveHash = await hashInstalledPaths(member.absPath, [entry.sourceRelPath], {
+        followSymlinks: false,
+      })
+      if (liveHash !== entry.sourceHash) {
+        flag({
+          repo: entry.repo,
+          kind: 'stale-linked-context',
+          detail:
+            `Linked ${entry.type} "${entry.name}" (${entry.path}) is stale — the source in ` +
+            `${entry.repo} changed since it was linked. Re-run \`haus workspace link-context\`.`,
+        })
+      }
+    }
   }
 
   return emit({ workspaceRoot, manifest, drift, detail, json: opts.json })

@@ -103,8 +103,30 @@ relationships: []
 
 This is a real CLI surface (unlike clone/cloneandsetup) — safe to script or wire into CI for a periodic "are all our repos still healthy" check.
 
+`haus workspace` reads member repos via a bridge layer (`readMembers()`) that accepts **either** `haus.workspace.yaml` **or** `repos.manifest.json` — you don't need to maintain both. This is a deliberate "bridge now, consolidate later" decision (see ADR-0026): the three-file split above (`haus.workspace.yaml` / `repos.manifest.json` / `repos.local.json`) remains a known wart, not yet unified into one file, but the CLI no longer requires the `haus.workspace.yaml`-specific format if your workspace only has a `repos.manifest.json`.
+
+## Isolated workspace worktrees (`haus workspace worktree`)
+
+Running `haus` (or Claude Code) inside a plain `git worktree add` of the meta-repo doesn't work for a multi-repo workspace: `git worktree` only checks out _tracked_ files, and member repos are gitignored siblings — a plain worktree is an empty shell missing every member repo it needs to build or test anything. `haus workspace worktree` fixes this by giving **each member repo its own real `git worktree`**, not a symlink (see ADR-0029 for the full reasoning):
+
+| Command                                                                                                | What it does                                                                                                                                                                                                                                                                                        |
+| :----------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `haus workspace worktree add <slug> [--branch <name>] [--only <repo,repo>] [--no-hydrate] [--dry-run]` | Creates a workspace-level worktree at `.claude/worktrees/<slug>`, plus one real worktree per member repo, all on the same mirrored branch (created from each member's own default branch if the branch doesn't exist there yet). Hydrates dependencies unless `--no-hydrate`.                       |
+| `haus workspace worktree hydrate [--only <repo>] [--force] [--dry-run]`                                | Re-runs hydration (copy-on-write clone of `node_modules`/`vendor`/`obj`/`bin`, then install-reconciliation against the branch's own lockfile) without recreating worktrees.                                                                                                                         |
+| `haus workspace worktree list`                                                                         | Lists existing workspace worktrees and each member's materialization/branch status.                                                                                                                                                                                                                 |
+| `haus workspace worktree remove <slug> [--force] [--dry-run]`                                          | Removes a workspace worktree and every member worktree under it. Refuses by default on uncommitted or unpushed work, naming exactly what it found — `--force` overrides.                                                                                                                            |
+| `haus workspace worktree doctor [--from-hook]`                                                         | Fast, side-effect-free health check: are members materialized, on the right branch, hydrated? A `SessionStart` hook runs this automatically (`--from-hook` mode always exits 0 and never installs anything) as a safety net if you end up in an unhydrated worktree without running `add` yourself. |
+
+Hydration never fetches over the network and never runs `npm ci` (which would delete the very `node_modules` the copy-on-write clone just cloned) — it always uses the plain install command for the detected lockfile.
+
+## Cross-repo skill/agent/command visibility (`haus workspace link-context`)
+
+A member repo's own `.claude/skills/`, `.claude/agents/`, `.claude/commands/` don't automatically show up in a Claude Code session started at the workspace root. `haus workspace link-context [--write] [--json]` copies each already-haus-initialized member repo's skills/agents/commands into the workspace root's own `.claude/{skills,agents,commands}/<repo-folder>--<name>/`, prefixed to avoid name collisions between repos that happen to ship a same-named skill. Each copy is stamped with a source hash so `haus workspace doctor` can flag it `stale` (re-run `link-context`) once the source changes — copies are never treated as user-tampered content. Copies are gitignored, not committed; they're regenerated, not authored. Runs automatically as the last step of `haus workspace setup`, or standalone after a fresh `project:clone`. See ADR-0028 for why copy was chosen over a symlink.
+
 ## Which one do I want?
 
 - **Getting a multi-repo project onto a new machine** → `/haus-workflow project:cloneandsetup` (or `project:clone` if you just want the code, no local-dev setup)
 - **Already have all the repos, want to run `haus doctor`/`haus scan` across them** → `haus workspace doctor` / `haus workspace scan`
+- **Starting a feature that touches multiple member repos and need an isolated, runnable copy of all of them on a branch** → `haus workspace worktree add <slug>`
+- **A member repo's skills/agents/commands aren't showing up in a Claude Code session started at the workspace root** → `haus workspace link-context --write`
 - **Just working on one repo** → none of this; use `haus init` / `/haus-workflow project:init` as normal
