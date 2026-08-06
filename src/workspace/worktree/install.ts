@@ -78,6 +78,11 @@ export async function computeLockfileSignals(dir: string): Promise<LockfileSigna
     cwd: dir,
     onlyFiles: true,
     suppressErrors: true,
+    // Consistent with this codebase's no-symlink-follow posture elsewhere
+    // (fs.ts's findNestedRepoDirs, discover.ts's discoverRepos): a symlink
+    // shouldn't be able to route this search outside the intended tree or
+    // reintroduce a symlink-cycle/perf concern.
+    followSymbolicLinks: false,
     ignore: ['**/node_modules/**', '**/bin/**', '**/obj/**'],
   })
   const hasDotnetProject = dotnetFiles.length > 0

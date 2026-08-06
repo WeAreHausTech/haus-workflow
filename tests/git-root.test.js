@@ -23,6 +23,28 @@ function initRepo(dir) {
 }
 
 describe('resolveRoots', () => {
+  test('git binary unspawnable (e.g. minimal environment): safe all-cwd fallback, never throws', async () => {
+    // No mocking precedent in this codebase for exec calls — real PATH
+    // manipulation is the direct way to reproduce "git can't be spawned at
+    // all" (execa throws only for this case, not for a git command that ran
+    // and exited non-zero). Restored in `finally` regardless of outcome.
+    const dir = tmpDir()
+    const originalPath = process.env.PATH
+    try {
+      initRepo(dir) // still a real git repo — proves the fallback isn't just "non-git dir"
+      process.env.PATH = ''
+      await assert.doesNotReject(async () => {
+        const info = await resolveRoots(dir)
+        assert.equal(info.isGitRepo, false)
+        assert.equal(info.cwd, dir)
+        assert.equal(info.repoRoot, dir)
+      })
+    } finally {
+      process.env.PATH = originalPath
+      fs.rmSync(dir, { recursive: true, force: true })
+    }
+  })
+
   test('non-git directory: safe all-cwd fallback, never throws', async () => {
     const dir = tmpDir()
     try {
