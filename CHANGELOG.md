@@ -1,5 +1,40 @@
 # Changelog
 
+## [1.5.0](https://github.com/WeAreHausTech/haus-workflow/compare/v1.4.1...v1.5.0) (2026-08-06)
+
+### Features
+
+- **claude:** gitignore-writer + untrack machine-local scan artifacts ([36854cd](https://github.com/WeAreHausTech/haus-workflow/commit/36854cdfd634eb26153297043ab261daa7f9d4c5))
+- **doctor:** warn when .claude/ or .haus-workflow/ is gitignored ([1c854f7](https://github.com/WeAreHausTech/haus-workflow/commit/1c854f7a5ae1c0dfbf2afd085ceab17c42b1807e))
+- **hooks:** SessionStart worktree-doctor safety net ([4ac41f5](https://github.com/WeAreHausTech/haus-workflow/commit/4ac41f58a84f06d333fb31e739be8ceb1e8cf1a6))
+- **scan:** loud zero-signal warning + worktree-aware guard + --force gate ([ad84df1](https://github.com/WeAreHausTech/haus-workflow/commit/ad84df1eba3445e377322e6430308767a2f000e7))
+- **scanner:** workspace/meta-repo role suppresses noise at workspace roots ([68d41dc](https://github.com/WeAreHausTech/haus-workflow/commit/68d41dc35ce7bb13a5d4687e3e614b481e887285))
+- **setup:** suggest workspace discover when sibling repos detected ([adf092f](https://github.com/WeAreHausTech/haus-workflow/commit/adf092f0725de8f7f44e33eee09cc02114a576d4))
+- **workspace:** extend REPO_MARKERS for .NET/Java/Ruby ([0211ac5](https://github.com/WeAreHausTech/haus-workflow/commit/0211ac542d7b5aed9509b163fdac7bd8444604dc))
+- **workspace:** haus workspace worktree add/hydrate/list/remove/doctor ([003996d](https://github.com/WeAreHausTech/haus-workflow/commit/003996d0cf683ff8a2ffe173f4f286cf000efb23))
+- **workspace:** link-context — copy-with-provenance cross-repo skill/agent/command visibility ([5f8330d](https://github.com/WeAreHausTech/haus-workflow/commit/5f8330d897af1a3e98d4b19917a8d7efcd1b543b))
+- **workspace:** readMembers() bridges haus.workspace.yaml + repos.manifest.json ([07394b8](https://github.com/WeAreHausTech/haus-workflow/commit/07394b8d19fcc841274cc5d4dfb211d00cd88ea4))
+- **worktree:** worktree-safe root resolution via resolveRoots() ([85bbe8a](https://github.com/WeAreHausTech/haus-workflow/commit/85bbe8a5a6a228425020f9d453db5da4887a4b65))
+
+### Bug Fixes
+
+- 4th-pass copilot findings — Windows path separators, .claude/commands gitignore gap ([36af7d1](https://github.com/WeAreHausTech/haus-workflow/commit/36af7d1904c4eb56cea5213a851509e641217024)), closes [#197](https://github.com/WeAreHausTech/haus-workflow/issues/197)
+- address 2nd-pass copilot findings — dotnet subdir detection, hydrate ordering ([a1b68ab](https://github.com/WeAreHausTech/haus-workflow/commit/a1b68ab0ac4f97faf920f15297255af60ec29bc9)), closes [#197](https://github.com/WeAreHausTech/haus-workflow/issues/197)
+- address copilot-pull-request-reviewer findings on PR [#197](https://github.com/WeAreHausTech/haus-workflow/issues/197) ([3ffe7ac](https://github.com/WeAreHausTech/haus-workflow/commit/3ffe7acfa263c2edab427824dfc66e6fe5e4c458))
+- **scanner:** enforce nested-repo boundary, stop leaking sibling stacks ([3e6c661](https://github.com/WeAreHausTech/haus-workflow/commit/3e6c661a1321c6a548bab4524bfd0ef4a39a16aa))
+- **test:** CI-flaky submodule default-branch + CoW-unsupported-fs skip; drop unused vars ([16a4464](https://github.com/WeAreHausTech/haus-workflow/commit/16a44645b863c58502d97db8a1cfb12a3084c385))
+- **workspace:** 2-pass discover glob avoids walking .git internals; --force hydrate cleans dest first ([6316de3](https://github.com/WeAreHausTech/haus-workflow/commit/6316de3092d1c191986c0d04e24858216ef8cd14)), closes [#197](https://github.com/WeAreHausTech/haus-workflow/issues/197)
+- **workspace:** 4 more findings — .git-only repos, symlink-safe hashing, Windows path ([d01b751](https://github.com/WeAreHausTech/haus-workflow/commit/d01b751e6c272f7bf8b22b0c504db1c9f38f3090)), closes [#197](https://github.com/WeAreHausTech/haus-workflow/issues/197)
+- **workspace:** discover role field reflects mixed frontend+backend signals ([418dcad](https://github.com/WeAreHausTech/haus-workflow/commit/418dcadf429d33fc81c2c8a4eab2a36f3e1c8922))
+- **workspace:** doctor flags a missing linked-context copy, not just staleness ([d819fb9](https://github.com/WeAreHausTech/haus-workflow/commit/d819fb9dcab9db7d964eccddcbe6ccef5444795d)), closes [#197](https://github.com/WeAreHausTech/haus-workflow/issues/197)
+- **workspace:** list falls back to configured members when state file missing ([72d529a](https://github.com/WeAreHausTech/haus-workflow/commit/72d529ad9b6368e8622f6b991803eb65bed80cdf)), closes [#197](https://github.com/WeAreHausTech/haus-workflow/issues/197)
+- **workspace:** lstat not stat for symlink safety; cheaper sibling-repo hint ([c28aa66](https://github.com/WeAreHausTech/haus-workflow/commit/c28aa6689f147d2a7e5ddaaa171da12d1e565807)), closes [#197](https://github.com/WeAreHausTech/haus-workflow/issues/197)
+- **workspace:** normalize a relative pathOverrides entry to absolute ([6130f8b](https://github.com/WeAreHausTech/haus-workflow/commit/6130f8bf1d766b9a6961b54dfda88972c6085a34))
+- **workspace:** normalize machine-local-file path to forward slashes before git ls-files ([336efd1](https://github.com/WeAreHausTech/haus-workflow/commit/336efd1ddbeddf39f68178bb8e342ad814b5bca9)), closes [#197](https://github.com/WeAreHausTech/haus-workflow/issues/197)
+- **workspace:** remove no longer leaks orphaned registrations for config-dropped members ([38f8fa6](https://github.com/WeAreHausTech/haus-workflow/commit/38f8fa63b973f70c50e0427fda3e1b41c46e6a5e)), closes [#197](https://github.com/WeAreHausTech/haus-workflow/issues/197)
+- **workspace:** use --reflink=always for Linux CoW clone, not auto ([f43fd55](https://github.com/WeAreHausTech/haus-workflow/commit/f43fd55a88647ae7312d3c02a0df9fb05877a494)), closes [#197](https://github.com/WeAreHausTech/haus-workflow/issues/197)
+- **worktree:** resolveRoots() actually honors its 'never throws' contract ([b3ac390](https://github.com/WeAreHausTech/haus-workflow/commit/b3ac3904c4251470a3a88bd1af118f7ce08273d0)), closes [#197](https://github.com/WeAreHausTech/haus-workflow/issues/197)
+
 ## [1.4.1](https://github.com/WeAreHausTech/haus-workflow/compare/v1.4.0...v1.4.1) (2026-08-05)
 
 ### Bug Fixes
