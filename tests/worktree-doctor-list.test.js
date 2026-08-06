@@ -185,3 +185,29 @@ test('list on a workspace with no worktrees yet returns an empty array, not an e
     fs.rmSync(ws, { recursive: true, force: true })
   }
 })
+
+test('list falls back to every configured member when .haus-worktree.json is missing (matches state.ts doc)', async () => {
+  const { ws } = buildFixture()
+  try {
+    await withCwd(ws, async () => {
+      await runAdd({ slug: 'no-state-slug', hydrate: false })
+      const wtPath = path.join(ws, '.claude', 'worktrees', 'no-state-slug')
+      // Simulate the state file being lost — list must still show both configured
+      // members (best-effort), not silently drop to zero.
+      fs.rmSync(path.join(wtPath, '.haus-worktree.json'), { force: true })
+
+      const result = await runList()
+      assert.equal(result.ok, true)
+      const entry = result.worktrees.find((w) => w.slug === 'no-state-slug')
+      assert.ok(entry)
+      assert.equal(
+        entry.members.length,
+        2,
+        'both configured members must appear even without the state file',
+      )
+      assert.ok(entry.members.every((m) => m.materialized))
+    })
+  } finally {
+    fs.rmSync(ws, { recursive: true, force: true })
+  }
+})
