@@ -100,6 +100,27 @@ test('doctor warns when .claude/ is gitignored', async () => {
   }
 })
 
+test('doctor warns when only .claude/commands is gitignored (not just skills/agents)', async () => {
+  const dir = mkdtempSync(path.join(os.tmpdir(), 'haus-doctor-gi-owned-commands-'))
+  try {
+    git(dir, ['init', '-q'])
+    git(dir, ['config', 'user.email', 'test@example.com'])
+    git(dir, ['config', 'user.name', 'test'])
+    writeBaseFixtures(dir)
+    mkdirSync(path.join(dir, '.claude/commands'), { recursive: true })
+    writeFileSync(path.join(dir, '.claude/commands/placeholder.md'), '# placeholder\n')
+    // Ignore commands specifically, leave the rest of .claude/ tracked, so this
+    // only passes if HAUS_OWNED_TRACKED_PATHS actually includes .claude/commands.
+    writeFileSync(dir + '/.gitignore', '.claude/commands/\n')
+
+    const { output, exitCode } = await runInDir(dir, () => runDoctor())
+    assert.match(output, /is gitignored/)
+    assert.equal(exitCode, 1, 'a gitignored .claude/commands/ is a blocking problem too')
+  } finally {
+    rmSync(dir, { recursive: true, force: true })
+  }
+})
+
 test('doctor warns when .haus-workflow/ is gitignored', async () => {
   const dir = mkdtempSync(path.join(os.tmpdir(), 'haus-doctor-gi-owned-workflow-'))
   try {

@@ -123,10 +123,13 @@ export async function runDoctor(): Promise<DoctorReport> {
   for (const member of members) {
     const entries = await listWorktrees(member.absPath)
     for (const entry of entries) {
+      // `git worktree list` can print forward slashes even on Windows — normalize
+      // before the path.sep-based marker search, or this silently misses orphans there.
+      const entryPath = path.normalize(entry.path)
       const marker = `${path.sep}.claude${path.sep}worktrees${path.sep}`
-      const idx = entry.path.indexOf(marker)
+      const idx = entryPath.indexOf(marker)
       if (idx === -1) continue
-      const rest = entry.path.slice(idx + marker.length)
+      const rest = entryPath.slice(idx + marker.length)
       const slugName = rest.split(path.sep)[0]
       if (!slugName) continue
       if (!existsSync(path.join(wsWorktreesDir, slugName))) {
