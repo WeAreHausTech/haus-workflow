@@ -223,8 +223,9 @@ test('hydration produces a runnable repo (npm install, offline) and satisfies si
 
 test('CoW clone: content is identical after copy, and writes to the clone do not leak back to the source', async (t) => {
   // cowCopyDir() deliberately skips the copy attempt ENTIRELY on an unsupported
-  // filesystem (ext4 and friends) rather than letting --reflink=auto silently
-  // fall back to a full copy — see src/workspace/worktree/cow-copy.ts. On CI
+  // filesystem (ext4 and friends), and uses --reflink=always (not auto) on a
+  // btrfs/xfs mount so a real-but-reflink-disabled mount fails fast instead of
+  // silently falling back to a full copy — see src/workspace/worktree/cow-copy.ts. On CI
   // Linux runners (typically ext4), the dummy node_modules fixture file this
   // test asserts on is therefore never cloned at all (hydration falls straight
   // through to install-reconciliation instead) — skip rather than false-fail.
