@@ -79,30 +79,35 @@ export async function runHydrateWorktree(
     return { ok: true, dryRun: true, slug, results }
   }
 
-  const results: HydrateMemberResult[] = []
-  await mapWithConcurrency(selected, async (member) => {
-    const memberPath = path.join(wtPath, member.folder)
-    if (!existsSync(memberPath)) {
-      results.push({
-        member: member.id,
-        folder: member.folder,
-        status: 'skipped',
-        error: 'not materialized in this worktree',
-      })
-      return
-    }
-    try {
-      const hydration = await hydrateMember(member.absPath, memberPath, { force: opts.force })
-      results.push({ member: member.id, folder: member.folder, status: 'ok', hydration })
-    } catch (err) {
-      results.push({
-        member: member.id,
-        folder: member.folder,
-        status: 'failed',
-        error: err instanceof Error ? err.message : String(err),
-      })
-    }
-  })
+  // Return each member's result from the mapper rather than pushing into a shared
+  // array from concurrent callbacks — mapWithConcurrency already preserves input
+  // order in its own return value, so this keeps `results` deterministic instead
+  // of ordered by whichever member's hydration happens to finish first.
+  const results = await mapWithConcurrency(
+    selected,
+    async (member): Promise<HydrateMemberResult> => {
+      const memberPath = path.join(wtPath, member.folder)
+      if (!existsSync(memberPath)) {
+        return {
+          member: member.id,
+          folder: member.folder,
+          status: 'skipped',
+          error: 'not materialized in this worktree',
+        }
+      }
+      try {
+        const hydration = await hydrateMember(member.absPath, memberPath, { force: opts.force })
+        return { member: member.id, folder: member.folder, status: 'ok', hydration }
+      } catch (err) {
+        return {
+          member: member.id,
+          folder: member.folder,
+          status: 'failed',
+          error: err instanceof Error ? err.message : String(err),
+        }
+      }
+    },
+  )
 
   return { ok: results.every((r) => r.status !== 'failed'), dryRun: false, slug, results }
 }
