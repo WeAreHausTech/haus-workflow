@@ -50,8 +50,15 @@ export type LinkPlan = {
  * resolves to `.` (the workspace root is itself a configured member repo).
  */
 export function repoFolderPrefix(member: Member): string {
-  const base = path.basename(member.folder)
-  if (base && base !== '.' && base !== path.sep) return base
+  // path.posix.basename, not the platform-dependent path.basename: member.folder
+  // is a config value (typically POSIX-style even in configs like `apps/storefront`
+  // written on macOS/Linux) — on Windows, plain path.basename() would return the
+  // whole string unchanged (no '/' segments to split on), producing a destKey that
+  // itself contains '/' and lands the copy in an unexpected nested path.
+  const base = path.posix.basename(member.folder)
+  if (base && base !== '.' && base !== '/') return base
+  // member.absPath is a real filesystem path, so the platform's own basename is
+  // correct here.
   const fromAbs = path.basename(member.absPath)
   return fromAbs || member.id
 }
@@ -121,7 +128,13 @@ export async function buildLinkPlan(members: Member[]): Promise<LinkPlan> {
     const member = membersById.get(repo)
     /* istanbul ignore next -- repo came from members themselves, always resolvable */
     if (!member) continue
-    const sourceHash = await hashInstalledPaths(member.absPath, [asset.sourceRelPath])
+    // followSymlinks: false — the recorded hash must reflect only content the
+    // copy step actually copies (link.ts's fs.copy filter already skips
+    // symlinks), never content read through a symlink that could point outside
+    // the repo.
+    const sourceHash = await hashInstalledPaths(member.absPath, [asset.sourceRelPath], {
+      followSymlinks: false,
+    })
     entries.push({
       repo,
       type,

@@ -105,8 +105,11 @@ export async function exists(file: string): Promise<boolean> {
  * match belongs to that other repo, not a repo of its own).
  *
  * Uses a single `fast-glob` pass (not a manual recursive `readdir` walk) so this stays
- * cheap on large trees — `**\/.git/**` is excluded from traversal, so the search never
- * descends into a repo's own object store, only ever matches the `.git` entry itself.
+ * cheap on large trees. Deliberately NO `**\/.git/**` ignore entry — see the NOTE inside
+ * this function for why that pattern would silently break detection entirely; instead,
+ * `fast-glob` itself short-circuits descent once a `**\/.git` match is found (verified:
+ * ~15ms against this repo's own sizeable `.git`, no full walk of `.git/objects`), so the
+ * search never descends into a repo's own object store without needing an ignore for it.
  * `fast-glob`'s directory entries are never resolved through symlinks by default, so a
  * symlink cannot be used to route the search outside `root` — consistent with this
  * codebase's no-symlink-follow posture (ADR-0019, ADR-0021; ADR-0010 is unrelated

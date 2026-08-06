@@ -63,7 +63,13 @@ const REPO_MARKERS = [
 ]
 const IGNORE = [
   '**/node_modules/**',
-  '**/.git/**',
+  // Deliberately NO '**/.git/**' entry — fast-glob/micromatch treats `dir` and
+  // `dir/**` as overlapping for ignore purposes, so that pattern also excludes
+  // the bare `.git` match REPO_MARKERS relies on, silently undercounting
+  // `.git`-only repos. Same pitfall, same fix as src/utils/fs.ts's
+  // findNestedRepoDirs() — see its comment for the empirical verification
+  // (fast-glob already short-circuits descent past a `.git` match on its own,
+  // so no ignore entry is needed for that anyway).
   '**/vendor/**',
   '**/dist/**',
   '**/.haus-workflow/**',
