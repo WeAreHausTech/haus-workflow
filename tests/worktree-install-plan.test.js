@@ -7,8 +7,11 @@
 // though this sandbox may lack those toolchains for a real integration run.
 import { describe, test } from 'node:test'
 import assert from 'node:assert/strict'
+import fs from 'node:fs'
+import os from 'node:os'
+import path from 'node:path'
 
-import { detectInstallPlan } from '../src/workspace/worktree/install.ts'
+import { computeLockfileSignals, detectInstallPlan } from '../src/workspace/worktree/install.ts'
 
 const NO_SIGNALS = {
   hasYarnLock: false,
@@ -77,5 +80,34 @@ describe('detectInstallPlan', () => {
       hasDotnetProject: true,
     })
     assert.equal(plan.manager, 'pnpm')
+  })
+})
+
+describe('computeLockfileSignals', () => {
+  test('detects a .csproj/.sln living in a subdirectory, not just the repo root', async () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'haus-lockfile-signals-'))
+    try {
+      fs.mkdirSync(path.join(dir, 'src', 'MyApp'), { recursive: true })
+      fs.writeFileSync(path.join(dir, 'src', 'MyApp', 'MyApp.csproj'), '<Project />')
+
+      const signals = await computeLockfileSignals(dir)
+      assert.equal(
+        signals.hasDotnetProject,
+        true,
+        'a nested .csproj must still be detected, not just a root-level one',
+      )
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true })
+    }
+  })
+
+  test('no dotnet project files anywhere -> hasDotnetProject is false', async () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'haus-lockfile-signals-'))
+    try {
+      const signals = await computeLockfileSignals(dir)
+      assert.equal(signals.hasDotnetProject, false)
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true })
+    }
   })
 })

@@ -71,10 +71,14 @@ export async function computeLockfileSignals(dir: string): Promise<LockfileSigna
   const hasPnpmLock = existsSync(path.join(dir, 'pnpm-lock.yaml'))
   const hasPackageLock = existsSync(path.join(dir, 'package-lock.json'))
   const hasComposerLock = existsSync(path.join(dir, 'composer.lock'))
-  const dotnetFiles = await fg(['*.csproj', '*.sln'], {
+  // Recurse below `dir` — a root-only glob misses the common .NET layout where the
+  // .sln/.csproj files live in a subdirectory (e.g. src/), which would otherwise
+  // make runInstallPlan() silently skip `dotnet restore` for a real dotnet project.
+  const dotnetFiles = await fg(['**/*.csproj', '**/*.sln'], {
     cwd: dir,
     onlyFiles: true,
     suppressErrors: true,
+    ignore: ['**/node_modules/**', '**/bin/**', '**/obj/**'],
   })
   const hasDotnetProject = dotnetFiles.length > 0
 
