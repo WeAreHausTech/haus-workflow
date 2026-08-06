@@ -70,13 +70,34 @@ Copies config-type catalog items into your project root. One-time, explicit — 
 
 See [Workspace mode](/docs/haus-workflow/workspace) for the full picture — these operate across multiple already-cloned repos via `haus.workspace.yaml`, a **different** file from the `repos.manifest.json` that `haus clone`/`/haus-workflow project:clone` reads.
 
-| Command                   | Description                                                                                             |
-| :------------------------ | :------------------------------------------------------------------------------------------------------ |
-| `haus workspace init`     | Initialize `haus.workspace.yaml` in the current directory                                               |
-| `haus workspace discover` | Auto-discover member repos and write `haus.workspace.yaml`                                              |
-| `haus workspace scan`     | Run `haus scan` across every discovered/configured workspace repo                                       |
-| `haus workspace setup`    | Run the setup flow across workspace repos; records outcomes to `.haus-workflow/workspace.manifest.json` |
-| `haus workspace doctor`   | Run `haus doctor` across workspace repos                                                                |
+| Command                       | Description                                                                                             |
+| :---------------------------- | :------------------------------------------------------------------------------------------------------ |
+| `haus workspace init`         | Initialize `haus.workspace.yaml` in the current directory                                               |
+| `haus workspace discover`     | Auto-discover member repos and write `haus.workspace.yaml`                                              |
+| `haus workspace scan`         | Run `haus scan` across every discovered/configured workspace repo                                       |
+| `haus workspace setup`        | Run the setup flow across workspace repos; records outcomes to `.haus-workflow/workspace.manifest.json` |
+| `haus workspace doctor`       | Run `haus doctor` across workspace repos, plus cross-repo linked-context drift                          |
+| `haus workspace undo`         | Revert haus setup for every configured repo, plus workspace-root artifacts                              |
+| `haus workspace link-context` | Copy each member repo's skills/agents/commands into the workspace root's own `.claude/` (see below)     |
+| `haus workspace worktree ...` | Isolated multi-repo worktrees — one real `git worktree` per member repo (see below)                     |
+
+### Cross-repo skill/agent/command visibility
+
+A member repo's own `.claude/skills/`, `.claude/agents/`, `.claude/commands/` don't automatically surface in a Claude Code session started at the workspace root. `haus workspace link-context [--write] [--json]` copies each already-haus-initialized member's entries into the workspace root's `.claude/{skills,agents,commands}/<repo-folder>--<name>/`, prefixed to avoid name collisions. Copy is used deliberately, not a symlink — matches this codebase's no-symlink-follow posture, avoids Windows symlink-permission friction, and doesn't depend on an external tool's discovery behavior. Runs automatically as the last step of `haus workspace setup --write`. `haus workspace doctor` flags a copy as stale once its source changes, or missing if the copy itself vanishes.
+
+### Isolated workspace worktrees
+
+`haus workspace worktree` gives each member repo a real, isolated `git worktree` (not a symlink) for feature work spanning multiple repos — all member worktrees share one mirrored branch name.
+
+| Command                                                                                            | Description                                                                                                                                               |
+| :------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `haus workspace worktree add <slug> [--branch <name>] [--only <repos>] [--no-hydrate] [--dry-run]` | Creates the workspace worktree plus one worktree per member, hydrated with a copy-on-write clone of `node_modules`-class dirs and lockfile-driven install |
+| `haus workspace worktree hydrate [--only <repos>] [--force] [--dry-run]`                           | Re-runs hydration without recreating worktrees                                                                                                            |
+| `haus workspace worktree list`                                                                     | Lists materialized workspace worktrees and each member's status                                                                                           |
+| `haus workspace worktree remove <slug> [--force] [--dry-run]`                                      | Removes a workspace worktree and its members; refuses by default on uncommitted/unpushed work                                                             |
+| `haus workspace worktree doctor [--from-hook]`                                                     | Fast, side-effect-free health check; installed as a `SessionStart` safety-net hook                                                                        |
+
+Hydration never fetches over the network and never runs `npm ci` (which would delete the very `node_modules` the copy-on-write clone just cloned).
 
 ## ADR / decisions gate
 

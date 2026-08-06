@@ -54,7 +54,7 @@ describe('isBranchCheckedOutElsewhereError', () => {
 })
 
 describe('branchExists / resolveDefaultBranch', () => {
-  test('branchExists is true for HEAD\'s branch, false for a nonexistent one', async () => {
+  test("branchExists is true for HEAD's branch, false for a nonexistent one", async () => {
     const dir = tmpDir('haus-wt-branch-')
     try {
       initRepo(dir)

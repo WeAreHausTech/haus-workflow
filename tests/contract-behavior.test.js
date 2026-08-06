@@ -18,7 +18,11 @@ const catalogValidateCorePath = findCatalogValidateCore(catalogRepoPath)
 
 test(
   'both validators agree on every fixture in tests/fixtures/contract-behavior/',
-  { skip: !catalogValidateCorePath && 'no haus-workflow-catalog checkout found (set HAUS_CATALOG_REPO_PATH)' },
+  {
+    skip:
+      !catalogValidateCorePath &&
+      'no haus-workflow-catalog checkout found (set HAUS_CATALOG_REPO_PATH)',
+  },
   async () => {
     const mismatches = await runContractBehaviorCheck(catalogValidateCorePath)
     assert.deepEqual(mismatches, [])

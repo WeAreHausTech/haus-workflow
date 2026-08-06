@@ -22,10 +22,18 @@ test('scanProject: in-memory result has no absolute-path field', async () => {
     const result = await scanProject(tmp)
     assert.equal('root' in result, false, 'ContextMap must not carry a root field')
     const serialized = JSON.stringify(result)
-    assert.doesNotMatch(serialized, /"\/(Users|home)\//, 'no absolute user path anywhere in the scan result')
+    assert.doesNotMatch(
+      serialized,
+      /"\/(Users|home)\//,
+      'no absolute user path anywhere in the scan result',
+    )
     // Belt-and-suspenders: the temp dir path itself (which lives under the platform
     // tmp dir, not necessarily /Users or /home) must also not appear verbatim.
-    assert.equal(serialized.includes(tmp), false, 'scan result must not embed the scanned root path')
+    assert.equal(
+      serialized.includes(tmp),
+      false,
+      'scan result must not embed the scanned root path',
+    )
   } finally {
     fs.rmSync(tmp, { recursive: true, force: true })
   }

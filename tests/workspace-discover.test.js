@@ -121,9 +121,15 @@ test('discoverRepos recognises .NET/Java/Ruby markers alongside JS/PHP, with no 
 
   assert.ok(paths.includes('js-app'), `expected js-app, got ${paths.join(',')}`)
   assert.ok(paths.includes('php-app'), `expected php-app, got ${paths.join(',')}`)
-  assert.ok(paths.includes('dotnet-app'), `expected dotnet-app (.csproj/.sln), got ${paths.join(',')}`)
+  assert.ok(
+    paths.includes('dotnet-app'),
+    `expected dotnet-app (.csproj/.sln), got ${paths.join(',')}`,
+  )
   assert.ok(paths.includes('java-app'), `expected java-app (pom.xml), got ${paths.join(',')}`)
-  assert.ok(paths.includes('gradle-app'), `expected gradle-app (build.gradle*), got ${paths.join(',')}`)
+  assert.ok(
+    paths.includes('gradle-app'),
+    `expected gradle-app (build.gradle*), got ${paths.join(',')}`,
+  )
   assert.ok(paths.includes('ruby-app'), `expected ruby-app (Gemfile), got ${paths.join(',')}`)
 
   // Exactly these 6 repos — no phantom extra repo spawned by the nested Lib.csproj.
@@ -169,7 +175,10 @@ test('discoverRepos reflects mixed frontend+backend signals in role instead of p
   const repos = await discoverRepos(ws)
   const app = repos.find((r) => r.name === 'fullstack-app')
   assert.ok(app, 'fullstack-app repo present')
-  assert.ok(app.role.includes('express-service'), `expected express-service in role, got ${app.role}`)
+  assert.ok(
+    app.role.includes('express-service'),
+    `expected express-service in role, got ${app.role}`,
+  )
   assert.ok(app.role.includes('react-app'), `expected react-app in role, got ${app.role}`)
   assert.notEqual(
     app.role,

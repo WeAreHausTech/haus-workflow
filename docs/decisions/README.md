@@ -33,8 +33,8 @@ this index covers CLI/repo decisions. ADR-0001 here links to those where the JSO
 | [0022](0022-recommender-gate-breakdown-near-miss.md)             | Recommender gate-breakdown schema and near-miss semantics                       | Accepted |
 | [0023](0023-catalog-github-api-auth-rate-limit-ux.md)            | Catalog GitHub API auth resolution and rate-limit UX                            | Accepted |
 | [0024](0024-cross-repo-validator-behavior-parity.md)             | Cross-repo validator behavior-parity check (live sibling checkout)              | Accepted |
-| [0025](0025-untrack-machine-local-scan-artifacts.md)             | Untrack machine-local scan artifacts — gitignore-writer + migration             | Proposed |
-| [0026](0026-workspace-member-config-bridge-not-consolidation.md) | Workspace member config — bridge repos.manifest.json, don't consolidate         | Proposed |
-| [0027](0027-zero-signal-setup-guard.md)                          | Zero-signal setup guard — warn always, `--force`-gate zero catalog matches      | Proposed |
-| [0028](0028-workspace-cross-repo-context-copy-vs-symlink.md)     | Workspace cross-repo skill/agent/command — copy-with-provenance, not symlink    | Proposed |
-| [0029](0029-workspace-worktree-real-isolation-model.md)          | Workspace worktree materialization — real git-worktree-per-member, not symlinks | Proposed |
+| [0025](0025-untrack-machine-local-scan-artifacts.md)             | Untrack machine-local scan artifacts — gitignore-writer + migration             | Accepted |
+| [0026](0026-workspace-member-config-bridge-not-consolidation.md) | Workspace member config — bridge repos.manifest.json, don't consolidate         | Accepted |
+| [0027](0027-zero-signal-setup-guard.md)                          | Zero-signal setup guard — warn always, `--force`-gate zero catalog matches      | Accepted |
+| [0028](0028-workspace-cross-repo-context-copy-vs-symlink.md)     | Workspace cross-repo skill/agent/command — copy-with-provenance, not symlink    | Accepted |
+| [0029](0029-workspace-worktree-real-isolation-model.md)          | Workspace worktree materialization — real git-worktree-per-member, not symlinks | Accepted |

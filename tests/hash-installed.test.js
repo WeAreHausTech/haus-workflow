@@ -146,7 +146,10 @@ test('followSymlinks: false excludes a symlinked top-level path entirely', async
 })
 
 test('followSymlinks: false excludes a symlinked file nested inside an otherwise-real directory', async () => {
-  const outsideFile = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'haus-hash-outside-')), 'x.md')
+  const outsideFile = path.join(
+    fs.mkdtempSync(path.join(os.tmpdir(), 'haus-hash-outside-')),
+    'x.md',
+  )
   fs.writeFileSync(outsideFile, '# outside file\n')
   try {
     fs.mkdirSync(path.join(tmpDir, 'skill2'), { recursive: true })

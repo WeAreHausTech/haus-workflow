@@ -69,7 +69,9 @@ test('workspace role fires on repos.manifest.json or haus.workspace.yaml at the 
 test('workspace role does NOT fire for a nested (non-root) occurrence of the marker file', () => {
   // fileEquals matches the exact relative path only — a marker file that isn't at
   // the scan root (e.g. inside a sub-directory) must not trigger the workspace role.
-  const out = runDetection(ctx({ files: ['sub/repos.manifest.json', 'nested/haus.workspace.yaml'] }))
+  const out = runDetection(
+    ctx({ files: ['sub/repos.manifest.json', 'nested/haus.workspace.yaml'] }),
+  )
   assert.equal(out.roles.includes('workspace'), false)
 })
 

@@ -40,7 +40,8 @@ All `src/` modules:
 | Install       | `src/install/`     | Global `~/.claude/` seed/teardown; settings merge (hooks, deny/allow); orphan cleanup; companion tools; `scaffold.ts` copies `config`-type items into the project root |
 | Security      | `src/security/`    | Guard dangerous bash tokens and sensitive file paths; derive `permissions.deny` list                                                                                   |
 | Catalog       | `src/catalog/`     | Load and validate catalog manifest; apply validation rules from `validation-rules.json`                                                                                |
-| Utils         | `src/utils/`       | Shared pure utilities: `logger`, `fs`, `paths`, `audit-checks`, `diff`, `exec`, `prompts`, `versions`                                                                  |
+| Utils         | `src/utils/`       | Shared pure utilities: `logger`, `fs`, `paths`, `audit-checks`, `diff`, `exec`, `prompts`, `versions`, `git-root` (worktree-safe root resolution)                      |
+| Workspace     | `src/workspace/`   | Multi-repo workspace core logic: member-list bridge (`members.ts`), real-worktree materialization (`worktree/`), cross-repo skill/agent/command copy (`link-context/`) |
 | Types         | `src/types/`       | Ambient type declarations                                                                                                                                              |
 
 Key files inside modules:
@@ -55,22 +56,30 @@ Key files inside modules:
 | `src/claude/merge-project-settings.ts` | Reconciles haus hooks into project `.claude/settings.json`                                                                   |
 | `src/install/settings-merge.ts`        | Reconciles haus hooks and permissions into `~/.claude/settings.json`; tracks added entries under `_haus` for clean uninstall |
 | `src/commands/setup-core.ts`           | Shared scan→recommend→apply pipeline used by `init` and `setup-project`                                                      |
+| `src/utils/git-root.ts`                | `resolveRoots()` — distinguishes a linked `git worktree` from its main checkout (`--git-dir` vs `--git-common-dir`)          |
+| `src/workspace/members.ts`             | `readMembers()` — bridges `haus.workspace.yaml` and `repos.manifest.json`, honoring `repos.local.json` `pathOverrides`       |
+| `src/workspace/worktree/`              | `add`/`hydrate`/`remove`/`list`/`doctor` — real git-worktree-per-member materialization, CoW hydration, install dispatch     |
+| `src/workspace/link-context/`          | Cross-repo skill/agent/command copy-with-provenance into the workspace root's `.claude/`                                     |
+| `src/claude/gitignore-owned-check.ts`  | Shared `.claude`/`.haus-workflow` gitignore-awareness check, used by both `doctor` and `apply --write`                       |
 
 ## Where to change what
 
-| Task                                            | Primary path                                                                   |
-| ----------------------------------------------- | ------------------------------------------------------------------------------ |
-| Add/change a CLI command                        | `src/commands/<cmd>.ts` + register in `src/cli.ts`                             |
-| Change stack/role detection                     | `src/scanner/detection-registry.ts`                                            |
-| Change recommendation policy                    | `src/recommender/policies.ts`                                                  |
-| Change which files haus writes to `.claude/`    | `src/claude/write-claude-files.ts`                                             |
-| Change `haus scaffold` config-file distribution | `src/install/scaffold.ts`, `src/commands/scaffold.ts`                          |
-| Change hook configuration                       | `src/claude/load-hooks.ts` (`CANONICAL_HOOKS`)                                 |
-| Change global install behaviour                 | `src/install/apply.ts`, `src/install/settings-merge.ts`                        |
-| Add/change a security guard rule                | `src/security/`                                                                |
-| Add/change catalog validation rules             | Sync from `haus-workflow-catalog`; see `library/catalog/validation-rules.json` |
-| Add a QA or release script                      | `scripts/*.mjs`                                                                |
-| Update bundled global skills/agents             | `library/global/`                                                              |
+| Task                                            | Primary path                                                                         |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------ |
+| Add/change a CLI command                        | `src/commands/<cmd>.ts` + register in `src/cli.ts`                                   |
+| Change stack/role detection                     | `src/scanner/detection-registry.ts`                                                  |
+| Change recommendation policy                    | `src/recommender/policies.ts`                                                        |
+| Change which files haus writes to `.claude/`    | `src/claude/write-claude-files.ts`                                                   |
+| Change `haus scaffold` config-file distribution | `src/install/scaffold.ts`, `src/commands/scaffold.ts`                                |
+| Change hook configuration                       | `src/claude/load-hooks.ts` (`CANONICAL_HOOKS`)                                       |
+| Change global install behaviour                 | `src/install/apply.ts`, `src/install/settings-merge.ts`                              |
+| Add/change a security guard rule                | `src/security/`                                                                      |
+| Add/change catalog validation rules             | Sync from `haus-workflow-catalog`; see `library/catalog/validation-rules.json`       |
+| Add a QA or release script                      | `scripts/*.mjs`                                                                      |
+| Update bundled global skills/agents             | `library/global/`                                                                    |
+| Change worktree add/hydrate/remove behavior     | `src/workspace/worktree/`; thin handler `src/commands/workspace/worktree.ts`         |
+| Change cross-repo skill/agent/command linking   | `src/workspace/link-context/`; thin handler `src/commands/workspace/link-context.ts` |
+| Change how member repos are enumerated          | `src/workspace/members.ts` (`readMembers()`)                                         |
 
 ## Tests
 

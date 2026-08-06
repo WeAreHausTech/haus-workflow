@@ -43,12 +43,23 @@ describe('write-gitignore: block content', () => {
 
 describe('gitignoreCovers', () => {
   it('accepts an exact verbatim entry', () => {
-    assert.equal(gitignoreCovers(['.haus-workflow/context-map.json'], '.haus-workflow/context-map.json'), true)
-    assert.equal(gitignoreCovers(['/.haus-workflow/context-map.json'], '.haus-workflow/context-map.json'), true)
+    assert.equal(
+      gitignoreCovers(['.haus-workflow/context-map.json'], '.haus-workflow/context-map.json'),
+      true,
+    )
+    assert.equal(
+      gitignoreCovers(['/.haus-workflow/context-map.json'], '.haus-workflow/context-map.json'),
+      true,
+    )
   })
 
   it('accepts a broader directory pattern that already covers the entry', () => {
-    for (const dirLine of ['.haus-workflow/', '.haus-workflow', '/.haus-workflow/', '.haus-workflow/**']) {
+    for (const dirLine of [
+      '.haus-workflow/',
+      '.haus-workflow',
+      '/.haus-workflow/',
+      '.haus-workflow/**',
+    ]) {
       assert.equal(
         gitignoreCovers([dirLine], '.haus-workflow/context-map.json'),
         true,
@@ -105,7 +116,11 @@ describe('write-gitignore: injectGitignoreBlock', () => {
       0,
       'managed block must not duplicate the user-owned entry',
     )
-    assert.equal((out.match(/context-map\.json/g) ?? []).length, 1, 'entry appears exactly once total')
+    assert.equal(
+      (out.match(/context-map\.json/g) ?? []).length,
+      1,
+      'entry appears exactly once total',
+    )
     // The other three artifacts still need haus's own entries.
     assert.ok(blockOnly.includes('recommendation.json'))
   })

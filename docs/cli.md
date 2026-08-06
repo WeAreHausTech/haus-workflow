@@ -12,15 +12,18 @@ First-run setup: scan → recommend → apply in one step. Use inside a project 
 
 - `--json` — emit JSON output
 
-### `haus setup-project [--json]`
+### `haus setup-project [--json] [--force]`
 
 Re-run setup on an existing project. Prompts to confirm before writing (unless `--json`).
 
 - `--json` — preview only; emit JSON output and write nothing
+- `--force` — write `recommendation.json`/`haus.lock.json` even when literally zero catalog items matched at all (not just zero detected stacks — a stack-agnostic-only project still writes normally with no `--force` needed). Without it, a genuinely zero-match project refuses the write and points at `--force` (see ADR-0027).
 
 ### `haus scan [--json]`
 
 Scan repo and write context-map. Detects stacks, roles, package manager, and dependencies.
+
+Prints a `WARN:` line when `detectionStatus` comes back `unknown` (no recognised role or stack signal) — previously silent. When run from inside a linked `git worktree`, the warning explicitly names that condition: a zero-signal read there can mean "sibling repos genuinely aren't on disk here" rather than "no stack at all" (see ADR-0027; root/worktree detection via `resolveRoots()`, `src/utils/git-root.ts`).
 
 Output: `.haus-workflow/context-map.json`, `.haus-workflow/dependency-map.json`, `.haus-workflow/scan-hashes.json`, `.haus-workflow/repo-summary.md`
 
@@ -62,6 +65,8 @@ locally edited old paths are preserved. Dry-run reports the pending migration wi
 writing.
 
 After writing `.claude/settings.json`, apply runs a self-check that it matches `CANONICAL_HOOKS` in `src/claude/load-hooks.ts`. Throws on drift.
+
+**Untracking migration (`--write`):** ensures `.gitignore` covers `context-map.json`, `recommendation.json`, `sources-report.json`, `deep-context.json` under `.haus-workflow/` (additive/idempotent — never clobbers existing user entries; `src/claude/write-gitignore.ts`). If any of these are currently tracked, runs `git rm --cached` on them with a clear, non-silent explanation — they carry machine-local absolute-path scan output and should never have been committed (see ADR-0025). Idempotent; also warns if `.claude/`/`.haus-workflow/` themselves come back gitignored (see `doctor` above for the same check).
 
 > `config`-type catalog items (ESLint, Prettier) are **not** written by apply — they
 > live in the project root and are user-owned. `haus recommend` surfaces them when
@@ -130,6 +135,11 @@ with developer detail beneath.
 
 - `--hooks` — verify `.claude/settings.json` matches the canonical hook contract; exits non-zero if missing or drifted
 
+Also flags (blocking, per-check in `src/claude/gitignore-owned-check.ts`, shared with `apply --write`'s final summary):
+
+- any of `.claude`, `.claude/skills`, `.claude/agents`, `.claude/commands`, `.haus-workflow` still gitignored — an entire skill/agent/command install becomes invisible to git-tracked state otherwise
+- any machine-local scan artifact (`context-map.json`, `recommendation.json`, `sources-report.json`, `deep-context.json`) still tracked in git, with the exact `git rm --cached` fix command (see ADR-0025)
+
 ### `haus explain-recommendation [--json]`
 
 Render explainability data directly from `.haus-workflow/recommendation.json` (no extra scoring pass).
@@ -194,9 +204,46 @@ Run setup flow across workspace repos. Records each repo's outcome to
 `.haus-workflow/workspace.manifest.json` — a derived, advisory record; per-repo
 `haus.lock.json` stays the source of truth.
 
-### `haus workspace doctor`
+### `haus workspace doctor [--json]`
 
-Run health checks across workspace repos.
+Run health checks across workspace repos: reports drift against `.haus-workflow/workspace.manifest.json` (version mismatch, missing `.claude`/lock, failed setup, catalog-ref mismatch), plus `linkedContext` entry staleness/missing-source/missing-copy (see `link-context` below).
+
+### `haus workspace undo [-y | --yes]`
+
+Revert haus setup for every configured repo, plus workspace-root artifacts (`haus.workspace.yaml`-adjacent manifest, cross-repo summary, linked-context copies). Per-repo, this is the same removal `haus undo` does standalone.
+
+### `haus workspace link-context [--write] [--json]`
+
+Copies each already-haus-initialized member repo's `.claude/{skills,agents,commands}` entries into the workspace root's own `.claude/{skills,agents,commands}/<repo-folder>--<name>/`, prefixed to avoid name collisions between repos that ship a same-named skill. A member repo's own skills/agents/commands don't otherwise surface in a Claude Code session started at the workspace root — copy is chosen over symlink for this codebase's existing no-symlink-follow posture, Windows compatibility, and version-stability (see ADR-0028; a symlink-discovery hypothesis from an earlier ticket was investigated and disproven — see the ADR's Context section).
+
+- `--write` — persist copies + the `linkedContext` manifest section + gitignore entries (default previews only)
+- `--json` — output the link result as JSON
+
+Each copy is stamped with a source content hash so `haus workspace doctor` can flag it `stale-linked-context` (source changed) or `missing-linked-context-copy` (the copy itself vanished) — distinct from `missing-linked-context-source` (the member repo dropped out of config or isn't cloned). Runs automatically as the last step of `haus workspace setup --write`; re-run standalone after `project:clone`/`project:cloneandsetup` without a full re-setup. Name collisions surviving the repo-folder prefix fail the whole run loudly — never silently pick a winner.
+
+### `haus workspace worktree`
+
+Real, isolated workspace worktrees for multi-repo feature work — one real `git worktree` per member repo (not a symlink), all on the same mirrored branch, hydrated with a copy-on-write clone of `node_modules`-class dirs plus lockfile-driven install-reconciliation. See ADR-0029 for the isolation-model reasoning and the CoW measurement. Root resolution (`resolveRoots()`, `src/utils/git-root.ts`) is worktree-aware, so running any `haus` command from inside a workspace worktree resolves the real repo/workspace root, not the worktree's own directory.
+
+#### `haus workspace worktree add <slug> [--branch <name>] [--only <repos>] [--no-hydrate] [--dry-run]`
+
+Creates the workspace-level worktree at `.claude/worktrees/<slug>`, plus one worktree per member repo, all on `--branch` (default: the slug). A member's branch is checked out if it already exists there, else created from that member's own default branch (read via `git symbolic-ref`, falling back to local `main` then `master`) — **never fetches over the network**, since member repos can live on different hosts with different auth. Hydrates unless `--no-hydrate`. `--dry-run` writes nothing.
+
+#### `haus workspace worktree hydrate [--only <repos>] [--force] [--dry-run]`
+
+Re-runs hydration (CoW clone + install-reconciliation) without recreating worktrees. `--force` re-clones a hydration target even if already present at the destination — replaces it first (a plain `cp` into an existing destination directory copies _into_ it rather than replacing it).
+
+#### `haus workspace worktree list`
+
+Lists materialized workspace worktrees and each member's on-disk/branch status. Falls back to every currently configured member (not just what `.haus-worktree.json` recorded) when that state file is missing.
+
+#### `haus workspace worktree remove <slug> [--force] [--dry-run]`
+
+Removes a workspace worktree and its member worktrees, then prunes every touched repo so no stale `git worktree list` registration survives. Refuses by default on uncommitted or unpushed work anywhere in the slug's worktrees, naming exactly what was found — only `--force` bypasses. A member that dropped out of the workspace config between `add` and `remove` is still unregistered correctly (its `absPath` is captured in `.haus-worktree.json` at `add` time for exactly this case) — unless that state predates this tracking, in which case `remove` blocks by default rather than silently leaking the registration.
+
+#### `haus workspace worktree doctor [--from-hook]`
+
+Fast, side-effect-free health check: are configured members materialized in the current worktree, on the expected branch, hydrated; are there orphaned member-repo worktree registrations whose workspace worktree directory is gone. `--from-hook` always exits 0 (installed as the `hook.workspace.worktree-check` SessionStart hook — report-only; auto-hydrate is not implemented, see `docs/plans/workspace-worktree-follow-ups.md`).
 
 ---
 

@@ -99,7 +99,10 @@ test('doctor --from-hook semantics: reports every-member-missing but the CLI han
         assert.equal(report.isWorkspace, true)
         assert.equal(report.inWorkspaceWorktree, true)
         assert.equal(report.slug, 'empty-slug')
-        assert.equal(report.members.every((m) => m.materialized === false), true)
+        assert.equal(
+          report.members.every((m) => m.materialized === false),
+          true,
+        )
         assert.ok(report.problems.length >= 2, 'both forms and admin should be reported missing')
         assert.ok(elapsed < 1000, `doctor took ${elapsed}ms, expected < 1000ms`)
       })
@@ -122,7 +125,9 @@ test('doctor flags a branch mismatch inside a materialized worktree', async () =
         const report = await runDoctor()
         const formsCheck = report.members.find((m) => m.id === 'forms')
         assert.equal(formsCheck.branchMismatch, true)
-        assert.ok(report.problems.some((p) => p.includes('forms') && p.includes('someone-changed-it')))
+        assert.ok(
+          report.problems.some((p) => p.includes('forms') && p.includes('someone-changed-it')),
+        )
       })
     })
   } finally {

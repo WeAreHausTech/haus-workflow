@@ -56,7 +56,12 @@ function buildFixture({ manifestOnly = false } = {}) {
   if (manifestOnly) {
     fs.writeFileSync(
       path.join(ws, 'repos.manifest.json'),
-      JSON.stringify({ repos: [{ id: 'forms', folder: 'forms' }, { id: 'admin', folder: 'admin' }] }),
+      JSON.stringify({
+        repos: [
+          { id: 'forms', folder: 'forms' },
+          { id: 'admin', folder: 'admin' },
+        ],
+      }),
     )
   } else {
     fs.writeFileSync(
@@ -143,16 +148,19 @@ test('add creates the workspace worktree + one member worktree per member, all o
       assert.ok(fs.existsSync(path.join(wtRoot, 'admin')))
 
       assert.equal(git(wtRoot, ['rev-parse', '--abbrev-ref', 'HEAD']).trim(), 'feature-x')
-      assert.equal(git(path.join(wtRoot, 'forms'), ['rev-parse', '--abbrev-ref', 'HEAD']).trim(), 'feature-x')
-      assert.equal(git(path.join(wtRoot, 'admin'), ['rev-parse', '--abbrev-ref', 'HEAD']).trim(), 'feature-x')
+      assert.equal(
+        git(path.join(wtRoot, 'forms'), ['rev-parse', '--abbrev-ref', 'HEAD']).trim(),
+        'feature-x',
+      )
+      assert.equal(
+        git(path.join(wtRoot, 'admin'), ['rev-parse', '--abbrev-ref', 'HEAD']).trim(),
+        'feature-x',
+      )
 
       const state = await readWorktreeState(wtRoot)
       assert.equal(state.slug, 'feature-x')
       assert.equal(state.branch, 'feature-x')
-      assert.deepEqual(
-        state.members.map((m) => m.id).sort(),
-        ['admin', 'forms'],
-      )
+      assert.deepEqual(state.members.map((m) => m.id).sort(), ['admin', 'forms'])
     })
   } finally {
     fs.rmSync(ws, { recursive: true, force: true })
@@ -231,7 +239,9 @@ test('CoW clone: content is identical after copy, and writes to the clone do not
   // through to install-reconciliation instead) — skip rather than false-fail.
   const strategy = await detectCowStrategy(os.tmpdir())
   if (strategy === 'unsupported' || strategy === 'unknown-platform') {
-    t.skip(`CoW unsupported on this filesystem (${strategy}) — cowCopyDir() skips the copy entirely by design`)
+    t.skip(
+      `CoW unsupported on this filesystem (${strategy}) — cowCopyDir() skips the copy entirely by design`,
+    )
     return
   }
 
@@ -256,7 +266,11 @@ test('CoW clone: content is identical after copy, and writes to the clone do not
 
       fs.writeFileSync(clonedFile, 'changed-in-worktree')
       const original = fs.readFileSync(path.join(forms, 'node_modules', 'dummy', 'pkg.txt'), 'utf8')
-      assert.equal(original, 'original-content', 'source must be unaffected by a write to the clone')
+      assert.equal(
+        original,
+        'original-content',
+        'source must be unaffected by a write to the clone',
+      )
     })
   } finally {
     fs.rmSync(ws, { recursive: true, force: true })

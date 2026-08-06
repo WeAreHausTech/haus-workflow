@@ -137,7 +137,7 @@ test('doctor warns when .haus-workflow/ is gitignored', async () => {
   }
 })
 
-test('doctor does not false-positive on this repo\'s own documented gitignore pattern', async () => {
+test("doctor does not false-positive on this repo's own documented gitignore pattern", async () => {
   const dir = mkdtempSync(path.join(os.tmpdir(), 'haus-doctor-gi-owned-clean-'))
   try {
     git(dir, ['init', '-q'])

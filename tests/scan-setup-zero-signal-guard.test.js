@@ -148,7 +148,9 @@ test('setup-project --force writes recommendation.json and haus.lock.json when z
       existsSync(path.join(dir, '.haus-workflow/recommendation.json')),
       'recommendation.json must be written when --force is passed',
     )
-    const rec = JSON.parse(readFileSync(path.join(dir, '.haus-workflow/recommendation.json'), 'utf8'))
+    const rec = JSON.parse(
+      readFileSync(path.join(dir, '.haus-workflow/recommendation.json'), 'utf8'),
+    )
     assert.deepEqual(rec.recommended, [])
     assert.ok(
       existsSync(path.join(dir, '.haus-workflow/haus.lock.json')),
