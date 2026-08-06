@@ -112,11 +112,24 @@ export async function runLinkContext(
     if (write) {
       await fs.ensureDir(path.dirname(destAbs))
       if (await fs.pathExists(destAbs)) await fs.remove(destAbs)
-      // fs.copy defaults to dereference:false (never follows a symlink inside the
-      // source content) — same posture ADR-0019/ADR-0021 already established for
-      // catalog items; see ADR-0028 for why this feature copies rather than symlinks
-      // at all.
-      await fs.copy(entry.sourceAbsPath, destAbs, { overwrite: true, errorOnExist: false })
+      // dereference:false + filter: never *replicate* a symlink into the workspace
+      // root — dereference:false alone only means "copy the symlink as a symlink,"
+      // which would still create one at the destination (and could point outside
+      // the repo). Matches src/install/scaffold.ts's established pattern; same
+      // posture ADR-0019/ADR-0021 already established for catalog items — see
+      // ADR-0028 for why this feature copies rather than symlinks at all.
+      await fs.copy(entry.sourceAbsPath, destAbs, {
+        overwrite: true,
+        errorOnExist: false,
+        dereference: false,
+        filter: (s) => {
+          try {
+            return !fs.lstatSync(s).isSymbolicLink()
+          } catch {
+            return false
+          }
+        },
+      })
     }
 
     if (!priorPaths.has(destRel)) added.push(destRel)

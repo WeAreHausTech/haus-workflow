@@ -54,7 +54,7 @@ export function computeDetectionStatus(
  * condition — a zero-signal read from inside a linked `git worktree` checkout can
  * mean "sibling repos genuinely aren't on disk here" rather than "no stack at
  * all", and silently treating the two the same misleads the user. See
- * docs/decisions/ ADR for the zero-signal setup guard this feeds into.
+ * docs/decisions/0027-zero-signal-setup-guard.md for the guard this feeds into.
  */
 export function describeUnknownDetection(
   unsupportedSignals: string[],

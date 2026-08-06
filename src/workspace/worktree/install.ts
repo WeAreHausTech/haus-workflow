@@ -116,7 +116,11 @@ export async function runInstallPlan(dir: string, plan: InstallPlan): Promise<In
   }
   const available = await commandExists(plan.command)
   if (!available) {
-    return { plan, ran: false, ok: false, skippedReason: `${plan.command} not found on PATH` }
+    // Skipped, not failed — matches this function's own doc comment. Callers
+    // branch on `ran` before ever reading `ok` (see describeInstall() in
+    // src/commands/workspace/worktree.ts), but `ok: true` here keeps that
+    // contract honest for any future caller that reads `ok` on its own.
+    return { plan, ran: false, ok: true, skippedReason: `${plan.command} not found on PATH` }
   }
   const result = await runCommand(plan.command, plan.args, { cwd: dir })
   return {
