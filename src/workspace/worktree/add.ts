@@ -152,10 +152,13 @@ export async function runAdd(opts: AddOptions): Promise<AddOutcome> {
   })
 
   // 4. Persist state for list/remove/doctor — only the members that actually materialized.
+  // absPath is captured now so `remove` can still find/unregister this member's
+  // worktree later even if it drops out of the workspace config in the meantime.
   const stateMembers: WorktreeMemberState[] = okResults.map((m) => ({
     id: m.member,
     folder: m.folder,
     branch: m.branch,
+    absPath: selected.find((s) => s.id === m.member)?.absPath,
   }))
   await writeWorktreeState(wsWorktreePath, {
     slug: opts.slug,
