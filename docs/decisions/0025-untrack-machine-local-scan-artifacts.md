@@ -1,6 +1,7 @@
 # ADR-0025: Untrack machine-local scan artifacts — gitignore-writer, apply-time migration, absolute-path removal
 
-- **Status:** Proposed | **Date:** 2026-08-05
+- **Status:** Accepted
+- **Date:** 2026-08-06
 - **Decided by:** Aniisa Bihi (draft by Claude)
 - **Affects:** `src/claude/write-gitignore.ts` (new), `src/commands/apply.ts`, `src/commands/doctor.ts`, `src/types.ts`, `src/scanner/scan-project.ts`, `src/claude/write-workflow-config.ts`, `tests/write-gitignore.test.js`, `tests/apply-gitignore-untrack.test.js`, `tests/doctor-gitignore.test.js`, `tests/scan-project-no-absolute-path.test.js`
 - **Related:** [docs/plans/workspace-worktree-materialization.md](../plans/workspace-worktree-materialization.md) (Task 2), [ADR-0006](0006-ownership-marking-on-frontmatter-files.md) (the managed-block sentinel convention reused here), `src/claude/write-prettierignore.ts` (the existing `.prettierignore` managed block this mirrors)

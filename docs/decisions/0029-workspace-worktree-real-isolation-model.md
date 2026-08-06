@@ -1,6 +1,7 @@
 # ADR-0029: Workspace worktree materialization — real git-worktree-per-member isolation, not symlinks
 
-- **Status:** Proposed | **Date:** 2026-08-05
+- **Status:** Accepted
+- **Date:** 2026-08-06
 - **Decided by:** Aniisa Bihi (draft by Claude)
 - **Affects:** `src/workspace/worktree/*` (`add.ts`, `hydrate.ts`, `cow-copy.ts`, `install.ts`, `remove.ts`, `list.ts`, `doctor.ts`, `git-worktree.ts`, `root.ts`, `select-members.ts`, `state.ts`, `local-files.ts`), `src/commands/workspace/worktree.ts`, `src/claude/merge-project-settings.ts` (`hook.workspace.worktree-check`)
 - **Related:** [docs/plans/workspace-worktree-materialization.md](../plans/workspace-worktree-materialization.md) (Task 4, Task 5); [ADR-0026](0026-workspace-member-config-bridge-not-consolidation.md) (`readMembers()`, the config source `worktree add` enumerates); [ADR-0028](0028-workspace-cross-repo-context-copy-vs-symlink.md) (this codebase's separate, sibling decision to copy rather than symlink for cross-repo skill/agent/command visibility — a different feature, same "prefer real materialization over a link" instinct, arrived at independently for its own reasons)

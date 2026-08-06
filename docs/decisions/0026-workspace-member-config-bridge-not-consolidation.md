@@ -1,6 +1,7 @@
 # ADR-0026: Workspace member config — bridge `repos.manifest.json` into the CLI, don't consolidate the three files yet
 
-- **Status:** Proposed | **Date:** 2026-08-05
+- **Status:** Accepted
+- **Date:** 2026-08-06
 - **Decided by:** Aniisa Bihi (draft by Claude)
 - **Affects:** `src/workspace/members.ts` (new), `tests/workspace-members.test.js` (new)
 - **Related:** [docs/plans/workspace-worktree-materialization.md](../plans/workspace-worktree-materialization.md) (Task 3), [ADR-0025](0025-untrack-machine-local-scan-artifacts.md) (sibling Task 2 of the same plan), `src/commands/workspace/config.ts` (the pre-existing `haus.workspace.yaml` parser this bridges from), `docusaurus-docs/workspace.mdx` (documents the three-file split this ADR does not remove)
