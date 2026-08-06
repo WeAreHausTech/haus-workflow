@@ -50,7 +50,10 @@ async function collectSkills(member: Member): Promise<SourceAsset[]> {
   const out: SourceAsset[] = []
   for (const name of [...names].sort()) {
     const abs = path.join(dir, name)
-    const stat = await fs.stat(abs)
+    // lstat, not stat — a symlinked entry must never be treated as a real skill
+    // source (consistent with this codebase's no-symlink-follow posture, and with
+    // link.ts's copy step which already skips symlinks via the same check).
+    const stat = await fs.lstat(abs)
     if (!stat.isDirectory()) continue
     if (!(await fs.pathExists(path.join(abs, 'SKILL.md')))) continue
     out.push({ type: 'skill', name, sourceRelPath: path.posix.join('.claude', 'skills', name) })
@@ -71,7 +74,8 @@ async function collectFlatMarkdown(
   for (const fileName of [...names].sort()) {
     if (!fileName.endsWith('.md')) continue
     const abs = path.join(dir, fileName)
-    if (!(await fs.stat(abs)).isFile()) continue
+    // lstat, not stat — see the matching comment in collectSkills() above.
+    if (!(await fs.lstat(abs)).isFile()) continue
     const name = fileName.slice(0, -'.md'.length)
     out.push({ type, name, sourceRelPath: path.posix.join('.claude', subdir, fileName) })
   }
