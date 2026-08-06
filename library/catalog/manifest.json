@@ -1,5 +1,5 @@
 {
-  "version": "4.1.1",
+  "version": "4.1.2",
   "items": [
     {
       "id": "haus.agentic-workflow-standard",
@@ -1980,7 +1980,7 @@
     },
     {
       "id": "haus.stripe-stripe-best-practices",
-      "version": "1.0.5",
+      "version": "1.0.6",
       "source": "curated",
       "type": "skill",
       "path": "skills/stripe/stripe-best-practices",
@@ -2004,7 +2004,7 @@
       ],
       "tags": ["workflow", "stripe", "payments"],
       "repoRoles": [],
-      "tokenEstimate": 1147,
+      "tokenEstimate": 1222,
       "installMode": "copy-selected",
       "default": false,
       "reviewStatus": "approved",
@@ -2013,8 +2013,8 @@
       "license": "MIT",
       "licenseConfidence": "medium",
       "originSourceId": "stripe-ai",
-      "originUrl": "https://github.com/stripe/ai/blob/2ecd560bd426075690686536200174785c94f2b5/skills/stripe-best-practices/SKILL.md",
-      "pinnedRef": "2ecd560bd426075690686536200174785c94f2b5",
+      "originUrl": "https://github.com/stripe/ai/blob/a929698fa483f392a21d46e7385ff3f6025407e6/skills/stripe-best-practices/SKILL.md",
+      "pinnedRef": "a929698fa483f392a21d46e7385ff3f6025407e6",
       "ecosystem": "stripe",
       "requiresAny": [
         {
@@ -2586,7 +2586,7 @@
     },
     {
       "id": "haus.turborepo-turborepo",
-      "version": "1.0.3",
+      "version": "1.0.4",
       "source": "curated",
       "type": "skill",
       "path": "skills/turborepo/turborepo",
@@ -2596,7 +2596,7 @@
       "whenNotToUse": "Do not use when a more specific skill or command applies.",
       "tags": ["turbo", "workflow"],
       "repoRoles": ["turbo-monorepo"],
-      "tokenEstimate": 7114,
+      "tokenEstimate": 7153,
       "installMode": "copy-selected",
       "default": true,
       "reviewStatus": "approved",
@@ -2605,8 +2605,8 @@
       "license": "MIT",
       "licenseConfidence": "high",
       "originSourceId": "vercel-turborepo",
-      "originUrl": "https://github.com/vercel/turborepo/blob/c6fbc97bb8841f9c87d106af2d89ce11e97ea56c/skills/turborepo/SKILL.md",
-      "pinnedRef": "c6fbc97bb8841f9c87d106af2d89ce11e97ea56c",
+      "originUrl": "https://github.com/vercel/turborepo/blob/d43eec5a24b8665dcbeefa8a90e721ef8dac9f86/skills/turborepo/SKILL.md",
+      "pinnedRef": "d43eec5a24b8665dcbeefa8a90e721ef8dac9f86",
       "ecosystem": "turbo",
       "requiresAny": [
         {
@@ -3250,7 +3250,7 @@
     },
     {
       "id": "haus.prisma-prisma-client-api",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "source": "curated",
       "type": "skill",
       "path": "skills/prisma/prisma-client-api",
@@ -3269,8 +3269,8 @@
       "license": "MIT",
       "licenseConfidence": "high",
       "originSourceId": "prisma-skills",
-      "originUrl": "https://github.com/prisma/skills/blob/dc08577cacd642af075e1017f0f7fe93177b06b4/prisma-client-api/SKILL.md",
-      "pinnedRef": "dc08577cacd642af075e1017f0f7fe93177b06b4",
+      "originUrl": "https://github.com/prisma/skills/blob/808913c1dac11dc425631c2454f7fcb2d5ade5ca/prisma-client-api/SKILL.md",
+      "pinnedRef": "808913c1dac11dc425631c2454f7fcb2d5ade5ca",
       "ecosystem": "database",
       "requiresAny": [
         {
