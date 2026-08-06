@@ -5,61 +5,22 @@ import checkbox from '@inquirer/checkbox'
 
 import { loadCatalog } from '../catalog/load-catalog.js'
 import { getCacheDir, getCacheManifestAge } from '../catalog/remote-catalog.js'
+import {
+  findGitignoredHausPaths,
+  summarizeGitignoredHausDirs,
+} from '../claude/gitignore-owned-check.js'
 import { writeClaudeFiles } from '../claude/write-claude-files.js'
 import { untrackMachineLocalArtifacts, writeGitignore } from '../claude/write-gitignore.js'
 import { collectLlmsTxtUrls, fetchRefsForItems, pruneOrphanedRefs } from '../refs/fetch-refs.js'
 import type { Recommendation } from '../types.js'
 import type { LockItem } from '../update/lockfile.js'
 import { parseIdList } from '../utils/args.js'
-import { runGit } from '../utils/exec.js'
 import { readJson } from '../utils/fs.js'
 import { error, log, warn } from '../utils/logger.js'
 import { displayPath, hausPath } from '../utils/paths.js'
 
 /** Matches `haus doctor`'s own catalog-cache staleness threshold. */
 const STALE_CACHE_THRESHOLD_DAYS = 7
-
-/**
- * Repo-relative paths of haus-owned, git-*tracked* content (skills/agents under
- * `.claude/`, plus `.haus-workflow/` itself) that must never be gitignored — mirrors
- * `haus doctor`'s own check (`src/commands/doctor.ts`). Surfaced here too because a
- * fresh install is when this matters most: an accidentally-gitignored `.claude/` would
- * make an entire catalog install (skills, agents, commands) invisible to git-tracked
- * state right after `apply --write` finishes. See Task 1.3 (D5) in
- * docs/plans/workspace-detection-and-permissions-fixes.md.
- */
-const HAUS_OWNED_TRACKED_PATHS = ['.claude', '.claude/skills', '.claude/agents', '.haus-workflow']
-
-/** Repo-relative paths (among `HAUS_OWNED_TRACKED_PATHS`) currently covered by a
- * `.gitignore` rule at `root`. Returns an empty array — never throws — when `root`
- * isn't a git repository, git is unavailable, or the check errors/times out. */
-async function findGitignoredHausPaths(root: string): Promise<string[]> {
-  try {
-    const result = await runGit(['check-ignore', '--', ...HAUS_OWNED_TRACKED_PATHS], {
-      cwd: root,
-      timeout: 5000,
-    })
-    if (result.exitCode !== 0 && result.exitCode !== 1) return []
-    return [
-      ...new Set(
-        result.stdout
-          .split('\n')
-          .map((line) => line.trim())
-          .filter(Boolean),
-      ),
-    ]
-  } catch {
-    return []
-  }
-}
-
-/** Collapse raw ignored `HAUS_OWNED_TRACKED_PATHS` matches into their top-level dirs
- * (`.claude/` and/or `.haus-workflow/`) for a readable warning. */
-function summarizeGitignoredHausDirs(paths: string[]): string[] {
-  const dirs = new Set<string>()
-  for (const p of paths) dirs.add(p === '.haus-workflow' ? '.haus-workflow/' : '.claude/')
-  return [...dirs]
-}
 
 async function cacheHasItems(): Promise<boolean> {
   const data = await readJson<{ items?: unknown[] }>(path.join(getCacheDir(), 'manifest.json'))

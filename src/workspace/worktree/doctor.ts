@@ -131,7 +131,7 @@ export async function runDoctor(): Promise<DoctorReport> {
       if (!slugName) continue
       if (!existsSync(path.join(wsWorktreesDir, slugName))) {
         orphans.push(
-          `${member.id}: worktree registered at ${entry.path} but ${path.join(wsWorktreesDir, slugName)} no longer exists — run \`git -C ${member.absPath} worktree prune\`.`,
+          `${member.id}: worktree registered at ${entry.path} but ${path.join(wsWorktreesDir, slugName)} no longer exists — run \`git -C "${member.absPath}" worktree prune\`.`,
         )
       }
     }
