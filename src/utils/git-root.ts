@@ -78,45 +78,58 @@ async function resolveAbsoluteGitPath(
 
 /**
  * Resolves worktree-safe root information for `start` (defaults to `process.cwd()`).
- * Never throws — a non-git directory or a bare repo returns an all-`cwd` fallback
- * with `isGitRepo: false`, letting callers fall back to today's behavior.
+ * Never throws — a non-git directory, a bare repo, OR git itself being unspawnable
+ * (missing binary, minimal environment) all return an all-`cwd` fallback with
+ * `isGitRepo: false`, letting callers fall back to today's behavior. `runGit()`
+ * only returns a non-zero exit code for a git command that ran and failed; it
+ * still throws if the `git` process itself can't be spawned at all (per its own
+ * doc comment in exec.ts) — the try/catch below is what actually makes good on
+ * this function's "never throws" promise for that case, not just exit codes.
  */
 export async function resolveRoots(start?: string): Promise<RootInfo> {
   const cwd = start ?? process.cwd()
 
-  const toplevel = await runGit(['rev-parse', '--show-toplevel'], { cwd })
-  if (toplevel.exitCode !== 0) return fallback(cwd)
-  const toplevelRaw = toplevel.stdout.trim()
-  if (!toplevelRaw) return fallback(cwd)
-  // Normalize separators — see the matching comment in resolveAbsoluteGitPath().
-  const repoRoot = path.resolve(toplevelRaw)
+  try {
+    const toplevel = await runGit(['rev-parse', '--show-toplevel'], { cwd })
+    if (toplevel.exitCode !== 0) return fallback(cwd)
+    const toplevelRaw = toplevel.stdout.trim()
+    if (!toplevelRaw) return fallback(cwd)
+    // Normalize separators — see the matching comment in resolveAbsoluteGitPath().
+    const repoRoot = path.resolve(toplevelRaw)
 
-  const [gitDir, gitCommonDir] = await Promise.all([
-    resolveAbsoluteGitPath('--git-dir', cwd, repoRoot),
-    resolveAbsoluteGitPath('--git-common-dir', cwd, repoRoot),
-  ])
-  if (!gitDir || !gitCommonDir) return fallback(cwd)
+    const [gitDir, gitCommonDir] = await Promise.all([
+      resolveAbsoluteGitPath('--git-dir', cwd, repoRoot),
+      resolveAbsoluteGitPath('--git-common-dir', cwd, repoRoot),
+    ])
+    if (!gitDir || !gitCommonDir) return fallback(cwd)
 
-  const isLinkedWorktree = gitDir !== gitCommonDir
+    const isLinkedWorktree = gitDir !== gitCommonDir
 
-  // Submodule guard: a submodule's gitDir lives under `<parent>/.git/modules/<name>`,
-  // where `dirname(gitCommonDir)` would resolve to the wrong directory. Only derive
-  // mainRoot from gitCommonDir when it actually ends in `.git` (the main-checkout shape).
-  const mainRoot =
-    isLinkedWorktree && path.basename(gitCommonDir) === '.git'
-      ? path.dirname(gitCommonDir)
-      : repoRoot
+    // Submodule guard: a submodule's gitDir lives under `<parent>/.git/modules/<name>`,
+    // where `dirname(gitCommonDir)` would resolve to the wrong directory. Only derive
+    // mainRoot from gitCommonDir when it actually ends in `.git` (the main-checkout shape).
+    const mainRoot =
+      isLinkedWorktree && path.basename(gitCommonDir) === '.git'
+        ? path.dirname(gitCommonDir)
+        : repoRoot
 
-  const worktreeName = isLinkedWorktree ? path.basename(gitDir) : null
+    const worktreeName = isLinkedWorktree ? path.basename(gitDir) : null
 
-  return {
-    cwd,
-    repoRoot,
-    gitDir,
-    gitCommonDir,
-    isLinkedWorktree,
-    mainRoot,
-    worktreeName,
-    isGitRepo: true,
+    return {
+      cwd,
+      repoRoot,
+      gitDir,
+      gitCommonDir,
+      isLinkedWorktree,
+      mainRoot,
+      worktreeName,
+      isGitRepo: true,
+    }
+  } catch {
+    // git itself couldn't be spawned (not installed, or a minimal/sandboxed
+    // environment) — fall back exactly as if this weren't a git repo, rather
+    // than propagating a crash into scan/setup/doctor callers that assumed
+    // this function never throws.
+    return fallback(cwd)
   }
 }
