@@ -102,8 +102,12 @@ describe('resolveRoots', () => {
     const parent = tmpDir()
     const upstream = tmpDir()
     try {
-      // Bare upstream repo the submodule points at.
+      // Bare upstream repo the submodule points at. HEAD's default branch name
+      // (main vs master) depends on the runner's git version/config — set it
+      // explicitly so `submodule add`'s checkout doesn't land on an empty
+      // "branch yet to be born" when the CI runner's default differs from main.
       git(upstream, ['init', '--bare', '-q'])
+      git(upstream, ['symbolic-ref', 'HEAD', 'refs/heads/main'])
 
       const seed = tmpDir()
       initRepo(seed)

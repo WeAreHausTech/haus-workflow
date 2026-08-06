@@ -24,6 +24,7 @@ import path from 'node:path'
 import { execFileSync } from 'node:child_process'
 
 import { runAdd } from '../src/workspace/worktree/add.ts'
+import { detectCowStrategy } from '../src/workspace/worktree/cow-copy.ts'
 import { branchExists } from '../src/workspace/worktree/git-worktree.ts'
 import { readWorktreeState } from '../src/workspace/worktree/state.ts'
 
@@ -129,7 +130,7 @@ function withCwd(dir, fn) {
 }
 
 test('add creates the workspace worktree + one member worktree per member, all on the mirrored branch (AC1)', async () => {
-  const { ws, forms, admin } = buildFixture()
+  const { ws } = buildFixture()
   try {
     await withCwd(ws, async () => {
       const result = await runAdd({ slug: 'feature-x' })
@@ -220,7 +221,19 @@ test('hydration produces a runnable repo (npm install, offline) and satisfies si
   }
 })
 
-test('CoW clone: content is identical after copy, and writes to the clone do not leak back to the source', async () => {
+test('CoW clone: content is identical after copy, and writes to the clone do not leak back to the source', async (t) => {
+  // cowCopyDir() deliberately skips the copy attempt ENTIRELY on an unsupported
+  // filesystem (ext4 and friends) rather than letting --reflink=auto silently
+  // fall back to a full copy — see src/workspace/worktree/cow-copy.ts. On CI
+  // Linux runners (typically ext4), the dummy node_modules fixture file this
+  // test asserts on is therefore never cloned at all (hydration falls straight
+  // through to install-reconciliation instead) — skip rather than false-fail.
+  const strategy = await detectCowStrategy(os.tmpdir())
+  if (strategy === 'unsupported' || strategy === 'unknown-platform') {
+    t.skip(`CoW unsupported on this filesystem (${strategy}) — cowCopyDir() skips the copy entirely by design`)
+    return
+  }
+
   const { ws, forms } = buildFixture()
   try {
     await withCwd(ws, async () => {
