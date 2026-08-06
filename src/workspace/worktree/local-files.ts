@@ -19,7 +19,11 @@ export const MACHINE_LOCAL_FILES = [
 ]
 
 async function isTracked(repoRoot: string, relFile: string): Promise<boolean> {
-  const result = await runGit(['ls-files', '--error-unmatch', relFile], { cwd: repoRoot })
+  // git pathspecs are always forward-slash, even on Windows — MACHINE_LOCAL_FILES
+  // entries built with path.join() would otherwise carry backslashes there
+  // (e.g. `.claude\settings.local.json`), which `git ls-files` can fail to match.
+  const gitPath = relFile.replace(/\\/g, '/')
+  const result = await runGit(['ls-files', '--error-unmatch', gitPath], { cwd: repoRoot })
   return result.exitCode === 0
 }
 
