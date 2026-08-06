@@ -221,7 +221,13 @@ export async function runWorkspaceDoctor(
         })
         continue
       }
-      const liveHash = await hashInstalledPaths(member.absPath, [entry.sourceRelPath])
+      // followSymlinks: false — must match the hashing mode plan.ts used when it
+      // recorded entry.sourceHash, or a repo with a symlink in its skill/agent/
+      // command source would report permanently stale (or permanently fresh)
+      // depending on which side happened to follow it.
+      const liveHash = await hashInstalledPaths(member.absPath, [entry.sourceRelPath], {
+        followSymlinks: false,
+      })
       if (liveHash !== entry.sourceHash) {
         flag({
           repo: entry.repo,

@@ -63,6 +63,12 @@ function makeWorkspace() {
 
   writePkg(path.join(ws, 'a', 'b', 'c', 'd'), { name: 'deeprepo' })
 
+  // A repo with ONLY a `.git` — no package.json/composer.json/any other marker at
+  // all. Regression coverage for a real bug: an explicit `**/.git/**` ignore entry
+  // (removed) suppressed the bare `.git` match itself under fast-glob/micromatch's
+  // dir-vs-dir/** overlap, silently undercounting exactly this kind of repo.
+  gitDir(path.join(ws, 'legacy-repo'))
+
   try {
     symlinkSync(ws, path.join(ws, 'cycle'), 'dir')
   } catch {
@@ -138,6 +144,10 @@ test('discoverRepos finds nested repos, excludes decoys, collapses monorepo pack
   assert.ok(names.includes('api'), 'composer-only repo discovered with basename')
   assert.ok(names.includes('worker'), 'nested repo with own .git discovered')
   assert.ok(names.includes('mono'), 'monorepo root discovered')
+  assert.ok(
+    names.includes('legacy-repo'),
+    `a .git-only repo (no manifest at all) must still be discovered, got ${names.join(',')}`,
+  )
 
   // Monorepo package collapsed into its parent repo root.
   assert.ok(!names.includes('ui'), 'nested manifest package must collapse into mono')

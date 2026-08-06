@@ -125,3 +125,43 @@ test('directory expansion hashes mixed text and binary files without throwing', 
   const hash = await hashInstalledPaths(tmpDir, ['skill'])
   assert.ok(hash.startsWith('sha256-'))
 })
+
+test('followSymlinks: false excludes a symlinked top-level path entirely', async () => {
+  const outsideDir = fs.mkdtempSync(path.join(os.tmpdir(), 'haus-hash-outside-'))
+  try {
+    fs.writeFileSync(path.join(outsideDir, 'SKILL.md'), '# outside\n')
+    fs.symlinkSync(outsideDir, path.join(tmpDir, 'symlinked-skill'))
+
+    const withSymlinks = await hashInstalledPaths(tmpDir, ['symlinked-skill'])
+    const withoutSymlinks = await hashInstalledPaths(tmpDir, ['symlinked-skill'], {
+      followSymlinks: false,
+    })
+    // Default (unchanged) behavior follows it and hashes the outside content.
+    assert.notEqual(withSymlinks, hashText(EMPTY_LOCK_PATHS_TOKEN))
+    // followSymlinks: false must treat it as if the path weren't there at all.
+    assert.equal(withoutSymlinks, hashText(`${EMPTY_LOCK_PATHS_TOKEN}|symlinked-skill`))
+  } finally {
+    fs.rmSync(outsideDir, { recursive: true, force: true })
+  }
+})
+
+test('followSymlinks: false excludes a symlinked file nested inside an otherwise-real directory', async () => {
+  const outsideFile = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'haus-hash-outside-')), 'x.md')
+  fs.writeFileSync(outsideFile, '# outside file\n')
+  try {
+    fs.mkdirSync(path.join(tmpDir, 'skill2'), { recursive: true })
+    fs.writeFileSync(path.join(tmpDir, 'skill2', 'SKILL.md'), '# real\n', 'utf8')
+    fs.symlinkSync(outsideFile, path.join(tmpDir, 'skill2', 'linked.md'))
+
+    const withSymlinks = await hashInstalledPaths(tmpDir, ['skill2'])
+    const withoutSymlinks = await hashInstalledPaths(tmpDir, ['skill2'], { followSymlinks: false })
+    // The symlinked nested file changes the default-mode hash...
+    assert.notEqual(withSymlinks, withoutSymlinks)
+    // ...but excluding it must still hash the real SKILL.md content, not treat the
+    // whole directory as empty.
+    const realOnly = hashText(`skill2/SKILL.md=${hashText('# real\n')}`)
+    assert.equal(withoutSymlinks, realOnly)
+  } finally {
+    fs.rmSync(path.dirname(outsideFile), { recursive: true, force: true })
+  }
+})
