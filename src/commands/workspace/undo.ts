@@ -18,7 +18,7 @@ import { confirm } from '../../utils/prompts.js'
 import { runUndo } from '../undo.js'
 
 import { readWorkspaceConfig, WORKSPACE_FILE } from './config.js'
-import { manifestPath } from './manifest.js'
+import { manifestPath, readLinkedContext } from './manifest.js'
 
 /** The four workspace-root aggregate artifacts `writeWorkspaceArtifacts` writes. */
 const WORKSPACE_AGGREGATE_FILES = [
@@ -78,6 +78,19 @@ export async function runWorkspaceUndo(
     } catch (err) {
       anyRepoFailed = true
       warn(`Undo failed for ${repo.name}: ${err instanceof Error ? err.message : String(err)}`)
+    }
+  }
+
+  // `haus workspace link-context` copies — read before the manifest (which records
+  // them) is removed below, so a full workspace undo doesn't leave orphaned
+  // `.claude/{skills,agents,commands}/<repo>--<name>` copies behind. Machine-
+  // generated, never user-authored, so removing them outright is always safe.
+  const linkedContext = await readLinkedContext(workspaceRoot)
+  for (const entry of linkedContext) {
+    const abs = path.join(workspaceRoot, entry.path)
+    if (await fs.pathExists(abs)) {
+      await fs.remove(abs)
+      log(`Removed ${entry.path} (linked ${entry.type} from ${entry.repo})`)
     }
   }
 

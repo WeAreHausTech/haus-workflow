@@ -5,7 +5,12 @@ import checkbox from '@inquirer/checkbox'
 
 import { loadCatalog } from '../catalog/load-catalog.js'
 import { getCacheDir, getCacheManifestAge } from '../catalog/remote-catalog.js'
+import {
+  findGitignoredHausPaths,
+  summarizeGitignoredHausDirs,
+} from '../claude/gitignore-owned-check.js'
 import { writeClaudeFiles } from '../claude/write-claude-files.js'
+import { untrackMachineLocalArtifacts, writeGitignore } from '../claude/write-gitignore.js'
 import { collectLlmsTxtUrls, fetchRefsForItems, pruneOrphanedRefs } from '../refs/fetch-refs.js'
 import type { Recommendation } from '../types.js'
 import type { LockItem } from '../update/lockfile.js'
@@ -160,6 +165,14 @@ export async function runApply(options: {
     prune: options.prune,
   })
 
+  // Machine-local scan artifacts (context-map.json, recommendation.json,
+  // sources-report.json, deep-context.json) must never be tracked in git — see
+  // ADR-0025. Ensure .gitignore covers them, then migrate any project that already
+  // has them tracked by untracking (never deleting) the files, with a clear,
+  // non-silent explanation per file. Idempotent: a second run finds nothing tracked.
+  await writeGitignore(root, isDryRun)
+  await untrackMachineLocalArtifacts(root, isDryRun, warn)
+
   if (!isDryRun) {
     // Best-effort: fetch llms.txt refs only for items this run actually installed
     // (per the lock just written by writeClaudeFiles), and drop cached refs for
@@ -187,6 +200,19 @@ export async function runApply(options: {
         `Could not fetch llms.txt references: ${err instanceof Error ? err.message : String(err)}`,
       )
     }
+  }
+
+  // Surfaced once at the end of a fresh install — this is when it matters most: a
+  // gitignored .claude/ or .haus-workflow/ would make everything `writeClaudeFiles`
+  // just wrote invisible to git-tracked state.
+  const gitignoredHausPaths = await findGitignoredHausPaths(root)
+  if (gitignoredHausPaths.length > 0) {
+    const dirs = summarizeGitignoredHausDirs(gitignoredHausPaths)
+    const dirList = dirs.join(' and ')
+    const verb = dirs.length === 1 ? 'is' : 'are'
+    warn(
+      `${dirList} ${verb} gitignored — installed skills/agents/commands will not be visible to anything relying on git-tracked state. Remove the covering .gitignore rule (only settings.json, settings.local.json, and worktrees/ under .claude/ should ever be ignored).`,
+    )
   }
 
   if (isDryRun) {

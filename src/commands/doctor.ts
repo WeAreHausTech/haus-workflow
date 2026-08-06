@@ -4,8 +4,13 @@ import path from 'node:path'
 import fs from 'fs-extra'
 
 import { getCacheDir, getCacheManifestAge } from '../catalog/remote-catalog.js'
+import {
+  findGitignoredHausPaths,
+  summarizeGitignoredHausDirs,
+} from '../claude/gitignore-owned-check.js'
 import { checkManagedTamper } from '../claude/managed-tamper.js'
 import { verifyProjectSettingsHooksContract } from '../claude/verify-hooks-contract.js'
+import { listTrackedArtifactPaths } from '../claude/write-gitignore.js'
 import { IGNORED_PATHS, prettierIgnoreProtects } from '../claude/write-prettierignore.js'
 import { BLOCK_BEGIN, BLOCK_END } from '../claude/write-root-claude-md.js'
 import { auditDecisionsLayout } from '../decisions/doctor.js'
@@ -228,6 +233,39 @@ export async function runDoctor(options?: { hooks?: boolean }): Promise<void> {
     } else {
       ok(`- .prettierignore: protects ${IGNORED_PATHS.join(' and ')}`)
     }
+  }
+
+  // Machine-local scan artifacts (context-map.json, recommendation.json,
+  // sources-report.json, deep-context.json) must never be tracked in git — they carry
+  // per-machine absolute paths and scan output. See ADR-0025 and `apply.ts`'s own
+  // untrack-on-write migration (this is the read-only detection half of the same fix).
+  const trackedArtifacts = await listTrackedArtifactPaths(root)
+  if (trackedArtifacts.length > 0) {
+    flag(
+      `- GITIGNORE: ${trackedArtifacts.length} machine-local scan artifact(s) still tracked in git (${trackedArtifacts.join(', ')})`,
+      `${trackedArtifacts.length} machine-local scan artifact(s) are still tracked in git`,
+      `git rm --cached ${trackedArtifacts.join(' ')} (or run \`haus apply --write\` to do this and update .gitignore for you)`,
+    )
+  } else {
+    ok('- GITIGNORE: OK (no machine-local scan artifacts tracked in git)')
+  }
+
+  // The inverse concern: .claude/ and .haus-workflow/ hold haus-installed, git-tracked
+  // content (skills, agents, commands, WORKFLOW.md, etc.) that must NOT be gitignored.
+  // A broad rule meant to cover only settings.json (e.g. a plain `.claude/` line)
+  // silently hides everything installed underneath from git-tracked state.
+  const gitignoredHausPaths = await findGitignoredHausPaths(root)
+  if (gitignoredHausPaths.length > 0) {
+    const dirs = summarizeGitignoredHausDirs(gitignoredHausPaths)
+    const dirList = dirs.join(' and ')
+    const verb = dirs.length === 1 ? 'is' : 'are'
+    flag(
+      `- GITIGNORE (haus content): ${dirList} ${verb} gitignored — installed skills/agents/commands will not be visible to anything relying on git-tracked state`,
+      `${dirList} ${verb} gitignored, so haus-installed content isn't visible to git-tracked state`,
+      'remove the covering .gitignore rule (only settings.json, settings.local.json, and worktrees/ under .claude/ should ever be ignored)',
+    )
+  } else {
+    ok('- GITIGNORE (haus content): OK (.claude/ and .haus-workflow/ are tracked)')
   }
 
   for (const finding of await auditDecisionsLayout(root)) {

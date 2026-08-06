@@ -136,6 +136,19 @@
     },
     "confidence": 0.62
   },
+  "workspace-root": {
+    "repoRoles": ["workspace"],
+    "detectedStacks": {
+      "backend": [],
+      "frontend": [],
+      "databases": [],
+      "testing": [],
+      "auth": [],
+      "tooling": ["missing-prettier", "missing-eslint"],
+      "packageManagers": []
+    },
+    "confidence": 0.3
+  },
   "wordpress-with-node-tooling": {
     "repoRoles": ["wordpress-bedrock-site", "wordpress-site"],
     "detectedStacks": {

@@ -62,6 +62,13 @@ export const PROJECT_HOOK_FRAGMENTS: HookFragment[] = [
     matcher: '*',
     command: 'haus update --from-hook',
   },
+  {
+    id: 'hook.workspace.worktree-check',
+    gate: 'keep',
+    event: 'SessionStart',
+    matcher: '*',
+    command: 'haus workspace worktree doctor --from-hook',
+  },
 ]
 
 /** Reads project `.claude/settings.json`, returning `{}` when missing. */

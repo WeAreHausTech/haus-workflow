@@ -1,0 +1,6 @@
+{
+  "repos": [
+    { "id": "frontend", "folder": "frontend", "repo": "git@example.com:org/frontend.git" },
+    { "id": "backend", "folder": "backend", "repo": "git@example.com:org/backend.git" }
+  ]
+}

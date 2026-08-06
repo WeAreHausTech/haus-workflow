@@ -28,12 +28,39 @@ export type WorkspaceManifestRepo = {
   error?: string
 }
 
+/** Which kind of catalog-shaped asset a {@link LinkedContextEntry} copies. */
+export type LinkedContextAssetType = 'skill' | 'agent' | 'command'
+
+/**
+ * One copied cross-repo skill/agent/command, written by `haus workspace link-context`
+ * (see `src/workspace/link-context/`). Tracked here so `doctor`/`apply --write` know
+ * these `.claude/{skills,agents,commands}` entries are generated and don't misreport
+ * them as drift — see docs/decisions/0028-workspace-cross-repo-context-copy-vs-symlink.md.
+ */
+export type LinkedContextEntry = {
+  /** Member id (matches `Member.id` from `../../workspace/members.js`). */
+  repo: string
+  type: LinkedContextAssetType
+  /** Source asset name, unprefixed (e.g. the skill directory name). */
+  name: string
+  /** Workspace-root-relative destination path of the copy (posix separators). */
+  path: string
+  /** Member-repo-relative path of the source (posix separators). */
+  sourceRelPath: string
+  /** Content hash of the source at link time, via `hashInstalledPaths` (Re-hash the
+   * live source and compare to detect staleness — see `workspace/doctor.ts`). */
+  sourceHash: string
+  linkedAt: string
+}
+
 export type WorkspaceManifest = {
   version: 1
   generatedAt: string
   hausVersion: string
   client: string
   repos: WorkspaceManifestRepo[]
+  /** Present only once `haus workspace link-context` has run at least once. */
+  linkedContext?: LinkedContextEntry[]
 }
 
 const MANIFEST_FILE = 'workspace.manifest.json'
@@ -86,6 +113,10 @@ export function buildManifest(opts: {
   repos: ManifestRepoInput[]
   now?: string
   version?: string
+  /** Carry a prior `linkedContext` section forward verbatim — `buildManifest` has no
+   * opinion on cross-repo link state, it just must not silently drop it on a rebuild
+   * (`link-context` owns writing this section; see `writeLinkedContext` below). */
+  linkedContext?: LinkedContextEntry[]
 }): WorkspaceManifest {
   const now = opts.now ?? new Date().toISOString()
   const version = opts.version ?? hausVersion()
@@ -111,6 +142,7 @@ export function buildManifest(opts: {
       status: repo.status,
       ...(repo.error ? { error: repo.error } : {}),
     })),
+    ...(opts.linkedContext ? { linkedContext: opts.linkedContext } : {}),
   }
 }
 
@@ -127,4 +159,35 @@ export async function writeWorkspaceManifest(
   const target = manifestPath(workspaceRoot)
   await writeJson(target, manifest)
   return target
+}
+
+/** Read just the `linkedContext` section — `[]` when the manifest or the section is absent. */
+export async function readLinkedContext(workspaceRoot: string): Promise<LinkedContextEntry[]> {
+  const manifest = await readManifest(workspaceRoot)
+  return manifest?.linkedContext ?? []
+}
+
+/**
+ * Write (replace) the `linkedContext` section, preserving everything else in the
+ * manifest verbatim. When no manifest exists yet (`link-context` run standalone
+ * before `workspace setup`), a minimal skeleton is created with an empty `repos`
+ * list — `doctor`'s existing `no-manifest`/per-repo checks still apply correctly
+ * against it once `setup` actually runs.
+ */
+export async function writeLinkedContext(
+  workspaceRoot: string,
+  linkedContext: LinkedContextEntry[],
+): Promise<string> {
+  const prior = await readManifest(workspaceRoot)
+  const next: WorkspaceManifest = prior
+    ? { ...prior, generatedAt: new Date().toISOString(), linkedContext }
+    : {
+        version: 1,
+        generatedAt: new Date().toISOString(),
+        hausVersion: hausVersion(),
+        client: 'unknown',
+        repos: [],
+        linkedContext,
+      }
+  return writeWorkspaceManifest(workspaceRoot, next)
 }

@@ -116,7 +116,6 @@ function refillContent(existing: string, v: WorkflowConfigValues): string {
 
 const FALLBACK_CONTEXT: ContextMap = {
   generatedAt: '',
-  root: '',
   repoName: '',
   packageManager: 'unknown',
   repoRoles: [],

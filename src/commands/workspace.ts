@@ -22,10 +22,12 @@ import { writeWorkspaceArtifacts, type WorkspaceRepoInput } from './workspace/ag
 import { parseWorkspaceConfig, WORKSPACE_FILE } from './workspace/config.js'
 import { runDiscover } from './workspace/discover.js'
 import { runWorkspaceDoctor } from './workspace/doctor.js'
+import { runWorkspaceLinkContext } from './workspace/link-context.js'
 import { resolveWorkspaceRoot, runWorkspaceSetup } from './workspace/setup.js'
 import { runWorkspaceUndo } from './workspace/undo.js'
 
-export type WorkspaceAction = 'init' | 'discover' | 'scan' | 'setup' | 'doctor' | 'undo'
+export type WorkspaceAction =
+  'init' | 'discover' | 'scan' | 'setup' | 'doctor' | 'undo' | 'link-context'
 
 /** Raw flags from commander (camelCased); normalized per-action before delegating. */
 export type WorkspaceOptions = {
@@ -165,6 +167,9 @@ export async function runWorkspace(
       return
     case 'undo':
       await runWorkspaceUndo(workspaceRoot, { yes: options.yes })
+      return
+    case 'link-context':
+      await runWorkspaceLinkContext(workspaceRoot, { write: options.write, json: options.json })
       return
   }
 }

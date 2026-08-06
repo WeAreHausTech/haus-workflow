@@ -17,6 +17,7 @@ import { buildSourcesReport } from '../scanner/write-sources-report.js'
 import { SENSITIVE_ITEM_KEYWORDS } from '../security/sensitive-paths.js'
 import type { CatalogItem, ContextMap, DeepContext, Recommendation } from '../types.js'
 import { readJson } from '../utils/fs.js'
+import { resolveRoots } from '../utils/git-root.js'
 import { hausPath } from '../utils/paths.js'
 
 import { readChangedFiles } from './git-signal.js'
@@ -334,11 +335,14 @@ export async function recommend(
   const skippedRules = skipped.length
   const estimatedContextTokens = estimateContextTokens(selectedRules)
   const estimatedTokenReductionPct = tokenReductionPct(selectedRules, skippedRules)
+  // Only needed to word the detectionStatus:'unknown' warning correctly — never throws
+  // (falls back to isLinkedWorktree:false for a non-git directory).
+  const { isLinkedWorktree } = await resolveRoots(root)
   return {
     recommended,
     skipped,
     optInEligible,
-    warnings: [...mergeRecommendationWarnings(context), ...includeWarnings],
+    warnings: [...mergeRecommendationWarnings(context, isLinkedWorktree), ...includeWarnings],
     estimatedContextTokens,
     selectedRules,
     skippedRules,
