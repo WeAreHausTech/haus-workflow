@@ -1,6 +1,7 @@
 # ADR-0027: Zero-signal setup guard — warn loudly always, gate the write only on zero catalog matches
 
-- **Status:** Proposed | **Date:** 2026-08-05
+- **Status:** Accepted
+- **Date:** 2026-08-06
 - **Decided by:** Aniisa Bihi (draft by Claude)
 - **Affects:** `src/commands/scan.ts`, `src/claude/setup-core.ts`, `src/commands/setup-project.ts`, `src/cli.ts`, `src/recommender/policies.ts`, `src/recommender/recommend.ts`, `src/scanner/detection.ts`
 - **Related:** [docs/plans/workspace-detection-and-permissions-fixes.md](../plans/workspace-detection-and-permissions-fixes.md) (Task 1.2 / D1), [docs/plans/workspace-worktree-materialization.md](../plans/workspace-worktree-materialization.md) (Task 1 — `resolveRoots()`, the worktree signal this guard consumes)

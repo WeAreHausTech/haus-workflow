@@ -1,6 +1,7 @@
 # ADR-0028: Workspace cross-repo context — copy-with-provenance, not symlink
 
-- **Status:** Proposed | **Date:** 2026-08-05
+- **Status:** Accepted
+- **Date:** 2026-08-06
 - **Decided by:** Aniisa Bihi (draft by Claude)
 - **Affects:** `src/workspace/link-context/*`, `src/commands/workspace/link-context.ts`, `src/commands/workspace/manifest.ts`, `src/commands/workspace/doctor.ts`, `src/commands/workspace/setup.ts`, `src/commands/workspace/undo.ts`, `src/claude/write-gitignore.ts`
 - **Related:** [docs/plans/workspace-detection-and-permissions-fixes.md](../plans/workspace-detection-and-permissions-fixes.md) Task 3.4 (D6, revised); [ADR-0019](0019-haus-backups-restore-safety-model.md), [ADR-0021](0021-dry-run-diff-symlink-refusal.md) (this codebase's existing never-follow/never-create-symlink policy)
