@@ -3,11 +3,15 @@
  * Task 4. Real per-filesystem CoW support is detected before attempting a clone:
  *
  * - macOS/APFS: `cp -c -R` (clonefile).
- * - Linux btrfs/XFS: `cp -a --reflink=auto -R`.
- * - Anything else (ext4, unknown platform): `--reflink=auto` would silently fall
- *   back to a full byte copy with no indication it happened — detected here and
- *   skipped entirely rather than eating a multi-hundred-MB copy silently. Callers
- *   go straight to install-reconciliation instead.
+ * - Linux btrfs/XFS: `cp -a --reflink=always -R` — `always`, not `auto`: a btrfs/
+ *   xfs *filesystem type* match doesn't guarantee the specific mount actually has
+ *   reflink enabled (e.g. xfs needs `-m reflink=1` at mkfs time), and `auto` would
+ *   silently fall back to a full byte copy in that case with no indication it
+ *   happened. `always` fails fast instead, so that case still correctly reports
+ *   `ok: false` rather than eating a multi-hundred-MB copy silently.
+ * - Anything else (ext4, unknown platform, or a real `--reflink=always` failure):
+ *   skipped/failed entirely rather than falling back to a copy. Callers go
+ *   straight to install-reconciliation instead.
  *
  * A copy failure is logged by the caller and never fatal to the overall hydrate/add
  * flow — worst case, that member falls through to a plain install.
@@ -79,8 +83,17 @@ export async function cowCopyDir(src: string, dest: string): Promise<CowCopyResu
   }
 
   await fs.ensureDir(path.dirname(dest))
+  // `--reflink=always` (not `auto`): `auto` silently falls back to a full byte
+  // copy when reflinks aren't actually usable (e.g. an xfs volume mounted
+  // without reflink support, even though the filesystem *type* check above says
+  // xfs) — exactly the "silent 310MB copy" this module's own doc says to avoid.
+  // `always` fails fast instead, so a genuinely non-CoW-capable mount correctly
+  // falls through to install-reconciliation via `ok: false`, not an expensive
+  // copy neither of us asked for.
   const args =
-    strategy === 'darwin-clonefile' ? ['-c', '-R', src, dest] : ['-a', '--reflink=auto', src, dest]
+    strategy === 'darwin-clonefile'
+      ? ['-c', '-R', src, dest]
+      : ['-a', '--reflink=always', src, dest]
   const result = await runCommand('cp', args)
   return {
     strategy,
