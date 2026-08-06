@@ -47,7 +47,11 @@ export type LinkContextSuccess = {
   /** Full set of entries valid after this run (what the manifest now records, or
    * would record under `--write`). */
   linked: LinkedContextEntry[]
-  /** Destination paths newly copied this run (were not already linked). */
+  /** Destination paths newly present in the manifest this run (weren't in the
+   * *prior manifest's* `linkedContext` list) — not a per-run copy counter. An
+   * entry already in the prior manifest is not counted here even if it was
+   * recopied this run (source changed) or its on-disk copy was missing and got
+   * restored — see `linked` for the full current set instead. */
   added: string[]
   /** Destination paths removed this run (orphaned — member gone/uncloned/asset removed). */
   removed: string[]

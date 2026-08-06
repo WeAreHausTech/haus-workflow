@@ -290,6 +290,30 @@ test(
 )
 
 test(
+  'workspace doctor flags a missing-linked-context-copy entry when the destination copy is deleted',
+  withExitCode(async () => {
+    const { ws } = makeWorkspace()
+    await writeCleanManifest(ws, ['acme-frontend', 'acme-api'])
+    const linkResult = await runLinkContext(ws, { write: true })
+    assert.equal(linkResult.ok, true)
+
+    const clean = await runWorkspaceDoctor(ws)
+    assert.deepEqual(clean.drift, [], 'no drift right after linking')
+
+    // Delete the DESTINATION copy (not the source) — simulates a user manually
+    // removing .claude/skills/<repo>--<skill>/ (or a cleanup tool touching it).
+    const copyPath = path.join(ws, '.claude', 'skills', 'frontend--react19-patterns')
+    rmSync(copyPath, { recursive: true, force: true })
+
+    const after = await runWorkspaceDoctor(ws)
+    assert.equal(after.drift.length, 1, 'exactly one drift item — the missing copy')
+    assert.equal(after.drift[0].repo, 'acme-frontend')
+    assert.equal(after.drift[0].kind, 'missing-linked-context-copy')
+    assert.match(after.drift[0].detail, /re-run `haus workspace link-context`/i)
+  }),
+)
+
+test(
   'workspace doctor flags a missing-linked-context-source entry when the member repo is gone',
   withExitCode(async () => {
     const { ws } = makeWorkspace()
