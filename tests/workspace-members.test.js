@@ -51,10 +51,7 @@ test('readMembers works against a haus.workspace.yaml-only workspace', async () 
 
     const members = await readMembers(fakeRootInfo(ws))
     assert.equal(members.length, 2)
-    assert.deepEqual(
-      members.map((m) => m.id).sort(),
-      ['cms', 'storefront'],
-    )
+    assert.deepEqual(members.map((m) => m.id).sort(), ['cms', 'storefront'])
     for (const m of members) {
       assert.equal(m.source, 'haus.workspace.yaml')
       assert.equal(m.absPath, path.resolve(ws, m.folder))
@@ -162,7 +159,10 @@ test('readMembers normalizes a relative pathOverrides entry against the workspac
 
     const members = await readMembers(fakeRootInfo(ws))
     assert.equal(members.length, 1)
-    assert.ok(path.isAbsolute(members[0].absPath), 'a relative override must be resolved to absolute')
+    assert.ok(
+      path.isAbsolute(members[0].absPath),
+      'a relative override must be resolved to absolute',
+    )
     assert.equal(members[0].absPath, path.resolve(ws, '../elsewhere-relative'))
   } finally {
     fs.rmSync(ws, { recursive: true, force: true })

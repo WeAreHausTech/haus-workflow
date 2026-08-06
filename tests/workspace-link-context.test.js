@@ -112,43 +112,46 @@ async function writeCleanManifest(ws, repoNames) {
 }
 
 test('repoFolderPrefix uses the last folder segment, falling back for a root member', () => {
-  assert.equal(repoFolderPrefix({ id: 'x', folder: 'apps/frontend', absPath: '/x/apps/frontend' }), 'frontend')
-  assert.equal(repoFolderPrefix({ id: 'root-repo', folder: '.', absPath: '/tmp/my-workspace' }), 'my-workspace')
+  assert.equal(
+    repoFolderPrefix({ id: 'x', folder: 'apps/frontend', absPath: '/x/apps/frontend' }),
+    'frontend',
+  )
+  assert.equal(
+    repoFolderPrefix({ id: 'root-repo', folder: '.', absPath: '/tmp/my-workspace' }),
+    'my-workspace',
+  )
 })
 
-test(
-  'runLinkContext --write copies skills/agents into .claude/ with repo-prefixed names, no collisions',
-  async () => {
-    const { ws } = makeWorkspace()
-    const result = await runLinkContext(ws, { write: true })
+test('runLinkContext --write copies skills/agents into .claude/ with repo-prefixed names, no collisions', async () => {
+  const { ws } = makeWorkspace()
+  const result = await runLinkContext(ws, { write: true })
 
-    assert.equal(result.ok, true)
-    assert.equal(result.dryRun, false)
-    assert.equal(result.skipped.length, 0)
+  assert.equal(result.ok, true)
+  assert.equal(result.dryRun, false)
+  assert.equal(result.skipped.length, 0)
 
-    assert.ok(existsSync(path.join(ws, '.claude/skills/frontend--react19-patterns/SKILL.md')))
-    assert.ok(existsSync(path.join(ws, '.claude/agents/frontend--frontend-reviewer.md')))
-    assert.ok(existsSync(path.join(ws, '.claude/skills/api--nestjs-patterns/SKILL.md')))
+  assert.ok(existsSync(path.join(ws, '.claude/skills/frontend--react19-patterns/SKILL.md')))
+  assert.ok(existsSync(path.join(ws, '.claude/agents/frontend--frontend-reviewer.md')))
+  assert.ok(existsSync(path.join(ws, '.claude/skills/api--nestjs-patterns/SKILL.md')))
 
-    assert.equal(result.linked.length, 3)
-    assert.equal(result.added.length, 3)
+  assert.equal(result.linked.length, 3)
+  assert.equal(result.added.length, 3)
 
-    const manifest = await readManifest(ws)
-    assert.ok(manifest.linkedContext, 'manifest carries a linkedContext section')
-    assert.equal(manifest.linkedContext.length, 3)
-    const skillEntry = manifest.linkedContext.find((e) => e.name === 'react19-patterns')
-    assert.equal(skillEntry.repo, 'acme-frontend')
-    assert.equal(skillEntry.type, 'skill')
-    assert.equal(skillEntry.path, '.claude/skills/frontend--react19-patterns')
-    assert.equal(skillEntry.sourceRelPath, '.claude/skills/react19-patterns')
-    assert.ok(skillEntry.sourceHash.startsWith('sha256-') || skillEntry.sourceHash.length > 0)
+  const manifest = await readManifest(ws)
+  assert.ok(manifest.linkedContext, 'manifest carries a linkedContext section')
+  assert.equal(manifest.linkedContext.length, 3)
+  const skillEntry = manifest.linkedContext.find((e) => e.name === 'react19-patterns')
+  assert.equal(skillEntry.repo, 'acme-frontend')
+  assert.equal(skillEntry.type, 'skill')
+  assert.equal(skillEntry.path, '.claude/skills/frontend--react19-patterns')
+  assert.equal(skillEntry.sourceRelPath, '.claude/skills/react19-patterns')
+  assert.ok(skillEntry.sourceHash.startsWith('sha256-') || skillEntry.sourceHash.length > 0)
 
-    // Gitignore updated for the workspace root.
-    const gi = readFileSync(path.join(ws, '.gitignore'), 'utf8')
-    assert.ok(gi.includes('.claude/skills/*--*/'))
-    assert.ok(gi.includes('.claude/agents/*--*.md'))
-  },
-)
+  // Gitignore updated for the workspace root.
+  const gi = readFileSync(path.join(ws, '.gitignore'), 'utf8')
+  assert.ok(gi.includes('.claude/skills/*--*/'))
+  assert.ok(gi.includes('.claude/agents/*--*.md'))
+})
 
 test('runLinkContext default preview does not write copies or the manifest', async () => {
   const { ws } = makeWorkspace()
@@ -210,9 +213,7 @@ test('runLinkContext skips a member with no .claude/skills|agents|commands', asy
   const result = await runLinkContext(ws, { write: true })
   assert.equal(result.ok, true)
   assert.equal(result.linked.length, 0)
-  assert.ok(
-    result.skipped.some((s) => s.repo === 'acme-plain' && /nothing to link/.test(s.reason)),
-  )
+  assert.ok(result.skipped.some((s) => s.repo === 'acme-plain' && /nothing to link/.test(s.reason)))
 })
 
 test('runLinkContext fails loudly on a name collision and writes nothing', async () => {
@@ -408,11 +409,20 @@ test('runLinkContext removes copies for a member that drops out of the workspace
   const second = await runLinkContext(ws, { write: true })
   assert.equal(second.ok, true)
   assert.ok(second.removed.includes('.claude/skills/api--nestjs-patterns'))
-  assert.ok(!existsSync(path.join(ws, '.claude/skills/api--nestjs-patterns')), 'orphan removed from disk')
-  assert.ok(existsSync(path.join(ws, '.claude/skills/frontend--react19-patterns')), 'remaining member unaffected')
+  assert.ok(
+    !existsSync(path.join(ws, '.claude/skills/api--nestjs-patterns')),
+    'orphan removed from disk',
+  )
+  assert.ok(
+    existsSync(path.join(ws, '.claude/skills/frontend--react19-patterns')),
+    'remaining member unaffected',
+  )
 
   const manifest = await readManifest(ws)
-  assert.ok(!manifest.linkedContext.some((e) => e.repo === 'acme-api'), 'manifest entry removed too')
+  assert.ok(
+    !manifest.linkedContext.some((e) => e.repo === 'acme-api'),
+    'manifest entry removed too',
+  )
 })
 
 test('runLinkContext removes copies for a member no longer cloned locally', async () => {

@@ -24,7 +24,11 @@ const NO_SIGNALS = {
 
 describe('detectInstallPlan', () => {
   test('yarn.lock + packageManager field -> corepack yarn install', () => {
-    const plan = detectInstallPlan({ ...NO_SIGNALS, hasYarnLock: true, hasPackageManagerField: true })
+    const plan = detectInstallPlan({
+      ...NO_SIGNALS,
+      hasYarnLock: true,
+      hasPackageManagerField: true,
+    })
     assert.deepEqual(plan, { manager: 'yarn', command: 'corepack', args: ['yarn', 'install'] })
   })
 
@@ -35,7 +39,11 @@ describe('detectInstallPlan', () => {
 
   test('pnpm-lock.yaml -> pnpm install --frozen-lockfile', () => {
     const plan = detectInstallPlan({ ...NO_SIGNALS, hasPnpmLock: true })
-    assert.deepEqual(plan, { manager: 'pnpm', command: 'pnpm', args: ['install', '--frozen-lockfile'] })
+    assert.deepEqual(plan, {
+      manager: 'pnpm',
+      command: 'pnpm',
+      args: ['install', '--frozen-lockfile'],
+    })
   })
 
   test('package-lock.json -> npm install, NEVER npm ci (would delete node_modules and defeat CoW)', () => {

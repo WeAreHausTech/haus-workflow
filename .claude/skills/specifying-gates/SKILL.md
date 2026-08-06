@@ -38,10 +38,10 @@ Use `AskUserQuestion` — one question at a time per the brainstorming skill's r
 ```yaml
 AskUserQuestion:
   question: "Gate: <task subject>. What exact state proves this works? One line per criterion. 'It works' is not an answer — name a sensor, HTTP status, log line, file presence, or equivalent."
-  header: 'Gate outcome'
+  header: "Gate outcome"
   options:
     - label: "I'll type the criteria"
-      description: 'Write 1-5 concrete, observable conditions'
+      description: "Write 1-5 concrete, observable conditions"
     - label: "Copy from task's acceptanceCriteria"
       description: "Use the existing list (only if it's already concrete)"
 ```
@@ -52,36 +52,38 @@ Store the user's free-text answer as a list of strings in `acceptanceCriteria`. 
 
 ```yaml
 AskUserQuestion:
-  question: 'How should the agent capture that state?'
-  header: 'Mechanism'
+  question: "How should the agent capture that state?"
+  header: "Mechanism"
   options:
-    - label: 'CLI command'
-      description: 'A shell command whose output shows the criterion'
-    - label: 'REST / API call'
-      description: 'HTTP request, inspect response'
-    - label: 'Subagent with briefing'
-      description: 'Dispatch Sonnet or Haiku with a prompt template'
-    - label: 'Direct inspection'
-      description: 'Read a file, query an entity, check a log'
+    - label: "CLI command"
+      description: "A shell command whose output shows the criterion"
+    - label: "REST / API call"
+      description: "HTTP request, inspect response"
+    - label: "Subagent with briefing"
+      description: "Dispatch Sonnet or Haiku with a prompt template"
+    - label: "Direct inspection"
+      description: "Read a file, query an entity, check a log"
 ```
 
 If "Subagent with briefing" → ask Q5 (dispatch contract) before proceeding.
+
+If the user already named the live fixture in their brief, do NOT offer a "dry trace" proof mechanism — record the live command as the only `verifyCommand`. The specification is a lock, not a re-opening of a decision the user already made.
 
 ### Q3 — Scope
 
 ```yaml
 AskUserQuestion:
-  question: 'Run this once, or over multiple targets?'
-  header: 'Scope'
+  question: "Run this once, or over multiple targets?"
+  header: "Scope"
   options:
-    - label: 'Once'
-      description: 'Single execution, single target'
-    - label: 'Per instance / target'
-      description: 'Run identically across a list (e.g. all environments)'
-    - label: 'First on one, then on all'
-      description: 'Prove it on one target, then roll out to the rest — the classic two-gate pattern'
-    - label: 'Custom'
-      description: 'Describe the rule in free text'
+    - label: "Once"
+      description: "Single execution, single target"
+    - label: "Per instance / target"
+      description: "Run identically across a list (e.g. all environments)"
+    - label: "First on one, then on all"
+      description: "Prove it on one target, then roll out to the rest — the classic two-gate pattern"
+    - label: "Custom"
+      description: "Describe the rule in free text"
 ```
 
 Store as `gateScope`: `"once"` | `"per-target"` | `"one-then-all"` | custom string.
@@ -90,15 +92,15 @@ Store as `gateScope`: `"once"` | `"per-target"` | `"one-then-all"` | custom stri
 
 ```yaml
 AskUserQuestion:
-  question: 'If the gate fails, what happens?'
-  header: 'On failure'
+  question: "If the gate fails, what happens?"
+  header: "On failure"
   options:
-    - label: 'Stop the plan (Recommended)'
-      description: 'No further tasks until this gate passes'
-    - label: 'Reopen this task, continue others'
-      description: 'Mark in_progress, keep the plan moving elsewhere'
-    - label: 'Log and continue'
-      description: 'Record failure, proceed — use only for informational gates'
+    - label: "Stop the plan (Recommended)"
+      description: "No further tasks until this gate passes"
+    - label: "Reopen this task, continue others"
+      description: "Mark in_progress, keep the plan moving elsewhere"
+    - label: "Log and continue"
+      description: "Record failure, proceed — use only for informational gates"
 ```
 
 Store as `failurePolicy`: `"stop-plan"` | `"reopen-continue"` | `"log-continue"`.
@@ -109,14 +111,14 @@ Only when Q2 = "Subagent with briefing".
 
 ```yaml
 AskUserQuestion:
-  question: 'Paste the exact prompt / briefing the subagent should receive. This becomes the dispatch contract — the agent cannot substitute a shorter version at runtime.'
-  header: 'Dispatch brief'
+  question: "Paste the exact prompt / briefing the subagent should receive. This becomes the dispatch contract — the agent cannot substitute a shorter version at runtime."
+  header: "Dispatch brief"
   options:
     - label: "I'll paste it"
-      description: 'Provide the briefing text'
-    - label: 'Use instances/<tag>/seed-briefing.md'
-      description: 'Per-target briefing file already written by a plan task'
-    - label: 'Generate from task description'
+      description: "Provide the briefing text"
+    - label: "Use instances/<tag>/seed-briefing.md"
+      description: "Per-target briefing file already written by a plan task"
+    - label: "Generate from task description"
       description: "Build the briefing from the task's Goal + Files + Acceptance Criteria"
 ```
 

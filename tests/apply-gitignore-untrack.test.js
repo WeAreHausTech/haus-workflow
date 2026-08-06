@@ -33,7 +33,10 @@ function makeProject(prefix) {
   return temp
 }
 
-const env = { ...process.env, HAUS_FIXTURE_CATALOG: path.resolve('tests/fixtures/catalog/manifest.json') }
+const env = {
+  ...process.env,
+  HAUS_FIXTURE_CATALOG: path.resolve('tests/fixtures/catalog/manifest.json'),
+}
 
 test('apply --write adds gitignore entries for a freshly-initialized project', (t) => {
   const temp = makeProject('gi-fresh')
@@ -73,7 +76,11 @@ test('apply --write untracks already-tracked artifacts and explains why', (t) =>
   git(temp, ['add', '.haus-workflow/context-map.json'])
   git(temp, ['commit', '-qm', 'poison: commit machine-local scan artifact'])
 
-  const trackedBefore = git(temp, ['ls-files', '--', '.haus-workflow/context-map.json']).stdout.trim()
+  const trackedBefore = git(temp, [
+    'ls-files',
+    '--',
+    '.haus-workflow/context-map.json',
+  ]).stdout.trim()
   assert.equal(trackedBefore, '.haus-workflow/context-map.json')
 
   const result = execaSync('node', [cli, 'apply', '--write'], { cwd: temp, env })
@@ -81,7 +88,11 @@ test('apply --write untracks already-tracked artifacts and explains why', (t) =>
   assert.match(out, /Untracked \.haus-workflow\/context-map\.json/)
   assert.match(out, /should never have been committed/)
 
-  const trackedAfter = git(temp, ['ls-files', '--', '.haus-workflow/context-map.json']).stdout.trim()
+  const trackedAfter = git(temp, [
+    'ls-files',
+    '--',
+    '.haus-workflow/context-map.json',
+  ]).stdout.trim()
   assert.equal(trackedAfter, '', 'context-map.json must no longer be tracked')
 
   // The untrack must not delete the file from disk — only from the git index.

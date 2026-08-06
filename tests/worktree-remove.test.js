@@ -167,14 +167,23 @@ test('remove --force still unregisters a member dropped from config since add, v
       // .haus-worktree.json at add time, not just readMembers().
       fs.writeFileSync(
         path.join(ws, 'haus.workspace.yaml'),
-        ['client: fixture', 'repos:', '  - name: admin', '    path: admin', 'relationships: []', ''].join(
-          '\n',
-        ),
+        [
+          'client: fixture',
+          'repos:',
+          '  - name: admin',
+          '    path: admin',
+          'relationships: []',
+          '',
+        ].join('\n'),
       )
 
       const result = await runRemove({ slug: 'dropped-slug', force: true })
       assert.equal(result.ok, true)
-      assert.equal(result.failed.length, 0, 'forms should still be unregistered via its recorded absPath')
+      assert.equal(
+        result.failed.length,
+        0,
+        'forms should still be unregistered via its recorded absPath',
+      )
 
       const formsEntries = await listWorktrees(forms)
       assert.equal(
@@ -205,9 +214,14 @@ test('remove blocks by default on a dropped member with no recorded absPath (pre
       // Drop 'forms' from config so it can't be resolved from readMembers() either.
       fs.writeFileSync(
         path.join(ws, 'haus.workspace.yaml'),
-        ['client: fixture', 'repos:', '  - name: admin', '    path: admin', 'relationships: []', ''].join(
-          '\n',
-        ),
+        [
+          'client: fixture',
+          'repos:',
+          '  - name: admin',
+          '    path: admin',
+          'relationships: []',
+          '',
+        ].join('\n'),
       )
 
       const result = await runRemove({ slug: 'legacy-slug' })

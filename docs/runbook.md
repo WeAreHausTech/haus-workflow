@@ -184,3 +184,20 @@ predates it until re-applied. This is expected, the same way a new required deny
 rule would also show red until the next apply. **Fix:** run
 `/haus-workflow project:refresh` (or `haus apply --write`) once; `doctor --hooks`
 goes green.
+
+## A `.git`-only repo (no manifest at all) silently vanishes from `discoverRepos`/nested-repo detection
+
+**Symptom:** `haus workspace discover` or the D9 nested-repo boundary check
+(`findNestedRepoDirs`, `src/utils/fs.ts`) undercounts repos — one with only a `.git`
+(no `package.json`/`composer.json`/etc.) never shows up, even though a plain `find . -name
+.git` finds it. **Cause:** fast-glob/micromatch treats a bare `dir` match and a `dir/**`
+ignore pattern as overlapping — adding `**/.git/**` to the `ignore` list (an intuitive
+"don't walk into `.git` internals" guard) also silently suppresses the bare `**/.git`
+match itself. Confirmed empirically (`node -e "require('fast-glob')(...)"` with and
+without the ignore entry — see `src/utils/fs.ts`'s `findNestedRepoDirs` and
+`src/commands/workspace/discover.ts`'s `findRepoRoots` for the working fix in both
+places). **Fix:** never add a `.git/**`-style ignore entry to a glob that's also
+matching `**/.git` — fast-glob already short-circuits descent past a `**/.git` match on
+its own (no ignore needed for that), and if a pattern set needs to exclude `.git`
+internals for _other_ markers, split into two separate glob passes instead (one for the
+`.git` marker with no such ignore, one for everything else with the ignore).

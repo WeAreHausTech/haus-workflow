@@ -1,4 +1,4 @@
-<!-- HAUS-MANAGED id=template.workflow v=1 source=@haus-tech/haus-workflow@1.1.1 hash=sha256-96636906280b87fa632a4f110d823f060f3b540dcffba4b72022c04743f0e170 -->
+<!-- HAUS-MANAGED id=template.workflow v=1 source=@haus-tech/haus-workflow@1.5.0 hash=sha256-96636906280b87fa632a4f110d823f060f3b540dcffba4b72022c04743f0e170 -->
 # Agentic Development Workflow Standard
 
 > Tech-agnostic methodology for AI-assisted software projects.

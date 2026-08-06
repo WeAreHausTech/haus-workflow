@@ -20,7 +20,6 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 **Context:** If working in an isolated worktree, it should have been created via the `superpowers-extended-cc:using-git-worktrees` skill at execution time.
 
 **Save plans to:** `docs/superpowers/plans/YYYY-MM-DD-<feature-name>.md`
-
 - (User preferences for plan location override this default)
 
 ## Scope Check
@@ -46,7 +45,7 @@ This structure informs the task decomposition. Each task should produce self-con
 2. If tasks exist: you will enhance them with implementation details as you write the plan
 3. If no tasks: you will create them with `TaskCreate` as you write each plan task
 
-**Do not proceed to exploration until TaskList has been called.**
+**Do not proceed to exploration until TaskList has been called.** This includes dispatching background or parallel investigation subagents — TaskList is fast and synchronous, so call it FIRST, then fan out any exploration agents.
 
 ```
 TaskList
@@ -61,7 +60,6 @@ See `.claude/skills/shared/task-format-reference.md` for the full granularity gu
 Key principle: TDD cycles happen WITHIN tasks, not as separate tasks. A task is "Implement X with tests" — the red-green-refactor steps are execution detail inside the task, not task boundaries.
 
 **Scope test:**
-
 1. Can it be verified independently? (if no → too small)
 2. Does it touch more than one concern? (if yes → too big)
 3. Would it get its own commit? (if no → merge with adjacent task)
@@ -81,6 +79,8 @@ Key principle: TDD cycles happen WITHIN tasks, not as separate tasks. A task is 
 
 **Tech Stack:** [Key technologies/libraries]
 
+**Global Constraints:** [Binding requirements every task must respect — exact values, formats, cross-component relationships ("same layout as X", "matches Y"). Execution controllers hand these to every reviewer. "none" if none.]
+
 **User decisions (already made):** [One line per decision the user made during brainstorming/planning, quotable. "none" if none.]
 
 ---
@@ -89,7 +89,6 @@ Key principle: TDD cycles happen WITHIN tasks, not as separate tasks. A task is 
 ### Deferred decisions
 
 If the plan schedules questions for the user (a DECIDE list, an AskUserQuestion step), each question MUST:
-
 - Cite why it is still open despite the header decisions. If a recorded decision answers it, answer from the record — do not re-ask.
 - Carry the facts needed to answer it in the option descriptions: name the artifact AND its role/state (e.g. "stale GitHub mirror, last push 2026-03-25 — separate from your local-tools dev home"), and state what does NOT change under each option.
 - Recommend nothing that contradicts a recorded decision. That is a plan failure (same severity as No Placeholders).
@@ -102,13 +101,11 @@ If the plan schedules questions for the user (a DECIDE list, an AskUserQuestion 
 **Goal:** [One sentence — what this task produces]
 
 **Files:**
-
 - Create: `exact/path/to/file.py`
 - Modify: `exact/path/to/existing.py:123-145`
 - Test: `tests/exact/path/to/test.py`
 
 **Acceptance Criteria:**
-
 - [ ] [Concrete, testable criterion]
 - [ ] [Another criterion]
 
@@ -152,20 +149,12 @@ git commit -m "feat: add specific feature"
 ## No Placeholders
 
 Every step must contain the actual content an engineer needs. These are **plan failures** — never write them:
-
 - "TBD", "TODO", "implement later", "fill in details"
 - "Add appropriate error handling" / "add validation" / "handle edge cases"
 - "Write tests for the above" (without actual test code)
 - "Similar to Task N" (repeat the code — the engineer may be reading tasks out of order)
 - Steps that describe what to do without showing how (code blocks required for code steps)
 - References to types, functions, or methods not defined in any task
-
-## Remember
-
-- Exact file paths always
-- Complete code in every step — if a step changes code, show the code
-- Exact commands with expected output
-- DRY, YAGNI, TDD, frequent commits
 
 ## Self-Review
 
@@ -207,13 +196,13 @@ Your ONLY permitted next action is calling `AskUserQuestion` with this EXACT str
 
 ```yaml
 AskUserQuestion:
-  question: 'Plan complete and saved to docs/superpowers/plans/<filename>.md. How would you like to execute it?'
-  header: 'Execution'
+  question: "Plan complete and saved to docs/superpowers/plans/<filename>.md. How would you like to execute it?"
+  header: "Execution"
   options:
-    - label: 'Subagent-Driven (this session)'
-      description: 'I dispatch fresh subagent per task, review between tasks, fast iteration'
-    - label: 'Parallel Session (separate)'
-      description: 'Open new session in worktree with executing-plans, batch execution with checkpoints'
+    - label: "Subagent-Driven (this session)"
+      description: "I dispatch fresh subagent per task, review between tasks, fast iteration"
+    - label: "Parallel Session (separate)"
+      description: "Open new session in worktree with executing-plans, batch execution with checkpoints"
 ```
 
 **If you are about to call ExitPlanMode, STOP — call AskUserQuestion instead.**
@@ -223,7 +212,6 @@ STOP. The user has chosen an execution method. You MUST invoke the corresponding
 
 **If Subagent-Driven chosen:**
 Invoke the Skill tool: `superpowers-extended-cc:subagent-driven-development`
-
 - The skill handles everything: subagent dispatch, review, task tracking
 - You stay in this session as the coordinator
 - Do NOT start working on tasks directly
@@ -248,15 +236,14 @@ You MUST run this check for EVERY task you create. It takes seconds and is the c
 
 **Step 1 — Scan for gate-language.** For each of these, search the user's brief AND the task's Goal/Acceptance Criteria, case-insensitive, whole-word where reasonable:
 
-| Bucket | Keywords / patterns                                                                            |
-| ------ | ---------------------------------------------------------------------------------------------- |
-| Verbs  | `verify`, `prove`, `validate`, `confirm`, `ensure`, `check`, `gate`                            |
-| Nouns  | `verification gate`, `acceptance test`, `smoke test`, `end-to-end`, `E2E`                      |
-| Scope  | `first on one`, `then all`, `one before the rest`, `before proceeding`, `don't continue until` |
-| Proof  | `prove it works`, `make sure`, `demonstrate`, `show that`                                      |
+| Bucket | Keywords / patterns |
+|--------|---------------------|
+| Verbs | `verify`, `prove`, `validate`, `confirm`, `ensure`, `check`, `gate` |
+| Nouns | `verification gate`, `acceptance test`, `smoke test`, `end-to-end`, `E2E` |
+| Scope | `first on one`, `then all`, `one before the rest`, `before proceeding`, `don't continue until` |
+| Proof | `prove it works`, `make sure`, `demonstrate`, `show that` |
 
 **Trigger rule** — a task is a user-thrown gate ONLY if:
-
 - a **Nouns** match is found (these phrases are unambiguous gate nouns), OR
 - a **Scope** match is found (commitment to ordering is a gate by itself), OR
 - a **Verbs** match co-occurs with EITHER a Scope or a Proof match.
@@ -275,6 +262,8 @@ If no bucket matches, or only Verbs match → regular task, no tagging needed.
 **Step 3 — Add the prose banner** (mandatory whenever `userGate: true`). Near the top of the task description, right under **Goal:**, include verbatim:
 
 > **USER-ORDERED GATE — NON-SKIPPABLE.** This task was requested by the user in the current conversation. It MUST NOT be closed by walking around it, by declaring it "verified inline", or by substituting a cheaper check. Close only after every item in `acceptanceCriteria` has been re-validated independently, with output captured.
+
+- **A clearly-directed verification is SETTLED, not a menu.** If the user named a concrete live fixture (a real MR/branch/ticket/endpoint) as the verification, encode it as REQUIRED: put the live invocation in `verifyCommand`, and make every `requireEvidenceTokens` axis (e.g. green/red) provable ONLY by the live run's captured output. A dry/paper trace MUST NOT appear as an acceptance criterion or an alternate close path — the plan fixes the approach so execution cannot downgrade it.
 
 **Tasks with declared evidence axes — set `requireEvidenceTokens`.** When a task's close is meaningful only if the coordinator has actually observed two (or more) labeled states, declare the axes in metadata. The `post-task-complete-revalidate` hook refuses the close unless at least one token from each axis appears in the close window. Examples:
 
@@ -304,11 +293,22 @@ See `.claude/skills/shared/task-format-reference.md` → "User-Thrown Gates" for
 
 **Why it matters.** Both execution paths (`executing-plans` and `subagent-driven-development`) read the task description via TaskGet and pass it to the implementing subagent. A one-sentence description makes the subagent improvise AC. The plan `.md` is not a fallback — TaskGet does not read it.
 
-**Self-check before finishing the skill.** After TaskCreate for every task, open the task description (via TaskGet or by reading `<plan>.tasks.json`) and confirm all four section headers (`**Goal:**`, `**Files:**`, `**Acceptance Criteria:**`, `**Verify:**`) AND the `json:metadata` fence are present. If any section is missing → TaskUpdate the description to the full block.
+**Self-check before finishing the skill.** This is a mechanical count, not a read-and-confirm — a prose pass can be rubber-stamped, a count can't. For each of the four section headers (`**Goal:**`, `**Files:**`, `**Acceptance Criteria:**`, `**Verify:**`), run `grep -c` over `<plan>.tasks.json`:
 
-````yaml
+```bash
+grep -c '\*\*Goal:\*\*' <plan>.tasks.json
+grep -c '\*\*Files:\*\*' <plan>.tasks.json
+grep -c '\*\*Acceptance Criteria:\*\*' <plan>.tasks.json
+grep -c '\*\*Verify:\*\*' <plan>.tasks.json
+```
+
+Each count MUST equal the number of tasks. If any count is lower → a task dropped that section; TaskUpdate it to the full block BEFORE the Execution Handoff. Also confirm the `json:metadata` fence is present in every task. Fall back to per-task TaskGet only if the tasks file is missing.
+
+**Keep subjects compact.** The harness re-injects every task's subject line into context on periodic reminders, so subjects are paid for repeatedly — aim for ≤ 60 characters and put detail in the description.
+
+```yaml
 TaskCreate:
-  subject: 'Task N: [Component Name]'
+  subject: "Task N: [Component Name]"
   description: |
     **Goal:** [From task's Goal line]
 
@@ -320,19 +320,15 @@ TaskCreate:
 
     **Verify:** [From task's Verify line]
 
-    **Steps:**
-    [Key actions from task's Steps — abbreviated]
-
     ```json:metadata
     {"files": ["path/to/file1.py"], "verifyCommand": "pytest tests/path/ -v", "acceptanceCriteria": ["criterion 1", "criterion 2"], "modelTier": "mechanical"}
     ```
-  activeForm: 'Implementing [Component Name]'
-````
+  activeForm: "Implementing [Component Name]"
+```
 
 ### Why Embedded Metadata
 
 The `metadata` parameter on TaskCreate is accepted but **not returned by TaskGet**. Embedding it as a `json:metadata` code fence in the description ensures:
-
 - TaskGet returns the full metadata (it's part of the description)
 - Cross-session resume can parse it from .tasks.json
 - Subagent dispatch can extract it for implementer prompts
@@ -371,7 +367,7 @@ At plan completion, write the task persistence file **in the same directory as t
 
 If the plan is saved to `docs/superpowers/plans/2026-01-15-feature.md`, the tasks file MUST be saved to `docs/superpowers/plans/2026-01-15-feature.md.tasks.json`.
 
-````json
+```json
 {
   "planPath": "docs/superpowers/plans/2026-01-15-feature.md",
   "tasks": [
@@ -391,14 +387,13 @@ If the plan is saved to `docs/superpowers/plans/2026-01-15-feature.md`, the task
   ],
   "lastUpdated": "<timestamp>"
 }
-````
+```
 
 Both the plan `.md` and `.tasks.json` must be co-located in `docs/superpowers/plans/`.
 
 ### Resuming Work
 
 Any new session can resume by running:
-
 ```
 /superpowers-extended-cc:executing-plans <plan-path>
 ```

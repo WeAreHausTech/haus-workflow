@@ -141,14 +141,7 @@ describe('resolveRoots', () => {
 
       initRepo(parent)
       git(parent, ['commit', '--allow-empty', '-qm', 'init'])
-      git(parent, [
-        '-c',
-        'protocol.file.allow=always',
-        'submodule',
-        'add',
-        upstream,
-        'sub',
-      ])
+      git(parent, ['-c', 'protocol.file.allow=always', 'submodule', 'add', upstream, 'sub'])
       git(parent, ['commit', '-qm', 'add submodule'])
 
       const subPath = path.join(parent, 'sub')

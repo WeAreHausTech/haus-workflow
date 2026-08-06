@@ -70,7 +70,10 @@ test('a linked-worktree-style nested .git (file, not dir) is excluded the same w
     // Simulate a linked worktree: a `.git` *file* (not directory) at the nested root.
     const sibling = path.join(meta, 'sibling-worktree')
     fs.mkdirSync(sibling, { recursive: true })
-    fs.writeFileSync(path.join(sibling, '.git'), 'gitdir: /somewhere/.git/worktrees/sibling-worktree\n')
+    fs.writeFileSync(
+      path.join(sibling, '.git'),
+      'gitdir: /somewhere/.git/worktrees/sibling-worktree\n',
+    )
     fs.writeFileSync(path.join(sibling, 'schema.graphql'), 'type Query { ok: Boolean }')
 
     const files = await listFiles(meta, ['**/*.graphql'])

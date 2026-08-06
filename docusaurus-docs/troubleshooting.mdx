@@ -48,6 +48,11 @@ Run `haus doctor` (or `/haus-workflow project:doctor` in Claude Code) first — 
 **Cause:** the scanner walks your whole repo tree (excluding `node_modules/`, `.git/`, `dist/`, and `tests/fixtures/`) looking for stack markers like `package.json` dependencies, `*.csproj`/`*.sln` files, or `vendure-config.*`. If your repo vendors, mirrors, or fixtures a different stack's files somewhere else on disk, those can register as real signals.
 **Fix:** run `haus scan --json` and check `.haus-workflow/context-map.json` — if a role/stack looks wrong, find what file triggered it (search for the exact marker file: a stray `.sln`, an old `vendure-config.ts` left in an example folder, etc.) and either remove it or move it somewhere the scan doesn't need to touch. `haus doctor`'s detection status (`supported` / `partial` / `unknown`) is a quick signal something's off — a stack you don't recognize is worth investigating before trusting the recommendations that follow.
 
+## "haus scan/setup-project says my stack wasn't recognised, but I know it should be"
+
+**Cause:** if you're running `haus` from inside a linked `git worktree` (including a `haus workspace worktree add` worktree), sibling repos referenced by a workspace config may genuinely not be materialized at that path — a zero-signal read there can look identical to "no stack at all" but has a different fix. `haus scan`/`setup-project`'s warning now names the worktree condition explicitly when this is the case.
+**Fix:** run from the main checkout (or the workspace root), not the worktree — or, if you do want to work from inside the worktree, run `haus workspace worktree doctor` first to confirm all members are actually materialized there. `setup-project` refuses to write `recommendation.json`/`haus.lock.json` when literally zero catalog items matched at all (not just zero detected stacks); pass `--force` only if you deliberately want to proceed anyway.
+
 ## "I want to turn off the ADR (decision record) requirement"
 
 Not a bug — it's opt-out by design. Create `.haus-workflow/adr-gate.json` with:

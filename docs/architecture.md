@@ -10,21 +10,22 @@ Core flow: **scan → recommend → apply**
 
 ## Repo structure
 
-| Path               | Purpose                                                                                                                  |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------ |
-| `src/cli.ts`       | CLI entry, command registration, Node engine check                                                                       |
-| `src/commands/`    | One file per CLI command (thin handlers only)                                                                            |
-| `src/scanner/`     | Repo detection and context-map generation                                                                                |
-| `src/recommender/` | Binary eligibility recommendation and explainability                                                                     |
-| `src/claude/`      | Generated file writer and hook contract checks                                                                           |
-| `src/update/`      | Lockfile checks, hash refresh, backup, diff summary                                                                      |
-| `src/install/`     | Global `~/.claude/` install/uninstall: file copy + manifest, settings merge (hooks, deny/allow), postinstall gate        |
-| `src/security/`    | Guardrails for sensitive paths and dangerous bash; derives `permissions.deny` from the same lists                        |
-| `src/catalog/`     | Catalog manifest loader and validation (rules from the synced `validation-rules.json` fixture)                           |
-| `src/utils/`       | Shared utilities: `logger.ts`, `fs.ts`, `paths.ts`, `audit-checks.ts`, `diff.ts`, `exec.ts`, `prompts.ts`, `versions.ts` |
-| `src/types/`       | Local ambient type declarations                                                                                          |
-| `library/global/`  | Shipped skills, agents, and hook templates                                                                               |
-| `library/catalog/` | Bundled manifest + `validation-rules.json` fixture (synced from catalog; fallback when remote cache is absent)           |
+| Path               | Purpose                                                                                                                                 |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/cli.ts`       | CLI entry, command registration, Node engine check                                                                                      |
+| `src/commands/`    | One file per CLI command (thin handlers only)                                                                                           |
+| `src/scanner/`     | Repo detection and context-map generation                                                                                               |
+| `src/recommender/` | Binary eligibility recommendation and explainability                                                                                    |
+| `src/claude/`      | Generated file writer and hook contract checks                                                                                          |
+| `src/update/`      | Lockfile checks, hash refresh, backup, diff summary                                                                                     |
+| `src/install/`     | Global `~/.claude/` install/uninstall: file copy + manifest, settings merge (hooks, deny/allow), postinstall gate                       |
+| `src/security/`    | Guardrails for sensitive paths and dangerous bash; derives `permissions.deny` from the same lists                                       |
+| `src/catalog/`     | Catalog manifest loader and validation (rules from the synced `validation-rules.json` fixture)                                          |
+| `src/utils/`       | Shared utilities: `logger.ts`, `fs.ts`, `paths.ts`, `audit-checks.ts`, `diff.ts`, `exec.ts`, `prompts.ts`, `versions.ts`, `git-root.ts` |
+| `src/workspace/`   | Multi-repo workspace core: `members.ts` (bridge), `worktree/` (materialization), `link-context/` (cross-repo copy)                      |
+| `src/types/`       | Local ambient type declarations                                                                                                         |
+| `library/global/`  | Shipped skills, agents, and hook templates                                                                                              |
+| `library/catalog/` | Bundled manifest + `validation-rules.json` fixture (synced from catalog; fallback when remote cache is absent)                          |
 
 ---
 
@@ -36,6 +37,7 @@ Core flow: **scan → recommend → apply**
 - `src/recommender/` → may use `src/scanner/`, `src/utils/`, `src/catalog/`
 - `src/claude/` → may use `src/utils/`, `src/update/`, `src/recommender/`
 - `src/security/` → may use `src/utils/` only
+- `src/workspace/` → may use `src/utils/` (esp. `git-root.ts`), `src/commands/workspace/config.ts` (shared YAML parser — an exception to the thin-handler rule, since `config.ts` already functions as a shared parser consumed by sibling command files, not a command handler itself)
 
 ---
 
@@ -121,6 +123,18 @@ The catalog is maintained in a separate repository ([`haus-workflow-catalog`](ht
 
 ---
 
+## Workspace flow
+
+Multi-repo "workspace" support (a meta-repo plus sibling member-repo clones) layers on top of the single-repo flows above.
+
+1. **Root resolution.** `resolveRoots()` (`src/utils/git-root.ts`) distinguishes a linked `git worktree` from its main checkout via `--git-dir` vs `--git-common-dir` — every workspace command resolves to the real repo/workspace root, not a worktree slug, even when invoked from inside a workspace worktree.
+2. **Member resolution.** `readMembers()` (`src/workspace/members.ts`) bridges `haus.workspace.yaml` (code-parsed via `src/commands/workspace/config.ts`) and `repos.manifest.json` into one normalized `Member[]` — either config source works, no consolidation required (ADR-0026). `repos.local.json`'s `pathOverrides` are honored and normalized to absolute paths regardless of how they were written.
+3. **Worktree materialization** (`haus workspace worktree add`, `src/workspace/worktree/`): one real `git worktree` per member repo (never a symlink — ADR-0029), all on the same mirrored branch. Hydration is copy-on-write clone of `node_modules`-class dirs (`cow-copy.ts`, filesystem-type-gated — never a silent full copy) followed by lockfile-driven install-reconciliation (`install.ts`). State is tracked per workspace-worktree in `.haus-worktree.json`, including each member's `absPath` at materialization time so `remove` can still unregister a member that later drops out of the workspace config.
+4. **Cross-repo context linking** (`haus workspace link-context`, `src/workspace/link-context/`): copies (never symlinks — ADR-0028) each haus-initialized member repo's `.claude/{skills,agents,commands}` into the workspace root's own `.claude/`, prefixed `<repo-folder>--<name>` to avoid collisions. Source hashing for staleness detection is symlink-safe (`hashInstalledPaths(..., { followSymlinks: false })`) so it never reflects content the copy step itself would refuse to copy.
+5. **Workspace doctor** (`haus workspace doctor`) reports drift against `.haus-workflow/workspace.manifest.json` — version mismatch, missing `.claude`/lock, failed setup, catalog-ref mismatch — plus `linkedContext` staleness/missing-source/missing-copy.
+
+---
+
 ## Memory
 
 haus ships no memory store. Cross-session learnings use Claude Code's native
@@ -145,13 +159,17 @@ haus ships no memory store. Cross-session learnings use Claude Code's native
 
 ## Output files
 
-| File                                   | Written by  |
-| -------------------------------------- | ----------- |
-| `.haus-workflow/context-map.json`      | `scan`      |
-| `.haus-workflow/dependency-map.json`   | `scan`      |
-| `.haus-workflow/scan-hashes.json`      | `scan`      |
-| `.haus-workflow/repo-summary.md`       | `scan`      |
-| `.haus-workflow/recommendation.json`   | `recommend` |
-| `.haus-workflow/selected-context.json` | `apply`     |
-| `.haus-workflow/haus.lock.json`        | `apply`     |
-| `.claude/*`                            | `apply`     |
+| File                                           | Written by                                                 | Tracked in git?                                                                          |
+| ---------------------------------------------- | ---------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `.haus-workflow/context-map.json`              | `scan`                                                     | No — gitignored, `apply --write` untracks if found tracked (ADR-0025)                    |
+| `.haus-workflow/dependency-map.json`           | `scan`                                                     | No                                                                                       |
+| `.haus-workflow/scan-hashes.json`              | `scan`                                                     | No                                                                                       |
+| `.haus-workflow/repo-summary.md`               | `scan`                                                     | No                                                                                       |
+| `.haus-workflow/recommendation.json`           | `recommend`                                                | No — gitignored, untracked if found tracked                                              |
+| `.haus-workflow/sources-report.json`           | `scan`                                                     | No — gitignored, untracked if found tracked                                              |
+| `.haus-workflow/deep-context.json`             | `writing-documentation` skill (LLM-authored, not this CLI) | No — gitignored, untracked if found tracked                                              |
+| `.haus-workflow/selected-context.json`         | `apply`                                                    | Yes                                                                                      |
+| `.haus-workflow/haus.lock.json`                | `apply`                                                    | Yes — registry of what's installed, not scan output                                      |
+| `.claude/*`                                    | `apply`                                                    | Yes                                                                                      |
+| `.claude/worktrees/<slug>/.haus-worktree.json` | `workspace worktree add`                                   | No — gitignored, machine-local materialization state                                     |
+| `.haus-workflow/workspace.manifest.json`       | `workspace setup`, `workspace link-context`                | Yes — advisory record, `linkedContext` section round-trips across `setup --write` reruns |

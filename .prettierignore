@@ -1,5 +1,6 @@
 # HAUS:BEGIN haus-managed v=1
-# haus-owned files — do not reformat (keeps tamper-detection hashes stable)
+# haus-owned files — do not reformat (keeps tamper/lock hashes stable)
 .haus-workflow/
+.claude/
 # HAUS:END haus-managed
 .claude/

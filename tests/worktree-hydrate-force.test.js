@@ -23,7 +23,9 @@ test('hydrateMember --force replaces an existing destination target, never nests
   // assert on here at all (the destination stays empty after --force's cleanup).
   const strategy = await detectCowStrategy(os.tmpdir())
   if (strategy === 'unsupported' || strategy === 'unknown-platform') {
-    t.skip(`CoW unsupported on this filesystem (${strategy}) — cowCopyDir() skips the copy entirely by design`)
+    t.skip(
+      `CoW unsupported on this filesystem (${strategy}) — cowCopyDir() skips the copy entirely by design`,
+    )
     return
   }
 
@@ -49,7 +51,11 @@ test('hydrateMember --force replaces an existing destination target, never nests
     )
     // The destination must reflect the fresh source content, not the stale one.
     const content = fs.readFileSync(path.join(destNodeModules, 'dep', 'pkg.txt'), 'utf8')
-    assert.equal(content, 'fresh-content', '--force must replace stale content with the fresh source')
+    assert.equal(
+      content,
+      'fresh-content',
+      '--force must replace stale content with the fresh source',
+    )
   } finally {
     fs.rmSync(main, { recursive: true, force: true })
     fs.rmSync(worktree, { recursive: true, force: true })

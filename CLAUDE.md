@@ -21,7 +21,7 @@ CLI → command module → core module (scanner/recommender/writer) → concise 
 
 Outputs written to: `.haus-workflow/context-map.json`, `.haus-workflow/recommendation.json`, `.haus-workflow/haus.lock.json`, `.claude/*`
 
-Catalog content from [`haus-workflow-catalog`](https://github.com/WeAreHausTech/haus-workflow-catalog) (122 items: 101 skills, 15 agents, 4 templates, 2 configs; version in `library/catalog/manifest.json`). `apply`/`update` prune catalog items removed upstream when lock hash matches; user edits are kept. Validation rules: synced fixture `library/catalog/validation-rules.json` (skills require frontmatter `description:`).
+Catalog content from [`haus-workflow-catalog`](https://github.com/WeAreHausTech/haus-workflow-catalog) (118 items: 97 skills, 15 agents, 4 templates, 2 configs; version in `library/catalog/manifest.json`). `apply`/`update` prune catalog items removed upstream when lock hash matches; user edits are kept. Validation rules: synced fixture `library/catalog/validation-rules.json` (skills require frontmatter `description:`).
 
 ## Key conventions
 
@@ -52,5 +52,4 @@ Catalog content from [`haus-workflow-catalog`](https://github.com/WeAreHausTech/
 @.haus-workflow/WORKFLOW.md
 @.haus-workflow/workflow-config.md
 @docs/decisions/README.md
-
 <!-- HAUS:END haus-imports -->
