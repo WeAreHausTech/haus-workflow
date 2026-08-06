@@ -52,5 +52,4 @@ Catalog content from [`haus-workflow-catalog`](https://github.com/WeAreHausTech/
 @.haus-workflow/WORKFLOW.md
 @.haus-workflow/workflow-config.md
 @docs/decisions/README.md
-
 <!-- HAUS:END haus-imports -->
