@@ -63,18 +63,35 @@ export async function runRemove(opts: RemoveOptions): Promise<RemoveResult> {
 
   // Prefer the recorded state (the exact set materialized at `add` time); fall
   // back to every currently configured member if the state file is missing
-  // (e.g. a hand-built worktree, or the state file got deleted).
-  const memberFolders = state ? state.members.map((m) => m.folder) : allMembers.map((m) => m.folder)
+  // (e.g. a hand-built worktree, or the state file got deleted). Normalized to a
+  // common shape up front so both branches (WorktreeMemberState vs. bare
+  // Member) are handled identically below.
+  const stateMembers: { id: string; folder: string; absPath?: string }[] =
+    state?.members.map((m) => ({ id: m.id, folder: m.folder, absPath: m.absPath })) ??
+    allMembers.map((m) => ({ id: m.id, folder: m.folder, absPath: m.absPath }))
   const targets: RemoveTarget[] = [
     { repo: '(workspace)', ownerRepo: workspaceRoot, path: wsWorktreePath },
   ]
-  for (const folder of memberFolders) {
-    const member = allMembers.find((m) => m.folder === folder)
-    if (!member) continue
+  // Members that were materialized at `add` time but have since dropped out of
+  // the workspace config (renamed/removed) — readMembers() no longer knows their
+  // absPath, so their git worktree registration can't be located/unregistered
+  // unless the state file itself captured absPath (added after this fix). Never
+  // silently skip these: skipping meant their on-disk directory still got
+  // deleted (nested under the workspace worktree root) while their registration
+  // in the now-unreachable owning repo leaked forever, invisible to `doctor` too
+  // (it also only ever looks at currently configured members).
+  const unresolvedDroppedMembers: string[] = []
+  for (const stateMember of stateMembers) {
+    const configMember = allMembers.find((m) => m.folder === stateMember.folder)
+    const ownerRepo = configMember?.absPath ?? stateMember.absPath
+    if (!ownerRepo) {
+      if (!configMember) unresolvedDroppedMembers.push(stateMember.folder)
+      continue
+    }
     targets.push({
-      repo: member.id,
-      ownerRepo: member.absPath,
-      path: path.join(wsWorktreePath, folder),
+      repo: configMember?.id ?? stateMember.id,
+      ownerRepo,
+      path: path.join(wsWorktreePath, stateMember.folder),
     })
   }
 
@@ -85,6 +102,18 @@ export async function runRemove(opts: RemoveOptions): Promise<RemoveResult> {
 
   if (!opts.force) {
     const blockers: RemoveBlocker[] = []
+    // A dropped-from-config member with no recorded absPath can't be verified
+    // (uncommitted work?) or unregistered — never proceed past this silently.
+    for (const folder of unresolvedDroppedMembers) {
+      blockers.push({
+        repo: folder,
+        reason:
+          'no longer in the workspace config and this worktree predates absPath tracking — ' +
+          'cannot verify for uncommitted work or unregister its git worktree; removing anyway ' +
+          'will delete its directory here but leak the registration in whatever repo it came ' +
+          'from (run `git worktree prune` there manually afterward)',
+      })
+    }
     for (const target of existingTargets) {
       // The workspace worktree root always contains two kinds of untracked-by-design
       // content that must not count as "uncommitted work" here: our own
@@ -96,7 +125,9 @@ export async function runRemove(opts: RemoveOptions): Promise<RemoveResult> {
       // so excluding them here just avoids double-counting/false-flagging a member
       // repo's mere presence as if it were workspace-level uncommitted work.
       const ignorePaths =
-        target.repo === '(workspace)' ? [WORKTREE_STATE_FILE, ...memberFolders] : []
+        target.repo === '(workspace)'
+          ? [WORKTREE_STATE_FILE, ...stateMembers.map((m) => m.folder)]
+          : []
       if (await hasUncommittedChanges(target.path, ignorePaths)) {
         blockers.push({ repo: target.repo, reason: 'uncommitted changes' })
         continue
@@ -118,6 +149,20 @@ export async function runRemove(opts: RemoveOptions): Promise<RemoveResult> {
 
   const removed: string[] = []
   const failed: Array<{ repo: string; error: string }> = []
+
+  // Reached only under --force (the blocker loop above already returned otherwise).
+  // Their directory still gets deleted below (nested under wsWorktreePath, cleaned
+  // up by the belt-and-braces fs.remove()), but their git worktree registration in
+  // whatever repo they came from cannot be unregistered without a known absPath —
+  // surface that explicitly rather than reporting a silent, misleadingly clean result.
+  for (const folder of unresolvedDroppedMembers) {
+    failed.push({
+      repo: folder,
+      error:
+        'directory removed, but its git worktree registration could not be unregistered ' +
+        '(no recorded absPath) — run `git worktree prune` in its original owning repo',
+    })
+  }
 
   const memberTargets = existingTargets.filter((t) => t.repo !== '(workspace)')
   for (const target of memberTargets) {

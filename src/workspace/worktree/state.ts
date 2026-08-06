@@ -18,11 +18,24 @@ import { readJson, writeJson } from '../../utils/fs.js'
 
 export const WORKTREE_STATE_FILE = '.haus-worktree.json'
 
-/** One member repo's materialization record inside a workspace worktree. */
+/**
+ * One member repo's materialization record inside a workspace worktree.
+ *
+ * `absPath` is captured at `add` time specifically so `remove` can still locate
+ * and unregister this member's `git worktree` even if the member later drops out
+ * of `haus.workspace.yaml`/`repos.manifest.json` (renamed, removed) before
+ * `remove` runs — without it, a config-dropped member's worktree directory would
+ * still get deleted (nested under the workspace worktree root) while its git
+ * registration in the now-unreachable owning repo silently leaks. Optional only
+ * because a `.haus-worktree.json` written before this field existed won't have
+ * it — `remove` treats that case as unverifiable and blocks by default rather
+ * than guessing.
+ */
 export type WorktreeMemberState = {
   id: string
   folder: string
   branch: string
+  absPath?: string
 }
 
 /** The full state recorded for one `.claude/worktrees/<slug>` workspace worktree. */

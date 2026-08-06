@@ -156,6 +156,74 @@ test('remove --force removes every worktree and leaves no orphaned registrations
   }
 })
 
+test('remove --force still unregisters a member dropped from config since add, via absPath captured in state', async () => {
+  const { ws, forms, admin } = buildFixture()
+  try {
+    await withCwd(ws, async () => {
+      await runAdd({ slug: 'dropped-slug', hydrate: false })
+
+      // Simulate the member dropping out of the workspace config after `add`
+      // (renamed/removed) — remove must still find it via absPath recorded in
+      // .haus-worktree.json at add time, not just readMembers().
+      fs.writeFileSync(
+        path.join(ws, 'haus.workspace.yaml'),
+        ['client: fixture', 'repos:', '  - name: admin', '    path: admin', 'relationships: []', ''].join(
+          '\n',
+        ),
+      )
+
+      const result = await runRemove({ slug: 'dropped-slug', force: true })
+      assert.equal(result.ok, true)
+      assert.equal(result.failed.length, 0, 'forms should still be unregistered via its recorded absPath')
+
+      const formsEntries = await listWorktrees(forms)
+      assert.equal(
+        formsEntries.length,
+        1,
+        'no orphaned registration should remain for the dropped member',
+      )
+    })
+  } finally {
+    fs.rmSync(ws, { recursive: true, force: true })
+    fs.rmSync(forms, { recursive: true, force: true })
+    fs.rmSync(admin, { recursive: true, force: true })
+  }
+})
+
+test('remove blocks by default on a dropped member with no recorded absPath (pre-fix state file)', async () => {
+  const { ws, forms, admin } = buildFixture()
+  try {
+    await withCwd(ws, async () => {
+      await runAdd({ slug: 'legacy-slug', hydrate: false })
+
+      // Simulate a .haus-worktree.json written before absPath tracking existed.
+      const statePath = path.join(ws, '.claude', 'worktrees', 'legacy-slug', '.haus-worktree.json')
+      const state = JSON.parse(fs.readFileSync(statePath, 'utf8'))
+      for (const m of state.members) delete m.absPath
+      fs.writeFileSync(statePath, JSON.stringify(state))
+
+      // Drop 'forms' from config so it can't be resolved from readMembers() either.
+      fs.writeFileSync(
+        path.join(ws, 'haus.workspace.yaml'),
+        ['client: fixture', 'repos:', '  - name: admin', '    path: admin', 'relationships: []', ''].join(
+          '\n',
+        ),
+      )
+
+      const result = await runRemove({ slug: 'legacy-slug' })
+      assert.equal(result.ok, false)
+      assert.equal(result.blocked, true)
+      const formsBlocker = result.blockers.find((b) => b.repo === 'forms')
+      assert.ok(formsBlocker, 'the unresolvable dropped member must block, never silently proceed')
+      assert.match(formsBlocker.reason, /cannot verify|unregister/)
+    })
+  } finally {
+    fs.rmSync(ws, { recursive: true, force: true })
+    fs.rmSync(forms, { recursive: true, force: true })
+    fs.rmSync(admin, { recursive: true, force: true })
+  }
+})
+
 test('remove reports a clear error for an unknown slug', async () => {
   const { ws } = buildFixture()
   try {
