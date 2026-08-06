@@ -44,7 +44,15 @@ export async function hydrateMember(
     const src = path.join(mainMemberPath, target)
     const dest = path.join(worktreeMemberPath, target)
     if (!(await fs.pathExists(src))) continue
-    if (!opts.force && (await fs.pathExists(dest))) continue
+    const destExists = await fs.pathExists(dest)
+    if (!opts.force && destExists) continue
+    if (opts.force && destExists) {
+      // cp copies INTO an existing destination directory rather than replacing
+      // it (e.g. `cp -R node_modules existing-dir` → `existing-dir/node_modules`),
+      // which would silently nest a stale copy inside itself. --force means
+      // "re-clone this target," so the existing destination must go first.
+      await fs.remove(dest)
+    }
     const copy = await cowCopyDir(src, dest)
     targets.push({ target, copy })
   }

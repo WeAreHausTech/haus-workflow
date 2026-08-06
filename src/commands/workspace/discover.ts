@@ -13,7 +13,9 @@
  * preserved, new repos are appended, nothing is deleted.
  *
  * Risk guards: `followSymbolicLinks:false` (symlink cycles), `deep:maxDepth`
- * (deep monorepos), and `node_modules`/`.git`/`vendor`/`dist`/`.haus-workflow` ignores.
+ * (deep monorepos), and `node_modules`/`vendor`/`dist`/`.haus-workflow` ignores for
+ * the manifest-marker glob (the `.git`-marker glob deliberately has no `.git/**`
+ * ignore of its own — see the comment above `GIT_MARKER`/`MANIFEST_MARKERS`).
  */
 import path from 'node:path'
 
@@ -50,8 +52,19 @@ export type DiscoverOptions = {
 }
 
 const DEFAULT_MAX_DEPTH = 3
-const REPO_MARKERS = [
-  '**/.git',
+// Split into two glob passes (not one combined REPO_MARKERS list) specifically so
+// each pass can use the ignore list that's actually safe for it:
+// - GIT_MARKER alone, with NO '**/.git/**' ignore — that pattern also excludes the
+//   bare '**/.git' match itself (fast-glob/micromatch treats `dir` and `dir/**` as
+//   overlapping for ignore purposes), silently undercounting `.git`-only repos.
+//   Same pitfall, same fix as src/utils/fs.ts's findNestedRepoDirs().
+// - MANIFEST_MARKERS, WITH a '**/.git/**' ignore — these patterns (package.json,
+//   *.csproj, etc.) can never legitimately match inside a repo's own `.git`
+//   object store, so excluding it here is pure win: no ignore-vs-match ambiguity
+//   (nothing we want lives at exactly path `.git`), and it stops fast-glob from
+//   walking `.git/objects/**` hunting for a match that will never be found there.
+const GIT_MARKER = ['**/.git']
+const MANIFEST_MARKERS = [
   '**/package.json',
   '**/composer.json',
   '**/*.csproj',
@@ -61,19 +74,7 @@ const REPO_MARKERS = [
   '**/build.gradle*', // Java
   '**/Gemfile', // Ruby
 ]
-const IGNORE = [
-  '**/node_modules/**',
-  // Deliberately NO '**/.git/**' entry — fast-glob/micromatch treats `dir` and
-  // `dir/**` as overlapping for ignore purposes, so that pattern also excludes
-  // the bare `.git` match REPO_MARKERS relies on, silently undercounting
-  // `.git`-only repos. Same pitfall, same fix as src/utils/fs.ts's
-  // findNestedRepoDirs() — see its comment for the empirical verification
-  // (fast-glob already short-circuits descent past a `.git` match on its own,
-  // so no ignore entry is needed for that anyway).
-  '**/vendor/**',
-  '**/dist/**',
-  '**/.haus-workflow/**',
-]
+const IGNORE = ['**/node_modules/**', '**/vendor/**', '**/dist/**', '**/.haus-workflow/**']
 
 /** True when `child` is a strict descendant of `ancestor` (both repo-relative posix paths). */
 function isDescendant(child: string, ancestor: string): boolean {
@@ -97,7 +98,7 @@ export async function findRepoRoots(
   workspaceRoot: string,
   maxDepth: number = DEFAULT_MAX_DEPTH,
 ): Promise<string[]> {
-  const matches = await fg(REPO_MARKERS, {
+  const commonOpts = {
     cwd: workspaceRoot,
     dot: true,
     onlyFiles: false,
@@ -106,18 +107,20 @@ export async function findRepoRoots(
     // Discovery walks arbitrary directories under the workspace root; an
     // unreadable subtree (EPERM/EACCES) must be skipped, not abort the whole scan.
     suppressErrors: true,
-    ignore: IGNORE,
-  })
+  } as const
+  const [gitMatches, manifestMatches] = await Promise.all([
+    fg(GIT_MARKER, { ...commonOpts, ignore: IGNORE }),
+    fg(MANIFEST_MARKERS, { ...commonOpts, ignore: [...IGNORE, '**/.git/**'] }),
+  ])
 
   // Collapse each marker to its owning directory (posix-relative to the workspace root).
   const gitDirs = new Set<string>()
   const manifestDirs = new Set<string>()
-  for (const match of matches) {
-    const base = path.posix.basename(match)
-    const dir = path.posix.dirname(match)
-    const owner = dir === '.' ? '.' : dir
-    if (base === '.git') gitDirs.add(owner)
-    else manifestDirs.add(owner)
+  for (const match of gitMatches) {
+    gitDirs.add(path.posix.dirname(match))
+  }
+  for (const match of manifestMatches) {
+    manifestDirs.add(path.posix.dirname(match))
   }
 
   // A git dir is always a repo root. A manifest-only dir is a repo root only when no
