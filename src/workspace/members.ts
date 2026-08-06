@@ -74,13 +74,20 @@ export class MemberConfigError extends Error {
 
 type RepoManifestEntry = { id: string; folder: string; repo?: string }
 
-/** Absolute path for `folder`: a `pathOverrides` entry wins, else `workspaceRoot/folder`. */
+/** Absolute path for `folder`: a `pathOverrides` entry wins, else `workspaceRoot/folder`.
+ * An override is normalized through `path.resolve()` — against `workspaceRoot` if it's
+ * relative — rather than returned verbatim: `Member.absPath` promises an absolute path,
+ * and a relative `repos.local.json` override (an easy mistake to make by hand) would
+ * otherwise silently produce a relative one, breaking any downstream `git -C`/worktree
+ * call that isn't run from the exact directory the relative path was written against. */
 function resolveAbsPath(
   workspaceRoot: string,
   folder: string,
   overrides: Record<string, string>,
 ): string {
-  return overrides[folder] ?? path.resolve(workspaceRoot, folder)
+  const override = overrides[folder]
+  if (override) return path.resolve(workspaceRoot, override)
+  return path.resolve(workspaceRoot, folder)
 }
 
 /**
