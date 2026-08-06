@@ -63,13 +63,17 @@ async function resolveAbsoluteGitPath(
 ): Promise<string> {
   const withFormat = await runGit(['rev-parse', '--path-format=absolute', flag], { cwd })
   const raw = withFormat.exitCode === 0 ? withFormat.stdout.trim() : ''
-  if (raw && path.isAbsolute(raw)) return raw
+  // path.resolve() on an already-absolute path normalizes its separators to the
+  // current platform's — git can print forward slashes on Windows (e.g.
+  // `C:/Users/...`) while downstream code joins paths with path.join()'s
+  // backslashes, which would otherwise break string-based checks like startsWith().
+  if (raw && path.isAbsolute(raw)) return path.resolve(raw)
 
   // Fallback for git < 2.31: `--path-format` is unrecognized, so re-run without it.
   const plain = await runGit(['rev-parse', flag], { cwd })
   const plainRaw = plain.exitCode === 0 ? plain.stdout.trim() : ''
   if (!plainRaw) return ''
-  return path.isAbsolute(plainRaw) ? plainRaw : path.resolve(repoRoot, plainRaw)
+  return path.isAbsolute(plainRaw) ? path.resolve(plainRaw) : path.resolve(repoRoot, plainRaw)
 }
 
 /**
@@ -82,8 +86,10 @@ export async function resolveRoots(start?: string): Promise<RootInfo> {
 
   const toplevel = await runGit(['rev-parse', '--show-toplevel'], { cwd })
   if (toplevel.exitCode !== 0) return fallback(cwd)
-  const repoRoot = toplevel.stdout.trim()
-  if (!repoRoot) return fallback(cwd)
+  const toplevelRaw = toplevel.stdout.trim()
+  if (!toplevelRaw) return fallback(cwd)
+  // Normalize separators — see the matching comment in resolveAbsoluteGitPath().
+  const repoRoot = path.resolve(toplevelRaw)
 
   const [gitDir, gitCommonDir] = await Promise.all([
     resolveAbsoluteGitPath('--git-dir', cwd, repoRoot),

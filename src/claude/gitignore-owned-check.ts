@@ -11,9 +11,9 @@
 import { runGit } from '../utils/exec.js'
 
 /**
- * Repo-relative paths of haus-owned, git-*tracked* content (skills/agents under
- * `.claude/`, plus `.haus-workflow/` itself — WORKFLOW.md, workflow-config.md, etc.)
- * that must never be gitignored. This is the opposite concern from
+ * Repo-relative paths of haus-owned, git-*tracked* content (skills/agents/commands
+ * under `.claude/`, plus `.haus-workflow/` itself — WORKFLOW.md, workflow-config.md,
+ * etc.) that must never be gitignored. This is the opposite concern from
  * `write-gitignore.ts`'s `GITIGNORED_ARTIFACT_PATHS` (machine-local *scan artifacts*
  * that must stay untracked): if any of these come back ignored instead, an entire
  * catalog install becomes invisible to anything relying on git-tracked state — the
@@ -23,6 +23,7 @@ export const HAUS_OWNED_TRACKED_PATHS = [
   '.claude',
   '.claude/skills',
   '.claude/agents',
+  '.claude/commands',
   '.haus-workflow',
 ] as const
 
